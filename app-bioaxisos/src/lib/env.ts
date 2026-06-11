@@ -41,3 +41,8 @@ export function requireEnv<K extends keyof Env>(key: K): NonNullable<Env[K]> {
   }
   return value as NonNullable<Env[K]>;
 }
+
+/** True when a database connection is configured. DB-backed views check this. */
+export function isDbConfigured(): boolean {
+  return typeof env.DATABASE_URL === "string" && env.DATABASE_URL.length > 0;
+}

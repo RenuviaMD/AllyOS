@@ -20,19 +20,23 @@ export default function WorkspaceDashboard() {
             </p>
           </Card>
         </Link>
-        <Card>
-          <CardTitle>MD Inbox</CardTitle>
-          <p className="text-sm text-ink-muted">
-            Flagged check-ins surface here (pain ≥7, new mass, severe abdominal pain). Wires to the
-            DB in the next step.
-          </p>
-        </Card>
-        <Card>
-          <CardTitle>Patients</CardTitle>
-          <p className="text-sm text-ink-muted">
-            Roster + charts arrive with the DigitalOcean database connection.
-          </p>
-        </Card>
+        <Link href="/workspace/inbox">
+          <Card className="transition-colors hover:border-accent">
+            <CardTitle>MD Inbox</CardTitle>
+            <p className="text-sm text-ink-muted">
+              Flagged check-ins (pain ≥7, new mass, severe abdominal pain). Live once the DB is
+              connected.
+            </p>
+          </Card>
+        </Link>
+        <Link href="/workspace/patients">
+          <Card className="transition-colors hover:border-accent">
+            <CardTitle>Patients</CardTitle>
+            <p className="text-sm text-ink-muted">
+              Your roster (row-level ownership). Live once the DB is connected.
+            </p>
+          </Card>
+        </Link>
       </div>
     </div>
   );

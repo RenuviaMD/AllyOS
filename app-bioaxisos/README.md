@@ -50,13 +50,27 @@ pnpm dev                        # http://localhost:3000
 `SKIP_ENV_VALIDATION=1` lets CI build without secrets; runtime accessors still
 throw if a value they need is missing.
 
-## Database (DigitalOcean)
+## Database (DigitalOcean) — pre-wired, connect later
 
-I can't provision the DO database from here, same as Netlify. To wire it up:
+The app runs **without** a database: DB-backed views (MD Inbox, Patients) render a
+"connect database" state until `DATABASE_URL` is set, and `/api/health` reports
+`database.configured`. To activate:
 
-1. Create a **Managed Postgres** cluster in DigitalOcean; create a `bioaxisos` DB.
-2. Put the **pooled** (PgBouncer, port 25061) connection string + `?sslmode=require` in `DATABASE_URL`; add the DO CA cert to `DATABASE_CA_CERT`.
-3. `pnpm db:generate` then `pnpm db:migrate`.
+1. In DigitalOcean, open the Managed Postgres cluster → **Connection string**
+   (prefer a **Connection Pool**, port 25061) and **download the CA cert**.
+2. Set `DATABASE_URL` (append `?sslmode=require`) + `DATABASE_CA_CERT` in Netlify
+   env and/or local `.env.local`.
+3. Apply the schema — the build container has **no egress to DO**, so run it from
+   a machine/runner that does:
+   - locally: `pnpm db:migrate`, or
+   - the **`DB migrate` GitHub Action** (manual dispatch) using a `DATABASE_URL`
+     repo secret — optional `seed` input loads synthetic demo data.
+4. Optional synthetic data: `pnpm db:seed` (**test data only — never PHI**).
+
+> **HIPAA/BAA:** a `-dev` Managed DB is not a HIPAA-covered environment by
+> default. Execute a DigitalOcean BAA and move to a HIPAA-eligible, encrypted,
+> access-controlled setup **before** any real patient data. Synthetic data only
+> until then.
 
 ## Deploy (Netlify — connect once)
 

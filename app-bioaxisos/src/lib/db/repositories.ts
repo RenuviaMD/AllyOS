@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { getDb } from "./index";
-import { checkIns, patients, prescriptions } from "./schema";
+import { checkIns, patients, prescriptions, type CheckIn, type Patient } from "./schema";
 import type { OwnedPatient } from "@/lib/auth/rbac";
 
 /**
@@ -61,4 +61,23 @@ export async function insertCheckIn(input: InsertCheckIn): Promise<{ id: string 
     })
     .returning({ id: checkIns.id });
   return rows[0]!;
+}
+
+/** Flagged check-ins for the MD inbox, newest first. */
+export async function listFlaggedCheckIns(limit = 50): Promise<CheckIn[]> {
+  return getDb()
+    .select()
+    .from(checkIns)
+    .where(eq(checkIns.severity, "flagged"))
+    .orderBy(desc(checkIns.createdAt))
+    .limit(limit);
+}
+
+/** Patient roster scoped to a provider (admins should call listAllPatients). */
+export async function listPatientsForProvider(providerId: string): Promise<Patient[]> {
+  return getDb()
+    .select()
+    .from(patients)
+    .where(eq(patients.ownerProviderId, providerId))
+    .orderBy(desc(patients.createdAt));
 }

@@ -15,7 +15,13 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
               Dashboard
             </Link>
             <Link href="/workspace/designer" className="hover:text-ink">
-              Protocol Designer
+              Designer
+            </Link>
+            <Link href="/workspace/inbox" className="hover:text-ink">
+              MD Inbox
+            </Link>
+            <Link href="/workspace/patients" className="hover:text-ink">
+              Patients
             </Link>
           </nav>
         </div>

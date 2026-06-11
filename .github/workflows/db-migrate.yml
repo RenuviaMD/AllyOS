@@ -1,0 +1,41 @@
+name: DB migrate
+
+# Manual-dispatch migration runner. GitHub's runners have egress to DigitalOcean
+# (the build container does not), so this applies the Drizzle migration without
+# needing a local machine. Requires the DATABASE_URL repo secret.
+on:
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: "Also seed synthetic demo data (never real PHI)"
+        type: boolean
+        default: false
+
+defaults:
+  run:
+    working-directory: app-bioaxisos
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: database
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app-bioaxisos/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - name: Migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: pnpm db:migrate
+      - name: Seed (optional)
+        if: ${{ inputs.seed }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: pnpm db:seed
