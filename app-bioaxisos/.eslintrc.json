@@ -1,0 +1,16 @@
+{
+  "extends": ["next/core-web-vitals"],
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["**/email/transport*"],
+            "message": "Import from @/lib/email (sendPortalEmail) — never the raw transport. Emails must not carry PHI."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+# Netlify deploy config for BioaxisOS (Next.js App Router).
+# Connect once in the Netlify UI: Add new site -> Import from GitHub ->
+# select armandofalcon66/renuviamd-site, set Base directory to "app-bioaxisos".
+# The Next runtime plugin handles SSR / server actions / route handlers.
+
+[build]
+  base = "app-bioaxisos"
+  command = "pnpm build"
+  publish = "app-bioaxisos/.next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NPM_FLAGS = "--version" # use pnpm, not npm, for install
+  PNPM_VERSION = "10"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Required env vars (set in Netlify UI -> Site settings -> Environment):
+#   AUTH_SECRET, DATABASE_URL, DATABASE_CA_CERT, APP_URL, EMAIL_FROM, EMAIL_API_KEY
+# DATABASE_URL must be the DigitalOcean *pooled* (PgBouncer) string with ?sslmode=require.
