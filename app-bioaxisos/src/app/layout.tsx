@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Manrope, IBM_Plex_Mono } from "next/font/google";
+import { SyntheticBanner } from "@/components/ui/synthetic-banner";
 import "./globals.css";
 
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap" });
@@ -21,7 +22,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${manrope.variable} ${inter.variable} ${plexMono.variable}`}>
-      <body className="min-h-screen hud-surface">{children}</body>
+      <body className="min-h-screen hud-surface">
+        <SyntheticBanner />
+        {children}
+      </body>
     </html>
   );
 }
