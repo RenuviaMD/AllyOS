@@ -146,9 +146,35 @@ export const checkIns = pgTable(
   }),
 );
 
+/** Refill requests (spec §10 approveRefill). Patient requests, provider decides. */
+export const refillStatus = pgEnum("refill_status", ["requested", "approved", "denied"]);
+
+export const rxRefills = pgTable(
+  "rx_refills",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    prescriptionId: uuid("prescription_id")
+      .notNull()
+      .references(() => prescriptions.id, { onDelete: "restrict" }),
+    patientId: uuid("patient_id")
+      .notNull()
+      .references(() => patients.id, { onDelete: "restrict" }),
+    status: refillStatus("status").notNull().default("requested"),
+    note: text("note"),
+    decidedBy: uuid("decided_by"),
+    requestedAt: timestamp("requested_at", { withTimezone: true }).notNull().defaultNow(),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+  },
+  (t) => ({
+    patientIdx: index("refill_patient_idx").on(t.patientId),
+    statusIdx: index("refill_status_idx").on(t.status),
+  }),
+);
+
 export type User = typeof users.$inferSelect;
 export type Patient = typeof patients.$inferSelect;
 export type AuditLogRow = typeof auditLog.$inferSelect;
 export type NewAuditLogRow = typeof auditLog.$inferInsert;
 export type Prescription = typeof prescriptions.$inferSelect;
 export type CheckIn = typeof checkIns.$inferSelect;
+export type RxRefill = typeof rxRefills.$inferSelect;

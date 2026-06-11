@@ -8,6 +8,13 @@
       "when": 1781179765292,
       "tag": "0000_chilly_rachel_grey",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1781220203385,
+      "tag": "0001_narrow_celestials",
+      "breakpoints": true
     }
   ]
 }

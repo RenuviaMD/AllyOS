@@ -4,9 +4,36 @@ import { getRequestContext, getServerSession } from "@/lib/auth";
 import { requirePatientAccess } from "@/lib/auth/rbac";
 import { withAudit } from "@/lib/audit";
 import { evaluateCheckIn } from "@/lib/checkin/flagger";
-import { getPatientOwnership, insertCheckIn } from "@/lib/db/repositories";
+import {
+  getPatientByUserId,
+  getPatientOwnership,
+  insertCheckIn,
+} from "@/lib/db/repositories";
 import { submitCheckInSchema, type SubmitCheckInInput } from "@/lib/schemas";
 import type { ActionResult } from "./prescriptions";
+
+type CheckInResult = { id: string; flagged: boolean; reasons: string[] };
+
+/**
+ * Portal check-in: the signed-in patient submits about themselves. The patient
+ * id is resolved from the session — never trusted from the client.
+ */
+export async function submitPortalCheckIn(input: {
+  painScore?: number;
+  freeText?: string;
+}): Promise<ActionResult<CheckInResult>> {
+  const session = await getServerSession();
+  if (!session || session.role !== "patient") {
+    return { ok: false, error: "Not permitted" };
+  }
+  const patient = await getPatientByUserId(session.userId);
+  if (!patient) return { ok: false, error: "No patient record for this account" };
+  return submitCheckIn({
+    patientId: patient.id,
+    painScore: input.painScore,
+    freeText: input.freeText,
+  });
+}
 
 /**
  * submitCheckIn (spec §10 + §5.4). Runs the flagger; a flagged check-in is

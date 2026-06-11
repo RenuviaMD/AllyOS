@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { createPrescription } from "@/app/actions/prescriptions";
 import type { CatalogItem } from "@/lib/formulary/catalog";
 import { filterFormulary } from "@/lib/formulary/filter";
 import { axisEnum, statusEnum } from "@/lib/formulary/schema";
+import type { FormularyFilter } from "@/lib/schemas";
 
 const AXES = axisEnum.options;
 const STATUSES = statusEnum.options;
@@ -24,34 +26,48 @@ const COMPLIANCE_ITEMS = [
 
 type ComplianceKey = (typeof COMPLIANCE_ITEMS)[number]["key"];
 
+interface PatientOption {
+  id: string;
+  mrn: string;
+}
+
 /**
- * Protocol Designer (spec §4.5) — 3 columns: filter rail / formulary grid /
- * popup card with the "Prescribe to Patient" compliance gate. Operational
- * styling: flat surfaces, no glow.
+ * Protocol Designer (spec §4.5) — filter rail / formulary grid / popup card with
+ * the "Prescribe to Patient" compliance gate. Prescribing commits through the
+ * audited createPrescription server action (RBAC + row-level ownership).
  */
-export function ProtocolDesigner({ catalog }: { catalog: CatalogItem[] }) {
+export function ProtocolDesigner({
+  catalog,
+  patients,
+}: {
+  catalog: CatalogItem[];
+  patients: PatientOption[];
+}) {
   const [query, setQuery] = useState("");
   const [axes, setAxes] = useState<string[]>([]);
   const [statuses, setStatuses] = useState<string[]>([]);
   const [selected, setSelected] = useState<CatalogItem | null>(null);
+  const [patientId, setPatientId] = useState("");
+  const [dose, setDose] = useState("");
+  const [route, setRoute] = useState("SC");
+  const [pending, startTransition] = useTransition();
+  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [gate, setGate] = useState<Record<ComplianceKey, boolean>>({
     consentSigned: false,
     patientEducationDelivered: false,
     sourcePharmacyVerified: false,
     classGatingItemConfirmed: false,
   });
-  const [confirmed, setConfirmed] = useState<string | null>(null);
 
-  const results = useMemo(
-    () =>
-      filterFormulary(catalog, {
-        kind: "all",
-        query: query || undefined,
-        axes: axes.length ? (axes as typeof AXES) : undefined,
-        statuses: statuses.length ? (statuses as typeof STATUSES) : undefined,
-      }),
-    [catalog, query, axes, statuses],
-  );
+  const results = useMemo(() => {
+    const filter: FormularyFilter = {
+      kind: "all",
+      query: query || undefined,
+      axes: axes.length ? (axes as FormularyFilter["axes"]) : undefined,
+      statuses: statuses.length ? (statuses as FormularyFilter["statuses"]) : undefined,
+    };
+    return filterFormulary(catalog, filter);
+  }, [catalog, query, axes, statuses]);
 
   function toggle(list: string[], set: (v: string[]) => void, value: string) {
     set(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
@@ -59,7 +75,8 @@ export function ProtocolDesigner({ catalog }: { catalog: CatalogItem[] }) {
 
   function select(item: CatalogItem) {
     setSelected(item);
-    setConfirmed(null);
+    setResult(null);
+    setDose("");
     setGate({
       consentSigned: false,
       patientEducationDelivered: false,
@@ -69,6 +86,29 @@ export function ProtocolDesigner({ catalog }: { catalog: CatalogItem[] }) {
   }
 
   const gateComplete = COMPLIANCE_ITEMS.every((i) => gate[i.key]);
+  const canPrescribe = gateComplete && patientId !== "" && dose.trim() !== "" && !pending;
+
+  function prescribe() {
+    if (!selected || !canPrescribe) return;
+    setResult(null);
+    startTransition(async () => {
+      const res = await createPrescription({
+        patientId,
+        items: [{ slug: selected.slug, kind: selected.kind, dose: dose.trim(), route: route.trim() }],
+        complianceConfirmed: {
+          consentSigned: true,
+          patientEducationDelivered: true,
+          sourcePharmacyVerified: true,
+          classGatingItemConfirmed: true,
+        },
+      });
+      setResult(
+        res.ok
+          ? { ok: true, message: "Prescribed. Now active on the patient's chart." }
+          : { ok: false, message: res.error ?? "Could not prescribe." },
+      );
+    });
+  }
 
   return (
     <div className="grid gap-4 lg:grid-cols-[220px_1fr_340px]">
@@ -132,6 +172,40 @@ export function ProtocolDesigner({ catalog }: { catalog: CatalogItem[] }) {
 
             <div className="my-4 border-t border-surface-border pt-4">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                Patient & dose
+              </p>
+              <select
+                value={patientId}
+                onChange={(e) => setPatientId(e.target.value)}
+                className="mb-2 w-full rounded-md border border-surface-border bg-surface-base px-2 py-1.5 text-xs outline-none focus:border-accent"
+              >
+                <option value="">
+                  {patients.length ? "Select patient…" : "No patients (seed/connect DB)"}
+                </option>
+                {patients.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    MRN {p.mrn}
+                  </option>
+                ))}
+              </select>
+              <div className="flex gap-2">
+                <input
+                  value={dose}
+                  onChange={(e) => setDose(e.target.value)}
+                  placeholder="Dose (e.g. 250 mcg daily)"
+                  className="w-full rounded-md border border-surface-border bg-surface-base px-2 py-1.5 text-xs outline-none focus:border-accent"
+                />
+                <input
+                  value={route}
+                  onChange={(e) => setRoute(e.target.value)}
+                  placeholder="Route"
+                  className="w-20 rounded-md border border-surface-border bg-surface-base px-2 py-1.5 text-xs outline-none focus:border-accent"
+                />
+              </div>
+            </div>
+
+            <div className="my-4 border-t border-surface-border pt-4">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ink-muted">
                 Compliance gate
               </p>
               {COMPLIANCE_ITEMS.map((item) => (
@@ -148,21 +222,26 @@ export function ProtocolDesigner({ catalog }: { catalog: CatalogItem[] }) {
             </div>
 
             <button
-              disabled={!gateComplete}
-              onClick={() => setConfirmed(selected.slug)}
+              disabled={!canPrescribe}
+              onClick={prescribe}
               className="inline-flex h-9 w-full items-center justify-center rounded-md bg-accent px-4 text-sm font-medium text-accent-fg transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Prescribe to Patient
+              {pending ? "Prescribing…" : "Prescribe to Patient"}
             </button>
             {!gateComplete && (
               <p className="mt-2 text-[11px] text-ink-faint">
-                All four gate items must be confirmed to enable prescribing.
+                Confirm all four gate items, pick a patient, and enter a dose to enable.
               </p>
             )}
-            {confirmed === selected.slug && (
-              <p className="mt-3 rounded-md border border-status-ok/40 bg-status-ok/10 p-2 text-xs text-status-ok">
-                Gate satisfied. Next: select a patient chart to commit this protocol (server action
-                <code className="mono"> createPrescription</code> is wired and audited).
+            {result && (
+              <p
+                className={`mt-3 rounded-md p-2 text-xs ${
+                  result.ok
+                    ? "border border-status-ok/40 bg-status-ok/10 text-status-ok"
+                    : "border border-status-stop/40 bg-status-stop/10 text-status-stop"
+                }`}
+              >
+                {result.message}
               </p>
             )}
           </div>

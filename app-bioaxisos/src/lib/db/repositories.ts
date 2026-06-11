@@ -5,10 +5,12 @@ import {
   checkIns,
   patients,
   prescriptions,
+  rxRefills,
   type AuditLogRow,
   type CheckIn,
   type Patient,
   type Prescription,
+  type RxRefill,
 } from "./schema";
 import type { OwnedPatient } from "@/lib/auth/rbac";
 
@@ -119,4 +121,71 @@ export async function listCheckInsForPatient(patientId: string, limit = 30): Pro
 /** Recent audit events (admin viewer). Reads metadata only — never PHI content. */
 export async function listRecentAuditEvents(limit = 100): Promise<AuditLogRow[]> {
   return getDb().select().from(auditLog).orderBy(desc(auditLog.createdAt)).limit(limit);
+}
+
+/** Ownership context for a prescription (its patient's account + owning provider). */
+export async function getPrescriptionOwnership(
+  prescriptionId: string,
+): Promise<(OwnedPatient & { patientId: string }) | null> {
+  const rows = await getDb()
+    .select({
+      patientId: prescriptions.patientId,
+      userId: patients.userId,
+      ownerProviderId: patients.ownerProviderId,
+    })
+    .from(prescriptions)
+    .innerJoin(patients, eq(prescriptions.patientId, patients.id))
+    .where(eq(prescriptions.id, prescriptionId))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export async function insertRefill(input: {
+  prescriptionId: string;
+  patientId: string;
+}): Promise<{ id: string }> {
+  const rows = await getDb()
+    .insert(rxRefills)
+    .values({ prescriptionId: input.prescriptionId, patientId: input.patientId })
+    .returning({ id: rxRefills.id });
+  return rows[0]!;
+}
+
+/** Refill queue for a provider's own patients, newest first. */
+export async function listRefillsForProvider(providerId: string): Promise<RxRefill[]> {
+  const rows = await getDb()
+    .select({ refill: rxRefills })
+    .from(rxRefills)
+    .innerJoin(patients, eq(rxRefills.patientId, patients.id))
+    .where(eq(patients.ownerProviderId, providerId))
+    .orderBy(desc(rxRefills.requestedAt));
+  return rows.map((r) => r.refill);
+}
+
+/** Ownership context for a refill (for the approve/deny guard). */
+export async function getRefillOwnership(
+  refillId: string,
+): Promise<(OwnedPatient & { status: string }) | null> {
+  const rows = await getDb()
+    .select({
+      userId: patients.userId,
+      ownerProviderId: patients.ownerProviderId,
+      status: rxRefills.status,
+    })
+    .from(rxRefills)
+    .innerJoin(patients, eq(rxRefills.patientId, patients.id))
+    .where(eq(rxRefills.id, refillId))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export async function updateRefillDecision(
+  refillId: string,
+  status: "approved" | "denied",
+  decidedBy: string,
+): Promise<void> {
+  await getDb()
+    .update(rxRefills)
+    .set({ status, decidedBy, decidedAt: new Date() })
+    .where(eq(rxRefills.id, refillId));
 }
