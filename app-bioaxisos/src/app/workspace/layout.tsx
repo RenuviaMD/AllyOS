@@ -23,6 +23,9 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
             <Link href="/workspace/patients" className="hover:text-ink">
               Patients
             </Link>
+            <Link href="/workspace/audit" className="hover:text-ink">
+              Audit
+            </Link>
           </nav>
         </div>
       </header>

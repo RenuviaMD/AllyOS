@@ -1,6 +1,15 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { getDb } from "./index";
-import { checkIns, patients, prescriptions, type CheckIn, type Patient } from "./schema";
+import {
+  auditLog,
+  checkIns,
+  patients,
+  prescriptions,
+  type AuditLogRow,
+  type CheckIn,
+  type Patient,
+  type Prescription,
+} from "./schema";
 import type { OwnedPatient } from "@/lib/auth/rbac";
 
 /**
@@ -80,4 +89,34 @@ export async function listPatientsForProvider(providerId: string): Promise<Patie
     .from(patients)
     .where(eq(patients.ownerProviderId, providerId))
     .orderBy(desc(patients.createdAt));
+}
+
+/** Resolve the patient record for a portal account. */
+export async function getPatientByUserId(userId: string): Promise<Patient | null> {
+  const rows = await getDb().select().from(patients).where(eq(patients.userId, userId)).limit(1);
+  return rows[0] ?? null;
+}
+
+/** Active protocols for one patient (portal read-back). */
+export async function listActivePrescriptions(patientId: string): Promise<Prescription[]> {
+  return getDb()
+    .select()
+    .from(prescriptions)
+    .where(and(eq(prescriptions.patientId, patientId), eq(prescriptions.status, "active")))
+    .orderBy(desc(prescriptions.createdAt));
+}
+
+/** Recent check-ins for one patient (chart timeline). */
+export async function listCheckInsForPatient(patientId: string, limit = 30): Promise<CheckIn[]> {
+  return getDb()
+    .select()
+    .from(checkIns)
+    .where(eq(checkIns.patientId, patientId))
+    .orderBy(desc(checkIns.createdAt))
+    .limit(limit);
+}
+
+/** Recent audit events (admin viewer). Reads metadata only — never PHI content. */
+export async function listRecentAuditEvents(limit = 100): Promise<AuditLogRow[]> {
+  return getDb().select().from(auditLog).orderBy(desc(auditLog.createdAt)).limit(limit);
 }
