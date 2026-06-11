@@ -1,19 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, SESSION_MAX_AGE, signSession, type Role } from "@/lib/auth";
-import { env } from "@/lib/env";
+import { env, isBaaSigned } from "@/lib/env";
 
 /**
- * DEV-ONLY session issuer so the RBAC guards and (later) the workspace/portal
- * are exercisable end-to-end during review. Disabled outside development.
- *
- * Phase 1 replaces this with the real authentication flow. It is NOT a
- * production login and issues no PHI.
+ * Synthetic-mode session issuer so the RBAC guards and the workspace/portal are
+ * exercisable end-to-end in the test environment. Available ONLY while the app
+ * is in synthetic mode (BAA not signed); it auto-locks the moment BAA_SIGNED is
+ * "true". It is NOT a real login and issues no PHI. Real auth is a Phase-1 seam.
  */
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  if (env.NODE_ENV === "production") {
-    return NextResponse.json({ error: "disabled in production" }, { status: 404 });
+  if (isBaaSigned()) {
+    return NextResponse.json({ error: "disabled once BAA is signed" }, { status: 404 });
   }
   const params = req.nextUrl.searchParams;
   const role = (params.get("role") ?? "provider") as Role;
