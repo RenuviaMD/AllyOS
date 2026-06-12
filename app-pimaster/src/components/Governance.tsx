@@ -17,17 +17,16 @@ import {
   getGovernanceReviewHtml,
   getReportHtml,
   listGovernanceReviews,
-  listReportsForMonth,
+  listReportsForWindow,
   saveGovernanceReview,
+  windowStart,
   type GovernanceReviewRow,
   type MonthChart,
 } from "../lib/store";
 import { CLINIC } from "../lib/clinic";
 
-function defaultMonth(): string {
-  const d = new Date();
-  d.setMonth(d.getMonth() - 1);
-  return d.toISOString().slice(0, 7);
+function today(): string {
+  return new Date().toISOString().slice(0, 10);
 }
 
 const STATUS_CLASS: Record<string, string> = {
@@ -38,7 +37,7 @@ const STATUS_CLASS: Record<string, string> = {
 };
 
 export function GovernancePage(props: { onClose: () => void }) {
-  const [month, setMonth] = useState(defaultMonth);
+  const [reviewDate, setReviewDate] = useState(today);
   const [target, setTarget] = useState(MIN_CHARTS);
   const [reviewer, setReviewer] = useState(CLINIC.provider);
   const [followUp, setFollowUp] = useState("");
@@ -54,7 +53,7 @@ export function GovernancePage(props: { onClose: () => void }) {
   async function loadSample() {
     setStatus("Loading charts…");
     try {
-      const charts = await listReportsForMonth(month);
+      const charts = await listReportsForWindow(reviewDate);
       setPool(charts);
       const sampled = sampleCharts(charts, target);
       setItems(
@@ -71,7 +70,7 @@ export function GovernancePage(props: { onClose: () => void }) {
       );
       setStatus(
         charts.length === 0
-          ? "No charts found for this month."
+          ? "No charts found in the 30-day window."
           : `Random sample of ${Math.min(target, charts.length)} of ${charts.length} encounters loaded and pre-evaluated. Review each point — your changes are recorded as MD overrides.`,
       );
     } catch (e) {
@@ -108,15 +107,16 @@ export function GovernancePage(props: { onClose: () => void }) {
   async function generateBinderReport() {
     if (!allReviewed || !meetsMinimum || !pool) return;
     const html = buildGovernanceReportHtml({
-      month,
+      periodStart: windowStart(reviewDate),
+      periodEnd: reviewDate,
       targetCount: target,
-      totalChartsInMonth: pool.length,
+      totalChartsInPeriod: pool.length,
       items,
       reviewer,
       followUp,
     });
     printHtml(html);
-    const res = await saveGovernanceReview({ month, targetCount: target, reviewer, items: items as unknown as object[], html });
+    const res = await saveGovernanceReview({ month: `${windowStart(reviewDate)} → ${reviewDate}`, targetCount: target, reviewer, items: items as unknown as object[], html });
     setStatus(res.ok ? "AHCA audit report generated and saved to governance records." : `Generated, but save failed: ${res.error}`);
     listGovernanceReviews().then(setHistory).catch(() => {});
   }
@@ -138,13 +138,13 @@ export function GovernancePage(props: { onClose: () => void }) {
         <p className="status">
           § 400.9935 F.S. systematic review: billing matched against the note, provider authority, and documentation
           standards. Each chart is pre-evaluated point-by-point (Y/N/NA); the Medical Director confirms or overrides.
-          Minimum {MIN_CHARTS}, up to {MAX_CHARTS} charts per month.
+          Charts are sampled at random from all encounters in the 30 days before the review date — minimum {MIN_CHARTS}, up to {MAX_CHARTS}.
         </p>
 
         <div className="grid" style={{ marginBottom: 10 }}>
           <div className="field">
-            <label>Review month</label>
-            <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
+            <label>Review date (samples the prior 30 days)</label>
+            <input type="date" value={reviewDate} onChange={(e) => setReviewDate(e.target.value)} />
           </div>
           <div className="field">
             <label>Charts ({MIN_CHARTS}–{MAX_CHARTS})</label>

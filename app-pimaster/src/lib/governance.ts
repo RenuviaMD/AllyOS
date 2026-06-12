@@ -172,14 +172,16 @@ const STATUS_COLOR: Record<ChartStatus, string> = {
 
 /** AHCA-style Medical Director audit report for the compliance binder. */
 export function buildGovernanceReportHtml(args: {
-  month: string;
+  periodStart: string;
+  periodEnd: string;
   targetCount: number;
-  totalChartsInMonth: number;
+  totalChartsInPeriod: number;
   items: ChartReviewItem[];
   reviewer: string;
   followUp: string;
 }): string {
-  const { month, items } = args;
+  const { items } = args;
+  const period = `${args.periodStart} → ${args.periodEnd}`;
   const perChart = items.map((i) => {
     const s = chartScore(i.evaluation);
     return { item: i, score: s, status: statusFor(s.pct) };
@@ -208,11 +210,11 @@ export function buildGovernanceReportHtml(args: {
   const pointHeaders = AUDIT_POINTS.map((_, i) => `<th>P${i + 1}</th>`).join("");
   const legend = AUDIT_POINTS.map((p, i) => `<tr><td><strong>P${i + 1}</strong></td><td>${esc(p.label)}</td></tr>`).join("");
   const shortSample =
-    args.totalChartsInMonth < args.targetCount
-      ? `<p>Note: only ${args.totalChartsInMonth} chart(s) were generated during this period; all available charts were reviewed.</p>`
+    args.totalChartsInPeriod < args.targetCount
+      ? `<p>Note: only ${args.totalChartsInPeriod} chart(s) were generated during this period; all available charts were reviewed.</p>`
       : "";
 
-  return `<!doctype html><html><head><meta charset="utf-8"><title>MD Audit — ${esc(month)}</title>
+  return `<!doctype html><html><head><meta charset="utf-8"><title>MD Audit — ${esc(period)}</title>
   <style>
     body { font-family: Georgia, serif; color: #1a252f; margin: 36px; font-size: 12px; }
     .letterhead { text-align: center; border-bottom: 3px double #16a085; padding-bottom: 10px; margin-bottom: 16px; }
@@ -231,8 +233,8 @@ export function buildGovernanceReportHtml(args: {
   <div>Phone: ${esc(CLINIC.phone)} | Fax: ${esc(CLINIC.fax)}</div></div>
   <h1>MEDICAL DIRECTOR CHART AUDIT REPORT — AHCA COMPLIANCE BINDER</h1>
   <p>
-    <span class="kpi">Period<br><b>${esc(month)}</b></span>
-    <span class="kpi">Total encounters<br><b>${args.totalChartsInMonth}</b></span>
+    <span class="kpi">Review period (30 days)<br><b>${esc(period)}</b></span>
+    <span class="kpi">Total encounters<br><b>${args.totalChartsInPeriod}</b></span>
     <span class="kpi">Charts reviewed<br><b>${items.length}</b></span>
     <span class="kpi">Deficiencies<br><b>${deficiencies}</b></span>
     <span class="kpi">Aggregate score<br><b>${agg === null ? "—" : `${agg}%`}</b></span>

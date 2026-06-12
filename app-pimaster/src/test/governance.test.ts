@@ -130,9 +130,10 @@ describe("binder report", () => {
       comments: "License verified on DOH.",
     };
     const html = buildGovernanceReportHtml({
-      month: "2026-05",
+      periodStart: "2026-05-13",
+      periodEnd: "2026-06-11",
       targetCount: 5,
-      totalChartsInMonth: 3,
+      totalChartsInPeriod: 3,
       items: [item],
       reviewer: "Dr. Armando Falcon, MD",
       followUp: "Re-train staff on consent capture.",
@@ -140,6 +141,7 @@ describe("binder report", () => {
     expect(html).toContain("400.9935");
     expect(html).toContain("MEDICAL DIRECTOR CHART AUDIT REPORT");
     expect(html).toContain("Total encounters");
+    expect(html).toContain("2026-05-13 → 2026-06-11");
     expect(html).toContain("T.P.");
     expect(html).not.toContain("Test Patient"); // no PHI in the admin report
     expect(html).toContain("protected health information");

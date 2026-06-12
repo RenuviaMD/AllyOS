@@ -173,14 +173,18 @@ function initialsOf(first?: string, last?: string): string {
   return `${i(first)}${i(last)}` || "—";
 }
 
-/** All active reports with a date of service inside the given YYYY-MM month. */
-export async function listReportsForMonth(month: string): Promise<MonthChart[]> {
+/** All active reports with a date of service inside the rolling window ending on `endDate` (inclusive). */
+export async function listReportsForWindow(endDate: string, days = 30): Promise<MonthChart[]> {
+  const end = new Date(endDate + "T00:00:00Z");
+  const start = new Date(end);
+  start.setUTCDate(end.getUTCDate() - (days - 1));
+  const startIso = start.toISOString().slice(0, 10);
   const { data, error } = await supabase()
     .from("reports")
     .select("id, mode, dos, form_data, icd_codes, cpt_codes")
     .eq("status", "active")
-    .gte("dos", `${month}-01`)
-    .lt("dos", nextMonth(month))
+    .gte("dos", startIso)
+    .lte("dos", endDate)
     .order("dos", { ascending: true });
   if (error) throw error;
   return (data ?? []).map((r) => {
@@ -199,9 +203,11 @@ export async function listReportsForMonth(month: string): Promise<MonthChart[]> 
   });
 }
 
-function nextMonth(month: string): string {
-  const [y, m] = month.split("-").map(Number);
-  return m === 12 ? `${y + 1}-01-01` : `${y}-${String(m + 1).padStart(2, "0")}-01`;
+export function windowStart(endDate: string, days = 30): string {
+  const end = new Date(endDate + "T00:00:00Z");
+  const start = new Date(end);
+  start.setUTCDate(end.getUTCDate() - (days - 1));
+  return start.toISOString().slice(0, 10);
 }
 
 export async function saveGovernanceReview(args: {
