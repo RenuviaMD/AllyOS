@@ -10,6 +10,7 @@ describe("repository surface", () => {
   const expected = [
     "getPatientOwnership",
     "getPatientByUserId",
+    "getPatientById",
     "insertPrescription",
     "insertCheckIn",
     "listFlaggedCheckIns",
@@ -17,6 +18,11 @@ describe("repository surface", () => {
     "listActivePrescriptions",
     "listCheckInsForPatient",
     "listRecentAuditEvents",
+    "getPrescriptionOwnership",
+    "insertRefill",
+    "listRefillsForProvider",
+    "getRefillOwnership",
+    "updateRefillDecision",
   ] as const;
 
   it("exposes every repository function used by actions/pages", () => {

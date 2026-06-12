@@ -99,6 +99,12 @@ export async function getPatientByUserId(userId: string): Promise<Patient | null
   return rows[0] ?? null;
 }
 
+/** Resolve a patient record by its id (chart detail). */
+export async function getPatientById(patientId: string): Promise<Patient | null> {
+  const rows = await getDb().select().from(patients).where(eq(patients.id, patientId)).limit(1);
+  return rows[0] ?? null;
+}
+
 /** Active protocols for one patient (portal read-back). */
 export async function listActivePrescriptions(patientId: string): Promise<Prescription[]> {
   return getDb()

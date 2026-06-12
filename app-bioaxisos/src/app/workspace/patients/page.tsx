@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Card, CardTitle } from "@/components/ui/card";
 import { DbNotConfigured } from "@/components/ui/db-not-configured";
 import { getServerSession } from "@/lib/auth";
@@ -35,14 +36,16 @@ export default async function PatientsPage() {
       ) : (
         <div className="space-y-2">
           {roster.map((p) => (
-            <Card key={p.id}>
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-sm">MRN {p.mrn}</span>
-                <span className="text-xs text-ink-faint">
-                  since {new Date(p.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-            </Card>
+            <Link key={p.id} href={`/workspace/patients/${p.id}`}>
+              <Card className="transition-colors hover:border-accent">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-sm">MRN {p.mrn}</span>
+                  <span className="text-xs text-ink-faint">
+                    since {new Date(p.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </Card>
+            </Link>
           ))}
         </div>
       )}
