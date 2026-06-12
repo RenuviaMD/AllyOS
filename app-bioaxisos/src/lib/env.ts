@@ -15,6 +15,9 @@ const envSchema = z.object({
   DATABASE_CA_CERT: z.string().optional(),
   EMAIL_FROM: z.string().default("BioaxisOS <no-reply@bioaxis.renuviamd.com>"),
   EMAIL_API_KEY: z.string().optional(),
+  // Compliance gate. Until a BAA is signed, the app runs in synthetic-only mode
+  // and shows a persistent banner. Must be the literal "true" to disable it.
+  BAA_SIGNED: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -45,4 +48,13 @@ export function requireEnv<K extends keyof Env>(key: K): NonNullable<Env[K]> {
 /** True when a database connection is configured. DB-backed views check this. */
 export function isDbConfigured(): boolean {
   return typeof env.DATABASE_URL === "string" && env.DATABASE_URL.length > 0;
+}
+
+/**
+ * Whether a Business Associate Agreement is in force. Defaults to FALSE — the
+ * app stays in synthetic-only mode (banner shown) until this is explicitly
+ * "true". Never set true without an executed BAA + HIPAA-eligible infra.
+ */
+export function isBaaSigned(): boolean {
+  return env.BAA_SIGNED === "true";
 }

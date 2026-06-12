@@ -32,6 +32,19 @@ export const createPrescriptionSchema = z.object({
 
 export type CreatePrescriptionInput = z.infer<typeof createPrescriptionSchema>;
 
+export const createPatientSchema = z.object({
+  email: z.string().email(),
+  fullName: z.string().min(1).max(200),
+  mrn: z
+    .string()
+    .min(1)
+    .max(40)
+    .regex(/^[A-Za-z0-9-]+$/, "MRN: letters, digits, dashes only")
+    .optional(),
+});
+
+export type CreatePatientInput = z.infer<typeof createPatientSchema>;
+
 export const submitCheckInSchema = z.object({
   patientId: z.string().uuid(),
   painScore: z.number().int().min(0).max(10).optional(),

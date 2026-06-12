@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { Card, CardTitle } from "@/components/ui/card";
 import { DbNotConfigured } from "@/components/ui/db-not-configured";
+import { NewPatientForm } from "@/components/workspace/new-patient-form";
 import { getServerSession } from "@/lib/auth";
 import { requireRole } from "@/lib/auth/rbac";
 import { listPatientsForProvider } from "@/lib/db/repositories";
@@ -27,6 +29,7 @@ export default async function PatientsPage() {
     <div>
       <h1 className="mb-1 text-2xl font-semibold">Patients</h1>
       <p className="mb-6 text-ink-muted">Charts you own.</p>
+      <NewPatientForm />
       {roster.length === 0 ? (
         <Card>
           <CardTitle>No patients yet</CardTitle>
@@ -35,14 +38,16 @@ export default async function PatientsPage() {
       ) : (
         <div className="space-y-2">
           {roster.map((p) => (
-            <Card key={p.id}>
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-sm">MRN {p.mrn}</span>
-                <span className="text-xs text-ink-faint">
-                  since {new Date(p.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-            </Card>
+            <Link key={p.id} href={`/workspace/patients/${p.id}`}>
+              <Card className="transition-colors hover:border-accent">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-sm">MRN {p.mrn}</span>
+                  <span className="text-xs text-ink-faint">
+                    since {new Date(p.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </Card>
+            </Link>
           ))}
         </div>
       )}

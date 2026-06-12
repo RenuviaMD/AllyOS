@@ -20,6 +20,9 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
             <Link href="/workspace/inbox" className="hover:text-ink">
               MD Inbox
             </Link>
+            <Link href="/workspace/refills" className="hover:text-ink">
+              Refills
+            </Link>
             <Link href="/workspace/patients" className="hover:text-ink">
               Patients
             </Link>
