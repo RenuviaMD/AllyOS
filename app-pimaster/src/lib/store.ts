@@ -162,13 +162,16 @@ export interface MonthChart {
   dos: string;
   patient_label: string;
   telehealth: boolean;
+  form: VisitForm;
+  icd_codes: string[];
+  cpt_codes: string[];
 }
 
 /** All active reports with a date of service inside the given YYYY-MM month. */
 export async function listReportsForMonth(month: string): Promise<MonthChart[]> {
   const { data, error } = await supabase()
     .from("reports")
-    .select("id, mode, dos, form_data")
+    .select("id, mode, dos, form_data, icd_codes, cpt_codes")
     .eq("status", "active")
     .gte("dos", `${month}-01`)
     .lt("dos", nextMonth(month))
@@ -183,6 +186,9 @@ export async function listReportsForMonth(month: string): Promise<MonthChart[]> 
       dos: r.dos as string,
       patient_label: p ? `${p.firstName ?? ""} ${p.lastName ?? ""}`.trim() || "(unnamed)" : "(unnamed)",
       telehealth: f?.visitMode === "telehealth",
+      form: (f ?? {}) as VisitForm,
+      icd_codes: (r.icd_codes as string[] | null) ?? [],
+      cpt_codes: (r.cpt_codes as string[] | null) ?? [],
     };
   });
 }

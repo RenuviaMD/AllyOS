@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import {
+  AUDIT_POINTS,
+  autoEvaluate,
   buildGovernanceReportHtml,
-  emptyItem,
+  chartScore,
   itemComplete,
   MAX_CHARTS,
   MIN_CHARTS,
   sampleCharts,
+  statusFor,
   type ChartReviewItem,
+  type PointValue,
 } from "../lib/governance";
 import { printHtml } from "../lib/report";
 import {
@@ -22,14 +26,22 @@ import { CLINIC } from "../lib/clinic";
 
 function defaultMonth(): string {
   const d = new Date();
-  d.setMonth(d.getMonth() - 1); // default to the previous month
+  d.setMonth(d.getMonth() - 1);
   return d.toISOString().slice(0, 7);
 }
+
+const STATUS_CLASS: Record<string, string> = {
+  PASS: "ok",
+  MONITOR: "",
+  CORRECTIVE: "warn",
+  ESCALATION: "warn",
+};
 
 export function GovernancePage(props: { onClose: () => void }) {
   const [month, setMonth] = useState(defaultMonth);
   const [target, setTarget] = useState(MIN_CHARTS);
   const [reviewer, setReviewer] = useState(CLINIC.provider);
+  const [followUp, setFollowUp] = useState("");
   const [pool, setPool] = useState<MonthChart[] | null>(null);
   const [items, setItems] = useState<ChartReviewItem[]>([]);
   const [status, setStatus] = useState("");
@@ -45,21 +57,44 @@ export function GovernancePage(props: { onClose: () => void }) {
       const charts = await listReportsForMonth(month);
       setPool(charts);
       const sampled = sampleCharts(charts, target);
-      setItems(sampled.map(emptyItem));
+      setItems(
+        sampled.map((c) => ({
+          reportId: c.id,
+          patientLabel: c.patient_label,
+          dos: c.dos,
+          mode: c.mode,
+          telehealth: c.telehealth,
+          evaluation: autoEvaluate(c.form, c.cpt_codes, c.icd_codes),
+          mdOverrides: [],
+          comments: "",
+        })),
+      );
       setStatus(
         charts.length === 0
           ? "No charts found for this month."
-          : charts.length < target
-            ? `Only ${charts.length} chart(s) in this period — all will be reviewed.`
-            : `Random sample of ${sampled.length} of ${charts.length} charts loaded.`,
+          : `Random sample of ${Math.min(target, charts.length)} of ${charts.length} encounters loaded and pre-evaluated. Review each point — your changes are recorded as MD overrides.`,
       );
     } catch (e) {
       setStatus(`Could not load charts: ${e instanceof Error ? e.message : e}`);
     }
   }
 
-  function update(idx: number, partial: Partial<ChartReviewItem>) {
-    setItems((arr) => arr.map((it, i) => (i === idx ? { ...it, ...partial } : it)));
+  function setPoint(idx: number, pointId: string, value: PointValue) {
+    setItems((arr) =>
+      arr.map((it, i) => {
+        if (i !== idx) return it;
+        const overrides = it.mdOverrides.includes(pointId) ? it.mdOverrides : [...it.mdOverrides, pointId];
+        return {
+          ...it,
+          mdOverrides: overrides,
+          evaluation: { ...it.evaluation, [pointId]: { value, reason: `${it.evaluation[pointId]?.reason ?? ""} [MD override]`.trim() } },
+        };
+      }),
+    );
+  }
+
+  function setComments(idx: number, comments: string) {
+    setItems((arr) => arr.map((it, i) => (i === idx ? { ...it, comments } : it)));
   }
 
   async function viewChart(reportId: string) {
@@ -78,10 +113,11 @@ export function GovernancePage(props: { onClose: () => void }) {
       totalChartsInMonth: pool.length,
       items,
       reviewer,
+      followUp,
     });
     printHtml(html);
     const res = await saveGovernanceReview({ month, targetCount: target, reviewer, items: items as unknown as object[], html });
-    setStatus(res.ok ? "Binder report generated and saved to governance records." : `Generated, but save failed: ${res.error}`);
+    setStatus(res.ok ? "AHCA audit report generated and saved to governance records." : `Generated, but save failed: ${res.error}`);
     listGovernanceReviews().then(setHistory).catch(() => {});
   }
 
@@ -90,25 +126,19 @@ export function GovernancePage(props: { onClose: () => void }) {
     if (html) printHtml(html);
   }
 
-  const checks: { key: "documentationComplete" | "codingSupported" | "necessitySupported"; label: string }[] = [
-    { key: "documentationComplete", label: "Documentation complete" },
-    { key: "codingSupported", label: "ICD/CPT supported by documentation" },
-    { key: "necessitySupported", label: "Medical necessity supported" },
-  ];
-
   return (
     <div className="modal-back" onClick={props.onClose}>
-      <div className="modal" style={{ width: "min(900px, 94vw)" }} onClick={(e) => e.stopPropagation()}>
+      <div className="modal" style={{ width: "min(980px, 96vw)" }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
-          <h2 style={{ margin: 0, color: "var(--gold)" }}>Medical Director Governance — Monthly Chart Review</h2>
+          <h2 style={{ margin: 0, color: "var(--gold)" }}>Medical Director Governance — AHCA Chart Audit</h2>
           <button className="btn ghost" style={{ marginLeft: "auto" }} onClick={props.onClose}>
             Close
           </button>
         </div>
         <p className="status">
-          Conducted per the Medical Director duties of the Florida Health Care Clinic Act (§ 400.9935, F.S.) — systematic
-          review of clinical records and billings. Minimum {MIN_CHARTS} charts per month, up to {MAX_CHARTS} at the Medical
-          Director's discretion. The PDF report is for the AHCA compliance binder.
+          § 400.9935 F.S. systematic review: billing matched against the note, provider authority, and documentation
+          standards. Each chart is pre-evaluated point-by-point (Y/N/NA); the Medical Director confirms or overrides.
+          Minimum {MIN_CHARTS}, up to {MAX_CHARTS} charts per month.
         </p>
 
         <div className="grid" style={{ marginBottom: 10 }}>
@@ -117,12 +147,10 @@ export function GovernancePage(props: { onClose: () => void }) {
             <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
           </div>
           <div className="field">
-            <label>Charts to review ({MIN_CHARTS}–{MAX_CHARTS})</label>
+            <label>Charts ({MIN_CHARTS}–{MAX_CHARTS})</label>
             <select value={target} onChange={(e) => setTarget(Number(e.target.value))}>
               {Array.from({ length: MAX_CHARTS - MIN_CHARTS + 1 }, (_, i) => MIN_CHARTS + i).map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
+                <option key={n} value={n}>{n}</option>
               ))}
             </select>
           </div>
@@ -132,72 +160,87 @@ export function GovernancePage(props: { onClose: () => void }) {
           </div>
           <div className="field">
             <label>&nbsp;</label>
-            <button className="btn" onClick={loadSample}>
-              Load random sample
-            </button>
+            <button className="btn" onClick={loadSample}>Load & pre-evaluate sample</button>
           </div>
         </div>
 
-        {items.map((it, idx) => (
-          <div key={it.reportId} className="section" style={{ marginBottom: 10 }}>
-            <div className="section-head">
-              <span className="section-num">{idx + 1}</span>
-              <span className="section-title">
-                {it.patientLabel} — {it.dos} — {it.mode}
-                {it.telehealthCompliant !== null ? " — TELEHEALTH" : ""}
-              </span>
-              <button className="btn ghost" style={{ marginLeft: "auto" }} onClick={() => viewChart(it.reportId)}>
-                View chart
-              </button>
-            </div>
-            <div className="section-body">
-              <div className="checkgroup">
-                {checks.map((c) => (
-                  <label key={c.key} className={it[c.key] ? "checked" : ""}>
-                    <input type="checkbox" checked={it[c.key]} onChange={() => update(idx, { [c.key]: !it[c.key] } as Partial<ChartReviewItem>)} />
-                    {c.label}
-                  </label>
-                ))}
-                {it.telehealthCompliant !== null && (
-                  <label className={it.telehealthCompliant ? "checked" : ""}>
-                    <input
-                      type="checkbox"
-                      checked={it.telehealthCompliant}
-                      onChange={() => update(idx, { telehealthCompliant: !it.telehealthCompliant })}
-                    />
-                    Telehealth consent & origination statement present
-                  </label>
-                )}
+        {items.map((it, idx) => {
+          const score = chartScore(it.evaluation);
+          const st = statusFor(score.pct);
+          return (
+            <div key={it.reportId} className="section" style={{ marginBottom: 10 }}>
+              <div className="section-head">
+                <span className="section-num">{idx + 1}</span>
+                <span className="section-title">
+                  {it.patientLabel} — {it.dos} — {it.mode}
+                  {it.telehealth ? " — TELEHEALTH" : ""}
+                </span>
+                <span className={`status ${STATUS_CLASS[st]}`} style={{ marginLeft: "auto", fontWeight: 700 }}>
+                  {score.pct === null ? "—" : `${score.pct}%`} · {st}
+                </span>
+                <button className="btn ghost" onClick={() => viewChart(it.reportId)}>View chart</button>
               </div>
-              <div className="grid" style={{ marginTop: 8 }}>
-                <div className="field">
-                  <label>Finding</label>
-                  <select value={it.finding} onChange={(e) => update(idx, { finding: e.target.value as ChartReviewItem["finding"] })}>
-                    <option value="">— select —</option>
-                    <option value="compliant">Compliant</option>
-                    <option value="minor">Minor deficiency</option>
-                    <option value="significant">Significant deficiency</option>
-                  </select>
-                </div>
-                <div className="field grid-wide">
+              <div className="section-body">
+                <table className="rom-table">
+                  <tbody>
+                    {AUDIT_POINTS.map((p) => {
+                      const r = it.evaluation[p.id];
+                      return (
+                        <tr key={p.id}>
+                          <td style={{ width: "42%" }}>{p.label}</td>
+                          <td style={{ width: 160 }}>
+                            <div className="rom-grades">
+                              {(["Y", "N", "NA"] as PointValue[]).map((v) => (
+                                <button
+                                  key={v}
+                                  type="button"
+                                  className={`${v === "Y" ? "g-wnl" : v === "N" ? "g-cannot" : "g-limited"}${r?.value === v ? " sel" : ""}`}
+                                  onClick={() => setPoint(idx, p.id, v)}
+                                >
+                                  {v}
+                                </button>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="status">
+                            {r?.reason}
+                            {it.mdOverrides.includes(p.id) ? " ✱" : p.auto ? "" : " (manual review)"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                <div className="field" style={{ marginTop: 8 }}>
                   <label>Comments / corrective action</label>
-                  <input value={it.comments} onChange={(e) => update(idx, { comments: e.target.value })} />
+                  <input value={it.comments} onChange={(e) => setComments(idx, e.target.value)} />
                 </div>
               </div>
             </div>
+          );
+        })}
+
+        {items.length > 0 && (
+          <div className="field" style={{ margin: "10px 0" }}>
+            <label>Follow-up / corrective action plan (prints on the report)</label>
+            <textarea
+              value={followUp}
+              onChange={(e) => setFollowUp(e.target.value)}
+              style={{ width: "100%", background: "var(--hover)", border: "1px solid #46627f", color: "var(--text)", borderRadius: 4, padding: 8 }}
+            />
           </div>
-        ))}
+        )}
 
         <div className="toolbar" style={{ margin: "10px 0" }}>
           <button className="btn gold" disabled={!allReviewed || !meetsMinimum} onClick={generateBinderReport}>
-            Generate AHCA Binder Report (PDF)
+            Generate AHCA Audit Report (PDF)
           </button>
           <span className="status">{status}</span>
         </div>
 
         {history.length > 0 && (
           <>
-            <h3 className="exam-h">Past reviews</h3>
+            <h3 className="exam-h">Past audits</h3>
             <table className="rom-table">
               <tbody>
                 {history.map((h) => (
@@ -207,9 +250,7 @@ export function GovernancePage(props: { onClose: () => void }) {
                     <td>{h.reviewer}</td>
                     <td>{h.created_at.slice(0, 10)}</td>
                     <td>
-                      <button className="btn ghost" onClick={() => openHistory(h.id)}>
-                        View / Print
-                      </button>
+                      <button className="btn ghost" onClick={() => openHistory(h.id)}>View / Print</button>
                     </td>
                   </tr>
                 ))}
