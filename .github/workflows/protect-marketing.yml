@@ -1,0 +1,33 @@
+name: Protect marketing site
+
+# bioaxis.renuviamd.com auto-deploys from this repo's `main`. These files are the
+# public marketing site; the BioaxisOS app lives entirely under app-bioaxisos/ and
+# must never alter them. This guard fails any PR that touches the marketing files
+# or introduces a root netlify.toml (which would override the marketing build).
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Block changes to public marketing files
+        run: |
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.event.pull_request.head.sha }}"
+          changed=$(git diff --name-only "$base" "$head")
+          echo "Changed files in this PR:"
+          echo "$changed"
+          echo "---"
+          protected=$(printf '%s\n' "$changed" | grep -E '^(index\.html|shopify-snippet-renuviamd-banner\.liquid|netlify\.toml)$' || true)
+          if [ -n "$protected" ]; then
+            echo "::error::This PR modifies public marketing-site files that auto-deploy to bioaxis.renuviamd.com:"
+            printf '%s\n' "$protected"
+            echo "If this is truly intended, the change must be made deliberately and this guard updated in the same PR with sign-off."
+            exit 1
+          fi
+          echo "OK — no public marketing files touched. Safe for bioaxis.renuviamd.com."
