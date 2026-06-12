@@ -1,8 +1,17 @@
+import { totalCharges, type BillingSettings, type ServiceLine } from "./billing";
 import { CLINIC, DIAGNOSTIC_CENTER } from "./clinic";
 import { EM_LEVELS, PT_MODALITIES, resolveImagingSelection } from "./cpt";
 import { deriveIcd10, parseManualCodes, PSYCH_CODES } from "./icd10";
-import { aggravationNarrative, imagingReviewNarrative, injuryNarrative, telehealthStatement } from "./narratives";
-import { EXAM_REGIONS, GRADE_LABELS, JOINT_REGIONS, SPINE_REGION_IDS, SPINE_REGION_LABELS } from "./rom";
+import {
+  aggravationNarrative,
+  causationStatement,
+  certificationStatement,
+  imagingReviewNarrative,
+  injuryNarrative,
+  prognosisStatement,
+  telehealthStatement,
+} from "./narratives";
+import { EXAM_REGIONS, GRADE_LABELS, impairedSides, JOINT_REGIONS, SPINE_REGION_IDS, SPINE_REGION_LABELS } from "./rom";
 import type { DxCode, VisitForm } from "./types";
 import { daysSinceAccident, weekBounds, weekNumber } from "./weeks";
 
@@ -166,6 +175,16 @@ export function buildClinicalNoteHtml(form: VisitForm): string {
     if (pl.followUp) b += `<p><strong>Follow-up:</strong> ${esc(pl.followUp)}</p>`;
   }
 
+  if (form.visitType === "initial" && form.plan.emc) {
+    const emcText = { yes: "YES — the patient has an Emergency Medical Condition as defined under Florida Statute § 627.736. A Certification of Emergency Medical Condition has been issued.", no: "NO — no Emergency Medical Condition was identified on today's evaluation.", deferred: "DEFERRED — determination pending further evaluation and diagnostic correlation." }[form.plan.emc];
+    b += `<h2>Emergency Medical Condition Determination</h2><p>${esc(emcText)}</p>`;
+  }
+
+  const caus = causationStatement(form.plan.causation, form.accident.accidentDate, form.accident.accidentType);
+  if (caus) b += `<h2>Causation Statement</h2><p class="narrative">${esc(caus)}</p>`;
+  const prog = prognosisStatement(form.plan.prognosis);
+  if (prog) b += `<h2>Prognosis</h2><p class="narrative">${esc(prog)}</p>`;
+
   if (form.visitType === "final") {
     const d = form.discharge;
     b += `<h2>Discharge Summary</h2><table>
@@ -178,7 +197,129 @@ export function buildClinicalNoteHtml(form: VisitForm): string {
     </table><p><strong>Case status: CLOSED.</strong></p>`;
   }
 
+  b += `<h2>Physician Certification</h2><p>${esc(certificationStatement())}</p>`;
+
   return wrap(`Clinical Note — ${form.patient.lastName}`, b + signature());
+}
+
+/** EMC region checkboxes derived from documented findings (mirrors the clinic's certification form). */
+export function emcRegions(form: VisitForm): { label: string; checked: boolean }[] {
+  const has = (id: string) => impairedSides(id, form).length > 0;
+  return [
+    { label: "HEAD", checked: false },
+    { label: "CERVICAL REGION", checked: has("cervical") },
+    { label: "THORACIC REGION", checked: has("thoracic") },
+    { label: "LUMBAR REGION", checked: has("lumbar") },
+    { label: "UPPER EXTREMITIES", checked: has("shoulder") || has("elbow") || has("wrist") },
+    { label: "LOWER EXTREMITIES", checked: has("hip") || has("knee") || has("ankle") },
+    { label: "OTHER", checked: false },
+  ];
+}
+
+/** Certification of Emergency Medical Condition — replicates the clinic's existing form. */
+export function buildEmcCertificationHtml(form: VisitForm): string {
+  const dx = allDiagnosisCodes(form);
+  const half = Math.ceil(dx.length / 2);
+  const rows: string[] = [];
+  for (let i = 0; i < half; i++) {
+    const left = dx[i];
+    const right = dx[i + half];
+    rows.push(
+      `<tr><td>${esc(left.code)}</td><td>${esc(left.desc)}</td><td>${right ? esc(right.code) : ""}</td><td>${right ? esc(right.desc) : ""}</td></tr>`,
+    );
+  }
+  const regions = emcRegions(form)
+    .map((r) => `<span style="margin-right:18px; white-space:nowrap;"><strong>${r.checked ? "X" : "___"}</strong> ${esc(r.label)}</span>`)
+    .join(" ");
+  const b = `<h1 style="text-align:center">CERTIFICATION OF EMERGENCY MEDICAL CONDITION</h1>
+    <p><strong>PATIENT NAME:</strong> ${esc(form.patient.firstName)} ${esc(form.patient.lastName)}
+       &nbsp;&nbsp;<strong>DATE OF SERVICE (DOS):</strong> ${esc(form.visitDate)}<br>
+       <strong>DATE OF ACCIDENT (DOA):</strong> ${esc(form.accident.accidentDate)}</p>
+    <h2>Diagnosis</h2>
+    <table><tr><th>ICD-10 Code</th><th>Diagnosis</th><th>ICD-10 Code</th><th>Diagnosis</th></tr>${rows.join("")}</table>
+    <p style="text-transform:uppercase; font-size:11px;"><strong>"Emergency Medical Condition" means a condition manifesting itself by acute symptoms of
+    sufficient severity, which may include severe pain, such that the absence of immediate medical attention could reasonably
+    be expected to result in any of the following:</strong></p>
+    <p style="margin-left:20px; font-size:11px; text-transform:uppercase;">A. Serious jeopardy to patient health<br>B. Serious impairment to bodily functions<br>C. Serious dysfunction of any bodily organ or part</p>
+    <p><strong>Physician Certification — Region(s):</strong> The patient has an Emergency Medical Condition documented in the region(s) marked below.</p>
+    <p>${regions}</p>
+    <h2>Physician Certification</h2>
+    <p>I, ${esc(CLINIC.provider)}, evaluated the patient on the date of service. Based on the patient's history, reported accident
+    mechanism, clinical presentation, examination findings, and my medical judgment, I certify that the patient has an Emergency
+    Medical Condition as defined under Florida Statute § 627.736.</p>
+    <p>This certification is based on clinical findings only. It is not based on reimbursement, referral source, therapy use, or case value.</p>
+    <p>I certify that the above information is true and correct to the best of my medical judgment.</p>
+    ${signature()}
+    <p style="font-size:10px; color:#555; margin-top:30px;">${esc(CLINIC.name)} · ${esc(CLINIC.address)} · ${esc(CLINIC.phone)} · Fax: ${esc(CLINIC.fax)}.
+    This document is confidential and intended solely for the named recipient and authorized parties. Unauthorized disclosure is prohibited.</p>`;
+  return wrap(`EMC Certification — ${form.patient.lastName}`, b);
+}
+
+/** Per-encounter superbill: diagnoses with pointers + priced service lines. */
+export function buildSuperbillHtml(form: VisitForm, lines: ServiceLine[], settings: BillingSettings, encounter: "md" | "pt"): string {
+  const dx = allDiagnosisCodes(form).slice(0, 12);
+  const letters = "ABCDEFGHIJKL";
+  const dxRows = dx.map((d, i) => `<tr><td>${letters[i]}</td><td>${esc(d.code)}</td><td>${esc(d.desc)}</td></tr>`).join("");
+  const pointers = letters.slice(0, Math.min(dx.length, 4));
+  const lineRows = lines
+    .map(
+      (l) =>
+        `<tr><td>${esc(form.visitDate)}</td><td>${l.pos}</td><td>${esc(l.cpt)}${l.modifier ? `-${l.modifier}` : ""}</td><td>${esc(l.description)}</td><td>${pointers}</td><td>${l.units}</td><td>${l.charge ? `$${esc(l.charge)}` : ""}</td></tr>`,
+    )
+    .join("");
+  const total = totalCharges(lines);
+  const b = `<h1>${encounter === "md" ? "ENCOUNTER SUPERBILL" : "PHYSICAL THERAPY SUPERBILL"}</h1>
+    ${patientBlock(form)}
+    <h2>Diagnoses (ICD-10)</h2>
+    <table><tr><th>Ref</th><th>Code</th><th>Description</th></tr>${dxRows}</table>
+    <h2>Services</h2>
+    <table><tr><th>DOS</th><th>POS</th><th>CPT/Mod</th><th>Description</th><th>Dx Ptr</th><th>Units</th><th>Charge</th></tr>${lineRows}
+    <tr><td colspan="6" style="text-align:right"><strong>Total</strong></td><td><strong>${total ? `$${total}` : ""}</strong></td></tr></table>
+    <table style="margin-top:10px"><tr>
+      <th>Federal Tax ID (EIN)</th><td>${esc(settings.ein)}</td>
+      <th>Billing NPI</th><td>${esc(settings.billingNpi || settings.renderingNpi)}</td>
+      <th>Rendering NPI</th><td>${esc(settings.renderingNpi)}</td>
+    </tr></table>
+    ${signature()}
+    <div class="sig"><div class="sig-line">Patient Signature</div></div>`;
+  return wrap(`Superbill — ${form.patient.lastName}`, b);
+}
+
+/** CMS-1500 (02/12) print replica, auto-populated. Box numbers shown for cross-reference. */
+export function buildCms1500Html(form: VisitForm, lines: ServiceLine[], settings: BillingSettings): string {
+  const p = form.patient;
+  const dx = allDiagnosisCodes(form).slice(0, 12);
+  const letters = "ABCDEFGHIJKL";
+  const dxCells = dx.map((d, i) => `<td><strong>${letters[i]}.</strong> ${esc(d.code)}</td>`).join("");
+  const pointers = letters.slice(0, Math.min(dx.length, 4));
+  const lineRows = lines
+    .map(
+      (l) =>
+        `<tr><td>${esc(form.visitDate)}</td><td>${l.pos}</td><td>${esc(l.cpt)}</td><td>${l.modifier}</td><td>${pointers}</td><td>${l.charge ? `$${esc(l.charge)}` : ""}</td><td>${l.units}</td><td>${esc(settings.renderingNpi)}</td></tr>`,
+    )
+    .join("");
+  const total = totalCharges(lines);
+  const sexBox = p.sex === "male" ? "M [X]  F [ ]" : p.sex === "female" ? "M [ ]  F [X]" : "M [ ]  F [ ]";
+  const b = `<h1>HEALTH INSURANCE CLAIM FORM — CMS-1500 (02/12) DATA</h1>
+    <p class="status" style="color:#555">Print replica for review/fax. For payer submission on preprinted red OCR forms, transfer values by box number.</p>
+    <table>
+      <tr><th>1. Type</th><td>OTHER [X] (Auto/PIP)</td><th>1a. Insured's ID / Policy</th><td>${esc(p.policyNumber)}</td></tr>
+      <tr><th>2. Patient's Name</th><td>${esc(p.lastName)}, ${esc(p.firstName)}</td><th>3. DOB / Sex</th><td>${esc(p.dob)} — ${sexBox}</td></tr>
+      <tr><th>4. Insured's Name</th><td>${esc(p.lastName)}, ${esc(p.firstName)} (Self)</td><th>6. Relationship</th><td>Self [X]</td></tr>
+      <tr><th>5. Patient's Address</th><td colspan="3">${esc(p.address)}, ${esc(p.city)}, ${esc(p.state)} ${esc(p.zip)} — Tel: ${esc(p.phone)}</td></tr>
+      <tr><th>10b. Auto Accident?</th><td>YES [X] — PLACE (State): FL</td><th>11. Insurance Plan</th><td>${esc(p.insuranceCarrier)}</td></tr>
+      <tr><th>14. Date of Current Illness/Injury (Qual. 439)</th><td>${esc(form.accident.accidentDate)}</td><th>21. ICD Ind.</th><td>0 (ICD-10-CM)</td></tr>
+    </table>
+    <h2>21. Diagnosis Codes</h2>
+    <table><tr>${dxCells}</tr></table>
+    <h2>24. Service Lines</h2>
+    <table><tr><th>A. DOS</th><th>B. POS</th><th>D. CPT</th><th>Mod</th><th>E. Dx Ptr</th><th>F. Charges</th><th>G. Units</th><th>J. Rendering NPI</th></tr>${lineRows}</table>
+    <table style="margin-top:10px">
+      <tr><th>25. Federal Tax ID</th><td>${esc(settings.ein)}</td><th>28. Total Charge</th><td>${total ? `$${total}` : ""}</td></tr>
+      <tr><th>31. Signature of Physician</th><td>${esc(CLINIC.provider)} — ${esc(form.visitDate)}</td><th>32. Service Facility</th><td>${esc(CLINIC.name)}, ${esc(CLINIC.address)}</td></tr>
+      <tr><th>33. Billing Provider</th><td>${esc(CLINIC.name)}, ${esc(CLINIC.address)} — ${esc(CLINIC.phone)}</td><th>33a. NPI</th><td>${esc(settings.billingNpi || settings.renderingNpi)}</td></tr>
+    </table>`;
+  return wrap(`CMS-1500 — ${form.patient.lastName}`, b);
 }
 
 /** X-Ray order on clinic letterhead, addressed to MAZEL. */

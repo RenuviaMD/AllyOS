@@ -68,6 +68,28 @@ export function Section7Plan({ form, patch }: SectionProps) {
         <Select label="PT Frequency" value={p.ptFrequency} onChange={(v) => patch("plan", { ptFrequency: v })} options={PT_FREQUENCIES} />
         <Select label="PT Duration" value={p.ptDuration} onChange={(v) => patch("plan", { ptDuration: v })} options={PT_DURATIONS} />
         <Select label="Follow-Up" value={p.followUp} onChange={(v) => patch("plan", { followUp: v })} options={FOLLOW_UPS} />
+        {form.visitType === "initial" && (
+          <Select
+            label="EMC Determination (FL PIP § 627.736) — REQUIRED"
+            value={p.emc}
+            onChange={(v) => patch("plan", { emc: v as typeof p.emc })}
+            options={["yes", "no", "deferred"]}
+            labels={["YES — Emergency Medical Condition", "NO — no EMC identified", "DEFERRED — pending evaluation"]}
+          />
+        )}
+        <Select
+          label={`Causation Opinion${form.visitType !== "followup" ? " — REQUIRED" : ""}`}
+          value={p.causation}
+          onChange={(v) => patch("plan", { causation: v as typeof p.causation })}
+          options={["related", "not-related", "undetermined"]}
+          labels={["Causally related to accident", "Not causally related", "Undetermined at this time"]}
+        />
+        <Select
+          label="Prognosis"
+          value={p.prognosis}
+          onChange={(v) => patch("plan", { prognosis: v as typeof p.prognosis })}
+          options={["Excellent", "Good", "Fair", "Guarded", "Poor"]}
+        />
         <div className="field grid-wide">
           <label>Medical Necessity — REQUIRED — {necessityLabel}</label>
           <textarea

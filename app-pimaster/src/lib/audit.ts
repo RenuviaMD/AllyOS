@@ -24,9 +24,27 @@ export function auditNote(form: VisitForm): AuditResult {
   }
   if (!form.plan.emLevel) warnings.push("No E/M level selected (Section 7).");
 
+  if (form.visitType === "initial") {
+    if (!form.plan.emc) {
+      errors.push("Emergency Medical Condition determination is required on initial visits (Section 7) — FL PIP § 627.736.");
+    }
+    if (!form.plan.causation) {
+      errors.push("Causation opinion is required on initial visits (Section 7).");
+    }
+    if (!form.plan.prognosis) warnings.push("No prognosis documented (Section 7).");
+  }
+  if (form.visitType === "final" && !form.plan.causation) {
+    errors.push("Causation opinion is required on final visits (Section 7).");
+  }
+
   if (form.visitMode === "telehealth") {
     if (!form.telehealth.consentObtained) {
       errors.push("Telehealth consent has not been documented — required before generating a telehealth note.");
+    }
+    if ((form.visitType === "initial" || form.visitType === "final") && !form.telehealth.overrideReason.trim()) {
+      errors.push(
+        "Initial and final visits default to in-person. To document this visit as telehealth, record the reason in the Telehealth section.",
+      );
     }
     // Hands-on findings cannot exist on a telehealth visit. The exam form hides
     // these inputs, but data entered before switching modality must be cleared.

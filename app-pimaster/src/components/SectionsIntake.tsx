@@ -25,6 +25,11 @@ export function Section1CheckIn({ form, patch }: SectionProps) {
         />
         <Text label="Insurance Carrier" value={p.insuranceCarrier} onChange={(v) => patch("patient", { insuranceCarrier: v })} />
         <Text label="Policy Number" value={p.policyNumber} onChange={(v) => patch("patient", { policyNumber: v })} />
+        <Text label="Address" value={p.address} onChange={(v) => patch("patient", { address: v })} />
+        <Text label="City" value={p.city} onChange={(v) => patch("patient", { city: v })} />
+        <Text label="State" value={p.state} onChange={(v) => patch("patient", { state: v })} />
+        <Text label="ZIP" value={p.zip} onChange={(v) => patch("patient", { zip: v })} />
+        <Text label="Phone" value={p.phone} onChange={(v) => patch("patient", { phone: v })} />
       </div>
     </Section>
   );
@@ -53,6 +58,14 @@ export function TelehealthConsent({ form, patch }: SectionProps) {
           </div>
         </div>
         <Text label="Consent obtained by (staff name)" value={t.consentBy} onChange={(v) => patch("telehealth", { consentBy: v })} />
+        {(form.visitType === "initial" || form.visitType === "final") && (
+          <Text
+            label="Reason for telehealth on an initial/final visit (required — these default to in-person)"
+            value={t.overrideReason}
+            onChange={(v) => patch("telehealth", { overrideReason: v })}
+            wide
+          />
+        )}
       </div>
     </Section>
   );

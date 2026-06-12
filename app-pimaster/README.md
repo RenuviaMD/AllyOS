@@ -32,6 +32,14 @@ Every visit carries a modality toggle next to the visit-type toggle. Telehealth 
 
 A pre-generation audit (`src/lib/audit.ts`) blocks notes with missing identity/accident data, missing medical-necessity rationale, missing telehealth consent, hands-on findings on telehealth visits, or a final visit without an outcome.
 
+## PI/PIP documentation & billing
+
+- **EMC determination** is a required field on every initial visit (FL PIP § 627.736 — $10,000 vs $2,500 benefit). When YES, the app generates the clinic's **Certification of Emergency Medical Condition** (statutory definition, auto-checked body regions, paired sprain/strain/pain ICD-10 codes, physician certification language) replicating the existing paper form.
+- **Causation Statement, Prognosis, and Physician Certification** print on every clinical note, composed strictly from the physician's documented selections — never auto-asserted.
+- **Same-accident clone guard**: before a note generates, its narrative is compared (word n-gram similarity, narrative sections only — boilerplate excluded) against notes of other patients from the same accident date. Above 20% similarity the note is blocked until patient-specific history/findings are documented; near-identical exam findings raise a warning to document distinguishing findings, never to fabricate differences. Scores are stored in the report's audit trail.
+- **Billing**: per-device Billing Settings (EIN, billing/rendering NPI, fee schedule — blank charges print blank, never estimated) drive a per-encounter **Superbill** and a **CMS-1500 (02/12) print replica** with auto accident = YES/FL, accident date (qualifier 439), ICD-10 codes A–L with pointers, and modality-aware service lines: POS 11 in person, POS 02 + modifier 95 for facility-originated telehealth (never POS 10 — the patient is never at home).
+- Initial and final visits default to in-person; documenting them as telehealth requires a recorded reason (audit-enforced).
+
 ## Features (per spec)
 
 - **Visit toggle** Initial / Follow-Up / Final controls section visibility; **role toggle** Staff / Physician / PT controls permissions.

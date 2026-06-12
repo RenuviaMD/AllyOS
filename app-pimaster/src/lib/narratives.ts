@@ -81,6 +81,36 @@ export function telehealthStatement(t: TelehealthInfo): string {
   );
 }
 
+/** Causation Statement from the physician's documented opinion — never auto-asserted. */
+export function causationStatement(causation: "" | "related" | "not-related" | "undetermined", accidentDate: string, accidentType: string): string {
+  if (!causation) return "";
+  const event = `${accidentType === "MVA" ? "motor vehicle accident" : "accident"}${accidentDate ? ` of ${accidentDate}` : ""}`;
+  switch (causation) {
+    case "related":
+      return `Based on the patient's history, the reported mechanism of injury, the clinical presentation, and today's examination findings, it is my opinion within a reasonable degree of medical probability that the diagnoses documented above are causally related to the ${event}.`;
+    case "not-related":
+      return `Based on the patient's history and today's examination findings, it is my opinion that the documented findings are not causally related to the ${event}.`;
+    case "undetermined":
+      return `Causation with respect to the ${event} cannot be determined at this time; further evaluation and diagnostic correlation are required.`;
+  }
+}
+
+export function prognosisStatement(prognosis: string): string {
+  if (!prognosis) return "";
+  return `Prognosis is assessed as ${prognosis.toLowerCase()} based on the patient's current clinical presentation, documented functional limitations, and anticipated response to the prescribed course of treatment.`;
+}
+
+/** Physician certification block (mirrors the clinic's certification language). */
+export function certificationStatement(): string {
+  return (
+    `I certify that I personally evaluated the patient on the date of service and that the findings, diagnoses, and ` +
+    `treatment plan documented above are based on the patient's history, reported accident mechanism, clinical presentation, ` +
+    `examination findings, and my medical judgment. This documentation is based on clinical findings only; it is not based on ` +
+    `reimbursement, referral source, therapy use, or case value. I certify that the above information is true and correct to ` +
+    `the best of my medical judgment.`
+  );
+}
+
 /** Editable starting template for the required medical-necessity rationale. */
 export function medicalNecessityTemplate(visitType: VisitType): string {
   switch (visitType) {

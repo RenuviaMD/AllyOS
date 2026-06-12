@@ -21,6 +21,8 @@ export const PT_MODALITIES: CptItem[] = [
   { cpt: "97014", name: "E-Stim Unattended", desc: "Electrical stimulation, unattended" },
   { cpt: "97018", name: "Paraffin Bath", desc: "Paraffin bath therapy" },
   { cpt: "97032", name: "E-Stim Attended", desc: "Electrical stimulation, manual, attended" },
+  { cpt: "97112", name: "Neuromuscular Re-education", desc: "Movement, balance, coordination, posture" },
+  { cpt: "97116", name: "Gait Training", desc: "Gait training therapy" },
 ];
 
 export const PT_FREQUENCIES = ["5x/week", "4x/week", "3x/week", "2x/week", "Daily", "PRN"];

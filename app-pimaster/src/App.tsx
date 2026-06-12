@@ -4,10 +4,32 @@ import { Section10Discharge, Section3Pmh, Section4GeneralExam, Section5Exam } fr
 import { Section1CheckIn, Section2Injury, TelehealthConsent } from "./components/SectionsIntake";
 import { Section11PtDaily, Section12PtWeekly } from "./components/SectionsPt";
 import { Section6Assessment, Section7Plan, Section8ImageOrders, Section9ImagingReview } from "./components/SectionsPlan";
+import { BillingSettingsCard } from "./components/BillingSettings";
 import { auditNote } from "./lib/audit";
+import { buildServiceLines, loadBillingSettings } from "./lib/billing";
 import { CLINIC } from "./lib/clinic";
-import { allCptCodes, allDiagnosisCodes, buildClinicalNoteHtml, buildPtReportHtml, buildXrayOrderHtml, printHtml } from "./lib/report";
-import { loadDraft, saveDraft, saveReport, type ReportMode } from "./lib/store";
+import { injuryNarrative } from "./lib/narratives";
+import {
+  allCptCodes,
+  allDiagnosisCodes,
+  buildClinicalNoteHtml,
+  buildCms1500Html,
+  buildEmcCertificationHtml,
+  buildPtReportHtml,
+  buildSuperbillHtml,
+  buildXrayOrderHtml,
+  printHtml,
+} from "./lib/report";
+import {
+  compareToPeers,
+  findingsSet,
+  FINDINGS_SIMILARITY_WARN,
+  narrativeFingerprint,
+  TEXT_SIMILARITY_LIMIT,
+  type PeerNote,
+  type SimilarityHit,
+} from "./lib/similarity";
+import { fetchSameAccidentForms, loadDraft, saveDraft, saveReport, type ReportMode } from "./lib/store";
 import { emptyForm, type Role, type VisitForm, type VisitMode, type VisitType } from "./lib/types";
 
 const VISIT_LABELS: Record<VisitType, string> = { initial: "Initial", followup: "Follow-Up", final: "Final" };
@@ -21,6 +43,7 @@ export default function App() {
   const [genState, setGenState] = useState<string>("");
   const [auditIssues, setAuditIssues] = useState<string[]>([]);
   const [showArchive, setShowArchive] = useState(false);
+  const [showBilling, setShowBilling] = useState(false);
   const loaded = useRef(false);
 
   useEffect(() => {
@@ -74,11 +97,85 @@ export default function App() {
     s12: role === "pt",
   };
 
-  async function generate(kind: "note" | "xray" | "ptdaily" | "ptprogress") {
+  /** Same-accident clone guard: compares narrative + exam findings against other patients from the same accident. */
+  async function runCloneGuard(): Promise<{ blockers: string[]; warnings: string[]; hits: SimilarityHit[] }> {
+    const peers = await fetchSameAccidentForms(
+      form.accident.accidentDate,
+      `${form.patient.firstName} ${form.patient.lastName}`,
+    );
+    const peerNotes: PeerNote[] = [];
+    for (const p of peers) {
+      try {
+        peerNotes.push({
+          patientLabel: `${p.patient.firstName} ${p.patient.lastName}`,
+          narrative: narrativeFingerprint(p, injuryNarrative(p.patient, p.accident)),
+          findings: findingsSet({ romExam: p.romExam ?? {}, spineExam: p.spineExam, jointTenderness: p.jointTenderness ?? {} }),
+        });
+      } catch {
+        // older-format report — skip
+      }
+    }
+    const mine = narrativeFingerprint(form, injuryNarrative(form.patient, form.accident));
+    const hits = compareToPeers(mine, findingsSet(form), peerNotes);
+    const blockers: string[] = [];
+    const warnings: string[] = [];
+    for (const h of hits) {
+      const pct = Math.round(h.textSimilarity * 100);
+      if (h.textSimilarity > TEXT_SIMILARITY_LIMIT) {
+        blockers.push(
+          `Note narrative is ${pct}% similar to the note for ${h.otherPatient} (same accident — limit 20%). Document this patient's distinct history, complaints, and findings.`,
+        );
+      }
+      if (h.findingsSimilarity > FINDINGS_SIMILARITY_WARN) {
+        warnings.push(
+          `Exam findings are nearly identical to ${h.otherPatient} (same accident). Document each patient's distinguishing findings — do not fabricate differences.`,
+        );
+      }
+    }
+    return { blockers, warnings, hits };
+  }
+
+  async function generate(kind: "note" | "xray" | "emc" | "superbill" | "cms1500" | "ptdaily" | "ptprogress") {
+    const settings = loadBillingSettings();
+
+    if (kind === "emc") {
+      if (form.visitType !== "initial" || form.plan.emc !== "yes") {
+        setGenState("EMC certification is issued on initial visits with EMC determination = YES.");
+        return;
+      }
+      printHtml(buildEmcCertificationHtml(form));
+      setGenState("EMC certification opened for print.");
+      return;
+    }
+    if (kind === "superbill" || kind === "cms1500") {
+      const lines = buildServiceLines(form, settings, role === "pt" ? "pt" : "md");
+      if (lines.length === 0) {
+        setGenState(role === "pt" ? "Select treatments provided (Section 11) first." : "Select an E/M level (Section 7) first.");
+        return;
+      }
+      const issues: string[] = [];
+      if (!settings.ein) issues.push("⚠️ Federal Tax ID (EIN) is not set — open Billing Settings.");
+      if (lines.some((l) => !l.charge)) issues.push("⚠️ Some services have no charge configured — they print blank.");
+      setAuditIssues(issues);
+      printHtml(
+        kind === "superbill"
+          ? buildSuperbillHtml(form, lines, settings, role === "pt" ? "pt" : "md")
+          : buildCms1500Html(form, lines, settings),
+      );
+      setGenState(`${kind === "superbill" ? "Superbill" : "CMS-1500"} opened for print.`);
+      return;
+    }
+
+    let cloneHits: SimilarityHit[] = [];
     if (kind === "note") {
+      setGenState("Auditing…");
       const audit = auditNote(form);
-      setAuditIssues([...audit.errors.map((e) => `⛔ ${e}`), ...audit.warnings.map((w) => `⚠️ ${w}`)]);
-      if (audit.errors.length > 0) {
+      const clone = await runCloneGuard();
+      cloneHits = clone.hits;
+      const errors = [...audit.errors, ...clone.blockers];
+      const warnings = [...audit.warnings, ...clone.warnings];
+      setAuditIssues([...errors.map((e) => `⛔ ${e}`), ...warnings.map((w) => `⚠️ ${w}`)]);
+      if (errors.length > 0) {
         setGenState("Audit failed — resolve the items above before generating the note.");
         return;
       }
@@ -108,6 +205,18 @@ export default function App() {
       html,
       icdCodes: allDiagnosisCodes(form).map((d) => d.code),
       cptCodes: allCptCodes(form),
+      auditTrail:
+        kind === "note"
+          ? {
+              auditedAt: new Date().toISOString(),
+              visitMode: form.visitMode,
+              cloneGuard: cloneHits.map((h) => ({
+                otherPatient: h.otherPatient,
+                textSimilarityPct: Math.round(h.textSimilarity * 100),
+                findingsSimilarityPct: Math.round(h.findingsSimilarity * 100),
+              })),
+            }
+          : undefined,
     });
     setGenState(res.ok ? "Report saved to records." : `Report generated, but cloud save failed: ${res.error}`);
   }
@@ -191,7 +300,12 @@ export default function App() {
               </button>
               {vt === "initial" && (
                 <button className="btn gold" onClick={() => generate("xray")}>
-                  Generate X-Ray Order (MAZEL)
+                  X-Ray Order (MAZEL)
+                </button>
+              )}
+              {vt === "initial" && form.plan.emc === "yes" && (
+                <button className="btn gold" onClick={() => generate("emc")}>
+                  EMC Certification
                 </button>
               )}
             </>
@@ -206,6 +320,19 @@ export default function App() {
               </button>
             </>
           )}
+          {role !== "staff" && (
+            <>
+              <button className="btn ghost" onClick={() => generate("superbill")}>
+                Superbill
+              </button>
+              <button className="btn ghost" onClick={() => generate("cms1500")}>
+                CMS-1500
+              </button>
+              <button className="btn ghost" onClick={() => setShowBilling(true)}>
+                Billing Settings
+              </button>
+            </>
+          )}
           <button className="btn ghost" onClick={() => setShowArchive(true)}>
             Reports Archive
           </button>
@@ -217,6 +344,7 @@ export default function App() {
       </main>
 
       {showArchive && <ReportsArchive onClose={() => setShowArchive(false)} />}
+      {showBilling && <BillingSettingsCard onClose={() => setShowBilling(false)} />}
     </>
   );
 }

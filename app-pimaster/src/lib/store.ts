@@ -76,13 +76,15 @@ export async function saveReport(args: {
   html: string;
   icdCodes: string[];
   cptCodes: string[];
+  /** audit trail: similarity scores, warnings shown, audited timestamp */
+  auditTrail?: object;
 }): Promise<{ ok: boolean; error?: string }> {
   try {
     const { error } = await supabase().from("reports").insert({
       mode: args.mode,
       dos: args.dos,
       report_html: args.html,
-      form_data: args.form,
+      form_data: args.auditTrail ? { ...args.form, _audit: args.auditTrail } : args.form,
       icd_codes: args.icdCodes,
       cpt_codes: args.cptCodes,
       clinic_id: "wellness_hcc",
@@ -91,6 +93,37 @@ export async function saveReport(args: {
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+/**
+ * Notes for other patients injured in the same accident (same accident date,
+ * different patient) — used by the clone guard before generating a note.
+ */
+export async function fetchSameAccidentForms(accidentDate: string, excludePatient: string, limit = 30): Promise<VisitForm[]> {
+  if (!accidentDate) return [];
+  try {
+    const { data, error } = await supabase()
+      .from("reports")
+      .select("form_data")
+      .in("mode", ["initial", "followup", "final"])
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (error) throw error;
+    const me = excludePatient.trim().toLowerCase();
+    const out: VisitForm[] = [];
+    for (const row of data ?? []) {
+      const f = row.form_data as VisitForm | null;
+      if (!f?.accident?.accidentDate || f.accident.accidentDate !== accidentDate) continue;
+      const name = `${f.patient?.firstName ?? ""} ${f.patient?.lastName ?? ""}`.trim().toLowerCase();
+      if (!name || name === me) continue;
+      out.push(f);
+      if (out.length >= limit) break;
+    }
+    return out;
+  } catch {
+    return []; // offline: clone guard degrades to a warning in the UI
   }
 }
 

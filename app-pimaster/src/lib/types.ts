@@ -12,6 +12,11 @@ export interface PatientInfo {
   sex: "" | "male" | "female" | "other";
   insuranceCarrier: string;
   policyNumber: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  phone: string;
 }
 
 export interface AccidentInfo {
@@ -70,6 +75,8 @@ export type JointTenderness = Record<string, { R: YesNo; L: YesNo }>;
 export interface TelehealthInfo {
   consentObtained: boolean;
   consentBy: string;
+  /** initial/final visits default to in-person; telehealth requires a documented reason */
+  overrideReason: string;
 }
 
 export interface DxCode {
@@ -93,6 +100,11 @@ export interface TreatmentPlan {
   ptDuration: string;
   modalities: string[]; // CPT codes
   followUp: string;
+  /** Emergency Medical Condition determination (FL PIP) — required on initial visits */
+  emc: "" | "yes" | "no" | "deferred";
+  /** physician's causation opinion — drives the Causation Statement */
+  causation: "" | "related" | "not-related" | "undetermined";
+  prognosis: "" | "Excellent" | "Good" | "Fair" | "Guarded" | "Poor";
 }
 
 export interface ImageOrders {
@@ -176,8 +188,20 @@ export function emptyForm(): VisitForm {
     visitType: "initial",
     visitMode: "inPerson",
     visitDate: today,
-    telehealth: { consentObtained: false, consentBy: "" },
-    patient: { firstName: "", lastName: "", dob: "", sex: "", insuranceCarrier: "", policyNumber: "" },
+    telehealth: { consentObtained: false, consentBy: "", overrideReason: "" },
+    patient: {
+      firstName: "",
+      lastName: "",
+      dob: "",
+      sex: "",
+      insuranceCarrier: "",
+      policyNumber: "",
+      address: "",
+      city: "",
+      state: "FL",
+      zip: "",
+      phone: "",
+    },
     accident: {
       accidentDate: "",
       accidentType: "",
@@ -229,6 +253,9 @@ export function emptyForm(): VisitForm {
       ptDuration: "4 weeks",
       modalities: [],
       followUp: "2 weeks",
+      emc: "",
+      causation: "",
+      prognosis: "",
     },
     imaging: { selected: [], mriRegion: "", ctRegion: "", usRegion: "" },
     imagingReview: { images: [], findings: "", discussed: "" },
