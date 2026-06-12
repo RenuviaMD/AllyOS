@@ -6,6 +6,7 @@ import { Section11PtDaily, Section12PtWeekly } from "./components/SectionsPt";
 import { Section6Assessment, Section7Plan, Section8ImageOrders, Section9ImagingReview } from "./components/SectionsPlan";
 import { BillingSettingsCard } from "./components/BillingSettings";
 import { CatalogPage } from "./components/CatalogPage";
+import { FacilityPanel } from "./components/FacilityPanel";
 import { GovernancePage } from "./components/Governance";
 import { auditNote } from "./lib/audit";
 import { buildServiceLines, loadBillingSettings } from "./lib/billing";
@@ -48,6 +49,7 @@ export default function App() {
   const [showBilling, setShowBilling] = useState(false);
   const [showGovernance, setShowGovernance] = useState(false);
   const [showCatalogs, setShowCatalogs] = useState(false);
+  const [showFacility, setShowFacility] = useState(false);
   const loaded = useRef(false);
 
   useEffect(() => {
@@ -346,6 +348,9 @@ export default function App() {
               <button className="btn ghost" onClick={() => setShowCatalogs(true)}>
                 Catalogs
               </button>
+              <button className="btn ghost" onClick={() => setShowFacility(true)}>
+                Facility
+              </button>
             </>
           )}
           <button className="btn ghost" onClick={() => setShowArchive(true)}>
@@ -362,6 +367,7 @@ export default function App() {
       {showBilling && <BillingSettingsCard onClose={() => setShowBilling(false)} />}
       {showGovernance && <GovernancePage onClose={() => setShowGovernance(false)} />}
       {showCatalogs && <CatalogPage onClose={() => setShowCatalogs(false)} />}
+      {showFacility && <FacilityPanel onClose={() => setShowFacility(false)} />}
     </>
   );
 }

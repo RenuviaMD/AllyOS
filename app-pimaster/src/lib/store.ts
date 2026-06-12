@@ -326,6 +326,60 @@ export interface ClinicBillingIdentity {
   rendering_npi: string;
 }
 
+// ---------- Facility compliance registries (PHI-free) ----------
+
+export async function listFacilityRows(table: string): Promise<Array<Record<string, unknown> & { id: string }>> {
+  const { data, error } = await supabase().from(table).select("*").order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as Array<Record<string, unknown> & { id: string }>;
+}
+
+export async function upsertFacilityRow(table: string, row: Record<string, unknown>): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const clean = Object.fromEntries(Object.entries(row).filter(([, v]) => v !== undefined && v !== ""));
+    const { error } = await supabase().from(table).upsert({ ...clean, clinic_id: "wellness_hcc" });
+    if (error) throw error;
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+export interface AhcaLicenseInfo {
+  ahca_license_number: string;
+  ahca_license_expiration: string;
+}
+
+export async function loadAhcaLicense(): Promise<AhcaLicenseInfo> {
+  try {
+    const { data } = await supabase()
+      .from("clinic_settings")
+      .select("ahca_license_number, ahca_license_expiration")
+      .eq("clinic_id", "wellness_hcc")
+      .maybeSingle();
+    return {
+      ahca_license_number: data?.ahca_license_number ?? "",
+      ahca_license_expiration: data?.ahca_license_expiration ?? "",
+    };
+  } catch {
+    return { ahca_license_number: "", ahca_license_expiration: "" };
+  }
+}
+
+export async function saveAhcaLicense(info: AhcaLicenseInfo): Promise<void> {
+  await supabase()
+    .from("clinic_settings")
+    .upsert(
+      {
+        clinic_id: "wellness_hcc",
+        ahca_license_number: info.ahca_license_number || null,
+        ahca_license_expiration: info.ahca_license_expiration || null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "clinic_id" },
+    );
+}
+
 export async function loadClinicBilling(): Promise<ClinicBillingIdentity | null> {
   try {
     const { data, error } = await supabase()
