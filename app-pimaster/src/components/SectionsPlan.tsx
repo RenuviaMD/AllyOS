@@ -6,7 +6,7 @@ import { Area, CheckGroup, Section, Select, YesNoField } from "./fields";
 import type { SectionProps } from "./SectionsIntake";
 
 export function Section6Assessment({ form, patch }: SectionProps) {
-  const derived = deriveIcd10(form.romExam);
+  const derived = deriveIcd10(form);
   // Auto-populate from ROM whenever the derived set changes, preserving physician removals
   const lastDerived = useRef<string>("");
   useEffect(() => {
@@ -21,8 +21,8 @@ export function Section6Assessment({ form, patch }: SectionProps) {
   const codes = form.assessment.autoCodes;
   return (
     <Section num={6} title="Assessment & ICD-10 Diagnosis" tag="Physician only">
-      <p className="status">Auto-populated from ROM results. Remove any code or add manually below — physician retains final authority.</p>
-      {codes.length === 0 && <p className="status warn">No ROM impairment recorded yet — codes will appear as Section 5 is completed.</p>}
+      <p className="status">Auto-populated from documented exam findings. Remove any code or add manually below — physician retains final authority.</p>
+      {codes.length === 0 && <p className="status warn">No exam impairment recorded yet — codes will appear as Section 5 is completed.</p>}
       <ul className="dx-list">
         {codes.map((d) => (
           <li key={d.code}>

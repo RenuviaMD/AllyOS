@@ -1,7 +1,9 @@
 export type VisitType = "initial" | "followup" | "final";
+export type VisitMode = "inPerson" | "telehealth";
 export type Role = "staff" | "physician" | "pt";
 export type YesNo = "" | "yes" | "no";
-export type RomGrade = "" | "full" | "partial" | "limited" | "cannot";
+/** 3-point functional scale: WNL / Limited / Cannot perform */
+export type RomGrade = "" | "wnl" | "limited" | "cannot";
 
 export interface PatientInfo {
   firstName: string;
@@ -46,17 +48,29 @@ export interface GeneralExam {
   resp: string;
   temp: string;
   appearance: string;
-  heentAbnormal: YesNo;
-  heentFindings: string;
-  abdomenAbnormal: YesNo;
-  abdomenFindings: string;
-  neuroNormal: YesNo;
-  cardioNormal: YesNo;
-  respNormal: YesNo;
+  posture: string;
+  mood: string;
+  cognition: string;
 }
 
 /** movementId -> grade */
 export type RomExam = Record<string, RomGrade>;
+
+export interface SpineRegionExam {
+  tenderness: YesNo;
+  spasm: YesNo;
+  rom: RomGrade;
+}
+
+export type SpineExam = Record<"cervical" | "thoracic" | "lumbar", SpineRegionExam>;
+
+/** jointRegionId -> per-side tenderness (hands-on finding; in-person only) */
+export type JointTenderness = Record<string, { R: YesNo; L: YesNo }>;
+
+export interface TelehealthInfo {
+  consentObtained: boolean;
+  consentBy: string;
+}
 
 export interface DxCode {
   code: string;
@@ -137,12 +151,16 @@ export interface PtWeekly {
 
 export interface VisitForm {
   visitType: VisitType;
+  visitMode: VisitMode;
   visitDate: string;
+  telehealth: TelehealthInfo;
   patient: PatientInfo;
   accident: AccidentInfo;
   pmh: Pmh;
   gen: GeneralExam;
   romExam: RomExam;
+  spineExam: SpineExam;
+  jointTenderness: JointTenderness;
   assessment: Assessment;
   plan: TreatmentPlan;
   imaging: ImageOrders;
@@ -156,7 +174,9 @@ export function emptyForm(): VisitForm {
   const today = new Date().toISOString().slice(0, 10);
   return {
     visitType: "initial",
+    visitMode: "inPerson",
     visitDate: today,
+    telehealth: { consentObtained: false, consentBy: "" },
     patient: { firstName: "", lastName: "", dob: "", sex: "", insuranceCarrier: "", policyNumber: "" },
     accident: {
       accidentDate: "",
@@ -190,15 +210,17 @@ export function emptyForm(): VisitForm {
       resp: "",
       temp: "",
       appearance: "",
-      heentAbnormal: "",
-      heentFindings: "",
-      abdomenAbnormal: "",
-      abdomenFindings: "",
-      neuroNormal: "",
-      cardioNormal: "",
-      respNormal: "",
+      posture: "",
+      mood: "",
+      cognition: "",
     },
     romExam: {},
+    spineExam: {
+      cervical: { tenderness: "", spasm: "", rom: "" },
+      thoracic: { tenderness: "", spasm: "", rom: "" },
+      lumbar: { tenderness: "", spasm: "", rom: "" },
+    },
+    jointTenderness: {},
     assessment: { autoCodes: [], psych: [], manual: "" },
     plan: {
       emLevel: "",

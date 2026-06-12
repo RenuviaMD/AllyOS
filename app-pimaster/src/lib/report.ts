@@ -1,8 +1,8 @@
 import { CLINIC, DIAGNOSTIC_CENTER } from "./clinic";
 import { EM_LEVELS, PT_MODALITIES, resolveImagingSelection } from "./cpt";
 import { deriveIcd10, parseManualCodes, PSYCH_CODES } from "./icd10";
-import { aggravationNarrative, imagingReviewNarrative, injuryNarrative } from "./narratives";
-import { estimateDegrees, GRADE_LABELS, ROM_REGIONS } from "./rom";
+import { aggravationNarrative, imagingReviewNarrative, injuryNarrative, telehealthStatement } from "./narratives";
+import { EXAM_REGIONS, GRADE_LABELS, JOINT_REGIONS, SPINE_REGION_IDS, SPINE_REGION_LABELS } from "./rom";
 import type { DxCode, VisitForm } from "./types";
 import { daysSinceAccident, weekBounds, weekNumber } from "./weeks";
 
@@ -11,7 +11,7 @@ function esc(s: string): string {
 }
 
 export function allDiagnosisCodes(form: VisitForm): DxCode[] {
-  const auto = form.assessment.autoCodes.length ? form.assessment.autoCodes : deriveIcd10(form.romExam);
+  const auto = form.assessment.autoCodes.length ? form.assessment.autoCodes : deriveIcd10(form);
   const psych = PSYCH_CODES.filter((p) => form.assessment.psych.includes(p.code));
   const manual = parseManualCodes(form.assessment.manual);
   const seen = new Set<string>();
@@ -62,7 +62,7 @@ function patientBlock(form: VisitForm): string {
     <tr><th>Patient</th><td>${esc(p.firstName)} ${esc(p.lastName)}</td><th>DOB</th><td>${esc(p.dob)}</td></tr>
     <tr><th>Sex</th><td>${esc(p.sex)}</td><th>Visit Date</th><td>${esc(form.visitDate)}</td></tr>
     <tr><th>Insurance</th><td>${esc(p.insuranceCarrier)}</td><th>Policy #</th><td>${esc(p.policyNumber)}</td></tr>
-    <tr><th>Accident Date</th><td>${esc(form.accident.accidentDate)}</td><th>Visit Type</th><td>${esc(form.visitType.toUpperCase())}</td></tr>
+    <tr><th>Accident Date</th><td>${esc(form.accident.accidentDate)}</td><th>Visit Type</th><td>${esc(form.visitType.toUpperCase())} — ${form.visitMode === "telehealth" ? "TELEHEALTH (facility-originated)" : "IN PERSON"}</td></tr>
   </table>`;
 }
 
@@ -75,6 +75,10 @@ export function buildClinicalNoteHtml(form: VisitForm): string {
   const titles = { initial: "INITIAL EVALUATION", followup: "FOLLOW-UP EVALUATION", final: "FINAL EVALUATION / DISCHARGE" };
   let b = `<h1>${titles[form.visitType]}</h1>${patientBlock(form)}`;
 
+  if (form.visitMode === "telehealth") {
+    b += `<h2>Telehealth Encounter Statement</h2><p class="narrative">${esc(telehealthStatement(form.telehealth))}</p>`;
+  }
+
   const narr = injuryNarrative(form.patient, form.accident);
   if (narr) b += `<h2>History of Present Illness</h2><p class="narrative">${esc(narr)}</p>`;
   const agg = aggravationNarrative(form.pmh, form.accident.accidentType);
@@ -82,32 +86,57 @@ export function buildClinicalNoteHtml(form: VisitForm): string {
 
   const g = form.gen;
   if (g.bp || g.pulse || g.resp || g.temp) {
-    b += `<h2>Vitals</h2><table><tr><th>BP</th><td>${esc(g.bp)}</td><th>Pulse</th><td>${esc(g.pulse)}</td><th>Resp</th><td>${esc(g.resp)}</td><th>Temp</th><td>${esc(g.temp)}</td></tr></table>`;
+    const vitalsBy = form.visitMode === "telehealth" ? " (measured by on-site clinic staff)" : "";
+    b += `<h2>Vitals${vitalsBy}</h2><table><tr><th>BP</th><td>${esc(g.bp)}</td><th>Pulse</th><td>${esc(g.pulse)}</td><th>Resp</th><td>${esc(g.resp)}</td><th>Temp</th><td>${esc(g.temp)}</td></tr></table>`;
   }
   const exam: string[] = [];
-  if (g.appearance) exam.push(`General appearance: ${g.appearance}.`);
-  if (g.heentAbnormal === "no") exam.push("HEENT: normal.");
-  if (g.heentAbnormal === "yes") exam.push(`HEENT: abnormal — ${g.heentFindings}.`);
-  if (g.abdomenAbnormal === "no") exam.push("Abdomen: normal.");
-  if (g.abdomenAbnormal === "yes") exam.push(`Abdomen: abnormal — ${g.abdomenFindings}.`);
-  if (g.neuroNormal) exam.push(`Neurological screen: ${g.neuroNormal === "yes" ? "normal" : "abnormal"}.`);
-  if (g.cardioNormal) exam.push(`Cardiovascular: ${g.cardioNormal === "yes" ? "normal" : "abnormal"}.`);
-  if (g.respNormal) exam.push(`Respiratory: ${g.respNormal === "yes" ? "normal" : "abnormal"}.`);
+  if (g.appearance) exam.push(`Appearance: ${g.appearance}.`);
+  if (g.posture) exam.push(`Posture: ${g.posture}.`);
+  if (g.mood) exam.push(`Mood/Affect: ${g.mood}.`);
+  if (g.cognition) exam.push(`Cognition: ${g.cognition}.`);
   if (exam.length) b += `<h2>General Examination</h2><p>${esc(exam.join(" "))}</p>`;
 
+  // Spine table — tenderness/spasm are hands-on findings, reported in person only
+  const inPerson = form.visitMode === "inPerson";
+  const spineRows = SPINE_REGION_IDS.map((id) => {
+    const row = form.spineExam[id];
+    if (!row || (!row.tenderness && !row.spasm && !row.rom)) return "";
+    const yn = (v: string) => (v === "yes" ? "Present" : v === "no" ? "Absent" : "—");
+    const handsOn = inPerson
+      ? `<td>${yn(row.tenderness)}</td><td>${yn(row.spasm)}</td>`
+      : `<td>Not assessed (telehealth)</td><td>Not assessed (telehealth)</td>`;
+    return `<tr><td>${SPINE_REGION_LABELS[id]}</td>${handsOn}<td>${row.rom ? GRADE_LABELS[row.rom] : "—"}</td></tr>`;
+  }).filter(Boolean);
+  if (spineRows.length) {
+    b += `<h2>Spine Examination</h2><table><tr><th>Region</th><th>Tenderness</th><th>Spasm</th><th>ROM</th></tr>${spineRows.join("")}</table>`;
+  }
+
+  // Functional maneuvers (observed; valid for both modalities). Normal values are
+  // reference ranges only — no measured or estimated degrees are recorded.
   const romRows: string[] = [];
-  for (const region of ROM_REGIONS) {
-    for (const m of region.movements) {
-      const grade = form.romExam[m.id];
+  for (const region of EXAM_REGIONS) {
+    for (const mv of region.maneuvers) {
+      const grade = form.romExam[mv.id];
       if (!grade) continue;
-      const deg = estimateDegrees(m, grade);
       romRows.push(
-        `<tr><td>${esc(region.label)}</td><td>${esc(m.label)}</td><td>${esc(m.motion)}</td><td>${GRADE_LABELS[grade]}</td><td>~${deg}° / ${m.normalDeg}° normal</td></tr>`,
+        `<tr><td>${esc(region.label)}</td><td>${esc(mv.label)}</td><td>${GRADE_LABELS[grade]}</td><td>Normal: ${esc(mv.normalLabel)}</td></tr>`,
       );
     }
   }
   if (romRows.length) {
-    b += `<h2>Functional ROM Assessment</h2><table><tr><th>Region</th><th>Test</th><th>Motion</th><th>Result</th><th>Est. AAOS Degrees</th></tr>${romRows.join("")}</table>`;
+    b += `<h2>Functional Examination${form.visitMode === "telehealth" ? " (observed via synchronous audio-video)" : ""}</h2><table><tr><th>Region</th><th>Maneuver</th><th>Result</th><th>Reference</th></tr>${romRows.join("")}</table>`;
+  }
+
+  if (inPerson) {
+    const tendRows = JOINT_REGIONS.map((r) => {
+      const t = form.jointTenderness[r.id];
+      if (!t || (!t.R && !t.L)) return "";
+      const yn = (v: string) => (v === "yes" ? "Present" : v === "no" ? "Absent" : "—");
+      return `<tr><td>${esc(r.label)}</td><td>${yn(t.R ?? "")}</td><td>${yn(t.L ?? "")}</td></tr>`;
+    }).filter(Boolean);
+    if (tendRows.length) {
+      b += `<h2>Joint Tenderness</h2><table><tr><th>Joint</th><th>Right</th><th>Left</th></tr>${tendRows.join("")}</table>`;
+    }
   }
 
   const dx = allDiagnosisCodes(form);

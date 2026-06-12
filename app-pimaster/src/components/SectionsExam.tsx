@@ -1,6 +1,6 @@
-import type { RomGrade, VisitForm } from "../lib/types";
+import type { RomGrade, VisitForm, YesNo } from "../lib/types";
 import { aggravationNarrative } from "../lib/narratives";
-import { estimateDegrees, GRADE_LABELS, ROM_REGIONS } from "../lib/rom";
+import { EXAM_REGIONS, GRADE_LABELS, JOINT_REGIONS, SPINE_REGION_IDS, SPINE_REGION_LABELS } from "../lib/rom";
 import { Area, Section, Text, YesNoField } from "./fields";
 import type { SectionProps } from "./SectionsIntake";
 
@@ -50,90 +50,174 @@ export function Section3Pmh({ form, patch }: SectionProps) {
 
 export function Section4GeneralExam({ form, patch }: SectionProps) {
   const g = form.gen;
+  const telehealth = form.visitMode === "telehealth";
   return (
-    <Section num={4} title="General Exam" tag="Physician only">
+    <Section num={4} title="General Examination" tag={telehealth ? "Vitals by on-site staff" : "Physician only"}>
       <div className="grid">
-        <Text label="Blood Pressure" value={g.bp} onChange={(v) => patch("gen", { bp: v })} />
+        <Text label={telehealth ? "Blood Pressure (staff)" : "Blood Pressure"} value={g.bp} onChange={(v) => patch("gen", { bp: v })} />
         <Text label="Pulse" value={g.pulse} onChange={(v) => patch("gen", { pulse: v })} />
         <Text label="Respirations" value={g.resp} onChange={(v) => patch("gen", { resp: v })} />
         <Text label="Temperature" value={g.temp} onChange={(v) => patch("gen", { temp: v })} />
-        <Text label="General Appearance" value={g.appearance} onChange={(v) => patch("gen", { appearance: v })} wide />
-        <YesNoField label="HEENT Abnormal" value={g.heentAbnormal} onChange={(v) => patch("gen", { heentAbnormal: v })} />
-        {g.heentAbnormal === "yes" && (
-          <Text label="HEENT Findings" value={g.heentFindings} onChange={(v) => patch("gen", { heentFindings: v })} />
-        )}
-        <YesNoField label="Abdomen Abnormal" value={g.abdomenAbnormal} onChange={(v) => patch("gen", { abdomenAbnormal: v })} />
-        {g.abdomenAbnormal === "yes" && (
-          <Text label="Abdomen Findings" value={g.abdomenFindings} onChange={(v) => patch("gen", { abdomenFindings: v })} />
-        )}
-        <YesNoField label="Neuro Screen Normal" value={g.neuroNormal} onChange={(v) => patch("gen", { neuroNormal: v })} />
-        <YesNoField label="Cardiovascular Normal" value={g.cardioNormal} onChange={(v) => patch("gen", { cardioNormal: v })} />
-        <YesNoField label="Respiratory Normal" value={g.respNormal} onChange={(v) => patch("gen", { respNormal: v })} />
+        <Text label="Appearance" value={g.appearance} onChange={(v) => patch("gen", { appearance: v })} />
+        <Text label="Posture" value={g.posture} onChange={(v) => patch("gen", { posture: v })} />
+        <Text label="Mood / Affect" value={g.mood} onChange={(v) => patch("gen", { mood: v })} />
+        <Text label="Cognition" value={g.cognition} onChange={(v) => patch("gen", { cognition: v })} />
       </div>
     </Section>
   );
 }
 
-const GRADES: Exclude<RomGrade, "">[] = ["full", "partial", "limited", "cannot"];
+const GRADES: Exclude<RomGrade, "">[] = ["wnl", "limited", "cannot"];
 
-export function Section5Rom({ form, patch }: SectionProps) {
-  function setGrade(movementId: string, grade: RomGrade) {
-    const current = form.romExam[movementId];
-    patch("romExam", { [movementId]: current === grade ? "" : grade });
-  }
+function GradeButtons(props: { value: RomGrade; onChange: (g: RomGrade) => void }) {
   return (
-    <Section num={5} title="Functional ROM Assessment" tag="Physician only">
-      <p className="status">
-        4-point functional scale. Results map to estimated AAOS degrees and auto-populate ICD-10 in Section 6.
-      </p>
-      <table className="rom-table">
-        <tbody>
-          {ROM_REGIONS.map((region) => (
-            <RegionRows key={region.id} region={region} romExam={form.romExam} setGrade={setGrade} />
-          ))}
-        </tbody>
-      </table>
-    </Section>
+    <div className="rom-grades">
+      {GRADES.map((g) => (
+        <button
+          key={g}
+          type="button"
+          className={`g-${g}${props.value === g ? " sel" : ""}`}
+          onClick={() => props.onChange(props.value === g ? "" : g)}
+        >
+          {GRADE_LABELS[g]}
+        </button>
+      ))}
+    </div>
   );
 }
 
-function RegionRows(props: {
-  region: (typeof ROM_REGIONS)[number];
-  romExam: VisitForm["romExam"];
-  setGrade: (movementId: string, grade: RomGrade) => void;
-}) {
+function TendernessToggle(props: { label: string; value: YesNo; onChange: (v: YesNo) => void }) {
   return (
-    <>
-      <tr>
-        <td className="rom-region" colSpan={3}>
-          {props.region.label}
-        </td>
-      </tr>
-      {props.region.movements.map((m) => {
-        const grade = props.romExam[m.id] ?? "";
-        const deg = estimateDegrees(m, grade);
-        return (
-          <tr key={m.id}>
-            <td>{m.label}</td>
-            <td>
-              <div className="rom-grades">
-                {GRADES.map((g) => (
-                  <button
-                    key={g}
-                    type="button"
-                    className={`g-${g}${grade === g ? " sel" : ""}`}
-                    onClick={() => props.setGrade(m.id, g)}
-                  >
-                    {GRADE_LABELS[g]}
-                  </button>
-                ))}
-              </div>
-            </td>
-            <td className="rom-deg">{deg !== null ? `~${deg}° / ${m.normalDeg}° (${m.motion})` : `${m.motion} — ${m.normalDeg}° normal`}</td>
+    <span className="yn" style={{ alignItems: "center", gap: 8 }}>
+      <span className="status">{props.label}</span>
+      <button
+        type="button"
+        className={props.value === "yes" ? "on-no" : ""}
+        onClick={() => props.onChange(props.value === "yes" ? "" : "yes")}
+      >
+        Present
+      </button>
+      <button
+        type="button"
+        className={props.value === "no" ? "on-yes" : ""}
+        onClick={() => props.onChange(props.value === "no" ? "" : "no")}
+      >
+        Absent
+      </button>
+    </span>
+  );
+}
+
+export function Section5Exam({ form, patch }: SectionProps) {
+  const telehealth = form.visitMode === "telehealth";
+
+  function setGrade(maneuverId: string, grade: RomGrade) {
+    patch("romExam", { [maneuverId]: grade });
+  }
+  function setSpine(regionId: (typeof SPINE_REGION_IDS)[number], field: "tenderness" | "spasm" | "rom", value: string) {
+    patch("spineExam", { [regionId]: { ...form.spineExam[regionId], [field]: value } });
+  }
+  function setJointTenderness(regionId: string, side: "R" | "L", value: YesNo) {
+    const cur = form.jointTenderness[regionId] ?? { R: "" as YesNo, L: "" as YesNo };
+    patch("jointTenderness", { [regionId]: { ...cur, [side]: value } });
+  }
+
+  const spineRegions = EXAM_REGIONS.filter((r) => r.kind === "spine");
+
+  return (
+    <Section
+      num={5}
+      title="Spine & Extremity Examination"
+      tag={telehealth ? "Telehealth — observed functional exam" : "Physician only"}
+    >
+      {telehealth && (
+        <p className="status warn">
+          Telehealth visit: hands-on findings (tenderness/spasm) are not assessed. Results below document observed
+          functional limitation only — normal values are reference ranges, not measurements.
+        </p>
+      )}
+
+      <h3 className="exam-h">Spine Examination</h3>
+      <table className="rom-table" style={{ marginBottom: 14 }}>
+        <thead>
+          <tr>
+            <th>Region</th>
+            {!telehealth && <th>Tenderness</th>}
+            {!telehealth && <th>Spasm</th>}
+            <th>ROM</th>
           </tr>
-        );
-      })}
-    </>
+        </thead>
+        <tbody>
+          {SPINE_REGION_IDS.map((id) => (
+            <tr key={id}>
+              <td>{SPINE_REGION_LABELS[id]}</td>
+              {!telehealth && (
+                <td>
+                  <TendernessToggle label="" value={form.spineExam[id].tenderness} onChange={(v) => setSpine(id, "tenderness", v)} />
+                </td>
+              )}
+              {!telehealth && (
+                <td>
+                  <TendernessToggle label="" value={form.spineExam[id].spasm} onChange={(v) => setSpine(id, "spasm", v)} />
+                </td>
+              )}
+              <td>
+                <GradeButtons value={form.spineExam[id].rom} onChange={(g) => setSpine(id, "rom", g)} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {spineRegions.map((region) => (
+        <div key={region.id} style={{ marginBottom: 14 }}>
+          <h3 className="exam-h">{region.label} — Functional Maneuvers</h3>
+          {region.maneuvers.map((mv) => (
+            <div key={mv.id} className="maneuver-row">
+              <div className="maneuver-info">
+                <span className="maneuver-name">{mv.icon} {mv.label}</span>
+                <span className="maneuver-script">“{mv.script}”</span>
+                <span className="maneuver-normal">Normal: {mv.normalLabel}</span>
+              </div>
+              <GradeButtons value={form.romExam[mv.id] ?? ""} onChange={(g) => setGrade(mv.id, g)} />
+            </div>
+          ))}
+        </div>
+      ))}
+
+      <h3 className="exam-h">Extremity / Joint Examination</h3>
+      {JOINT_REGIONS.map((region) => (
+        <div key={region.id} style={{ marginBottom: 14 }}>
+          <div className="joint-head">
+            <span className="maneuver-name">{region.label}</span>
+            {!telehealth && (
+              <>
+                <TendernessToggle
+                  label="R tenderness"
+                  value={form.jointTenderness[region.id]?.R ?? ""}
+                  onChange={(v) => setJointTenderness(region.id, "R", v)}
+                />
+                <TendernessToggle
+                  label="L tenderness"
+                  value={form.jointTenderness[region.id]?.L ?? ""}
+                  onChange={(v) => setJointTenderness(region.id, "L", v)}
+                />
+              </>
+            )}
+          </div>
+          {region.maneuvers.map((mv) => (
+            <div key={mv.id} className="maneuver-row">
+              <div className="maneuver-info">
+                <span className="maneuver-name">{mv.icon} {mv.label}</span>
+                <span className="maneuver-script">“{mv.script}”</span>
+                <span className="maneuver-normal">Normal: {mv.normalLabel}</span>
+              </div>
+              <GradeButtons value={form.romExam[mv.id] ?? ""} onChange={(g) => setGrade(mv.id, g)} />
+            </div>
+          ))}
+        </div>
+      ))}
+    </Section>
   );
 }
 

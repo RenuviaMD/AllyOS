@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { ReportsArchive } from "./components/ReportsArchive";
-import { Section10Discharge, Section3Pmh, Section4GeneralExam, Section5Rom } from "./components/SectionsExam";
-import { Section1CheckIn, Section2Injury } from "./components/SectionsIntake";
+import { Section10Discharge, Section3Pmh, Section4GeneralExam, Section5Exam } from "./components/SectionsExam";
+import { Section1CheckIn, Section2Injury, TelehealthConsent } from "./components/SectionsIntake";
 import { Section11PtDaily, Section12PtWeekly } from "./components/SectionsPt";
 import { Section6Assessment, Section7Plan, Section8ImageOrders, Section9ImagingReview } from "./components/SectionsPlan";
+import { auditNote } from "./lib/audit";
 import { CLINIC } from "./lib/clinic";
 import { allCptCodes, allDiagnosisCodes, buildClinicalNoteHtml, buildPtReportHtml, buildXrayOrderHtml, printHtml } from "./lib/report";
 import { loadDraft, saveDraft, saveReport, type ReportMode } from "./lib/store";
-import { emptyForm, type Role, type VisitForm, type VisitType } from "./lib/types";
+import { emptyForm, type Role, type VisitForm, type VisitMode, type VisitType } from "./lib/types";
 
 const VISIT_LABELS: Record<VisitType, string> = { initial: "Initial", followup: "Follow-Up", final: "Final" };
+const MODE_LABELS: Record<VisitMode, string> = { inPerson: "In-Person", telehealth: "Telehealth" };
 const ROLE_LABELS: Record<Role, string> = { staff: "Staff", physician: "Physician", pt: "Physical Therapist" };
 
 export default function App() {
@@ -17,6 +19,7 @@ export default function App() {
   const [form, setForm] = useState<VisitForm>(emptyForm);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "cloud" | "local">("idle");
   const [genState, setGenState] = useState<string>("");
+  const [auditIssues, setAuditIssues] = useState<string[]>([]);
   const [showArchive, setShowArchive] = useState(false);
   const loaded = useRef(false);
 
@@ -46,6 +49,10 @@ export default function App() {
     setForm((f) => ({ ...f, visitType: v }));
   }
 
+  function setVisitMode(v: VisitMode) {
+    setForm((f) => ({ ...f, visitMode: v }));
+  }
+
   function chooseRole(r: Role) {
     setRole(r);
     localStorage.setItem("pimaster-role", r);
@@ -68,9 +75,13 @@ export default function App() {
   };
 
   async function generate(kind: "note" | "xray" | "ptdaily" | "ptprogress") {
-    if (kind === "note" && !form.plan.medicalNecessity.trim()) {
-      setGenState("Medical necessity (Section 7) is required for all visits before generating the note.");
-      return;
+    if (kind === "note") {
+      const audit = auditNote(form);
+      setAuditIssues([...audit.errors.map((e) => `⛔ ${e}`), ...audit.warnings.map((w) => `⚠️ ${w}`)]);
+      if (audit.errors.length > 0) {
+        setGenState("Audit failed — resolve the items above before generating the note.");
+        return;
+      }
     }
     setGenState("Generating…");
     let html: string;
@@ -120,6 +131,13 @@ export default function App() {
             </button>
           ))}
         </div>
+        <div className="seg">
+          {(Object.keys(MODE_LABELS) as VisitMode[]).map((v) => (
+            <button key={v} className={form.visitMode === v ? "active" : ""} onClick={() => setVisitMode(v)}>
+              {MODE_LABELS[v]}
+            </button>
+          ))}
+        </div>
         <div className="spacer" />
         <div className="seg">
           {(Object.keys(ROLE_LABELS) as Role[]).map((r) => (
@@ -136,11 +154,12 @@ export default function App() {
       </header>
 
       <main className="main">
+        {form.visitMode === "telehealth" && role !== "pt" && <TelehealthConsent form={form} patch={patch} />}
         {show.s1 && <Section1CheckIn form={form} patch={patch} />}
         {show.s2 && <Section2Injury form={form} patch={patch} readOnly={role === "staff"} />}
         {show.s3 && <Section3Pmh form={form} patch={patch} />}
         {show.s4 && <Section4GeneralExam form={form} patch={patch} />}
-        {show.s5 && <Section5Rom form={form} patch={patch} />}
+        {show.s5 && <Section5Exam form={form} patch={patch} />}
         {show.s6 && <Section6Assessment form={form} patch={patch} />}
         {show.s7 && <Section7Plan form={form} patch={patch} />}
         {show.s8 && <Section8ImageOrders form={form} patch={patch} />}
@@ -148,6 +167,21 @@ export default function App() {
         {show.s10 && <Section10Discharge form={form} patch={patch} />}
         {show.s11 && <Section11PtDaily form={form} patch={patch} />}
         {show.s12 && <Section12PtWeekly form={form} patch={patch} />}
+
+        {auditIssues.length > 0 && (
+          <div className="section" style={{ borderColor: "var(--warning)" }}>
+            <div className="section-head">
+              <span className="section-title">Note Audit</span>
+            </div>
+            <div className="section-body">
+              <ul className="dx-list">
+                {auditIssues.map((i) => (
+                  <li key={i}>{i}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
 
         <div className="toolbar">
           {role === "physician" && (

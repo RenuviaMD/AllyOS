@@ -21,6 +21,17 @@ npm test           # vitest unit tests (ICD-10 mapping, week math, narratives, R
 
 Supabase URL/key default to the live `pi-master` project (publishable key — safe to ship in the bundle). Override with `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` env vars if needed.
 
+## Visit modality (In-Person / Telehealth)
+
+Every visit carries a modality toggle next to the visit-type toggle. Telehealth visits are **facility-originated and Florida-only**: the patient is always physically at the clinic (originating site) with staff in attendance; the provider evaluates from a distant site. Selecting Telehealth:
+
+- requires documented patient consent (captured with the staff member's name) before a note can be generated;
+- inserts the telehealth origination + consent statement into the note automatically;
+- switches the exam to **observation-only**: hands-on findings (spine tenderness/spasm, joint tenderness) are hidden and blocked by the audit; vitals are attributed to on-site staff;
+- the functional exam (verbal-script maneuvers, WNL / Limited / Cannot perform) is valid in both modalities — normal degree values are reference ranges only and are never recorded as measurements.
+
+A pre-generation audit (`src/lib/audit.ts`) blocks notes with missing identity/accident data, missing medical-necessity rationale, missing telehealth consent, hands-on findings on telehealth visits, or a final visit without an outcome.
+
 ## Features (per spec)
 
 - **Visit toggle** Initial / Follow-Up / Final controls section visibility; **role toggle** Staff / Physician / PT controls permissions.

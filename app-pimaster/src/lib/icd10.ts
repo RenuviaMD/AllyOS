@@ -1,5 +1,5 @@
-import type { DxCode, RomExam } from "./types";
-import { ROM_REGIONS, impairedSides } from "./rom";
+import type { DxCode, VisitForm } from "./types";
+import { impairedSides, JOINT_REGIONS, SPINE_REGION_IDS } from "./rom";
 
 interface RegionDx {
   /** midline: single sprain code; limbs: per-side codes */
@@ -52,16 +52,6 @@ export const REGION_DX: Record<string, RegionDx> = {
       L: { code: "M25.532", desc: "Pain in left wrist" },
     },
   },
-  hand: {
-    sprain: {
-      R: { code: "S63.8X1A", desc: `Sprain of other part of right wrist and hand${ENC}` },
-      L: { code: "S63.8X2A", desc: `Sprain of other part of left wrist and hand${ENC}` },
-    },
-    pain: {
-      R: { code: "M79.641", desc: "Pain in right hand" },
-      L: { code: "M79.642", desc: "Pain in left hand" },
-    },
-  },
   hip: {
     sprain: {
       R: { code: "S73.101A", desc: `Unspecified sprain of right hip${ENC}` },
@@ -104,13 +94,19 @@ function isSided(v: RegionDx["sprain"]): v is { R: DxCode; L: DxCode } {
   return "R" in v;
 }
 
-/** Auto-populate ICD-10 sprain/strain + pain codes from ROM impairment. */
-export function deriveIcd10(rom: RomExam): DxCode[] {
+export type ExamFindings = Pick<VisitForm, "romExam" | "spineExam" | "jointTenderness">;
+
+/**
+ * Auto-populate ICD-10 sprain + pain codes from documented exam findings:
+ * functional maneuver impairment, spine tenderness/spasm/ROM, joint tenderness.
+ */
+export function deriveIcd10(findings: ExamFindings): DxCode[] {
   const out: DxCode[] = [];
-  for (const region of ROM_REGIONS) {
-    const dx = REGION_DX[region.id];
+  const regionIds = [...SPINE_REGION_IDS, ...JOINT_REGIONS.map((r) => r.id)];
+  for (const regionId of regionIds) {
+    const dx = REGION_DX[regionId];
     if (!dx) continue;
-    const sides = impairedSides(region.id, rom);
+    const sides = impairedSides(regionId, findings);
     if (sides.length === 0) continue;
     if (!isSided(dx.sprain) || !isSided(dx.pain)) {
       out.push(dx.sprain as DxCode, dx.pain as DxCode);

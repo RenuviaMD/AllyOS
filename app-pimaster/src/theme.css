@@ -123,11 +123,23 @@ body {
   background: var(--hover); border: 1px solid #46627f; color: var(--text);
   padding: 3px 8px; border-radius: 3px; cursor: pointer; font-size: 12px;
 }
-.rom-grades button.g-full.sel { background: var(--success); border-color: var(--success); }
-.rom-grades button.g-partial.sel { background: var(--gold); border-color: var(--gold); color: #1a252f; }
-.rom-grades button.g-limited.sel { background: #e67e22; border-color: #e67e22; }
+.rom-grades button.g-wnl.sel { background: var(--success); border-color: var(--success); }
+.rom-grades button.g-limited.sel { background: var(--gold); border-color: var(--gold); color: #1a252f; }
 .rom-grades button.g-cannot.sel { background: var(--warning); border-color: var(--warning); }
-.rom-deg { color: var(--muted); font-size: 12px; white-space: nowrap; }
+
+.exam-h { color: var(--accent); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; margin: 14px 0 8px; }
+.maneuver-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 7px 8px; border-bottom: 1px solid #46627f; flex-wrap: wrap;
+}
+.maneuver-info { display: flex; flex-direction: column; min-width: 240px; }
+.maneuver-name { font-weight: 600; font-size: 14px; }
+.maneuver-script { color: var(--muted); font-style: italic; font-size: 12px; }
+.maneuver-normal { color: var(--gold); font-size: 11px; }
+.joint-head {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  background: rgba(22, 160, 133, 0.12); border-radius: 4px; padding: 6px 10px; margin-bottom: 4px;
+}
 
 .dx-list { list-style: none; padding: 0; margin: 0; }
 .dx-list li {

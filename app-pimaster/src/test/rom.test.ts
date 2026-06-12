@@ -1,39 +1,56 @@
 import { describe, expect, it } from "vitest";
-import { estimateDegrees, impairedSides, ROM_REGIONS } from "../lib/rom";
+import { EXAM_REGIONS, emptySpineExam, impairedSides } from "../lib/rom";
 
-describe("ROM catalog", () => {
-  it("matches the spec movement counts", () => {
-    const counts = Object.fromEntries(ROM_REGIONS.map((r) => [r.id, r.movements.length]));
+describe("exam catalog", () => {
+  it("matches the specified maneuver counts per region", () => {
+    const counts = Object.fromEntries(EXAM_REGIONS.map((r) => [r.id, r.maneuvers.length]));
     expect(counts).toEqual({
       cervical: 6,
-      thoracic: 2,
       lumbar: 4,
       shoulder: 6,
       elbow: 4,
       wrist: 4,
-      hand: 4,
-      hip: 4,
+      hip: 2,
       knee: 4,
-      ankle: 8, // 6 named tests, roll in/out are separate movements per side
+      ankle: 6,
     });
   });
-});
 
-describe("estimateDegrees", () => {
-  const cervicalFlex = ROM_REGIONS[0].movements[0];
-  it("maps grades to AAOS degree estimates", () => {
-    expect(estimateDegrees(cervicalFlex, "full")).toBe(50);
-    expect(estimateDegrees(cervicalFlex, "partial")).toBe(33);
-    expect(estimateDegrees(cervicalFlex, "limited")).toBe(18);
-    expect(estimateDegrees(cervicalFlex, "cannot")).toBe(5);
-    expect(estimateDegrees(cervicalFlex, "")).toBeNull();
+  it("every maneuver has a verbal script and a normal reference", () => {
+    for (const r of EXAM_REGIONS) {
+      for (const m of r.maneuvers) {
+        expect(m.script.length).toBeGreaterThan(0);
+        expect(m.normalLabel.length).toBeGreaterThan(0);
+      }
+    }
   });
 });
 
 describe("impairedSides", () => {
-  it("detects affected limb sides", () => {
-    expect(impairedSides("shoulder", { "shoulder-raise-R": "limited" })).toEqual(["R"]);
-    expect(impairedSides("cervical", { "cervical-flex": "limited" })).toEqual([null]);
-    expect(impairedSides("ankle", {})).toEqual([]);
+  const base = { romExam: {}, spineExam: emptySpineExam(), jointTenderness: {} };
+
+  it("detects limb sides from functional maneuvers", () => {
+    expect(impairedSides("shoulder", { ...base, romExam: { "shoulder-raiseR": "limited" } })).toEqual(["R"]);
+  });
+
+  it("detects joint tenderness as impairment", () => {
+    expect(
+      impairedSides("knee", { ...base, jointTenderness: { knee: { R: "", L: "yes" } } }),
+    ).toEqual(["L"]);
+  });
+
+  it("treats spine regions as midline from maneuvers or the spine table", () => {
+    expect(impairedSides("cervical", { ...base, romExam: { "cervical-flex": "cannot" } })).toEqual([null]);
+    const spineExam = emptySpineExam();
+    spineExam.thoracic.spasm = "yes";
+    expect(impairedSides("thoracic", { ...base, spineExam })).toEqual([null]);
+  });
+
+  it("returns nothing when all findings are WNL/absent", () => {
+    const spineExam = emptySpineExam();
+    spineExam.lumbar.tenderness = "no";
+    spineExam.lumbar.rom = "wnl";
+    expect(impairedSides("lumbar", { ...base, spineExam, romExam: { "lumbar-flex": "wnl" } })).toEqual([]);
+    expect(impairedSides("ankle", base)).toEqual([]);
   });
 });

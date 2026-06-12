@@ -30,6 +30,34 @@ export function Section1CheckIn({ form, patch }: SectionProps) {
   );
 }
 
+/** Shown only on telehealth visits — consent must be captured before the note can be generated. */
+export function TelehealthConsent({ form, patch }: SectionProps) {
+  const t = form.telehealth;
+  return (
+    <Section num={0} title="Telehealth Encounter — Consent & Origination" tag="Required before documentation">
+      <p className="status">
+        Facility-originated telehealth: the patient is physically present at the clinic (originating site, Florida);
+        the provider conducts the evaluation from a distant site. This statement is inserted into the note automatically.
+      </p>
+      <div className="grid">
+        <div className="field">
+          <label>Patient consent to telehealth evaluation</label>
+          <div className="yn">
+            <button
+              type="button"
+              className={t.consentObtained ? "on-yes" : ""}
+              onClick={() => patch("telehealth", { consentObtained: !t.consentObtained })}
+            >
+              {t.consentObtained ? "✓ Consent obtained & documented" : "Mark consent obtained"}
+            </button>
+          </div>
+        </div>
+        <Text label="Consent obtained by (staff name)" value={t.consentBy} onChange={(v) => patch("telehealth", { consentBy: v })} />
+      </div>
+    </Section>
+  );
+}
+
 export function Section2Injury({ form, patch, readOnly }: SectionProps) {
   const a = form.accident;
   const narrative = injuryNarrative(form.patient, a);

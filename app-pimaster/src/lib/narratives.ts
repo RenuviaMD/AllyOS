@@ -1,4 +1,5 @@
-import type { AccidentInfo, ImagingReview, PatientInfo, Pmh, VisitType } from "./types";
+import { CLINIC } from "./clinic";
+import type { AccidentInfo, ImagingReview, PatientInfo, Pmh, TelehealthInfo, VisitType } from "./types";
 
 function yn(v: string, yes: string, no: string): string {
   if (v === "yes") return yes;
@@ -58,6 +59,26 @@ export function imagingReviewNarrative(review: ImagingReview): string {
     s += " Images and findings were reviewed and discussed with the patient, who verbalized understanding.";
   }
   return s;
+}
+
+/**
+ * Telehealth modality + consent statement. Facility-originated model:
+ * the patient is always physically at the clinic (originating site) in Florida;
+ * the provider conducts the evaluation from a distant site.
+ */
+export function telehealthStatement(t: TelehealthInfo): string {
+  const consent = t.consentObtained
+    ? ` Informed consent for telehealth evaluation was obtained from the patient prior to the encounter${t.consentBy.trim() ? ` by ${t.consentBy.trim()}` : ""} and is documented in the record.`
+    : "";
+  return (
+    `This encounter was conducted via synchronous audio-video telehealth. ` +
+    `The patient was physically present at ${CLINIC.name}, ${CLINIC.address} (originating site), with clinic staff in attendance. ` +
+    `${CLINIC.provider} conducted the evaluation from a distant site. ` +
+    `The patient was located in the State of Florida at the time of service.` +
+    consent +
+    ` The physical examination was performed by direct observation of patient-performed functional maneuvers; ` +
+    `no hands-on findings (palpation, percussion, or manual testing) are reported in this note.`
+  );
 }
 
 /** Editable starting template for the required medical-necessity rationale. */
