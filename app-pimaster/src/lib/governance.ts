@@ -129,7 +129,8 @@ export function worstStatus(statuses: ChartStatus[]): ChartStatus {
 
 export interface ChartReviewItem {
   reportId: string;
-  patientLabel: string;
+  /** initials only — the governance layer stores no PHI (AHCA Pro pattern) */
+  patientInitials: string;
   dos: string;
   mode: string;
   telehealth: boolean;
@@ -198,7 +199,7 @@ export function buildGovernanceReportHtml(args: {
         const overridden = item.mdOverrides.includes(p.id) ? "*" : "";
         return `<td style="text-align:center">${r ? r.value : ""}${overridden}</td>`;
       }).join("");
-      return `<tr><td>${n + 1}</td><td>${esc(item.patientLabel)}</td><td>${esc(item.dos)}</td><td>${esc(item.mode)}${item.telehealth ? " (TH)" : ""}</td>${cells}
+      return `<tr><td>${n + 1}</td><td>${esc(item.patientInitials)} <span style="color:#888">[${esc(item.reportId.slice(0, 8))}]</span></td><td>${esc(item.dos)}</td><td>${esc(item.mode)}${item.telehealth ? " (TH)" : ""}</td>${cells}
         <td>${score.pct === null ? "—" : `${score.pct}%`}</td>
         <td style="color:${STATUS_COLOR[status]}; font-weight:bold">${status}</td>
         <td>${esc(item.comments)}</td></tr>`;
@@ -241,7 +242,9 @@ export function buildGovernanceReportHtml(args: {
   § 400.9935, Florida Statutes, including the systematic review of clinic billings against the clinical record to ensure
   billings are not fraudulent or unlawful, verification of provider authority, and review of documentation standards.
   Each chart was evaluated against the inspection points below (Y = met, N = deficiency, NA = not applicable;
-  * = Medical Director override of the system's pre-evaluation).</p>
+  * = Medical Director override of the system's pre-evaluation).
+  Patient identifiers are limited to initials and chart reference IDs — this administrative report contains no
+  protected health information; the full clinical records are retained in the clinic's medical record system.</p>
   ${shortSample}
   <h2>Chart Matrix</h2>
   <table><tr><th>#</th><th>Patient</th><th>DOS</th><th>Type</th>${pointHeaders}<th>Score</th><th>Status</th><th>Comments / Corrective Action</th></tr>${matrix}</table>

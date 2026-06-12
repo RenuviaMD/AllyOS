@@ -60,7 +60,7 @@ export function GovernancePage(props: { onClose: () => void }) {
       setItems(
         sampled.map((c) => ({
           reportId: c.id,
-          patientLabel: c.patient_label,
+          patientInitials: c.patient_initials,
           dos: c.dos,
           mode: c.mode,
           telehealth: c.telehealth,
@@ -172,7 +172,7 @@ export function GovernancePage(props: { onClose: () => void }) {
               <div className="section-head">
                 <span className="section-num">{idx + 1}</span>
                 <span className="section-title">
-                  {it.patientLabel} — {it.dos} — {it.mode}
+                  {it.patientInitials} [{it.reportId.slice(0, 8)}] — {it.dos} — {it.mode}
                   {it.telehealth ? " — TELEHEALTH" : ""}
                 </span>
                 <span className={`status ${STATUS_CLASS[st]}`} style={{ marginLeft: "auto", fontWeight: 700 }}>

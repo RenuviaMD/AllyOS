@@ -120,8 +120,8 @@ describe("binder report", () => {
 
   it("includes statute, KPIs, matrix, and MD override markers", () => {
     const item: ChartReviewItem = {
-      reportId: "r1",
-      patientLabel: "Test Patient",
+      reportId: "r1c4f2a9b",
+      patientInitials: "T.P.",
       dos: "2026-05-04",
       mode: "initial",
       telehealth: false,
@@ -140,7 +140,9 @@ describe("binder report", () => {
     expect(html).toContain("400.9935");
     expect(html).toContain("MEDICAL DIRECTOR CHART AUDIT REPORT");
     expect(html).toContain("Total encounters");
-    expect(html).toContain("Test Patient");
+    expect(html).toContain("T.P.");
+    expect(html).not.toContain("Test Patient"); // no PHI in the admin report
+    expect(html).toContain("protected health information");
     expect(html).toContain("all available charts were reviewed");
     expect(html).toContain("Re-train staff on consent capture.");
     expect(AUDIT_POINTS.length).toBe(10);

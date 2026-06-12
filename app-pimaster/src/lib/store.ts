@@ -160,11 +160,17 @@ export interface MonthChart {
   id: string;
   mode: string;
   dos: string;
-  patient_label: string;
+  /** patient initials only — the governance/admin layer never stores PHI */
+  patient_initials: string;
   telehealth: boolean;
   form: VisitForm;
   icd_codes: string[];
   cpt_codes: string[];
+}
+
+function initialsOf(first?: string, last?: string): string {
+  const i = (s?: string) => (s?.trim() ? `${s.trim()[0].toUpperCase()}.` : "");
+  return `${i(first)}${i(last)}` || "—";
 }
 
 /** All active reports with a date of service inside the given YYYY-MM month. */
@@ -184,7 +190,7 @@ export async function listReportsForMonth(month: string): Promise<MonthChart[]> 
       id: r.id as string,
       mode: r.mode as string,
       dos: r.dos as string,
-      patient_label: p ? `${p.firstName ?? ""} ${p.lastName ?? ""}`.trim() || "(unnamed)" : "(unnamed)",
+      patient_initials: initialsOf(p?.firstName, p?.lastName),
       telehealth: f?.visitMode === "telehealth",
       form: (f ?? {}) as VisitForm,
       icd_codes: (r.icd_codes as string[] | null) ?? [],
