@@ -6,6 +6,7 @@ import {
   patients,
   prescriptions,
   rxRefills,
+  users,
   type AuditLogRow,
   type CheckIn,
   type Patient,
@@ -103,6 +104,26 @@ export async function getPatientByUserId(userId: string): Promise<Patient | null
 export async function getPatientById(patientId: string): Promise<Patient | null> {
   const rows = await getDb().select().from(patients).where(eq(patients.id, patientId)).limit(1);
   return rows[0] ?? null;
+}
+
+/** Create a portal account (patient role) + a patient chart owned by a provider. */
+export async function insertPatientWithUser(input: {
+  email: string;
+  fullName: string;
+  mrn: string;
+  ownerProviderId: string;
+}): Promise<{ patientId: string; userId: string }> {
+  const db = getDb();
+  const userRows = await db
+    .insert(users)
+    .values({ email: input.email, role: "patient", fullName: input.fullName })
+    .returning({ id: users.id });
+  const userId = userRows[0]!.id;
+  const patientRows = await db
+    .insert(patients)
+    .values({ userId, ownerProviderId: input.ownerProviderId, mrn: input.mrn })
+    .returning({ id: patients.id });
+  return { patientId: patientRows[0]!.id, userId };
 }
 
 /** Active protocols for one patient (portal read-back). */

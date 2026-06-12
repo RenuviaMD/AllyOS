@@ -11,6 +11,7 @@ describe("repository surface", () => {
     "getPatientOwnership",
     "getPatientByUserId",
     "getPatientById",
+    "insertPatientWithUser",
     "insertPrescription",
     "insertCheckIn",
     "listFlaggedCheckIns",
