@@ -8,6 +8,8 @@ import { BillingSettingsCard } from "./components/BillingSettings";
 import { CatalogPage } from "./components/CatalogPage";
 import { FacilityPanel } from "./components/FacilityPanel";
 import { GovernancePage } from "./components/Governance";
+import { SignInScreen } from "./components/SignIn";
+import { allowedViews, changePassword, fetchAuthState, onAuthChange, signOut, type AuthState } from "./lib/auth";
 import { auditNote } from "./lib/audit";
 import { buildServiceLines, loadBillingSettings } from "./lib/billing";
 import { CLINIC } from "./lib/clinic";
@@ -40,6 +42,7 @@ const MODE_LABELS: Record<VisitMode, string> = { inPerson: "In-Person", teleheal
 const ROLE_LABELS: Record<Role, string> = { staff: "Staff", physician: "Physician", pt: "Physical Therapist" };
 
 export default function App() {
+  const [auth, setAuth] = useState<AuthState | null | undefined>(undefined);
   const [role, setRole] = useState<Role>(() => (localStorage.getItem("pimaster-role") as Role) || "staff");
   const [form, setForm] = useState<VisitForm>(emptyForm);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "cloud" | "local">("idle");
@@ -53,12 +56,19 @@ export default function App() {
   const loaded = useRef(false);
 
   useEffect(() => {
+    const refresh = () => fetchAuthState().then(setAuth);
+    refresh();
+    return onAuthChange(refresh);
+  }, []);
+
+  useEffect(() => {
+    if (!auth) return;
     loadDraft().then((d) => {
       if (d) setForm({ ...emptyForm(), ...d });
       loaded.current = true;
     });
     syncBillingFromCloud().catch(() => {});
-  }, []);
+  }, [auth?.userId]);
 
   // Debounced autosave
   useEffect(() => {
@@ -86,6 +96,19 @@ export default function App() {
   function chooseRole(r: Role) {
     setRole(r);
     localStorage.setItem("pimaster-role", r);
+  }
+
+  const views = auth ? allowedViews(auth.roles) : [];
+  useEffect(() => {
+    if (auth && views.length > 0 && !views.includes(role)) setRole(views[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auth?.userId, views.join(",")]);
+
+  async function doChangePassword() {
+    const pw = prompt("New password (min 8 characters):");
+    if (!pw) return;
+    const err = await changePassword(pw);
+    alert(err ? `Could not change password: ${err}` : "Password updated.");
   }
 
   const vt = form.visitType;
@@ -233,6 +256,21 @@ export default function App() {
     setForm(emptyForm());
   }
 
+  if (auth === undefined) {
+    return <div style={{ padding: 60, textAlign: "center" }} className="status">Loading…</div>;
+  }
+  if (auth === null) {
+    return <SignInScreen onSignedIn={() => fetchAuthState().then(setAuth)} />;
+  }
+  if (views.length === 0) {
+    return (
+      <div style={{ padding: 60, textAlign: "center" }}>
+        <p className="status warn">This account ({auth.email}) has no clinic role assigned. Contact the administrator.</p>
+        <button className="btn ghost" onClick={() => signOut()}>Sign out</button>
+      </div>
+    );
+  }
+
   return (
     <>
       <header className="app-header">
@@ -256,7 +294,7 @@ export default function App() {
         </div>
         <div className="spacer" />
         <div className="seg">
-          {(Object.keys(ROLE_LABELS) as Role[]).map((r) => (
+          {views.map((r) => (
             <button key={r} className={role === r ? "active" : ""} onClick={() => chooseRole(r)}>
               {ROLE_LABELS[r]}
             </button>
@@ -267,6 +305,13 @@ export default function App() {
           {saveState === "cloud" && "✓ Saved"}
           {saveState === "local" && "Saved locally (offline)"}
         </span>
+        <span className="status">{auth.email}</span>
+        <button className="btn ghost" onClick={doChangePassword} title="Change password">
+          Password
+        </button>
+        <button className="btn ghost" onClick={() => signOut()}>
+          Sign out
+        </button>
       </header>
 
       <main className="main">

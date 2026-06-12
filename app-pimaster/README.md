@@ -51,12 +51,16 @@ A pre-generation audit (`src/lib/audit.ts`) blocks notes with missing identity/a
 
 `netlify.toml` is included (base `app-pimaster`, publish `dist`). Point the Netlify site at this repo/folder and map `pimaster.renuviamd.com`.
 
+## Authentication & access
+
+Sign-in is required (Supabase Auth). Roles come from the `app_users` table — staff / physician / pt, with `admin` unlocking all views — and Row Level Security enforces them server-side: clinical records require an active account; catalogs, governance, billing settings, and facility registries are writable only by physician/admin. Accounts are provisioned by the administrator (no open signup).
+
 ## Important compliance notes
 
 This system stores patient identifiers together with clinical information — that is PHI under HIPAA when handled by the practice.
 
 1. **Sign a BAA with Supabase** (Team plan or above) and with Netlify or host the frontend accordingly.
-2. The `reports` and `form_state` tables currently have **public (anon) RLS policies** inherited from the previous build — anyone holding the publishable key from the JS bundle could read them. Recommended hardening: enable Supabase Auth for the three roles and restrict these policies to `authenticated`, then remove the public policies. The app's data layer is structured so this can be added without reworking the UI.
+2. ~~Public RLS policies~~ — closed: all tables now require an authenticated, active `app_users` account; the inherited anon access was removed. (Note: this also disables the legacy PI Notes deployment's database access.)
 3. All auto-populated ICD-10 codes, narratives, and degree estimates are drafting aids; the physician reviews, overrides, and signs every note.
 
 ## Field-mapping notes
