@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { EM_LEVELS, FOLLOW_UPS, IMAGING_GROUPS, OTHER_IMAGING_REGIONS, PT_DURATIONS, PT_FREQUENCIES, PT_MODALITIES } from "../lib/cpt";
 import { deriveIcd10, PSYCH_CODES } from "../lib/icd10";
+import { listDxCatalog, type DxCatalogRow } from "../lib/store";
 import { imagingReviewNarrative, medicalNecessityTemplate } from "../lib/narratives";
 import { Area, CheckGroup, Section, Select, YesNoField } from "./fields";
 import type { SectionProps } from "./SectionsIntake";
@@ -39,6 +40,7 @@ export function Section6Assessment({ form, patch }: SectionProps) {
           </li>
         ))}
       </ul>
+      <CatalogQuickPicks form={form} patch={patch} />
       <div style={{ marginTop: 12 }}>
         <label className="status">Optional psychological diagnoses</label>
         <CheckGroup
@@ -55,6 +57,39 @@ export function Section6Assessment({ form, patch }: SectionProps) {
         />
       </div>
     </Section>
+  );
+}
+
+/** Physician-selectable additions from the clinic ICD-10 catalog (feeding page). */
+function CatalogQuickPicks({ form, patch }: SectionProps) {
+  const [catalog, setCatalog] = useState<DxCatalogRow[]>([]);
+  useEffect(() => {
+    listDxCatalog()
+      .then((rows) => setCatalog(rows.filter((r) => r.active && !r.auto_derive)))
+      .catch(() => setCatalog([]));
+  }, []);
+  if (catalog.length === 0) return null;
+  const selected = (form.assessment.extraCodes ?? []).map((d) => d.code);
+  return (
+    <div style={{ marginTop: 12 }}>
+      <label className="status">Clinic catalog — physician-selected additions (not auto-derived)</label>
+      <CheckGroup
+        items={catalog.map((r) => ({
+          key: r.code,
+          label: (
+            <span>
+              <span className="cpt">{r.code}</span> {r.description}
+            </span>
+          ),
+        }))}
+        selected={selected}
+        onChange={(sel) =>
+          patch("assessment", {
+            extraCodes: catalog.filter((r) => sel.includes(r.code)).map((r) => ({ code: r.code, desc: r.description })),
+          })
+        }
+      />
+    </div>
   );
 }
 

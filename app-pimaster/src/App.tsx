@@ -5,6 +5,8 @@ import { Section1CheckIn, Section2Injury, TelehealthConsent } from "./components
 import { Section11PtDaily, Section12PtWeekly } from "./components/SectionsPt";
 import { Section6Assessment, Section7Plan, Section8ImageOrders, Section9ImagingReview } from "./components/SectionsPlan";
 import { BillingSettingsCard } from "./components/BillingSettings";
+import { CatalogPage } from "./components/CatalogPage";
+import { GovernancePage } from "./components/Governance";
 import { auditNote } from "./lib/audit";
 import { buildServiceLines, loadBillingSettings } from "./lib/billing";
 import { CLINIC } from "./lib/clinic";
@@ -29,7 +31,7 @@ import {
   type PeerNote,
   type SimilarityHit,
 } from "./lib/similarity";
-import { fetchSameAccidentForms, loadDraft, saveDraft, saveReport, type ReportMode } from "./lib/store";
+import { fetchSameAccidentForms, loadDraft, saveDraft, saveReport, syncBillingFromCloud, type ReportMode } from "./lib/store";
 import { emptyForm, type Role, type VisitForm, type VisitMode, type VisitType } from "./lib/types";
 
 const VISIT_LABELS: Record<VisitType, string> = { initial: "Initial", followup: "Follow-Up", final: "Final" };
@@ -44,6 +46,8 @@ export default function App() {
   const [auditIssues, setAuditIssues] = useState<string[]>([]);
   const [showArchive, setShowArchive] = useState(false);
   const [showBilling, setShowBilling] = useState(false);
+  const [showGovernance, setShowGovernance] = useState(false);
+  const [showCatalogs, setShowCatalogs] = useState(false);
   const loaded = useRef(false);
 
   useEffect(() => {
@@ -51,6 +55,7 @@ export default function App() {
       if (d) setForm({ ...emptyForm(), ...d });
       loaded.current = true;
     });
+    syncBillingFromCloud().catch(() => {});
   }, []);
 
   // Debounced autosave
@@ -333,6 +338,16 @@ export default function App() {
               </button>
             </>
           )}
+          {role === "physician" && (
+            <>
+              <button className="btn ghost" onClick={() => setShowGovernance(true)}>
+                MD Governance
+              </button>
+              <button className="btn ghost" onClick={() => setShowCatalogs(true)}>
+                Catalogs
+              </button>
+            </>
+          )}
           <button className="btn ghost" onClick={() => setShowArchive(true)}>
             Reports Archive
           </button>
@@ -345,6 +360,8 @@ export default function App() {
 
       {showArchive && <ReportsArchive onClose={() => setShowArchive(false)} />}
       {showBilling && <BillingSettingsCard onClose={() => setShowBilling(false)} />}
+      {showGovernance && <GovernancePage onClose={() => setShowGovernance(false)} />}
+      {showCatalogs && <CatalogPage onClose={() => setShowCatalogs(false)} />}
     </>
   );
 }

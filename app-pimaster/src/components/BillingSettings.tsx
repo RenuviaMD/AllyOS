@@ -1,18 +1,35 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { billableCpts, loadBillingSettings, saveBillingSettings, type BillingSettings } from "../lib/billing";
+import { saveClinicBilling, syncBillingFromCloud, upsertServiceCatalog } from "../lib/store";
 import { Section, Text } from "./fields";
 
 export function BillingSettingsCard(props: { onClose: () => void }) {
   const [s, setS] = useState<BillingSettings>(loadBillingSettings);
 
+  useEffect(() => {
+    syncBillingFromCloud().then(() => setS(loadBillingSettings())).catch(() => {});
+  }, []);
+
   function update(partial: Partial<BillingSettings>) {
     const next = { ...s, ...partial };
     setS(next);
     saveBillingSettings(next);
+    saveClinicBilling({ ein: next.ein, billing_npi: next.billingNpi, rendering_npi: next.renderingNpi }).catch(() => {});
   }
 
   function setFee(cpt: string, charge: string) {
-    update({ fees: { ...s.fees, [cpt]: charge } });
+    const next = { ...s, fees: { ...s.fees, [cpt]: charge } };
+    setS(next);
+    saveBillingSettings(next);
+    const item = billableCpts().find((c) => c.cpt === cpt);
+    upsertServiceCatalog({
+      cpt,
+      name: item?.name ?? cpt,
+      category: cpt.startsWith("99") ? "em" : "pt",
+      default_units: 1,
+      charge: charge || null,
+      active: true,
+    }).catch(() => {});
   }
 
   return (
@@ -20,7 +37,8 @@ export function BillingSettingsCard(props: { onClose: () => void }) {
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <Section num={0} title="Billing Settings" tag="Used by Superbill & CMS-1500">
           <p className="status">
-            Saved on this device. Charges left blank print blank — they are never estimated or invented.
+            Synced to the clinic record (with a local cache for offline use). Charges left blank print blank — they are
+            never estimated or invented.
           </p>
           <div className="grid">
             <Text label="Federal Tax ID (EIN) — Box 25" value={s.ein} onChange={(v) => update({ ein: v })} />

@@ -1,7 +1,7 @@
 import { totalCharges, type BillingSettings, type ServiceLine } from "./billing";
 import { CLINIC, DIAGNOSTIC_CENTER } from "./clinic";
 import { EM_LEVELS, PT_MODALITIES, resolveImagingSelection } from "./cpt";
-import { deriveIcd10, parseManualCodes, PSYCH_CODES } from "./icd10";
+import { deriveIcd10, parseManualCodes, PSYCH_CODES, withEncounter } from "./icd10";
 import {
   aggravationNarrative,
   causationStatement,
@@ -21,10 +21,13 @@ function esc(s: string): string {
 
 export function allDiagnosisCodes(form: VisitForm): DxCode[] {
   const auto = form.assessment.autoCodes.length ? form.assessment.autoCodes : deriveIcd10(form);
+  const extra = form.assessment.extraCodes ?? [];
   const psych = PSYCH_CODES.filter((p) => form.assessment.psych.includes(p.code));
   const manual = parseManualCodes(form.assessment.manual);
   const seen = new Set<string>();
-  return [...auto, ...psych, ...manual].filter((d) => (seen.has(d.code) ? false : (seen.add(d.code), true)));
+  return [...auto, ...extra, ...psych, ...manual]
+    .map((d) => withEncounter(d, form.visitType))
+    .filter((d) => (seen.has(d.code) ? false : (seen.add(d.code), true)));
 }
 
 export function allCptCodes(form: VisitForm): string[] {

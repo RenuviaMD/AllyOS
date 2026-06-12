@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { loadBillingSettings, saveBillingSettings } from "./billing";
 import type { VisitForm } from "./types";
 
 // The publishable key ships in the client bundle by design (same model as the
@@ -151,4 +152,200 @@ export async function getReportHtml(id: string): Promise<string | null> {
   const { data, error } = await supabase().from("reports").select("report_html").eq("id", id).single();
   if (error) return null;
   return (data?.report_html as string) ?? null;
+}
+
+// ---------- Medical Director governance ----------
+
+export interface MonthChart {
+  id: string;
+  mode: string;
+  dos: string;
+  patient_label: string;
+  telehealth: boolean;
+}
+
+/** All active reports with a date of service inside the given YYYY-MM month. */
+export async function listReportsForMonth(month: string): Promise<MonthChart[]> {
+  const { data, error } = await supabase()
+    .from("reports")
+    .select("id, mode, dos, form_data")
+    .eq("status", "active")
+    .gte("dos", `${month}-01`)
+    .lt("dos", nextMonth(month))
+    .order("dos", { ascending: true });
+  if (error) throw error;
+  return (data ?? []).map((r) => {
+    const f = r.form_data as VisitForm | null;
+    const p = f?.patient;
+    return {
+      id: r.id as string,
+      mode: r.mode as string,
+      dos: r.dos as string,
+      patient_label: p ? `${p.firstName ?? ""} ${p.lastName ?? ""}`.trim() || "(unnamed)" : "(unnamed)",
+      telehealth: f?.visitMode === "telehealth",
+    };
+  });
+}
+
+function nextMonth(month: string): string {
+  const [y, m] = month.split("-").map(Number);
+  return m === 12 ? `${y + 1}-01-01` : `${y}-${String(m + 1).padStart(2, "0")}-01`;
+}
+
+export async function saveGovernanceReview(args: {
+  month: string;
+  targetCount: number;
+  reviewer: string;
+  items: object[];
+  html: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const { error } = await supabase().from("governance_reviews").insert({
+      review_month: args.month,
+      target_count: args.targetCount,
+      reviewer: args.reviewer,
+      items: args.items,
+      report_html: args.html,
+      clinic_id: "wellness_hcc",
+    });
+    if (error) throw error;
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+export interface GovernanceReviewRow {
+  id: string;
+  review_month: string;
+  target_count: number;
+  reviewer: string | null;
+  created_at: string;
+}
+
+export async function listGovernanceReviews(): Promise<GovernanceReviewRow[]> {
+  const { data, error } = await supabase()
+    .from("governance_reviews")
+    .select("id, review_month, target_count, reviewer, created_at")
+    .order("created_at", { ascending: false })
+    .limit(48);
+  if (error) throw error;
+  return (data ?? []) as GovernanceReviewRow[];
+}
+
+export async function getGovernanceReviewHtml(id: string): Promise<string | null> {
+  const { data, error } = await supabase().from("governance_reviews").select("report_html").eq("id", id).single();
+  if (error) return null;
+  return (data?.report_html as string) ?? null;
+}
+
+// ---------- Clinic catalogs & billing identity (cloud) ----------
+
+export interface DxCatalogRow {
+  id: string;
+  code: string;
+  description: string;
+  region: string | null;
+  kind: string | null;
+  auto_derive: boolean;
+  active: boolean;
+}
+
+export async function listDxCatalog(): Promise<DxCatalogRow[]> {
+  const { data, error } = await supabase()
+    .from("clinic_dx_catalog")
+    .select("id, code, description, region, kind, auto_derive, active")
+    .order("region")
+    .order("code");
+  if (error) throw error;
+  return (data ?? []) as DxCatalogRow[];
+}
+
+export async function upsertDxCatalog(row: Omit<DxCatalogRow, "id"> & { id?: string }): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const { error } = await supabase()
+      .from("clinic_dx_catalog")
+      .upsert({ ...row, clinic_id: "wellness_hcc" }, { onConflict: "clinic_id,code" });
+    if (error) throw error;
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+export interface ServiceCatalogRow {
+  id: string;
+  cpt: string;
+  name: string;
+  category: string | null;
+  default_units: number;
+  charge: string | null;
+  active: boolean;
+}
+
+export async function listServiceCatalog(): Promise<ServiceCatalogRow[]> {
+  const { data, error } = await supabase()
+    .from("clinic_service_catalog")
+    .select("id, cpt, name, category, default_units, charge, active")
+    .order("category")
+    .order("cpt");
+  if (error) throw error;
+  return (data ?? []).map((r) => ({ ...r, charge: r.charge === null ? null : String(r.charge) })) as ServiceCatalogRow[];
+}
+
+export async function upsertServiceCatalog(row: Omit<ServiceCatalogRow, "id"> & { id?: string }): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const { error } = await supabase()
+      .from("clinic_service_catalog")
+      .upsert(
+        { ...row, charge: row.charge ? Number(row.charge) : null, clinic_id: "wellness_hcc" },
+        { onConflict: "clinic_id,cpt" },
+      );
+    if (error) throw error;
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+export interface ClinicBillingIdentity {
+  ein: string;
+  billing_npi: string;
+  rendering_npi: string;
+}
+
+export async function loadClinicBilling(): Promise<ClinicBillingIdentity | null> {
+  try {
+    const { data, error } = await supabase()
+      .from("clinic_settings")
+      .select("ein, billing_npi, rendering_npi")
+      .eq("clinic_id", "wellness_hcc")
+      .maybeSingle();
+    if (error) throw error;
+    return data ? { ein: data.ein ?? "", billing_npi: data.billing_npi ?? "", rendering_npi: data.rendering_npi ?? "" } : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function saveClinicBilling(b: ClinicBillingIdentity): Promise<void> {
+  await supabase()
+    .from("clinic_settings")
+    .upsert({ clinic_id: "wellness_hcc", ...b, updated_at: new Date().toISOString() }, { onConflict: "clinic_id" });
+}
+
+/** Pull cloud billing identity + service charges into the local cache used by the document builders. */
+export async function syncBillingFromCloud(): Promise<void> {
+  const local = loadBillingSettings();
+  const [identity, services] = await Promise.all([loadClinicBilling(), listServiceCatalog().catch(() => [] as ServiceCatalogRow[])]);
+  const fees = { ...local.fees };
+  for (const s of services) {
+    if (s.charge) fees[s.cpt] = s.charge;
+  }
+  saveBillingSettings({
+    ein: identity?.ein || local.ein,
+    billingNpi: identity?.billing_npi || local.billingNpi,
+    renderingNpi: identity?.rendering_npi || local.renderingNpi,
+    fees,
+  });
 }

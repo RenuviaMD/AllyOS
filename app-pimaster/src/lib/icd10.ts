@@ -1,4 +1,4 @@
-import type { DxCode, VisitForm } from "./types";
+import type { DxCode, VisitForm, VisitType } from "./types";
 import { impairedSides, JOINT_REGIONS, SPINE_REGION_IDS } from "./rom";
 
 interface RegionDx {
@@ -46,6 +46,10 @@ export const REGION_DX: Record<string, RegionDx> = {
       R: { code: "S53.401A", desc: `Unspecified sprain of right elbow${ENC}` },
       L: { code: "S53.402A", desc: `Unspecified sprain of left elbow${ENC}` },
     },
+    strain: {
+      R: { code: "S56.911A", desc: `Strain of unspecified muscles, fascia and tendons at forearm level, right arm${ENC}` },
+      L: { code: "S56.912A", desc: `Strain of unspecified muscles, fascia and tendons at forearm level, left arm${ENC}` },
+    },
     pain: {
       R: { code: "M25.521", desc: "Pain in right elbow" },
       L: { code: "M25.522", desc: "Pain in left elbow" },
@@ -69,6 +73,10 @@ export const REGION_DX: Record<string, RegionDx> = {
     sprain: {
       R: { code: "S73.101A", desc: `Unspecified sprain of right hip${ENC}` },
       L: { code: "S73.102A", desc: `Unspecified sprain of left hip${ENC}` },
+    },
+    strain: {
+      R: { code: "S76.011A", desc: `Strain of muscle, fascia and tendon of right hip${ENC}` },
+      L: { code: "S76.012A", desc: `Strain of muscle, fascia and tendon of left hip${ENC}` },
     },
     pain: {
       R: { code: "M25.551", desc: "Pain in right hip" },
@@ -94,12 +102,30 @@ export const REGION_DX: Record<string, RegionDx> = {
       R: { code: "S93.401A", desc: `Sprain of unspecified ligament of right ankle${ENC}` },
       L: { code: "S93.402A", desc: `Sprain of unspecified ligament of left ankle${ENC}` },
     },
+    strain: {
+      R: { code: "S96.911A", desc: `Strain of unspecified muscle and tendon at ankle and foot level, right foot${ENC}` },
+      L: { code: "S96.912A", desc: `Strain of unspecified muscle and tendon at ankle and foot level, left foot${ENC}` },
+    },
     pain: {
       R: { code: "M25.571", desc: "Pain in right ankle and joints of right foot" },
       L: { code: "M25.572", desc: "Pain in left ankle and joints of left foot" },
     },
   },
 };
+
+/**
+ * Switch the ICD-10 7th character on injury (S/T-chapter) codes by visit type:
+ * Initial -> A (initial encounter), Follow-Up/Final -> D (subsequent encounter).
+ * Sequela (S) is never auto-applied — that is a physician decision.
+ */
+export function withEncounter(dx: DxCode, visitType: VisitType): DxCode {
+  if (visitType === "initial") return dx;
+  if (!/^[ST]/.test(dx.code) || !dx.code.endsWith("A")) return dx;
+  return {
+    code: dx.code.slice(0, -1) + "D",
+    desc: dx.desc.replace(/initial encounter$/, "subsequent encounter"),
+  };
+}
 
 export const PSYCH_CODES: DxCode[] = [
   { code: "F43.10", desc: "Post-traumatic stress disorder, unspecified" },
