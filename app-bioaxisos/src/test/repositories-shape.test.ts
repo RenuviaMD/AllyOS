@@ -15,6 +15,7 @@ describe("repository surface", () => {
     "insertPrescription",
     "insertCheckIn",
     "listFlaggedCheckIns",
+    "listFlaggedCheckInsForProvider",
     "listPatientsForProvider",
     "listActivePrescriptions",
     "listCheckInsForPatient",

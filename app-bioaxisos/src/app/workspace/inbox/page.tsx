@@ -3,7 +3,7 @@ import { DbNotConfigured } from "@/components/ui/db-not-configured";
 import { getServerSession } from "@/lib/auth";
 import { requireRole } from "@/lib/auth/rbac";
 import { withAudit } from "@/lib/audit";
-import { listFlaggedCheckIns } from "@/lib/db/repositories";
+import { listFlaggedCheckIns, listFlaggedCheckInsForProvider } from "@/lib/db/repositories";
 import { FLAG_LABELS, type FlagRuleId } from "@/lib/checkin/flagger";
 import { isDbConfigured } from "@/lib/env";
 
@@ -22,7 +22,8 @@ export default async function InboxPage() {
     );
   }
 
-  // Reading flagged check-ins touches PHI — audit it.
+  // Reading flagged check-ins touches PHI — audit it. Providers see only their
+  // own patients' flags; admins see all (row-level ownership, spec §9).
   const flagged = await withAudit(
     {
       action: "read",
@@ -31,7 +32,10 @@ export default async function InboxPage() {
       actorRole: session!.role,
       phi: true,
     },
-    () => listFlaggedCheckIns(),
+    () =>
+      session!.role === "admin"
+        ? listFlaggedCheckIns()
+        : listFlaggedCheckInsForProvider(session!.userId),
   );
 
   return (

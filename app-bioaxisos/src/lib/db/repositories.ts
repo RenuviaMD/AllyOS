@@ -75,7 +75,7 @@ export async function insertCheckIn(input: InsertCheckIn): Promise<{ id: string 
   return rows[0]!;
 }
 
-/** Flagged check-ins for the MD inbox, newest first. */
+/** Flagged check-ins across all patients (admin view), newest first. */
 export async function listFlaggedCheckIns(limit = 50): Promise<CheckIn[]> {
   return getDb()
     .select()
@@ -83,6 +83,24 @@ export async function listFlaggedCheckIns(limit = 50): Promise<CheckIn[]> {
     .where(eq(checkIns.severity, "flagged"))
     .orderBy(desc(checkIns.createdAt))
     .limit(limit);
+}
+
+/**
+ * Flagged check-ins limited to a provider's own patients (row-level ownership,
+ * spec §9). Providers must not see other providers' patients' check-ins.
+ */
+export async function listFlaggedCheckInsForProvider(
+  providerId: string,
+  limit = 50,
+): Promise<CheckIn[]> {
+  const rows = await getDb()
+    .select({ checkIn: checkIns })
+    .from(checkIns)
+    .innerJoin(patients, eq(checkIns.patientId, patients.id))
+    .where(and(eq(checkIns.severity, "flagged"), eq(patients.ownerProviderId, providerId)))
+    .orderBy(desc(checkIns.createdAt))
+    .limit(limit);
+  return rows.map((r) => r.checkIn);
 }
 
 /** Patient roster scoped to a provider (admins should call listAllPatients). */
