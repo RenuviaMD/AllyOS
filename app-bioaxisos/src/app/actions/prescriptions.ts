@@ -3,7 +3,12 @@
 import { getRequestContext, getServerSession } from "@/lib/auth";
 import { requirePatientAccess, requireRole } from "@/lib/auth/rbac";
 import { withAudit } from "@/lib/audit";
-import { getPatientOwnership, insertPrescription } from "@/lib/db/repositories";
+import {
+  getPatientOwnership,
+  getPrescriptionOwnership,
+  insertPrescription,
+  updatePrescriptionStatus,
+} from "@/lib/db/repositories";
 import { getFormularyCard } from "@/lib/formulary";
 import { createPrescriptionSchema, type CreatePrescriptionInput } from "@/lib/schemas";
 
@@ -11,6 +16,41 @@ export interface ActionResult<T> {
   ok: boolean;
   data?: T;
   error?: string;
+}
+
+/** Discontinue an active protocol (provider/admin, ownership-checked, audited). */
+export async function discontinuePrescription(
+  prescriptionId: string,
+): Promise<ActionResult<{ id: string }>> {
+  const session = await getServerSession();
+  try {
+    requireRole(session, "provider", "admin");
+    const owner = await getPrescriptionOwnership(prescriptionId);
+    if (!owner) return { ok: false, error: "Prescription not found" };
+    const actor = requirePatientAccess(session, owner);
+
+    const ctx = getRequestContext();
+    await withAudit(
+      {
+        action: "update",
+        resourceType: "prescription",
+        resourceId: prescriptionId,
+        patientId: owner.patientId,
+        actorUserId: actor.userId,
+        actorRole: actor.role,
+        phi: true,
+        ...ctx,
+        metadata: { status: "discontinued" },
+      },
+      () => updatePrescriptionStatus(prescriptionId, "discontinued"),
+    );
+    return { ok: true, data: { id: prescriptionId } };
+  } catch (err) {
+    const status = (err as { status?: number }).status;
+    if (status === 401) return { ok: false, error: "Not authenticated" };
+    if (status === 403) return { ok: false, error: "Not permitted" };
+    return { ok: false, error: "Could not discontinue" };
+  }
 }
 
 /**

@@ -124,6 +124,17 @@ export async function getPatientById(patientId: string): Promise<Patient | null>
   return rows[0] ?? null;
 }
 
+/** Change a prescription's lifecycle status (e.g. discontinue). */
+export async function updatePrescriptionStatus(
+  prescriptionId: string,
+  status: "active" | "completed" | "discontinued",
+): Promise<void> {
+  await getDb()
+    .update(prescriptions)
+    .set({ status, updatedAt: new Date() })
+    .where(eq(prescriptions.id, prescriptionId));
+}
+
 /** Create a portal account (patient role) + a patient chart owned by a provider. */
 export async function insertPatientWithUser(input: {
   email: string;
