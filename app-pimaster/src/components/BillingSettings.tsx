@@ -1,14 +1,27 @@
 import { useEffect, useState } from "react";
 import { billableCpts, loadBillingSettings, saveBillingSettings, type BillingSettings } from "../lib/billing";
-import { saveClinicBilling, syncBillingFromCloud, upsertServiceCatalog } from "../lib/store";
+import { loadImagingConfig, type ImagingConfig, type ImagingMode } from "../lib/imaging";
+import { saveClinicBilling, saveImagingConfigCloud, syncBillingFromCloud, upsertServiceCatalog } from "../lib/store";
 import { Section, Text } from "./fields";
 
 export function BillingSettingsCard(props: { onClose: () => void }) {
   const [s, setS] = useState<BillingSettings>(loadBillingSettings);
+  const [img, setImg] = useState<ImagingConfig>(loadImagingConfig);
 
   useEffect(() => {
-    syncBillingFromCloud().then(() => setS(loadBillingSettings())).catch(() => {});
+    syncBillingFromCloud()
+      .then(() => {
+        setS(loadBillingSettings());
+        setImg(loadImagingConfig());
+      })
+      .catch(() => {});
   }, []);
+
+  function updateImg(partial: Partial<ImagingConfig>) {
+    const next = { ...img, ...partial };
+    setImg(next);
+    saveImagingConfigCloud(next).catch(() => {});
+  }
 
   function update(partial: Partial<BillingSettings>) {
     const next = { ...s, ...partial };
@@ -45,6 +58,27 @@ export function BillingSettingsCard(props: { onClose: () => void }) {
             <Text label="Billing NPI (group) — Box 33a" value={s.billingNpi} onChange={(v) => update({ billingNpi: v })} />
             <Text label="Rendering NPI — Box 24J" value={s.renderingNpi} onChange={(v) => update({ renderingNpi: v })} />
           </div>
+
+          <h3 className="exam-h">Imaging / Diagnostics</h3>
+          <p className="status">How this clinic handles imaging — drives the diagnostic imaging order.</p>
+          <div className="seg" style={{ marginBottom: 10 }}>
+            {(["third_party", "onsite"] as ImagingMode[]).map((m) => (
+              <button key={m} className={img.mode === m ? "active" : ""} onClick={() => updateImg({ mode: m })}>
+                {m === "third_party" ? "Third-party center" : "On-site imaging"}
+              </button>
+            ))}
+          </div>
+          {img.mode === "third_party" ? (
+            <div className="grid">
+              <Text label="Diagnostic Center Name" value={img.centerName} onChange={(v) => updateImg({ centerName: v })} />
+              <Text label="Center Address" value={img.centerAddress} onChange={(v) => updateImg({ centerAddress: v })} />
+              <Text label="Center Phone" value={img.centerPhone} onChange={(v) => updateImg({ centerPhone: v })} />
+              <Text label="Center Fax" value={img.centerFax} onChange={(v) => updateImg({ centerFax: v })} />
+            </div>
+          ) : (
+            <p className="status">Imaging is performed on-site; orders print under the clinic's own letterhead.</p>
+          )}
+
           <h3 className="exam-h">Fee Schedule (per CPT)</h3>
           <table className="rom-table">
             <thead>

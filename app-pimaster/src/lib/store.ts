@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { loadBillingSettings, saveBillingSettings } from "./billing";
+import { defaultImagingConfig, saveImagingConfig, type ImagingConfig } from "./imaging";
 import type { VisitForm } from "./types";
 
 // The publishable key ships in the client bundle by design (same model as the
@@ -420,4 +421,49 @@ export async function syncBillingFromCloud(): Promise<void> {
     renderingNpi: identity?.rendering_npi || local.renderingNpi,
     fees,
   });
+  await syncImagingFromCloud();
+}
+
+export async function loadImagingConfigCloud(): Promise<ImagingConfig | null> {
+  try {
+    const { data, error } = await supabase()
+      .from("clinic_settings")
+      .select("imaging_mode, dx_center_name, dx_center_address, dx_center_phone, dx_center_fax")
+      .eq("clinic_id", "wellness_hcc")
+      .maybeSingle();
+    if (error || !data) return null;
+    const base = defaultImagingConfig();
+    return {
+      mode: (data.imaging_mode as ImagingConfig["mode"]) || base.mode,
+      centerName: data.dx_center_name ?? base.centerName,
+      centerAddress: data.dx_center_address ?? base.centerAddress,
+      centerPhone: data.dx_center_phone ?? base.centerPhone,
+      centerFax: data.dx_center_fax ?? base.centerFax,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function saveImagingConfigCloud(c: ImagingConfig): Promise<void> {
+  saveImagingConfig(c);
+  await supabase()
+    .from("clinic_settings")
+    .upsert(
+      {
+        clinic_id: "wellness_hcc",
+        imaging_mode: c.mode,
+        dx_center_name: c.centerName || null,
+        dx_center_address: c.centerAddress || null,
+        dx_center_phone: c.centerPhone || null,
+        dx_center_fax: c.centerFax || null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "clinic_id" },
+    );
+}
+
+async function syncImagingFromCloud(): Promise<void> {
+  const cloud = await loadImagingConfigCloud();
+  if (cloud) saveImagingConfig(cloud);
 }

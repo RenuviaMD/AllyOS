@@ -1,5 +1,6 @@
 import { totalCharges, type BillingSettings, type ServiceLine } from "./billing";
-import { CLINIC, DIAGNOSTIC_CENTER } from "./clinic";
+import { CLINIC } from "./clinic";
+import { imagingDestination, loadImagingConfig } from "./imaging";
 import { EM_LEVELS, PT_MODALITIES, resolveImagingSelection } from "./cpt";
 import { deriveIcd10, parseManualCodes, PSYCH_CODES, withEncounter } from "./icd10";
 import {
@@ -325,9 +326,11 @@ export function buildCms1500Html(form: VisitForm, lines: ServiceLine[], settings
   return wrap(`CMS-1500 — ${form.patient.lastName}`, b);
 }
 
-/** X-Ray order on clinic letterhead, addressed to MAZEL. */
+/** Imaging order on clinic letterhead — addressed to the clinic's configured
+ * third-party diagnostic center, or marked performed on-site. */
 export function buildXrayOrderHtml(form: VisitForm): string {
   const dx = allDiagnosisCodes(form);
+  const dest = imagingDestination(loadImagingConfig());
   const rows = form.imaging.selected
     .map((sel) => {
       const r = resolveImagingSelection(sel);
@@ -341,8 +344,8 @@ export function buildXrayOrderHtml(form: VisitForm): string {
   if (form.imaging.usRegion) rows.push(`<tr><td>Ultrasound</td><td>${esc(form.imaging.usRegion)}</td><td>—</td></tr>`);
 
   const b = `<h1>DIAGNOSTIC IMAGING ORDER</h1>
-    <p><strong>To:</strong> ${esc(DIAGNOSTIC_CENTER.name)}<br>${esc(DIAGNOSTIC_CENTER.address)}<br>
-    Phone: ${esc(DIAGNOSTIC_CENTER.phone)} | Fax: ${esc(DIAGNOSTIC_CENTER.fax)}</p>
+    <p><strong>${esc(dest.heading)}:</strong> ${esc(dest.name)}<br>${esc(dest.address)}<br>
+    Phone: ${esc(dest.phone)} | Fax: ${esc(dest.fax)}</p>
     ${patientBlock(form)}
     <h2>Studies Ordered</h2>
     <table><tr><th>Modality</th><th>Region</th><th>CPT</th></tr>${rows.join("")}</table>

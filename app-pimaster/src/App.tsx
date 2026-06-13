@@ -352,7 +352,7 @@ export default function App() {
               </button>
               {vt === "initial" && (
                 <button className="btn gold" onClick={() => generate("xray")}>
-                  X-Ray Order (MAZEL)
+                  Imaging Order
                 </button>
               )}
               {vt === "initial" && form.plan.emc === "yes" && (
