@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Card, CardTitle } from "@/components/ui/card";
+import { RxRow } from "@/components/workspace/rx-row";
 import { getServerSession } from "@/lib/auth";
 import { canAccessPatient, requireRole } from "@/lib/auth/rbac";
 import { withAudit } from "@/lib/audit";
@@ -73,14 +74,18 @@ export default async function PatientChart({ params }: { params: { id: string } 
             <p className="text-sm text-ink-muted">None active.</p>
           ) : (
             <ul className="space-y-2 text-sm">
-              {prescriptions.flatMap((p) =>
-                ((p.items as RxItem[]) ?? []).map((item, i) => (
-                  <li key={`${p.id}-${i}`} className="flex justify-between gap-3">
-                    <span>{getFormularyCard(item.slug)?.name ?? item.slug}</span>
-                    <span className="text-ink-muted">{item.dose}</span>
-                  </li>
-                )),
-              )}
+              {prescriptions.map((p) => (
+                <RxRow
+                  key={p.id}
+                  rx={{
+                    id: p.id,
+                    items: ((p.items as RxItem[]) ?? []).map((item) => ({
+                      name: getFormularyCard(item.slug)?.name ?? item.slug,
+                      dose: item.dose,
+                    })),
+                  }}
+                />
+              ))}
             </ul>
           )}
         </Card>
