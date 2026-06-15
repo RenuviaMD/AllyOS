@@ -2,14 +2,17 @@ import { describe, expect, it } from "vitest";
 import {
   AUDIT_POINTS,
   autoEvaluate,
+  buildEncountersCsv,
   buildGovernanceReportHtml,
   chartScore,
+  failedPoints,
   MAX_CHARTS,
   MIN_CHARTS,
   sampleCharts,
   statusFor,
   worstStatus,
   type ChartReviewItem,
+  type EncounterExport,
 } from "../lib/governance";
 import { withEncounter } from "../lib/icd10";
 import { emptyForm, type VisitForm } from "../lib/types";
@@ -87,6 +90,44 @@ describe("autoEvaluate inspection points", () => {
     const f = completedForm();
     f.plan.emc = "";
     expect(autoEvaluate(f, ["99204"], ["S13.4XXA"]).emc.value).toBe("N");
+  });
+});
+
+describe("AHCA Pro encounter export", () => {
+  it("lists deficiency points as risk flags", () => {
+    const f = completedForm();
+    f.plan.emc = "";
+    const flags = failedPoints(autoEvaluate(f, ["99204"], ["S13.4XXA"]));
+    expect(flags).toContain("emc");
+  });
+
+  it("builds a CSV with a header and one line per encounter, escaping commas", () => {
+    const rows: EncounterExport[] = [
+      {
+        chartId: "a1b2c3d4",
+        dos: "2026-06-01",
+        initials: "T.P.",
+        visitType: "initial",
+        modality: "In-Person",
+        telehealth: false,
+        icd: ["S13.4XXA", "M54.2"],
+        cpt: ["99204"],
+        chargeTotal: "300.00",
+        deficiencies: 2,
+        riskStatus: "CORRECTIVE",
+        riskFlags: ["billing_match", "emc"],
+      },
+    ];
+    const csv = buildEncountersCsv(rows);
+    const lines = csv.split("\r\n");
+    expect(lines).toHaveLength(2);
+    expect(lines[0]).toContain("Chart ID");
+    expect(lines[0]).toContain("Risk Flags");
+    expect(lines[1]).toContain("a1b2c3d4");
+    expect(lines[1]).toContain("$300.00");
+    expect(lines[1]).toContain("CORRECTIVE");
+    // multi-code cells are space-joined, so no stray commas split the row
+    expect(lines[1].split(",").length).toBe(12);
   });
 });
 

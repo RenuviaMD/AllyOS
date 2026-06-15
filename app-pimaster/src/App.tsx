@@ -7,7 +7,7 @@ import { Section6Assessment, Section7Plan, Section8ImageOrders, Section9ImagingR
 import { BillingSettingsCard } from "./components/BillingSettings";
 import { CatalogPage } from "./components/CatalogPage";
 import { FacilityPanel } from "./components/FacilityPanel";
-import { GovernancePage } from "./components/Governance";
+import { AhcaExportPage } from "./components/AhcaExport";
 import { SignInScreen } from "./components/SignIn";
 import { allowedViews, changePassword, fetchAuthState, onAuthChange, signOut, type AuthState } from "./lib/auth";
 import { auditNote } from "./lib/audit";
@@ -50,7 +50,7 @@ export default function App() {
   const [auditIssues, setAuditIssues] = useState<string[]>([]);
   const [showArchive, setShowArchive] = useState(false);
   const [showBilling, setShowBilling] = useState(false);
-  const [showGovernance, setShowGovernance] = useState(false);
+  const [showExport, setShowExport] = useState(false);
   const [showCatalogs, setShowCatalogs] = useState(false);
   const [showFacility, setShowFacility] = useState(false);
   const loaded = useRef(false);
@@ -387,8 +387,8 @@ export default function App() {
           )}
           {role === "physician" && (
             <>
-              <button className="btn ghost" onClick={() => setShowGovernance(true)}>
-                MD Governance
+              <button className="btn ghost" onClick={() => setShowExport(true)}>
+                AHCA Export
               </button>
               <button className="btn ghost" onClick={() => setShowCatalogs(true)}>
                 Catalogs
@@ -410,7 +410,7 @@ export default function App() {
 
       {showArchive && <ReportsArchive onClose={() => setShowArchive(false)} />}
       {showBilling && <BillingSettingsCard onClose={() => setShowBilling(false)} />}
-      {showGovernance && <GovernancePage onClose={() => setShowGovernance(false)} />}
+      {showExport && <AhcaExportPage onClose={() => setShowExport(false)} />}
       {showCatalogs && <CatalogPage onClose={() => setShowCatalogs(false)} />}
       {showFacility && <FacilityPanel onClose={() => setShowFacility(false)} />}
     </>

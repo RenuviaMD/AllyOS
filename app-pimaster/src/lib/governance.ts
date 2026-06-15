@@ -102,6 +102,68 @@ export function autoEvaluate(form: VisitForm, savedCpt: string[], savedIcd: stri
   return ev;
 }
 
+/** Inspection-point ids that came back as deficiencies (value "N"). */
+export function failedPoints(ev: ChartEvaluation): string[] {
+  return AUDIT_POINTS.filter((p) => ev[p.id]?.value === "N").map((p) => p.id);
+}
+
+/** One row of the 30-day encounter spreadsheet fed to AHCA Pro. */
+export interface EncounterExport {
+  chartId: string;
+  dos: string;
+  initials: string;
+  visitType: string;
+  modality: string;
+  telehealth: boolean;
+  icd: string[];
+  cpt: string[];
+  chargeTotal: string;
+  deficiencies: number;
+  riskStatus: ChartStatus;
+  riskFlags: string[];
+}
+
+function csvCell(v: string): string {
+  return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+}
+
+/** Build the last-30-days encounter CSV for risk triage / AHCA Pro upload. */
+export function buildEncountersCsv(rows: EncounterExport[]): string {
+  const header = [
+    "Chart ID",
+    "Date of Service",
+    "Patient Initials",
+    "Visit Type",
+    "Modality",
+    "Telehealth",
+    "ICD-10 Codes",
+    "CPT Codes",
+    "Charge Total",
+    "Deficiencies",
+    "Risk Status",
+    "Risk Flags",
+  ];
+  const lines = rows.map((r) =>
+    [
+      r.chartId,
+      r.dos,
+      r.initials,
+      r.visitType,
+      r.modality,
+      r.telehealth ? "Yes" : "No",
+      r.icd.join(" "),
+      r.cpt.join(" "),
+      r.chargeTotal ? `$${r.chargeTotal}` : "",
+      String(r.deficiencies),
+      r.riskStatus,
+      r.riskFlags.join(" "),
+    ]
+      .map((c) => csvCell(c))
+      .join(","),
+  );
+  return [header.join(","), ...lines].join("\r\n");
+}
+
 export function chartScore(ev: ChartEvaluation): { yes: number; no: number; pct: number | null } {
   let yes = 0;
   let no = 0;

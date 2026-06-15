@@ -406,3 +406,23 @@ export function printHtml(html: string): void {
   w.focus();
   setTimeout(() => w.print(), 300);
 }
+
+/** The stored signed report, or a freshly built note from the saved form data. */
+export async function getReportHtmlOrBuild(id: string, form: VisitForm): Promise<string> {
+  const { getReportHtml } = await import("./store");
+  const stored = await getReportHtml(id);
+  return stored ?? buildClinicalNoteHtml(form);
+}
+
+/** Trigger a client-side file download (used for the AHCA Pro encounter CSV). */
+export function downloadFile(filename: string, content: string, mime = "text/csv;charset=utf-8"): void {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
