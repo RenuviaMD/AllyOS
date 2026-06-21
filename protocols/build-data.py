@@ -48,6 +48,10 @@ def entry(path, is_stack):
         return None
     ps = d.get("popup_summary", {}) or {}
     slug = d["slug"]
+    # full 7-section prescribing-card body (everything after the frontmatter)
+    txt = path.read_text(encoding="utf-8")
+    parts = txt.split("---", 2)
+    body = parts[2].strip() if len(parts) > 2 else ""
     return {
         "slug": slug,
         "name": d.get("name", slug),
@@ -63,6 +67,8 @@ def entry(path, is_stack):
         "primary_use": ps.get("primary_use", ""),
         "contraindications": ps.get("contraindications_short", ""),
         "clinical_notes": ps.get("clinical_notes_short", ""),
+        "reviewed": (d.get("document_meta", {}) or {}).get("last_clinical_review", ""),
+        "body_md": body,
     }
 
 
@@ -100,6 +106,7 @@ for line_id, names in TEASERS.items():
             "name": nm, "brand_names": [], "line": line_id, "axis": "", "status": "",
             "status_label": "", "classification": cls, "controlled": False, "is_stack": False,
             "mechanism": "", "primary_use": "", "contraindications": "", "clinical_notes": "",
+            "reviewed": "", "body_md": "",
             "teaser": True,
         })
 
