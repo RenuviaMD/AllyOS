@@ -2,20 +2,43 @@
 
 _Date: 2026-06-21 · Source: portfolio audit of 21 repos (`~/RenuviaMD/CONSOLIDATION-AUDIT.md`)_
 
-## Operating principle (the rule that resolves everything)
+## Operating principle: FIVE ROLES, not "businesses"
 
-**No patient/consumer marketing. Every patient-facing platform is sold to a
-practice as its operating platform — the clinic faces the patient, RenuviaMD
-faces the clinic.** `bioaxis` is the reference implementation of this pattern.
+Structure is organized by the **physician role (hat)** Falcon wears, because each
+role has different standing and a different platform family. The critical split:
 
-## Four income lines
+- **Medical Director** = governance/oversight (supervises a clinic).
+- **Direct Care Provider** = treating physician (sees and bills the patient).
+  CAN be done in a clinic where Falcon is NOT the medical director.
 
-| Line | Definition | Canonical repos | Billing model |
-|---|---|---|---|
-| **A — Medical Director** | Governance/oversight provided to clinics | `AHCAClinicPortal` (shell/public), `AHCAAuditPro` (AHCA engine — "works"), `medical-director-console` (non-AHCA ops + protocol library) | B2B retainer |
-| **B — PIP Direct Care** | Falcon's own clinical work in accident clinics | `PIP-notes-` (T1 lite), `PI-Master-` (T2, active workhorse), `InjuryOS` (T3 full SaaS, EOY), `floridapipdoctor` (B2B landing), `fl_pi_hunter` (attorney sourcing) | **B2B preferred + direct paper CMS-1500 to auto/PIP carriers** |
-| **C — Practice Operating Platforms** | Line-of-care platforms SOLD to clinics; bioaxis = template | `bioaxis` (peptides — the example), `renuviamd-medical` (GLP-1/BHRT → repackage as sellable practice platform) | License / SaaS to practice |
-| **D — Research / PI** | Falcon as Principal Investigator for research sites | `research-renuviamd` | Site/PI income |
+These two roles stay **structurally separate**. `PI Master` is a Direct-Care
+platform ONLY — never a governance platform.
+
+| # | Role (hat) | What he does | Platform(s) | Billing |
+|---|---|---|---|---|
+| **1** | **Medical Director** | Govern AHCA + non-AHCA clinics | `AHCAClinicPortal` (shell/public), `AHCAAuditPro` (AHCA governance — "works"), `medical-director-console` (non-AHCA ops + protocol library) | B2B retainer |
+| **2** | **Direct Care Provider** | Treat PIP/accident patients himself | `PIP-notes-` (lite), **`PI Master`** (workhorse), `InjuryOS` (full SaaS), `floridapipdoctor` (landing), `fl_pi_hunter` (attorney leads) | **B2B preferred + direct CMS-1500 to auto carriers** |
+| **3** | **Platform Vendor** | License line-of-care OS to clinics; bioaxis = template | `bioaxis` (peptides), `renuviamd-medical` (GLP/BHRT) | License/SaaS to practice |
+| **4** | **Principal Investigator** | PI for research sites | `research-renuviamd` → research.renuviamd.com | Site/PI income |
+| **5** | **Product / D2C** | Sell GLP-Balance supplement | Shopify **done** (shop.renuviamd.com), Amazon **half-built**, `renuviamd-campaign-engine` | D2C retail |
+
+### Structural rule: keep governance OUT of PI Master
+The `claude/sweet-volta-9jzzv5` branch bolted an "AHCA Pro feeder" onto PI Master.
+That couples Role 1 into Role 2. **Decouple it:** PI Master runs standalone
+(direct-care docs + CMS-1500 billing). Governance is an **extra module that
+applies ONLY when the same physician is both the clinic's medical director AND a
+treating MD there** (Roles 1 + 2 on the same clinic). Default OFF; switch it on
+only for that overlap case.
+
+### PI Master canonical home (fork to resolve)
+The strongest PI Master frontend currently lives on branch
+`claude/sweet-volta-9jzzv5` inside `renuviamd-site` (the *peptides* repo) as
+`app-pimaster/` — tested, with CMS-1500/Superbill, telehealth, EMC, clone-guard.
+There is also `RenuviaMD/PI-Master-` in the org; both target the same Supabase
+project `pi-master` (ref `fkwqzmnqflmkchiszxub`). **Pick ONE canonical frontend
+(likely the sweet-volta build) and move it to its own repo in the org** — do not
+leave the direct-care platform homed inside the peptides repo, and do not run two
+frontends against one database.
 
 ## Decisions per repo
 
@@ -37,10 +60,9 @@ faces the clinic.** `bioaxis` is the reference implementation of this pattern.
 - `renuviamd-medical`: strip "RenuviaMD delivers care to patients" framing →
   "your practice runs GLP-1/BHRT on this platform." Stripe = the clinic's
   billing, not RenuviaMD's. Becomes Line C product #2 alongside bioaxis.
-- **GLP-Balance assets** (`renuviamd-campaign-engine`, `renuviamd-shopify-theme`,
-  `lead-engine`): the campaign engine (ad-copy/avatar generator) → repackage as a
-  B2B **practice-marketing module**. The D2C supplement Shopify store →
-  **FREEZE** unless it is currently producing revenue (decide).
+- **GLP-Balance (Role 5 — ACTIVE, ship this week):** Shopify storefront DONE at
+  `shop.renuviamd.com`; Amazon store **half-built** — finish it. `campaign-engine`
+  = the creative/ad engine. This is a committed D2C line, not frozen.
 
 ### RELOCATE (not RenuviaMD)
 - `rosy-proclean-`, `rosy-proclean-engine`, `rosyproclean-site` → transfer to a
