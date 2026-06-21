@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RenuviaMD — Clinical Protocol Library</title>
+<style>
+  :root{
+    --teal:#0e8a8a; --teal-d:#0b6e6e; --teal-ink:#16323a;
+    --gold:#e6a012; --gold-d:#c9870a;
+    --ink:#1c2b32; --muted:#5b6b72; --faint:#8898a0;
+    --bg:#f3f8f7; --card:#ffffff; --line:#e3ecea; --soft:#eaf4f2;
+    --green:#1e9e6a; --green-bg:#e8f7f0;
+    --amber:#d98a00; --amber-bg:#fdf3e2;
+    --red:#d7483b; --red-bg:#fdecea;
+    --shadow:0 1px 2px rgba(16,50,58,.06),0 8px 24px rgba(16,50,58,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  a{color:var(--teal-d);text-decoration:none}
+
+  /* Header */
+  header.top{background:linear-gradient(155deg,#0e3a40 0%,#0e8a8a 100%);color:#fff;padding:30px 0 26px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.15rem;letter-spacing:.02em}
+  .brand .dot{width:11px;height:11px;border-radius:3px;background:var(--gold);box-shadow:0 0 0 4px rgba(230,160,18,.25)}
+  .brand span{color:#ffd98a}
+  h1{font-size:1.9rem;line-height:1.15;margin:16px 0 6px;letter-spacing:-.01em}
+  header.top p{color:#d4ece9;max-width:640px;font-size:1.02rem}
+  .credit{margin-top:14px;display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:6px 14px;font-size:.85rem;color:#eafaf8}
+  .credit b{color:#fff}
+
+  /* Line-of-care nav */
+  nav.lines{position:sticky;top:0;z-index:30;background:rgba(243,248,247,.92);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line)}
+  nav.lines .row{display:flex;gap:8px;overflow-x:auto;padding:12px 0}
+  .ltab{flex:0 0 auto;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);
+    border-radius:999px;padding:9px 16px;font-weight:600;font-size:.92rem;color:var(--muted);cursor:pointer;
+    transition:all .15s;white-space:nowrap}
+  .ltab:hover{border-color:var(--teal);color:var(--teal-d)}
+  .ltab.active{background:var(--teal);border-color:var(--teal);color:#fff;box-shadow:var(--shadow)}
+  .ltab .soon{font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;background:var(--gold);color:#3a2a00;
+    border-radius:5px;padding:2px 6px;font-weight:800}
+  .ltab.active .soon{background:#ffe1a3}
+
+  /* Controls */
+  .controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:22px 0 10px}
+  .search{flex:1;min-width:220px;position:relative}
+  .search input{width:100%;border:1px solid var(--line);background:var(--card);border-radius:10px;
+    padding:11px 14px 11px 38px;font-size:.95rem;color:var(--ink);box-shadow:var(--shadow)}
+  .search input:focus{outline:none;border-color:var(--teal)}
+  .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.5}
+  .filters{display:flex;gap:6px;flex-wrap:wrap}
+  .fbtn{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:9px 13px;font-size:.85rem;
+    font-weight:600;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .15s}
+  .fbtn:hover{border-color:var(--teal)}
+  .fbtn.on{border-color:var(--teal);color:var(--teal-ink);background:var(--soft)}
+  .fbtn .pip{width:9px;height:9px;border-radius:50%}
+  .pg{background:var(--green)} .py{background:var(--amber)} .pr{background:var(--red)}
+
+  .legend{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:.84rem;padding:6px 0 4px}
+  .legend span{display:flex;align-items:center;gap:7px}
+  .countline{color:var(--faint);font-size:.84rem;padding:4px 0 18px}
+
+  /* Axis group */
+  .axis-h{display:flex;align-items:center;gap:12px;margin:26px 0 14px}
+  .axis-h h2{font-size:1.02rem;letter-spacing:.04em;text-transform:uppercase;color:var(--teal-ink)}
+  .axis-h .ln{flex:1;height:1px;background:var(--line)}
+  .axis-h .n{font-size:.78rem;color:var(--faint);font-weight:600}
+
+  /* Cards */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:13px;
+    padding:17px 17px 15px;box-shadow:var(--shadow);cursor:pointer;transition:transform .14s,box-shadow .14s;
+    display:flex;flex-direction:column;gap:8px}
+  .card:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(16,50,58,.12)}
+  .card.c-green{border-left-color:var(--green)} .card.c-yellow{border-left-color:var(--amber)} .card.c-red{border-left-color:var(--red)}
+  .card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .card h3{font-size:1.06rem;line-height:1.25;color:var(--ink)}
+  .card .brand-n{font-size:.78rem;color:var(--faint);margin-top:2px}
+  .badge{flex:0 0 auto;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+    padding:4px 8px;border-radius:6px;white-space:nowrap}
+  .b-green{background:var(--green-bg);color:#0c7a4d} .b-yellow{background:var(--amber-bg);color:#9a6300} .b-red{background:var(--red-bg);color:#b3372c}
+  .card .mech{font-size:.85rem;color:var(--muted)}
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+  .tag{font-size:.72rem;font-weight:600;color:var(--teal-d);background:var(--soft);border-radius:6px;padding:3px 8px}
+  .tag.status{color:var(--muted);background:#f0f3f2}
+  .tag.stack{color:#9a6300;background:var(--amber-bg)}
+
+  /* In-development panel */
+  .soon-panel{background:var(--card);border:1px dashed var(--teal);border-radius:16px;padding:34px;text-align:center;
+    box-shadow:var(--shadow);max-width:720px;margin:10px auto}
+  .soon-panel .ic{font-size:2rem}
+  .soon-panel h2{font-size:1.3rem;margin:8px 0 6px;color:var(--teal-ink)}
+  .soon-panel p{color:var(--muted);max-width:520px;margin:0 auto 16px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .chip{border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:.85rem;color:var(--muted);background:var(--soft)}
+
+  .empty{text-align:center;color:var(--faint);padding:50px 0}
+
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(16,50,58,.45);backdrop-filter:blur(3px);display:none;
+    align-items:flex-start;justify-content:center;padding:40px 18px;z-index:60;overflow-y:auto}
+  .overlay.open{display:flex}
+  .modal{background:#fff;border-radius:16px;max-width:600px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);
+    overflow:hidden;animation:pop .16s ease}
+  @keyframes pop{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+  .modal .mhead{padding:22px 24px;border-bottom:1px solid var(--line);position:relative}
+  .modal .mhead.c-green{border-top:5px solid var(--green)} .modal .mhead.c-yellow{border-top:5px solid var(--amber)} .modal .mhead.c-red{border-top:5px solid var(--red)}
+  .modal h2{font-size:1.4rem;padding-right:30px}
+  .modal .x{position:absolute;top:16px;right:18px;font-size:1.5rem;color:var(--faint);cursor:pointer;line-height:1}
+  .modal .mbody{padding:20px 24px 24px}
+  .field{margin-bottom:15px}
+  .field .k{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--teal-d);font-weight:800;margin-bottom:4px}
+  .field .v{font-size:.95rem;color:var(--ink)}
+  .field.danger .k{color:var(--red)} .field.danger .v{color:#a8362b}
+  .mnote{background:var(--soft);border-radius:10px;padding:12px 14px;font-size:.85rem;color:var(--muted);margin-top:6px}
+
+  footer{margin-top:50px;padding:26px 0 40px;border-top:1px solid var(--line);color:var(--faint);font-size:.82rem}
+  footer b{color:var(--muted)}
+  @media(max-width:560px){h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span>Renuvia<span>MD</span></div>
+    <h1>Clinical Protocol Library</h1>
+    <p>Physician-curated, evidence-graded protocols organized by line of care — the single source the practice platforms draw from.</p>
+    <div class="credit">Curated &amp; signed by&nbsp;<b>Armando Falcon, MD</b></div>
+  </div>
+</header>
+
+<nav class="lines"><div class="wrap"><div class="row" id="lineNav"></div></div></nav>
+
+<main class="wrap">
+  <div id="activeControls">
+    <div class="controls">
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16323a" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="q" type="search" placeholder="Search protocols, mechanism, use…">
+      </div>
+      <div class="filters" id="classFilters">
+        <button class="fbtn on" data-c="all">All</button>
+        <button class="fbtn" data-c="green"><span class="pip pg"></span>Green</button>
+        <button class="fbtn" data-c="yellow"><span class="pip py"></span>Yellow</button>
+        <button class="fbtn" data-c="red"><span class="pip pr"></span>Red</button>
+      </div>
+    </div>
+    <div class="legend">
+      <span><span class="pip pg"></span> Green — FDA-approved pathway</span>
+      <span><span class="pip py"></span> Yellow — physician-review only</span>
+      <span><span class="pip pr"></span> Red — research-only / exclusion</span>
+    </div>
+    <div class="countline" id="count"></div>
+  </div>
+  <div id="content"></div>
+</main>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+
+<footer><div class="wrap">
+  <b>Internal clinical reference for licensed clinicians.</b> Each entry is a drafting aid — every dose, contraindication, and monitoring plan is reviewed, customized, and signed by the treating physician before use. Tier&nbsp;1 = curated/MD-signed; Tier&nbsp;2 = on-demand peptide engine (verified, graduates into Tier&nbsp;1). Citations from PubMed &amp; ClinicalTrials.gov. © RenuviaMD.
+</div></footer>
+
+<script>
+/* Canonical protocol library — generated by build-data.py. Do not hand-edit. */
+window.RENUVIA_PROTOCOLS = {
+  "meta": {
+    "title": "RenuviaMD Clinical Protocol Library",
+    "curated_by": "Armando Falcon, MD",
+    "tiers": {
+      "1": "Curated, MD-signed library",
+      "2": "On-demand peptide engine \u2014 verified, graduates into Tier 1"
+    },
+    "count": 29
+  },
+  "lines": [
+    {
+      "id": "peptides",
+      "name": "Peptides",
+      "tagline": "Evidence-graded peptide protocols by clinical axis",
+      "status": "active",
+      "axes": [
+        "Metabolism",
+        "Growth",
+        "Repair",
+        "Vitality",
+        "Longevity",
+        "Cognition",
+        "Immunity"
+      ]
+    },
+    {
+      "id": "bhrt",
+      "name": "BHRT",
+      "tagline": "Bio-identical hormone replacement \u2014 male & female",
+      "status": "in_development",
+      "axes": []
+    },
+    {
+      "id": "iv-nad",
+      "name": "IV / NAD+",
+      "tagline": "IV infusion & NAD+ (Niagen IV) protocols",
+      "status": "in_development",
+      "axes": []
+    },
+    {
+      "id": "glp",
+      "name": "GLP-1 / Metabolic",
+      "tagline": "Medical weight management & metabolic",
+      "status": "in_development",
+      "axes": []
+    },
+    {
+      "id": "aesthetics",
+      "name": "Aesthetics / Devices",
+      "tagline": "Injectables & energy-device protocols",
+      "status": "in_development",
+      "axes": []
+    }
+  ],
+  "protocols": [
+    {
+      "slug": "aod-9604",
+      "name": "AOD-9604",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Metabolism",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "GH fragment (176-191) \u2014 stimulates lipolysis without affecting blood glucose or IGF-1",
+      "primary_use": "Adjunct fat-loss support in metabolic/weight programs",
+      "contraindications": "pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Mild effect, clean metabolic profile \u2014 no IGF-1 or glucose impact. Best as an adjunct, not a standalone. Human weight-loss data is weak; set expectations low."
+    },
+    {
+      "slug": "bpc-157",
+      "name": "BPC-157",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Repair",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Pentadecapeptide \u2014 upregulates VEGFR2/angiogenesis + NO pathway, promotes fibroblast migration",
+      "primary_use": "Soft-tissue/tendon/ligament injury and GI mucosal repair, plateaued on standard care",
+      "contraindications": "active/prior malignancy, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Image the injury first \u2014 don't use it to dodge a surgical lesion. Short goal-bound courses only; cancer history is an absolute no given the angiogenic mechanism."
+    },
+    {
+      "slug": "cerebrolysin",
+      "name": "Cerebrolysin",
+      "brand_names": [
+        "Cerebrolysin"
+      ],
+      "line": "peptides",
+      "axis": "Cognition",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Porcine brain-derived neuropeptide mix \u2014 neurotrophic (BDNF/NGF-like) and neuroprotective activity",
+      "primary_use": "Cognitive support in post-stroke, TBI, and neurodegenerative decline",
+      "contraindications": "pregnancy, lactation, age <18, hypersensitivity, severe renal impairment, status epilepticus",
+      "clinical_notes": "EU/RU/AR-labeled, no US brand \u2014 fully off-shore. Given as IV/IM courses, not a quick injection. Epilepsy is a caution. Verify a legitimate source \u2014 counterfeits exist."
+    },
+    {
+      "slug": "cjc-1295",
+      "name": "CJC-1295",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Long-acting GHRH analog \u2014 sustained stimulation of pituitary GH release",
+      "primary_use": "GH-axis support paired with a ghrelin agonist for recovery and body composition",
+      "contraindications": "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Default here is no-DAC (mod GRF 1-29), dosed daily; the DAC version is weekly. Almost always paired with ipamorelin. Watch fluid retention at higher doses."
+    },
+    {
+      "slug": "cjc-ipamorelin-blend",
+      "name": "CJC-1295 + Ipamorelin (blend)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "GHRH analog + ghrelin agonist \u2014 dual-pathway amplification of pulsatile GH release",
+      "primary_use": "Combined GH-axis support for recovery, body composition, and sleep",
+      "contraindications": "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "The workhorse growth combo \u2014 GHRH + GHRP synergy beats either alone. One bedtime shot. Watch fluid retention and glucose as you titrate."
+    },
+    {
+      "slug": "dsip",
+      "name": "Delta sleep-inducing peptide (DSIP)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Cognition",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Nonapeptide \u2014 modulates sleep architecture and stress/neuroendocrine response",
+      "primary_use": "Sleep-onset/quality support, adjunct in stress-related insomnia",
+      "contraindications": "pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Inconsistent human data; effects are variable patient-to-patient. Bedtime SC dosing. Address sleep hygiene and OSA first \u2014 don't paper over an untreated disorder."
+    },
+    {
+      "slug": "epitalon",
+      "name": "Epitalon",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Longevity",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Tetrapeptide \u2014 proposed telomerase activation and pineal/melatonin-axis modulation",
+      "primary_use": "Longevity/sleep-axis support, short pulsed courses",
+      "contraindications": "active malignancy, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Human evidence is thin and mostly older Russian work. Dosed in short 10-20 day pulses, not chronically. Telomerase claims are unproven \u2014 set expectations honestly."
+    },
+    {
+      "slug": "ghk-cu",
+      "name": "Copper tripeptide-1 (GHK-Cu)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Repair",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Copper-binding tripeptide \u2014 modulates wound-healing genes, collagen synthesis, angiogenesis",
+      "primary_use": "Skin/connective-tissue repair, hair, and aesthetic regeneration",
+      "contraindications": "active/prior malignancy, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Most evidence is topical; injectable/SC use is empiric. Watch cumulative copper with chronic systemic dosing. Same angiogenic cancer caution."
+    },
+    {
+      "slug": "ipamorelin",
+      "name": "Ipamorelin",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Selective ghrelin/GHSR agonist \u2014 stimulates GH pulse with minimal cortisol/prolactin effect",
+      "primary_use": "GH-axis support for recovery, body composition, and sleep, paired with a GHRH analog",
+      "contraindications": "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Cleanest GHRP \u2014 minimal hunger/cortisol vs GHRP-6. Synergistic with CJC-1295 or sermorelin. Bedtime dosing leverages the natural GH pulse."
+    },
+    {
+      "slug": "kisspeptin-10",
+      "name": "Kisspeptin-10",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Vitality",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "KISS1R agonist \u2014 stimulates hypothalamic GnRH release, upstream of LH/FSH",
+      "primary_use": "Libido and reproductive-axis support; investigational",
+      "contraindications": "active hormone-sensitive cancer, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Very early human data, mostly IV research dosing \u2014 SC use is empiric. Acts upstream on GnRH. Caution with hormone-sensitive conditions; consent as experimental."
+    },
+    {
+      "slug": "kpv",
+      "name": "KPV",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Immunity",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "\u03b1-MSH C-terminal tripeptide \u2014 anti-inflammatory via NF-\u03baB downregulation",
+      "primary_use": "Anti-inflammatory support, gut/skin inflammation adjunct",
+      "contraindications": "transplant on immunosuppression, severe active autoimmune, pregnancy, lactation, age <18",
+      "clinical_notes": "Anti-inflammatory tripeptide, oral or SC. Useful gut/skin adjunct; preclinical evidence. Pairs with T\u03b11 for an immune-axis combo. Not a substitute for IBD work-up."
+    },
+    {
+      "slug": "mots-c",
+      "name": "MOTS-c",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Longevity",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Mitochondrial-derived peptide \u2014 activates AMPK, improves metabolic flexibility (exercise mimetic)",
+      "primary_use": "Metabolic/healthspan support \u2014 insulin sensitivity and metabolic flexibility",
+      "contraindications": "active malignancy, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "No human therapeutic trials \u2014 preclinical only. Tie use to a number (HOMA-IR/A1c) and stop if it doesn't move. Exercise is the proven version of this mechanism."
+    },
+    {
+      "slug": "pt-141",
+      "name": "Bremelanotide",
+      "brand_names": [
+        "Vyleesi"
+      ],
+      "line": "peptides",
+      "axis": "Vitality",
+      "status": "fda_approved",
+      "status_label": "FDA-approved",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Melanocortin (MC4R) agonist \u2014 central activation of sexual desire/arousal pathways",
+      "primary_use": "HSDD in premenopausal women (on-label); off-label ED/low desire",
+      "contraindications": "uncontrolled HTN, significant CVD, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Central, not vascular \u2014 use when desire is the problem or PDE5 fails. Set the nausea expectation up front. Respect the BP contraindication; warn about hyperpigmentation."
+    },
+    {
+      "slug": "retatrutide",
+      "name": "Retatrutide",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Metabolism",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Triple GIP/GLP-1/glucagon receptor agonist \u2014 satiety + insulin sensitization + energy expenditure",
+      "primary_use": "Investigational obesity/metabolic \u2014 severe obesity not at goal on dual agonists",
+      "contraindications": "MTC/MEN-2 hx, acute pancreatitis, severe gastroparesis, pregnancy, hypersensitivity",
+      "clinical_notes": "Not FDA-approved \u2014 Phase 3 ongoing. Glucagon arm can raise heart rate and nudge glucose; monitor closely. Treat as experimental and consent accordingly."
+    },
+    {
+      "slug": "selank",
+      "name": "Selank",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Cognition",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Tuftsin analog \u2014 anxiolytic via GABA/serotonin modulation and BDNF, immunomodulatory",
+      "primary_use": "Anxiety/stress and cognitive support without sedation",
+      "contraindications": "pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Russian-origin anxiolytic peptide, dosed SC here, non-sedating. Pairs with Semax. SC gives tighter dose control than nasal; not a substitute for evaluating real anxiety."
+    },
+    {
+      "slug": "semax",
+      "name": "Semax",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Cognition",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "ACTH(4-10) analog \u2014 modulates BDNF and monoaminergic tone, neuroprotective",
+      "primary_use": "Focus, cognitive support, and recovery from cognitive fatigue",
+      "contraindications": "pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Russian-origin nootropic, now dosed SC here. Short well-tolerated courses; effects are subtle. SC gives more reliable dosing than intranasal drops \u2014 verify vial concentration."
+    },
+    {
+      "slug": "sermorelin",
+      "name": "Sermorelin",
+      "brand_names": [
+        "Geref"
+      ],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "off_label",
+      "status_label": "Off-label",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "GHRH(1-29) analog \u2014 stimulates endogenous pulsatile GH release via pituitary GHRH receptor",
+      "primary_use": "Adult age-related GH decline with low-normal IGF-1 and consistent symptoms",
+      "contraindications": "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Brand discontinued \u2014 compounded only. Treat thyroid first or you'll mislabel a responder. Bedtime, empty stomach; chase IGF-1 upper-normal-for-age, not above."
+    },
+    {
+      "slug": "ss-31",
+      "name": "Elamipretide (SS-31)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Longevity",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Cardiolipin-binding mitochondrial peptide \u2014 stabilizes inner membrane, improves ATP/electron transport",
+      "primary_use": "Mitochondrial-dysfunction/fatigue and healthspan support",
+      "contraindications": "active malignancy, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Investigational; trials in mitochondrial myopathy mixed. Trial dose 40 mg SC; compounded longevity use is lower and empiric. Watch injection-site reactions."
+    },
+    {
+      "slug": "tb-500",
+      "name": "Thymosin beta-4 (TB-500)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Repair",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Actin-binding peptide \u2014 promotes cell migration, angiogenesis, and tissue regeneration",
+      "primary_use": "Soft-tissue/tendon injury and muscle recovery, adjunct to rehab",
+      "contraindications": "active/prior malignancy, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Pairs with BPC-157 for the classic repair stack. Same angiogenic cancer caution applies. Loading phase twice weekly, then taper to maintenance."
+    },
+    {
+      "slug": "tesamorelin",
+      "name": "Tesamorelin",
+      "brand_names": [
+        "Egrifta",
+        "Egrifta SV"
+      ],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "fda_approved",
+      "status_label": "FDA-approved",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Stabilized GHRH analog \u2014 stimulates GH release, reduces visceral adipose tissue",
+      "primary_use": "Excess visceral adiposity (on-label: HIV lipodystrophy); off-label VAT reduction",
+      "contraindications": "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Strongest GH-secretagogue data for visceral fat. Brand is pricey; compounded common but verify source. Monitor IGF-1 and glucose \u2014 it can nudge insulin resistance."
+    },
+    {
+      "slug": "thymosin-alpha-1",
+      "name": "Thymosin alpha-1",
+      "brand_names": [
+        "Zadaxin"
+      ],
+      "line": "peptides",
+      "axis": "Immunity",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "28-aa thymic peptide \u2014 TLR-2/9-mediated T-cell maturation and Th1 immune modulation",
+      "primary_use": "Immune modulation in chronic/recurrent infection or immunosenescence",
+      "contraindications": "transplant on immunosuppression, severe active autoimmune, pregnancy, lactation, age <18",
+      "clinical_notes": "Modulator, not a generic booster \u2014 use against a defined immune problem. Always ask about transplant/immunosuppression. Strongest data is in hepatitis; favorable safety profile."
+    },
+    {
+      "slug": "tirzepatide",
+      "name": "Tirzepatide",
+      "brand_names": [
+        "Mounjaro",
+        "Zepbound"
+      ],
+      "line": "peptides",
+      "axis": "Metabolism",
+      "status": "fda_approved",
+      "status_label": "FDA-approved",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Dual GIP/GLP-1 receptor agonist \u2014 central satiety + insulin sensitization",
+      "primary_use": "Type 2 diabetes and chronic weight management (BMI \u226530, or \u226527 with comorbidity)",
+      "contraindications": "MTC/MEN-2 hx, acute pancreatitis, severe gastroparesis, pregnancy, hypersensitivity",
+      "clinical_notes": "Titrate to tolerance, not by calendar \u2014 most 'non-response' is stopping at 5 mg. Cut sulfonylurea/insulin at start to avoid lows. Counsel on oral-contraceptive absorption."
+    },
+    {
+      "slug": "cognition-stack",
+      "name": "Cognition Stack (Selank + Semax + DSIP + Cerebrolysin)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Cognition",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": true,
+      "mechanism": "Neuro stack \u2014 anxiolytic (Selank) + focus/BDNF (Semax) + sleep (DSIP) + neurotrophic (Cerebrolysin)",
+      "primary_use": "Cognitive performance, stress, and sleep optimization",
+      "contraindications": "pregnancy, lactation, age <18, hypersensitivity, severe renal impairment, uncontrolled epilepsy",
+      "clinical_notes": "Cerebrolysin is the heavyweight here (IV/IM courses) and brings the renal/seizure cautions. SC peptides are subtle. Verify source authenticity for Cerebrolysin and Russian peptides."
+    },
+    {
+      "slug": "growth-stack",
+      "name": "Growth Stack (Sermorelin + Ipamorelin)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": true,
+      "mechanism": "GH-axis pair \u2014 GHRH analog (Sermorelin) + ghrelin/GHSR agonist (Ipamorelin) for synergistic pulsatile GH",
+      "primary_use": "Recovery, body composition, and sleep in symptomatic low-normal IGF-1 adults",
+      "contraindications": "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "One GHRH + one GHRP is the clean synergy \u2014 no need to stack two GHRH analogs. Treat thyroid first. One bedtime shot; keep IGF-1 upper-normal-for-age, not above."
+    },
+    {
+      "slug": "immunity-stack",
+      "name": "Immunity Stack (Thymosin Alpha-1 + KPV)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Immunity",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": true,
+      "mechanism": "Immune stack \u2014 T-cell maturation/Th1 modulation (T\u03b11) + NF-\u03baB anti-inflammatory (KPV)",
+      "primary_use": "Immune modulation plus anti-inflammatory support",
+      "contraindications": "transplant on immunosuppression, severe active autoimmune, pregnancy, lactation, age <18",
+      "clinical_notes": "T\u03b11 sets immune tone, KPV calms inflammation \u2014 complementary. Always screen for transplant/immunosuppression and autoimmune disease before starting either."
+    },
+    {
+      "slug": "longevity-stack",
+      "name": "Longevity Stack (Epitalon + MOTS-c + SS-31)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Longevity",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": true,
+      "mechanism": "Longevity stack \u2014 telomerase/pineal (Epitalon) + AMPK (MOTS-c) + mitochondrial membrane (SS-31)",
+      "primary_use": "Healthspan, metabolic, and mitochondrial support",
+      "contraindications": "active malignancy, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "All three are early-evidence \u2014 honest expectations required. Epitalon pulses, MOTS-c and SS-31 daily/weekly. Tie continuation to objective metabolic markers."
+    },
+    {
+      "slug": "metabolic-stack",
+      "name": "Metabolic Stack (Tesamorelin + CJC/Ipa Blend + AOD-9604 + MOTS-c)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Metabolism",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": true,
+      "mechanism": "Metabolic stack \u2014 GHRH analogs (VAT reduction) + GH fragment lipolysis + AMPK metabolic flexibility",
+      "primary_use": "Visceral fat reduction and metabolic optimization",
+      "contraindications": "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Four agents \u2014 heavy stack; reserve for motivated patients with objective VAT. Tesamorelin and MOTS-c can both touch glucose, so monitor A1c. Diet/exercise still does the heavy lifting."
+    },
+    {
+      "slug": "vitality-stack",
+      "name": "Vitality Stack (PT-141 + Kisspeptin-10)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Vitality",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": true,
+      "mechanism": "Vitality stack \u2014 central melanocortin arousal (PT-141) + upstream GnRH/hormone axis (Kisspeptin)",
+      "primary_use": "Libido and sexual-function support \u2014 central + hormonal axes",
+      "contraindications": "uncontrolled HTN, significant CVD, hormone-sensitive cancer, pregnancy, lactation, age <18",
+      "clinical_notes": "PT-141 brings the BP contraindication and nausea; Kisspeptin is experimental and acts upstream. Document controlled BP and hormone-sensitive cancer screen before starting."
+    },
+    {
+      "slug": "wolverine-glow",
+      "name": "Wolverine GLOW (BPC-157 + TB-500 + GHK-Cu)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Repair",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": true,
+      "mechanism": "Tri-peptide repair stack \u2014 angiogenesis (VEGFR2) + cell migration + collagen/wound-healing genes",
+      "primary_use": "Aggressive soft-tissue/tendon repair and recovery, plateaued on standard care",
+      "contraindications": "active/prior malignancy, copper overload, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "The flagship repair combo \u2014 all three are angiogenic, so cancer history is an absolute no. Image the injury first. Short goal-bound course; watch cumulative copper from GHK-Cu."
+    }
+  ]
+};
+
+</script>
+<script>
+const DATA = window.RENUVIA_PROTOCOLS;
+const state = { line: "peptides", q: "", cls: "all" };
+const CLS = { green:"c-green", yellow:"c-yellow", red:"c-red" };
+
+const lineNav = document.getElementById("lineNav");
+const content = document.getElementById("content");
+const countEl = document.getElementById("count");
+const activeControls = document.getElementById("activeControls");
+
+function renderNav(){
+  lineNav.innerHTML = DATA.lines.map(l=>{
+    const soon = l.status==="in_development" ? '<span class="soon">soon</span>' : '';
+    return `<div class="ltab ${l.id===state.line?'active':''}" data-line="${l.id}">${l.name}${soon}</div>`;
+  }).join("");
+  lineNav.querySelectorAll(".ltab").forEach(t=>t.onclick=()=>{state.line=t.dataset.line;state.q="";document.getElementById("q").value="";render();});
+}
+
+function matches(p){
+  if(state.cls!=="all" && p.classification!==state.cls) return false;
+  if(!state.q) return true;
+  const s=(p.name+" "+p.brand_names.join(" ")+" "+p.mechanism+" "+p.primary_use+" "+p.axis).toLowerCase();
+  return s.includes(state.q.toLowerCase());
+}
+
+function card(p){
+  const brand = p.brand_names.length ? `<div class="brand-n">${p.brand_names.join(" · ")}</div>` : "";
+  const cn = {green:"b-green",yellow:"b-yellow",red:"b-red"}[p.classification];
+  const stackTag = p.is_stack ? '<span class="tag stack">Stack</span>' : '';
+  return `<div class="card ${CLS[p.classification]}" data-slug="${p.slug}">
+    <div class="top"><div><h3>${p.name}</h3>${brand}</div>
+      <span class="badge ${cn}">${p.classification}</span></div>
+    <div class="mech">${p.mechanism||p.primary_use||""}</div>
+    <div class="tags">${p.axis?`<span class="tag">${p.axis}</span>`:""}<span class="tag status">${p.status_label}</span>${stackTag}</div>
+  </div>`;
+}
+
+function renderPeptides(){
+  const line = DATA.lines.find(l=>l.id==="peptides");
+  const pool = DATA.protocols.filter(p=>p.line==="peptides" && matches(p));
+  countEl.textContent = `${pool.length} of ${DATA.protocols.length} protocols`;
+  if(!pool.length){ content.innerHTML='<div class="empty">No protocols match your search.</div>'; return; }
+  let html="";
+  for(const ax of line.axes){
+    const grp = pool.filter(p=>!p.is_stack && p.axis===ax);
+    if(!grp.length) continue;
+    html += `<div class="axis-h"><h2>${ax}</h2><span class="ln"></span><span class="n">${grp.length}</span></div>
+      <div class="grid">${grp.map(card).join("")}</div>`;
+  }
+  const stacks = pool.filter(p=>p.is_stack);
+  if(stacks.length){
+    html += `<div class="axis-h"><h2>Combination Stacks</h2><span class="ln"></span><span class="n">${stacks.length}</span></div>
+      <div class="grid">${stacks.map(card).join("")}</div>`;
+  }
+  content.innerHTML = html;
+  content.querySelectorAll(".card").forEach(c=>c.onclick=()=>openModal(c.dataset.slug));
+}
+
+function renderSoon(){
+  const l = DATA.lines.find(x=>x.id===state.line);
+  const blocks = {
+    "bhrt":["Male TRT","Female HRT","Pellets","Thyroid","Monitoring labs"],
+    "iv-nad":["NAD+ titration","Myers' cocktail","Hydration","Niagen IV","Push vs drip"],
+    "glp":["Semaglutide","Tirzepatide","Titration ladders","Side-effect mgmt","Lab cadence"],
+    "aesthetics":["Neuromodulators","Dermal fillers","Microneedling/RF","Laser/IPL","Consent + settings"],
+  }[state.line]||[];
+  content.innerHTML = `<div class="soon-panel">
+    <div class="ic">🧬</div><h2>${l.name} protocols — in development</h2>
+    <p>${l.tagline}. Built on the same curated framework as the peptide library, and verified through the protocol engine before it goes live.</p>
+    <div class="chips">${blocks.map(b=>`<span class="chip">${b}</span>`).join("")}</div>
+  </div>`;
+}
+
+function render(){
+  renderNav();
+  const l = DATA.lines.find(x=>x.id===state.line);
+  const active = l.status!=="in_development";
+  activeControls.style.display = active ? "" : "none";
+  if(active) renderPeptides(); else renderSoon();
+}
+
+function openModal(slug){
+  const p = DATA.protocols.find(x=>x.slug===slug); if(!p) return;
+  const cn = {green:"b-green",yellow:"b-yellow",red:"b-red"}[p.classification];
+  const f=(k,v,danger)=> v?`<div class="field ${danger?'danger':''}"><div class="k">${k}</div><div class="v">${v}</div></div>`:"";
+  document.getElementById("modal").innerHTML = `
+    <div class="mhead ${CLS[p.classification]}">
+      <span class="x" onclick="closeModal()">×</span>
+      <h2>${p.name}</h2>
+      <div class="tags" style="margin-top:8px">
+        <span class="badge ${cn}">${p.classification}</span>
+        ${p.axis?`<span class="tag">${p.axis}</span>`:""}
+        <span class="tag status">${p.status_label}</span>
+        ${p.brand_names.length?`<span class="tag">${p.brand_names.join(" · ")}</span>`:""}
+        ${p.is_stack?'<span class="tag stack">Stack</span>':''}
+      </div>
+    </div>
+    <div class="mbody">
+      ${f("Mechanism",p.mechanism)}
+      ${f("Primary use",p.primary_use)}
+      ${f("Rule out (key)",p.contraindications,true)}
+      ${f("Clinical notes",p.clinical_notes)}
+      <div class="mnote">Full prescribing card — dose, reconstitution math, baseline labs, monitoring schedule, and safety gate — opens inside the platform. This summary is a drafting aid; the physician reviews and signs the final protocol.</div>
+    </div>`;
+  document.getElementById("overlay").classList.add("open");
+}
+function closeModal(){ document.getElementById("overlay").classList.remove("open"); }
+document.getElementById("overlay").onclick=e=>{ if(e.target.id==="overlay") closeModal(); };
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
+
+document.getElementById("q").addEventListener("input",e=>{state.q=e.target.value;renderPeptides();});
+document.getElementById("classFilters").querySelectorAll(".fbtn").forEach(b=>b.onclick=()=>{
+  state.cls=b.dataset.c;
+  document.querySelectorAll("#classFilters .fbtn").forEach(x=>x.classList.toggle("on",x===b));
+  renderPeptides();
+});
+
+render();
+</script>
+</body>
+</html>

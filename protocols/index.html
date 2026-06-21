@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RenuviaMD — Clinical Protocol Library</title>
+<style>
+  :root{
+    --teal:#0e8a8a; --teal-d:#0b6e6e; --teal-ink:#16323a;
+    --gold:#e6a012; --gold-d:#c9870a;
+    --ink:#1c2b32; --muted:#5b6b72; --faint:#8898a0;
+    --bg:#f3f8f7; --card:#ffffff; --line:#e3ecea; --soft:#eaf4f2;
+    --green:#1e9e6a; --green-bg:#e8f7f0;
+    --amber:#d98a00; --amber-bg:#fdf3e2;
+    --red:#d7483b; --red-bg:#fdecea;
+    --shadow:0 1px 2px rgba(16,50,58,.06),0 8px 24px rgba(16,50,58,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  a{color:var(--teal-d);text-decoration:none}
+
+  /* Header */
+  header.top{background:linear-gradient(155deg,#0e3a40 0%,#0e8a8a 100%);color:#fff;padding:30px 0 26px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.15rem;letter-spacing:.02em}
+  .brand .dot{width:11px;height:11px;border-radius:3px;background:var(--gold);box-shadow:0 0 0 4px rgba(230,160,18,.25)}
+  .brand span{color:#ffd98a}
+  h1{font-size:1.9rem;line-height:1.15;margin:16px 0 6px;letter-spacing:-.01em}
+  header.top p{color:#d4ece9;max-width:640px;font-size:1.02rem}
+  .credit{margin-top:14px;display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:6px 14px;font-size:.85rem;color:#eafaf8}
+  .credit b{color:#fff}
+
+  /* Line-of-care nav */
+  nav.lines{position:sticky;top:0;z-index:30;background:rgba(243,248,247,.92);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line)}
+  nav.lines .row{display:flex;gap:8px;overflow-x:auto;padding:12px 0}
+  .ltab{flex:0 0 auto;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);
+    border-radius:999px;padding:9px 16px;font-weight:600;font-size:.92rem;color:var(--muted);cursor:pointer;
+    transition:all .15s;white-space:nowrap}
+  .ltab:hover{border-color:var(--teal);color:var(--teal-d)}
+  .ltab.active{background:var(--teal);border-color:var(--teal);color:#fff;box-shadow:var(--shadow)}
+  .ltab .soon{font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;background:var(--gold);color:#3a2a00;
+    border-radius:5px;padding:2px 6px;font-weight:800}
+  .ltab.active .soon{background:#ffe1a3}
+
+  /* Controls */
+  .controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:22px 0 10px}
+  .search{flex:1;min-width:220px;position:relative}
+  .search input{width:100%;border:1px solid var(--line);background:var(--card);border-radius:10px;
+    padding:11px 14px 11px 38px;font-size:.95rem;color:var(--ink);box-shadow:var(--shadow)}
+  .search input:focus{outline:none;border-color:var(--teal)}
+  .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.5}
+  .filters{display:flex;gap:6px;flex-wrap:wrap}
+  .fbtn{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:9px 13px;font-size:.85rem;
+    font-weight:600;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .15s}
+  .fbtn:hover{border-color:var(--teal)}
+  .fbtn.on{border-color:var(--teal);color:var(--teal-ink);background:var(--soft)}
+  .fbtn .pip{width:9px;height:9px;border-radius:50%}
+  .pg{background:var(--green)} .py{background:var(--amber)} .pr{background:var(--red)}
+
+  .legend{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:.84rem;padding:6px 0 4px}
+  .legend span{display:flex;align-items:center;gap:7px}
+  .countline{color:var(--faint);font-size:.84rem;padding:4px 0 18px}
+
+  /* Axis group */
+  .axis-h{display:flex;align-items:center;gap:12px;margin:26px 0 14px}
+  .axis-h h2{font-size:1.02rem;letter-spacing:.04em;text-transform:uppercase;color:var(--teal-ink)}
+  .axis-h .ln{flex:1;height:1px;background:var(--line)}
+  .axis-h .n{font-size:.78rem;color:var(--faint);font-weight:600}
+
+  /* Cards */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:13px;
+    padding:17px 17px 15px;box-shadow:var(--shadow);cursor:pointer;transition:transform .14s,box-shadow .14s;
+    display:flex;flex-direction:column;gap:8px}
+  .card:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(16,50,58,.12)}
+  .card.c-green{border-left-color:var(--green)} .card.c-yellow{border-left-color:var(--amber)} .card.c-red{border-left-color:var(--red)}
+  .card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .card h3{font-size:1.06rem;line-height:1.25;color:var(--ink)}
+  .card .brand-n{font-size:.78rem;color:var(--faint);margin-top:2px}
+  .badge{flex:0 0 auto;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+    padding:4px 8px;border-radius:6px;white-space:nowrap}
+  .b-green{background:var(--green-bg);color:#0c7a4d} .b-yellow{background:var(--amber-bg);color:#9a6300} .b-red{background:var(--red-bg);color:#b3372c}
+  .card .mech{font-size:.85rem;color:var(--muted)}
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+  .tag{font-size:.72rem;font-weight:600;color:var(--teal-d);background:var(--soft);border-radius:6px;padding:3px 8px}
+  .tag.status{color:var(--muted);background:#f0f3f2}
+  .tag.stack{color:#9a6300;background:var(--amber-bg)}
+
+  /* In-development panel */
+  .soon-panel{background:var(--card);border:1px dashed var(--teal);border-radius:16px;padding:34px;text-align:center;
+    box-shadow:var(--shadow);max-width:720px;margin:10px auto}
+  .soon-panel .ic{font-size:2rem}
+  .soon-panel h2{font-size:1.3rem;margin:8px 0 6px;color:var(--teal-ink)}
+  .soon-panel p{color:var(--muted);max-width:520px;margin:0 auto 16px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .chip{border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:.85rem;color:var(--muted);background:var(--soft)}
+
+  .empty{text-align:center;color:var(--faint);padding:50px 0}
+
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(16,50,58,.45);backdrop-filter:blur(3px);display:none;
+    align-items:flex-start;justify-content:center;padding:40px 18px;z-index:60;overflow-y:auto}
+  .overlay.open{display:flex}
+  .modal{background:#fff;border-radius:16px;max-width:600px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);
+    overflow:hidden;animation:pop .16s ease}
+  @keyframes pop{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+  .modal .mhead{padding:22px 24px;border-bottom:1px solid var(--line);position:relative}
+  .modal .mhead.c-green{border-top:5px solid var(--green)} .modal .mhead.c-yellow{border-top:5px solid var(--amber)} .modal .mhead.c-red{border-top:5px solid var(--red)}
+  .modal h2{font-size:1.4rem;padding-right:30px}
+  .modal .x{position:absolute;top:16px;right:18px;font-size:1.5rem;color:var(--faint);cursor:pointer;line-height:1}
+  .modal .mbody{padding:20px 24px 24px}
+  .field{margin-bottom:15px}
+  .field .k{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--teal-d);font-weight:800;margin-bottom:4px}
+  .field .v{font-size:.95rem;color:var(--ink)}
+  .field.danger .k{color:var(--red)} .field.danger .v{color:#a8362b}
+  .mnote{background:var(--soft);border-radius:10px;padding:12px 14px;font-size:.85rem;color:var(--muted);margin-top:6px}
+
+  footer{margin-top:50px;padding:26px 0 40px;border-top:1px solid var(--line);color:var(--faint);font-size:.82rem}
+  footer b{color:var(--muted)}
+  @media(max-width:560px){h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span>Renuvia<span>MD</span></div>
+    <h1>Clinical Protocol Library</h1>
+    <p>Physician-curated, evidence-graded protocols organized by line of care — the single source the practice platforms draw from.</p>
+    <div class="credit">Curated &amp; signed by&nbsp;<b>Armando Falcon, MD</b></div>
+  </div>
+</header>
+
+<nav class="lines"><div class="wrap"><div class="row" id="lineNav"></div></div></nav>
+
+<main class="wrap">
+  <div id="activeControls">
+    <div class="controls">
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16323a" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="q" type="search" placeholder="Search protocols, mechanism, use…">
+      </div>
+      <div class="filters" id="classFilters">
+        <button class="fbtn on" data-c="all">All</button>
+        <button class="fbtn" data-c="green"><span class="pip pg"></span>Green</button>
+        <button class="fbtn" data-c="yellow"><span class="pip py"></span>Yellow</button>
+        <button class="fbtn" data-c="red"><span class="pip pr"></span>Red</button>
+      </div>
+    </div>
+    <div class="legend">
+      <span><span class="pip pg"></span> Green — FDA-approved pathway</span>
+      <span><span class="pip py"></span> Yellow — physician-review only</span>
+      <span><span class="pip pr"></span> Red — research-only / exclusion</span>
+    </div>
+    <div class="countline" id="count"></div>
+  </div>
+  <div id="content"></div>
+</main>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+
+<footer><div class="wrap">
+  <b>Internal clinical reference for licensed clinicians.</b> Each entry is a drafting aid — every dose, contraindication, and monitoring plan is reviewed, customized, and signed by the treating physician before use. Tier&nbsp;1 = curated/MD-signed; Tier&nbsp;2 = on-demand peptide engine (verified, graduates into Tier&nbsp;1). Citations from PubMed &amp; ClinicalTrials.gov. © RenuviaMD.
+</div></footer>
+
+<script src="protocols-data.js"></script>
+<script>
+const DATA = window.RENUVIA_PROTOCOLS;
+const state = { line: "peptides", q: "", cls: "all" };
+const CLS = { green:"c-green", yellow:"c-yellow", red:"c-red" };
+
+const lineNav = document.getElementById("lineNav");
+const content = document.getElementById("content");
+const countEl = document.getElementById("count");
+const activeControls = document.getElementById("activeControls");
+
+function renderNav(){
+  lineNav.innerHTML = DATA.lines.map(l=>{
+    const soon = l.status==="in_development" ? '<span class="soon">soon</span>' : '';
+    return `<div class="ltab ${l.id===state.line?'active':''}" data-line="${l.id}">${l.name}${soon}</div>`;
+  }).join("");
+  lineNav.querySelectorAll(".ltab").forEach(t=>t.onclick=()=>{state.line=t.dataset.line;state.q="";document.getElementById("q").value="";render();});
+}
+
+function matches(p){
+  if(state.cls!=="all" && p.classification!==state.cls) return false;
+  if(!state.q) return true;
+  const s=(p.name+" "+p.brand_names.join(" ")+" "+p.mechanism+" "+p.primary_use+" "+p.axis).toLowerCase();
+  return s.includes(state.q.toLowerCase());
+}
+
+function card(p){
+  const brand = p.brand_names.length ? `<div class="brand-n">${p.brand_names.join(" · ")}</div>` : "";
+  const cn = {green:"b-green",yellow:"b-yellow",red:"b-red"}[p.classification];
+  const stackTag = p.is_stack ? '<span class="tag stack">Stack</span>' : '';
+  return `<div class="card ${CLS[p.classification]}" data-slug="${p.slug}">
+    <div class="top"><div><h3>${p.name}</h3>${brand}</div>
+      <span class="badge ${cn}">${p.classification}</span></div>
+    <div class="mech">${p.mechanism||p.primary_use||""}</div>
+    <div class="tags">${p.axis?`<span class="tag">${p.axis}</span>`:""}<span class="tag status">${p.status_label}</span>${stackTag}</div>
+  </div>`;
+}
+
+function renderPeptides(){
+  const line = DATA.lines.find(l=>l.id==="peptides");
+  const pool = DATA.protocols.filter(p=>p.line==="peptides" && matches(p));
+  countEl.textContent = `${pool.length} of ${DATA.protocols.length} protocols`;
+  if(!pool.length){ content.innerHTML='<div class="empty">No protocols match your search.</div>'; return; }
+  let html="";
+  for(const ax of line.axes){
+    const grp = pool.filter(p=>!p.is_stack && p.axis===ax);
+    if(!grp.length) continue;
+    html += `<div class="axis-h"><h2>${ax}</h2><span class="ln"></span><span class="n">${grp.length}</span></div>
+      <div class="grid">${grp.map(card).join("")}</div>`;
+  }
+  const stacks = pool.filter(p=>p.is_stack);
+  if(stacks.length){
+    html += `<div class="axis-h"><h2>Combination Stacks</h2><span class="ln"></span><span class="n">${stacks.length}</span></div>
+      <div class="grid">${stacks.map(card).join("")}</div>`;
+  }
+  content.innerHTML = html;
+  content.querySelectorAll(".card").forEach(c=>c.onclick=()=>openModal(c.dataset.slug));
+}
+
+function renderSoon(){
+  const l = DATA.lines.find(x=>x.id===state.line);
+  const blocks = {
+    "bhrt":["Male TRT","Female HRT","Pellets","Thyroid","Monitoring labs"],
+    "iv-nad":["NAD+ titration","Myers' cocktail","Hydration","Niagen IV","Push vs drip"],
+    "glp":["Semaglutide","Tirzepatide","Titration ladders","Side-effect mgmt","Lab cadence"],
+    "aesthetics":["Neuromodulators","Dermal fillers","Microneedling/RF","Laser/IPL","Consent + settings"],
+  }[state.line]||[];
+  content.innerHTML = `<div class="soon-panel">
+    <div class="ic">🧬</div><h2>${l.name} protocols — in development</h2>
+    <p>${l.tagline}. Built on the same curated framework as the peptide library, and verified through the protocol engine before it goes live.</p>
+    <div class="chips">${blocks.map(b=>`<span class="chip">${b}</span>`).join("")}</div>
+  </div>`;
+}
+
+function render(){
+  renderNav();
+  const l = DATA.lines.find(x=>x.id===state.line);
+  const active = l.status!=="in_development";
+  activeControls.style.display = active ? "" : "none";
+  if(active) renderPeptides(); else renderSoon();
+}
+
+function openModal(slug){
+  const p = DATA.protocols.find(x=>x.slug===slug); if(!p) return;
+  const cn = {green:"b-green",yellow:"b-yellow",red:"b-red"}[p.classification];
+  const f=(k,v,danger)=> v?`<div class="field ${danger?'danger':''}"><div class="k">${k}</div><div class="v">${v}</div></div>`:"";
+  document.getElementById("modal").innerHTML = `
+    <div class="mhead ${CLS[p.classification]}">
+      <span class="x" onclick="closeModal()">×</span>
+      <h2>${p.name}</h2>
+      <div class="tags" style="margin-top:8px">
+        <span class="badge ${cn}">${p.classification}</span>
+        ${p.axis?`<span class="tag">${p.axis}</span>`:""}
+        <span class="tag status">${p.status_label}</span>
+        ${p.brand_names.length?`<span class="tag">${p.brand_names.join(" · ")}</span>`:""}
+        ${p.is_stack?'<span class="tag stack">Stack</span>':''}
+      </div>
+    </div>
+    <div class="mbody">
+      ${f("Mechanism",p.mechanism)}
+      ${f("Primary use",p.primary_use)}
+      ${f("Rule out (key)",p.contraindications,true)}
+      ${f("Clinical notes",p.clinical_notes)}
+      <div class="mnote">Full prescribing card — dose, reconstitution math, baseline labs, monitoring schedule, and safety gate — opens inside the platform. This summary is a drafting aid; the physician reviews and signs the final protocol.</div>
+    </div>`;
+  document.getElementById("overlay").classList.add("open");
+}
+function closeModal(){ document.getElementById("overlay").classList.remove("open"); }
+document.getElementById("overlay").onclick=e=>{ if(e.target.id==="overlay") closeModal(); };
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
+
+document.getElementById("q").addEventListener("input",e=>{state.q=e.target.value;renderPeptides();});
+document.getElementById("classFilters").querySelectorAll(".fbtn").forEach(b=>b.onclick=()=>{
+  state.cls=b.dataset.c;
+  document.querySelectorAll("#classFilters .fbtn").forEach(x=>x.classList.toggle("on",x===b));
+  renderPeptides();
+});
+
+render();
+</script>
+</body>
+</html>
