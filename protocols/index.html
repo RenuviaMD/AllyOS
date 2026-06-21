@@ -101,6 +101,25 @@
 
   .empty{text-align:center;color:var(--faint);padding:50px 0}
 
+  /* Access bar + locked-tease */
+  .accessbar{background:#0b6e6e;color:#d4ece9;font-size:.82rem}
+  .accessbar .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:9px 0}
+  .accessbar b{color:#fff}
+  .accessbar .pill{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:3px 11px}
+  .ltab.locked-tab{color:var(--faint)}
+  .ltab.locked-tab .lk{font-size:.8rem;opacity:.8}
+  .card.locked{border-left-color:#cdd8d5;background:#fafcfb}
+  .card.locked h3{color:#7c8a90}
+  .card.locked .lockbadge{display:inline-flex;align-items:center;gap:5px;font-size:.66rem;font-weight:800;
+    text-transform:uppercase;letter-spacing:.05em;color:#9a6300;background:var(--amber-bg);border-radius:6px;padding:4px 8px}
+  .addbanner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    background:linear-gradient(120deg,#fdf3e2,#eaf4f2);border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin:20px 0 22px}
+  .addbanner h2{font-size:1.18rem;color:var(--teal-ink)}
+  .addbanner p{color:var(--muted);font-size:.9rem;margin-top:3px;max-width:560px}
+  .addbtn{flex:0 0 auto;background:var(--gold);color:#3a2a00;font-weight:800;border:none;border-radius:10px;
+    padding:12px 20px;font-size:.92rem;cursor:pointer;box-shadow:0 6px 18px rgba(230,160,18,.3);transition:background .15s}
+  .addbtn:hover{background:var(--gold-d)}
+
   /* Modal */
   .overlay{position:fixed;inset:0;background:rgba(16,50,58,.45);backdrop-filter:blur(3px);display:none;
     align-items:flex-start;justify-content:center;padding:40px 18px;z-index:60;overflow-y:auto}
@@ -134,6 +153,8 @@
     <div class="credit">Curated &amp; signed by&nbsp;<b>Armando Falcon, MD</b></div>
   </div>
 </header>
+
+<div class="accessbar"><div class="wrap"><div class="row" id="accessBar"></div></div></div>
 
 <nav class="lines"><div class="wrap"><div class="row" id="lineNav"></div></div></nav>
 
@@ -170,7 +191,12 @@
 <script src="protocols-data.js"></script>
 <script>
 const DATA = window.RENUVIA_PROTOCOLS;
-const state = { line: "peptides", q: "", cls: "all" };
+// Demo entitlements: which lines this clinic's plan includes. Try ?plan=peptides,bhrt
+const qp = new URLSearchParams(location.search);
+const ENTITLEMENTS = (qp.get("plan") || "peptides").split(",").map(s=>s.trim()).filter(Boolean);
+const ACCOUNT = qp.get("clinic") || "Coastal Wellness (demo)";
+const entitled = id => ENTITLEMENTS.includes(id);
+const state = { line: ENTITLEMENTS[0]||"peptides", q: "", cls: "all" };
 const CLS = { green:"c-green", yellow:"c-yellow", red:"c-red" };
 
 const lineNav = document.getElementById("lineNav");
@@ -178,12 +204,24 @@ const content = document.getElementById("content");
 const countEl = document.getElementById("count");
 const activeControls = document.getElementById("activeControls");
 
+function lineName(id){ return (DATA.lines.find(l=>l.id===id)||{}).name||id; }
+
+function renderAccessBar(){
+  const plan = ENTITLEMENTS.map(lineName).join(" · ") || "—";
+  document.getElementById("accessBar").innerHTML =
+    `<span class="pill">🩺 Licensed provider</span>
+     <span>Clinic: <b>${ACCOUNT}</b></span>
+     <span>Plan: <b>${plan}</b></span>
+     <span style="margin-left:auto;opacity:.85">Locked lines are available to add</span>`;
+}
+
 function renderNav(){
   lineNav.innerHTML = DATA.lines.map(l=>{
-    const soon = l.status==="in_development" ? '<span class="soon">soon</span>' : '';
-    return `<div class="ltab ${l.id===state.line?'active':''}" data-line="${l.id}">${l.name}${soon}</div>`;
+    const lock = entitled(l.id) ? "" : '<span class="lk">🔒</span>';
+    const cls = `ltab ${l.id===state.line?'active':''} ${entitled(l.id)?'':'locked-tab'}`;
+    return `<div class="${cls}" data-line="${l.id}">${l.name}${lock}</div>`;
   }).join("");
-  lineNav.querySelectorAll(".ltab").forEach(t=>t.onclick=()=>{state.line=t.dataset.line;state.q="";document.getElementById("q").value="";render();});
+  lineNav.querySelectorAll(".ltab").forEach(t=>t.onclick=()=>{state.line=t.dataset.line;state.q="";const q=document.getElementById("q");if(q)q.value="";render();});
 }
 
 function matches(p){
@@ -205,16 +243,18 @@ function card(p){
   </div>`;
 }
 
-function renderPeptides(){
-  const line = DATA.lines.find(l=>l.id==="peptides");
-  const pool = DATA.protocols.filter(p=>p.line==="peptides" && matches(p));
-  countEl.textContent = `${pool.length} of ${DATA.protocols.length} protocols`;
+function renderFull(){
+  const line = DATA.lines.find(l=>l.id===state.line);
+  const pool = DATA.protocols.filter(p=>p.line===state.line && !p.teaser && matches(p));
+  const total = DATA.protocols.filter(p=>p.line===state.line && !p.teaser).length;
+  countEl.textContent = `${pool.length} of ${total} protocols`;
   if(!pool.length){ content.innerHTML='<div class="empty">No protocols match your search.</div>'; return; }
   let html="";
-  for(const ax of line.axes){
+  const axes = line.axes && line.axes.length ? line.axes : [...new Set(pool.map(p=>p.axis))];
+  for(const ax of axes){
     const grp = pool.filter(p=>!p.is_stack && p.axis===ax);
     if(!grp.length) continue;
-    html += `<div class="axis-h"><h2>${ax}</h2><span class="ln"></span><span class="n">${grp.length}</span></div>
+    html += `<div class="axis-h"><h2>${ax||line.name}</h2><span class="ln"></span><span class="n">${grp.length}</span></div>
       <div class="grid">${grp.map(card).join("")}</div>`;
   }
   const stacks = pool.filter(p=>p.is_stack);
@@ -224,6 +264,44 @@ function renderPeptides(){
   }
   content.innerHTML = html;
   content.querySelectorAll(".card").forEach(c=>c.onclick=()=>openModal(c.dataset.slug));
+}
+
+function lockedCard(p){
+  return `<div class="card locked ${CLS[p.classification]}">
+    <div class="top"><h3>${p.name}</h3><span class="lockbadge">🔒 locked</span></div>
+    ${p.axis?`<div class="tags"><span class="tag">${p.axis}</span></div>`:""}
+  </div>`;
+}
+
+function renderLocked(){
+  const line = DATA.lines.find(l=>l.id===state.line);
+  const titles = DATA.protocols.filter(p=>p.line===state.line);
+  content.innerHTML = `
+    <div class="addbanner">
+      <div><h2>${line.name} isn't in your plan</h2>
+        <p>${line.tagline}. ${titles.length} protocols available — titles shown below. Add this line to unlock full prescribing cards, doses, labs, and monitoring.</p></div>
+      <button class="addbtn" data-add="${line.id}">＋ Add ${line.name} to your plan</button>
+    </div>
+    <div class="grid">${titles.map(lockedCard).join("")}</div>`;
+  content.querySelectorAll(".card.locked").forEach(c=>c.onclick=()=>openUpsell(state.line));
+  content.querySelector(".addbtn").onclick=()=>openUpsell(state.line);
+}
+
+function openUpsell(lineId){
+  const line = DATA.lines.find(l=>l.id===lineId);
+  const n = DATA.protocols.filter(p=>p.line===lineId).length;
+  document.getElementById("modal").innerHTML = `
+    <div class="mhead c-yellow"><span class="x" onclick="closeModal()">×</span>
+      <h2>Add ${line.name}</h2>
+      <div class="tags" style="margin-top:8px"><span class="tag stack">🔒 not in plan</span><span class="tag">${n} protocols</span></div>
+    </div>
+    <div class="mbody">
+      <div class="field"><div class="k">What you unlock</div>
+        <div class="v">Full ${line.name} prescribing cards — dose, reconstitution, baseline labs, monitoring schedule, safety gate — plus reference-card PDFs, available to your licensed providers.</div></div>
+      <div class="mnote">Adding a line updates this clinic's plan; the ${line.name} tab unlocks instantly for your providers. No rebuild, billed as an add-on.</div>
+      <div style="margin-top:16px;text-align:center"><button class="addbtn" onclick="closeModal()">Request ${line.name} for ${ACCOUNT}</button></div>
+    </div>`;
+  document.getElementById("overlay").classList.add("open");
 }
 
 function renderSoon(){
@@ -242,11 +320,14 @@ function renderSoon(){
 }
 
 function render(){
+  renderAccessBar();
   renderNav();
-  const l = DATA.lines.find(x=>x.id===state.line);
-  const active = l.status!=="in_development";
-  activeControls.style.display = active ? "" : "none";
-  if(active) renderPeptides(); else renderSoon();
+  const isEntitled = entitled(state.line);
+  const hasFull = DATA.protocols.some(p=>p.line===state.line && !p.teaser);
+  activeControls.style.display = (isEntitled && hasFull) ? "" : "none";
+  if(!isEntitled) renderLocked();
+  else if(hasFull) renderFull();
+  else renderSoon();
 }
 
 function openModal(slug){
@@ -278,11 +359,11 @@ function closeModal(){ document.getElementById("overlay").classList.remove("open
 document.getElementById("overlay").onclick=e=>{ if(e.target.id==="overlay") closeModal(); };
 document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
 
-document.getElementById("q").addEventListener("input",e=>{state.q=e.target.value;renderPeptides();});
+document.getElementById("q").addEventListener("input",e=>{state.q=e.target.value;renderFull();});
 document.getElementById("classFilters").querySelectorAll(".fbtn").forEach(b=>b.onclick=()=>{
   state.cls=b.dataset.c;
   document.querySelectorAll("#classFilters .fbtn").forEach(x=>x.classList.toggle("on",x===b));
-  renderPeptides();
+  renderFull();
 });
 
 render();

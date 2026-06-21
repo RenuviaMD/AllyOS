@@ -76,6 +76,33 @@ for p in sorted((FORM / "_stacks").glob("*.md")):
     if e:
         items.append(e)
 
+# Mark all formulary entries as full (real prescribing cards).
+for e in items:
+    e["teaser"] = False
+
+# Title-only catalog teasers for the not-yet-built lines — names a provider
+# recognizes, NO clinical content. These power the locked-tease / upsell view.
+TEASERS = {
+    "bhrt": [("Testosterone Cypionate", "green"), ("Testosterone + Anastrozole", "yellow"),
+             ("Estradiol (Biest)", "green"), ("Progesterone", "green"), ("NDT / Thyroid", "yellow"),
+             ("DHEA", "yellow"), ("Hormone Pellets (T/E)", "yellow")],
+    "iv-nad": [("NAD+ Infusion", "yellow"), ("Myers' Cocktail", "yellow"), ("High-dose Vitamin C", "yellow"),
+               ("Glutathione Push", "yellow"), ("Hydration + Electrolytes", "green"), ("Niagen IV (NR)", "yellow")],
+    "glp": [("Semaglutide", "green"), ("Tirzepatide", "green"), ("Compounded Semaglutide", "yellow"),
+            ("Liraglutide", "green"), ("B12 / MIC", "yellow")],
+    "aesthetics": [("Botulinum Toxin", "green"), ("Dermal Filler (HA)", "green"), ("Microneedling + RF", "green"),
+                   ("Laser / IPL", "green"), ("PRP", "yellow"), ("Kybella", "green")],
+}
+for line_id, names in TEASERS.items():
+    for nm, cls in names:
+        items.append({
+            "slug": line_id + "-" + nm.lower().replace(" ", "-").replace("/", "").replace("(", "").replace(")", "").replace("+", "plus"),
+            "name": nm, "brand_names": [], "line": line_id, "axis": "", "status": "",
+            "status_label": "", "classification": cls, "controlled": False, "is_stack": False,
+            "mechanism": "", "primary_use": "", "contraindications": "", "clinical_notes": "",
+            "teaser": True,
+        })
+
 # Lines of care: peptides populated now; the rest scaffolded (same structure, ready to fill).
 lines = [
     {"id": "peptides", "name": "Peptides", "tagline": "Evidence-graded peptide protocols by clinical axis", "status": "active",
