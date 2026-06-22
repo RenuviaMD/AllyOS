@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vera — Clinical Assistant · RenuviaMD®</title>
+<style>
+:root{--navy:#102a30;--navy2:#0e3a40;--teal:#0e8a8a;--gold:#c9870a;--ink:#1c2b32;--muted:#5b6b72;--line:#e3ecea;--soft:#f3f8f7}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
+body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#eef4f3;display:flex;flex-direction:column}
+header{background:linear-gradient(150deg,#0e3a40,#0e8a8a);color:#fff;padding:16px 22px;flex:0 0 auto}
+.brand{font-weight:800}.brand span{color:#ffd98a}
+.who{display:flex;align-items:center;gap:12px;margin-top:8px}
+.av{width:42px;height:42px;border-radius:50%;background:#ffd98a;color:#3a2a00;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.2rem;font-family:Georgia,serif}
+.who h1{font-size:1.25rem;font-family:Georgia,serif}.who p{font-size:.8rem;color:#d4ece9}
+main{flex:1;overflow-y:auto;padding:20px 0}.wrap{max-width:760px;margin:0 auto;padding:0 18px}
+.msg{margin:14px 0;display:flex;gap:10px}.msg .b{padding:12px 15px;border-radius:13px;font-size:.95rem;line-height:1.55;white-space:pre-wrap}
+.msg.u{justify-content:flex-end}.msg.u .b{background:var(--navy);color:#fff;border-bottom-right-radius:4px;max-width:80%}
+.msg.a .b{background:#fff;border:1px solid var(--line);border-bottom-left-radius:4px;max-width:88%;box-shadow:0 2px 8px rgba(16,50,58,.05)}
+.msg.a .b a{color:var(--teal)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:.85rem;color:var(--teal);cursor:pointer}
+.chip:hover{border-color:var(--teal)}
+.intro{background:#fff;border:1px solid var(--line);border-radius:13px;padding:16px;font-size:.92rem;color:var(--muted)}
+.intro b{color:var(--navy)}
+footer{flex:0 0 auto;background:#fff;border-top:1px solid var(--line);padding:12px 0}
+.bar{max-width:760px;margin:0 auto;padding:0 18px;display:flex;gap:10px}
+textarea{flex:1;border:1px solid var(--line);border-radius:11px;padding:11px 14px;font-size:.95rem;resize:none;font-family:inherit;max-height:120px}
+button.send{background:var(--teal);color:#fff;border:none;border-radius:11px;padding:0 20px;font-weight:700;cursor:pointer}
+.disc{max-width:760px;margin:6px auto 0;padding:0 18px;font-size:.7rem;color:var(--muted);text-align:center}
+</style></head><body>
+<header><div class="brand">Renuvia<span>MD</span>® · Compliance Division</div>
+<div class="who"><div class="av">V</div><div><h1>Vera</h1><p>Honest clinical decision-support — peptides · BHRT · IV · PRP · aesthetics · for licensed providers</p></div></div></header>
+<main><div class="wrap" id="log">
+  <div class="intro"><b>I'm Vera.</b> I answer from RenuviaMD's physician-curated knowledge base across all five lines of care — honestly. I'll give you evidence grades, name the failed trials, cite sources, and flag FDA/503A status. I won't invent dosing or studies. I'm decision-support for licensed providers, not medical advice — you review and sign.
+  <div class="chips">
+    <div class="chip" onclick="ask(this.textContent)">Is BPC-157 legal to compound right now?</div>
+    <div class="chip" onclick="ask(this.textContent)">Reconstitute 10 mg MOTS-c in 2 mL — dose 5 mg?</div>
+    <div class="chip" onclick="ask(this.textContent)">What changed for GLP-1 compounding in 2026?</div>
+    <div class="chip" onclick="ask(this.textContent)">Mandatory screens before starting male TRT?</div>
+  </div></div>
+</div></main>
+<footer><div class="bar"><textarea id="q" rows="1" placeholder="Ask Vera… (licensed providers only)"></textarea><button class="send" onclick="ask()">Send</button></div>
+<div class="disc">Educational clinical decision-support for licensed professionals — not medical or legal advice, prescribing authorization, or a medical-director relationship. No PHI. Verify current FDA status at fda.gov. © 2026 RenuviaMD® Compliance Division.</div></footer>
+<script>
+const log=document.getElementById('log'),qel=document.getElementById('q');let msgs=[];
+function add(role,text){const d=document.createElement('div');d.className='msg '+(role==='user'?'u':'a');
+ const b=document.createElement('div');b.className='b';b.innerHTML=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>');
+ d.appendChild(b);log.appendChild(d);d.scrollIntoView({behavior:'smooth',block:'end'});return b;}
+async function ask(text){text=(text||qel.value).trim();if(!text)return;qel.value='';add('user',text);msgs.push({role:'user',content:text});
+ const b=add('assistant','…');
+ try{const r=await fetch('/.netlify/functions/ask',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({messages:msgs})});
+  const j=await r.json();const t=j.text||j.error||'Error.';b.innerHTML=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>');msgs.push({role:'assistant',content:t});}
+ catch(e){b.textContent='Connection error — is the function deployed with ANTHROPIC_API_KEY set?';}}
+qel.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask();}});
+</script></body></html>
