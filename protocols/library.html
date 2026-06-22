@@ -89,6 +89,14 @@
   .tag{font-size:.72rem;font-weight:600;color:var(--teal-d);background:var(--soft);border-radius:6px;padding:3px 8px}
   .tag.status{color:var(--muted);background:#f0f3f2}
   .tag.stack{color:#9a6300;background:var(--amber-bg)}
+  .tag.grade{color:#33444c;background:#eef3f2;font-weight:800}
+  .tag.pcac{color:#7a4a10;background:#fff3df;border:1px solid #f0cd92;font-weight:700}
+  .cites{list-style:none;margin:4px 0}
+  .cites li{font-size:.84rem;padding:3px 0 3px 16px;position:relative;color:var(--ink)}
+  .cites li::before{content:"›";position:absolute;left:2px;color:var(--teal)}
+  .cites a{color:var(--teal-d);text-decoration:underline;word-break:break-word}
+  .pcac-note{background:#fff3df;border:1px solid #f0cd92;border-radius:10px;padding:12px 14px;font-size:.84rem;color:#7a4a10;margin-top:12px}
+  .pcac-note b{color:#5a3500}
 
   /* In-development panel */
   .soon-panel{background:var(--card);border:1px dashed var(--teal);border-radius:16px;padding:34px;text-align:center;
@@ -263,11 +271,13 @@ function card(p){
   const brand = p.brand_names.length ? `<div class="brand-n">${p.brand_names.join(" · ")}</div>` : "";
   const cn = {green:"b-green",yellow:"b-yellow",red:"b-red"}[p.classification];
   const stackTag = p.is_stack ? '<span class="tag stack">Stack</span>' : '';
+  const gradeTag = p.grade ? `<span class="tag grade">Grade ${p.grade}</span>` : '';
+  const pcacTag = p.fda_pcac ? '<span class="tag pcac">⚖ PCAC Jul 2026</span>' : '';
   return `<div class="card ${CLS[p.classification]}" data-slug="${p.slug}">
     <div class="top"><div><h3>${p.name}</h3>${brand}</div>
       <span class="badge ${cn}">${p.classification}</span></div>
     <div class="mech">${p.mechanism||p.primary_use||""}</div>
-    <div class="tags">${p.axis?`<span class="tag">${p.axis}</span>`:""}<span class="tag status">${p.status_label}</span>${stackTag}</div>
+    <div class="tags">${p.axis?`<span class="tag">${p.axis}</span>`:""}${gradeTag}<span class="tag status">${p.status_label}</span>${stackTag}${pcacTag}</div>
   </div>`;
 }
 
@@ -402,12 +412,27 @@ function modalHead(p){
     <h2>${p.name}</h2>
     <div class="tags" style="margin-top:8px">
       <span class="badge ${cn}">${p.classification}</span>
+      ${p.grade?`<span class="tag grade">Grade ${p.grade}</span>`:""}
       ${p.axis?`<span class="tag">${p.axis}</span>`:""}
       <span class="tag status">${p.status_label}</span>
       ${p.brand_names.length?`<span class="tag">${p.brand_names.join(" · ")}</span>`:""}
       ${p.is_stack?'<span class="tag stack">Stack</span>':''}
       ${p.controlled?'<span class="tag stack">Controlled</span>':''}
+      ${p.fda_pcac?'<span class="tag pcac">⚖ PCAC Jul 2026</span>':''}
     </div></div>`;
+}
+
+function citesHtml(p){
+  if(!p.citations||!p.citations.length) return "";
+  const items=p.citations.map(c=> c.url
+    ? `<li><a href="${c.url}" target="_blank" rel="noopener">${c.label}</a></li>`
+    : `<li>${c.label}</li>`).join("");
+  return `<div class="field"><div class="k">Citations · PubMed / DOI</div><ul class="cites">${items}</ul></div>`;
+}
+
+function pcacNote(p){
+  if(!p.fda_pcac) return "";
+  return `<div class="pcac-note">⚖ <b>FDA PCAC — ${p.fda_pcac.date}.</b> Under Pharmacy Compounding Advisory Committee review for the 503A bulk-substances (compounding) list. The recommendation is <b>non-binding and is not FDA drug approval</b>; legal compounding still requires formal rulemaking.</div>`;
 }
 
 function openModal(slug){
@@ -422,6 +447,9 @@ function openModal(slug){
       ${f("Primary use",p.primary_use)}
       ${f("Rule out (key)",p.contraindications,true)}
       ${f("Clinical notes",p.clinical_notes)}
+      ${f("Evidence",p.evidence)}
+      ${citesHtml(p)}
+      ${pcacNote(p)}
       ${fullBtn}
       <div class="mnote">This summary is a drafting aid; the treating physician reviews, customizes, and signs the final protocol before use.</div>
     </div>`;
@@ -438,6 +466,9 @@ function openFullCard(slug){
         <button class="linkbtn primary" onclick="window.print()">🖨 Print / Save PDF</button>
       </div>
       <div class="fullcard">${mdToHtml(p.body_md)}</div>
+      ${p.evidence?`<div class="fullcard"><h2>Evidence</h2><p>${p.evidence}</p></div>`:""}
+      ${citesHtml(p)}
+      ${pcacNote(p)}
       <div class="stamp">RenuviaMD Clinical Protocol Library · ${p.name} · last clinical review ${p.reviewed||'—'} · generated ${new Date().toISOString().slice(0,10)}. Drafting aid — reviewed, customized, and signed by the treating physician before use. Current version always online.</div>
     </div>`;
   document.getElementById("overlay").classList.add("open");

@@ -5,7 +5,7 @@ Outputs (single source of truth — other pages consume these):
   protocols/protocols.json   machine-readable, for any consumer
   protocols/protocols-data.js  window.RENUVIA_PROTOCOLS, for the static page (file:// safe)
 """
-import json, pathlib, yaml
+import json, pathlib, re, yaml
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 FORM = ROOT / "_research" / "formulary"
@@ -32,6 +32,71 @@ STATUS_LABEL = {
     "fda_approved": "FDA-approved", "off_label": "Off-label",
     "investigational": "Investigational", "not_approved": "Research-only",
 }
+
+# FDA Pharmacy Compounding Advisory Committee (PCAC) — 503A bulk-list review, July 23–24, 2026.
+# Verified via FDA advisory-committee calendar. This is a COMPOUNDING-eligibility review,
+# non-binding, NOT FDA drug approval.
+PCAC = {
+    "bpc-157": 1, "kpv": 1, "tb-500": 1, "mots-c": 1,
+    "dsip": 2, "semax": 2, "epitalon": 2,
+}
+PCAC_DATE = {1: "2026-07-23", 2: "2026-07-24"}
+
+# Ordered (most-specific first) keyword -> slug, to map reference-doc titles to formulary slugs.
+# Stack headings (23-29) contain component names, so match them FIRST to their stack slug.
+REF_ALIASES = [
+    ("wolverine", "wolverine-glow"), ("longevity —", "longevity-stack"),
+    ("growth —", "growth-stack"), ("metabolic —", "metabolic-stack"),
+    ("cognition —", "cognition-stack"), ("immunity —", "immunity-stack"),
+    ("vitality —", "vitality-stack"),
+    ("cjc-1295 + ipamorelin", "cjc-ipamorelin-blend"), ("cjc-1295 +", "cjc-ipamorelin-blend"),
+    ("bpc-157", "bpc-157"), ("tb-500", "tb-500"), ("ghk-cu", "ghk-cu"),
+    ("tirzepatide", "tirzepatide"), ("retatrutide", "retatrutide"), ("aod-9604", "aod-9604"),
+    ("sermorelin", "sermorelin"), ("tesamorelin", "tesamorelin"), ("ipamorelin", "ipamorelin"),
+    ("cjc-1295", "cjc-1295"), ("mots-c", "mots-c"), ("elamipretide", "ss-31"), ("ss-31", "ss-31"),
+    ("epitalon", "epitalon"), ("cerebrolysin", "cerebrolysin"), ("semax", "semax"),
+    ("selank", "selank"), ("dsip", "dsip"), ("emideltide", "dsip"), ("kpv", "kpv"),
+    ("thymosin alpha", "thymosin-alpha-1"), ("thymosin α", "thymosin-alpha-1"),
+    ("kisspeptin", "kisspeptin-10"), ("bremelanotide", "pt-141"), ("pt-141", "pt-141"),
+]
+
+
+def parse_reference(path):
+    """Extract {slug: {grade, evidence, citations[]}} from the original reference doc."""
+    if not path.exists():
+        return {}
+    out = {}
+    blocks = path.read_text(encoding="utf-8").split("\n## ")
+    for blk in blocks[1:]:
+        lines = blk.split("\n")
+        title = lines[0].lower()
+        slug = next((s for kw, s in REF_ALIASES if kw in title), None)
+        if not slug:
+            continue
+        gm = re.search(r"grade\s+([a-d][^·\n]*)", title)
+        grade = gm.group(1).strip().rstrip(".").upper() if gm else ""
+        evidence, cites = "", []
+        for ln in lines[1:]:
+            if ln.startswith("**Evidence:**"):
+                evidence = ln.replace("**Evidence:**", "").strip()
+            elif ln.startswith("- ") and ("http" in ln or "PMID" in ln):
+                for piece in ln[2:].split(" · "):
+                    piece = piece.strip()
+                    if not piece:
+                        continue
+                    if " — " in piece:
+                        label, url = piece.split(" — ", 1)
+                    else:
+                        label, url = piece, ""
+                    label = label.replace("*", "").strip()
+                    url = url.strip() if url.startswith("http") else ""
+                    cites.append({"label": label, "url": url})
+        if slug not in out:  # first (individual) entry wins over any later mention
+            out[slug] = {"grade": grade, "evidence": evidence, "citations": cites}
+    return out
+
+
+REF = parse_reference(ROOT / "RenuviaMD-Peptide-Reference.md")
 
 
 def fm(path):
@@ -82,9 +147,15 @@ for p in sorted((FORM / "_stacks").glob("*.md")):
     if e:
         items.append(e)
 
-# Mark all formulary entries as full (real prescribing cards).
+# Mark all formulary entries as full, and merge in grade/evidence/citations + PCAC flag.
 for e in items:
     e["teaser"] = False
+    r = REF.get(e["slug"], {})
+    e["grade"] = r.get("grade", "")
+    e["evidence"] = r.get("evidence", "")
+    e["citations"] = r.get("citations", [])
+    pd = PCAC.get(e["slug"])
+    e["fda_pcac"] = {"day": pd, "date": PCAC_DATE[pd]} if pd else None
 
 # Title-only catalog teasers for the not-yet-built lines — names a provider
 # recognizes, NO clinical content. These power the locked-tease / upsell view.
@@ -107,6 +178,7 @@ for line_id, names in TEASERS.items():
             "status_label": "", "classification": cls, "controlled": False, "is_stack": False,
             "mechanism": "", "primary_use": "", "contraindications": "", "clinical_notes": "",
             "reviewed": "", "body_md": "",
+            "grade": "", "evidence": "", "citations": [], "fda_pcac": None,
             "teaser": True,
         })
 
