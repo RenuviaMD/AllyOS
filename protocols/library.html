@@ -179,6 +179,15 @@
   .sigblock .row{margin:7px 0;display:flex;gap:6px;flex-wrap:wrap}
   .sigblock b{color:var(--teal-ink)}
   @media print{ .personalize{display:none!important} }
+  /* Footer disclaimer + compliance division — on every PDF page */
+  .pdf-footer{display:none}
+  @media print{
+    .pdf-footer{display:block;position:fixed;bottom:0;left:0;right:0;background:#fff;
+      border-top:1px solid #bbb;padding:5px 12px;text-align:center;
+      font-size:6.5pt;line-height:1.35;color:#555}
+    .pdf-footer b{color:#0b6e6e}
+    .mbody{padding-bottom:78px}
+  }
   @media print{
     body>*{display:none!important}
     #overlay{display:block!important;position:static;background:#fff;padding:0;overflow:visible}
@@ -496,6 +505,7 @@ function openFullCard(slug){
         <div class="row">License #: ____________________ &nbsp;·&nbsp; Signature: ____________________ &nbsp;·&nbsp; Date: ____________</div>
       </div>
       <div class="stamp">RenuviaMD Clinical Protocol Library · ${p.name} · last clinical review ${p.reviewed||'—'} · generated ${new Date().toISOString().slice(0,10)}. Drafting aid — reviewed, customized, and signed by the treating physician before use. Current version always online.</div>
+      <div class="pdf-footer">For licensed healthcare professionals — educational &amp; clinical decision-support only. Not medical or legal advice, prescribing authorization, a standing order, delegation agreement, clinic or pharmacy approval, or a medical-director relationship. Dated snapshot — verify current applicability. No resale, redistribution, public upload, or white-labeling. Full terms at renuviamd.com/terms · <b>RenuviaMD® Compliance Division</b></div>
     </div>`;
   document.getElementById("overlay").classList.add("open");
 }
