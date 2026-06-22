@@ -1,4 +1,4 @@
-// Netlify function: POST { messages:[{role,content}] } -> Vera's reply.
+// Netlify function: POST { messages:[{role,content}] } -> Ally's reply.
 // Needs env var ANTHROPIC_API_KEY. Loads the curated knowledge base + system prompt.
 const fs = require("fs");
 const path = require("path");
