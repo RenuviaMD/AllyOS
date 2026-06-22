@@ -1,0 +1,396 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>The Peptide Compendium — 2026 Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#102a30;--navy2:#0e3a40;--teal:#0e8a8a;--gold:#c9870a;--ink:#1c2b32;--muted:#5b6b72;--line:#dbe6e4;--soft:#f3f8f7;--amber:#fff3df}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Georgia,"Times New Roman",serif;color:var(--ink);line-height:1.5;font-size:10.5pt}
+  .serif{font-family:"Playfair Display",Georgia,serif}
+  .page{padding:0 14mm}
+  /* running header band + footer */
+  .band{position:running(hdr)}
+  @page{size:letter;margin:22mm 0 20mm;
+    @top-center{content:element(hdr)} @bottom-center{content:element(ftr)}}
+  .hdr{position:running(hdr);width:100%;padding:0 14mm}
+  .hdrline{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1.5px solid var(--teal);padding-bottom:5px;font-size:8pt;color:var(--muted)}
+  .hdrline b{font-family:"Playfair Display",Georgia,serif;font-size:11pt;color:var(--navy);letter-spacing:.02em}
+  .hdrline .r{text-transform:uppercase;letter-spacing:.12em}
+  .ftr{position:running(ftr);width:100%;padding:0 14mm;font-size:6.5pt;color:#777;text-align:center;border-top:1px solid var(--line);padding-top:5px}
+  .ftr b{color:var(--teal)}
+
+  /* COVER */
+  .cover{height:235mm;display:flex;flex-direction:column;justify-content:space-between;text-align:center;page-break-after:always;padding:24mm 18mm}
+  .cover .top{display:flex;justify-content:space-between;align-items:baseline;font-size:8.5pt;color:var(--muted);text-transform:uppercase;letter-spacing:.14em;border-bottom:1.5px solid var(--teal);padding-bottom:8px}
+  .cover .top b{font-family:"Playfair Display",Georgia,serif;font-size:13pt;color:var(--navy);letter-spacing:.02em;text-transform:none}
+  .cover .mid{margin-top:auto;margin-bottom:auto}
+  .cover .eyebrow{text-transform:uppercase;letter-spacing:.28em;font-size:9pt;color:var(--teal);margin-bottom:22px}
+  .cover h1{font-family:"Playfair Display",Georgia,serif;font-weight:800;font-size:34pt;line-height:1.1;color:var(--navy);margin-bottom:18px}
+  .cover .sub{font-size:13pt;color:var(--muted);font-style:italic;max-width:150mm;margin:0 auto}
+  .cover .rule{width:60mm;height:2px;background:var(--gold);margin:26px auto}
+  .cover .by{font-size:10.5pt;color:var(--ink)} .cover .by b{color:var(--navy)}
+  .cover .ed{margin-top:14px;font-size:9pt;color:var(--muted);text-transform:uppercase;letter-spacing:.16em}
+  .cover .conf{font-size:8pt;color:var(--muted);text-transform:uppercase;letter-spacing:.2em}
+
+  /* TOC */
+  .toc{page-break-after:always;padding:6mm 14mm}
+  .toc h2{font-family:"Playfair Display",Georgia,serif;font-size:20pt;color:var(--navy);margin-bottom:14px;border-bottom:2px solid var(--teal);padding-bottom:8px}
+  .toc ul{list-style:none;columns:2;column-gap:14mm;font-size:9.5pt}
+  .toc li{padding:4px 0;border-bottom:1px dotted var(--line);display:flex;gap:8px;align-items:baseline}
+  .toc li span{color:var(--teal);font-weight:700;font-variant-numeric:tabular-nums}
+  .toc li em{margin-left:auto;color:var(--muted);font-style:normal;font-size:8pt}
+
+  /* MONOGRAPH */
+  .mono{page-break-before:always;padding:4mm 14mm}
+  .mono-head{display:flex;gap:14px;align-items:flex-start;border-bottom:1.5px solid var(--teal);padding-bottom:10px;margin-bottom:12px}
+  .mono-no{font-family:"Playfair Display",Georgia,serif;font-size:26pt;font-weight:800;color:var(--gold);line-height:1}
+  .mono-head h2{font-family:"Playfair Display",Georgia,serif;font-size:19pt;color:var(--navy);line-height:1.1}
+  .mono-head .meta{font-size:8.5pt;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
+  .body h4{font-size:8pt;text-transform:uppercase;letter-spacing:.1em;color:var(--teal);border-bottom:1px solid var(--line);padding-bottom:3px;margin:13px 0 6px}
+  .body h5{font-size:10pt;color:var(--navy);margin:9px 0 3px}
+  .body p{margin:5px 0} .body strong{color:var(--navy2)}
+  .body ul{list-style:none;margin:5px 0}
+  .body li{padding:2px 0 2px 16px;position:relative} .body li::before{content:"•";position:absolute;left:4px;color:var(--teal)}
+  .body li.chk::before{content:"☐";left:0;color:var(--gold)}
+  table{width:100%;border-collapse:collapse;margin:7px 0;font-size:8.5pt}
+  th,td{border:1px solid var(--line);padding:5px 7px;text-align:left} th{background:var(--soft);color:var(--navy)}
+  .cites{font-size:8pt} .cites li::before{content:"›"} .cites a{color:var(--teal)}
+  .callout{border-left:3px solid var(--teal);background:var(--soft);padding:9px 12px;margin:10px 0;font-size:9pt}
+  .callout.amber{border-left-color:var(--gold);background:var(--amber)}
+  .sigblock{margin-top:16px;border-top:1px solid var(--line);padding-top:9px;font-size:8.5pt;color:var(--navy)}
+</style></head>
+<body>
+
+<!-- running header + footer (printed on every page via @page) -->
+<div class="hdr"><div class="hdrline"><b>RenuviaMD®</b>
+  <span class="r">Compliance Division · The Peptide Compendium · 2026 Edition</span></div></div>
+<div class="ftr">For licensed healthcare professionals — educational &amp; clinical decision-support only. Not medical or legal advice, prescribing authorization, a standing order, delegation, clinic/pharmacy approval, or a medical-director relationship. Dated snapshot (2026-06-22) — verify current applicability. No resale or redistribution. · <b>RenuviaMD® Compliance Division</b></div>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="top"><b>RenuviaMD®</b><span>Compliance Division · v1.0 · 2026-06-22</span></div>
+  <div class="mid">
+    <div class="eyebrow">Clinical Protocol Compendium · 2026 Edition</div>
+    <h1>The Peptide Compendium<br>for Practitioners</h1>
+    <div class="rule"></div>
+    <p class="sub">22 evidence-graded peptide protocols — physician-authored, fully cited, with reconstitution, monitoring, and ready-to-sign documentation.</p>
+  </div>
+  <div>
+    <p class="by">Compiled &amp; edited by <b>Armando A. Falcon, M.D.</b> · FL License ME 84789 · RenuviaMD® PLLC</p>
+    <p class="ed">2026 Edition · Version 1.0</p>
+    <p class="conf" style="margin-top:30px">Confidential · Licensed to a single healthcare professional</p>
+  </div>
+</div>
+
+<!-- TOC -->
+<div class="toc"><h2>Contents</h2><ul><li><span>01</span> AOD-9604<em>Grade D</em></li><li><span>02</span> BPC-157<em>Grade D</em></li><li><span>03</span> Cerebrolysin<em>Grade B/C</em></li><li><span>04</span> CJC-1295<em>Grade C (DAC) / D (NO-DAC)</em></li><li><span>05</span> CJC-1295 + Ipamorelin (blend)<em>Grade D</em></li><li><span>06</span> Delta sleep-inducing peptide (DSIP)<em>Grade D</em></li><li><span>07</span> Epitalon<em>Grade D</em></li><li><span>08</span> Copper tripeptide-1 (GHK-Cu)<em>Grade C TOPICAL / D SYSTEMIC</em></li><li><span>09</span> Ipamorelin<em>Grade C/D</em></li><li><span>10</span> Kisspeptin-10<em>Grade C</em></li><li><span>11</span> KPV<em>Grade D</em></li><li><span>12</span> MOTS-c<em>Grade D→C</em></li><li><span>13</span> Bremelanotide<em>Grade A (LABEL INDICATION)</em></li><li><span>14</span> Retatrutide<em>Grade B</em></li><li><span>15</span> Selank<em>Grade C/D</em></li><li><span>16</span> Semax<em>Grade C/D</em></li><li><span>17</span> Sermorelin<em>Grade B (PEDS/DX) / D (ADULT WELLNESS)</em></li><li><span>18</span> Elamipretide (SS-31)<em>Grade B−</em></li><li><span>19</span> Thymosin beta-4 (TB-500)<em>Grade D (CONSUMER FRAGMENT)</em></li><li><span>20</span> Tesamorelin<em>Grade A (LABEL INDICATION)</em></li><li><span>21</span> Thymosin alpha-1<em>Grade B–C</em></li><li><span>22</span> Tirzepatide<em>Grade A</em></li></ul></div>
+
+
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">01</span>
+      <div><h2>AOD-9604</h2>
+        <div class="meta">Metabolism · Investigational · Grade D · Research-only</div></div>
+    </div>
+    
+    <div class="body"><h4>Indication</h4><p>Adjunct fat-loss support within a structured metabolic/weight program. &lt;!-- NOTE: human efficacy data weak; modest at best --&gt;</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Pregnancy</li><li class="chk">Lactation</li><li class="chk">Age &lt;18</li><li class="chk">Hypersensitivity to peptide/diluent</li><li class="chk">Active malignancy (precautionary)</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 300 mcg SC daily; range 250–500 mcg/day</li><li><strong>Route:</strong> SC (fasted/AM)</li><li><strong>Reconstitution:</strong> 5 mg + 2 mL BAC water = 2.5 mg/mL = 2,500 mcg/mL → 300 mcg = 0.12 mL = <strong>12 units</strong> (U-100)</li><li><strong>Cycle:</strong> 8–12 weeks</li><li><strong>Stack pairs:</strong> tesamorelin, cjc-ipamorelin-blend, mots-c</li></ul><h4>Labs (baseline)</h4><ul><li>CMP, fasting glucose, lipids, weight/waist</li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Tolerance, site</td><td>Continue</td></tr><tr><td>Mo 1</td><td>Weight/waist trend</td><td>Hold or ↑ within range</td></tr><tr><td>Mo 3</td><td>Body composition, lipids</td><td>Continue if benefit</td></tr><tr><td>Mo 6</td><td>Weight maintenance</td><td>Stop if no objective change</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Investigational consent signed (`consent_investigational_peptide`)</li><li class="chk">Patient education delivered (`patiented_aod-9604`)</li><li class="chk">Source pharmacy verified</li><li class="chk">Baseline metabolic panel documented</li></ul><h4>Patient education key points</h4><ul><li>Not FDA-approved; effects are modest and adjunctive.</li><li>Does not replace diet and exercise — those drive results.</li><li>Doesn't affect blood sugar or IGF-1.</li><li>Report injection-site reactions or unexpected symptoms.</li></ul>
+      <h3>Evidence</h3><p>Phase 2 obesity development **discontinued for lack of meaningful efficacy**; **zero registered trials**; substantive data preclinical.</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1210/endo.142.12.8522">Heffernan 2001, Endocrinology (preclinical)</a></li><li>Wilding 2004, Curr Opin Investig Drugs (review, PMID 15134286)</li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">02</span>
+      <div><h2>BPC-157</h2>
+        <div class="meta">Repair · Research-only · Grade D · Research-only</div></div>
+    </div>
+    <div class="callout amber"><b>FDA PCAC — 2026-07-23.</b> Under Pharmacy Compounding Advisory Committee review for the 503A compounding list — non-binding, not FDA approval.</div>
+    <div class="body"><h4>Indication</h4><p>Adjunct for refractory soft-tissue (tendon/ligament/muscle) injury or GI mucosal complaints that have plateaued on standard care.</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Active or prior malignancy (pro-angiogenic — absolute)</li><li class="chk">Pregnancy</li><li class="chk">Lactation</li><li class="chk">Age &lt;18</li><li class="chk">Hypersensitivity to peptide/diluent</li><li class="chk">Undiagnosed mass / malignancy red flag</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 250 mcg SC daily; range 250–500 mcg/day</li><li><strong>Route:</strong> SC (local to injury preferred)</li><li><strong>Reconstitution:</strong> 5 mg + 2 mL BAC water = 2.5 mg/mL = 2,500 mcg/mL → 250 mcg = 0.10 mL = <strong>10 units</strong> (U-100)</li><li><strong>Cycle:</strong> 4–6 weeks, then reassess and stop</li><li><strong>Stack pairs:</strong> tb-500, ghk-cu</li></ul><h4>Labs (baseline)</h4><ul><li>CBC, CMP</li><li><strong>Age-appropriate cancer screening current ← gating</strong></li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Tolerance, injection site, response</td><td>↑ to 500 mcg or stop if no signal</td></tr><tr><td>Mo 1</td><td>Functional outcome (ROM/pain)</td><td>Continue short course or discontinue</td></tr><tr><td>Mo 3</td><td>Should be off; re-exam ± image</td><td>Pivot to definitive care if unresolved</td></tr><tr><td>Mo 6</td><td>Malignancy ROS</td><td>Stop + work up any red flag</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Off-label/investigational consent signed (`consent_investigational_peptide`)</li><li class="chk">Patient education delivered (`patiented_bpc-157`)</li><li class="chk">Source pharmacy verified</li><li class="chk">Cancer screening current ← gating</li></ul><h4>Patient education key points</h4><ul><li>Not FDA-approved; animal data only, no human efficacy proof.</li><li>Theoretical cancer-promotion risk — tell us any cancer history.</li><li>This supports rehab; it does not replace PT or needed surgery.</li><li>Report any new lump, weight loss, or unusual symptom immediately.</li></ul>
+      <h3>Evidence</h3><p>No completed published human efficacy RCT. One Phase 1 safety/PK (NCT02637284, status unknown); one Phase 2 *recruiting* (NCT07437547, hamstring strain). FDA barred it from compounding (2023).</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1007/s00441-019-03016-8">Gwyer 2019, Cell Tissue Res</a></li><li><a href="https://doi.org/10.3389/fphar.2021.627533">Seiwerth 2021, Front Pharmacol</a></li><li><a href="https://doi.org/10.2174/1381612826666200424180139">Sikiric 2020, Curr Pharm Des</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">03</span>
+      <div><h2>Cerebrolysin</h2>
+        <div class="meta">Cognition · Research-only · Grade B/C · Physician-review</div></div>
+    </div>
+    
+    <div class="body"><h4>Indication</h4><p>Cognitive support in post-stroke, TBI, or neurodegenerative decline. &lt;!-- NOTE: EU/RU/AR-labeled; not FDA-approved --&gt;</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Pregnancy</li><li class="chk">Lactation</li><li class="chk">Age &lt;18</li><li class="chk">Hypersensitivity</li><li class="chk">Severe renal impairment</li><li class="chk">Status epilepticus / uncontrolled epilepsy</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 5–10 mL daily ×10–20 day course</li><li><strong>Route:</strong> IM (≤5 mL) or slow IV (larger volumes)</li><li><strong>Reconstitution:</strong> Pre-mixed ampoule (215.2 mg/mL solution) — <strong>no reconstitution</strong></li><li><strong>Cycle:</strong> 10–20 day course, repeat 2–4×/year</li><li><strong>Stack pairs:</strong> semax, selank, dsip</li></ul><h4>Labs (baseline)</h4><ul><li>CMP (renal), CBC</li><li>Seizure/neuro history review</li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Tolerance, cognition</td><td>Complete course</td></tr><tr><td>Mo 1</td><td>Cognitive/functional change</td><td>Reassess</td></tr><tr><td>Mo 3</td><td>Off-cycle status</td><td>Plan next course</td></tr><tr><td>Mo 6</td><td>Durable benefit</td><td>Continue vs stop</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Off-label/investigational consent signed (`consent_investigational_peptide`)</li><li class="chk">Patient education delivered (`patiented_cerebrolysin`)</li><li class="chk">Source pharmacy verified (counterfeit risk)</li><li class="chk">Renal function + seizure history documented</li></ul><h4>Patient education key points</h4><ul><li>Not FDA-approved in the US; used as IV/IM courses.</li><li>Porcine-derived — tell us about allergies.</li><li>Report any seizure activity or dizziness.</li><li>Source authenticity matters — we verify supply.</li></ul>
+      <h3>Evidence</h3><p>42 trials + meta-analyses, **mixed**: favorable Alzheimer's meta-analysis + positive post-stroke RCT (CARS), but a **stroke meta-analysis found no significant efficacy.** Approved in several non-US countries.</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1161/STROKEAHA.115.009416">Muresanu 2016, Stroke (CARS)</a></li><li><a href="https://doi.org/10.1159/000377672">Gauthier 2015, Dement Geriatr Cogn Disord (AD meta)</a></li><li><a href="https://doi.org/10.1155/2017/4191670">Zhang 2017, Biomed Res Int (negative stroke meta)</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">04</span>
+      <div><h2>CJC-1295</h2>
+        <div class="meta">Growth · Investigational · Grade C (DAC) / D (NO-DAC) · Research-only</div></div>
+    </div>
+    
+    <div class="body"><h4>Indication</h4><p>GH-axis support for recovery and body composition, paired with a ghrelin agonist. &lt;!-- NOTE: card assumes no-DAC (mod GRF 1-29), daily; DAC version is 1-2 mg weekly --&gt;</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Active malignancy (absolute)</li><li class="chk">Untreated severe hypothyroidism</li><li class="chk">Pregnancy</li><li class="chk">Lactation; age &lt;18</li><li class="chk">Hypersensitivity</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 100 mcg SC nightly (no-DAC); range 100–200 mcg</li><li><strong>Route:</strong> SC, bedtime</li><li><strong>Reconstitution:</strong> 5 mg + 2.5 mL BAC water = 2 mg/mL = 2,000 mcg/mL → 100 mcg = 0.05 mL = <strong>5 units</strong> (U-100)</li><li><strong>Cycle:</strong> 12–16 weeks</li><li><strong>Stack pairs:</strong> ipamorelin, sermorelin</li></ul><h4>Labs (baseline)</h4><ul><li><strong>IGF-1, TSH/free T4 ← gating</strong></li><li>Fasting glucose, CMP, lipids</li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Tolerance, fluid retention</td><td>Reinforce timing</td></tr><tr><td>Mo 1</td><td>Symptoms, glucose</td><td>Hold/adjust</td></tr><tr><td>Mo 3</td><td>IGF-1, glucose</td><td>Titrate to upper-normal IGF-1</td></tr><tr><td>Mo 6</td><td>IGF-1, composition</td><td>Lowest effective dose</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Investigational consent signed (`consent_gh_secretagogue`)</li><li class="chk">Patient education delivered (`patiented_cjc-1295`)</li><li class="chk">Source pharmacy verified</li><li class="chk">Thyroid treated + cancer screen current ← gating</li></ul><h4>Patient education key points</h4><ul><li>Not FDA-approved; compounded GH secretagogue.</li><li>Bedtime, empty stomach.</li><li>Report swelling, joint aches, or tingling.</li><li>We track IGF-1 and glucose.</li></ul>
+      <h3>Evidence</h3><p>One human PK/PD RCT of the DAC form (dose-dependent GH/IGF-1 rise, t½ ~6–8 days); Phase 2 NCT00267527 terminated. "No-DAC" borrows the DAC molecule's credibility.</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1210/jc.2005-1536">Teichman 2006, JCEM (human DAC RCT)</a></li><li><a href="https://doi.org/10.1210/jc.2006-1702">Ionescu & Frohman 2006, JCEM</a></li><li><a href="https://doi.org/10.1210/en.2004-1286">Jetté 2005, Endocrinology (rat)</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">05</span>
+      <div><h2>CJC-1295 + Ipamorelin (blend)</h2>
+        <div class="meta">Growth · Investigational · Grade D · Research-only</div></div>
+    </div>
+    
+    <div class="body"><h4>Indication</h4><p>Combined GH-axis support for recovery, body composition, and sleep in symptomatic adults with low-normal IGF-1.</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Active malignancy (absolute)</li><li class="chk">Untreated severe hypothyroidism</li><li class="chk">Pregnancy</li><li class="chk">Lactation; age &lt;18</li><li class="chk">Hypersensitivity</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> ~100 mcg CJC + 200–300 mcg ipamorelin SC nightly</li><li><strong>Route:</strong> SC, bedtime</li><li><strong>Reconstitution:</strong> 5 mg CJC + 5 mg ipa co-vialed + 2.5 mL BAC = 2 mg/mL each = 2,000 mcg/mL → 0.15 mL = <strong>15 units</strong> (~300 mcg each)</li><li><strong>Cycle:</strong> 12–16 weeks</li><li><strong>Stack pairs:</strong> tesamorelin, aod-9604</li></ul><h4>Labs (baseline)</h4><ul><li><strong>IGF-1, TSH/free T4 ← gating</strong></li><li>Fasting glucose, CMP, lipids</li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Tolerance, fluid retention</td><td>Reinforce timing</td></tr><tr><td>Mo 1</td><td>Symptoms, glucose</td><td>Hold/adjust</td></tr><tr><td>Mo 3</td><td>IGF-1, glucose</td><td>Titrate to upper-normal IGF-1</td></tr><tr><td>Mo 6</td><td>IGF-1, composition</td><td>Lowest effective dose</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Investigational consent signed (`consent_gh_secretagogue`)</li><li class="chk">Patient education delivered (`patiented_cjc-ipamorelin-blend`)</li><li class="chk">Source pharmacy verified</li><li class="chk">Thyroid treated + cancer screen current ← gating</li></ul><h4>Patient education key points</h4><ul><li>Not FDA-approved; compounded combination.</li><li>One bedtime injection, empty stomach.</li><li>Report swelling, joint pain, tingling.</li><li>We monitor IGF-1 and blood sugar.</li></ul>
+      <h3>Evidence</h3><p>**No human trials of the combination — period.** Supporting data are animal + review-level only (a 2026 sports-medicine primer states evidence is "limited to animal studies").</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1177/03635465251357593">Mayfield 2026, Am J Sports Med</a></li><li><a href="https://doi.org/10.23736/S0022-4707.26.17773-1">Coutinho 2026, J Sports Med Phys Fitness</a></li><li><a href="https://doi.org/10.3389/fragi.2026.1790247">Mavrych 2026, Front Aging</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">06</span>
+      <div><h2>Delta sleep-inducing peptide (DSIP)</h2>
+        <div class="meta">Cognition · Research-only · Grade D · Research-only</div></div>
+    </div>
+    <div class="callout amber"><b>FDA PCAC — 2026-07-24.</b> Under Pharmacy Compounding Advisory Committee review for the 503A compounding list — non-binding, not FDA approval.</div>
+    <div class="body"><h4>Indication</h4><p>Sleep-onset/quality support as an adjunct in stress-related insomnia. &lt;!-- NOTE: human evidence inconsistent --&gt;</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Pregnancy</li><li class="chk">Lactation</li><li class="chk">Age &lt;18</li><li class="chk">Hypersensitivity</li><li class="chk">Untreated OSA / primary sleep disorder</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 100–300 mcg SC at bedtime</li><li><strong>Route:</strong> SC</li><li><strong>Reconstitution:</strong> 5 mg + 2 mL BAC water = 2.5 mg/mL = 2,500 mcg/mL → 200 mcg = 0.08 mL = <strong>8 units</strong> (U-100)</li><li><strong>Cycle:</strong> 4–6 weeks</li><li><strong>Stack pairs:</strong> selank, cerebrolysin</li></ul><h4>Labs (baseline)</h4><ul><li>Generally none required</li><li>Sleep history / OSA screen</li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Sleep onset/quality</td><td>Adjust dose/timing</td></tr><tr><td>Mo 1</td><td>Sleep metrics</td><td>Hold/adjust</td></tr><tr><td>Mo 3</td><td>Durable benefit</td><td>Continue vs stop</td></tr><tr><td>Mo 6</td><td>Sleep status</td><td>Taper if stable</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Investigational consent signed (`consent_investigational_peptide`)</li><li class="chk">Patient education delivered (`patiented_dsip`)</li><li class="chk">Source pharmacy verified</li><li class="chk">OSA screen documented</li></ul><h4>Patient education key points</h4><ul><li>Not FDA-approved; effects vary person to person.</li><li>We address sleep hygiene and screen for sleep apnea first.</li><li>Inject at bedtime as directed.</li><li>Report daytime grogginess or unusual symptoms.</li></ul>
+      <h3>Evidence</h3><p>**Zero registered trials.** Old, sparse, inconclusive human data; reviewers note DSIP does not reliably promote sleep. Modern data preclinical.</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1016/0196-9781(86)90148-8">Graf & Kastin 1986, Peptides</a></li><li><a href="https://doi.org/10.1111/j.1471-4159.2006.03693.x">Kovalzon & Strekalova 2006, J Neurochem</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">07</span>
+      <div><h2>Epitalon</h2>
+        <div class="meta">Longevity · Research-only · Grade D · Research-only</div></div>
+    </div>
+    <div class="callout amber"><b>FDA PCAC — 2026-07-24.</b> Under Pharmacy Compounding Advisory Committee review for the 503A compounding list — non-binding, not FDA approval.</div>
+    <div class="body"><h4>Indication</h4><p>Longevity and sleep-axis support delivered as short pulsed courses. &lt;!-- NOTE: human data limited/low-quality; telomerase claims unproven --&gt;</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Active malignancy (precautionary — absolute)</li><li class="chk">Pregnancy</li><li class="chk">Lactation</li><li class="chk">Age &lt;18</li><li class="chk">Hypersensitivity</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 5–10 mg SC daily ×10–20 days per pulse</li><li><strong>Route:</strong> SC</li><li><strong>Reconstitution:</strong> 10 mg + 1 mL BAC water = 10 mg/mL = 10,000 mcg/mL → 10 mg = 1.0 mL = <strong>100 units</strong> (U-100)</li><li><strong>Cycle:</strong> 10–20 day pulse, repeat 1–2×/year</li><li><strong>Stack pairs:</strong> mots-c, ss-31</li></ul><h4>Labs (baseline)</h4><ul><li>CMP, CBC</li><li>Cancer screen current</li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Tolerance, sleep</td><td>Complete pulse</td></tr><tr><td>Mo 1</td><td>Subjective response</td><td>Reassess</td></tr><tr><td>Mo 3</td><td>Off-cycle; well-being</td><td>Plan next pulse vs stop</td></tr><tr><td>Mo 6</td><td>Cancer ROS</td><td>Stop on any red flag</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Investigational consent signed (`consent_investigational_peptide`)</li><li class="chk">Patient education delivered (`patiented_epitalon`)</li><li class="chk">Source pharmacy verified</li><li class="chk">Cancer screen current ← gating</li></ul><h4>Patient education key points</h4><ul><li>Not FDA-approved; longevity claims are unproven.</li><li>Given in short courses, not continuously.</li><li>Tell us any cancer history.</li><li>Report any unusual symptoms.</li></ul>
+      <h3>Evidence</h3><p>**Zero registered trials.** Telomere/longevity claims rest on in-vitro + animal + weak older Russian reports. No Western replication.</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1023/a:1025493705728">Khavinson 2003, Bull Exp Biol Med (in vitro)</a></li><li><a href="https://doi.org/10.1016/s0304-3835(02)00090-3">Anisimov 2002, Cancer Lett (rat)</a></li><li>Khavinson 2002, Neuro Endocrinol Lett (PMID 12374906)</li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">08</span>
+      <div><h2>Copper tripeptide-1 (GHK-Cu)</h2>
+        <div class="meta">Repair · Research-only · Grade C TOPICAL / D SYSTEMIC · Research-only</div></div>
+    </div>
+    
+    <div class="body"><h4>Indication</h4><p>Skin and connective-tissue repair, hair support, and aesthetic regeneration. &lt;!-- NOTE: strongest data is topical; systemic SC dosing is empiric --&gt;</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Active or prior malignancy (pro-angiogenic — absolute)</li><li class="chk">Pregnancy</li><li class="chk">Lactation</li><li class="chk">Age &lt;18</li><li class="chk">Hypersensitivity / copper sensitivity</li><li class="chk">Wilson disease / copper-overload state</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 1–2 mg SC daily (or topical 1–2% serum)</li><li><strong>Route:</strong> SC or topical</li><li><strong>Reconstitution:</strong> 50 mg + 5 mL BAC water = 10 mg/mL = 10,000 mcg/mL → 2 mg = 0.20 mL = <strong>20 units</strong> (U-100)</li><li><strong>Cycle:</strong> 4–8 weeks</li><li><strong>Stack pairs:</strong> bpc-157, tb-500</li></ul><h4>Labs (baseline)</h4><ul><li>CBC, CMP</li><li>Serum copper/ceruloplasmin if chronic systemic use</li><li><strong>Age-appropriate cancer screening current ← gating</strong></li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Skin/site tolerance</td><td>Continue</td></tr><tr><td>Mo 1</td><td>Response, copper if dosing high</td><td>Adjust dose/route</td></tr><tr><td>Mo 3</td><td>Outcome, serum copper</td><td>Taper or stop</td></tr><tr><td>Mo 6</td><td>Malignancy ROS, copper status</td><td>Stop on any red flag/overload</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Off-label/investigational consent signed (`consent_investigational_peptide`)</li><li class="chk">Patient education delivered (`patiented_ghk-cu`)</li><li class="chk">Source pharmacy verified</li><li class="chk">Cancer screening current ← gating</li></ul><h4>Patient education key points</h4><ul><li>Not FDA-approved as an injectable; topical use is better studied.</li><li>Don't exceed dosing — copper can accumulate.</li><li>Tell us any cancer history.</li><li>Report rash, metallic taste, or unusual symptoms.</li></ul>
+      <h3>Evidence</h3><p>Mostly topical/cosmetic + in-vitro. A small topical RCT post-laser showed improved satisfaction but **no objective benefit**. Ph2 topical RCT recruiting (NCT07437586). No completed RCT for injected/systemic use.</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1001/archfaci.8.4.252">Miller 2006, Arch Facial Plast Surg</a></li><li><a href="https://doi.org/10.3390/pharmaceutics15102485">Dymek 2023, Pharmaceutics</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">09</span>
+      <div><h2>Ipamorelin</h2>
+        <div class="meta">Growth · Investigational · Grade C/D · Research-only</div></div>
+    </div>
+    
+    <div class="body"><h4>Indication</h4><p>GH-axis support for recovery, body composition, and sleep quality, typically combined with a GHRH analog.</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Active malignancy (absolute)</li><li class="chk">Untreated severe hypothyroidism</li><li class="chk">Pregnancy</li><li class="chk">Lactation; age &lt;18</li><li class="chk">Hypersensitivity</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 200–300 mcg SC nightly (or BID)</li><li><strong>Route:</strong> SC, bedtime</li><li><strong>Reconstitution:</strong> 5 mg + 2.5 mL BAC water = 2 mg/mL = 2,000 mcg/mL → 300 mcg = 0.15 mL = <strong>15 units</strong> (U-100)</li><li><strong>Cycle:</strong> 12–16 weeks</li><li><strong>Stack pairs:</strong> cjc-1295, sermorelin</li></ul><h4>Labs (baseline)</h4><ul><li><strong>IGF-1, TSH/free T4 ← gating</strong></li><li>Fasting glucose, CMP, lipids</li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Tolerance, sleep</td><td>Reinforce timing</td></tr><tr><td>Mo 1</td><td>Symptoms, glucose</td><td>Hold/adjust</td></tr><tr><td>Mo 3</td><td>IGF-1, glucose</td><td>Titrate to upper-normal IGF-1</td></tr><tr><td>Mo 6</td><td>IGF-1, composition</td><td>Lowest effective dose</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Investigational consent signed (`consent_gh_secretagogue`)</li><li class="chk">Patient education delivered (`patiented_ipamorelin`)</li><li class="chk">Source pharmacy verified</li><li class="chk">Thyroid treated + cancer screen current ← gating</li></ul><h4>Patient education key points</h4><ul><li>Not FDA-approved; compounded GH secretagogue.</li><li>Bedtime, empty stomach for best effect.</li><li>Report swelling, joint pain, or tingling.</li><li>We monitor IGF-1 and blood sugar over time.</li></ul>
+      <h3>Evidence</h3><p>Two completed human Phase 2 trials (GI motility) — **both negative** (NCT00672074 missed primary endpoint; NCT01280344). Zero human efficacy data for anti-aging/muscle/fat use.</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1530/eje.0.1390552">Raun 1998, Eur J Endocrinol</a></li><li><a href="https://doi.org/10.1007/s00384-014-2030-8">Beck 2014, Int J Colorectal Dis (negative human Ph2)</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">10</span>
+      <div><h2>Kisspeptin-10</h2>
+        <div class="meta">Vitality · Investigational · Grade C · Physician-review</div></div>
+    </div>
+    
+    <div class="body"><h4>Indication</h4><p>Libido and reproductive-axis support. &lt;!-- NOTE: investigational; human data mostly IV research dosing, SC empiric --&gt;</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Active hormone-sensitive malignancy (absolute)</li><li class="chk">Pregnancy</li><li class="chk">Lactation</li><li class="chk">Age &lt;18</li><li class="chk">Hypersensitivity</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> ~100 mcg SC (empiric); range narrow, start low &lt;!-- NOTE: no validated SC regimen --&gt;</li><li><strong>Route:</strong> SC</li><li><strong>Reconstitution:</strong> 5 mg + 2.5 mL BAC water = 2 mg/mL = 2,000 mcg/mL → 100 mcg = 0.05 mL = <strong>5 units</strong> (U-100)</li><li><strong>Cycle:</strong> 4–8 weeks</li><li><strong>Stack pairs:</strong> pt-141</li></ul><h4>Labs (baseline)</h4><ul><li>LH/FSH, total testosterone/estradiol, prolactin</li><li>Hormone-sensitive cancer screen</li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Tolerance, libido</td><td>Continue</td></tr><tr><td>Mo 1</td><td>Symptoms, hormones</td><td>Hold/adjust</td></tr><tr><td>Mo 3</td><td>LH/testosterone, response</td><td>Continue if benefit</td></tr><tr><td>Mo 6</td><td>Hormone panel</td><td>Stop if no durable change</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Investigational consent signed (`consent_investigational_peptide`)</li><li class="chk">Patient education delivered (`patiented_kisspeptin-10`)</li><li class="chk">Source pharmacy verified</li><li class="chk">Hormone-sensitive cancer screen documented</li></ul><h4>Patient education key points</h4><ul><li>Experimental; very limited human data.</li><li>Acts on the brain's hormone-control center.</li><li>Tell us any hormone-sensitive cancer history.</li><li>Report unusual symptoms; effects may be subtle.</li></ul>
+      <h3>Evidence</h3><p>Genuine human Phase 1 physiology studies (reliably stimulates LH acutely) — NCT00914823, NCT03286517 — but **no completed efficacy RCTs** for libido/fertility/"vitality."</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1111/and.13219">Ullah 2018, Andrologia</a></li><li><a href="https://doi.org/10.1210/jc.2016-1545">Lippincott 2016, JCEM</a></li><li><a href="https://doi.org/10.1007/400_2007_050">Colledge 2008, Results Probl Cell Differ</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">11</span>
+      <div><h2>KPV</h2>
+        <div class="meta">Immunity · Research-only · Grade D · Research-only</div></div>
+    </div>
+    <div class="callout amber"><b>FDA PCAC — 2026-07-23.</b> Under Pharmacy Compounding Advisory Committee review for the 503A compounding list — non-binding, not FDA approval.</div>
+    <div class="body"><h4>Indication</h4><p>Anti-inflammatory support, particularly as a gut or skin inflammation adjunct. &lt;!-- NOTE: preclinical evidence; no human RCTs --&gt;</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Transplant on immunosuppression (precautionary)</li><li class="chk">Severe active autoimmune disease</li><li class="chk">Pregnancy</li><li class="chk">Lactation; age &lt;18</li><li class="chk">Hypersensitivity</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 200–500 mcg SC daily (or oral capsule)</li><li><strong>Route:</strong> SC or oral</li><li><strong>Reconstitution:</strong> 5 mg + 2.5 mL BAC water = 2 mg/mL = 2,000 mcg/mL → 500 mcg = 0.25 mL = <strong>25 units</strong> (U-100)</li><li><strong>Cycle:</strong> 4–8 weeks</li><li><strong>Stack pairs:</strong> thymosin-alpha-1, bpc-157</li></ul><h4>Labs (baseline)</h4><ul><li>CBC, CMP, CRP/ESR if inflammatory</li><li>GI/derm work-up as indicated</li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Tolerance, symptoms</td><td>Continue</td></tr><tr><td>Mo 1</td><td>Inflammatory markers</td><td>Hold/adjust</td></tr><tr><td>Mo 3</td><td>Symptom/marker response</td><td>Continue if benefit</td></tr><tr><td>Mo 6</td><td>Durable response</td><td>Taper/stop</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Investigational consent signed (`consent_immunomodulator`)</li><li class="chk">Patient education delivered (`patiented_kpv`)</li><li class="chk">Source pharmacy verified</li><li class="chk">Autoimmune/transplant status documented</li></ul><h4>Patient education key points</h4><ul><li>Not FDA-approved; evidence is preclinical.</li><li>An adjunct — doesn't replace work-up of gut/skin disease.</li><li>Tell us about autoimmune conditions or immune-suppressing meds.</li><li>Report any unusual symptoms.</li></ul>
+      <h3>Evidence</h3><p>**Preclinical only — zero human trials of any phase** (mouse colitis/IBD + in-vitro).</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1002/ibd.20334">Kannengiesser 2008, Inflamm Bowel Dis</a></li><li><a href="https://doi.org/10.1016/j.jcmgh.2016.01.006">Viennois 2016, Cell Mol Gastroenterol Hepatol</a></li><li><a href="https://doi.org/10.1016/j.ymthe.2016.11.020">Xiao 2017, Mol Ther</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">12</span>
+      <div><h2>MOTS-c</h2>
+        <div class="meta">Longevity · Research-only · Grade D→C · Research-only</div></div>
+    </div>
+    <div class="callout amber"><b>FDA PCAC — 2026-07-23.</b> Under Pharmacy Compounding Advisory Committee review for the 503A compounding list — non-binding, not FDA approval.</div>
+    <div class="body"><h4>Indication</h4><p>Metabolic/healthspan support targeting insulin sensitivity and metabolic flexibility. &lt;!-- NOTE: no human therapeutic RCTs; preclinical only --&gt;</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Active malignancy (precautionary — absolute)</li><li class="chk">Pregnancy</li><li class="chk">Lactation</li><li class="chk">Age &lt;18</li><li class="chk">Hypersensitivity</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 5–10 mg SC, 2–3×/week</li><li><strong>Route:</strong> SC</li><li><strong>Reconstitution:</strong> 10 mg + 1 mL BAC water = 10 mg/mL = 10,000 mcg/mL → 5 mg = 0.50 mL = <strong>50 units</strong> (U-100)</li><li><strong>Cycle:</strong> 4–8 weeks tied to a metabolic endpoint</li><li><strong>Stack pairs:</strong> ss-31, epitalon, tesamorelin</li></ul><h4>Labs (baseline)</h4><ul><li><strong>Fasting glucose/insulin (HOMA-IR), A1c ← gating endpoint</strong></li><li>Lipids, CMP, CBC; cancer screen current</li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Tolerance, glucose</td><td>Reinforce diet/exercise</td></tr><tr><td>Mo 1</td><td>Fasting glucose/insulin</td><td>Reconsider if no signal</td></tr><tr><td>Mo 3</td><td>A1c, HOMA-IR</td><td>Continue only if objective benefit</td></tr><tr><td>Mo 6</td><td>Metabolic panel</td><td>Stop if no durable change</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Investigational consent signed (`consent_investigational_peptide`)</li><li class="chk">Patient education delivered (`patiented_mots-c`)</li><li class="chk">Source pharmacy verified</li><li class="chk">Cancer screen current ← gating</li></ul><h4>Patient education key points</h4><ul><li>Experimental; no human efficacy proof.</li><li>Exercise and diet do the proven work here.</li><li>We'll measure your metabolic markers and stop if they don't improve.</li><li>Tell us any cancer history; report unusual symptoms.</li></ul>
+      <h3>Evidence</h3><p>Preclinical-dominant; human data observational/associational. First interventional **Phase 2a RCT now recruiting** (NCT07505745, prediabetes/obesity, n=120). No completed human efficacy trials.</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1016/j.cmet.2015.02.009">Lee 2015, Cell Metab</a></li><li><a href="https://doi.org/10.1152/ajpendo.00275.2020">Kumagai 2021, Am J Physiol Endocrinol Metab</a></li><li><a href="https://doi.org/10.3389/fendo.2023.1120533">Zheng 2023, Front Endocrinol</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">13</span>
+      <div><h2>Bremelanotide</h2>
+        <div class="meta">Vitality · FDA-approved · Grade A (LABEL INDICATION) · Grade A pathway</div></div>
+    </div>
+    
+    <div class="body"><h4>Indication</h4><p>Acquired, generalized HSDD in premenopausal women (on-label); off-label for ED or low desire.</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Uncontrolled hypertension (absolute)</li><li class="chk">Significant cardiovascular disease</li><li class="chk">Pregnancy</li><li class="chk">Lactation; age &lt;18</li><li class="chk">Hypersensitivity</li><li class="chk">Priapism-predisposing condition (ED use)</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 1.75 mg SC PRN, ≥45 min before activity; max 1/24h, ≤8/month</li><li><strong>Route:</strong> SC PRN</li><li><strong>Reconstitution:</strong> Vyleesi autoinjector pre-mixed (1.75 mg/0.3 mL) — <strong>no math</strong>. Compounded: 10 mg + 5 mL = 2 mg/mL → 1.75 mg = 0.875 mL. &lt;!-- NOTE: verify compounded concentration --&gt;</li><li><strong>Cycle:</strong> PRN ongoing; reassess at 8 wk</li><li><strong>Stack pairs:</strong> kisspeptin-10</li></ul><h4>Labs (baseline)</h4><ul><li><strong>BP documented controlled ← gating</strong></li><li>Pregnancy test; reversible-cause screen (TSH, meds, mood)</li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Nausea, BP, efficacy</td><td>Pre-treat nausea; confirm 45-min lead</td></tr><tr><td>Mo 1</td><td>Efficacy, dose count</td><td>Keep ≤8/month</td></tr><tr><td>Mo 3</td><td>Benefit, BP, skin</td><td>Discontinue if no benefit by 8 wk</td></tr><tr><td>Mo 6</td><td>Efficacy, BP, skin</td><td>Continue if effective</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Off-label consent signed (`consent_sexual_health_peptide`) — N/A if on-label</li><li class="chk">Patient education delivered (`patiented_pt-141`)</li><li class="chk">Source pharmacy verified</li><li class="chk">BP controlled documented ← gating</li></ul><h4>Patient education key points</h4><ul><li>Nausea is common early — take ≥45 min before activity, with food.</li><li>Don't use if blood pressure is uncontrolled; report chest pain.</li><li>Repeated use can darken skin/gums (may not fully reverse).</li><li>Episodic only — no more than 8 doses a month.</li></ul>
+      <h3>Evidence</h3><p>FDA-approved (2019) for acquired, generalized HSDD in premenopausal women. Two completed Phase 3 RCTs (RECONNECT) + Phase 2; effect modest. Grade A *for the label indication only*; male/general "libido" use is off-label.</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1097/AOG.0000000000003500">Kingsberg 2019, Obstet Gynecol (RECONNECT)</a></li><li><a href="https://doi.org/10.2217/whe-2016-0018">Clayton 2016, Womens Health</a></li><li><a href="https://doi.org/10.1111/j.1743-6109.2006.00268.x">Diamond 2006, J Sex Med</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">14</span>
+      <div><h2>Retatrutide</h2>
+        <div class="meta">Metabolism · Investigational · Grade B · Physician-review</div></div>
+    </div>
+    
+    <div class="body"><h4>Indication</h4><p>Investigational use for severe obesity/metabolic disease not at goal on approved incretins. &lt;!-- NOTE: not FDA-approved; Phase 3 pending — fully investigational --&gt;</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Personal/family MTC or MEN-2 (absolute)</li><li class="chk">Acute pancreatitis</li><li class="chk">Severe gastroparesis</li><li class="chk">Pregnancy / planning; lactation; age &lt;18</li><li class="chk">Hypersensitivity</li><li class="chk">Uncontrolled tachyarrhythmia (glucagon-driven HR rise)</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 2 mg SC weekly start; titrate slowly toward 8–12 mg &lt;!-- NOTE: trial titration; compounded dosing empiric --&gt;</li><li><strong>Route:</strong> SC weekly</li><li><strong>Reconstitution:</strong> 12 mg + 1.2 mL BAC water = 10 mg/mL → 2 mg = 0.20 mL = <strong>20 units</strong> (U-100)</li><li><strong>Cycle:</strong> Chronic (investigational)</li><li><strong>Stack pairs:</strong> mots-c</li></ul><h4>Labs (baseline)</h4><ul><li>A1c, fasting glucose, CMP, lipids, <strong>resting HR/ECG if cardiac risk</strong></li><li>Pregnancy test; <strong>MTC/pancreatitis screen ← gating</strong></li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>GI tolerance, HR</td><td>Slow titration</td></tr><tr><td>Mo 1</td><td>Weight, BP, HR</td><td>Advance if tolerated</td></tr><tr><td>Mo 3</td><td>A1c, weight %, HR</td><td>Titrate to goal</td></tr><tr><td>Mo 6</td><td>A1c, lipids, HR, weight</td><td>Maintenance dose</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Investigational consent signed (`consent_investigational_peptide`)</li><li class="chk">Patient education delivered (`patiented_retatrutide`)</li><li class="chk">Source pharmacy verified</li><li class="chk">MTC/pancreatitis screen + baseline HR ← gating</li></ul><h4>Patient education key points</h4><ul><li>Experimental — not FDA-approved; long-term safety unknown.</li><li>May raise heart rate; report palpitations.</li><li>Same GI and pancreatitis cautions as other incretins.</li><li>Report severe abdominal pain immediately.</li></ul>
+      <h3>Evidence</h3><p>Completed Phase 2 obesity RCT (~−24.2% body weight at 48 wk); Phase 3 (TRIUMPH-1 NCT05929066 completed; NCT05882045 active). Not yet approved.</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1056/NEJMoa2301972">Jastreboff/Kaplan/Frías 2023, NEJM</a></li><li><a href="https://doi.org/10.3390/biom15060796">Katsi 2025, Biomolecules</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">15</span>
+      <div><h2>Selank</h2>
+        <div class="meta">Cognition · Research-only · Grade C/D · Research-only</div></div>
+    </div>
+    
+    <div class="body"><h4>Indication</h4><p>Anxiety/stress reduction and cognitive support without sedation. &lt;!-- NOTE: not FDA-approved; Russian-origin; native Selank SC has a short half-life (intranasal is conventional) — SC dosing here is empiric; N-acetyl/amidated analogs are more stable for SC --&gt;</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Pregnancy</li><li class="chk">Lactation</li><li class="chk">Age &lt;18</li><li class="chk">Hypersensitivity</li><li class="chk">Untreated primary anxiety/mood disorder needing formal care</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 300 mcg SC daily; range 250–500 mcg (divided if higher)</li><li><strong>Route:</strong> SC</li><li><strong>Reconstitution:</strong> 10 mg + 2 mL BAC water = 5 mg/mL = 5,000 mcg/mL → 300 mcg = 0.06 mL = <strong>6 units</strong> (U-100)</li><li><strong>Cycle:</strong> 2–4 weeks, pulsed</li><li><strong>Stack pairs:</strong> semax, dsip</li></ul><h4>Labs (baseline)</h4><ul><li>Generally none required</li><li>Anxiety/mood screen</li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Tolerance, anxiety</td><td>Continue</td></tr><tr><td>Mo 1</td><td>Mood/stress effect</td><td>Hold/adjust</td></tr><tr><td>Mo 3</td><td>Off-cycle status</td><td>Plan next pulse</td></tr><tr><td>Mo 6</td><td>Durable benefit</td><td>Continue vs stop</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Investigational consent signed (`consent_investigational_peptide`)</li><li class="chk">Patient education delivered (`patiented_selank`)</li><li class="chk">Source pharmacy verified</li><li class="chk">Mood/anxiety screen documented</li></ul><h4>Patient education key points</h4><ul><li>Not FDA-approved; not a treatment for diagnosed anxiety disorders.</li><li>Now given as a small subcutaneous injection, non-sedating — rotate sites.</li><li>Report worsening mood or unusual symptoms.</li><li>Seek formal care if anxiety is significant.</li></ul>
+      <h3>Evidence</h3><p>**Zero genuine registered trials.** Two small Russian comparative anxiety trials (vs benzodiazepines) + preclinical. Marketed intranasally in Russia only.</p>
+      <h3>References</h3><ul class="cites"><li>Zozulia 2008, Zh Nevrol Psikhiatr (PMID 18454096)</li><li>Medvedev 2014, Zh Nevrol Psikhiatr (PMID 25176261)</li><li><a href="https://doi.org/10.1155/2017/5091027">Kasian 2017, Behav Neurol (rat)</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">16</span>
+      <div><h2>Semax</h2>
+        <div class="meta">Cognition · Research-only · Grade C/D · Research-only</div></div>
+    </div>
+    <div class="callout amber"><b>FDA PCAC — 2026-07-24.</b> Under Pharmacy Compounding Advisory Committee review for the 503A compounding list — non-binding, not FDA approval.</div>
+    <div class="body"><h4>Indication</h4><p>Focus, cognitive support, and recovery from cognitive fatigue. &lt;!-- NOTE: not FDA-approved; Russian-origin; native Semax SC has a short half-life (intranasal is the conventional route) — SC dosing here is empiric; N-acetyl/amidated analogs are more stable for SC --&gt;</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Pregnancy</li><li class="chk">Lactation</li><li class="chk">Age &lt;18</li><li class="chk">Hypersensitivity</li><li class="chk">Acute psychiatric instability (precautionary)</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 300 mcg SC daily; range 250–600 mcg (divided if higher)</li><li><strong>Route:</strong> SC</li><li><strong>Reconstitution:</strong> 10 mg + 2 mL BAC water = 5 mg/mL = 5,000 mcg/mL → 300 mcg = 0.06 mL = <strong>6 units</strong> (U-100)</li><li><strong>Cycle:</strong> 2–4 weeks, pulsed</li><li><strong>Stack pairs:</strong> selank, dsip, cerebrolysin</li></ul><h4>Labs (baseline)</h4><ul><li>Generally none required; BP if hypertensive</li><li>Psychiatric history review</li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Tolerance, focus</td><td>Continue</td></tr><tr><td>Mo 1</td><td>Cognitive/mood effect</td><td>Hold/adjust</td></tr><tr><td>Mo 3</td><td>Off-cycle status</td><td>Plan next pulse</td></tr><tr><td>Mo 6</td><td>Durable benefit</td><td>Continue vs stop</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Investigational consent signed (`consent_investigational_peptide`)</li><li class="chk">Patient education delivered (`patiented_semax`)</li><li class="chk">Source pharmacy verified</li><li class="chk">Vial concentration confirmed</li></ul><h4>Patient education key points</h4><ul><li>Not FDA-approved; effects are subtle.</li><li>Now given as a small subcutaneous injection — rotate sites.</li><li>Report agitation, headache, or sleep changes.</li><li>Used in short courses, not indefinitely.</li></ul>
+      <h3>Evidence</h3><p>**Zero genuine registered trials.** Best human data = a small non-randomized Russian acute-stroke study; rest preclinical. Marketed intranasally in Russia only.</p>
+      <h3>References</h3><ul class="cites"><li>Gusev 1997, Zh Nevrol Psikhiatr (PMID 11517472)</li><li><a href="https://doi.org/10.1111/j.1471-4159.2006.03658.x">Dolotov 2006, J Neurochem (rat)</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">17</span>
+      <div><h2>Sermorelin</h2>
+        <div class="meta">Growth · Off-label · Grade B (PEDS/DX) / D (ADULT WELLNESS) · Physician-review</div></div>
+    </div>
+    
+    <div class="body"><h4>Indication</h4><p>Adult symptomatic age-related GH decline with low-normal/low IGF-1 after excluding other causes.</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Active malignancy (absolute)</li><li class="chk">Untreated severe hypothyroidism (treat first)</li><li class="chk">Pregnancy</li><li class="chk">Lactation; age &lt;18</li><li class="chk">Hypersensitivity</li><li class="chk">Non-functional pituitary (won't respond)</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 300 mcg SC nightly; range 200–500 mcg</li><li><strong>Route:</strong> SC, bedtime, empty stomach</li><li><strong>Reconstitution:</strong> 5 mg + 5 mL BAC water = 1 mg/mL = 1,000 mcg/mL → 300 mcg = 0.30 mL = <strong>30 units</strong> (U-100)</li><li><strong>Cycle:</strong> 12–24 weeks; reassess</li><li><strong>Stack pairs:</strong> ipamorelin, cjc-1295</li></ul><h4>Labs (baseline)</h4><ul><li><strong>IGF-1, TSH/free T4 ← gating</strong> (thyroid + IGF-1)</li><li>Fasting glucose/A1c, CMP, lipids, CBC</li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Tolerance, sleep</td><td>Reinforce timing</td></tr><tr><td>Mo 1</td><td>Symptoms, fasting glucose</td><td>Hold dose</td></tr><tr><td>Mo 3</td><td>IGF-1, glucose</td><td>Titrate to upper-normal IGF-1</td></tr><tr><td>Mo 6</td><td>IGF-1, A1c, composition</td><td>Lowest effective dose; stop if flat</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Off-label consent signed (`consent_gh_secretagogue`)</li><li class="chk">Patient education delivered (`patiented_sermorelin`)</li><li class="chk">Source pharmacy verified</li><li class="chk">Thyroid treated + cancer screen current ← gating</li></ul><h4>Patient education key points</h4><ul><li>Compounded/off-label; this is not synthetic HGH.</li><li>Inject at bedtime on an empty stomach — no carbs first.</li><li>Benefits are modest; we track IGF-1 and symptoms.</li><li>Report swelling, joint aches, or tingling (signs of too much).</li></ul>
+      <h3>Evidence</h3><p>Real FDA history — was approved (Geref) for pediatric GHD diagnosis/treatment, now discontinued; compounded use not FDA-approved. No RCTs for adult "anti-aging" use.</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.2165/00063030-199912020-00007">Prakash & Goa 1999, BioDrugs</a></li><li><a href="https://doi.org/10.2147/ciia.2006.1.4.307">Walker 2006, Clin Interv Aging</a></li><li><a href="https://doi.org/10.1016/s0169-409x(03)00109-1">Esposito 2003, Adv Drug Deliv Rev</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">18</span>
+      <div><h2>Elamipretide (SS-31)</h2>
+        <div class="meta">Longevity · Investigational · Grade B− · Physician-review</div></div>
+    </div>
+    
+    <div class="body"><h4>Indication</h4><p>Mitochondrial-dysfunction/fatigue and healthspan support. &lt;!-- NOTE: investigational; trial dose 40 mg SC daily, compounded use is lower/empiric --&gt;</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Active malignancy (precautionary — absolute)</li><li class="chk">Pregnancy</li><li class="chk">Lactation</li><li class="chk">Age &lt;18</li><li class="chk">Hypersensitivity</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 5–10 mg SC daily (empiric); trial dosing 40 mg SC daily</li><li><strong>Route:</strong> SC</li><li><strong>Reconstitution:</strong> 10 mg + 1 mL BAC water = 10 mg/mL = 10,000 mcg/mL → 10 mg = 1.0 mL = <strong>100 units</strong> (U-100)</li><li><strong>Cycle:</strong> 4–8 weeks</li><li><strong>Stack pairs:</strong> mots-c, epitalon</li></ul><h4>Labs (baseline)</h4><ul><li>CMP, CBC, lipids</li><li>Baseline fatigue/functional metric; cancer screen current</li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Tolerance, site reaction</td><td>Continue</td></tr><tr><td>Mo 1</td><td>Energy/function</td><td>Hold/adjust</td></tr><tr><td>Mo 3</td><td>Functional metric</td><td>Continue if benefit</td></tr><tr><td>Mo 6</td><td>Sustained response</td><td>Stop if no durable change</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Investigational consent signed (`consent_investigational_peptide`)</li><li class="chk">Patient education delivered (`patiented_ss-31`)</li><li class="chk">Source pharmacy verified</li><li class="chk">Cancer screen current ← gating</li></ul><h4>Patient education key points</h4><ul><li>Experimental; human results so far are mixed.</li><li>Injection-site reactions are the most common issue.</li><li>We track energy/function and stop if no benefit.</li><li>Report unusual or persistent symptoms.</li></ul>
+      <h3>Evidence</h3><p>21 registered trials, but the **pivotal Phase 3 in mitochondrial myopathy (MMPOWER-3) missed endpoints and was terminated**; AMD/Barth ongoing; a Ph2a aging trial recruiting (NCT07275424). No approved indication.</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1212/WNL.0000000000207402">Karaa 2023, Neurology (MMPOWER-3)</a></li><li><a href="https://doi.org/10.1002/jcsm.12559">Karaa 2020, J Cachexia Sarcopenia Muscle</a></li><li><a href="https://doi.org/10.1111/bph.12461">Szeto 2014, Br J Pharmacol</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">19</span>
+      <div><h2>Thymosin beta-4 (TB-500)</h2>
+        <div class="meta">Repair · Research-only · Grade D (CONSUMER FRAGMENT) · Research-only</div></div>
+    </div>
+    <div class="callout amber"><b>FDA PCAC — 2026-07-23.</b> Under Pharmacy Compounding Advisory Committee review for the 503A compounding list — non-binding, not FDA approval.</div>
+    <div class="body"><h4>Indication</h4><p>Adjunct for soft-tissue, tendon, or muscle injury and recovery where standard rehab has plateaued.</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Active or prior malignancy (pro-angiogenic — absolute)</li><li class="chk">Pregnancy</li><li class="chk">Lactation</li><li class="chk">Age &lt;18</li><li class="chk">Hypersensitivity to peptide/diluent</li><li class="chk">Undiagnosed mass / malignancy red flag</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 2–2.5 mg SC twice weekly (loading ×4–6 wk), then 2 mg weekly maintenance</li><li><strong>Route:</strong> SC</li><li><strong>Reconstitution:</strong> 10 mg + 2 mL BAC water = 5 mg/mL = 5,000 mcg/mL → 2 mg = 0.40 mL = <strong>40 units</strong> (U-100)</li><li><strong>Cycle:</strong> 6 weeks loading + 4–6 weeks maintenance</li><li><strong>Stack pairs:</strong> bpc-157, ghk-cu</li></ul><h4>Labs (baseline)</h4><ul><li>CBC, CMP</li><li><strong>Age-appropriate cancer screening current ← gating</strong></li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Tolerance, injection site</td><td>Continue loading</td></tr><tr><td>Mo 1</td><td>Functional response</td><td>Taper to weekly maintenance</td></tr><tr><td>Mo 3</td><td>Outcome ± imaging</td><td>Stop if at goal or no benefit</td></tr><tr><td>Mo 6</td><td>Malignancy ROS</td><td>Stop + work up red flags</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Off-label/investigational consent signed (`consent_investigational_peptide`)</li><li class="chk">Patient education delivered (`patiented_tb-500`)</li><li class="chk">Source pharmacy verified</li><li class="chk">Cancer screening current ← gating</li></ul><h4>Patient education key points</h4><ul><li>Not FDA-approved; human evidence is preclinical/anecdotal.</li><li>Tell us any cancer history — theoretical tumor-growth risk.</li><li>An adjunct to rehab, not a replacement for it.</li><li>Report any new mass or unexplained symptom promptly.</li></ul>
+      <h3>Evidence</h3><p>Full-length Tβ4 (RGN-259) has completed Phase 3 ophthalmic RCTs; the **consumer fragment has no completed human efficacy trial** (NCT07487363, Ph1/2, recruiting). PubMed coverage of literal "TB-500" is mostly doping analytics.</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1002/dta.1402">Esposito 2012, Drug Test Anal</a></li><li><a href="https://doi.org/10.1016/j.chroma.2012.09.043">Ho 2012, J Chromatogr A</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">20</span>
+      <div><h2>Tesamorelin</h2>
+        <div class="meta">Growth · FDA-approved · Grade A (LABEL INDICATION) · Grade A pathway</div></div>
+    </div>
+    
+    <div class="body"><h4>Indication</h4><p>Reduction of excess visceral adipose tissue — on-label in HIV-associated lipodystrophy; off-label for VAT reduction. &lt;!-- NOTE: brand Egrifta substantially more expensive than compounded; pricing reflects compounded tier --&gt;</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Active malignancy (absolute)</li><li class="chk">Untreated severe hypothyroidism</li><li class="chk">Pregnancy / disrupted HPA axis</li><li class="chk">Lactation; age &lt;18</li><li class="chk">Hypersensitivity to tesamorelin/mannitol</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 2 mg SC daily</li><li><strong>Route:</strong> SC (abdomen), rotate</li><li><strong>Reconstitution:</strong> 2 mg vial + 2.1 mL sterile water; inject 2 mL ≈ 2 mg. &lt;!-- NOTE: per Egrifta SV labeling --&gt;</li><li><strong>Cycle:</strong> 12–26 weeks; reassess VAT</li><li><strong>Stack pairs:</strong> cjc-ipamorelin-blend, aod-9604, mots-c</li></ul><h4>Labs (baseline)</h4><ul><li><strong>IGF-1, TSH/free T4 ← gating</strong></li><li>Fasting glucose/A1c, lipids, CMP</li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Tolerance, site</td><td>Continue</td></tr><tr><td>Mo 1</td><td>Glucose, symptoms</td><td>Hold/adjust</td></tr><tr><td>Mo 3</td><td>IGF-1, A1c, waist</td><td>Titrate; keep IGF-1 in range</td></tr><tr><td>Mo 6</td><td>VAT/waist, A1c</td><td>Continue if responding</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Off-label consent signed (`consent_gh_secretagogue`) — N/A if on-label</li><li class="chk">Patient education delivered (`patiented_tesamorelin`)</li><li class="chk">Source pharmacy verified</li><li class="chk">Thyroid treated + cancer screen current ← gating</li></ul><h4>Patient education key points</h4><ul><li>FDA-approved for HIV-related belly fat; other uses are off-label.</li><li>Daily injection; may affect blood sugar — we monitor.</li><li>Report swelling, joint pain, or tingling.</li><li>Tell us any cancer history.</li></ul>
+      <h3>Evidence</h3><p>FDA-approved (2010) for HIV-associated lipodystrophy. Two pivotal Phase 3 RCTs (pooled VAT −15.4% vs placebo, glucose-neutral) + ongoing MASLD/liver trials. Off-label for general "anti-aging."</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1210/jc.2010-0490">Falutz 2010, JCEM (pivotal Ph3 pooled)</a></li><li><a href="https://doi.org/10.1172/jci.insight.140134">Fourman 2020, JCI Insight</a></li><li><a href="https://doi.org/10.2165/11202240-000000000-00000">Dhillon 2011, Drugs</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">21</span>
+      <div><h2>Thymosin alpha-1</h2>
+        <div class="meta">Immunity · Research-only · Grade B–C · Physician-review</div></div>
+    </div>
+    
+    <div class="body"><h4>Indication</h4><p>Immune modulation in chronic/recurrent infection or immunosenescence. &lt;!-- NOTE: Zadaxin approved in ~35 countries; not FDA-approved in US --&gt;</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Transplant on immunosuppression (rejection risk — absolute)</li><li class="chk">Severe active autoimmune disease</li><li class="chk">Pregnancy</li><li class="chk">Lactation; age &lt;18</li><li class="chk">Hypersensitivity</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 1.6 mg SC twice weekly</li><li><strong>Route:</strong> SC</li><li><strong>Reconstitution:</strong> 5 mg + 1 mL BAC water = 5 mg/mL = 5,000 mcg/mL → 1.6 mg = 0.32 mL = <strong>32 units</strong> (U-100)</li><li><strong>Cycle:</strong> 8–24 weeks (indication-driven)</li><li><strong>Stack pairs:</strong> kpv</li></ul><h4>Labs (baseline)</h4><ul><li>CBC w/ diff (± lymphocyte subsets), CMP/LFTs</li><li>Autoimmune screen if history; viral serologies as indicated</li><li><strong>Transplant/immunosuppression status ← gating</strong></li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>Tolerance, autoimmune sx</td><td>Continue</td></tr><tr><td>Mo 1</td><td>CBC/diff, LFTs</td><td>Continue if tolerated</td></tr><tr><td>Mo 3</td><td>Subsets, viral load</td><td>Continue per response</td></tr><tr><td>Mo 6</td><td>Immune status, LFTs</td><td>Lowest effective regimen</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Off-label/investigational consent signed (`consent_immunomodulator`)</li><li class="chk">Patient education delivered (`patiented_thymosin-alpha-1`)</li><li class="chk">Source pharmacy verified</li><li class="chk">Transplant/autoimmune status documented ← gating</li></ul><h4>Patient education key points</h4><ul><li>Not FDA-approved in the US; modulates immune tone.</li><li>Tell us about any transplant, immune-suppressing meds, or autoimmune disease.</li><li>Report new joint pain, rash, or fatigue (possible flare).</li><li>Generally well tolerated; report injection-site reactions.</li></ul>
+      <h3>Evidence</h3><p>Real RCTs — chronic hepatitis B (NCT00291616, NCT02366208), melanoma adjuvant (NCT00911443), pancreatitis (TRACE), colorectal adjuvant (NCT05086614 recruiting). Approved as Zadaxin abroad; not FDA-approved. Robust for *specific* indications, **not** "vitality/anti-aging."</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1093/ajhp/58.10.886">Ancell 2001, Am J Health Syst Pharm</a></li><li><a href="https://doi.org/10.1136/bmjopen-2020-037231">Zhou 2020, BMJ Open</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+  <section class="mono">
+    <div class="mono-head">
+      <span class="mono-no">22</span>
+      <div><h2>Tirzepatide</h2>
+        <div class="meta">Metabolism · FDA-approved · Grade A · Grade A pathway</div></div>
+    </div>
+    
+    <div class="body"><h4>Indication</h4><p>Type 2 diabetes (Mounjaro) or chronic weight management (Zepbound) in BMI ≥30, or ≥27 with a weight-related comorbidity.</p><h4>Rule out (contraindications)</h4><ul><li class="chk">Personal/family MTC or MEN-2 (boxed — absolute)</li><li class="chk">Acute pancreatitis (active/recent)</li><li class="chk">Severe gastroparesis</li><li class="chk">Pregnancy / planning pregnancy</li><li class="chk">Lactation; age &lt;18</li><li class="chk">Hypersensitivity to tirzepatide</li></ul><h4>Rx</h4><ul><li><strong>Dose:</strong> 2.5 mg SC weekly ×4 wk → 5 mg; titrate +2.5 mg q4wk to max <strong>15 mg</strong></li><li><strong>Route:</strong> SC weekly</li><li><strong>Reconstitution:</strong> Commercial pen/vial pre-mixed — <strong>fixed 0.5 mL, no math</strong>. &lt;!-- NOTE: prefer commercial; compounded vials vary, verify concentration --&gt;</li><li><strong>Cycle:</strong> Chronic</li><li><strong>Stack pairs:</strong> mots-c, aod-9604</li></ul><h4>Labs (baseline)</h4><ul><li>A1c, fasting glucose, CMP, lipids</li><li>Pregnancy test; <strong>MTC/pancreatitis history screen ← gating</strong></li></ul><h4>Ongoing care</h4><table><tr><th>When</th><th>What to check</th><th>What to adjust</th></tr><tr><td>Wk 2</td><td>GI tolerance, hypoglycemia</td><td>Cut SU/insulin; manage nausea</td></tr><tr><td>Mo 1</td><td>Weight, BP, stepped to 5 mg</td><td>Advance dose if tolerated</td></tr><tr><td>Mo 3</td><td>A1c, weight %</td><td>Titrate toward goal</td></tr><tr><td>Mo 6</td><td>A1c, weight, lipids</td><td>Effective maintenance dose</td></tr></table><h4>Safety &amp; compliance gate</h4><ul><li class="chk">Off-label/investigational consent signed (`consent_glp1_incretin`) — N/A if on-label</li><li class="chk">Patient education delivered (`patiented_tirzepatide`)</li><li class="chk">Source pharmacy verified</li><li class="chk">MTC/pancreatitis screen documented ← gating</li></ul><h4>Patient education key points</h4><ul><li>Nausea is common early and usually eases — eat smaller, low-fat meals.</li><li>Report severe abdominal pain (pancreatitis warning).</li><li>Oral birth control may work less well — use backup.</li><li>Protein + resistance training to protect muscle; weight returns if stopped.</li></ul>
+      <h3>Evidence</h3><p>Extensive completed Phase 3 program (SURMOUNT-1: up to ~−20.9% body weight at 72 wk; SURPASS, SUMMIT, OSA). FDA-approved for T2D, chronic weight management, OSA in obesity.</p>
+      <h3>References</h3><ul class="cites"><li><a href="https://doi.org/10.1056/NEJMoa2206038">Jastreboff 2022, NEJM (SURMOUNT-1)</a></li></ul>
+    </div>
+    <div class="sigblock"><b>Reviewed &amp; approved — Medical Director:</b> ____________________________
+      &nbsp; License # ____________ &nbsp; Signature ____________________ &nbsp; Date __________</div>
+  </section>
+</body></html>
