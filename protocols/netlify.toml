@@ -1,0 +1,22 @@
+# RenuviaMD — Clinical Protocol Library (static site)
+#
+# Deploy from the repo root in one command:
+#   netlify deploy --dir=protocols --prod
+#
+# index.html  = public landing (front door)
+# library.html = the gated library (peptides live; other lines locked-tease)
+# protocols.json = canonical data (consumers: bioaxis, medical-director-console)
+
+[build]
+  publish = "."
+
+# Pretty URLs (also mirrored in ./_redirects for folder deploys)
+[[redirects]]
+  from = "/library"
+  to = "/library.html"
+  status = 200
+
+[[redirects]]
+  from = "/api/protocols"
+  to = "/protocols.json"
+  status = 200
