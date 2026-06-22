@@ -7,7 +7,7 @@ window.RENUVIA_PROTOCOLS = {
       "1": "Curated, MD-signed library",
       "2": "On-demand peptide engine \u2014 verified, graduates into Tier 1"
     },
-    "count": 53
+    "count": 55
   },
   "lines": [
     {
@@ -450,6 +450,34 @@ window.RENUVIA_PROTOCOLS = {
       }
     },
     {
+      "slug": "melanotan-ii",
+      "name": "Melanotan II",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Vitality",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Non-selective melanocortin receptor agonist (MC1R/MC3R/MC4R) \u2014 stimulates melanogenesis (tanning) with central effects on libido and appetite",
+      "primary_use": "Reported (gray-market) for skin tanning and sexual arousal \u2014 not approved for any use",
+      "contraindications": "personal/family melanoma or atypical/dysplastic nevi, dysplastic nevus syndrome, pregnancy, lactation, hypersensitivity",
+      "clinical_notes": "Grade D, not approved. Major safety concern \u2014 case reports of melanoma and new/darkening or changing moles after use; nausea, flushing, and priapism are common. Distinct from FDA-approved afamelanotide (SCENESSE). Mandate full-body skin surveillance; many clinicians decline to prescribe.",
+      "reviewed": "2026-06-22",
+      "body_md": "# Melanotan II\n\n## Indication\nNo approved indication. Reported marketplace use for skin tanning and for sexual arousal/libido. Included as a reference entry because of high consumer demand \u2014 not a recommendation to prescribe.\n\n## Rule out (contraindications)\n- \u2610 Personal or family history of melanoma (absolute)\n- \u2610 Atypical / dysplastic nevi or dysplastic nevus syndrome\n- \u2610 Pregnancy / lactation\n- \u2610 Hypersensitivity\n- \u2610 Uncontrolled hypertension / cardiovascular instability\n- \u2610 Unverified / gray-market source\n\n## Rx\n- **Dose:** *reported* (marketplace; no validated regimen): low microgram SC dosing with cautious titration. **Not a recommended protocol.**\n- **Route:** SC\n- **Reconstitution:** per product (gray-market potency/purity unreliable \u2014 forensic analyses have found ~30% purity)\n- **Cycle:** N/A \u2014 research/gray-market\n- **Stack pairs:** none recommended\n\n## Labs (baseline)\n- Full skin/mole mapping and dermatologic baseline; BP; CMP\n\n## Ongoing care\n| When | What to check | What to adjust |\n| Baseline | Full-body skin exam, mole mapping | Do not start if atypical lesions |\n| Ongoing | New/changing pigmented lesions, BP | Stop + dermatology referral on any change |\n\n## Safety & compliance gate\n- \u2610 Melanoma / atypical-nevi history excluded (absolute)\n- \u2610 Dermatologic surveillance plan documented\n- \u2610 Patient counseled on melanoma case reports + unregulated purity\n- \u2610 Enhanced/experimental informed consent obtained\n\n## Patient education key points\n- **Not FDA-approved; not the same as afamelanotide (SCENESSE).**\n- Case reports link use to melanoma and to new/changing moles \u2014 any pigmented-lesion change requires urgent evaluation.\n- Common effects: nausea, facial flushing, spontaneous erections (priapism).\n- Source purity is unregulated and unreliable.",
+      "teaser": false,
+      "grade": "D",
+      "evidence": "No FDA approval; small/early efficacy data plus harm signals \u2014 case reports of melanoma and mucosal hyperpigmentation after use; nausea/flushing/priapism common. Distinct from FDA-approved afamelanotide.",
+      "citations": [
+        {
+          "label": "Oral mucosal melanoma after MT-II 2025, Int J Oral Maxillofac Surg",
+          "url": "https://doi.org/10.1016/j.ijom.2025.03.014"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
       "slug": "mots-c",
       "name": "MOTS-c",
       "brand_names": [],
@@ -590,6 +618,42 @@ window.RENUVIA_PROTOCOLS = {
         {
           "label": "Kasian 2017, Behav Neurol (rat)",
           "url": "https://doi.org/10.1155/2017/5091027"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "semaglutide",
+      "name": "Semaglutide",
+      "brand_names": [
+        "Ozempic",
+        "Wegovy",
+        "Rybelsus"
+      ],
+      "line": "peptides",
+      "axis": "Metabolism",
+      "status": "fda_approved",
+      "status_label": "FDA-approved",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "GLP-1 receptor agonist \u2014 glucose-dependent insulin secretion, slowed gastric emptying, central appetite suppression",
+      "primary_use": "Type 2 diabetes; chronic weight management; MASH with fibrosis (2025); CV and renal risk reduction",
+      "contraindications": "personal/family medullary thyroid carcinoma or MEN2, pregnancy, prior serious hypersensitivity, pancreatitis history (caution)",
+      "clinical_notes": "FDA-approved, Grade A \u2014 the reference GLP-1. Titrate slowly to limit GI effects. Now approved for MASH (2025) with positive renal (FLOW) and CV (SELECT) outcomes. Counsel on reduced oral-contraceptive reliability with delayed gastric emptying, and on pancreatitis/gallbladder symptoms.",
+      "reviewed": "2026-06-22",
+      "body_md": "# Semaglutide\n\n## Indication\nType 2 diabetes; chronic weight management (BMI \u226530, or \u226527 with a weight-related comorbidity); MASH with moderate\u2013advanced fibrosis (Wegovy, 2025); cardiovascular risk reduction; renal protection in T2D with CKD.\n\n## Rule out (contraindications)\n- \u2610 Personal or family history of medullary thyroid carcinoma or MEN2 (boxed warning)\n- \u2610 Pregnancy or planning pregnancy\n- \u2610 Prior serious hypersensitivity to semaglutide\n- \u2610 History of pancreatitis (caution)\n- \u2610 Severe gastroparesis\n- \u2610 Active proliferative diabetic retinopathy (caution \u2014 monitor)\n\n## Rx\n- **Dose (label, indication-specific):** Wegovy SC weekly 0.25 \u2192 0.5 \u2192 1.0 \u2192 1.7 \u2192 2.4 mg (escalate ~q4wk). Ozempic SC weekly 0.25 \u2192 0.5 \u2192 1.0 (\u21922.0) mg. Rybelsus oral 3 mg \u00d730d \u2192 7 mg \u2192 14 mg daily (fasting, plain water).\n- **Route:** SC once weekly (or oral daily \u2014 Rybelsus)\n- **Titration:** increase no faster than every 4 weeks to limit nausea/GI effects\n- **Cycle:** chronic, indication-dependent\n- **Stack pairs:** per prescriber judgment\n\n## Labs (baseline)\n- A1c, fasting glucose, CMP, lipids, weight/BMI; pregnancy status; lipase if pancreatitis risk\n\n## Ongoing care\n| When | What to check | What to adjust |\n| Wk 4 | GI tolerance, weight, glucose | Hold escalation if intolerant |\n| Mo 1 | A1c trend, weight | Up-titrate per response |\n| Mo 3 | A1c, lipids, BP | Continue / adjust dose |\n| Mo 6 | A1c, weight maintenance, renal | Maintain effective dose |\n\n## Safety & compliance gate\n- \u2610 MTC/MEN2 excluded; pancreatitis risk addressed\n- \u2610 Contraception counseling documented (delayed gastric emptying)\n- \u2610 Patient education delivered (`patient-semaglutide`)\n- \u2610 Source pharmacy verified\n\n## Patient education key points\n- FDA-approved; on-label use per prescriber judgment.\n- Inject the same day each week; rotate sites.\n- Report severe abdominal pain (pancreatitis), gallbladder symptoms, or persistent vomiting.\n- Weight/glucose effects regress if discontinued.",
+      "teaser": false,
+      "grade": "A",
+      "evidence": "Extensive Phase 3 program (SUSTAIN/STEP). FDA-approved for T2D, chronic weight management, and (2025) MASH with fibrosis; FLOW renal and SELECT cardiovascular outcomes positive.",
+      "citations": [
+        {
+          "label": "Sanyal 2025, NEJM (ESSENCE / MASH)",
+          "url": "https://doi.org/10.1056/NEJMoa2413258"
+        },
+        {
+          "label": "Perkovic 2024, NEJM (FLOW renal)",
+          "url": "https://doi.org/10.1056/NEJMoa2403347"
         }
       ],
       "fda_pcac": null

@@ -27,6 +27,24 @@ CLASS = {
     "metabolic-stack": "yellow", "vitality-stack": "yellow", "immunity-stack": "yellow",
     "growth-stack": "red", "longevity-stack": "red", "cognition-stack": "red",
     "wolverine-glow": "red",
+    # added monographs (provider-reference scope)
+    "semaglutide": "green", "melanotan-ii": "red",
+}
+
+# For peptides not in the original reference doc, supply grade/evidence/citations here.
+GRADE_OVERRIDE = {"semaglutide": "A", "melanotan-ii": "D"}
+EVIDENCE_OVERRIDE = {
+    "semaglutide": "Extensive Phase 3 program (SUSTAIN/STEP). FDA-approved for T2D, chronic weight management, and (2025) MASH with fibrosis; FLOW renal and SELECT cardiovascular outcomes positive.",
+    "melanotan-ii": "No FDA approval; small/early efficacy data plus harm signals — case reports of melanoma and mucosal hyperpigmentation after use; nausea/flushing/priapism common. Distinct from FDA-approved afamelanotide.",
+}
+CITES_OVERRIDE = {
+    "semaglutide": [
+        {"label": "Sanyal 2025, NEJM (ESSENCE / MASH)", "url": "https://doi.org/10.1056/NEJMoa2413258"},
+        {"label": "Perkovic 2024, NEJM (FLOW renal)", "url": "https://doi.org/10.1056/NEJMoa2403347"},
+    ],
+    "melanotan-ii": [
+        {"label": "Oral mucosal melanoma after MT-II 2025, Int J Oral Maxillofac Surg", "url": "https://doi.org/10.1016/j.ijom.2025.03.014"},
+    ],
 }
 STATUS_LABEL = {
     "fda_approved": "FDA-approved", "off_label": "Off-label",
@@ -151,9 +169,9 @@ for p in sorted((FORM / "_stacks").glob("*.md")):
 for e in items:
     e["teaser"] = False
     r = REF.get(e["slug"], {})
-    e["grade"] = r.get("grade", "")
-    e["evidence"] = r.get("evidence", "")
-    e["citations"] = r.get("citations", [])
+    e["grade"] = r.get("grade") or GRADE_OVERRIDE.get(e["slug"], "")
+    e["evidence"] = r.get("evidence") or EVIDENCE_OVERRIDE.get(e["slug"], "")
+    e["citations"] = r.get("citations") or CITES_OVERRIDE.get(e["slug"], [])
     pd = PCAC.get(e["slug"])
     e["fda_pcac"] = {"day": pd, "date": PCAC_DATE[pd]} if pd else None
 
