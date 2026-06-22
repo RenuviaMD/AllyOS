@@ -7,7 +7,7 @@ window.RENUVIA_PROTOCOLS = {
       "1": "Curated, MD-signed library",
       "2": "On-demand peptide engine \u2014 verified, graduates into Tier 1"
     },
-    "count": 55
+    "count": 61
   },
   "lines": [
     {
@@ -343,6 +343,106 @@ window.RENUVIA_PROTOCOLS = {
       "fda_pcac": null
     },
     {
+      "slug": "ghrp-2",
+      "name": "GHRP-2 (Pralmorelin)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Synthetic GH-releasing peptide / ghrelin-receptor agonist - stimulates pituitary GH release",
+      "primary_use": "GH-stimulation diagnostic agent abroad; reported off-label for GH elevation - not approved in the US",
+      "contraindications": "active malignancy, hypersensitivity; theoretical cortisol/prolactin and appetite effects",
+      "clinical_notes": "Grade D therapeutic. Recognized GH-stimulation test agent (approved in some countries) but no US therapeutic approval and no efficacy trials for anti-aging/body-composition use. Often stacked with a GHRH analog (unproven).",
+      "reviewed": "2026-06-22",
+      "body_md": "# GHRP-2 (Pralmorelin)\n\n## Indication\nNo US therapeutic approval. Diagnostic GH-stimulation use abroad; reported off-label for GH elevation. Reference entry only.\n\n## Rule out (contraindications)\n- \u2610 Active malignancy\n- \u2610 Hypersensitivity\n- \u2610 Caution: appetite/cortisol/prolactin effects\n\n## Rx\n- **Dose:** *reported* (marketplace): ~100-300 mcg SC 1-3x/day, often stacked with a GHRH analog.\n- **Route:** SC\n- **Cycle:** no validated protocol\n\n## Labs (baseline)\n- IGF-1, TSH/free T4, fasting glucose/A1c\n\n## Safety & compliance gate\n- \u2610 Contraindications excluded; honest evidence-grade (D) disclosed\n- \u2610 Source pharmacy verified\n- \u2610 Enhanced/experimental informed consent where investigational\n\n## Patient education key points\n- Evidence grade D; status reviewed and signed by the treating physician.\n- Report unexpected symptoms; source purity may be unregulated for non-approved peptides.",
+      "teaser": false,
+      "grade": "D",
+      "evidence": "GH-stimulation diagnostic agent abroad; no US therapeutic approval and no efficacy trials for wellness/anti-aging use. 2024\u201326 literature is diagnostic only.",
+      "citations": [],
+      "fda_pcac": null
+    },
+    {
+      "slug": "ghrp-6",
+      "name": "GHRP-6",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "GH-releasing hexapeptide / ghrelin-receptor agonist - GH release with marked appetite stimulation",
+      "primary_use": "Reported off-label for GH elevation and appetite - not approved; preclinical cardioprotection interest",
+      "contraindications": "active malignancy, hypersensitivity; pronounced appetite stimulation, cortisol/prolactin effects",
+      "clinical_notes": "Grade D. No human efficacy trials for wellness use; strong appetite/hunger effect. 2024-26 literature is preclinical (cardioprotective/anti-fibrotic) only. Stacked with GHRH analogs (unproven).",
+      "reviewed": "2026-06-22",
+      "body_md": "# GHRP-6\n\n## Indication\nNo approved indication. Reported off-label GH/appetite use. Reference entry only.\n\n## Rule out (contraindications)\n- \u2610 Active malignancy\n- \u2610 Hypersensitivity\n- \u2610 Marked appetite stimulation\n\n## Rx\n- **Dose:** *reported* (marketplace): ~100 mcg SC 1-3x/day.\n- **Route:** SC\n- **Cycle:** no validated protocol\n\n## Labs (baseline)\n- IGF-1, TSH/free T4, fasting glucose/A1c\n\n## Safety & compliance gate\n- \u2610 Contraindications excluded; honest evidence-grade (D) disclosed\n- \u2610 Source pharmacy verified\n- \u2610 Enhanced/experimental informed consent where investigational\n\n## Patient education key points\n- Evidence grade D; status reviewed and signed by the treating physician.\n- Report unexpected symptoms; source purity may be unregulated for non-approved peptides.",
+      "teaser": false,
+      "grade": "D",
+      "evidence": "No human efficacy trials for wellness use; marked appetite stimulation. 2024\u201326 literature is preclinical (cardioprotective/anti-fibrotic) only.",
+      "citations": [],
+      "fda_pcac": null
+    },
+    {
+      "slug": "gonadorelin",
+      "name": "Gonadorelin",
+      "brand_names": [
+        "Factrel",
+        "Lutrepulse"
+      ],
+      "line": "peptides",
+      "axis": "Vitality",
+      "status": "off_label",
+      "status_label": "Off-label",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Synthetic GnRH - stimulates pituitary LH/FSH release (pulsatile physiology)",
+      "primary_use": "Historically FDA-approved (brands discontinued); compounded use for male HPG-axis support during TRT and female ovulation induction",
+      "contraindications": "hormone-sensitive malignancy, pregnancy (unless ovulation-induction protocol), pituitary adenoma, hypersensitivity",
+      "clinical_notes": "Grade C (B for female pulsatile ovulation induction). Brand products discontinued; only US availability is compounded (reportedly Category 1). Male TRT/fertility use is off-label with limited modern evidence. Pulsatile delivery matters physiologically.",
+      "reviewed": "2026-06-22",
+      "body_md": "# Gonadorelin\n\n## Indication\nHistorically approved for diagnostic/ovulation-induction use (brands discontinued). Compounded off-label use for HPG-axis support during TRT and female ovulation induction.\n\n## Rule out (contraindications)\n- \u2610 Hormone-sensitive malignancy\n- \u2610 Pituitary adenoma\n- \u2610 Pregnancy (unless ovulation-induction protocol)\n- \u2610 Hypersensitivity\n\n## Rx\n- **Dose:** indication- and protocol-specific; pulsatile dosing for ovulation induction. Male TRT-adjunct dosing is off-label and not standardized.\n- **Route:** SC / IV (pulsatile)\n- **Cycle:** protocol-dependent\n\n## Labs (baseline)\n- LH, FSH, testosterone (men) / estradiol + cycle monitoring (women); pregnancy status\n\n## Safety & compliance gate\n- \u2610 Contraindications excluded; honest evidence-grade (C) disclosed\n- \u2610 Source pharmacy verified\n- \u2610 Enhanced/experimental informed consent where investigational\n\n## Patient education key points\n- Evidence grade C; status reviewed and signed by the treating physician.\n- Report unexpected symptoms; source purity may be unregulated for non-approved peptides.",
+      "teaser": false,
+      "grade": "C",
+      "evidence": "Brand GnRH products (Factrel/Lutrepulse) discontinued; only US availability is compounded. Female pulsatile ovulation-induction has real evidence; male TRT-adjunct use is off-label with limited modern data.",
+      "citations": [
+        {
+          "label": "Pulsatile GnRH ovulation induction 2026, Gynecol Endocrinol",
+          "url": "https://doi.org/10.1080/09513590.2026.2677994"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "hexarelin",
+      "name": "Hexarelin (Examorelin)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "GH-releasing hexapeptide / ghrelin-receptor agonist - potent GH release; cardiac CD36 binding studied",
+      "primary_use": "Reported off-label for GH elevation; preclinical cardiovascular interest - not approved",
+      "contraindications": "active malignancy, hypersensitivity; receptor desensitization with continued use, cortisol/prolactin effects",
+      "clinical_notes": "Grade D. No human therapeutic approval or efficacy trials; potent GH secretagogue prone to receptor desensitization. 2024-26 literature is preclinical/analytical only.",
+      "reviewed": "2026-06-22",
+      "body_md": "# Hexarelin (Examorelin)\n\n## Indication\nNo approved indication. Reported off-label GH-elevation use. Reference entry only.\n\n## Rule out (contraindications)\n- \u2610 Active malignancy\n- \u2610 Hypersensitivity\n- \u2610 Tachyphylaxis with continued dosing\n\n## Rx\n- **Dose:** *reported* (marketplace): ~100 mcg SC 1-2x/day.\n- **Route:** SC\n- **Cycle:** no validated protocol\n\n## Labs (baseline)\n- IGF-1, TSH/free T4, fasting glucose/A1c\n\n## Safety & compliance gate\n- \u2610 Contraindications excluded; honest evidence-grade (D) disclosed\n- \u2610 Source pharmacy verified\n- \u2610 Enhanced/experimental informed consent where investigational\n\n## Patient education key points\n- Evidence grade D; status reviewed and signed by the treating physician.\n- Report unexpected symptoms; source purity may be unregulated for non-approved peptides.",
+      "teaser": false,
+      "grade": "D",
+      "evidence": "No human therapeutic approval or efficacy trials; potent GH secretagogue prone to receptor desensitization. 2024\u201326 literature is preclinical/analytical only.",
+      "citations": [],
+      "fda_pcac": null
+    },
+    {
       "slug": "ipamorelin",
       "name": "Ipamorelin",
       "brand_names": [],
@@ -450,6 +550,37 @@ window.RENUVIA_PROTOCOLS = {
       }
     },
     {
+      "slug": "liraglutide",
+      "name": "Liraglutide",
+      "brand_names": [
+        "Victoza",
+        "Saxenda"
+      ],
+      "line": "peptides",
+      "axis": "Metabolism",
+      "status": "fda_approved",
+      "status_label": "FDA-approved",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "GLP-1 receptor agonist (once-daily) \u2014 insulin secretion, slowed gastric emptying, appetite suppression",
+      "primary_use": "Type 2 diabetes (Victoza) and chronic weight management (Saxenda); pediatric weight data",
+      "contraindications": "personal/family MTC or MEN2, pregnancy, pancreatitis history, hypersensitivity",
+      "clinical_notes": "FDA-approved, Grade A. Daily dosing (vs weekly semaglutide). First generic Victoza (2024) and generic Saxenda (2025) now available; SCALE Kids extended pediatric use. Titrate to limit GI effects.",
+      "reviewed": "2026-06-22",
+      "body_md": "# Liraglutide\n\n## Indication\nType 2 diabetes (Victoza); chronic weight management, BMI >=30 or >=27 with comorbidity (Saxenda); pediatric obesity per label.\n\n## Rule out (contraindications)\n- \u2610 Personal/family history of MTC or MEN2 (boxed)\n- \u2610 Pregnancy\n- \u2610 History of pancreatitis (caution)\n- \u2610 Hypersensitivity\n- \u2610 Severe gastroparesis\n\n## Rx\n- **Dose:** Victoza 0.6 mg SC daily x1wk -> 1.2 -> 1.8 mg. Saxenda 0.6 mg daily, +0.6 mg weekly -> 3.0 mg.\n- **Route:** SC once daily\n- **Titration:** weekly steps to limit nausea\n- **Cycle:** chronic\n\n## Labs (baseline)\n- A1c, fasting glucose, CMP, lipids, weight/BMI; pregnancy status; lipase if pancreatitis risk\n\n## Safety & compliance gate\n- \u2610 Contraindications excluded; honest evidence-grade (A) disclosed\n- \u2610 Source pharmacy verified\n- \u2610 Enhanced/experimental informed consent where investigational\n\n## Patient education key points\n- Evidence grade A; status reviewed and signed by the treating physician.\n- Report unexpected symptoms; source purity may be unregulated for non-approved peptides.",
+      "teaser": false,
+      "grade": "A",
+      "evidence": "FDA-approved (Victoza for T2D, Saxenda for weight). SCALE Kids extended pediatric data; first generics approved 2024\u20132025.",
+      "citations": [
+        {
+          "label": "Fox 2024, NEJM (SCALE Kids)",
+          "url": "https://doi.org/10.1056/NEJMoa2407379"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
       "slug": "melanotan-ii",
       "name": "Melanotan II",
       "brand_names": [],
@@ -473,6 +604,34 @@ window.RENUVIA_PROTOCOLS = {
         {
           "label": "Oral mucosal melanoma after MT-II 2025, Int J Oral Maxillofac Surg",
           "url": "https://doi.org/10.1016/j.ijom.2025.03.014"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "mk-677",
+      "name": "MK-677 (Ibutamoren)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Orally active ghrelin-receptor (GHS-R1a) agonist / GH secretagogue - raises GH and IGF-1",
+      "primary_use": "Reported for GH/IGF-1 elevation, body composition, sleep - not approved",
+      "contraindications": "active malignancy, heart failure / fluid retention risk, uncontrolled diabetes, pregnancy/lactation",
+      "clinical_notes": "Grade C/D, not approved. Raises IGF-1 but no approved indication; causes fluid retention, increased appetite, and insulin resistance. New safety signal: atraumatic splenic rupture case report (with RAD-140). Monitor glucose and edema.",
+      "reviewed": "2026-06-22",
+      "body_md": "# MK-677 (Ibutamoren)\n\n## Indication\nNo approved indication. Reported oral use for GH/IGF-1 elevation, body composition, and sleep. Reference entry, not a recommendation.\n\n## Rule out (contraindications)\n- \u2610 Active or prior malignancy\n- \u2610 Heart failure / fluid-retention risk\n- \u2610 Uncontrolled diabetes / insulin resistance\n- \u2610 Pregnancy / lactation\n- \u2610 Hypersensitivity\n\n## Rx\n- **Dose:** *reported* (marketplace): 10-25 mg orally at night. No validated regimen.\n- **Route:** oral\n- **Cycle:** reported cycling; no validated protocol\n\n## Labs (baseline)\n- IGF-1, fasting glucose/A1c, CMP, lipids; weight/edema; cardiac history\n\n## Safety & compliance gate\n- \u2610 Contraindications excluded; honest evidence-grade (C/D) disclosed\n- \u2610 Source pharmacy verified\n- \u2610 Enhanced/experimental informed consent where investigational\n\n## Patient education key points\n- Evidence grade C/D; status reviewed and signed by the treating physician.\n- Report unexpected symptoms; source purity may be unregulated for non-approved peptides.",
+      "teaser": false,
+      "grade": "C/D",
+      "evidence": "No FDA approval; raises IGF-1 but no approved indication. Causes fluid retention and insulin resistance; new atraumatic splenic-rupture case report (with RAD-140).",
+      "citations": [
+        {
+          "label": "Jaffry 2026, Cureus (splenic rupture case)",
+          "url": "https://doi.org/10.7759/cureus.106106"
         }
       ],
       "fda_pcac": null

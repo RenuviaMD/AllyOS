@@ -28,14 +28,24 @@ CLASS = {
     "growth-stack": "red", "longevity-stack": "red", "cognition-stack": "red",
     "wolverine-glow": "red",
     # added monographs (provider-reference scope)
-    "semaglutide": "green", "melanotan-ii": "red",
+    "semaglutide": "green", "melanotan-ii": "red", "liraglutide": "green",
+    "mk-677": "red", "ghrp-2": "red", "ghrp-6": "red", "gonadorelin": "yellow", "hexarelin": "red",
 }
 
 # For peptides not in the original reference doc, supply grade/evidence/citations here.
-GRADE_OVERRIDE = {"semaglutide": "A", "melanotan-ii": "D"}
+GRADE_OVERRIDE = {
+    "semaglutide": "A", "melanotan-ii": "D", "liraglutide": "A", "mk-677": "C/D",
+    "ghrp-2": "D", "ghrp-6": "D", "gonadorelin": "C", "hexarelin": "D",
+}
 EVIDENCE_OVERRIDE = {
     "semaglutide": "Extensive Phase 3 program (SUSTAIN/STEP). FDA-approved for T2D, chronic weight management, and (2025) MASH with fibrosis; FLOW renal and SELECT cardiovascular outcomes positive.",
     "melanotan-ii": "No FDA approval; small/early efficacy data plus harm signals — case reports of melanoma and mucosal hyperpigmentation after use; nausea/flushing/priapism common. Distinct from FDA-approved afamelanotide.",
+    "liraglutide": "FDA-approved (Victoza for T2D, Saxenda for weight). SCALE Kids extended pediatric data; first generics approved 2024–2025.",
+    "mk-677": "No FDA approval; raises IGF-1 but no approved indication. Causes fluid retention and insulin resistance; new atraumatic splenic-rupture case report (with RAD-140).",
+    "ghrp-2": "GH-stimulation diagnostic agent abroad; no US therapeutic approval and no efficacy trials for wellness/anti-aging use. 2024–26 literature is diagnostic only.",
+    "ghrp-6": "No human efficacy trials for wellness use; marked appetite stimulation. 2024–26 literature is preclinical (cardioprotective/anti-fibrotic) only.",
+    "gonadorelin": "Brand GnRH products (Factrel/Lutrepulse) discontinued; only US availability is compounded. Female pulsatile ovulation-induction has real evidence; male TRT-adjunct use is off-label with limited modern data.",
+    "hexarelin": "No human therapeutic approval or efficacy trials; potent GH secretagogue prone to receptor desensitization. 2024–26 literature is preclinical/analytical only.",
 }
 CITES_OVERRIDE = {
     "semaglutide": [
@@ -44,6 +54,15 @@ CITES_OVERRIDE = {
     ],
     "melanotan-ii": [
         {"label": "Oral mucosal melanoma after MT-II 2025, Int J Oral Maxillofac Surg", "url": "https://doi.org/10.1016/j.ijom.2025.03.014"},
+    ],
+    "liraglutide": [
+        {"label": "Fox 2024, NEJM (SCALE Kids)", "url": "https://doi.org/10.1056/NEJMoa2407379"},
+    ],
+    "mk-677": [
+        {"label": "Jaffry 2026, Cureus (splenic rupture case)", "url": "https://doi.org/10.7759/cureus.106106"},
+    ],
+    "gonadorelin": [
+        {"label": "Pulsatile GnRH ovulation induction 2026, Gynecol Endocrinol", "url": "https://doi.org/10.1080/09513590.2026.2677994"},
     ],
 }
 STATUS_LABEL = {
