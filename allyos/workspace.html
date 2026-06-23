@@ -132,6 +132,14 @@ label{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:upperca
 .ally textarea{resize:none;height:60px}
 .scrim{position:fixed;inset:46px 0 0 0;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:.18s;z-index:19}.scrim.open{opacity:1;pointer-events:auto}
 
+.prow{margin-top:15px}
+.prow>.lbl{display:block;margin-bottom:6px}
+.pills{display:flex;flex-wrap:wrap;gap:7px}
+.pill{padding:6px 12px;border:1px solid var(--line2);border-radius:18px;font-size:12.5px;color:var(--muted);cursor:pointer;user-select:none;white-space:nowrap}
+.pill:hover{border-color:var(--faint);color:var(--ink)}
+.pill.on{background:rgba(41,184,168,.14);border-color:var(--teal-dim);color:var(--ink)}
+.pill.flagon{background:#1f1110;border-color:#532520;color:#f0a59d}
+
 @media print{
   body *{visibility:hidden}
   #printArea,#printArea *{visibility:visible}
@@ -1986,6 +1994,38 @@ var ALL = (window.RENUVIA_PROTOCOLS && window.RENUVIA_PROTOCOLS.protocols || [])
   .filter(function(p){return p.line==='peptides' && !p.teaser && !p.is_stack});
 function byslug(s){return ALL.filter(function(p){return p.slug===s})[0]}
 
+/* ───────── structured intake vocab (pills) ───────── */
+var SEX=['Female','Male'];
+var EGFR=['≥90','60–89','45–59','30–44','<30'];
+var A1C=['<5.7','5.7–6.4','≥6.5'];
+var GOALS=['Weight loss','Metabolic','Recovery / repair','Longevity','Cognitive','Sexual health','GH / body comp','Immune'];
+var MEDSL=['Insulin','Sulfonylurea','Metformin','GLP-1 (current)','Thyroid Rx','Anticoagulant','SSRI/SNRI'];
+var FLAGS=['Pancreatitis hx','MTC / MEN2','Pregnancy / planning','Breastfeeding','Gallbladder dz','Eating disorder','Active malignancy','Type 1 DM','Gastroparesis'];
+var FLAGKW={'Pancreatitis hx':['pancreatitis'],'MTC / MEN2':['medullary','men2','thyroid carc'],'Pregnancy / planning':['pregnan'],'Breastfeeding':['lactation','breastfeed'],'Gallbladder dz':['gallbladder'],'Eating disorder':['eating'],'Active malignancy':['malignan','cancer'],'Type 1 DM':['type 1'],'Gastroparesis':['gastroparesis','motility']};
+
+function pills(grp,opts,sel,multi,danger){
+  return '<div class="pills" data-multi="'+(multi?1:0)+'">'+opts.map(function(o){
+    var on = multi ? (sel||[]).indexOf(o)>-1 : sel===o;
+    return '<span class="pill'+(on?(danger?' flagon':' on'):'')+'" data-grp="'+grp+'" data-v="'+o+'">'+o+'</span>';
+  }).join('')+'</div>';
+}
+function bindPills(cb){
+  document.querySelectorAll('.pill[data-grp]').forEach(function(el){
+    el.onclick=function(){ cb(el.dataset.grp, el.dataset.v, el.parentNode.dataset.multi==='1'); };
+  });
+}
+function conflicts(){
+  var out=[],fl=S.patient.flags||[];
+  S.sel.forEach(function(s){var p=byslug(s)||{};var c=(p.contraindications||'').toLowerCase();
+    fl.forEach(function(f){(FLAGKW[f]||[]).forEach(function(kw){
+      if(c.indexOf(kw)>-1){var key=p.name+' ✕ '+f;if(out.indexOf(key)<0)out.push(key);}});});});
+  return out;
+}
+function conflictAlerts(){
+  var c=conflicts();if(!c.length)return '';
+  return c.map(function(x){return '<div class="flag r">⚠ Contraindication conflict — '+x+'</div>'}).join('');
+}
+
 /* ───────── local engine ───────── */
 function gradeTier(g){g=(g||'').toUpperCase();
   if(g.indexOf('D')>-1) return 4; if(g.indexOf('C')>-1) return 3; if(g.indexOf('B')>-1) return 2;
@@ -2007,60 +2047,58 @@ function setStep(n){if(n<0||n>3)return;S.step=n;save();render();}
 function render(){
   document.querySelectorAll('.step').forEach(function(el){var s=+el.dataset.s;
     el.classList.toggle('on',s===S.step);el.classList.toggle('done',s<S.step);});
-  var p=S.patient;ctx.textContent = p.name ? (p.name+(p.age?' · '+p.age+(p.sex?' '+p.sex:''):'')+' · '+(S.sel.length?S.sel.length+' agent(s)':'no protocol')) : 'New session · no patient loaded';
+  ctxUpdate();
   [stepPatient,stepProtocol,stepPlan,stepPacket][S.step]();
   renderActs();save();
 }
 function renderActs(){
-  var canNext = (S.step===0 && S.patient.name) || (S.step===1 && S.sel.length) || (S.step===2) ;
+  var canNext = (S.step===0 && S.patient.name) || (S.step===1 && S.sel.length) || (S.step===2);
   var right = S.step<3
     ? '<button class="btn pri" id="next" '+(canNext?'':'disabled')+'>Continue →</button>'
     : '<button class="btn" id="saveToday">Save to today (device)</button><button class="btn pri" id="printBtn">Print packet</button>';
-  var left = S.step>0 ? '<button class="btn" id="back">← Back</button>' : '<span class="muted-sm">Step '+(S.step+1)+' of 4 · everything on this step stays on your device</span>';
+  var left = S.step>0 ? '<button class="btn" id="back">← Back</button>' : '<span class="muted-sm">Step '+(S.step+1)+' of 4 · everything stays on your device</span>';
   acts.innerHTML = left + right;
   var b=document.getElementById('back');if(b)b.onclick=function(){setStep(S.step-1)};
   var n=document.getElementById('next');if(n)n.onclick=function(){setStep(S.step+1)};
   var pr=document.getElementById('printBtn');if(pr)pr.onclick=doPrint;
   var st=document.getElementById('saveToday');if(st)st.onclick=function(){var t=JSON.parse(localStorage.getItem('allyos_today')||'[]');t.push({name:S.patient.name||'(unnamed)',n:S.sel.length,at:new Date().toLocaleString()});localStorage.setItem('allyos_today',JSON.stringify(t));st.textContent='Saved ✓';};
 }
+function ctxUpdate(){var p=S.patient;ctx.textContent=p.name?(p.name+(p.age?' · '+p.age:'')+(p.sex?' '+p.sex[0]:'')+(S.sel.length?' · '+S.sel.length+' agent(s)':'')):'New session · no patient loaded';}
 
-/* step 1 — patient (local intake) */
+/* step 1 — patient (structured, pill-based) */
 function stepPatient(){
-  var p=S.patient;
+  var p=S.patient; p.goals=p.goals||[]; p.meds=p.meds||[]; p.flags=p.flags||[];
   panel.innerHTML=''
-   +'<div class="phead"><h2>Patient encounter</h2><span class="sub">Intake — stays on this device</span></div>'
-   +'<div class="note-local">🔒 <b>On-device.</b> Entered here, individualized here, printed here. Never transmitted.</div>'
-   +'<div class="grid g4">'
-     +fld('name','Patient name','text','span2',p.name)
-     +fld('sex','Sex','sel','',p.sex,['','Female','Male'])
-     +fld('age','Age','number','',p.age)
-     +fld('weight','Weight (kg)','number','',p.weight)
-     +fld('egfr','eGFR','number','',p.egfr)
-     +fld('a1c','A1c (%)','number','',p.a1c)
-     +fld('goal','Goal / indication','text','',p.goal)
+   +'<div class="phead"><h2>Patient encounter</h2><span class="sub">Structured intake — stays on this device</span></div>'
+   +'<div class="note-local">🔒 <b>On-device.</b> Entered, individualized, and printed here. Never transmitted.</div>'
+   +'<div class="grid g4" style="align-items:end">'
+     +'<div class="span2">'+lf('name','Patient name / ID')+'<input id="f_name" value="'+(p.name||'')+'"></div>'
+     +'<div>'+lf('age','Age')+'<input id="f_age" type="number" value="'+(p.age==null?'':p.age)+'"></div>'
+     +'<div>'+lf('weight','Weight (kg)')+'<input id="f_weight" type="number" value="'+(p.weight==null?'':p.weight)+'"></div>'
    +'</div>'
-   +'<div class="grid" style="margin-top:14px"><div>'+lf('meds','Current medications')+'<textarea id="f_meds" rows="2" placeholder="comma-separated">'+(p.meds||'')+'</textarea></div>'
-     +'<div>'+lf('hx','Relevant history / screen notes')+'<textarea id="f_hx" rows="2" placeholder="pancreatitis, MTC/MEN2, pregnancy, GI, eating disorder…">'+(p.hx||'')+'</textarea></div></div>';
-  bindPatient();
-}
-function fld(id,label,type,cls,val,opts){
-  var inner = type==='sel'
-    ? '<select id="f_'+id+'">'+opts.map(function(o){return '<option'+(o===val?' selected':'')+'>'+o+'</option>'}).join('')+'</select>'
-    : '<input id="f_'+id+'" type="'+type+'" value="'+(val==null?'':val)+'">';
-  return '<div class="'+(cls||'')+'">'+lf(id,label)+inner+'</div>';
+   +'<div class="prow"><span class="lbl">Sex</span>'+pills('sex',SEX,p.sex,false)+'</div>'
+   +'<div class="grid g2"><div class="prow"><span class="lbl">Renal · eGFR</span>'+pills('egfr',EGFR,p.egfr,false)+'</div>'
+     +'<div class="prow"><span class="lbl">A1c %</span>'+pills('a1c',A1C,p.a1c,false)+'</div></div>'
+   +'<div class="prow"><span class="lbl">Goal / indication</span>'+pills('goals',GOALS,p.goals,true)+'</div>'
+   +'<div class="prow"><span class="lbl">Current meds</span>'+pills('meds',MEDSL,p.meds,true)+'</div>'
+   +'<div class="prow"><span class="lbl" style="color:var(--danger)">Contraindication screen — flag any present</span>'+pills('flags',FLAGS,p.flags,true,true)+'</div>';
+  bindPills(function(grp,v,multi){var q=S.patient;
+    if(multi){q[grp]=q[grp]||[];var i=q[grp].indexOf(v);if(i>-1)q[grp].splice(i,1);else q[grp].push(v);}
+    else{q[grp]=q[grp]===v?'':v;}
+    save();stepPatient();renderActs();});
+  var nm=document.getElementById('f_name');nm.oninput=function(){S.patient.name=nm.value;save();ctxUpdate();var n=document.getElementById('next');if(n)n.disabled=!S.patient.name;};
+  document.getElementById('f_age').oninput=function(){S.patient.age=this.value;save();ctxUpdate();};
+  document.getElementById('f_weight').oninput=function(){S.patient.weight=this.value;save();};
 }
 function lf(id,label){return '<label for="f_'+id+'">'+label+'</label>'}
-function bindPatient(){['name','sex','age','weight','egfr','a1c','goal','meds','hx'].forEach(function(k){
-  var el=document.getElementById('f_'+k);if(!el)return;
-  el.oninput=el.onchange=function(){S.patient[k]=el.value;save();ctxUpdate();var n=document.getElementById('next');if(n)n.disabled=!S.patient.name;};});}
-function ctxUpdate(){var p=S.patient;ctx.textContent=p.name?(p.name+(p.age?' · '+p.age+(p.sex?' '+p.sex:''):'')):'New session · no patient loaded';}
 
 /* step 2 — protocol selection + consent tier */
 function stepProtocol(){
   panel.innerHTML=''
    +'<div class="phead"><h2>Protocol</h2><span class="sub">Select agents — you decide; the engine documents</span></div>'
    +'<div class="note-local">Consent tier escalates automatically to the highest-grade agent selected.</div>'
-   +'<div class="fmlytop"><input id="fsearch" placeholder="Search formulary ('+ALL.length+' peptides)…"></div>'
+   +'<div class="prow"><span class="lbl">Line</span><div class="pills"><span class="pill on">Peptides</span><span class="pill" style="opacity:.4;cursor:default">BHRT · soon</span><span class="pill" style="opacity:.4;cursor:default">IV · soon</span><span class="pill" style="opacity:.4;cursor:default">PRP · soon</span><span class="pill" style="opacity:.4;cursor:default">Aesthetics · soon</span></div></div>'
+   +'<div class="fmlytop" style="margin-top:15px"><input id="fsearch" placeholder="Search formulary ('+ALL.length+' peptides)…"></div>'
    +'<div class="fmly" id="fmly"></div>'
    +'<div class="lbl" style="margin:18px 0 6px">Selected</div><div class="selbar" id="selbar"></div>'
    +'<div id="tierwrap"></div>';
@@ -2079,7 +2117,7 @@ function paintFmly(q){
   document.querySelectorAll('.frow').forEach(function(el){el.onclick=function(){toggleSel(el.dataset.s)}});
 }
 function toggleSel(s){var i=S.sel.indexOf(s);if(i>-1)S.sel.splice(i,1);else S.sel.push(s);save();
-  paintFmly(document.getElementById('fsearch').value.toLowerCase());paintSel();renderActs();}
+  paintFmly(document.getElementById('fsearch').value.toLowerCase());paintSel();renderActs();ctxUpdate();}
 function paintSel(){
   var sb=document.getElementById('selbar');
   sb.innerHTML=S.sel.length?S.sel.map(function(s){var p=byslug(s)||{};
@@ -2087,20 +2125,22 @@ function paintSel(){
     :'<span style="color:var(--faint);font-size:12.5px">None selected.</span>';
   sb.querySelectorAll('.x').forEach(function(el){el.onclick=function(){toggleSel(el.dataset.s)}});
   var t=stackTier();
-  document.getElementById('tierwrap').innerHTML = t? '<div class="tierbox"><div class="tn">Tier '+t+'</div><div class="td"><b>Required consent: '+TIERTXT[t].split('—')[0].trim()+'</b><br>'+TIERTXT[t]+(S.sel.length>1?' · combination addendum required':'')+'</div></div>':'';
+  var box = t? '<div class="tierbox"><div class="tn">Tier '+t+'</div><div class="td"><b>Required consent: '+TIERTXT[t].split('—')[0].trim()+'</b><br>'+TIERTXT[t]+(S.sel.length>1?' · combination addendum required':'')+'</div></div>':'';
+  document.getElementById('tierwrap').innerHTML = box + conflictAlerts();
 }
 
-/* step 3 — computed plan (individualized, on device) */
+/* step 3 — computed plan */
 function stepPlan(){
   if(!S.sel.length){panel.innerHTML='<div class="phead"><h2>Plan</h2></div><p style="color:var(--faint)">Select at least one protocol in step 2.</p>';return;}
   panel.innerHTML='<div class="phead"><h2>Plan of care</h2><span class="sub">Computed on this device for '+(S.patient.name||'this patient')+'</span></div>'
    +'<div class="note-local"><span class="ondev">computed on-device</span> Deterministic dosing math — not generated by AI.</div>'
+   + conflictAlerts()
    + S.sel.map(specSheet).join('');
   S.sel.forEach(bindCalc);
 }
 function specSheet(s){
   var p=byslug(s)||{};var d=parseRecon(p.body_md);var v=S.vials[s]||{mg:d.mg,ml:d.ml,dose:d.dose};S.vials[s]=v;
-  var dose=parseField(p.body_md,/\*\*Dose:\*\*\s*([^\n]+)/)||parseField(p.body_md,/\*\*Dose[^:]*:\*\*\s*([^\n]+)/);
+  var dose=parseField(p.body_md,/\*\*Dose:\*\*\s*([^\n]+)/);
   var route=parseField(p.body_md,/\*\*Route:\*\*\s*([^\n]+)/);
   var cyc=parseField(p.body_md,/\*\*Cycle:\*\*\s*([^\n]+)/);
   var r=recon(v.mg,v.ml,v.dose);
@@ -2137,12 +2177,14 @@ function stepPacket(){
   document.getElementById('doc').innerHTML=[docNote,docConsent,docHandout,docCompliance][S.packetTab]();
 }
 function pinfo(){var p=S.patient;return (p.name||'________')+'  ·  '+(p.age?p.age+'y ':'')+(p.sex||'')+(p.weight?'  ·  '+p.weight+' kg':'');}
+function plist(a){return (a&&a.length)?a.join(', '):'';}
 function agentLines(){return S.sel.map(function(s){var p=byslug(s)||{};var v=S.vials[s]||{};var r=recon(v.mg,v.ml,v.dose);
   return '<li><b>'+p.name+'</b> — '+(parseField(p.body_md,/\*\*Dose:\*\*\s*([^\n]+)/)||'per monograph')+'; reconstitute '+v.mg+' mg + '+v.ml+' mL → <b>'+r.units.toFixed(1)+' units</b>/dose'+(S.start[s]?'; start '+fdate(S.start[s]):'')+'</li>';}).join('');}
 function docNote(){var p=S.patient;return '<h3>Clinical encounter note</h3><div class="docsub">'+pinfo()+'  ·  '+new Date().toLocaleDateString()+'</div>'
-  +'<h4>Indication</h4><p>'+(p.goal||'—')+'</p>'
-  +'<h4>Pertinent data</h4><p>eGFR '+(p.egfr||'—')+' · A1c '+(p.a1c||'—')+' · Meds: '+(p.meds||'none recorded')+'</p>'
-  +(p.hx?'<h4>Screen / history</h4><p>'+p.hx+'</p>':'')
+  +'<h4>Indication</h4><p>'+(plist(p.goals)||'—')+'</p>'
+  +'<h4>Pertinent data</h4><p>eGFR '+(p.egfr||'—')+' · A1c '+(p.a1c||'—')+' · Meds: '+(plist(p.meds)||'none recorded')+'</p>'
+  +'<h4>Contraindication screen</h4><p>'+(plist(p.flags)||'No red flags reported')+'</p>'
+  + (conflicts().length?'<p style="color:#f0a59d"><b>Conflicts:</b> '+conflicts().join('; ')+'</p>':'')
   +'<h4>Plan</h4><ul>'+agentLines()+'</ul>'
   +'<p style="margin-top:10px;color:var(--muted)">Consent tier '+stackTier()+' obtained'+(S.sel.length>1?'; combination addendum reviewed':'')+'. Provider counseled patient on risks, benefits, alternatives, and monitoring.</p>'
   +'<div class="sigrow"><div class="sig">Provider signature</div><div class="sig">Date</div></div>';}
@@ -2160,22 +2202,21 @@ function docHandout(){return '<h3>Your treatment plan</h3><div class="docsub">Fo
   +'<h4>What to expect</h4><p>Effects build over weeks. Report severe abdominal pain, persistent vomiting, or unusual symptoms promptly.</p>'
   +'<h4>Questions</h4><p>Contact the prescribing clinic.</p>';}
 function docCompliance(){var p=S.patient;var checks=[
-   ['Patient identity recorded',!!p.name],['Indication / goal documented',!!p.goal],
+   ['Patient identity recorded',!!p.name],['Indication / goal documented',(p.goals||[]).length>0],
    ['Protocol selected',S.sel.length>0],['Consent tier determined',stackTier()>0],
-   ['Reconstitution computed',S.sel.every(function(s){return S.vials[s]})],
-   ['Start date set',S.sel.every(function(s){return S.start[s]})],
-   ['Contraindication screen reviewed',!!p.hx]];
+   ['Reconstitution computed',S.sel.length>0&&S.sel.every(function(s){return S.vials[s]})],
+   ['Start date set',S.sel.length>0&&S.sel.every(function(s){return S.start[s]})],
+   ['No unaddressed contraindication conflict',conflicts().length===0]];
   return '<h3>Pre-visit compliance check</h3><div class="docsub">'+pinfo()+'</div>'
    +checks.map(function(c){return '<div class="flag '+(c[1]?'g':'r')+'">'+(c[1]?'✓':'!')+' '+c[0]+(c[1]?'':' — incomplete')+'</div>'}).join('');}
 
-/* print: render current packet tab into #printArea */
+/* print */
 function doPrint(){
-  var html=[docNote,docConsent,docHandout,docCompliance][S.packetTab]();
-  document.getElementById('printArea').innerHTML=html;
+  document.getElementById('printArea').innerHTML=[docNote,docConsent,docHandout,docCompliance][S.packetTab]();
   window.print();
 }
 
-/* ───────── ally slideover (de-identified reference) ───────── */
+/* ───────── ally slideover ───────── */
 var ally=document.getElementById('ally'),scrim=document.getElementById('scrim');
 function openAlly(){ally.classList.add('open');scrim.classList.add('open');}
 function closeAlly(){ally.classList.remove('open');scrim.classList.remove('open');}
@@ -2185,7 +2226,7 @@ document.getElementById('allySend').onclick=function(){
   var q=document.getElementById('allyIn').value.trim();if(!q)return;
   var b=document.getElementById('allyBody');
   b.innerHTML+='<div style="margin:12px 0"><div class="lbl">You</div><p style="font-size:13px">'+q+'</p></div>';
-  b.innerHTML+='<div style="margin:12px 0"><div class="lbl" style="color:var(--teal)">Ally</div><p style="font-size:13px;color:var(--muted)">Connect ANTHROPIC_API_KEY in Netlify to enable live answers. Ally will answer from the curated knowledge base — honest grades, real citations, flags to verify. (De-identified questions only.)</p></div>';
+  b.innerHTML+='<div style="margin:12px 0"><div class="lbl" style="color:var(--teal)">Ally</div><p style="font-size:13px;color:var(--muted)">Connect ANTHROPIC_API_KEY in Netlify to enable live answers — honest grades, real citations, flags to verify. (De-identified questions only.)</p></div>';
   document.getElementById('allyIn').value='';b.scrollTop=b.scrollHeight;
 };
 
@@ -2194,5 +2235,6 @@ document.getElementById('endBtn').onclick=function(){if(confirm('Clear this sess
 document.getElementById('tier').textContent='TOP';
 
 render();
+
 </script>
 </body></html>
