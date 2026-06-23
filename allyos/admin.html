@@ -43,9 +43,9 @@ footer{color:var(--faint);font-size:11px;border-top:1px solid var(--line);margin
       <p>Re-runs the multi-Opus-auditor pass over live content — re-resolves every citation, re-checks FDA-label doses &amp; contraindications, flags newly outdated or drifted items.</p>
       <div class="meta">Last run: today 04:12 · 30 peptides · 0 fabrication · 2 currency flags</div>
       <button class="btn pri">▷ Run audit now</button> <button class="btn">View report</button></div>
-    <div class="tile"><div class="h"><b>Debug / Health</b><span class="st ok">healthy</span></div>
+    <div class="tile"><div class="h"><b>Debug / Health</b><span class="st ok" id="hStat">healthy</span></div>
       <p>Validates every JSON, loads the workspace headless for console errors, re-tests reconstitution math, checks broken links &amp; stale data, regression-tests the engine.</p>
-      <div class="meta">Last run: today 04:18 · JSON 6/6 valid · 0 console errors · 22/22 calc OK</div>
+      <div class="meta" id="hMeta">Last run: today 04:18 · JSON 6/6 valid · 0 console errors · 22/22 calc OK</div>
       <button class="btn pri">▷ Run health check</button> <button class="btn">View report</button></div>
     <div class="tile"><div class="h"><b>Ally Output Review</b><span class="st warn">3 flagged</span></div>
       <p>Provider-flagged Ally answers (de-identified) queued for your review &amp; correction; bad answers feed back into the knowledge base.</p>
@@ -82,4 +82,11 @@ footer{color:var(--faint);font-size:11px;border-top:1px solid var(--line);margin
 
   <footer><b style="color:#dfeae8">AllyOS Admin — Master Console.</b> Governs shared clinical content, Ally behavior, system health, and regulatory currency. Handles no PHI. Prototype — daily execution wires to a scheduled GitHub Action + the Claude API; figures shown are illustrative. © 2026 RenuviaMD®.</footer>
 </div>
+<script>
+fetch('admin-status.json').then(function(r){return r.json()}).then(function(d){
+  var ok=d.json_valid&&d.calc_ok&&(!d.errors||!d.errors.length);
+  var st=document.getElementById('hStat'); if(st){st.textContent=ok?'healthy':'issues';st.className='st '+(ok?'ok':'warn');}
+  var m=document.getElementById('hMeta'); if(m){m.textContent='Last run '+(d.date||'').slice(0,16).replace('T',' ')+' UTC · '+(d.files_checked?d.files_checked.length:0)+' JSON valid · calc '+(d.calc_ok?'OK':'FAIL')+(d.errors&&d.errors.length?' · '+d.errors.length+' error(s)':' · 0 errors');}
+}).catch(function(){});
+</script>
 </body></html>
