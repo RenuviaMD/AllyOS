@@ -1,0 +1,1209 @@
+{
+  "schema": "renuvia.protocol-detail.v1",
+  "updated": "2026-06-23",
+  "note": "Detailed clinical management protocols — the deterministic 'Full protocol' reference shown to providers per agent. AUDITED by independent Opus auditors (factual/label/DOI, clinical soundness, fabrication/currency); recon math + all real DOIs verified, no fabrication. 30 agents locked 2026-06-23.",
+  "peptides": {
+    "semaglutide": {
+      "status": "FDA-approved (Wegovy / Ozempic / Rybelsus). Continuous therapy — no cycling; follow-up only.",
+      "candidacy": "Adults BMI ≥30, or ≥27 with ≥1 weight-related comorbidity. Also: adolescents ≥12 (≥95th percentile); MACE reduction in CVD + obesity; noncirrhotic MASH F2–F3 fibrosis (Wegovy, Aug 2025); oral semaglutide 25 mg daily (Dec 2025).",
+      "starting_dose": "Wegovy 0.25 mg SC once weekly ×4 weeks (initiation only).",
+      "titration": "0.25 → 0.5 → 1.0 → 1.7 → 2.4 mg (max), each step ~4 weeks.",
+      "hold_rules": "If a dose isn't tolerated, delay escalation 4 weeks at the current/prior dose — don't skip steps. If 2.4 mg not tolerated, drop to 1.7 mg ×4 wk then re-attempt; if still intolerant, discontinue. ≥2 missed weekly doses → consider reinitiate + re-titrate.",
+      "ae_common": [
+        "Nausea ~44%",
+        "Diarrhea ~30%",
+        "Vomiting ~24%",
+        "Constipation ~24%",
+        "GI discontinuation ~4.5% (vs 0.8% placebo, STEP-1)"
+      ],
+      "ae_serious": [
+        "Pancreatitis",
+        "Gallbladder disease",
+        "Acute kidney injury from volume depletion",
+        "Diabetic retinopathy worsening (SUSTAIN-6)",
+        "Hypoglycemia with insulin/sulfonylurea",
+        "Medullary thyroid carcinoma — boxed warning",
+        "Serious hypersensitivity",
+        "Mood / suicidality — counsel"
+      ],
+      "management": [
+        "Nausea/vomiting: small low-fat frequent meals, hydrate, HOLD escalation, ondansetron PRN (off-label adjunct), step down if severe",
+        "Constipation: fiber, fluids, activity + osmotic laxative",
+        "Hypoglycemia: reduce insulin/sulfonylurea at initiation",
+        "Gallbladder symptoms: RUQ ultrasound + LFTs",
+        "Suspected pancreatitis: STOP, evaluate; do NOT restart if confirmed",
+        "Dehydration/AKI: hold, rehydrate, check renal, reassess diuretics/RAAS/NSAIDs"
+      ],
+      "monitoring": [
+        "Baseline: wt/BMI, BP/HR, renal, glucose/A1c, meds, pregnancy, MTC/pancreatitis screen, mood",
+        "~4 wk & each up-titration: tolerability, hydration, wt, HR/BP, adjust insulin/SU, mood",
+        "3 mo: weight response, tolerability, glucose",
+        "6 mo + every 3–6 mo: weight trend, labs, GI tolerance, mental health",
+        "Discontinue if pregnancy"
+      ],
+      "discontinuation": "Chronic disease — substantial regain expected (~⅔ over ~1 yr). No mandated taper; restart lower + re-titrate after ≥2 missed doses.",
+      "sources": [
+        "FDA Wegovy label (confirm current revision)",
+        "Wilding 2021 STEP-1, NEJM, doi:10.1056/NEJMoa2032183"
+      ]
+    },
+    "tirzepatide": {
+      "status": "FDA-approved (Mounjaro / Zepbound). Continuous — no cycling; follow-up only.",
+      "candidacy": "Adults BMI ≥30, or ≥27 + ≥1 comorbidity; also moderate–severe OSA with obesity (Dec 2024).",
+      "starting_dose": "2.5 mg SC once weekly ×4 weeks (initiation only).",
+      "titration": "2.5 → 5 → 7.5 → 10 → 12.5 → 15 mg (max); +2.5 mg increments after ≥4 weeks. Maintenance 5/10/15 mg.",
+      "hold_rules": "Don't escalate until ≥4 wk and tolerated; for GI intolerance stay at current dose or step down — don't skip increments.",
+      "ae_common": [
+        "Nausea ~25–33% (10 mg arm ~33%)",
+        "Diarrhea ~19–23%",
+        "Constipation ~11–17%",
+        "Vomiting ~8–13%",
+        "AE discontinuation ~4–7% (SURMOUNT-1)"
+      ],
+      "ae_serious": [
+        "Pancreatitis",
+        "Gallbladder disease",
+        "Acute kidney injury",
+        "Hypoglycemia with insulin/sulfonylurea",
+        "Diabetic retinopathy",
+        "MTC — boxed warning",
+        "Serious hypersensitivity",
+        "Mood / suicidality"
+      ],
+      "management": [
+        "Same GI / constipation / hypoglycemia / gallbladder / pancreatitis / AKI approach as semaglutide",
+        "Reduced oral-contraceptive efficacy → advise non-oral or barrier method for 4 wk after start and after each dose increase",
+        "Suspected pancreatitis: STOP, do not restart if confirmed"
+      ],
+      "monitoring": [
+        "Baseline (incl. oral-contraceptive review)",
+        "~4 wk & each up-titration (reinforce contraception counseling after each increase)",
+        "3 mo, 6 mo + every 3–6 mo",
+        "Discontinue if pregnancy"
+      ],
+      "discontinuation": "Chronic; SURMOUNT-4 withdrawal showed substantial regain. No mandated taper; re-titrate if restarting.",
+      "sources": [
+        "FDA Zepbound label",
+        "Jastreboff 2022 SURMOUNT-1, NEJM, doi:10.1056/NEJMoa2206038"
+      ]
+    },
+    "liraglutide": {
+      "status": "FDA-approved (Saxenda / Victoza). Once DAILY (not weekly). Continuous — no cycling.",
+      "candidacy": "Adults BMI ≥30, or ≥27 + ≥1 comorbidity; adolescents 12–17 >60 kg with obesity.",
+      "starting_dose": "0.6 mg SC daily ×1 week.",
+      "titration": "0.6 → 1.2 → 1.8 → 2.4 → 3.0 mg (max), +0.6 mg at weekly intervals.",
+      "hold_rules": "Delay escalation ~1 extra week at current dose if intolerant; if 3.0 mg can't be tolerated, discontinue (efficacy is at 3.0 mg). ≥3 consecutive days missed → re-initiate at 0.6 mg + re-titrate.",
+      "ae_common": [
+        "Nausea ~39%",
+        "Diarrhea ~21%",
+        "Constipation ~19%",
+        "Vomiting ~16%",
+        "(label-pooled program values)"
+      ],
+      "ae_serious": [
+        "Pancreatitis",
+        "Gallbladder disease",
+        "Acute kidney injury",
+        "Hypoglycemia with insulin/sulfonylurea",
+        "Heart-rate increase",
+        "Diabetic retinopathy",
+        "MTC — boxed warning",
+        "Mood / suicidality"
+      ],
+      "management": [
+        "Same class approach (GI diet/hold, fiber/osmotic for constipation, reduce insulin/SU, evaluate gallbladder, STOP + no restart for pancreatitis, hold/rehydrate/check renal for AKI)"
+      ],
+      "monitoring": [
+        "Baseline; up-titration is weekly; ~4 wk after reaching 3.0 mg",
+        "16-week / 4% rule: if NOT ≥4% baseline weight loss by ~16 wk, unlikely effective — consider discontinuation",
+        "6 mo + every 3–6 mo",
+        "Discontinue if pregnancy"
+      ],
+      "discontinuation": "Chronic; regain expected (SCALE Maintenance). Restart at 0.6 mg after ≥3 missed days.",
+      "sources": [
+        "FDA Saxenda label (note 16-wk/4% rule, weekly up-titration)",
+        "Pi-Sunyer 2015 SCALE, NEJM, doi:10.1056/NEJMoa1411892"
+      ]
+    },
+    "retatrutide": {
+      "status": "⚠ INVESTIGATIONAL — NOT FDA-approved (Phase 3). No label, indication, or approved dose. Do not prescribe outside an authorized trial/IND. All parameters are Phase-2-derived and flagged VERIFY.",
+      "candidacy": "VERIFY — no approved indication. Phase 2: BMI ≥30, or 27–<30 + ≥1 weight-related condition.",
+      "starting_dose": "VERIFY — Phase 2 used 2 mg or 4 mg SC weekly; the lower 2 mg start mitigated GI AEs.",
+      "titration": "VERIFY — weekly SC, stepwise toward 1/4/8/12 mg; max studied 12 mg.",
+      "hold_rules": "VERIFY — lower start + slower escalation reduced GI events; stay/slow for intolerance, don't skip steps.",
+      "ae_common": [
+        "GI events, dose-related, mostly mild–moderate (per-symptom rates are dose-stratified — VERIFY, not a single number)",
+        "Dose-dependent heart-rate increase peaking ~wk 24, then declining"
+      ],
+      "ae_serious": [
+        "By class, pending Phase-3/label (VERIFY): pancreatitis, gallbladder, AKI, hypoglycemia with insulin/SU, retinopathy, MTC/thyroid C-cell"
+      ],
+      "management": [
+        "By class analogy (VERIFY): GI diet/hydrate/slow-or-hold + antiemetic; constipation fiber/osmotic; reduce insulin/SU at start; MONITOR HR; gallbladder evaluate; STOP + no restart for confirmed pancreatitis; hold/hydrate/check renal for AKI; follow the trial safety plan"
+      ],
+      "monitoring": [
+        "Standard GLP-1 continuous cadence (baseline, ~4 wk, 3 mo, 6 mo, ongoing): wt/BMI, GI tolerance, BP, HR (emphasized), renal, glucose, mood + protocol-specific labs/ECG — VERIFY"
+      ],
+      "discontinuation": "VERIFY — long-term withdrawal data not yet established; regain expected by class analogy.",
+      "sources": [
+        "No FDA label — VERIFY",
+        "Jastreboff 2023 Phase-2, NEJM, doi:10.1056/NEJMoa2301972 (NCT04881760)"
+      ]
+    },
+    "sermorelin": {
+      "status": "⚠ VERIFY — compounded/off-label, NOT FDA-approved. Brand Geref (GHRH 1-29) was approved for pediatric GHD but is discontinued; adult GH-axis use is compounded, off-label, no modern efficacy RCTs. Cycled (not continuous like a GLP-1).",
+      "candidacy": "Symptomatic adults with low-normal/age-appropriate-low IGF-1 seeking GH-axis support (recovery, body composition, sleep). Empiric — benefit inferred from GHRH-analog mechanism, not proven; requires intact pituitary to respond. Treat hypothyroidism first (gating); exclude active malignancy (absolute).",
+      "starting_dose": "300 mcg SC typical (range 200–500 mcg). Recon DEFAULT: 5 mg vial + 5 mL BAC → 1 mg/mL (1,000 mcg/mL) → 300 mcg = 0.30 mL = 30 units (U-100). Units are calculator defaults — recompute from the pharmacy's actual vial mg + BAC mL.",
+      "titration": "Titrate to lowest effective dose within 200–500 mcg, guided by IGF-1 (target upper-normal-for-age, not above) and symptom/tolerance response. Hold/step down if IGF-1 flat or AEs emerge.",
+      "frequency": "Nightly at bedtime, fasted (≥2–3 h after the last meal — glucose/somatostatin blunt the GH pulse). Some protocols use 5-on / 2-off weekly dosing.",
+      "cycle_rest": "Cycle 12–24 weeks, then reassess. No fixed washout — effectively continuous-with-reassessment; titrate to lowest effective dose, hold or stop if IGF-1 is flat or symptoms have resolved.",
+      "ae_common": [
+        "Injection-site reactions (redness, pain, swelling, pruritus)",
+        "Flushing",
+        "Headache",
+        "Dizziness",
+        "Transient nausea",
+        "Somnolence / vivid dreams",
+        "Fluid retention / mild edema",
+        "Arthralgia"
+      ],
+      "ae_serious": [
+        "Carpal tunnel syndrome",
+        "Significant peripheral edema",
+        "New/worsening glucose intolerance or diabetes",
+        "Unmasking/worsening of OSA",
+        "Hypersensitivity reaction",
+        "Theoretical concern with occult malignancy (GH/IGF-1 mitogenic axis — active cancer is an absolute screen-out)"
+      ],
+      "management": [
+        "Injection-site reactions → rotate SC sites, correct technique, cold compress; usually self-limited",
+        "Fluid retention / arthralgia / paresthesia → reduce to lowest effective dose; hold if carpal-tunnel symptoms appear",
+        "Glucose drift → reinforce diet, recheck fasting glucose/A1c; reduce or stop if worsening",
+        "Treat hypothyroidism first (blunts GH response); reduce concurrent glucocorticoids if feasible",
+        "Hypersensitivity → discontinue"
+      ],
+      "monitoring": [
+        "Baseline (gating): IGF-1 and TSH/free T4 (treat hypothyroidism first), fasting glucose/A1c, CMP, lipids; exclude active malignancy",
+        "Wk 2: tolerance / fluid retention",
+        "Mo 1: symptoms + glucose",
+        "Mo 3: IGF-1 + glucose (titrate to upper-normal IGF-1)",
+        "Mo 6: IGF-1 + body composition (lowest effective dose)"
+      ],
+      "discontinuation": "Stop if IGF-1 fails to rise / symptoms unimproved after an adequate course, if IGF-1 exceeds upper-normal-for-age, if carpal tunnel / significant edema / glucose intolerance develops, on hypersensitivity, on pregnancy, or if malignancy is diagnosed. No taper required (secretagogue, not exogenous GH).",
+      "sources": [
+        "Empiric — VERIFY",
+        "Walker 2006 (review)",
+        "Prakash & Goa 1999 (review)",
+        "Geref FDA history (discontinued)"
+      ]
+    },
+    "tesamorelin": {
+      "status": "FDA-APPROVED (2010, EGRIFTA / EGRIFTA SV) for reduction of excess abdominal visceral adipose tissue (VAT) in HIV-associated lipodystrophy. Continuous per label (effect regresses on discontinuation). Anti-aging / non-HIV use is OFF-LABEL / empiric.",
+      "candidacy": "ON-LABEL: HIV-associated lipodystrophy with excess VAT. OFF-LABEL (empiric): non-HIV central/visceral adiposity, GH-axis support — disclose off-label status. Contraindicated if pituitary axis disrupted, active malignancy, or pregnant.",
+      "starting_dose": "LABEL fixed dose, no titration. EGRIFTA SV: 1.4 mg SC once daily — reconstitute with 0.5 mL Sterile Water, inject 0.35 mL. Original EGRIFTA: 2 mg SC once daily — reconstitute with 2.1 mL Sterile Water, inject 2 mL. Use STERILE WATER, NOT BAC. EGRIFTA SV ≠ original EGRIFTA (different strength/recon — do not conflate).",
+      "titration": "Fixed dose — no titration. Manage by continue / discontinue, not up-titration.",
+      "frequency": "Once daily SC, abdomen, rotate injection sites.",
+      "cycle_rest": "Continuous per label — no scheduled off-period. Off-label VAT protocols reassess at 12–26 wk and discontinue if no VAT response.",
+      "ae_common": [
+        "Injection-site reactions (erythema, pruritus, pain, irritation, hemorrhage, hypertrophy)",
+        "Arthralgia",
+        "Myalgia",
+        "Peripheral edema",
+        "Extremity pain",
+        "Paresthesia / hypoesthesia",
+        "Flushing",
+        "Nausea"
+      ],
+      "ae_serious": [
+        "IGF-1 elevation (potential neoplasia-promotion concern)",
+        "Fluid retention (edema, carpal tunnel syndrome)",
+        "Glucose intolerance / new or worsening diabetes",
+        "Hypersensitivity (rash, urticaria; rare anaphylaxis)",
+        "Acute critical illness (GH-class mortality signal — consider discontinuing)",
+        "Malignancy recurrence"
+      ],
+      "management": [
+        "Injection-site reactions → rotate abdominal sites, technique review; usually self-limited",
+        "Fluid retention / arthralgia / carpal tunnel → manage symptomatically; discontinue if persistent/severe",
+        "Persistent IGF-1 elevation → consider discontinuation (label)",
+        "Glucose intolerance → monitor glucose/A1c; manage diabetes; discontinue if worsening",
+        "Hypersensitivity → discontinue; treat reaction",
+        "Intercurrent acute critical illness → consider holding/discontinuing"
+      ],
+      "monitoring": [
+        "Baseline: IGF-1, fasting glucose/A1c, exclude active malignancy and pituitary-axis disruption, pregnancy status",
+        "On therapy: periodic IGF-1 (consider discontinuation with persistent elevation), glucose/A1c, edema / carpal-tunnel symptoms, VAT/clinical response",
+        "Malignancy surveillance; discontinue on any recurrence"
+      ],
+      "discontinuation": "Discontinue for persistent IGF-1 elevation, malignancy or recurrence, pregnancy, hypersensitivity, intolerable fluid retention/CTS, uncontrolled glucose intolerance, acute critical illness, or (off-label) no VAT response by 12–26 wk. No taper. VAT benefit regresses after stopping.",
+      "sources": [
+        "FDA LABEL (EGRIFTA / EGRIFTA SV prescribing information)",
+        "Falutz 2010, JCEM — ~15% VAT reduction vs placebo, glucose-neutral (doi:10.1210/jc.2010-0490)"
+      ]
+    },
+    "cjc-1295": {
+      "status": "⚠ VERIFY — compounded/research-only, NOT FDA-approved. Default here is no-DAC (mod GRF 1-29), dosed DAILY. The DAC ester is a different molecule on a weekly schedule (1–2 mg/wk) — do not conflate. Cycled.",
+      "candidacy": "Symptomatic adults with low-normal IGF-1 seeking GH-axis support (recovery, body composition); almost always paired with a ghrelin agonist (ipamorelin). Empiric — the only human RCT is of the DAC form (PK/PD); no-DAC has no efficacy RCT. Treat hypothyroidism first; exclude active malignancy (absolute).",
+      "starting_dose": "100 mcg SC typical (range 100–200 mcg), no-DAC. Recon DEFAULT: 5 mg vial + 2.5 mL BAC → 2 mg/mL (2,000 mcg/mL) → 100 mcg = 0.05 mL = 5 units (U-100). Recompute from actual fill.",
+      "titration": "Titrate within 100–200 mcg to upper-normal IGF-1, lowest effective dose. Watch fluid retention at higher doses.",
+      "frequency": "Nightly at bedtime, fasted (no-DAC daily schedule).",
+      "cycle_rest": "Cycle 12–16 weeks, then reassess. Continuous-with-reassessment — titrate to upper-normal IGF-1, lowest effective dose; hold/stop on plateau or AEs.",
+      "ae_common": [
+        "Injection-site reactions",
+        "Flushing",
+        "Headache",
+        "Transient dizziness / lightheadedness",
+        "Fluid retention / mild edema",
+        "Arthralgia",
+        "Vivid dreams / somnolence"
+      ],
+      "ae_serious": [
+        "Carpal tunnel syndrome",
+        "Significant edema",
+        "Glucose intolerance / new or worsening diabetes",
+        "OSA unmasking/worsening",
+        "Hypersensitivity",
+        "Occult-malignancy concern (mitogenic GH/IGF-1 axis — active cancer is an absolute screen-out)"
+      ],
+      "management": [
+        "Site reactions → rotate, technique, cold compress",
+        "Fluid retention / arthralgia / paresthesia → reduce to lowest effective dose; hold if CTS develops",
+        "Glucose drift → reinforce diet, recheck glucose/A1c; reduce/stop if worsening",
+        "Treat hypothyroidism first (gating); reinforce bedtime-fasted timing",
+        "Hypersensitivity → discontinue"
+      ],
+      "monitoring": [
+        "Baseline (gating): IGF-1 and TSH/free T4 (treat thyroid first), fasting glucose, CMP, lipids; cancer screen current",
+        "Wk 2: tolerance / fluid retention (reinforce timing)",
+        "Mo 1: symptoms + glucose",
+        "Mo 3: IGF-1 + glucose (titrate to upper-normal IGF-1)",
+        "Mo 6: IGF-1 + composition (lowest effective dose)"
+      ],
+      "discontinuation": "Stop on IGF-1 plateau without benefit, IGF-1 above upper-normal, CTS / significant edema / glucose intolerance, hypersensitivity, pregnancy, or malignancy diagnosis. No taper (secretagogue).",
+      "sources": [
+        "Empiric — VERIFY",
+        "Teichman 2006, JCEM (human DAC RCT; t½ ~6–8 d; doi:10.1210/jc.2005-1536)",
+        "Ionescu & Frohman 2006, JCEM (doi:10.1210/jc.2006-1702)",
+        "Jetté 2005, Endocrinology, rat (doi:10.1210/en.2004-1286)"
+      ]
+    },
+    "ipamorelin": {
+      "status": "⚠ VERIFY — compounded/research-only, NOT FDA-approved. Two completed human Phase 2 trials (GI motility) were both negative; zero human efficacy data for anti-aging/body-composition use. Cycled.",
+      "candidacy": "Symptomatic adults with low-normal IGF-1 seeking GH-axis support (recovery, body composition, sleep), typically paired with a GHRH analog (CJC-1295 or sermorelin). Empiric — 'cleanest' GHRP (minimal cortisol/prolactin/hunger vs GHRP-6) but no proven efficacy. Treat hypothyroidism first; exclude active malignancy (absolute).",
+      "starting_dose": "200–300 mcg SC (typical 300 mcg). Recon DEFAULT: 5 mg vial + 2.5 mL BAC → 2 mg/mL (2,000 mcg/mL) → 300 mcg = 0.15 mL = 15 units (U-100).",
+      "titration": "Titrate within 200–300 mcg to lowest effective dose; guided by IGF-1 (upper-normal target) and tolerance. (Some protocols dose BID.)",
+      "frequency": "Nightly at bedtime, fasted (or BID).",
+      "cycle_rest": "Cycle 12–16 weeks, then reassess. Continuous-with-reassessment; lowest effective dose; hold/stop on plateau or AEs.",
+      "ae_common": [
+        "Injection-site reactions",
+        "Transient headache",
+        "Flushing",
+        "Lightheadedness",
+        "Mild fluid retention",
+        "Arthralgia",
+        "Somnolence / vivid dreams (minimal appetite/cortisol/prolactin effect vs other GHRPs)"
+      ],
+      "ae_serious": [
+        "Carpal tunnel syndrome",
+        "Significant edema",
+        "Glucose intolerance / new or worsening diabetes",
+        "OSA unmasking/worsening",
+        "Hypersensitivity",
+        "Occult-malignancy concern (active cancer is an absolute screen-out)"
+      ],
+      "management": [
+        "Site reactions → rotate, technique, cold compress",
+        "Fluid retention / arthralgia / paresthesia → reduce to lowest effective; hold if CTS appears",
+        "Glucose drift → diet reinforcement, recheck glucose/A1c; reduce/stop if worsening",
+        "Treat hypothyroidism first (gating); reinforce bedtime-fasted timing",
+        "Hypersensitivity → discontinue"
+      ],
+      "monitoring": [
+        "Baseline (gating): IGF-1 and TSH/free T4, fasting glucose, CMP, lipids; cancer screen current",
+        "Wk 2: tolerance / sleep (reinforce timing)",
+        "Mo 1: symptoms + glucose",
+        "Mo 3: IGF-1 + glucose (titrate to upper-normal IGF-1)",
+        "Mo 6: IGF-1 + composition (lowest effective dose)"
+      ],
+      "discontinuation": "Stop on plateau without benefit, IGF-1 above upper-normal, CTS / edema / glucose intolerance, hypersensitivity, pregnancy, or malignancy. No taper (secretagogue).",
+      "sources": [
+        "Empiric — VERIFY",
+        "Raun 1998, Eur J Endocrinol (doi:10.1530/eje.0.1390552)",
+        "Beck 2014, Int J Colorectal Dis — negative human Ph2 (GI motility)"
+      ]
+    },
+    "bpc-157": {
+      "status": "⚠ VERIFY — research-only, NOT FDA-approved. FDA placed BPC-157 in Category 2 of the interim 503A bulk-substances list (significant-safety-concern); as of Apr 15, 2026 FDA REMOVED it from Category 2 — it is NOT yet on the 503A positive bulks list, and a PCAC review is scheduled for Jul 23–24, 2026. Compounding status is unresolved/in-review, not a flat ban — VERIFY current status before compounding. Cycled — short goal-bound courses.",
+      "candidacy": "Adjunct for refractory soft-tissue (tendon/ligament/muscle) injury or GI mucosal complaints that have plateaued on standard care. Empiric — animal data only, no human efficacy proof. Image the injury first — do not use it to dodge a surgical lesion. Active or prior malignancy is an ABSOLUTE contraindication (pro-angiogenic).",
+      "starting_dose": "250 mcg SC daily (typical); range 250–500 mcg/day. Recon DEFAULT: 5 mg vial + 2 mL BAC → 2.5 mg/mL (2,500 mcg/mL) → 250 mcg = 0.10 mL = 10 units (U-100). SC, local to injury preferred; oral variants exist (community-used for GI complaints; SC is the protocol standard).",
+      "titration": "Escalate to 500 mcg or stop if no signal by ~Wk 2; may split BID at the higher end. Otherwise fixed within range.",
+      "frequency": "Once daily (may split BID at the higher end).",
+      "cycle_rest": "Cycle 4–6 weeks, then reassess and stop. Off after the course (NOT continuous); re-course only if goal-bound and re-screened.",
+      "ae_common": [
+        "Generally well tolerated in reports",
+        "Injection-site reactions",
+        "Transient nausea / GI upset",
+        "Headache",
+        "Lightheadedness / transient BP changes (anecdotal)",
+        "Note: human safety data are essentially absent — AE profile is poorly characterized"
+      ],
+      "ae_serious": [
+        "Theoretical tumor promotion (pro-angiogenic VEGFR2 mechanism — absolute screen-out for active/prior malignancy)",
+        "Hypersensitivity",
+        "Risk of masking an undiagnosed surgical/malignant lesion",
+        "Unknown long-term human safety and source/purity hazard (unregulated supply)"
+      ],
+      "management": [
+        "Site reactions / GI upset → rotate sites, dose timing; usually self-limited",
+        "Any new lump, unexplained weight loss, or red-flag symptom → STOP and work up malignancy",
+        "Keep courses short and goal-bound; if injury unresolved by ~Mo 3, pivot to definitive care (PT/surgery), re-exam ± image",
+        "Verify source pharmacy; counsel on unregulated supply",
+        "Hypersensitivity → discontinue"
+      ],
+      "monitoring": [
+        "Baseline: CBC, CMP; age-appropriate cancer screening current (gating)",
+        "Wk 2: tolerance / site / response (escalate to 500 mcg or stop if no signal)",
+        "Mo 1: functional outcome (ROM/pain) — continue short course or stop",
+        "Mo 3: should be off, re-exam ± image",
+        "Mo 6: malignancy ROS — stop + work up any red flag"
+      ],
+      "discontinuation": "Stop at end of the 4–6 wk course (default), on any malignancy red flag, on hypersensitivity, on pregnancy, or if functional goal unmet — pivot to definitive care. No taper.",
+      "sources": [
+        "Empiric — VERIFY",
+        "Gwyer 2019, Cell Tissue Res (doi:10.1007/s00441-019-03016-8)",
+        "Seiwerth 2021, Front Pharmacol (doi:10.3389/fphar.2021.627533)",
+        "Sikiric 2020, Curr Pharm Des (doi:10.2174/1381612826666200424180139)",
+        "Trials: NCT02637284 (Ph1), NCT07437547 (Ph2 recruiting)",
+        "Compounding: removed from 503A Category 2 Apr 15 2026; PCAC review Jul 23–24 2026 — VERIFY"
+      ]
+    },
+    "tb-500": {
+      "status": "⚠ VERIFY — research-only, NOT FDA-approved. The consumer fragment 'TB-500' has no completed human efficacy trial — do NOT conflate with full-length Tβ4 (RGN-259), a separate molecule with completed Phase 3 ophthalmic RCTs. Cycled.",
+      "candidacy": "Adjunct for refractory soft-tissue/tendon/ligament/muscle injury (often stacked with BPC-157). Empiric; published human data are doping-analytics only, no efficacy. Active or prior malignancy is an ABSOLUTE contraindication (actin-binding, pro-angiogenic/pro-migratory).",
+      "starting_dose": "2–2.5 mg SC twice weekly during loading, then 2 mg SC once weekly maintenance. Recon DEFAULT: 10 mg vial + 2 mL BAC → 5 mg/mL (5,000 mcg/mL) → 2 mg = 0.40 mL = 40 units (U-100).",
+      "titration": "Fixed loading/maintenance convention — no fine titration. Step down from loading (2×/wk) to maintenance (1×/wk) per the standard schedule.",
+      "frequency": "2×/week loading → 1×/week maintenance.",
+      "cycle_rest": "Cycle ~6 weeks loading + 4–6 weeks maintenance. Off after maintenance (NOT continuous); re-course only if re-screened.",
+      "ae_common": [
+        "Generally well tolerated in reports",
+        "Injection-site reactions",
+        "Transient fatigue/lethargy or head-rush (anecdotal)",
+        "Headache",
+        "Human safety data essentially absent — AE profile poorly characterized"
+      ],
+      "ae_serious": [
+        "Theoretical tumor promotion / unwanted cell migration / fibrosis (actin-binding, pro-angiogenic/pro-migratory — absolute screen-out for active/prior malignancy; caution in proliferative retinopathy)",
+        "Hypersensitivity",
+        "Unknown long-term human safety",
+        "Source/purity hazard (unregulated; fragment ≠ RGN-259)"
+      ],
+      "management": [
+        "Site reactions / fatigue → rotate sites, adjust timing; usually self-limited",
+        "Any new lump, weight loss, or red-flag symptom → STOP and work up malignancy",
+        "Caution/avoid in proliferative retinopathy or settings where fibrosis/migration could harm",
+        "Verify source pharmacy; counsel that the fragment is not RGN-259",
+        "Hypersensitivity → discontinue"
+      ],
+      "monitoring": [
+        "Baseline: CBC, CMP; age-appropriate cancer screening current (gating); retinal status if at risk",
+        "Tolerance / site each phase",
+        "Functional outcome at end of loading",
+        "Reassess at end of maintenance; malignancy ROS at follow-up; stop on any red flag"
+      ],
+      "discontinuation": "Stop at end of the loading + maintenance course (default), on any malignancy red flag, on hypersensitivity, on pregnancy, or if functional goal unmet — pivot to definitive care. No taper.",
+      "sources": [
+        "Empiric — VERIFY",
+        "Esposito 2012 (doping analytics, doi:10.1002/dta.1402)",
+        "Ho 2012 (doi:10.1016/j.chroma.2012.09.043)",
+        "Consumer-fragment trial NCT07487363 (Ph1/2 recruiting)",
+        "Full-length Tβ4/RGN-259 is a distinct molecule — do not conflate"
+      ]
+    },
+    "cjc-ipamorelin-blend": {
+      "status": "⚠ VERIFY — investigational, NOT FDA-approved (compounded GHRH-analog + ghrelin-agonist combo; no human trials of the combination exist). Cycled. Grade D.",
+      "candidacy": "Symptomatic adults with low-normal IGF-1 for recovery, body composition, sleep. Gating: treat hypothyroidism first, current cancer screening. Absolute: active malignancy; pregnancy/lactation/age <18; hypersensitivity to either component; non-functional/disrupted pituitary axis (extrapolated, VERIFY).",
+      "starting_dose": "~100 mcg CJC-1295 + 200–300 mcg ipamorelin SC per nightly dose. Recon DEFAULT: 5 mg CJC + 5 mg ipa co-vialed + 2.5 mL BAC = 2 mg/mL each → 0.15 mL = 15 units (U-100, ≈300 mcg each).",
+      "titration": "Titrate to upper-normal-for-age IGF-1 (lowest effective dose); watch fluid retention / glucose.",
+      "frequency": "One SC injection nightly at bedtime, fasted.",
+      "cycle_rest": "12–16 weeks, then reassess. Continuous-with-reassessment — no fixed washout; hold/step down or stop if IGF-1 flat / no benefit.",
+      "ae_common": [
+        "Injection-site reaction",
+        "Fluid retention / edema",
+        "Arthralgia",
+        "Paresthesia / tingling (carpal-tunnel type)",
+        "Flushing / lightheadedness",
+        "Vivid dreams",
+        "Increased appetite",
+        "Transient glucose rise"
+      ],
+      "ae_serious": [
+        "Sustained IGF-1 elevation above upper-normal (proliferative/malignancy concern)",
+        "Worsening glucose intolerance / new diabetes",
+        "Significant edema",
+        "Carpal tunnel syndrome",
+        "Hypersensitivity"
+      ],
+      "management": [
+        "Reinforce bedtime-fasted timing",
+        "Reduce/hold for edema / arthralgia / paresthesia",
+        "Treat hypothyroidism first",
+        "Manage glucose; titrate down to lowest effective dose"
+      ],
+      "monitoring": [
+        "Baseline (gating): IGF-1, TSH/free T4; fasting glucose, CMP, lipids",
+        "Wk 2: tolerance / fluid",
+        "Mo 1: symptoms / glucose",
+        "Mo 3: IGF-1 + glucose (titrate to upper-normal)",
+        "Mo 6: IGF-1 + composition"
+      ],
+      "discontinuation": "Stop for active malignancy / cancer red flag, pregnancy, persistent IGF-1 elevation, significant edema / CHF signal, intolerable arthralgia / carpal tunnel, hypersensitivity, or no benefit. Effects regress off-drug.",
+      "sources": [
+        "Empiric (combination: no human trials — VERIFY)",
+        "Mayfield 2026, Am J Sports Med (doi:10.1177/03635465251357593)",
+        "Coutinho 2026, J Sports Med Phys Fitness (doi:10.23736/S0022-4707.26.17773-1)",
+        "Mavrych 2026, Front Aging (doi:10.3389/fragi.2026.1790247)"
+      ]
+    },
+    "ghrp-2": {
+      "status": "⚠ VERIFY — research-only, NO US therapeutic approval. GH-stimulation diagnostic agent abroad; no efficacy trials for anti-aging/body-composition. No validated cycle. Grade D.",
+      "candidacy": "No validated therapeutic candidacy — reference entry. Absolute: active malignancy; pregnancy/lactation/age <18; hypersensitivity. Relative: diabetes/insulin resistance; untreated/severe hypothyroidism; cortisol & prolactin elevation; appetite stimulation; fluid retention/edema/carpal tunnel; OSA; retinopathy; acute critical illness.",
+      "starting_dose": "Reported ~100 mcg SC (range 100–300 mcg). Recon DEFAULT: 5 mg + 2.5 mL BAC = 2 mg/mL → 100 mcg = 0.05 mL = 5 units.",
+      "titration": "No validated titration; empiric to upper-normal IGF-1. VERIFY.",
+      "frequency": "1–3× daily (AM fasted / pre-bed / post-workout); bedtime-fasted leverages the GH pulse.",
+      "cycle_rest": "No validated protocol (community 8–12 wk reported). No validated washout.",
+      "ae_common": [
+        "Increased appetite",
+        "Injection-site reaction",
+        "Flushing",
+        "Cortisol / prolactin rise",
+        "Fluid retention",
+        "Transient glucose rise",
+        "Lightheadedness"
+      ],
+      "ae_serious": [
+        "Hyperprolactinemia / hypercortisolism",
+        "Worsening glucose intolerance",
+        "Significant edema / carpal tunnel",
+        "Hypersensitivity",
+        "Theoretical proliferative concern"
+      ],
+      "management": [
+        "Counsel on appetite",
+        "Monitor prolactin/cortisol if symptomatic",
+        "Reduce/hold for edema or glucose worsening",
+        "Reinforce timing",
+        "Treat hypothyroidism first"
+      ],
+      "monitoring": [
+        "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c; consider prolactin/cortisol",
+        "On-treatment: glucose/A1c, IGF-1 (upper-normal), edema/appetite"
+      ],
+      "discontinuation": "Active malignancy / cancer red flag, pregnancy, hypersensitivity, persistent IGF-1 elevation, edema, endocrine derangement, or no benefit.",
+      "sources": [
+        "No DOI citations in the curated library (citations: []). Diagnostic agent abroad; 2024–26 literature diagnostic only. VERIFY — no fabricated reference."
+      ]
+    },
+    "ghrp-6": {
+      "status": "⚠ VERIFY — research-only, NOT FDA-approved; no human efficacy trials for wellness. 2024–26 literature preclinical only. No validated cycle. Grade D.",
+      "candidacy": "No validated therapeutic candidacy — reference entry. Defining feature: marked appetite stimulation (strongest GHRP) — counsel weight gain. Absolute: active malignancy; pregnancy/lactation/age <18; hypersensitivity. Relative: appetite stimulation; diabetes/insulin resistance; cortisol & prolactin elevation; untreated/severe hypothyroidism; edema/carpal tunnel; OSA; retinopathy; acute critical illness.",
+      "starting_dose": "Reported ~100 mcg SC. Recon DEFAULT: 5 mg + 2.5 mL BAC = 2 mg/mL → 100 mcg = 0.05 mL = 5 units.",
+      "titration": "No validated titration; empiric. VERIFY.",
+      "frequency": "1–3× daily; bedtime/fasted convention applies.",
+      "cycle_rest": "No validated protocol. No validated washout.",
+      "ae_common": [
+        "Pronounced hunger / weight gain (defining)",
+        "Injection-site reaction",
+        "Flushing",
+        "Cortisol / prolactin rise",
+        "Fluid retention",
+        "Transient glucose rise"
+      ],
+      "ae_serious": [
+        "Significant weight gain / metabolic worsening",
+        "Hyperprolactinemia / hypercortisolism",
+        "Glucose intolerance",
+        "Edema / carpal tunnel",
+        "Hypersensitivity",
+        "Proliferative concern"
+      ],
+      "management": [
+        "Strong appetite counseling + weight tracking",
+        "Dose reduction/hold for hunger/edema/glucose",
+        "Monitor prolactin/cortisol",
+        "Reinforce timing",
+        "Treat hypothyroidism first"
+      ],
+      "monitoring": [
+        "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c; weight/appetite each visit",
+        "Glucose/A1c; IGF-1 (upper-normal)"
+      ],
+      "discontinuation": "Active malignancy / cancer red flag, pregnancy, hypersensitivity, unmanageable appetite/weight, glucose worsening, persistent IGF-1 elevation, or no benefit.",
+      "sources": [
+        "No DOI citations in the curated library (citations: []). No human efficacy trials; 2024–26 preclinical. VERIFY — no fabricated citation."
+      ]
+    },
+    "hexarelin": {
+      "status": "⚠ VERIFY — research-only, NO human therapeutic approval or efficacy trials; most potent GHRP but prone to receptor desensitization (tachyphylaxis). 2024–26 literature preclinical/analytical (cardiac CD36 binding). No validated cycle. Grade D.",
+      "candidacy": "No validated therapeutic candidacy — reference entry. Receptor-desensitization caution is defining: dose short/intermittent. GATE on baseline cardiac history/symptoms (named CD36 cardiac-binding mechanism) — caution in cardiac disease. Absolute: active malignancy; pregnancy/lactation/age <18; hypersensitivity. Relative: receptor desensitization/tachyphylaxis; cortisol & prolactin elevation; diabetes/insulin resistance; untreated/severe hypothyroidism; cardiac CD36-binding (preclinical); edema/carpal tunnel; OSA; retinopathy; acute critical illness.",
+      "starting_dose": "Reported ~100 mcg SC. Recon DEFAULT: 5 mg + 2.5 mL BAC = 2 mg/mL → 100 mcg = 0.05 mL = 5 units.",
+      "titration": "No validated titration; keep exposure low/intermittent to limit desensitization. VERIFY.",
+      "frequency": "1–2× daily (kept lower than other GHRPs because of tachyphylaxis); bedtime/fasted.",
+      "cycle_rest": "No validated protocol; deliberately short / intermittent due to desensitization. Off-periods advised to limit GHSR desensitization (no validated schedule).",
+      "ae_common": [
+        "Diminishing GH response over time (tachyphylaxis)",
+        "Injection-site reaction",
+        "Flushing",
+        "Cortisol / prolactin rise",
+        "Fluid retention",
+        "Transient glucose rise",
+        "Appetite increase"
+      ],
+      "ae_serious": [
+        "GHSR desensitization (loss of effect)",
+        "Hyperprolactinemia / hypercortisolism",
+        "Potential cardiac effects (CD36 — preclinical)",
+        "Glucose intolerance",
+        "Edema / carpal tunnel",
+        "Hypersensitivity",
+        "Proliferative concern"
+      ],
+      "management": [
+        "Short, intermittent courses with off-periods to preserve receptor sensitivity",
+        "Reduce/hold for cardiac symptoms / edema / glucose; cardiac symptoms during use → hold/stop",
+        "Monitor prolactin/cortisol; cardiac caution",
+        "Treat hypothyroidism first"
+      ],
+      "monitoring": [
+        "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c; cardiac history (CD36) — gate",
+        "On-treatment: glucose/A1c, IGF-1 (upper-normal), watch for waning response and cardiac symptoms"
+      ],
+      "discontinuation": "Active malignancy / cancer red flag, pregnancy, hypersensitivity, cardiac symptoms, glucose worsening, loss of response (desensitization), or no benefit.",
+      "sources": [
+        "No DOI citations in the curated library (citations: []). No approval/efficacy trials; 2024–26 preclinical/analytical. VERIFY — no fabricated citation."
+      ]
+    },
+    "mk-677": {
+      "status": "⚠ VERIFY — research-only, NO FDA approval; orally active non-peptide ghrelin/GHS-R agonist raising IGF-1. ORAL — no reconstitution. Community cycling reported; no validated protocol. Grade C/D.",
+      "candidacy": "Adults wanting sustained GH/IGF-1 elevation (~24 h half-life) preferring oral dosing. Documented liability: reproducibly raises fasting glucose, reduces insulin sensitivity. Absolute: active or prior malignancy; pregnancy/lactation/age <18; hypersensitivity. Relative: CHF / fluid-retention — avoid in HF; diabetes/insulin resistance (documented — monitor); increased appetite; untreated/severe hypothyroidism; OSA; retinopathy; elevated IGF-1 (long-term safety unknown); acute critical illness; atraumatic splenic-rupture case report (with RAD-140).",
+      "starting_dose": "10–25 mg orally once daily (reported typical). Reconstitution: oral — n/a.",
+      "titration": "No validated titration; empiric within 10–25 mg/day to upper-normal IGF-1, watching glucose/edema. VERIFY.",
+      "frequency": "Once daily, usually at night (~24 h half-life; bedtime favored for sleep/GH-pulse).",
+      "cycle_rest": "Community cycling reported; no validated protocol. No validated washout.",
+      "ae_common": [
+        "Increased appetite",
+        "Fluid retention / edema",
+        "Lethargy / transient fatigue",
+        "Increased fasting glucose / reduced insulin sensitivity (documented)",
+        "Vivid dreams / improved sleep",
+        "Mild transient BP rise",
+        "Arthralgia"
+      ],
+      "ae_serious": [
+        "Worsening glucose intolerance / new or worsened diabetes (documented)",
+        "CHF / heart-failure signal in older adults — avoid in HF",
+        "Sustained IGF-1 elevation (long-term safety unknown)",
+        "Atraumatic splenic rupture (case report w/ RAD-140)",
+        "Hypersensitivity"
+      ],
+      "management": [
+        "Monitor glucose/A1c and edema closely; avoid in HF",
+        "Counsel on appetite/weight",
+        "Dose-reduce/hold for edema / glucose worsening / CHF signs",
+        "Treat hypothyroidism first",
+        "Lowest effective dose keeping IGF-1 upper-normal"
+      ],
+      "monitoring": [
+        "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c, CMP, lipids; weight/edema/BP",
+        "Priority on-treatment checks: glucose/A1c and edema; IGF-1 upper-normal; periodic reassessment"
+      ],
+      "discontinuation": "Active/prior malignancy or cancer red flag, pregnancy, CHF / significant edema, worsening diabetes, persistent IGF-1 elevation, hypersensitivity, or no benefit.",
+      "sources": [
+        "Jaffry 2026, Cureus (atraumatic splenic-rupture case report w/ RAD-140). Glucose/insulin-resistance and edema/CHF effects documented per library. VERIFY; no fabrication."
+      ]
+    },
+    "aod-9604": {
+      "status": "⚠ VERIFY — investigational, NOT FDA-approved (FDA GRAS food-ingredient only). Phase 2 obesity development discontinued for lack of efficacy; zero registered trials. Cycled. Grade D.",
+      "candidacy": "Adjunct fat-loss within a structured program — modest at best, not standalone. Clean metabolic profile: no IGF-1 or glucose impact (GH fragment 176-191, lipolytic). Absolute: hypersensitivity; pregnancy/lactation; age <18. Relative: active malignancy (precautionary only — weak rationale, no IGF-1 stimulation); compounded/unregulated sourcing; no established DDI profile.",
+      "starting_dose": "300 mcg SC daily; range 250–500 mcg/day. Recon DEFAULT: 5 mg + 2 mL BAC = 2.5 mg/mL → 300 mcg = 0.12 mL = 12 units.",
+      "titration": "Within 250–500 mcg/day by response — narrow empiric range, not a formal titration. VERIFY.",
+      "frequency": "Once daily, SC, fasted / AM.",
+      "cycle_rest": "8–12 weeks, reassess. No standardized validated off-period — stop if no objective change by ~6 months.",
+      "ae_common": [
+        "Injection-site reaction",
+        "Generally well tolerated",
+        "No glucose or IGF-1 effect (distinguishing feature)",
+        "Headache / mild GI (anecdotal)"
+      ],
+      "ae_serious": [
+        "None established (no human safety RCT)",
+        "Hypersensitivity possible",
+        "Unregulated-sourcing risk"
+      ],
+      "management": [
+        "Set expectations low (adjunct)",
+        "Reinforce diet/exercise as drivers",
+        "Manage site reactions",
+        "Verify source",
+        "Stop if no objective change"
+      ],
+      "monitoring": [
+        "Baseline: CMP, fasting glucose, lipids, weight/waist",
+        "Wk 2: tolerance / site",
+        "Mo 1: weight/waist trend",
+        "Mo 3: composition / lipids",
+        "Mo 6: maintenance — stop if no objective change"
+      ],
+      "discontinuation": "Hypersensitivity, pregnancy, or no objective change by ~6 months.",
+      "sources": [
+        "Empiric — VERIFY",
+        "Heffernan 2001, Endocrinology (preclinical, doi:10.1210/endo.142.12.8522)",
+        "Wilding 2004, Curr Opin Investig Drugs (review, PMID 15134286)"
+      ]
+    },
+    "mots-c": {
+      "status": "⚠ VERIFY — investigational, NOT FDA-approved (mitochondrial-derived peptide; no completed human therapeutic RCT — first Ph2a NCT07505745 recruiting). Cycled. Grade D→C.",
+      "candidacy": "Adults seeking metabolic / insulin-sensitivity support tied to an objective endpoint (HOMA-IR / A1c). Absolute: hypersensitivity; pregnancy/lactation (no human data); age <18. Relative: active malignancy (precautionary; mixed preclinical signals); diabetes / glucose-lowering agents — AMPK/insulin sensitization → theoretical additive hypoglycemia, monitor glucose; compounded/unregulated sourcing; no DDI profile.",
+      "starting_dose": "5–10 mg SC per dose. Recon DEFAULT: 10 mg + 1 mL BAC = 10 mg/mL → 5 mg = 0.50 mL = 50 units.",
+      "titration": "Within 5–10 mg/dose, empiric to metabolic response. VERIFY.",
+      "frequency": "2–3× per week, SC.",
+      "cycle_rest": "4–8 weeks, tied to a metabolic endpoint. Continue only with objective benefit; stop if no durable change — no validated fixed off-period.",
+      "ae_common": [
+        "Injection-site reaction",
+        "Generally well tolerated",
+        "Theoretical additive glucose lowering with antidiabetics",
+        "Fatigue / flushing (anecdotal)"
+      ],
+      "ae_serious": [
+        "None established",
+        "Hypoglycemia if combined with insulin/sulfonylureas (theoretical)",
+        "Hypersensitivity",
+        "Sourcing risk"
+      ],
+      "management": [
+        "Monitor glucose (esp. with antidiabetics)",
+        "Reduce antidiabetic dosing if hypoglycemia",
+        "Verify source",
+        "Continue only with objective benefit"
+      ],
+      "monitoring": [
+        "Baseline: fasting glucose/A1c, HOMA-IR, CMP, lipids",
+        "Glucose/A1c & HOMA-IR at endpoint; reassess 1–6 months; malignancy precaution"
+      ],
+      "discontinuation": "Hypersensitivity, pregnancy, unmanageable hypoglycemia, or no durable metabolic change.",
+      "sources": [
+        "Empiric — VERIFY",
+        "Lee 2015, Cell Metab",
+        "Kumagai 2021",
+        "Zheng 2023 (DOIs not enumerated in dosing.md — confirm against library; no fabrication)"
+      ]
+    },
+    "ss-31": {
+      "status": "FDA-APPROVED as FORZINITY (elamipretide, accelerated approval Sept 2025) to improve muscle strength in Barth syndrome (patients ≥30 kg) — that approval does NOT cover the metabolic/longevity use here, which is OFF-LABEL / empiric. SC only — not IV. Benzyl-alcohol excipient — NOT for neonates. Cycled (off-label use).",
+      "candidacy": "OFF-LABEL longevity use: adults seeking mitochondrial / metabolic-longevity support. Absolute (carried from FORZINITY label): serious hypersensitivity to elamipretide/excipient. Relative: serious allergic reactions; SC only — not IV; benzyl-alcohol — not neonates, avoid pregnancy/neonates; injection-site reactions; pregnancy (limited data — VERIFY); lactation (no data — VERIFY); active malignancy (precautionary, not label — VERIFY); compounded SS-31 vs FORZINITY — purity/benzyl-alcohol/dosing unverified (VERIFY).",
+      "starting_dose": "OFF-LABEL empiric: 5–10 mg SC daily. Recon DEFAULT: 10 mg + 1 mL BAC = 10 mg/mL → 10 mg = 1.0 mL = 100 units; 5 mg = 0.5 mL = 50 units. (FORZINITY LABEL dose for Barth, for reference, is fixed 40 mg SC once daily for ≥30 kg; 20 mg daily in severe renal impairment [eGFR <30, not on dialysis] — NOT weight-titrated. Mito-myopathy trials used 40 mg SC daily.)",
+      "titration": "Empiric within 5–10 mg/day (off-label); no validated titration → VERIFY. Label use is fixed-dose, no titration.",
+      "frequency": "Once daily, SC.",
+      "cycle_rest": "Off-label: 4–8 weeks; reassess 1–6 months; stop if no durable functional benefit. No validated off-period. (Label use for Barth is continuous/chronic.)",
+      "ae_common": [
+        "Injection-site reactions (most common)"
+      ],
+      "ae_serious": [
+        "Hypersensitivity / serious allergic reaction — discontinue/seek care",
+        "Benzyl-alcohol risks (avoid neonates/pregnancy)",
+        "IV route not approved",
+        "Compounded purity risk"
+      ],
+      "management": [
+        "Confirm SC-only",
+        "Verify compounded product (benzyl-alcohol, purity, dosing)",
+        "Manage site reactions",
+        "Discontinue on serious allergic reaction"
+      ],
+      "monitoring": [
+        "Baseline + on-treatment functional/metabolic endpoint to justify continuation",
+        "Injection-site / hypersensitivity surveillance",
+        "Malignancy precaution"
+      ],
+      "discontinuation": "Serious hypersensitivity / allergic reaction, pregnancy concern (benzyl alcohol), or no durable functional benefit.",
+      "sources": [
+        "FDA LABEL (FORZINITY / elamipretide; Barth syndrome, Sept 2025) — VERIFY exact dosing against the PI",
+        "Karaa 2023, Neurology (MMPOWER-3 — missed its co-primary endpoints: 6MWT and fatigue)",
+        "Karaa 2020",
+        "Szeto 2014 (DOIs not enumerated — confirm against library)",
+        "Off-label dosing = empiric, NOT validated → VERIFY"
+      ]
+    },
+    "ghk-cu": {
+      "status": "⚠ VERIFY — NOT FDA-approved. Strongest evidence is topical/cosmetic; injected/systemic SC use is empiric — no completed RCT. Cycled — short courses then off (NOT continuous), with attention to cumulative copper. A Ph2 topical RCT is recruiting (NCT07437586).",
+      "candidacy": "Adults seeking skin/tissue-repair or cosmetic benefit; topical route has the better (still modest) evidence. Empiric for systemic SC. Active or prior malignancy is ABSOLUTE (pro-angiogenic); Wilson disease / copper-overload is ABSOLUTE.",
+      "starting_dose": "1–2 mg SC daily (typical 2 mg) — or topical 1–2% serum. Recon DEFAULT: 50 mg vial + 5 mL BAC → 10 mg/mL → 2 mg = 0.20 mL = 20 units (U-100).",
+      "titration": "Fixed within 1–2 mg/day SC; lowest effective dose; cap duration to limit copper accumulation.",
+      "frequency": "Once daily (SC or topical).",
+      "cycle_rest": "Cycle 4–8 weeks. Off after the course (NOT continuous); with chronic/repeated systemic dosing, check serum copper/ceruloplasmin before re-course.",
+      "ae_common": [
+        "Injection-site reactions",
+        "Topical erythema / irritation / contact sensitivity",
+        "Metallic taste (anecdotal)"
+      ],
+      "ae_serious": [
+        "Copper accumulation / toxicity (Wilson disease/copper overload absolute)",
+        "Hypersensitivity / copper sensitivity",
+        "Theoretical tumor promotion (pro-angiogenic — active/prior malignancy absolute)",
+        "Unknown long-term systemic safety",
+        "Source/purity hazard"
+      ],
+      "management": [
+        "Rotate sites / patch-test",
+        "On prolonged use check serum copper + ceruloplasmin, hold if rising/symptomatic",
+        "Counsel copper-altering meds (zinc)",
+        "Malignancy red flag → STOP / work up",
+        "Hypersensitivity → discontinue"
+      ],
+      "monitoring": [
+        "Baseline: exclude Wilson disease / copper overload; cancer screening current",
+        "Chronic systemic use: serum copper + ceruloplasmin (± LFTs)",
+        "Wk 2 tolerance; end-of-course response; copper labs before re-course"
+      ],
+      "discontinuation": "End of 4–8 wk course; rising/symptomatic copper; malignancy red flag; hypersensitivity; pregnancy; no benefit. No taper.",
+      "sources": [
+        "Empiric — VERIFY (systemic)",
+        "Miller 2006 (doi:10.1001/archfaci.8.4.252)",
+        "Dymek 2023 (doi:10.3390/pharmaceutics15102485)",
+        "Ph2 topical NCT07437586"
+      ]
+    },
+    "thymosin-alpha-1": {
+      "status": "⚠ VERIFY — NOT FDA-approved in the US; marketed as Zadaxin in ~35 countries. Real RCTs for specific indications (chronic hep B, melanoma adjuvant, pancreatitis, colorectal), NOT for vitality/anti-aging. Indication-driven course.",
+      "candidacy": "Use against a defined immune problem, not a generic booster. Transplant on immunosuppression is ABSOLUTE (rejection/graft-failure hazard); severe active autoimmune disease is ABSOLUTE (flare).",
+      "starting_dose": "1.6 mg SC twice weekly (conventional Zadaxin unit dose). Recon DEFAULT: 5 mg vial + 1 mL BAC → 5 mg/mL → 1.6 mg = 0.32 mL = 32 units.",
+      "titration": "Fixed unit dose; titrate regimen/duration to response.",
+      "frequency": "Twice weekly SC.",
+      "cycle_rest": "Cycle 8–24 weeks, indication-driven. No fixed off-period; lowest effective regimen; stop when objective met.",
+      "ae_common": [
+        "Injection-site reactions",
+        "Well tolerated",
+        "Transient fatigue / malaise",
+        "Rare flu-like symptoms"
+      ],
+      "ae_serious": [
+        "Autoimmune flare",
+        "Transplant rejection / graft failure (immunosuppressed)",
+        "Hypersensitivity",
+        "Theoretical antagonism of needed immunosuppression"
+      ],
+      "management": [
+        "Rotate sites",
+        "Autoimmune flare → hold + specialist",
+        "Transplant/immunosuppressed → do not use",
+        "Coordinate concurrent immunosuppression",
+        "Hypersensitivity → discontinue"
+      ],
+      "monitoring": [
+        "Baseline: exclude transplant/immunosuppression, severe active autoimmune disease; define target + indication labs",
+        "Watch autoimmune symptoms"
+      ],
+      "discontinuation": "Objective met/unmet; autoimmune flare; transplant scenario; hypersensitivity; pregnancy. No taper.",
+      "sources": [
+        "Empiric — VERIFY for US",
+        "Ancell 2001 (doi:10.1093/ajhp/58.10.886)",
+        "Zhou 2020 (doi:10.1136/bmjopen-2020-037231)",
+        "hep B NCT00291616 / NCT02366208; melanoma NCT00911443; colorectal NCT05086614"
+      ]
+    },
+    "kpv": {
+      "status": "⚠ VERIFY — NOT FDA-approved. Preclinical only — zero human trials. Cycled.",
+      "candidacy": "Adjunct for GI/skin inflammation, not a substitute for IBD/derm work-up. Caution in transplant/immunosuppression, severe active autoimmune disease, active/recent serious infection.",
+      "starting_dose": "200–500 mcg SC daily (or oral). Recon DEFAULT: 5 mg vial + 2.5 mL BAC → 2 mg/mL → 500 mcg = 0.25 mL = 25 units.",
+      "titration": "200–500 mcg/day; start low.",
+      "frequency": "Once daily (SC or oral).",
+      "cycle_rest": "Cycle 4–8 weeks; off after course; reassess markers before re-course.",
+      "ae_common": [
+        "Well tolerated in reports",
+        "Injection-site reactions",
+        "Mild GI upset (oral)",
+        "Headache",
+        "AE profile poorly characterized"
+      ],
+      "ae_serious": [
+        "Immune suppression of a needed response",
+        "Theoretical autoimmune/transplant interactions",
+        "Hypersensitivity",
+        "Unknown long-term safety",
+        "Source/purity hazard"
+      ],
+      "management": [
+        "Rotate sites/route",
+        "Adjunct only — don't delay IBD/derm work-up",
+        "Hold in active serious infection",
+        "Verify source",
+        "Hypersensitivity → discontinue"
+      ],
+      "monitoring": [
+        "Baseline: define target + markers (calprotectin/CRP); exclude active infection / transplant immunosuppression / severe autoimmune",
+        "End-of-course response"
+      ],
+      "discontinuation": "End of course; intercurrent infection; hypersensitivity; pregnancy; no benefit. No taper.",
+      "sources": [
+        "Empiric — VERIFY",
+        "Kannengiesser 2008 (doi:10.1002/ibd.20334)",
+        "Viennois 2016 (doi:10.1016/j.jcmgh.2016.01.006)",
+        "Xiao 2017 (doi:10.1016/j.ymthe.2016.11.020)"
+      ]
+    },
+    "semax": {
+      "status": "⚠ VERIFY — compounded/empiric, NOT FDA-approved; zero genuine registered trials. Intranasal conventional (0.1%); SC empiric (short half-life). Cycled/pulsed.",
+      "candidacy": "Nootropic/neuroprotective. Best data = small non-randomized Russian acute-stroke study. Caution: lowered seizure threshold, psychiatric instability/mania, uncontrolled HTN/CVD, nasal mucosal disease.",
+      "starting_dose": "Intranasal ~250–600 mcg/day (typical 300), divided BID–TID; SC 300 mcg/day (250–600). SC recon DEFAULT: 10 mg vial + 2 mL BAC → 5 mg/mL → 300 mcg = 0.06 mL = 6 units.",
+      "titration": "250–600 mcg/day; start low, divide higher totals.",
+      "frequency": "Daily (divided) during pulse.",
+      "cycle_rest": "Cycle 2–4 weeks, pulsed; off between pulses.",
+      "ae_common": [
+        "Nasal irritation / congestion / rhinorrhea",
+        "Headache",
+        "Transient BP changes",
+        "Insomnia / overstimulation",
+        "Irritability"
+      ],
+      "ae_serious": [
+        "Lowered seizure threshold / seizure",
+        "Psychiatric destabilization",
+        "Hypertensive response",
+        "Hypersensitivity",
+        "Unknown long-term safety"
+      ],
+      "management": [
+        "Reduce conc/frequency for nasal irritation",
+        "Dose earlier for insomnia",
+        "Seizure / psychiatric destabilization → STOP + eval",
+        "Monitor BP",
+        "Hypersensitivity → discontinue"
+      ],
+      "monitoring": [
+        "Baseline: psychiatric/seizure history, BP, nasal exam",
+        "During pulse: BP / mood / sleep; cognitive response"
+      ],
+      "discontinuation": "End of pulse; seizure / psychiatric destabilization; uncontrolled BP; hypersensitivity; pregnancy. No taper.",
+      "sources": [
+        "Empiric — VERIFY",
+        "Gusev 1997 (PMID 11517472)",
+        "Dolotov 2006 (doi:10.1111/j.1471-4159.2006.03658.x)"
+      ]
+    },
+    "selank": {
+      "status": "⚠ VERIFY — compounded/empiric, NOT FDA-approved; zero genuine registered trials. Intranasal conventional (0.15%); SC empiric. Cycled/pulsed.",
+      "candidacy": "Anxiolytic/anti-stress. Data = two small Russian anxiety trials vs benzodiazepines + preclinical. Caution: additive sedation with BZD/CNS depressants; not for unsupervised withdrawal management; adjunct only in significant psychiatric illness; nasal mucosal disease.",
+      "starting_dose": "Intranasal ~250–500 mcg/day (typical 300), divided; SC 300 mcg/day (250–500). SC recon DEFAULT: 10 mg vial + 2 mL BAC → 5 mg/mL → 300 mcg = 0.06 mL = 6 units.",
+      "titration": "250–500 mcg/day; start low.",
+      "frequency": "Daily (divided) during pulse.",
+      "cycle_rest": "Cycle 2–4 weeks, pulsed; off between pulses.",
+      "ae_common": [
+        "Well tolerated",
+        "Nasal irritation / congestion",
+        "Mild sedation / drowsiness",
+        "Taste change",
+        "Headache"
+      ],
+      "ae_serious": [
+        "Additive CNS depression with BZD/alcohol/hypnotics",
+        "Masking of a primary psychiatric disorder",
+        "Hypersensitivity",
+        "Unknown long-term safety"
+      ],
+      "management": [
+        "Reduce conc/frequency for nasal irritation",
+        "Reduce dose for sedation, counsel against CNS depressants/driving",
+        "Adjunct only; no unsupervised withdrawal use",
+        "Hypersensitivity → discontinue"
+      ],
+      "monitoring": [
+        "Baseline: psychiatric history, concurrent CNS depressants, nasal exam",
+        "During pulse: sedation / mood; anxiety response"
+      ],
+      "discontinuation": "End of pulse; excessive sedation; hypersensitivity; pregnancy. No taper.",
+      "sources": [
+        "Empiric — VERIFY",
+        "Zozulia 2008 (PMID 18454096)",
+        "Medvedev 2014 (PMID 25176261)",
+        "Kasian 2017 (doi:10.1155/2017/5091027)"
+      ]
+    },
+    "cerebrolysin": {
+      "status": "NOT FDA-approved (approved in EU/RU and ~other countries). Real RCT dosing (DOIs cited) but evidence MIXED. Pre-made ampoule (215.2 mg/mL) — NO reconstitution. Course-based (10–20 days); repeat 2–4×/yr.",
+      "candidacy": "Post-stroke/TBI recovery or cognitive impairment (per RCT populations). Porcine brain-derived. Absolute: hypersensitivity (anaphylaxis reported), status epilepticus / uncontrolled seizures, severe renal impairment.",
+      "starting_dose": "Typical 10 mL/day; range 5–30 mL/day (post-stroke/TBI ~30 mL; cognitive 5–10 mL). IM ≤5 mL; slow IV infusion (diluted in saline ~15–60 min) for larger volumes. No reconstitution (pre-made ampoule).",
+      "titration": "Choose course dose by indication/acuity; fixed within course.",
+      "frequency": "Once daily for the course.",
+      "cycle_rest": "10–20 consecutive days per course; repeat 2–4×/year.",
+      "ae_common": [
+        "Infusion-related flushing / heat / sweating / dizziness",
+        "Headache",
+        "Mild agitation",
+        "Nausea — reduced by slower infusion"
+      ],
+      "ae_serious": [
+        "Hypersensitivity / anaphylaxis (porcine)",
+        "Seizure provocation (avoid in uncontrolled seizures; slow + monitor in epilepsy)",
+        "Infusion reactions in atopy",
+        "Caution with serotonergic agents / MAOIs",
+        "Renal accumulation in severe impairment"
+      ],
+      "management": [
+        "Slow the infusion for reactions",
+        "Anaphylaxis → STOP + epinephrine + emergency care",
+        "Seizure → STOP; avoid in status epilepticus",
+        "Coordinate serotonergic/MAOI",
+        "Verify source (counterfeit risk)"
+      ],
+      "monitoring": [
+        "Baseline: renal function, allergy/atopy, seizure history, serotonergic/MAOI meds",
+        "Per session: infusion tolerance/vitals; neuro/cognitive response over course"
+      ],
+      "discontinuation": "Hypersensitivity / anaphylaxis; seizure; severe renal impairment; pregnancy/lactation (VERIFY); no benefit across courses. Course ends day 10–20 by design.",
+      "sources": [
+        "Real RCT dosing",
+        "Muresanu 2016, Stroke (CARS trial, doi:10.1161/STROKEAHA.115.009416)",
+        "Gauthier 2015 (doi:10.1159/000377672)",
+        "MIXED: Zhang 2017 (doi:10.1155/2017/4191670) — no significant efficacy"
+      ]
+    },
+    "dsip": {
+      "status": "⚠ VERIFY — compounded/empiric, NOT FDA-approved; zero registered trials. Sparse/inconclusive data; does not reliably promote sleep. Cycled.",
+      "candidacy": "Adjunct sleep support; unpredictable response. Do not mask untreated OSA / undiagnosed sleep disorder. Caution with sedatives/hypnotics/alcohol, endocrine instability (ACTH/cortisol axis).",
+      "starting_dose": "Typical 200 mcg; range 100–300 mcg at bedtime. Recon DEFAULT: 5 mg vial + 2 mL BAC → 2.5 mg/mL → 200 mcg = 0.08 mL = 8 units.",
+      "titration": "100–300 mcg at bedtime; start low.",
+      "frequency": "Once at bedtime (nightly/PRN) during cycle.",
+      "cycle_rest": "Cycle 4–6 weeks; off after; reassess before resuming.",
+      "ae_common": [
+        "Well tolerated in sparse reports",
+        "Injection-site reactions",
+        "Headache",
+        "Next-day grogginess",
+        "Unreliable sleep effect"
+      ],
+      "ae_serious": [
+        "Masking of untreated OSA / sleep disorder",
+        "Additive CNS depression",
+        "Endocrine (ACTH/cortisol) perturbation",
+        "Hypersensitivity",
+        "Unknown long-term safety"
+      ],
+      "management": [
+        "Screen/treat OSA first",
+        "Counsel against alcohol/sedatives",
+        "Reduce dose for grogginess + sleep hygiene",
+        "Caution in endocrine instability",
+        "Hypersensitivity → discontinue"
+      ],
+      "monitoring": [
+        "Baseline: sleep history, OSA screen (study if at risk), CNS depressants, endocrine status",
+        "End-of-cycle sleep-quality response"
+      ],
+      "discontinuation": "End of 4–6 wk cycle; no reliable benefit; hypersensitivity; pregnancy. No taper.",
+      "sources": [
+        "Empiric — VERIFY",
+        "Graf & Kastin 1986 (doi:10.1016/0196-9781(86)90148-8)",
+        "Kovalzon & Strekalova 2006 (doi:10.1111/j.1471-4159.2006.03693.x)"
+      ]
+    },
+    "epitalon": {
+      "status": "⚠ VERIFY — compounded/empiric, NOT FDA-approved; zero registered trials. Telomerase/longevity claims = in-vitro/animal/weak older Russian reports, no Western replication. Pulsed — short 10–20 day courses, NOT chronic; repeat 1–2×/yr.",
+      "candidacy": "Longevity/pineal-axis support; mechanism unproven and cancer-direction uncertain → precautionary malignancy screen. Short pulses only. Caution with circadian/melatonin disorders, concurrent melatonin/hormonal therapy.",
+      "starting_dose": "Typical 5–10 mg/day. Recon DEFAULT: 10 mg vial + 1 mL BAC → 10 mg/mL → 10 mg = 1.0 mL = 100 units; 5 mg = 0.5 mL = 50 units.",
+      "titration": "5–10 mg/day; fixed within pulse.",
+      "frequency": "Once daily per pulse.",
+      "cycle_rest": "10–20 day pulse (NOT chronic); off between pulses; repeat 1–2×/year.",
+      "ae_common": [
+        "Well tolerated in sparse reports",
+        "Injection-site reactions",
+        "Mild headache",
+        "Transient drowsiness",
+        "Circadian/sleep shifts",
+        "AE profile poorly characterized"
+      ],
+      "ae_serious": [
+        "Theoretical malignancy concern (telomerase/pineal, direction unproven — screen active/prior malignancy)",
+        "Circadian/melatonin-axis disruption",
+        "Hypersensitivity",
+        "Unknown long-term safety"
+      ],
+      "management": [
+        "Keep to short 10–20 day pulses",
+        "Confirm current cancer screening, red flag → STOP/work up",
+        "Adjust timing for circadian shifts",
+        "Hypersensitivity → discontinue"
+      ],
+      "monitoring": [
+        "Baseline: age-appropriate cancer screening current; pineal/circadian history; concurrent melatonin/hormonal therapy",
+        "Reassess before each pulse"
+      ],
+      "discontinuation": "End of 10–20 day pulse; malignancy red flag; hypersensitivity; pregnancy. No taper.",
+      "sources": [
+        "Empiric — VERIFY",
+        "Khavinson 2003 (doi:10.1023/a:1025493705728)",
+        "Khavinson 2002 (PMID 12374906)",
+        "(A mismatched Anisimov DOI was removed in audit — VERIFY any additional citation.)"
+      ]
+    },
+    "pt-141": {
+      "status": "FDA-APPROVED (Vyleesi, 2019) for acquired/generalized HSDD in premenopausal women. PRN — the 1/24 h + 8/month caps ARE the throttle. Male / general-libido / ED use is OFF-LABEL.",
+      "candidacy": "ON-LABEL: premenopausal women with acquired/generalized HSDD. ABSOLUTE: uncontrolled HTN and known CVD (label). Not recommended in high CV risk.",
+      "starting_dose": "LABEL fixed: 1.75 mg SC (abdomen/thigh) PRN. Vyleesi autoinjector is pre-filled 1.75 mg / 0.3 mL — no reconstitution. Compounded DEFAULT: 10 mg vial + 5 mL BAC → 2 mg/mL → 1.75 mg = 0.875 mL (~88 units) — VERIFY pharmacy fill.",
+      "titration": "Fixed — no titration.",
+      "frequency": "PRN, ≥45 min before activity; max 1 dose/24 h and ≤8 doses/month (label caps).",
+      "cycle_rest": "PRN/episodic; reassess at ~8 weeks. No scheduled rest — the dose caps ARE the throttle.",
+      "ae_common": [
+        "Nausea (most common)",
+        "Flushing",
+        "Injection-site reactions",
+        "Headache",
+        "Vomiting",
+        "Transient BP↑ / HR↓"
+      ],
+      "ae_serious": [
+        "Transient BP elevation (contraindicated in uncontrolled HTN / known CVD)",
+        "Focal hyperpigmentation (face/gingiva/breasts; may not resolve)",
+        "Oral naltrexone-containing products interaction (may markedly lower naltrexone — not recommended)",
+        "Hypersensitivity"
+      ],
+      "management": [
+        "Counsel / antiemetic for nausea",
+        "Measure BP, respect caps",
+        "Counsel hyperpigmentation may be permanent",
+        "Avoid oral naltrexone products",
+        "Pregnancy / hypersensitivity → discontinue"
+      ],
+      "monitoring": [
+        "Baseline: BP + CV risk (gating); oral-naltrexone review; pregnancy",
+        "On therapy: BP; benefit reassessment ~8 wk; hyperpigmentation watch"
+      ],
+      "discontinuation": "No benefit by ~8 wk; intolerable nausea; hyperpigmentation; uncontrolled BP/CVD; hypersensitivity; pregnancy. No taper.",
+      "sources": [
+        "FDA LABEL (Vyleesi / bremelanotide, 2019; acquired/generalized HSDD premenopausal women) — 1.75 mg SC PRN, max 1/24 h & ≤8/month"
+      ]
+    },
+    "kisspeptin-10": {
+      "status": "⚠ VERIFY — investigational, NOT FDA-approved. Phase 1 confirms acute LH rise; no completed efficacy RCTs and no validated SC regimen (genuine data is acute IV). Cycled.",
+      "candidacy": "HPG-axis stimulation (libido/fertility-adjacent); consent as experimental. Screen out hormone-sensitive malignancy (precautionary absolute); pregnancy outside supervised protocol; caution on gonadotropins (additive stimulation).",
+      "starting_dose": "~100 mcg SC typical; start low (~50–100 mcg). No validated range. Recon DEFAULT: 5 mg vial + 2.5 mL BAC → 2 mg/mL → 100 mcg = 0.05 mL = 5 units.",
+      "titration": "Empiric, start ~50–100 mcg; no validated titration.",
+      "frequency": "Empiric — once daily or few times weekly; NOT established.",
+      "cycle_rest": "Cycle 4–8 weeks empiric, tied to response; off-cycle between courses (not validated).",
+      "ae_common": [
+        "Injection-site reactions",
+        "Transient flushing / warmth",
+        "Headache",
+        "Chronic-SC AE profile uncharacterized"
+      ],
+      "ae_serious": [
+        "Stimulation of hormone-sensitive malignancy",
+        "Additive HPG over-stimulation on gonadotropins",
+        "Hypersensitivity",
+        "Long-term safety unstudied",
+        "Unverified source"
+      ],
+      "management": [
+        "Screen out hormone-sensitive malignancy",
+        "Coordinate with reproductive specialist if on gonadotropins",
+        "Document experimental consent",
+        "Verify source",
+        "Hypersensitivity → discontinue"
+      ],
+      "monitoring": [
+        "Baseline: hormone-sensitive malignancy screen; pregnancy; reproductive context",
+        "Consider LH / sex-steroid checks",
+        "Response across cycle"
+      ],
+      "discontinuation": "End of empiric cycle; no benefit; malignancy concern; hypersensitivity; pregnancy (outside supervised protocol). No taper.",
+      "sources": [
+        "Empiric/community-protocol — VERIFY",
+        "Investigational; Phase 1 acute LH rise only; no validated SC regimen",
+        "No specific kisspeptin DOIs in library — VERIFY any citation"
+      ]
+    },
+    "gonadorelin": {
+      "status": "⚠ VERIFY — compounded only; brands Factrel/Lutrepulse discontinued. Female pulsatile ovulation-induction has real evidence; male TRT-adjunct is OFF-LABEL, empiric, limited modern data — VERIFY. Pulsatile delivery is essential (continuous receptor exposure downregulates the axis).",
+      "candidacy": "(a) Male TRT/HPG support (empiric/off-label); (b) Female ovulation induction (evidence-backed pump). Absolute: hypersensitivity (anaphylaxis), conditions aggravated by rising gonadotropins/sex steroids (hormone-sensitive malignancy), pituitary adenoma/tumor (VERIFY).",
+      "starting_dose": "Male (empiric): ~100–200 mcg SC/pulse (range 100–500). Recon DEFAULT: 10 mg vial + 5 mL BAC → 2 mg/mL → 100 mcg = 0.05 mL = 5 units (smaller fills common — match pharmacy). Female ovulation induction: ~5–20 mcg IV every 60–90 min via pump (distinct indication/dosing).",
+      "titration": "Empiric for TRT support; ovulation induction per pump protocol. Pulsatility matters more than dose size.",
+      "frequency": "TRT support: EOD or 2–3×/week (some daily/twice-weekly) — these intermittent SC injections ARE the pulsatile delivery (distinct from the continuous receptor occupancy that downregulates the axis). Ovulation induction: every 60–90 min via pump.",
+      "cycle_rest": "TRT support continuous alongside testosterone (no scheduled rest) — but delivered as intermittent pulses, not continuous infusion. Ovulation induction per pump protocol.",
+      "ae_common": [
+        "Injection-site reactions",
+        "Headache",
+        "Flushing",
+        "Nausea",
+        "(Ovulation induction) ovarian-stimulation symptoms"
+      ],
+      "ae_serious": [
+        "Hypersensitivity / anaphylaxis",
+        "OHSS (cyst rupture, ascites, thromboembolism — avoid in ovarian enlargement)",
+        "Axis downregulation with continuous exposure",
+        "Hormone-sensitive malignancy stimulation",
+        "Pituitary adenoma concern (VERIFY)"
+      ],
+      "management": [
+        "Preserve pulsatile dosing",
+        "Monitor for OHSS, manage urgently",
+        "Screen out hormone-sensitive malignancy / pituitary adenoma",
+        "Verify source",
+        "Anaphylaxis → STOP + epinephrine"
+      ],
+      "monitoring": [
+        "Baseline: exclude hormone-sensitive malignancy / pituitary adenoma (VERIFY); pregnancy as relevant",
+        "Male: LH/FSH, total/free testosterone, semen params as indicated",
+        "Ovulation induction: follicular US + estradiol; OHSS watch"
+      ],
+      "discontinuation": "Hypersensitivity / anaphylaxis; OHSS / ovarian enlargement; hormone-sensitive malignancy; pituitary concern; loss of benefit. TRT support tied to TRT course. No specific taper.",
+      "sources": [
+        "Compounded only — VERIFY (male TRT-adjunct off-label/empiric); female pulsatile ovulation-induction has real evidence",
+        "Factrel/Lutrepulse discontinued",
+        "No specific gonadorelin DOIs in library — VERIFY any citation"
+      ]
+    },
+    "melanotan-ii": {
+      "status": "⚠ VERIFY — NOT FDA-approved for any use; distinct from afamelanotide (SCENESSE). Gray-market; potency/purity unreliable (~30% in forensic analyses). No validated cycle. Low-start titration mandatory; melanoma screening mandatory.",
+      "candidacy": "Tanning/pigmentation (off-target libido). ABSOLUTE: melanoma / any pigmented-atypical-changing lesion / personal-family melanoma history (documented melanoma incl. oral mucosal after intranasal use); uncontrolled HTN / significant CVD ABSOLUTE (hypertensive crises, renal infarction). Mandate full-body skin surveillance.",
+      "starting_dose": "Reported / gray-market (NOT recommended): Loading — start LOW ~0.25 mg (250 mcg) SC daily, titrate cautiously toward ~0.5–1 mg/day as tolerated (low start limits nausea, flushing, priapism). Maintenance ~1 mg SC 1–2×/week. Recon DEFAULT: 10 mg vial + 5 mL BAC → 2 mg/mL → 250 mcg = 0.125 mL = 12.5 units; 1 mg = 0.5 mL = 50 units (purity unreliable).",
+      "titration": "Low-start titration MANDATORY: begin ~250 mcg/day, increase slowly only as tolerated; step down to weekly maintenance at target pigmentation.",
+      "frequency": "Loading daily (low dose) → maintenance ~1–2×/week.",
+      "cycle_rest": "N/A — gray-market; no validated cycle; off between loading phases.",
+      "ae_common": [
+        "Nausea",
+        "Flushing",
+        "Spontaneous erections / priapism (dose-related)",
+        "Appetite suppression",
+        "Injection-site reactions",
+        "Darkening of nevi / new moles",
+        "Yawning"
+      ],
+      "ae_serious": [
+        "Melanoma / new-changing-darkening pigmented lesions (absolute screen-out)",
+        "Priapism >4 h — urologic emergency",
+        "Hypertensive crisis / renal infarction (absolute in uncontrolled HTN/CVD)",
+        "Rhabdomyolysis (CK >5,000) / systemic toxicity",
+        "Hypersensitivity",
+        "Unregulated supply"
+      ],
+      "management": [
+        "Mandatory low-start + slow titration",
+        "Priapism >4 h → emergency; avoid in predisposed (sickle cell, prior priapism)",
+        "Any new/changing pigmented lesion → STOP + derm/melanoma referral",
+        "Do not use in uncontrolled HTN/CVD, monitor BP",
+        "Check CK for muscle symptoms",
+        "Counsel gray-market purity (many clinicians decline)",
+        "Hypersensitivity → discontinue"
+      ],
+      "monitoring": [
+        "Baseline: full-body skin/dermatologic exam (gating) + BP/CV (gating)",
+        "On therapy: interval full-body skin surveillance; BP; priapism counseling; CK if symptomatic"
+      ],
+      "discontinuation": "New/changing pigmented lesion; priapism; hypertensive response; rhabdomyolysis; hypersensitivity; pregnancy; patient preference. No taper.",
+      "sources": [
+        "Empiric / gray-market — VERIFY",
+        "NOT FDA-approved; ≠ afamelanotide (SCENESSE)",
+        "Case reports: melanoma and new/changing moles; nausea/flushing/priapism common",
+        "No specific Melanotan II DOIs in library (case-report-derived) — VERIFY any citation"
+      ]
+    }
+  }
+}

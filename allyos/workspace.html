@@ -162,6 +162,32 @@ label{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:upperca
 .contra .cabs,.contra .crel{padding:2px 13px 4px}
 .contra ul{margin:0 0 6px 16px}.contra li{font-size:12px;color:#cdd7da;margin:2px 0}
 .contra .cabs li{color:#f0a59d}
+.docsblk{border:1px solid var(--line);border-radius:8px;margin:4px 0 14px;overflow:hidden}
+.docsblk .dr{display:flex;align-items:center;gap:16px;padding:12px 15px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.docsblk .dr:last-child{border-bottom:none}
+.docsblk .drs{font-size:11.5px;color:var(--muted);margin-top:2px}
+.docsblk .dctl{margin-left:auto;display:flex;align-items:center;gap:10px}
+.docsblk .lbl2{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.docsblk .opt{font-size:10px;color:var(--gold);border:1px solid #463413;border-radius:4px;padding:1px 6px;margin-left:4px}
+.btn.sm{padding:6px 12px;font-size:12px}
+.pdraw{position:fixed;top:46px;right:0;bottom:0;width:520px;max-width:92vw;background:var(--bg2);border-left:1px solid var(--line);transform:translateX(100%);transition:transform .18s;display:flex;flex-direction:column;z-index:22}
+.pdraw.open{transform:none}
+.pdraw .ah{display:flex;align-items:center;gap:9px;padding:13px 18px;border-bottom:1px solid var(--line)}
+.pdraw .ah b{font:600 14px Georgia,serif}
+.pdraw .body2{flex:1;overflow:auto;padding:16px 18px}
+.pdraw .foot{padding:12px 16px;border-top:1px solid var(--line)}
+.pd-sec{margin-bottom:13px}.pd-sec .t{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--teal);margin-bottom:5px;font-weight:700}
+.pd-sec.warn .t{color:var(--danger)}
+.pd-sec p{font-size:12.5px;color:#cdd7da;line-height:1.55}
+.pd-sec ul{margin:0 0 0 16px}.pd-sec li{font-size:12.5px;color:#cdd7da;margin:3px 0;line-height:1.5}
+.pdraw .src{font-size:10.5px;color:var(--faint);border-top:1px solid var(--line);padding-top:8px;margin-top:8px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:40}
+.modal.open{display:flex}
+.mcard{background:var(--bg2);border:1px solid var(--line2);border-radius:12px;width:460px;max-width:92vw;overflow:hidden}
+.mcard .mh{padding:14px 18px;font-weight:700;color:var(--danger);border-bottom:1px solid var(--line);background:#1f1110}
+.mcard .mb{padding:16px 18px}.mcard .mb p{font-size:13px;margin-bottom:8px}.mcard .mb ul{margin:0 0 12px 18px}.mcard .mb li{font-size:12.5px;color:#f0a59d;margin:3px 0}
+.mcard .mf{display:flex;gap:10px;justify-content:flex-end;padding:12px 18px;border-top:1px solid var(--line)}
+.doc .pref{border-left:2px solid var(--line2);padding:4px 0 4px 10px;margin:7px 0;font-size:12.5px;line-height:1.5}.doc .pref .kk{color:var(--muted);font-weight:600}
 @media print{
   body *{visibility:hidden}
   #printArea,#printArea *{visibility:visible}
@@ -217,6 +243,8 @@ label{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:upperca
   <div class="foot"><textarea id="allyIn" placeholder="e.g. renal dosing cautions for tirzepatide + sermorelin?"></textarea><button class="btn pri" id="allySend" style="align-self:flex-end">Ask</button></div>
 </aside>
 
+<aside class="pdraw" id="pdraw"><div class="ah"><b id="pdtitle">Protocol</b><button class="ghost" id="pdClose" style="margin-left:auto;padding:4px 9px">✕</button></div><div class="body2" id="pdbody"></div><div class="foot"><button class="btn pri" id="pdAlly" style="width:100%">Ask Ally about this (de-identified)</button></div></aside>
+<div class="modal" id="hsmodal"><div class="mcard"><div class="mh">⛔ Hard-stop — documented override required</div><div class="mb"><p>Flagged as contraindications for this patient:</p><ul id="hslist"></ul><p style="color:var(--muted);font-size:12px">AllyOS does not block clinical decisions. To proceed, document your clinical rationale — it is recorded in the note and consent.</p><label for="hsrat">Override rationale (required)</label><textarea id="hsrat" rows="3"></textarea></div><div class="mf"><button class="btn" id="hsCancel">Cancel</button><button class="btn pri" id="hsOverride">Override &amp; proceed</button></div></div></div>
 <div id="printArea"></div>
 
 <script>
@@ -2021,6 +2049,8 @@ function intakeFor(s){return INTAKE[s]}
 fetch('../protocols/intake-schema.json').then(function(r){return r.json()}).then(function(d){INTAKE=d.peptides||{};render();}).catch(function(){});
 var CONTRA={};function contraFor(s){return CONTRA[s]}
 fetch('../protocols/contraindications.json').then(function(r){return r.json()}).then(function(d){CONTRA=d.peptides||{};render();}).catch(function(){});
+var DETAIL={};function detailFor(s){return DETAIL[s]}
+fetch('../protocols/protocols-detail.json').then(function(r){return r.json()}).then(function(d){DETAIL=d.peptides||{};render();}).catch(function(){});
 
 /* ───────── structured intake vocab (pills) ───────── */
 var SEX=['Female','Male'];
@@ -2101,6 +2131,24 @@ function contraHTML(){
   }).filter(Boolean).join('');
   return blocks?'<div class="lbl" style="margin:14px 0 2px">Contraindications</div>'+blocks:'';
 }
+function docsBlock(){
+  var t=consentTier();var cs=S.consentSigned,hi=S.handoutInclude;
+  function yn(g,v){return '<span class="pill'+(v===true?' on':'')+'" data-doc="'+g+'" data-v="1">Yes</span><span class="pill'+(v===false?' on':'')+'" data-doc="'+g+'" data-v="0">No</span>';}
+  return '<div class="lbl" style="margin:6px 0 2px">Visit documents</div><div class="docsblk">'
+   +'<div class="dr"><div><b>Informed consent</b> <span class="chip gC" style="margin-left:4px">Tier '+t+'</span><div class="drs">Review the Tier-'+t+' consent with the patient, then mark signed.</div></div>'
+     +'<div class="dctl"><span class="lbl2">Signed</span><div class="pills">'+yn("consent",cs)+'</div><button class="btn sm" id="prtConsent">Print consent</button></div></div>'
+   +'<div class="dr"><div><b>Patient handout</b> <span class="opt">optional</span><div class="drs">Plain-language plan for the patient \u2014 provider\u2019s choice.</div></div>'
+     +'<div class="dctl"><span class="lbl2">Include</span><div class="pills">'+yn("handout",hi)+'</div><button class="btn sm" id="prtHandout"'+(hi?'':' disabled')+'>Print handout</button></div></div>'
+   +'</div>';
+}
+function bindDocs(){
+  document.querySelectorAll('.pill[data-doc]').forEach(function(el){el.onclick=function(){
+    var g=el.dataset.doc,v=el.dataset.v==='1'; if(g==='consent')S.consentSigned=v; else S.handoutInclude=v; save(); stepPlan();
+  };});
+  var pc=document.getElementById('prtConsent');if(pc)pc.onclick=function(){printDoc(docConsent());};
+  var ph=document.getElementById('prtHandout');if(ph)ph.onclick=function(){if(S.handoutInclude)printDoc(docHandout());};
+}
+function printDoc(h){document.getElementById('printArea').innerHTML=h;window.print();}
 /* ───────── local engine ───────── */
 function gradeTier(g){g=(g||'').toUpperCase();
   if(g.indexOf('D')>-1) return 4; if(g.indexOf('C')>-1) return 3; if(g.indexOf('B')>-1) return 2;
@@ -2136,7 +2184,7 @@ function renderActs(){
   var left = S.step>0 ? '<button class="btn" id="back">← Back</button>' : '<span class="muted-sm">Step '+(S.step+1)+' of 4 · everything stays on your device</span>';
   acts.innerHTML = left + right;
   var b=document.getElementById('back');if(b)b.onclick=function(){setStep(S.step-1)};
-  var n=document.getElementById('next');if(n)n.onclick=function(){setStep(S.step+1)};
+  var n=document.getElementById('next');if(n)n.onclick=function(){if(S.step===2&&hardStops().length&&!S.hsOverride){showHS();return;}setStep(S.step+1)};
   var pr=document.getElementById('printBtn');if(pr)pr.onclick=doPrint;
   var st=document.getElementById('saveToday');if(st)st.onclick=function(){var t=JSON.parse(localStorage.getItem('allyos_today')||'[]');t.push({name:S.patient.name||'(unnamed)',n:S.sel.length,at:new Date().toLocaleString()});localStorage.setItem('allyos_today',JSON.stringify(t));st.textContent='Saved ✓';};
 }
@@ -2223,12 +2271,13 @@ function stepPlan(){
   var advs=advisoryList();
   panel.innerHTML='<div class="phead"><h2>Plan of care</h2><span class="sub">Computed on this device for '+(S.patient.name||'this patient')+'</span></div>'
    +'<div class="note-local"><span class="ondev">computed on-device</span> Deterministic dosing math — not generated by AI.</div>'
+   + docsBlock()
    + conflictAlerts()
    + (advs.length?'<div class="lbl" style="margin:8px 0 2px">Advisories &amp; considerations</div><div class="advs">'+advs.map(advCard).join('')+'</div>':'')
    + recLabsHTML()
    + contraHTML()
    + S.sel.map(specSheet).join('');
-  S.sel.forEach(bindCalc);
+  S.sel.forEach(bindCalc);bindDocs();bindProtoBtns();
 }
 function specSheet(s){
   var p=byslug(s)||{};var d=parseRecon(p.body_md);var v=S.vials[s]||{mg:d.mg,ml:d.ml,dose:d.dose};S.vials[s]=v;
@@ -2236,7 +2285,7 @@ function specSheet(s){
   var route=parseField(p.body_md,/\*\*Route:\*\*\s*([^\n]+)/);
   var cyc=parseField(p.body_md,/\*\*Cycle:\*\*\s*([^\n]+)/);
   var r=recon(v.mg,v.ml,v.dose);
-  return '<div class="spec"><div class="sh"><span class="nm">'+p.name+'</span><span class="chip '+gradeClass(p.grade)+' gr">'+(p.grade||'')+'</span></div>'
+  return '<div class="spec"><div class="sh"><span class="nm">'+p.name+'</span><span class="chip '+gradeClass(p.grade)+' gr">'+(p.grade||'')+'</span>'+(detailFor(s)?'<button class="btn sm proto-btn" data-proto="'+s+'">Full protocol</button>':'')+'</div>'
    +'<div class="specrows">'
      +row('Mechanism',p.mechanism||'—')
      +row('Dose',dose||'see monograph')
@@ -2273,6 +2322,15 @@ function plist(a){return (a&&a.length)?a.join(', '):'';}
 function agentLines(){return S.sel.map(function(s){var p=byslug(s)||{};var v=S.vials[s]||{};var r=recon(v.mg,v.ml,v.dose);
   return '<li><b>'+p.name+'</b> — '+(parseField(p.body_md,/\*\*Dose:\*\*\s*([^\n]+)/)||'per monograph')+'; reconstitute '+v.mg+' mg + '+v.ml+' mL → <b>'+r.units.toFixed(1)+' units</b>/dose'+(S.start[s]?'; start '+fdate(S.start[s]):'')+'</li>';}).join('');}
 function labLines(){var l=recLabs();return l.length?'<h4>Recommended labs</h4><ul>'+l.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>':'';}
+function noteProtocolDetail(){return S.sel.map(function(s){var d=detailFor(s);if(!d)return '';var p=byslug(s)||{};
+  var mon=(d.monitoring||[]).slice(0,3);
+  return '<div class="pref"><b>'+(p.name||s)+'</b>'
+    +(d.starting_dose?'<div><span class="kk">Start:</span> '+d.starting_dose+'</div>':'')
+    +(d.titration?'<div><span class="kk">Titration:</span> '+d.titration+'</div>':'')
+    +(d.frequency?'<div><span class="kk">Frequency:</span> '+d.frequency+'</div>':'')
+    +(mon.length?'<div><span class="kk">Monitoring:</span> '+mon.join('; ')+'</div>':'')
+    +(d.discontinuation?'<div><span class="kk">Discontinue if:</span> '+d.discontinuation+'</div>':'')
+    +'</div>';}).join('');}
 function docNote(){var p=S.patient;return '<h3>Clinical encounter note</h3><div class="docsub">'+pinfo()+'  ·  '+new Date().toLocaleDateString()+'</div>'
   +'<h4>Indication</h4><p>'+(plist(p.goals)||'—')+'</p>'
   +'<h4>Pertinent data</h4><p>BMI '+(p.bmi||'—')+' · eGFR '+(p.egfr||'—')+' · A1c '+(p.a1c||'—')+'% · Comorbid: '+(plist(p.comorbid)||'none')+' · Meds: '+(plist(p.meds)||'none recorded')+'</p>'
@@ -2280,14 +2338,16 @@ function docNote(){var p=S.patient;return '<h3>Clinical encounter note</h3><div 
   + (conflicts().length?'<p style="color:#f0a59d"><b>Conflicts:</b> '+conflicts().join('; ')+'</p>':'')
   +'<h4>Plan</h4><ul>'+agentLines()+'</ul>'
   + labLines()
+  + (S.sel.some(function(s){return detailFor(s)})?'<h4>Protocol reference — titration &amp; monitoring</h4>'+noteProtocolDetail():'')
+  + (S.hsOverride?'<h4>Hard-stop override</h4><p style="color:#f0a59d">'+S.hsOverride.items.join('; ')+' — <b>rationale:</b> '+S.hsOverride.rationale+'</p>':'')
   +'<p style="margin-top:10px;color:var(--muted)">Consent tier '+consentTier()+' obtained'+(S.sel.length>1?'; combination addendum reviewed':'')+'. Provider counseled patient on risks, benefits, alternatives, and monitoring.</p>'
   +'<div class="sigrow"><div class="sig">Provider signature</div><div class="sig">Date</div></div>';}
-function docConsent(){var t=consentTier();var rats=consentRationale();return '<h3>Informed consent — peptide therapy</h3><div class="docsub">'+pinfo()+'  ·  Consent Tier '+t+' — '+(TIERTXT[t]||'')+'</div>'
+function docConsent(){var t=consentTier();var rats=consentRationale();return '<h3>Informed consent — peptide therapy</h3><div class="docsub">'+pinfo()+'  ·  Consent Tier '+t+' — '+(TIERTXT[t]||'')+(S.consentSigned?'  ·  SIGNED ✓':'  ·  not yet signed')+'</div>'
   +'<h4>Treatment</h4><ul>'+agentLines()+'</ul>'
   +'<h4>Disclosures</h4><ul><li>These agents are <b>not FDA-approved drugs unless otherwise noted</b>; some uses are off-label or investigational.</li>'
   +(t>=3?'<li><b>Investigational / limited human evidence</b> — outcomes and long-term risks are uncertain.</li>':'')
   +(S.sel.length>1?'<li><b>Combination therapy</b> — the combination is less studied than the individual agents; interactions may be unknown.</li>':'')
-  +'<li>Clinical decisions are made by the treating licensed provider, who assumes responsibility for this care.</li></ul>'
+  +'<li>Clinical decisions are made by the treating licensed provider, who assumes responsibility for this care.</li></ul>'+(S.hsOverride?'<h4>Hard-stop override</h4><p style="color:#9fb0b5">'+S.hsOverride.items.join('; ')+' — rationale: '+S.hsOverride.rationale+'</p>':'')
   +(rats.length?'<h4>Basis</h4><p style="font-size:12px;color:#9fb0b5">'+rats.join(' · ')+'</p>':'')
   +'<div class="sigrow"><div class="sig">Patient signature</div><div class="sig">Date</div></div>'
   +'<div class="sigrow"><div class="sig">Provider signature</div><div class="sig">Date</div></div>';}
@@ -2298,10 +2358,10 @@ function docHandout(){return '<h3>Your treatment plan</h3><div class="docsub">Fo
   +'<h4>Questions</h4><p>Contact the prescribing clinic.</p>';}
 function docCompliance(){var p=S.patient;var checks=[
    ['Patient identity recorded',!!p.name],['Indication / goal documented',(p.goals||[]).length>0],
-   ['Protocol selected',S.sel.length>0],['Consent tier determined',consentTier()>0],
+   ['Protocol selected',S.sel.length>0],['Consent tier determined',consentTier()>0],['Informed consent signed',S.consentSigned===true],
    ['Reconstitution computed',S.sel.length>0&&S.sel.every(function(s){return S.vials[s]})],
    ['Start date set',S.sel.length>0&&S.sel.every(function(s){return S.start[s]})],
-   ['No unaddressed contraindication conflict',conflicts().length===0]];
+   ['No unaddressed contraindication conflict',conflicts().length===0],['Hard-stop override documented',hardStops().length===0||S.hsOverride!=null],['Patient handout '+(S.handoutInclude?'included':'declined (optional)'),true]];
   return '<h3>Pre-visit compliance check</h3><div class="docsub">'+pinfo()+'</div>'
    +checks.map(function(c){return '<div class="flag '+(c[1]?'g':'r')+'">'+(c[1]?'✓':'!')+' '+c[0]+(c[1]?'':' — incomplete')+'</div>'}).join('');}
 
@@ -2310,12 +2370,46 @@ function doPrint(){
   window.print();
 }
 
+function pdSec(t,body,warn){return '<div class="pd-sec'+(warn?' warn':'')+'"><div class="t">'+t+'</div>'+body+'</div>';}
+function pdUl(a){return '<ul>'+(a||[]).map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>';}
+function bindProtoBtns(){document.querySelectorAll('.proto-btn').forEach(function(el){el.onclick=function(){openProto(el.dataset.proto)};});}
+function openProto(slug){var d=detailFor(slug);if(!d)return;var p=byslug(slug)||{};
+  document.getElementById('pdtitle').textContent=(p.name||slug)+' — full protocol';
+  var h='';
+  if(d.status)h+='<div class="pd-sec"><p style="color:var(--gold)">'+d.status+'</p></div>';
+  if(d.candidacy)h+=pdSec('Candidacy / indication','<p>'+d.candidacy+'</p>');
+  if(d.starting_dose)h+=pdSec('Starting dose','<p>'+d.starting_dose+'</p>');
+  if(d.titration)h+=pdSec('Titration','<p>'+d.titration+'</p>');
+  if(d.frequency)h+=pdSec('Frequency / timing','<p>'+d.frequency+'</p>');
+  if(d.cycle_rest)h+=pdSec('Cycle / rest','<p>'+d.cycle_rest+'</p>');
+  if(d.hold_rules)h+=pdSec('Hold / slow rules','<p>'+d.hold_rules+'</p>');
+  if(d.ae_common)h+=pdSec('Adverse events — common',pdUl(d.ae_common));
+  if(d.ae_serious)h+=pdSec('Adverse events — serious (watch)',pdUl(d.ae_serious),true);
+  if(d.management)h+=pdSec('Side-effect management',pdUl(d.management));
+  if(d.monitoring)h+=pdSec('Monitoring / follow-up',pdUl(d.monitoring));
+  if(d.discontinuation)h+=pdSec('Discontinuation','<p>'+d.discontinuation+'</p>');
+  if(d.sources)h+='<div class="src">Sources: '+(d.sources||[]).join(' · ')+'</div>';
+  document.getElementById('pdbody').innerHTML=h;
+  document.getElementById('pdAlly').onclick=function(){closeProto();var i=document.getElementById('allyIn');if(i)i.value='For a patient considering '+(p.name||slug)+', ';openAlly();};
+  document.getElementById('pdraw').classList.add('open');document.getElementById('scrim').classList.add('open');
+}
+function closeProto(){var d=document.getElementById('pdraw');if(d)d.classList.remove('open');document.getElementById('scrim').classList.remove('open');}
+function hardStops(){
+  var out=[],fl=S.patient.flags||[];var platform={'Pregnancy / planning':'Pregnancy','Active malignancy':'Active malignancy'};
+  S.sel.forEach(function(sl){var c=contraFor(sl),p=byslug(sl)||{};var abs=((c&&c.absolute)||[]).join(' ').toLowerCase();
+    fl.forEach(function(fx){var kws=FLAGKW[fx]||[];var inAbs=kws.some(function(kw){return abs.indexOf(kw)>-1});
+      if(inAbs||platform[fx]){var key=(platform[fx]||fx)+' \u2715 '+(p.name||sl);if(out.indexOf(key)<0)out.push(key);}});});
+  return out;
+}
+function showHS(){var hs=hardStops();document.getElementById('hslist').innerHTML=hs.map(function(x){return '<li>'+x+'</li>'}).join('');
+  document.getElementById('hsrat').value=(S.hsOverride&&S.hsOverride.rationale)||'';document.getElementById('hsmodal').classList.add('open');}
+function closeHS(){document.getElementById('hsmodal').classList.remove('open');}
 /* ───────── ally slideover ───────── */
 var ally=document.getElementById('ally'),scrim=document.getElementById('scrim');
 function openAlly(){ally.classList.add('open');scrim.classList.add('open');}
 function closeAlly(){ally.classList.remove('open');scrim.classList.remove('open');}
 document.getElementById('allyNav').onclick=function(e){e.preventDefault();openAlly();};
-document.getElementById('allyClose').onclick=closeAlly;scrim.onclick=closeAlly;
+document.getElementById('allyClose').onclick=closeAlly;var pdc=document.getElementById('pdClose');if(pdc)pdc.onclick=closeProto;scrim.onclick=function(){closeAlly();closeProto();};document.getElementById('hsCancel').onclick=closeHS;document.getElementById('hsOverride').onclick=function(){var r=document.getElementById('hsrat').value.trim();if(!r){document.getElementById('hsrat').style.borderColor='var(--danger)';return;}S.hsOverride={rationale:r,items:hardStops(),at:new Date().toLocaleString()};save();closeHS();setStep(3);};
 document.getElementById('allySend').onclick=function(){
   var q=document.getElementById('allyIn').value.trim();if(!q)return;
   var b=document.getElementById('allyBody');

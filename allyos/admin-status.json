@@ -1,0 +1,15 @@
+{
+  "date": "2026-06-23T07:43:43.683458Z",
+  "json_valid": true,
+  "calc_ok": true,
+  "files_checked": [
+    "pricing.json",
+    "protocols/protocols.json",
+    "protocols/peptide-packs.json",
+    "protocols/intake-schema.json",
+    "protocols/contraindications.json",
+    "protocols/protocols-detail.json"
+  ],
+  "errors": [],
+  "agent": "health-check"
+}

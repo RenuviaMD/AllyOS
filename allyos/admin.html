@@ -1,0 +1,92 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AllyOS Admin — Master Console</title>
+<style>
+:root{--bg:#0b0f11;--bg2:#11181b;--bg3:#161e22;--line:#222d32;--line2:#2c383e;--ink:#e8eef0;--muted:#8b9aa1;--faint:#5c6a71;--teal:#29b8a8;--teal-dim:#1c7a72;--gold:#d4a548;--danger:#ef6a5f;--warn:#e0a83a;--ok:#3fcf8e}
+*{box-sizing:border-box;margin:0;padding:0}body{font:14px/1.45 -apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+.num{font-variant-numeric:tabular-nums}
+.top{display:flex;align-items:center;gap:14px;padding:0 18px;height:48px;background:var(--bg2);border-bottom:1px solid var(--line)}
+.brand{font-weight:800}.brand b{color:var(--teal)}.tag{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);border:1px solid var(--line2);border-radius:4px;padding:2px 7px}
+.top .right{margin-left:auto;display:flex;align-items:center;gap:12px;color:var(--muted);font-size:12px}
+.lock{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ok)}.lock .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.wrap{max-width:1080px;margin:0 auto;padding:24px 18px}
+h1{font:600 1.4rem/1.2 Georgia,serif;margin-bottom:2px}.sub{color:var(--muted);font-size:.9rem;margin-bottom:8px}
+.phi{font-size:11.5px;color:var(--faint);border:1px solid var(--line);border-radius:7px;padding:9px 13px;margin:14px 0 22px;line-height:1.5}.phi b{color:var(--ok)}
+.grp{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:22px 0 10px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:14px}
+.tile{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:15px 16px}
+.tile .h{display:flex;align-items:center;gap:8px;margin-bottom:8px}.tile .h b{font-size:13.5px}
+.st{font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:5px;margin-left:auto}
+.st.ok{background:#0e2a1d;color:var(--ok);border:1px solid #1c5238}.st.warn{background:#2a230e;color:var(--warn);border:1px solid #4a3c18}.st.run{background:#0e2436;color:#4ea8e0;border:1px solid #1c4763}
+.tile p{font-size:12px;color:var(--muted);line-height:1.5}.tile .meta{font-size:11px;color:var(--faint);margin-top:8px}
+.btn{margin-top:11px;display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border:1px solid var(--line2);border-radius:7px;font-size:12px;font-weight:600;color:var(--ink);background:none;cursor:pointer}
+.btn:hover{border-color:var(--teal-dim)}.btn.pri{background:var(--teal);color:#04110f;border-color:var(--teal)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.panel{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.panel h3{font-size:13px;margin-bottom:4px}.panel .d{font-size:11.5px;color:var(--muted);margin-bottom:10px}
+.li{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px}.li:last-child{border:none}
+.li .b{margin-left:auto;font-size:10px;font-weight:700;text-transform:uppercase;padding:1px 7px;border-radius:4px}
+.b.r{background:#1f1110;color:#f0a59d;border:1px solid #532520}.b.y{background:#2a230e;color:var(--warn);border:1px solid #4a3c18}.b.g{background:#0e2a1d;color:var(--ok);border:1px solid #1c5238}
+.sched{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--muted);margin-top:6px}.sched .c{color:var(--teal);font-weight:700}
+footer{color:var(--faint);font-size:11px;border-top:1px solid var(--line);margin-top:26px;padding-top:14px;line-height:1.6}
+.proto{font-size:10px;color:var(--gold);border:1px solid #463413;border-radius:4px;padding:1px 7px;margin-left:6px}
+</style></head><body>
+<div class="top"><div class="brand">Ally<b>OS</b> Admin</div><span class="tag">master console</span>
+<div class="right"><span class="lock"><span class="dot"></span> PHI-free · content &amp; ops only</span><span>Dr. Falcon · admin</span></div></div>
+<div class="wrap">
+  <h1>Master Console <span class="proto">prototype</span></h1>
+  <div class="sub">Daily audit &amp; debug across the platform — fix content and AI behavior once, heal every provider.</div>
+  <div class="phi">🔒 <b>Patient data is never visible here.</b> Encounters stay on each provider's device (PHI-free architecture). This console governs the <b>shared engine</b>: clinical content, Ally's behavior, system health, and regulatory currency — fixes here propagate to all providers without touching anyone's patient data.</div>
+
+  <div class="grp">Daily agents</div>
+  <div class="tiles">
+    <div class="tile"><div class="h"><b>Operations Auditor</b><span class="st ok">pass · 2 flags</span></div>
+      <p>Re-runs the multi-Opus-auditor pass over live content — re-resolves every citation, re-checks FDA-label doses &amp; contraindications, flags newly outdated or drifted items.</p>
+      <div class="meta">Last run: today 04:12 · 30 peptides · 0 fabrication · 2 currency flags</div>
+      <button class="btn pri">▷ Run audit now</button> <button class="btn">View report</button></div>
+    <div class="tile"><div class="h"><b>Debug / Health</b><span class="st ok" id="hStat">healthy</span></div>
+      <p>Validates every JSON, loads the workspace headless for console errors, re-tests reconstitution math, checks broken links &amp; stale data, regression-tests the engine.</p>
+      <div class="meta" id="hMeta">Last run: today 04:18 · JSON 6/6 valid · 0 console errors · 22/22 calc OK</div>
+      <button class="btn pri">▷ Run health check</button> <button class="btn">View report</button></div>
+    <div class="tile"><div class="h"><b>Ally Output Review</b><span class="st warn">3 flagged</span></div>
+      <p>Provider-flagged Ally answers (de-identified) queued for your review &amp; correction; bad answers feed back into the knowledge base.</p>
+      <div class="meta">3 awaiting review · 0 auto-blocked</div>
+      <button class="btn pri">▷ Review queue</button></div>
+    <div class="tile"><div class="h"><b>Regulatory Radar</b><span class="st warn">2 pending</span></div>
+      <p>FDA approvals, label changes, PCAC/compounding status — surfaced for you to confirm and push to the cards.</p>
+      <div class="meta">Pending: SS-31 status sync · GLP-1 MASH/oral-Wegovy · PCAC Jul 2026</div>
+      <button class="btn pri">▷ Review updates</button></div>
+  </div>
+
+  <div class="grp">Open items (this run)</div>
+  <div class="row">
+    <div class="panel"><h3>Needs-fix (from Operations Auditor)</h3><div class="d">Content the daily audit flagged — confirm &amp; publish.</div>
+      <div class="li">SS-31 status in protocols.json still "investigational" <span class="b y">currency</span></div>
+      <div class="li">GLP-1 cards missing MASH + oral-Wegovy indications <span class="b y">currency</span></div>
+      <div class="li">BPC-157 card missing 2026 Category-2 / PCAC context <span class="b y">verify</span></div>
+      <div class="li">All citations resolve · no fabrication <span class="b g">clean</span></div>
+    </div>
+    <div class="panel"><h3>System health (from Debug agent)</h3><div class="d">Technical integrity across the platform.</div>
+      <div class="li">protocols.json · peptide-packs.json · pricing.json · intake-schema.json · contraindications.json · dosing.md <span class="b g">valid</span></div>
+      <div class="li">Workspace renders · 30 agents load · no console errors <span class="b g">ok</span></div>
+      <div class="li">Reconstitution math 22/22 <span class="b g">ok</span></div>
+      <div class="li">Ally function reachable (API key set) <span class="b g">ok</span></div>
+    </div>
+  </div>
+
+  <div class="grp">Publish</div>
+  <div class="panel"><h3>Push corrections → all providers</h3>
+    <div class="d">Approved content fixes deploy to every provider's app at once (data layer is shared; patient data is not).</div>
+    <button class="btn pri">⬆ Publish approved corrections</button>
+    <div class="sched">⏱ Daily agents scheduled <span class="c">04:00 UTC</span> via GitHub Action → write status here · buttons trigger on-demand runs.</div>
+  </div>
+
+  <footer><b style="color:#dfeae8">AllyOS Admin — Master Console.</b> Governs shared clinical content, Ally behavior, system health, and regulatory currency. Handles no PHI. Prototype — daily execution wires to a scheduled GitHub Action + the Claude API; figures shown are illustrative. © 2026 RenuviaMD®.</footer>
+</div>
+<script>
+fetch('admin-status.json').then(function(r){return r.json()}).then(function(d){
+  var ok=d.json_valid&&d.calc_ok&&(!d.errors||!d.errors.length);
+  var st=document.getElementById('hStat'); if(st){st.textContent=ok?'healthy':'issues';st.className='st '+(ok?'ok':'warn');}
+  var m=document.getElementById('hMeta'); if(m){m.textContent='Last run '+(d.date||'').slice(0,16).replace('T',' ')+' UTC · '+(d.files_checked?d.files_checked.length:0)+' JSON valid · calc '+(d.calc_ok?'OK':'FAIL')+(d.errors&&d.errors.length?' · '+d.errors.length+' error(s)':' · 0 errors');}
+}).catch(function(){});
+</script>
+</body></html>

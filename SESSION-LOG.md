@@ -149,3 +149,11 @@ Key: "patient data never goes to Ally" does NOT make the POC generic — the per
 - **NO predictive-analytics / genetics overclaim** — labs **on-device / deterministic only**; skip genetics (evidence thin). "We don't overclaim" is a stated value.
 - **Ally stays an ASSISTANT, never a "Dr."** — the anti-"Dr. Peptide." Dr. Falcon is the named MD; Ally is the honest assistant.
 - **Moat (the field is crowding fast — Dr. Peptide, Peptide Protocol Portal, peptideai.co, peptideproai.com, peptideprotocols.io, pepedhub.com):** honesty (grades D, names failures, cite-or-VERIFY) + real accountable MD + true on-device privacy + deterministic, auditable dosing. NOT a feature/AI-hype race.
+
+
+## 18. CLINICAL CONTENT DISCIPLINE — detailed protocols + mandatory multi-agent audit (locked)
+- **Every peptide gets a DETAILED clinical management protocol**, not just dose/cycle: candidacy/indication → **starting dose** → **titration** (exact steps, intervals, max, + HOLD/slow rules) → **AEs to watch** (common % + serious warning signs) → **side-effect MANAGEMENT** (how to treat nausea/GI/hypoglycemia/gallbladder/pancreatitis/etc.) → **monitoring/follow-up** → discontinuation & what to expect.
+- **Order:** GLP-1s first, then all 30 peptides.
+- ⭐ **AUDIT DISCIPLINE (non-negotiable):** NO clinical info is LOCKED until independently verified by **2–3 external audit agents** — resolve every DOI in PubMed, check every FDA-label dose/warning against the actual label, flag any fabrication/overstatement/outdated card. Build/lock only after audit clears + Dr. Falcon sign-off.
+- **GLP-1 = no cycles** (continuous + follow-up only). **Retatrutide & Liraglutide follow-up = standard GLP-1 cadence.**
+- Reconstitution locked: units never baked; live calculator computes from provider's actual vial+BAC; computed U-100 units populate the documented dose.
