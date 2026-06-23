@@ -137,3 +137,15 @@ Key: "patient data never goes to Ally" does NOT make the POC generic — the per
 - `pricing.json` = single source of truth for prices + Stripe link slots (empty link = disabled button). Default Member/Top = $99/$199 (adjustable, one edit).
 - Auto clear-on-close is the default (sessionStorage); opt-in "Save to today" → localStorage; "End session · clear" wipes both.
 - No permit needed to BUILD. Go-live needs (from Dr. Falcon): ANTHROPIC_API_KEY into Netlify env; public Stripe Payment Link URLs into pricing.json.
+
+
+## 17. COMPETITOR #2 — "Dr. Peptide" / PeptideProtocols.ai + DIFFERENTIATION (locked)
+**Dr. Peptide / PeptideProtocols.ai** (Dallas Regenerative LLC) — more polished competitor. Claims: 109+ peptides; genetics + labs + "predictive analytics" + "self-evolving collective intelligence"; 16 AI agents / 5 medical advisors / 50+ practitioners / 2,800+ PubMed studies. AI persona = **"Dr. Peptide"** (AI styled AS a doctor).
+- ⚠️ **Their privacy claim is self-contradictory and weaker than ours:** "all data remains on secure local servers" + "any data transmitted to generate protocols is encrypted" = data IS transmitted to THEIR servers (server-side genetics/lab processing, encrypted, trust-us + almost certainly a BAA). **NOT on-device.** Our **on-device / never-transmitted / no-BAA** model beats it — sharpen this contrast in copy: "your patient's data never leaves your device" vs. their "encrypted transmission to our servers."
+
+**Differentiation decisions (locked by Dr. Falcon):**
+- **NO advisory-board theater** — "the advisory board is BS." ONE real, named, accountable MD (Dr. Falcon) is the cleaner story. Don't fake a board.
+- **NO breadth race** — "I don't need 100 peptides with abstract names nobody knows." Stay focused on the peptides providers actually use, **honestly graded**. Quality/honesty > quantity (counters their 109+).
+- **NO predictive-analytics / genetics overclaim** — labs **on-device / deterministic only**; skip genetics (evidence thin). "We don't overclaim" is a stated value.
+- **Ally stays an ASSISTANT, never a "Dr."** — the anti-"Dr. Peptide." Dr. Falcon is the named MD; Ally is the honest assistant.
+- **Moat (the field is crowding fast — Dr. Peptide, Peptide Protocol Portal, peptideai.co, peptideproai.com, peptideprotocols.io, pepedhub.com):** honesty (grades D, names failures, cite-or-VERIFY) + real accountable MD + true on-device privacy + deterministic, auditable dosing. NOT a feature/AI-hype race.
