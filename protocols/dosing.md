@@ -139,10 +139,10 @@ _Decision-support compilation for LICENSED providers. Source of record: `/home/u
 - _Basis: empiric-VERIFY (Grade D) — most potent GHRP but **prone to receptor desensitization**; no human therapeutic approval or efficacy trials. 2024–26 literature preclinical/analytical only._
 
 ### Tesamorelin (Egrifta / Egrifta SV)
-- **Dose:** **2 mg** **Route:** SC (abdomen, rotate sites) **Frequency:** **once daily** (label; not bedtime-restricted, though many dose at night)
+- **Dose:** **EGRIFTA SV: 1.4 mg** SC once daily · **original EGRIFTA: 2 mg** SC once daily **Route:** SC (abdomen, rotate sites) **Frequency:** once daily (label)  *[audit-corrected]*
 - **Cycle:** continuous per label; off-label VAT protocols reassess at 12–26 weeks **Rest:** continuous (no scheduled off-period); discontinue if no VAT response or per clinical judgment
-- **Suggested recon (calculator default):** **2 mg vial + 2.1 mL sterile water** per Egrifta SV labeling; inject **2 mL ≈ 2 mg** (label uses sterile water for injection, not BAC)
-- _Basis: **LABEL** — FDA-approved (2010) for HIV-associated lipodystrophy; **2 mg SC daily** per Egrifta SV prescribing information. Pivotal Ph3 RCTs pooled VAT −15.4% vs placebo, glucose-neutral (Falutz 2010, JCEM). Use for general anti-aging is off-label._
+- **Suggested recon (calculator default):** **EGRIFTA SV → reconstitute with 0.5 mL Sterile Water, inject 0.35 mL (1.4 mg).** Original EGRIFTA → 2.1 mL Sterile Water, inject 2 mL (2 mg). **Sterile Water for injection, NOT BAC.** *[audit-corrected: SV ≠ original Egrifta]*
+- _Basis: **LABEL** — FDA-approved (2010) HIV-associated lipodystrophy. EGRIFTA SV = 1.4 mg/0.5 mL recon; original EGRIFTA = 2 mg/2.1 mL. Pivotal Ph3 VAT −15.4% vs placebo, glucose-neutral (Falutz 2010, JCEM, doi:10.1210/jc.2010-0490). Anti-aging use off-label._
 
 ### MK-677 (Ibutamoren)
 - **Dose:** 10–25 mg typical (reported) **Route:** **oral** **Frequency:** once daily, usually at night (long ~24 h half-life sustains 24 h IGF-1 elevation; bedtime favored for sleep/GH-pulse effect)
@@ -252,7 +252,7 @@ Source of record: `/home/user/renuviamd-site/protocols/protocols.json` (Tier-1, 
 - **Dose:** Typical 5-10 mg/day; range 5-10 mg. **Route:** SC. **Frequency:** Once daily for each pulse.
 - **Cycle:** **10-20 day pulse** (the conventional dosing convention — short pulsed courses, NOT chronic). **Rest:** Off between pulses; repeat the pulse 1-2x/year as indicated (not continuous).
 - **Suggested recon (calculator default):** 10 mg vial + 1 mL BAC = 10 mg/mL (10,000 mcg/mL) -> 10 mg = 1.0 mL = **100 units** (U-100). (For a 5 mg dose: 0.5 mL = 50 units.)
-- _Basis: empiric / community-protocol — **VERIFY**. Not FDA-approved; zero registered trials. Telomerase/longevity claims rest on in-vitro + animal + weak older Russian reports with no Western replication (Khavinson 2003, DOI 10.1023/a:1025493705728; Anisimov 2002, DOI 10.1016/s0304-3835(02)00090-3; Khavinson 2002, PMID 12374906)._
+- _Basis: empiric / community-protocol — **VERIFY**. Not FDA-approved; zero registered trials. Telomerase/longevity claims rest on in-vitro + animal + weak older Russian reports with no Western replication (Khavinson 2003, DOI 10.1023/a:1025493705728; Khavinson 2002, PMID 12374906  *[audit removed a mismatched Anisimov DOI that resolved to an unrelated paper]*)._
 
 ---
 
