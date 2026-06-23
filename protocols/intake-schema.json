@@ -1,0 +1,47 @@
+{
+  "schema": "renuvia.intake.v1",
+  "updated": "2026-06-22",
+  "note": "Per-peptide adaptive intake contract. RESEARCH-POPULATED: every clinical claim must carry a real citation (FDA label / PubMed DOI-PMID / guideline) or be marked VERIFY — never fabricated. This data drives the workspace intake, the advisories, the consent tier, AND the sellable PDF intake template in each peptide's Practice Pack.",
+
+  "override_policy": {
+    "principle": "The provider can override ANY recommendation. AllyOS is decision-support, never a gatekeeper. Every override is a documented clinical decision by the licensed provider — which is what keeps the platform a tool and transfers responsibility to the provider.",
+    "soft_advisory": "inline note + optional one-tap acknowledge",
+    "hard_stop": "blocking modal requiring a TYPED override rationale; recorded in the note + consent. Highest friction, still overridable — not an absolute lock.",
+    "platform_hard_stops": ["Pregnancy / positive pregnancy test", "Active malignancy"]
+  },
+
+  "general_screen": {
+    "all_patients": [
+      "age", "sex", "height", "weight -> BMI",
+      "weight-related comorbidities (HTN, dyslipidemia, prediabetes/T2DM, OSA, CVD, MASLD)",
+      "personal/family MTC or MEN2", "pancreatitis history", "gallbladder disease",
+      "active or prior malignancy", "current medications (insulin / sulfonylurea)",
+      "eating-disorder screen", "goal / indication (and basis: clinical vs preference)"
+    ],
+    "female_reproductive_required": [
+      "pregnancy status + test", "LMP (last menstrual period)",
+      "contraception / planning pregnancy", "breastfeeding"
+    ]
+  },
+
+  "entry_contract": {
+    "slug": "", "name": "", "class": "",
+    "indication_questions": ["focused goal-fit / why-here questions"],
+    "agent_specific_screen": ["red-flag questions specific to this agent (pill-friendly)"],
+    "hard_stops": ["agent-specific blocking conditions (overridable with typed rationale)"],
+    "soft_advisories": [{ "trigger": "", "message": "", "grade": "A|B|C|D", "citation": "" }],
+    "baseline_labs": ["recommended panel"],
+    "monitoring": [{ "when": "", "check": "" }],
+    "consent_tier": { "tier": "1-4", "rationale": "" },
+    "evidence": { "grade": "", "summary": "", "citations": [{ "label": "", "url": "" }] }
+  },
+
+  "rules_evidence": {
+    "glp1_indication_threshold": { "rule": "BMI >=30, or 27-29.9 + weight-related comorbidity", "grade": "A", "source": "FDA labels (Wegovy/Zepbound)" },
+    "glp1_pregnancy": { "rule": "contraindicated; discontinue ~5 half-lives pre-conception", "grade": "A", "source": "FDA label; animal embryofetal toxicity" },
+    "obesity_blunts_gh_axis": { "rule": "obesity suppresses GH/GHRH response; reversible with weight loss", "grade": "B", "source": "Nam 1996 doi:10.1016/s0026-0495(96)90029-3; Rasmussen 1995 doi:10.1210/jcem.80.4.7536210" },
+    "gh_igf1_malignancy": { "rule": "GH/IGF-1 mitogenic; active malignancy = platform hard stop", "grade": "C", "source": "acromegaly neoplasia epidemiology (PubMed) — VERIFY specific refs" }
+  },
+
+  "peptides": {}
+}
