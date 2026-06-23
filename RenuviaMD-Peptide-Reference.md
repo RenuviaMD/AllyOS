@@ -34,7 +34,7 @@ Each entry has two parts:
 
 ## 1. BPC-157 · 🔴 not approved · Grade D
 **Mechanism:** Synthetic gastric pentadecapeptide; reported pro-angiogenic + nitric-oxide modulation, soft-tissue/GI healing (mechanism almost entirely preclinical).
-**Evidence:** No completed published human efficacy RCT. One Phase 1 safety/PK (NCT02637284, status unknown); one Phase 2 *recruiting* (NCT07437547, hamstring strain). FDA barred it from compounding (2023).
+**Evidence:** No completed published human efficacy RCT. One Phase 1 safety/PK (NCT02637284, status unknown); one Phase 2 *recruiting* (NCT07437547, hamstring strain). FDA placed it in 503A Category 2, then removed it on Apr 15 2026 (not yet on the positive bulks list); PCAC review scheduled Jul 23–24 2026 — VERIFY current status.
 - Gwyer 2019, *Cell Tissue Res* — https://doi.org/10.1007/s00441-019-03016-8 · Seiwerth 2021, *Front Pharmacol* — https://doi.org/10.3389/fphar.2021.627533 · Sikiric 2020, *Curr Pharm Des* — https://doi.org/10.2174/1381612826666200424180139
 **Reported-use** *(marketplace):* 5 mg vial + 2.5 mL BAC = 2 mg/mL; reported 250–500 mcg SC 1–2×/day (often near injury); 2–6 wk cycles.
 **Rule out:** active/prior malignancy (pro-angiogenic), pregnancy, lactation, age <18, hypersensitivity, unverified source. WADA-prohibited.
