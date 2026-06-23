@@ -1,47 +1,520 @@
 {
   "schema": "renuvia.intake.v1",
-  "updated": "2026-06-22",
+  "updated": "2026-06-23",
   "note": "Per-peptide adaptive intake contract. RESEARCH-POPULATED: every clinical claim must carry a real citation (FDA label / PubMed DOI-PMID / guideline) or be marked VERIFY — never fabricated. This data drives the workspace intake, the advisories, the consent tier, AND the sellable PDF intake template in each peptide's Practice Pack.",
-
   "override_policy": {
     "principle": "The provider can override ANY recommendation. AllyOS is decision-support, never a gatekeeper. Every override is a documented clinical decision by the licensed provider — which is what keeps the platform a tool and transfers responsibility to the provider.",
     "soft_advisory": "inline note + optional one-tap acknowledge",
     "hard_stop": "blocking modal requiring a TYPED override rationale; recorded in the note + consent. Highest friction, still overridable — not an absolute lock.",
-    "platform_hard_stops": ["Pregnancy / positive pregnancy test", "Active malignancy"]
-  },
-
-  "general_screen": {
-    "all_patients": [
-      "age", "sex", "height", "weight -> BMI",
-      "weight-related comorbidities (HTN, dyslipidemia, prediabetes/T2DM, OSA, CVD, MASLD)",
-      "personal/family MTC or MEN2", "pancreatitis history", "gallbladder disease",
-      "active or prior malignancy", "current medications (insulin / sulfonylurea)",
-      "eating-disorder screen", "goal / indication (and basis: clinical vs preference)"
-    ],
-    "female_reproductive_required": [
-      "pregnancy status + test", "LMP (last menstrual period)",
-      "contraception / planning pregnancy", "breastfeeding"
+    "platform_hard_stops": [
+      "Pregnancy / positive pregnancy test",
+      "Active malignancy"
     ]
   },
-
+  "general_screen": {
+    "all_patients": [
+      "age",
+      "sex",
+      "height",
+      "weight -> BMI",
+      "weight-related comorbidities (HTN, dyslipidemia, prediabetes/T2DM, OSA, CVD, MASLD)",
+      "personal/family MTC or MEN2",
+      "pancreatitis history",
+      "gallbladder disease",
+      "active or prior malignancy",
+      "current medications (insulin / sulfonylurea)",
+      "eating-disorder screen",
+      "goal / indication (and basis: clinical vs preference)"
+    ],
+    "female_reproductive_required": [
+      "pregnancy status + test",
+      "LMP (last menstrual period)",
+      "contraception / planning pregnancy",
+      "breastfeeding"
+    ]
+  },
   "entry_contract": {
-    "slug": "", "name": "", "class": "",
-    "indication_questions": ["focused goal-fit / why-here questions"],
-    "agent_specific_screen": ["red-flag questions specific to this agent (pill-friendly)"],
-    "hard_stops": ["agent-specific blocking conditions (overridable with typed rationale)"],
-    "soft_advisories": [{ "trigger": "", "message": "", "grade": "A|B|C|D", "citation": "" }],
-    "baseline_labs": ["recommended panel"],
-    "monitoring": [{ "when": "", "check": "" }],
-    "consent_tier": { "tier": "1-4", "rationale": "" },
-    "evidence": { "grade": "", "summary": "", "citations": [{ "label": "", "url": "" }] }
+    "slug": "",
+    "name": "",
+    "class": "",
+    "indication_questions": [
+      "focused goal-fit / why-here questions"
+    ],
+    "agent_specific_screen": [
+      "red-flag questions specific to this agent (pill-friendly)"
+    ],
+    "hard_stops": [
+      "agent-specific blocking conditions (overridable with typed rationale)"
+    ],
+    "soft_advisories": [
+      {
+        "trigger": "",
+        "message": "",
+        "grade": "A|B|C|D",
+        "citation": ""
+      }
+    ],
+    "baseline_labs": [
+      "recommended panel"
+    ],
+    "monitoring": [
+      {
+        "when": "",
+        "check": ""
+      }
+    ],
+    "consent_tier": {
+      "tier": "1-4",
+      "rationale": ""
+    },
+    "evidence": {
+      "grade": "",
+      "summary": "",
+      "citations": [
+        {
+          "label": "",
+          "url": ""
+        }
+      ]
+    }
   },
-
   "rules_evidence": {
-    "glp1_indication_threshold": { "rule": "BMI >=30, or 27-29.9 + weight-related comorbidity", "grade": "A", "source": "FDA labels (Wegovy/Zepbound)" },
-    "glp1_pregnancy": { "rule": "contraindicated; discontinue ~5 half-lives pre-conception", "grade": "A", "source": "FDA label; animal embryofetal toxicity" },
-    "obesity_blunts_gh_axis": { "rule": "obesity suppresses GH/GHRH response; reversible with weight loss", "grade": "B", "source": "Nam 1996 doi:10.1016/s0026-0495(96)90029-3; Rasmussen 1995 doi:10.1210/jcem.80.4.7536210" },
-    "gh_igf1_malignancy": { "rule": "GH/IGF-1 mitogenic; active malignancy = platform hard stop", "grade": "C", "source": "acromegaly neoplasia epidemiology (PubMed) — VERIFY specific refs" }
+    "glp1_indication_threshold": {
+      "rule": "BMI >=30, or 27-29.9 + weight-related comorbidity",
+      "grade": "A",
+      "source": "FDA labels (Wegovy/Zepbound)"
+    },
+    "glp1_pregnancy": {
+      "rule": "contraindicated; discontinue ~5 half-lives pre-conception",
+      "grade": "A",
+      "source": "FDA label; animal embryofetal toxicity"
+    },
+    "obesity_blunts_gh_axis": {
+      "rule": "obesity suppresses GH/GHRH response; reversible with weight loss",
+      "grade": "B",
+      "source": "Nam 1996 doi:10.1016/s0026-0495(96)90029-3; Rasmussen 1995 doi:10.1210/jcem.80.4.7536210"
+    },
+    "gh_igf1_malignancy": {
+      "rule": "GH/IGF-1 mitogenic; active malignancy = platform hard stop",
+      "grade": "C",
+      "source": "acromegaly neoplasia epidemiology (PubMed) — VERIFY specific refs"
+    }
   },
-
-  "peptides": {}
+  "peptides": {
+    "sermorelin": {
+      "slug": "sermorelin",
+      "name": "Sermorelin",
+      "class": "GHRH(1-29) analog / growth hormone secretagogue",
+      "indication_questions": [
+        "What is your primary goal? (e.g., body composition / fat loss, recovery, energy/vitality, sleep, 'anti-aging')",
+        "Is this driven by a specific clinical concern documented by a clinician, or by personal preference / word-of-mouth / online research?",
+        "Have you ever had IGF-1 (and/or GH) tested? If so, what was the result and when? Bring the report if available.",
+        "Has any clinician ever diagnosed you with adult growth-hormone deficiency or pituitary disease, or worked you up for it?",
+        "Which symptoms are you experiencing, and for how long? (low energy, reduced muscle, increased central fat, poor recovery, sleep disturbance) Are there other explanations (poor sleep, overtraining, low testosterone/thyroid, depression, weight gain)?",
+        "What objective change would tell you this is working, and over what timeframe?"
+      ],
+      "agent_specific_screen": [
+        "Active or prior malignancy, or any undiagnosed mass / cancer red-flag symptoms (unintended weight loss, night sweats, new lump)?",
+        "Height and weight to compute BMI (obesity blunts the GH axis and the GH response to secretagogues, lowering the chance of response)?",
+        "Known impaired fasting glucose, prediabetes, type 2 diabetes, or insulin resistance? (GH/IGF-1 can worsen insulin sensitivity and raise glucose)",
+        "Untreated or undertreated hypothyroidism? (must be corrected first or you mislabel a non-responder and confound IGF-1)",
+        "Diagnosed or suspected obstructive sleep apnea, or significant snoring/daytime somnolence? (GH-axis stimulation can aggravate fluid retention/OSA)",
+        "Personal or family history of pituitary tumor / non-functional pituitary (would not respond to a GHRH analog)?"
+      ],
+      "hard_stops": [
+        "Pregnancy or positive pregnancy test (platform hard stop; overridable only with typed clinical rationale)",
+        "Active malignancy (platform hard stop given GH/IGF-1 mitogenicity; overridable only with typed clinical rationale)",
+        "Untreated severe hypothyroidism (treat and re-confirm before initiating; overridable with typed rationale)"
+      ],
+      "soft_advisories": [
+        {
+          "trigger": "BMI >= 30",
+          "message": "Obesity itself suppresses spontaneous GH secretion and blunts the GH response to GHRH/secretagogues, so a poor response is expected and this is largely a reversible, acquired defect that normalizes with substantial weight loss. Address weight and metabolic health first (lifestyle, and/or a GLP-1/incretin agent), which restores the GH/IGF-1 axis. If the actual goal is visceral fat reduction, tesamorelin is the evidence-backed GHRH analog (FDA-approved for HIV-associated visceral adiposity) rather than sermorelin.",
+          "grade": "B",
+          "citation": "Rasmussen 1995, J Clin Endocrinol Metab, doi:10.1210/jcem.80.4.7536210; Nam 1996, Metabolism, doi:10.1016/s0026-0495(96)90029-3; Douyon & Schteingart 2002, Endocrinol Metab Clin North Am, doi:10.1016/s0889-8529(01)00023-8; tesamorelin: Stanley 2012, Clin Infect Dis, doi:10.1093/cid/cis251"
+        },
+        {
+          "trigger": "Normal/age-appropriate IGF-1 OR no diagnosed GH deficiency (preference-driven request)",
+          "message": "This is elective wellness use without a diagnosed deficiency. Sermorelin is not FDA-approved for adult anti-aging/optimization and the human evidence for benefit in this setting is weak; the best RCT-level data are for recombinant GH in healthy older adults, where only small body-composition changes were seen alongside increased adverse events, and the authors concluded GH cannot be recommended as anti-aging therapy. Set expectations accordingly: modest at best, not proven, off-label. Define an objective endpoint and a stop rule before starting.",
+          "grade": "C",
+          "citation": "Liu 2007, Ann Intern Med, doi:10.7326/0003-4819-146-2-200701160-00005; Prakash & Goa 1999, BioDrugs, doi:10.2165/00063030-199912020-00007"
+        },
+        {
+          "trigger": "Impaired fasting glucose / prediabetes / T2DM / insulin resistance",
+          "message": "Raising GH/IGF-1 can reduce insulin sensitivity and worsen glycemia; in RCTs of GH in healthy older adults, treated participants were more likely to develop impaired fasting glucose and diabetes. Optimize glucose first, monitor fasting glucose/A1c on therapy, and reconsider if glycemia worsens.",
+          "grade": "B",
+          "citation": "Liu 2007, Ann Intern Med, doi:10.7326/0003-4819-146-2-200701160-00005"
+        },
+        {
+          "trigger": "Any consideration of sustained supraphysiologic IGF-1",
+          "message": "Higher circulating IGF-1 is associated in large prospective cohorts with increased risk of several cancers (colorectal, breast, prostate, thyroid). Do not push IGF-1 above the age-appropriate upper-normal range; titrate to symptoms and upper-normal IGF-1, not beyond.",
+          "grade": "C",
+          "citation": "Knuppel 2020, Cancer Res (UK Biobank, 30 cancers), doi:10.1158/0008-5472.CAN-20-1281"
+        }
+      ],
+      "baseline_labs": [
+        "IGF-1 (age/sex-adjusted) — anchors candidacy and titration",
+        "Fasting glucose and HbA1c (metabolic safety baseline)",
+        "Fasting lipid panel",
+        "TSH +/- free T4 (correct hypothyroidism before interpreting IGF-1 or response)",
+        "CMP and CBC (general baseline)"
+      ],
+      "monitoring": [
+        {
+          "when": "Week 2",
+          "check": "Tolerance, injection-site reactions, fluid retention/arthralgia/paresthesia (signs of excess), sleep"
+        },
+        {
+          "when": "Month 1",
+          "check": "Symptom response and fasting glucose; hold or reinforce timing"
+        },
+        {
+          "when": "Month 3",
+          "check": "IGF-1 (titrate toward upper-normal-for-age, not above) and fasting glucose/A1c"
+        },
+        {
+          "when": "Month 6",
+          "check": "IGF-1, HbA1c, body composition; use lowest effective dose and stop if no objective change"
+        }
+      ],
+      "consent_tier": {
+        "tier": "3",
+        "rationale": "Off-label, compounded GH secretagogue used for adult wellness/'GH-axis optimization' without an FDA-approved indication for this use (brand Geref was approved only for pediatric GHD diagnosis/treatment and is discontinued). Adult-optimization evidence is weak (Grade C/D); most use is preference-driven without a diagnosed deficiency, and there are real metabolic (glucose) and theoretical mitogenicity considerations. Requires enhanced off-label informed consent (consent_gh_secretagogue), honest expectation-setting, and documented exclusion of malignancy/pregnancy/untreated hypothyroidism."
+      },
+      "evidence": {
+        "grade": "B (pediatric GHD diagnosis/treatment, historical FDA-approved Geref) / D (adult wellness 'optimization')",
+        "summary": "Sermorelin is GHRH(1-29); as brand Geref it was FDA-approved for pediatric GH-deficiency diagnosis and treatment and is now discontinued, so all current adult use is compounded and off-label. There are no RCTs supporting sermorelin for adult anti-aging/body-composition 'optimization'; the closest high-quality evidence is a systematic review/meta-analysis of recombinant GH in healthy older adults, which found only small body-composition changes with more adverse events (edema, arthralgia, carpal tunnel, impaired fasting glucose/diabetes) and concluded GH cannot be recommended as anti-aging therapy. Because obesity suppresses the GH axis and blunts the secretagogue response (reversibly with weight loss), candidates with BMI>=30 are unlikely to respond and should address weight/metabolic health first; tesamorelin is the only GHRH analog with RCT-grade evidence for (visceral) fat, in HIV-associated lipodystrophy. Net: in adults without a diagnosed, worked-up GH deficiency, the evidence for benefit is weak and the use is elective.",
+        "citations": [
+          {
+            "label": "Liu 2007, Ann Intern Med — Systematic review: safety/efficacy of GH in the healthy elderly (GH not recommended as anti-aging; more adverse events incl. impaired glucose/diabetes)",
+            "url": "https://doi.org/10.7326/0003-4819-146-2-200701160-00005"
+          },
+          {
+            "label": "Rasmussen 1995, J Clin Endocrinol Metab — Massive weight loss restores 24-h GH release and IGF-I in obese subjects (obesity GH defect is reversible)",
+            "url": "https://doi.org/10.1210/jcem.80.4.7536210"
+          },
+          {
+            "label": "Nam 1996, Metabolism — FFA suppression potentiates blunted GH response to GHRH in obesity",
+            "url": "https://doi.org/10.1016/s0026-0495(96)90029-3"
+          },
+          {
+            "label": "Douyon & Schteingart 2002, Endocrinol Metab Clin North Am — Obesity lowers GH and blunts GH response to GHRH; reversed by weight reduction",
+            "url": "https://doi.org/10.1016/s0889-8529(01)00023-8"
+          },
+          {
+            "label": "Knuppel 2020, Cancer Res — Circulating IGF-I and risk of 30 cancers (UK Biobank)",
+            "url": "https://doi.org/10.1158/0008-5472.CAN-20-1281"
+          },
+          {
+            "label": "Stanley 2012, Clin Infect Dis — Tesamorelin (GHRH analog) reduces visceral fat with metabolic improvement, HIV lipodystrophy RCT data",
+            "url": "https://doi.org/10.1093/cid/cis251"
+          },
+          {
+            "label": "Dhillon 2011, Drugs — Tesamorelin review (only approved GHRH analog for visceral adiposity)",
+            "url": "https://doi.org/10.2165/11202240-000000000-00000"
+          },
+          {
+            "label": "Prakash & Goa 1999, BioDrugs — Sermorelin (Geref) review: approved use was pediatric GHD diagnosis/treatment",
+            "url": "https://doi.org/10.2165/00063030-199912020-00007"
+          }
+        ]
+      }
+    },
+    "tirzepatide": {
+      "slug": "tirzepatide",
+      "name": "Tirzepatide",
+      "class": "Dual GIP/GLP-1 receptor agonist (incretin)",
+      "indication_questions": [
+        "What is the clinical goal here — type 2 diabetes glycemic control, chronic weight management, both, or weight-loss preference without a qualifying indication?",
+        "What is the calculated BMI? (Label indication for weight management: BMI ≥30, OR ≥27 with at least one weight-related comorbidity such as HTN, dyslipidemia, prediabetes/T2DM, OSA, or CVD.)",
+        "If BMI 27–29.9: which weight-related comorbidity establishes indication fit?",
+        "Most recent A1c / known type 2 diabetes? (Mounjaro indication; informs hypoglycemia risk if on insulin/secretagogue.)",
+        "Any prior incretin/GLP-1 experience (semaglutide, dulaglutide, liraglutide, or prior tirzepatide)? Maximum dose tolerated and reason for stopping?",
+        "Prior GI intolerance to incretins (nausea, vomiting, severe constipation/diarrhea) — severity and whether it resolved with slower titration?",
+        "Diagnosed moderate-to-severe obstructive sleep apnea with obesity? (Zepbound is FDA-approved for OSA in this population — supports indication and goal-setting.)",
+        "Known heart failure with preserved ejection fraction (HFpEF) with obesity? (Emerging benefit; document as a treatment-relevant context, not a separate label indication for compounded/weight use.)"
+      ],
+      "agent_specific_screen": [
+        "Personal or family history of medullary thyroid carcinoma (MTC)? (Boxed warning — contraindicated.)",
+        "Personal or family history of Multiple Endocrine Neoplasia syndrome type 2 (MEN 2)? (Boxed warning — contraindicated.)",
+        "History of pancreatitis (acute or chronic)? Any recent/persistent severe abdominal pain radiating to the back?",
+        "Gallbladder disease — known gallstones, prior cholecystitis, or cholecystectomy? (Increased acute gallbladder disease on therapy.)",
+        "Severe gastrointestinal disease — gastroparesis or other severe GI motility disorder? (Delayed gastric emptying; not formally studied in severe GI disease.)",
+        "Type 1 diabetes or history of diabetic ketoacidosis? (Not a substitute for insulin; not indicated for T1DM.)",
+        "Currently using ORAL contraceptives? (Tirzepatide delays gastric emptying and can reduce oral contraceptive absorption — switch to a non-oral method or add a barrier method for 4 weeks after initiation and for 4 weeks after each dose escalation.)",
+        "On insulin or an insulin secretagogue (sulfonylurea, glinide)? (Increased hypoglycemia risk — plan dose reduction at initiation.)",
+        "History of diabetic retinopathy requiring treatment? (Not studied in proliferative retinopathy / macular edema; monitor with rapid glycemic improvement.)"
+      ],
+      "hard_stops": [
+        "Pregnancy or positive pregnancy test (platform hard stop; discontinue and counsel — weight loss offers no benefit and there is potential fetal harm). Overridable only with typed clinical rationale.",
+        "Active malignancy (platform hard stop). Overridable only with typed clinical rationale.",
+        "Personal or family history of medullary thyroid carcinoma (MTC) — FDA boxed-warning contraindication. Overridable only with typed clinical rationale.",
+        "Multiple Endocrine Neoplasia syndrome type 2 (MEN 2) — FDA boxed-warning contraindication. Overridable only with typed clinical rationale.",
+        "Known serious hypersensitivity to tirzepatide or any excipient. Overridable only with typed clinical rationale."
+      ],
+      "soft_advisories": [
+        {
+          "trigger": "Concomitant insulin or insulin secretagogue (sulfonylurea / glinide)",
+          "message": "Increased hypoglycemia risk in combination with an insulin secretagogue (10.3% vs 2.1% without). Consider reducing the dose of insulin or secretagogue at initiation and counsel on hypoglycemia recognition.",
+          "grade": "A",
+          "citation": "Zepbound USPI, Warnings & Precautions (DailyMed): https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=487cd7e7-434c-4925-99fa-aa80b1cc776b"
+        },
+        {
+          "trigger": "Current oral contraceptive use",
+          "message": "Tirzepatide delays gastric emptying and may reduce oral contraceptive absorption. Advise switching to a non-oral contraceptive or adding a barrier method for 4 weeks after initiation and for 4 weeks after each dose escalation.",
+          "grade": "A",
+          "citation": "Zepbound USPI, Drug Interactions / Use in Specific Populations (DailyMed): https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=487cd7e7-434c-4925-99fa-aa80b1cc776b"
+        },
+        {
+          "trigger": "BMI < 25 (or normal-weight patient seeking treatment)",
+          "message": "Patient is below the labeled weight-management indication (BMI ≥30, or ≥27 with a weight-related comorbidity). Reassess indication fit, goal appropriateness, and eating-disorder screen before proceeding; document basis for any off-label use.",
+          "grade": "A",
+          "citation": "Zepbound USPI, Indications & Usage (DailyMed): https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=487cd7e7-434c-4925-99fa-aa80b1cc776b"
+        },
+        {
+          "trigger": "History of pancreatitis",
+          "message": "Acute pancreatitis has been reported with incretin therapy. Use caution with a pancreatitis history; counsel patient to report persistent severe abdominal pain (± radiating to back), and discontinue if pancreatitis is suspected.",
+          "grade": "B",
+          "citation": "Zepbound USPI, Warnings & Precautions (DailyMed): https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=487cd7e7-434c-4925-99fa-aa80b1cc776b"
+        },
+        {
+          "trigger": "History of gallbladder disease / cholelithiasis",
+          "message": "Acute gallbladder disease (cholelithiasis, cholecystitis) occurs more frequently on therapy and with rapid weight loss. Counsel on right-upper-quadrant pain, fever, and jaundice; evaluate if symptomatic.",
+          "grade": "B",
+          "citation": "Zepbound USPI, Warnings & Precautions (DailyMed): https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=487cd7e7-434c-4925-99fa-aa80b1cc776b"
+        },
+        {
+          "trigger": "Significant GI adverse events (vomiting / diarrhea) or volume depletion",
+          "message": "GI adverse reactions can cause dehydration and, rarely, acute kidney injury (postmarketing). Counsel on hydration; hold and reassess renal function during severe or persistent GI symptoms.",
+          "grade": "B",
+          "citation": "Zepbound USPI, Warnings & Precautions — Acute Kidney Injury (DailyMed): https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=487cd7e7-434c-4925-99fa-aa80b1cc776b"
+        },
+        {
+          "trigger": "Compounded tirzepatide source",
+          "message": "Prefer FDA-approved Mounjaro/Zepbound pen or vial (fixed-concentration, no reconstitution math). If a compounded vial is used, verify concentration and source-pharmacy legitimacy before dosing.",
+          "grade": "C",
+          "citation": "FDA — compounded GLP-1 safety communications; Zepbound USPI dosage form (DailyMed): https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=487cd7e7-434c-4925-99fa-aa80b1cc776b"
+        }
+      ],
+      "baseline_labs": [
+        "A1c (HbA1c)",
+        "Fasting plasma glucose",
+        "Comprehensive metabolic panel (CMP) — includes renal function and hepatic enzymes",
+        "Lipase ± amylase (optional; baseline if pancreatitis history or to anchor future workup)",
+        "Fasting lipid panel",
+        "Pregnancy test (urine or serum) in persons of childbearing potential before initiation",
+        "Screen (history) for personal/family MTC or MEN 2 and pancreatitis — gating"
+      ],
+      "monitoring": [
+        {
+          "when": "Baseline / initiation (2.5 mg SC weekly, non-therapeutic starting dose)",
+          "check": "Confirm indication fit and contraindication screen; review baseline labs and pregnancy status; reduce insulin/secretagogue dose; counsel on GI side effects, contraception, and pancreatitis red flags."
+        },
+        {
+          "when": "Week ~4, before stepping 2.5 mg → 5 mg",
+          "check": "GI tolerance, hydration, injection technique/site, hypoglycemia if on insulin/SU; advance to 5 mg only if tolerated; reinforce barrier contraception window after each escalation."
+        },
+        {
+          "when": "Each 4-week escalation (5 → 7.5 → 10 → 12.5 → 15 mg as needed)",
+          "check": "Tolerance and weight trend; titrate by tolerance to the lowest effective maintenance dose (max 15 mg weekly), not by the calendar; re-counsel contraception backup for 4 weeks after each step."
+        },
+        {
+          "when": "Month 3",
+          "check": "A1c (if diabetic) and percent weight change vs goal; blood pressure; GI/gallbladder symptoms; adjust toward target dose."
+        },
+        {
+          "when": "Month 6 and periodically thereafter",
+          "check": "A1c, weight maintenance, lipids, renal function (CMP); reassess effective maintenance dose, muscle-preservation/protein + resistance plan, and continued indication; counsel that weight regain is expected if discontinued."
+        }
+      ],
+      "consent_tier": {
+        "tier": "1",
+        "rationale": "FDA-approved (Mounjaro for type 2 diabetes; Zepbound for chronic weight management and for moderate-to-severe OSA with obesity), used on-label within its indication. Grade A randomized-trial evidence and an established label; standard informed consent. Escalates to a higher tier only if used off-label (e.g., BMI below threshold) or sourced from a compounding pharmacy."
+      },
+      "evidence": {
+        "grade": "A",
+        "summary": "Large, completed Phase 3 program. SURMOUNT-1: up to -20.9% body weight at 72 weeks with 15 mg in obesity. SURPASS-2: superior A1c reduction (up to -2.30%) and greater weight loss vs semaglutide 1 mg in type 2 diabetes. SURMOUNT-OSA: ~-20 to -24 events/hour AHI reduction in moderate-to-severe OSA with obesity (supporting FDA OSA approval). SUMMIT: reduced composite of cardiovascular death or worsening heart failure (HR 0.62) and improved KCCQ in HFpEF with obesity. Most common adverse events are GI and dose-escalation-related; boxed warning for thyroid C-cell tumors (rodent), contraindicated in MTC/MEN 2.",
+        "citations": [
+          {
+            "label": "Zepbound (tirzepatide) US Prescribing Information — DailyMed (FDA label: contraindications, boxed warning, pancreatitis, gallbladder, hypoglycemia, oral-contraceptive, titration)",
+            "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=487cd7e7-434c-4925-99fa-aa80b1cc776b"
+          },
+          {
+            "label": "Mounjaro (tirzepatide) US Prescribing Information — DailyMed (T2DM label)",
+            "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=d2d7da5d-ad07-4228-955f-cf7e355c8cc0"
+          },
+          {
+            "label": "Jastreboff 2022, NEJM — SURMOUNT-1 (obesity, PMID 35658024)",
+            "url": "https://doi.org/10.1056/NEJMoa2206038"
+          },
+          {
+            "label": "Frías 2021, NEJM — SURPASS-2 (tirzepatide vs semaglutide in T2DM, PMID 34170647)",
+            "url": "https://doi.org/10.1056/NEJMoa2107519"
+          },
+          {
+            "label": "Malhotra 2024, NEJM — SURMOUNT-OSA (OSA + obesity, PMID 38912654)",
+            "url": "https://doi.org/10.1056/NEJMoa2404881"
+          },
+          {
+            "label": "Packer 2024, NEJM — SUMMIT (HFpEF + obesity, PMID 39555826)",
+            "url": "https://doi.org/10.1056/NEJMoa2410027"
+          }
+        ]
+      }
+    },
+    "semaglutide": {
+      "slug": "semaglutide",
+      "name": "Semaglutide",
+      "class": "GLP-1 receptor agonist",
+      "indication_questions": [
+        "What is your treatment goal here: chronic weight management, type 2 diabetes/glucose control, or both?",
+        "What is your current height and weight? (used to compute BMI for indication fit)",
+        "Is your BMI >=30, OR >=27 with a weight-related condition (HTN, dyslipidemia, prediabetes/T2DM, OSA, MASLD, established CVD)? (yes/no)",
+        "Which weight-related conditions do you have, if any? (HTN, high cholesterol, prediabetes/T2DM, sleep apnea, fatty liver, heart disease)",
+        "Have you used a GLP-1 (semaglutide, tirzepatide, liraglutide, dulaglutide) before? (yes/no)",
+        "If yes: highest dose reached, how long, and why you stopped (effect, cost, side effects)?",
+        "How did you tolerate it, especially nausea, vomiting, or diarrhea? (well / moderate / poorly)",
+        "Are you currently on insulin or a sulfonylurea (e.g., glipizide, glimepiride)? (yes/no)",
+        "Any current nausea, vomiting, early fullness, or known slow stomach emptying? (yes/no)"
+      ],
+      "agent_specific_screen": [
+        "Personal history of medullary thyroid carcinoma (MTC)? (yes/no)",
+        "Family history of MTC or Multiple Endocrine Neoplasia type 2 (MEN2)? (yes/no)",
+        "Prior episode of pancreatitis? (yes/no)",
+        "Known gallstones / gallbladder disease, or prior gallbladder symptoms? (yes/no)",
+        "Severe gastroparesis or other significant motility disorder? (yes/no)",
+        "Type 1 diabetes, or any history of diabetic ketoacidosis? (yes/no)",
+        "Established diabetic retinopathy (especially proliferative or being treated)? (yes/no)",
+        "Prior serious allergic/hypersensitivity reaction to semaglutide or another GLP-1? (yes/no)",
+        "Active or recent eating disorder, or rapid restrictive dieting? (yes/no)",
+        "Are you pregnant, planning pregnancy within ~2 months, or breastfeeding? (yes/no)",
+        "Significant kidney disease or recent dehydration/volume depletion? (yes/no)"
+      ],
+      "hard_stops": [
+        "Pregnancy or positive pregnancy test (PLATFORM hard stop — overridable only with typed clinical rationale)",
+        "Active malignancy (PLATFORM hard stop — overridable only with typed clinical rationale)",
+        "Personal history of medullary thyroid carcinoma (MTC) (boxed warning / labeled contraindication — overridable only with typed rationale)",
+        "Family history of MTC or MEN2 (boxed warning / labeled contraindication — overridable only with typed rationale)",
+        "Prior serious hypersensitivity reaction to semaglutide (labeled contraindication — overridable only with typed rationale)"
+      ],
+      "soft_advisories": [
+        {
+          "trigger": "Concomitant insulin or insulin secretagogue (sulfonylurea/meglitinide)",
+          "message": "Increased hypoglycemia risk. Consider reducing the insulin or sulfonylurea dose at initiation and during titration, and counsel on hypoglycemia recognition/treatment.",
+          "grade": "A",
+          "citation": "https://www.accessdata.fda.gov/scripts/cder/daf/index.cfm?event=overview.process&ApplNo=215256"
+        },
+        {
+          "trigger": "BMI < 25 (or BMI < 27 with no weight-related comorbidity) entered for a weight indication",
+          "message": "Below the labeled chronic-weight-management indication threshold (BMI >=30, or >=27 with a weight-related comorbidity). Reassess indication fit and goal; document rationale if proceeding off-label.",
+          "grade": "A",
+          "citation": "https://www.accessdata.fda.gov/scripts/cder/daf/index.cfm?event=overview.process&ApplNo=215256"
+        },
+        {
+          "trigger": "Person of reproductive potential not on reliable contraception",
+          "message": "Semaglutide is contraindicated in pregnancy (animal embryofetal harm); discontinue at least ~2 months before a planned pregnancy given the ~1-week half-life. Counsel on effective contraception. Delayed gastric emptying can reduce absorption of co-administered oral medications; for ORAL semaglutide (Rybelsus) and at initiation/dose changes, advise a non-oral or back-up contraceptive method.",
+          "grade": "B",
+          "citation": "https://www.accessdata.fda.gov/scripts/cder/daf/index.cfm?event=overview.process&ApplNo=215256"
+        },
+        {
+          "trigger": "Prior pancreatitis or new severe/persistent abdominal pain",
+          "message": "Acute pancreatitis has been reported with GLP-1 RAs. Use caution with a pancreatitis history; if pancreatitis is suspected, stop semaglutide and evaluate. Do not restart if confirmed.",
+          "grade": "B",
+          "citation": "https://www.accessdata.fda.gov/scripts/cder/daf/index.cfm?event=overview.process&ApplNo=215256"
+        },
+        {
+          "trigger": "History of cholelithiasis / gallbladder disease, or RUQ symptoms during rapid weight loss",
+          "message": "Acute gallbladder disease (cholelithiasis/cholecystitis) occurs more often with semaglutide and with rapid weight loss. Counsel on RUQ pain, fever, jaundice; evaluate if symptomatic.",
+          "grade": "B",
+          "citation": "https://www.accessdata.fda.gov/scripts/cder/daf/index.cfm?event=overview.process&ApplNo=215256"
+        },
+        {
+          "trigger": "Type 2 diabetes with diabetic retinopathy",
+          "message": "Rapid glucose improvement can transiently worsen diabetic retinopathy; SUSTAIN-6 showed more retinopathy complications with semaglutide in high-risk T2D (HR 1.76, 95% CI 1.11-2.78). Ensure recent eye exam and monitor patients with a history of retinopathy.",
+          "grade": "B",
+          "citation": "https://doi.org/10.1056/NEJMoa1607141"
+        },
+        {
+          "trigger": "Significant ongoing nausea/vomiting/diarrhea or volume depletion",
+          "message": "GI losses can cause dehydration and acute kidney injury (sometimes requiring dialysis), usually in those with pre-existing renal impairment. Hydrate, slow titration, and monitor renal function in at-risk patients.",
+          "grade": "B",
+          "citation": "https://www.accessdata.fda.gov/scripts/cder/daf/index.cfm?event=overview.process&ApplNo=215256"
+        }
+      ],
+      "baseline_labs": [
+        "HbA1c",
+        "Fasting plasma glucose",
+        "Comprehensive metabolic panel (CMP) — renal function, electrolytes, hepatic panel",
+        "Lipase (if pancreatitis history or significant abdominal symptoms)",
+        "Fasting lipid panel",
+        "Weight / BMI (and waist circumference)",
+        "Pregnancy test (serum or urine) in persons of reproductive potential",
+        "Baseline blood pressure / heart rate"
+      ],
+      "monitoring": [
+        {
+          "when": "Baseline",
+          "check": "BMI/weight, A1c, fasting glucose, CMP (renal/hepatic), lipids, pregnancy test if applicable; review MTC/MEN2, pancreatitis, gallbladder, retinopathy, insulin/SU use"
+        },
+        {
+          "when": "Every ~4 weeks during titration",
+          "check": "GI tolerance (nausea/vomiting/diarrhea), hydration, weight trend; hold or slow dose escalation if not tolerated; reduce insulin/SU if hypoglycemia"
+        },
+        {
+          "when": "~3 months",
+          "check": "A1c (if diabetic), weight-loss response (assess >=5% threshold for continued benefit), BP, renal function if at risk; reassess if inadequate response"
+        },
+        {
+          "when": "~6 months and then every 6-12 months",
+          "check": "A1c, weight maintenance, lipids, renal function; ongoing surveillance for pancreatitis, gallbladder symptoms, and retinopathy (in T2D); confirm contraception/pregnancy status as relevant"
+        }
+      ],
+      "consent_tier": {
+        "tier": "1",
+        "rationale": "FDA-approved, on-label use (chronic weight management at BMI >=30 or >=27 with a weight-related comorbidity; type 2 diabetes; and associated CV/renal/MASH indications) is standard-of-care, Grade A, and warrants standard informed consent (Tier 1). Off-label use (e.g., BMI below threshold without comorbidity, or compounded semaglutide) should be escalated to Tier 2 with documented rationale; the MTC/MEN2 boxed-warning override always requires a typed clinical rationale."
+      },
+      "evidence": {
+        "grade": "A",
+        "summary": "According to PubMed, semaglutide has an extensive Phase 3 evidence base. In overweight/obesity, once-weekly semaglutide 2.4 mg produced ~15% mean weight loss vs placebo over 68 weeks (STEP 1) with durable effect at 2 years (STEP 5). In high-CV-risk patients with overweight/obesity WITHOUT diabetes, semaglutide reduced major adverse cardiovascular events (SELECT). In type 2 diabetes, SUSTAIN-6 showed MACE reduction but a significant increase in diabetic-retinopathy complications (HR 1.76, 95% CI 1.11-2.78). FLOW demonstrated a 24% reduction in major kidney-disease events in T2D with CKD. A Phase 3 trial in MASH with fibrosis stage 2-3 (ESSENCE) showed steatohepatitis resolution in 62.9% vs 34.3% and fibrosis improvement in 36.8% vs 22.4%. FDA-label safety anchors include a boxed warning for thyroid C-cell (medullary) tumors, contraindications (personal/family MTC or MEN2; serious hypersensitivity), and warnings for pancreatitis, gallbladder disease, hypoglycemia with insulin/secretagogues, diabetic-retinopathy worsening, acute kidney injury, and pregnancy contraindication.",
+        "citations": [
+          {
+            "label": "FDA Wegovy (semaglutide) Prescribing Information — Drugs@FDA (BLA/NDA 215256): boxed warning, contraindications, warnings (pancreatitis, gallbladder, hypoglycemia, retinopathy, AKI), indication/BMI threshold, titration, pregnancy",
+            "url": "https://www.accessdata.fda.gov/scripts/cder/daf/index.cfm?event=overview.process&ApplNo=215256"
+          },
+          {
+            "label": "FDA Ozempic (semaglutide) Prescribing Information — Drugs@FDA (NDA 209637): T2D indication, dosing/titration, CV risk reduction",
+            "url": "https://www.accessdata.fda.gov/scripts/cder/daf/index.cfm?event=overview.process&ApplNo=209637"
+          },
+          {
+            "label": "FDA Rybelsus (oral semaglutide) Prescribing Information — Drugs@FDA (NDA 213051): oral dosing, fasting administration, gastric-emptying/oral-drug absorption",
+            "url": "https://www.accessdata.fda.gov/scripts/cder/daf/index.cfm?event=overview.process&ApplNo=213051"
+          },
+          {
+            "label": "Wilding 2021, NEJM — STEP 1: once-weekly semaglutide 2.4 mg in overweight/obesity (PubMed; PMID 33567185)",
+            "url": "https://doi.org/10.1056/NEJMoa2032183"
+          },
+          {
+            "label": "Garvey 2022, Nat Med — STEP 5: 2-year semaglutide in overweight/obesity (PubMed; PMID 36216945)",
+            "url": "https://doi.org/10.1038/s41591-022-02026-4"
+          },
+          {
+            "label": "Lincoff 2023, NEJM — SELECT: CV outcomes in obesity without diabetes (PubMed; PMID 37952131)",
+            "url": "https://doi.org/10.1056/NEJMoa2307563"
+          },
+          {
+            "label": "Marso 2016, NEJM — SUSTAIN-6: CV outcomes in T2D; retinopathy HR 1.76 (PubMed; PMID 27633186)",
+            "url": "https://doi.org/10.1056/NEJMoa1607141"
+          },
+          {
+            "label": "Perkovic 2024, NEJM — FLOW: renal outcomes in T2D with CKD (PubMed; PMID 38785209)",
+            "url": "https://doi.org/10.1056/NEJMoa2403347"
+          },
+          {
+            "label": "Sanyal 2025, NEJM — ESSENCE Phase 3: semaglutide in MASH with fibrosis (PubMed; PMID 40305708)",
+            "url": "https://doi.org/10.1056/NEJMoa2413258"
+          }
+        ]
+      }
+    }
+  }
 }
