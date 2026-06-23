@@ -154,6 +154,14 @@ label{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:upperca
 .reclabs .t{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
 .reclabs ul{margin-left:16px;font-size:12.5px;color:#cdd7da}.reclabs li{margin:2px 0}
 
+.contra{border:1px solid var(--line);border-radius:7px;margin:7px 0;overflow:hidden;background:var(--bg2)}
+.contra .ch{padding:9px 13px;font-weight:700;border-bottom:1px solid var(--line)}
+.contra .cn{font-weight:400;font-size:10.5px;color:var(--faint)}
+.contra .ct{font-size:10px;letter-spacing:.07em;text-transform:uppercase;margin:8px 0 3px;font-weight:700}
+.contra .cabs .ct{color:var(--danger)}.contra .crel .ct{color:var(--warn)}
+.contra .cabs,.contra .crel{padding:2px 13px 4px}
+.contra ul{margin:0 0 6px 16px}.contra li{font-size:12px;color:#cdd7da;margin:2px 0}
+.contra .cabs li{color:#f0a59d}
 @media print{
   body *{visibility:hidden}
   #printArea,#printArea *{visibility:visible}
@@ -2011,6 +2019,8 @@ function byslug(s){return ALL.filter(function(p){return p.slug===s})[0]}
 var INTAKE={};
 function intakeFor(s){return INTAKE[s]}
 fetch('../protocols/intake-schema.json').then(function(r){return r.json()}).then(function(d){INTAKE=d.peptides||{};render();}).catch(function(){});
+var CONTRA={};function contraFor(s){return CONTRA[s]}
+fetch('../protocols/contraindications.json').then(function(r){return r.json()}).then(function(d){CONTRA=d.peptides||{};render();}).catch(function(){});
 
 /* ───────── structured intake vocab (pills) ───────── */
 var SEX=['Female','Male'];
@@ -2081,6 +2091,16 @@ function advCard(a){
 function recLabs(){var set=[];S.sel.forEach(function(s){var e=intakeFor(s);if(e&&e.baseline_labs)e.baseline_labs.forEach(function(l){if(set.indexOf(l)<0)set.push(l)})});return set;}
 function recLabsHTML(){var l=recLabs();if(!l.length)return '';return '<div class="reclabs"><div class="t">Recommended labs</div><ul>'+l.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul></div>';}
 
+function contraHTML(){
+  var blocks=S.sel.map(function(s){var c=contraFor(s);if(!c)return '';var p=byslug(s)||{};
+    var ab=(c.absolute||[]).map(function(x){return '<li>'+x+'</li>'}).join('');
+    var rl=(c.relative||[]).map(function(x){return '<li>'+x+'</li>'}).join('');
+    return '<div class="contra"><div class="ch">'+p.name+(c.note?' <span class="cn">'+c.note+'</span>':'')+'</div>'
+     +(ab?'<div class="cabs"><div class="ct">Absolute</div><ul>'+ab+'</ul></div>':'')
+     +(rl?'<div class="crel"><div class="ct">Relative</div><ul>'+rl+'</ul></div>':'')+'</div>';
+  }).filter(Boolean).join('');
+  return blocks?'<div class="lbl" style="margin:14px 0 2px">Contraindications</div>'+blocks:'';
+}
 /* ───────── local engine ───────── */
 function gradeTier(g){g=(g||'').toUpperCase();
   if(g.indexOf('D')>-1) return 4; if(g.indexOf('C')>-1) return 3; if(g.indexOf('B')>-1) return 2;
@@ -2206,6 +2226,7 @@ function stepPlan(){
    + conflictAlerts()
    + (advs.length?'<div class="lbl" style="margin:8px 0 2px">Advisories &amp; considerations</div><div class="advs">'+advs.map(advCard).join('')+'</div>':'')
    + recLabsHTML()
+   + contraHTML()
    + S.sel.map(specSheet).join('');
   S.sel.forEach(bindCalc);
 }
