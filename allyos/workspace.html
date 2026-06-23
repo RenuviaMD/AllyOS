@@ -2455,7 +2455,7 @@ document.getElementById('allySend').onclick=function(){
    .then(function(res){var el=document.getElementById(id);var t;
      if(res.ok&&res.j.answer){t='<p style="font-size:13px;line-height:1.55;white-space:pre-wrap">'+esc(res.j.answer)+'</p>';}
      else if(res.j&&res.j.error==='not_configured'){t='<p style="font-size:13px;color:var(--muted)">Ally isn\'t connected yet — add <b>ANTHROPIC_API_KEY</b> in Netlify (Site settings → Environment variables), then redeploy. De-identified questions only.</p>';}
-     else{t='<p style="font-size:13px;color:var(--warn)">Ally couldn\'t reach the model just now. Try again shortly.</p>';}
+     else{var dd=(res.j&&(res.j.detail||res.j.error))||('HTTP '+((res.j&&res.j.status)||'?'));t='<p style="font-size:13px;color:var(--warn)">Ally couldn\'t reach the model. <span style="color:var(--faint);font-size:11px;white-space:pre-wrap">'+esc(String(dd).slice(0,240))+'</span></p>';}
      el.innerHTML='<div class="lbl" style="color:var(--teal)">Ally</div>'+t;b.scrollTop=b.scrollHeight;})
    .catch(function(){var el=document.getElementById(id);if(el)el.innerHTML='<div class="lbl" style="color:var(--teal)">Ally</div><p style="font-size:13px;color:var(--warn)">Network error reaching Ally.</p>';});
 };
