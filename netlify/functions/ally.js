@@ -19,11 +19,18 @@ const SYSTEM = [
 ].join("\n");
 
 exports.handler = async (event) => {
+  const key = process.env.ANTHROPIC_API_KEY;
+
+  // GET = health check. Reports whether the key is configured WITHOUT calling
+  // the model (no cost) — visit /.netlify/functions/ally in a browser to verify.
+  if (event.httpMethod === "GET") {
+    return json(200, { ok: true, configured: !!key, model: "claude-opus-4-8" });
+  }
+
   if (event.httpMethod !== "POST") {
     return json(405, { error: "Method not allowed" });
   }
 
-  const key = process.env.ANTHROPIC_API_KEY;
   if (!key) {
     // No key configured yet — tell the client to connect it in Netlify.
     return json(503, { error: "not_configured" });
