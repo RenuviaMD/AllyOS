@@ -2332,6 +2332,7 @@ function noteProtocolDetail(){return S.sel.map(function(s){var d=detailFor(s);if
     +(d.starting_dose?'<div><span class="kk">Start:</span> '+d.starting_dose+'</div>':'')
     +(d.titration?'<div><span class="kk">Titration:</span> '+d.titration+'</div>':'')
     +(d.frequency?'<div><span class="kk">Frequency:</span> '+d.frequency+'</div>':'')
+    +(d.cycle_rest?'<div><span class="kk">Cycle / duration:</span> '+d.cycle_rest+'</div>':'')
     +(mon.length?'<div><span class="kk">Monitoring:</span> '+mon.join('; ')+'</div>':'')
     +(d.discontinuation?'<div><span class="kk">Discontinue if:</span> '+d.discontinuation+'</div>':'')
     +'</div>';}).join('');}
