@@ -181,6 +181,12 @@ label{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:upperca
 .pd-sec p{font-size:12.5px;color:#cdd7da;line-height:1.55}
 .pd-sec ul{margin:0 0 0 16px}.pd-sec li{font-size:12.5px;color:#cdd7da;margin:3px 0;line-height:1.5}
 .pdraw .src{font-size:10.5px;color:var(--faint);border-top:1px solid var(--line);padding-top:8px;margin-top:8px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:40}
+.modal.open{display:flex}
+.mcard{background:var(--bg2);border:1px solid var(--line2);border-radius:12px;width:460px;max-width:92vw;overflow:hidden}
+.mcard .mh{padding:14px 18px;font-weight:700;color:var(--danger);border-bottom:1px solid var(--line);background:#1f1110}
+.mcard .mb{padding:16px 18px}.mcard .mb p{font-size:13px;margin-bottom:8px}.mcard .mb ul{margin:0 0 12px 18px}.mcard .mb li{font-size:12.5px;color:#f0a59d;margin:3px 0}
+.mcard .mf{display:flex;gap:10px;justify-content:flex-end;padding:12px 18px;border-top:1px solid var(--line)}
 @media print{
   body *{visibility:hidden}
   #printArea,#printArea *{visibility:visible}
@@ -237,6 +243,7 @@ label{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:upperca
 </aside>
 
 <aside class="pdraw" id="pdraw"><div class="ah"><b id="pdtitle">Protocol</b><button class="ghost" id="pdClose" style="margin-left:auto;padding:4px 9px">✕</button></div><div class="body2" id="pdbody"></div><div class="foot"><button class="btn pri" id="pdAlly" style="width:100%">Ask Ally about this (de-identified)</button></div></aside>
+<div class="modal" id="hsmodal"><div class="mcard"><div class="mh">⛔ Hard-stop — documented override required</div><div class="mb"><p>Flagged as contraindications for this patient:</p><ul id="hslist"></ul><p style="color:var(--muted);font-size:12px">AllyOS does not block clinical decisions. To proceed, document your clinical rationale — it is recorded in the note and consent.</p><label for="hsrat">Override rationale (required)</label><textarea id="hsrat" rows="3"></textarea></div><div class="mf"><button class="btn" id="hsCancel">Cancel</button><button class="btn pri" id="hsOverride">Override &amp; proceed</button></div></div></div>
 <div id="printArea"></div>
 
 <script>
@@ -2176,7 +2183,7 @@ function renderActs(){
   var left = S.step>0 ? '<button class="btn" id="back">← Back</button>' : '<span class="muted-sm">Step '+(S.step+1)+' of 4 · everything stays on your device</span>';
   acts.innerHTML = left + right;
   var b=document.getElementById('back');if(b)b.onclick=function(){setStep(S.step-1)};
-  var n=document.getElementById('next');if(n)n.onclick=function(){setStep(S.step+1)};
+  var n=document.getElementById('next');if(n)n.onclick=function(){if(S.step===2&&hardStops().length&&!S.hsOverride){showHS();return;}setStep(S.step+1)};
   var pr=document.getElementById('printBtn');if(pr)pr.onclick=doPrint;
   var st=document.getElementById('saveToday');if(st)st.onclick=function(){var t=JSON.parse(localStorage.getItem('allyos_today')||'[]');t.push({name:S.patient.name||'(unnamed)',n:S.sel.length,at:new Date().toLocaleString()});localStorage.setItem('allyos_today',JSON.stringify(t));st.textContent='Saved ✓';};
 }
@@ -2321,6 +2328,7 @@ function docNote(){var p=S.patient;return '<h3>Clinical encounter note</h3><div 
   + (conflicts().length?'<p style="color:#f0a59d"><b>Conflicts:</b> '+conflicts().join('; ')+'</p>':'')
   +'<h4>Plan</h4><ul>'+agentLines()+'</ul>'
   + labLines()
+  + (S.hsOverride?'<h4>Hard-stop override</h4><p style="color:#f0a59d">'+S.hsOverride.items.join('; ')+' — <b>rationale:</b> '+S.hsOverride.rationale+'</p>':'')
   +'<p style="margin-top:10px;color:var(--muted)">Consent tier '+consentTier()+' obtained'+(S.sel.length>1?'; combination addendum reviewed':'')+'. Provider counseled patient on risks, benefits, alternatives, and monitoring.</p>'
   +'<div class="sigrow"><div class="sig">Provider signature</div><div class="sig">Date</div></div>';}
 function docConsent(){var t=consentTier();var rats=consentRationale();return '<h3>Informed consent — peptide therapy</h3><div class="docsub">'+pinfo()+'  ·  Consent Tier '+t+' — '+(TIERTXT[t]||'')+(S.consentSigned?'  ·  SIGNED ✓':'  ·  not yet signed')+'</div>'
@@ -2328,7 +2336,7 @@ function docConsent(){var t=consentTier();var rats=consentRationale();return '<h
   +'<h4>Disclosures</h4><ul><li>These agents are <b>not FDA-approved drugs unless otherwise noted</b>; some uses are off-label or investigational.</li>'
   +(t>=3?'<li><b>Investigational / limited human evidence</b> — outcomes and long-term risks are uncertain.</li>':'')
   +(S.sel.length>1?'<li><b>Combination therapy</b> — the combination is less studied than the individual agents; interactions may be unknown.</li>':'')
-  +'<li>Clinical decisions are made by the treating licensed provider, who assumes responsibility for this care.</li></ul>'
+  +'<li>Clinical decisions are made by the treating licensed provider, who assumes responsibility for this care.</li></ul>'+(S.hsOverride?'<h4>Hard-stop override</h4><p style="color:#9fb0b5">'+S.hsOverride.items.join('; ')+' — rationale: '+S.hsOverride.rationale+'</p>':'')
   +(rats.length?'<h4>Basis</h4><p style="font-size:12px;color:#9fb0b5">'+rats.join(' · ')+'</p>':'')
   +'<div class="sigrow"><div class="sig">Patient signature</div><div class="sig">Date</div></div>'
   +'<div class="sigrow"><div class="sig">Provider signature</div><div class="sig">Date</div></div>';}
@@ -2342,7 +2350,7 @@ function docCompliance(){var p=S.patient;var checks=[
    ['Protocol selected',S.sel.length>0],['Consent tier determined',consentTier()>0],['Informed consent signed',S.consentSigned===true],
    ['Reconstitution computed',S.sel.length>0&&S.sel.every(function(s){return S.vials[s]})],
    ['Start date set',S.sel.length>0&&S.sel.every(function(s){return S.start[s]})],
-   ['No unaddressed contraindication conflict',conflicts().length===0],['Patient handout '+(S.handoutInclude?'included':'declined (optional)'),true]];
+   ['No unaddressed contraindication conflict',conflicts().length===0],['Hard-stop override documented',hardStops().length===0||S.hsOverride!=null],['Patient handout '+(S.handoutInclude?'included':'declined (optional)'),true]];
   return '<h3>Pre-visit compliance check</h3><div class="docsub">'+pinfo()+'</div>'
    +checks.map(function(c){return '<div class="flag '+(c[1]?'g':'r')+'">'+(c[1]?'✓':'!')+' '+c[0]+(c[1]?'':' — incomplete')+'</div>'}).join('');}
 
@@ -2373,12 +2381,22 @@ function openProto(slug){var d=detailFor(slug);if(!d)return;var p=byslug(slug)||
   document.getElementById('pdraw').classList.add('open');document.getElementById('scrim').classList.add('open');
 }
 function closeProto(){var d=document.getElementById('pdraw');if(d)d.classList.remove('open');document.getElementById('scrim').classList.remove('open');}
+function hardStops(){
+  var out=[],fl=S.patient.flags||[];var platform={'Pregnancy / planning':'Pregnancy','Active malignancy':'Active malignancy'};
+  S.sel.forEach(function(sl){var c=contraFor(sl),p=byslug(sl)||{};var abs=((c&&c.absolute)||[]).join(' ').toLowerCase();
+    fl.forEach(function(fx){var kws=FLAGKW[fx]||[];var inAbs=kws.some(function(kw){return abs.indexOf(kw)>-1});
+      if(inAbs||platform[fx]){var key=(platform[fx]||fx)+' \u2715 '+(p.name||sl);if(out.indexOf(key)<0)out.push(key);}});});
+  return out;
+}
+function showHS(){var hs=hardStops();document.getElementById('hslist').innerHTML=hs.map(function(x){return '<li>'+x+'</li>'}).join('');
+  document.getElementById('hsrat').value=(S.hsOverride&&S.hsOverride.rationale)||'';document.getElementById('hsmodal').classList.add('open');}
+function closeHS(){document.getElementById('hsmodal').classList.remove('open');}
 /* ───────── ally slideover ───────── */
 var ally=document.getElementById('ally'),scrim=document.getElementById('scrim');
 function openAlly(){ally.classList.add('open');scrim.classList.add('open');}
 function closeAlly(){ally.classList.remove('open');scrim.classList.remove('open');}
 document.getElementById('allyNav').onclick=function(e){e.preventDefault();openAlly();};
-document.getElementById('allyClose').onclick=closeAlly;var pdc=document.getElementById('pdClose');if(pdc)pdc.onclick=closeProto;scrim.onclick=function(){closeAlly();closeProto();};
+document.getElementById('allyClose').onclick=closeAlly;var pdc=document.getElementById('pdClose');if(pdc)pdc.onclick=closeProto;scrim.onclick=function(){closeAlly();closeProto();};document.getElementById('hsCancel').onclick=closeHS;document.getElementById('hsOverride').onclick=function(){var r=document.getElementById('hsrat').value.trim();if(!r){document.getElementById('hsrat').style.borderColor='var(--danger)';return;}S.hsOverride={rationale:r,items:hardStops(),at:new Date().toLocaleString()};save();closeHS();setStep(3);};
 document.getElementById('allySend').onclick=function(){
   var q=document.getElementById('allyIn').value.trim();if(!q)return;
   var b=document.getElementById('allyBody');
