@@ -50,6 +50,32 @@ exports.handler = async (event) => {
   const context = (body.context || "").toString().slice(0, 4000);
   const userContent = context ? context + "\n\nQuestion: " + question : question;
 
+  // RAIL 1 — ground every answer in the locked, audited AllyOS library passed by
+  // the client (the same source the workspace renders from). Dose / contraindication /
+  // protocol facts must come from here; if absent, say so and never invent.
+  let libraryText = "";
+  try {
+    if (body.library) {
+      libraryText = (typeof body.library === "string" ? body.library : JSON.stringify(body.library)).slice(0, 220000);
+    }
+  } catch (e) { libraryText = ""; }
+
+  const system = [{ type: "text", text: SYSTEM }];
+  if (libraryText) {
+    system.push({
+      type: "text",
+      text:
+        "GROUNDING — AllyOS LOCKED LIBRARY (physician-curated, 3-auditor-verified, JSON below). " +
+        "For ANY dose, reconstitution, titration, frequency, cycle, monitoring, discontinuation, " +
+        "contraindication, or protocol parameter, answer ONLY from this library. If a specific fact " +
+        "is not present here, say it is not in the locked library and to verify against primary sources " +
+        "\u2014 do NOT invent or recall a dose/contraindication from general knowledge. You may use clinical " +
+        "reasoning to explain or contextualize, but state facts only from the library, and prefer its exact " +
+        "wording and grades.\n\nLOCKED LIBRARY:\n" + libraryText,
+      cache_control: { type: "ephemeral" },
+    });
+  }
+
   try {
     const resp = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -61,7 +87,7 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         model: "claude-opus-4-8",
         max_tokens: 1200,
-        system: SYSTEM,
+        system: system,
         output_config: { effort: "medium" },
         messages: [{ role: "user", content: userContent.slice(0, 8000) }],
       }),

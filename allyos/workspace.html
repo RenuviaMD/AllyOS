@@ -2450,10 +2450,10 @@ document.getElementById('allySend').onclick=function(){
   if(p.comorbid&&p.comorbid.length)c.push('comorbid: '+p.comorbid.join(', '));
   if(p.meds&&p.meds.length)c.push('meds: '+p.meds.join(', '));
   var ctx=c.length?'De-identified context — '+c.join('; ')+'.':'';
-  fetch('/.netlify/functions/ally',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:q,context:ctx})})
+  fetch('/.netlify/functions/ally',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:q,context:ctx,library:{detail:DETAIL,contra:CONTRA}})})
    .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
    .then(function(res){var el=document.getElementById(id);var t;
-     if(res.ok&&res.j.answer){t='<p style="font-size:13px;line-height:1.55;white-space:pre-wrap">'+esc(res.j.answer)+'</p>';}
+     if(res.ok&&res.j.answer){t='<div style="font-size:10px;color:var(--ok);margin-bottom:5px">\u{1F4DA} grounded in your locked library</div><p style="font-size:13px;line-height:1.55;white-space:pre-wrap">'+esc(res.j.answer)+'</p>';}
      else if(res.j&&res.j.error==='not_configured'){t='<p style="font-size:13px;color:var(--muted)">Ally isn\'t connected yet — add <b>ANTHROPIC_API_KEY</b> in Netlify (Site settings → Environment variables), then redeploy. De-identified questions only.</p>';}
      else{var dd=(res.j&&(res.j.detail||res.j.error))||('HTTP '+((res.j&&res.j.status)||'?'));t='<p style="font-size:13px;color:var(--warn)">Ally couldn\'t reach the model. <span style="color:var(--faint);font-size:11px;white-space:pre-wrap">'+esc(String(dd).slice(0,240))+'</span></p>';}
      el.innerHTML='<div class="lbl" style="color:var(--teal)">Ally</div>'+t;b.scrollTop=b.scrollHeight;})
