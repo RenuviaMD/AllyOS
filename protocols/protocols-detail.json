@@ -45,7 +45,8 @@
       "sources": [
         "FDA Wegovy label (confirm current revision)",
         "Wilding 2021 STEP-1, NEJM, doi:10.1056/NEJMoa2032183"
-      ]
+      ],
+      "cycle_rest": "Continuous — no cycling or off-period. Chronic therapy: ongoing weekly dosing while indicated and tolerated, with routine follow-up. Substantial weight regain (~⅔ over ~1 yr) expected if stopped."
     },
     "tirzepatide": {
       "status": "FDA-approved (Mounjaro / Zepbound). Continuous — no cycling; follow-up only.",
@@ -85,7 +86,8 @@
       "sources": [
         "FDA Zepbound label",
         "Jastreboff 2022 SURMOUNT-1, NEJM, doi:10.1056/NEJMoa2206038"
-      ]
+      ],
+      "cycle_rest": "Continuous — no cycling or off-period. Chronic weekly therapy while indicated and tolerated; SURMOUNT-4 withdrawal showed substantial regain after stopping."
     },
     "liraglutide": {
       "status": "FDA-approved (Saxenda / Victoza). Once DAILY (not weekly). Continuous — no cycling.",
@@ -123,7 +125,8 @@
       "sources": [
         "FDA Saxenda label (note 16-wk/4% rule, weekly up-titration)",
         "Pi-Sunyer 2015 SCALE, NEJM, doi:10.1056/NEJMoa1411892"
-      ]
+      ],
+      "cycle_rest": "Continuous — DAILY dosing, no cycling. Chronic therapy; the 16-week / 4% rule guides whether to continue. Regain expected if stopped (SCALE Maintenance)."
     },
     "retatrutide": {
       "status": "⚠ INVESTIGATIONAL — NOT FDA-approved (Phase 3). No label, indication, or approved dose. Do not prescribe outside an authorized trial/IND. All parameters are Phase-2-derived and flagged VERIFY.",
@@ -148,7 +151,8 @@
       "sources": [
         "No FDA label — VERIFY",
         "Jastreboff 2023 Phase-2, NEJM, doi:10.1056/NEJMoa2301972 (NCT04881760)"
-      ]
+      ],
+      "cycle_rest": "⚠ VERIFY — investigational, not for use outside an authorized trial. By GLP-1 class analogy it would be continuous (no cycling); long-term withdrawal data not yet established."
     },
     "sermorelin": {
       "status": "⚠ VERIFY — compounded/off-label, NOT FDA-approved. Brand Geref (GHRH 1-29) was approved for pediatric GHD but is discontinued; adult GH-axis use is compounded, off-label, no modern efficacy RCTs. Cycled (not continuous like a GLP-1).",
