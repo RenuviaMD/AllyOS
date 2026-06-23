@@ -103,3 +103,10 @@ Our Top-tier premium AI feature = **Visit Packet generation** (not order-filling
 
 ## 11. COMPENDIUM STRUCTURE (40 chapters, reference)
 40-chapter "Comprehensive Peptide Therapy Compendium." Foundations (1–4: Intro, Evidence Grading, Safety, **Informed Consent**); Weight-Loss & Metabolic (5–14); Growth Hormone (15–22); Hormonal/Sexual (23–27); Regenerative (28–31, BPC-157/TB-500 education-only); Cognitive (32–36); Longevity (37–39); **Practice Implementation (37–40: Business/Legal, Pharmacy, Marketing[dropped from AllyOS scope], Practice Systems)**. Ch.4 §1.3 = consent tiers by grade; §5.1 = combination-therapy consent. Ch.40 = intake/consultation/titration/POC workflows (source for Visit Packet).
+
+
+## 12. AFFILIATE PROGRAM — decision
+Two different things; opposite sides of the firewall:
+- **A. Pharmacy pays YOU (affiliate of the pharmacy, per-order or listing fee) → AVOID.** Per-order % is economically identical to brokering: physician fee-splitting / anti-kickback optics (a medical board's top red flag), breaks the disclaimer's "earn no margin on any product" line, weakens the firewall, FTC disclosure. At most a flat, disclosed, non-volume listing fee with counsel — not worth it for a named MD.
+- **B. YOU run a software affiliate program (others refer clinics to AllyOS subscriptions) → YES, recommended.** Clean B2B growth lever; money is about software seats, not Rx volume → reinforces the firewall. Affiliates: member providers (refer-a-colleague), consultants, billing cos, MedSpa groups, KOLs, even pharmacies referring clinics to the software. Structure ~20–30% first-year recurring or flat $/clinic (Rewardful/PartnerStack/Stripe). **One rule: never tie a payout to peptide volume — every dollar is about the subscription, not the molecule.**
+- Principle (same as whole platform): **monetize the software, never the molecule.**
