@@ -1,0 +1,413 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AllyOS — Clinical Workspace</title>
+<style>
+:root{
+  --bg:#0b0f11;--bg2:#11181b;--bg3:#161e22;--raise:#1b2429;
+  --line:#222d32;--line2:#2c383e;--ink:#e8eef0;--muted:#8b9aa1;--faint:#5c6a71;
+  --teal:#29b8a8;--teal-dim:#1c7a72;--gold:#d4a548;
+  --danger:#ef6a5f;--warn:#e0a83a;--ok:#3fcf8e;
+  --r:7px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font:14px/1.45 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);overflow:hidden;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:none}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line2);border-radius:6px;padding:8px 10px;width:100%}
+input:focus,select,textarea:focus{outline:none;border-color:var(--teal-dim)}
+label{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 4px;font-weight:600}
+.lbl{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+/* ── app chrome ── */
+.app{display:grid;grid-template-rows:46px 1fr;height:100%}
+.topbar{display:flex;align-items:center;gap:16px;padding:0 16px;background:var(--bg2);border-bottom:1px solid var(--line)}
+.wordmark{font-weight:800;letter-spacing:.02em;font-size:15px}.wordmark b{color:var(--teal)}
+.tag{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);border:1px solid var(--line2);border-radius:4px;padding:2px 6px}
+.topbar .ctx{color:var(--muted);font-size:12.5px}
+.topbar .right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.lock{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ok)}
+.lock .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.tierpill{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);border:1px solid #463413;background:#1d160a;border-radius:5px;padding:3px 9px;font-weight:700}
+.ghost{font-size:12px;color:var(--muted);border:1px solid var(--line2);border-radius:6px;padding:6px 11px}
+.ghost:hover{color:var(--ink);border-color:var(--faint)}
+
+.body{display:grid;grid-template-columns:198px 1fr;height:100%;overflow:hidden}
+/* ── left rail ── */
+.rail{background:var(--bg2);border-right:1px solid var(--line);padding:12px 10px;display:flex;flex-direction:column;gap:2px}
+.rail .grp{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding:14px 10px 6px}
+.rail a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;color:var(--muted);text-decoration:none;font-size:13px;font-weight:500}
+.rail a .g{width:15px;text-align:center;color:var(--faint);font-size:12px}
+.rail a:hover{background:var(--bg3);color:var(--ink)}
+.rail a.on{background:linear-gradient(90deg,rgba(41,184,168,.14),transparent);color:var(--ink);box-shadow:inset 2px 0 0 var(--teal)}
+.rail a.on .g{color:var(--teal)}
+.rail .foot{margin-top:auto;font-size:10.5px;color:var(--faint);padding:10px;line-height:1.5;border-top:1px solid var(--line)}
+
+/* ── main ── */
+.main{display:flex;flex-direction:column;overflow:hidden}
+.stepper{display:flex;align-items:stretch;border-bottom:1px solid var(--line);background:var(--bg2);flex-shrink:0}
+.step{display:flex;align-items:center;gap:10px;padding:12px 18px;color:var(--faint);position:relative;border-right:1px solid var(--line)}
+.step .n{width:21px;height:21px;border-radius:50%;border:1.5px solid var(--line2);display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--muted)}
+.step .t{font-size:12.5px;font-weight:600;letter-spacing:.01em}
+.step.on{color:var(--ink)}.step.on .n{border-color:var(--teal);background:var(--teal);color:#04110f}
+.step.done{color:var(--muted);cursor:pointer}.step.done .n{border-color:var(--teal-dim);color:var(--teal)}
+.step.on:after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--teal)}
+
+.work{flex:1;overflow:auto;padding:22px 26px}
+.panel{max-width:980px;margin:0 auto}
+.phead{display:flex;align-items:baseline;gap:12px;margin-bottom:4px}
+.phead h2{font:600 17px/1.2 Georgia,serif}
+.phead .sub{color:var(--muted);font-size:12.5px}
+.note-local{font-size:11.5px;color:var(--faint);margin:6px 0 18px;display:flex;align-items:center;gap:7px}
+.note-local b{color:var(--ok)}
+
+.grid{display:grid;gap:14px 16px}
+.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+.span2{grid-column:span 2}
+
+/* formulary list */
+.fmlytop{display:flex;gap:10px;margin-bottom:12px}
+.fmlytop input{flex:1}
+.fmly{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;max-height:340px;overflow-y:auto}
+.frow{display:grid;grid-template-columns:1fr auto auto 26px;align-items:center;gap:12px;padding:9px 13px;border-bottom:1px solid var(--line);cursor:pointer}
+.frow:last-child{border-bottom:none}.frow:hover{background:var(--bg3)}
+.frow.sel{background:rgba(41,184,168,.08);box-shadow:inset 2px 0 0 var(--teal)}
+.frow .nm{font-weight:600;font-size:13px}.frow .ax{font-size:11px;color:var(--muted)}
+.chip{font-size:10px;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:4px;font-weight:700;white-space:nowrap}
+.gA{background:#0e2a1d;color:#4fd99a;border:1px solid #1c5238}.gB{background:#12241a;color:#6cc59a;border:1px solid #234a37}
+.gC{background:#2a230e;color:#e0b454;border:1px solid #4a3c18}.gD{background:#2a1411;color:#f08379;border:1px solid #532520}
+.frow .add{color:var(--faint);font-size:16px;text-align:center}.frow.sel .add{color:var(--teal)}
+
+.selbar{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.selchip{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--line2);border-radius:20px;padding:5px 6px 5px 13px;font-size:12.5px}
+.selchip b{font-weight:600}.selchip .x{width:18px;height:18px;border-radius:50%;background:var(--bg);color:var(--muted);display:grid;place-items:center;font-size:13px}
+.selchip .x:hover{color:var(--danger)}
+
+.tierbox{display:flex;align-items:center;gap:14px;border:1px solid var(--line2);border-radius:var(--r);padding:13px 16px;background:var(--bg2);margin-top:6px}
+.tierbox .tn{font:700 22px/1 Georgia,serif;color:var(--gold)}
+.tierbox .td{font-size:12px;color:var(--muted)}.tierbox .td b{color:var(--ink)}
+
+/* spec sheet (plan) */
+.spec{border:1px solid var(--line);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
+.spec .sh{display:flex;align-items:center;gap:10px;padding:11px 15px;background:var(--bg2);border-bottom:1px solid var(--line)}
+.spec .sh .nm{font-weight:700}.spec .sh .gr{margin-left:auto}
+.specrows{display:grid;grid-template-columns:auto 1fr;gap:0}
+.specrows>div{padding:8px 15px;border-bottom:1px solid var(--line);font-size:13px}
+.specrows .k{color:var(--muted);font-size:11px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;background:var(--bg2)}
+.specrows>div:nth-last-child(-n+2){border-bottom:none}
+.calc{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end;padding:13px 15px;background:rgba(41,184,168,.05);border-top:1px solid var(--line)}
+.calc .f{width:108px}.calc .out{margin-left:auto;text-align:right}
+.calc .out .n{font:700 24px/1 Georgia,serif;color:var(--teal)}.calc .out .u{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.ondev{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ok);border:1px solid #14402f;background:#0c1f17;border-radius:4px;padding:2px 7px}
+
+/* packet tabs */
+.ptabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:0}
+.ptab{padding:9px 16px;font-size:12.5px;font-weight:600;color:var(--muted);border:1px solid transparent;border-bottom:none;border-radius:6px 6px 0 0}
+.ptab.on{color:var(--ink);background:var(--bg2);border-color:var(--line)}
+.doc{border:1px solid var(--line);border-top:none;border-radius:0 0 var(--r) var(--r);background:var(--bg2);padding:22px 26px;min-height:300px}
+.doc h3{font:600 15px Georgia,serif;margin:0 0 3px}.doc .docsub{color:var(--muted);font-size:11.5px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.doc h4{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--teal);margin:16px 0 6px}
+.doc p,.doc li{font-size:13px;color:#cdd7da;margin:4px 0}.doc ul{margin-left:18px}
+.doc .sigrow{display:flex;gap:40px;margin-top:26px}.doc .sig{flex:1;border-top:1px solid var(--line2);padding-top:6px;font-size:11px;color:var(--muted)}
+.flag{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:6px;font-size:12.5px;margin:5px 0;border:1px solid}
+.flag.r{background:#1f1110;border-color:#532520;color:#f0a59d}.flag.g{background:#0e1d16;border-color:#1c4733;color:#7fd9af}
+
+/* footer actions */
+.acts{position:sticky;bottom:0;display:flex;gap:10px;justify-content:flex-end;padding:14px 26px;border-top:1px solid var(--line);background:var(--bg2)}
+.btn{padding:9px 18px;border-radius:7px;font-size:13px;font-weight:600;border:1px solid var(--line2);color:var(--ink)}
+.btn:hover{border-color:var(--faint)}
+.btn.pri{background:var(--teal);color:#04110f;border-color:var(--teal)}.btn.pri:hover{background:#34cdbb}
+.btn.pri:disabled{opacity:.4;cursor:not-allowed}
+.muted-sm{font-size:11px;color:var(--faint);margin-right:auto;align-self:center}
+
+/* ask ally slideover */
+.ally{position:fixed;top:46px;right:0;bottom:0;width:360px;background:var(--bg2);border-left:1px solid var(--line);transform:translateX(100%);transition:transform .18s;display:flex;flex-direction:column;z-index:20}
+.ally.open{transform:none}
+.ally .ah{display:flex;align-items:center;gap:9px;padding:13px 16px;border-bottom:1px solid var(--line)}
+.ally .ah .av{width:24px;height:24px;border-radius:6px;background:var(--teal);color:#04110f;display:grid;place-items:center;font-weight:800;font-size:13px}
+.ally .ah b{font-size:13px}.ally .ah .sub{font-size:10.5px;color:var(--muted)}
+.ally .deid{margin:12px 16px;font-size:11px;color:var(--warn);background:#1f1808;border:1px solid #463413;border-radius:6px;padding:9px 11px;line-height:1.5}
+.ally .body2{flex:1;overflow:auto;padding:0 16px}
+.ally .foot{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8px}
+.ally textarea{resize:none;height:60px}
+.scrim{position:fixed;inset:46px 0 0 0;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:.18s;z-index:19}.scrim.open{opacity:1;pointer-events:auto}
+
+@media print{
+  body *{visibility:hidden}
+  #printArea,#printArea *{visibility:visible}
+  #printArea{position:absolute;inset:0;padding:28px;background:#fff;color:#111;display:block!important}
+  #printArea h3{font:700 18px Georgia,serif}#printArea h4{color:#0a5;font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin:14px 0 4px}
+  #printArea .sig{border-top:1px solid #999;color:#555}
+}
+#printArea{display:none}
+</style></head><body>
+<div class="app">
+  <div class="topbar">
+    <div class="wordmark">Ally<b>OS</b></div>
+    <span class="tag">local-first</span>
+    <span class="ctx" id="ctx">New session · no patient loaded</span>
+    <div class="right">
+      <span class="lock"><span class="dot"></span> Local · on-device</span>
+      <span class="tierpill" id="tier">TOP</span>
+      <button class="ghost" id="endBtn">End session · clear</button>
+    </div>
+  </div>
+  <div class="body">
+    <nav class="rail">
+      <div class="grp">Workspace</div>
+      <a class="on" href="#"><span class="g">▣</span> Plan of care</a>
+      <a href="../protocols/library.html"><span class="g">≣</span> Formulary</a>
+      <a href="../protocols/calculator.html"><span class="g">∿</span> Calculator</a>
+      <div class="grp">Reference</div>
+      <a href="../protocols/regulatory-database.html"><span class="g">§</span> Regulatory</a>
+      <a href="#" id="allyNav"><span class="g">◆</span> Ask Ally</a>
+      <a href="../allyos/index.html"><span class="g">⬡</span> Store &amp; tiers</a>
+      <div class="foot"><b>Personalized for every patient. Private by design.</b><br>Charts are built &amp; printed on this device. Nothing about your patient touches our servers.</div>
+    </nav>
+
+    <main class="main">
+      <div class="stepper" id="stepper">
+        <div class="step on" data-s="0"><span class="n">1</span><span class="t">Patient</span></div>
+        <div class="step" data-s="1"><span class="n">2</span><span class="t">Protocol</span></div>
+        <div class="step" data-s="2"><span class="n">3</span><span class="t">Plan</span></div>
+        <div class="step" data-s="3"><span class="n">4</span><span class="t">Packet</span></div>
+      </div>
+      <div class="work"><div class="panel" id="panel"></div></div>
+      <div class="acts" id="acts"></div>
+    </main>
+  </div>
+</div>
+
+<!-- Ask Ally slideover -->
+<div class="scrim" id="scrim"></div>
+<aside class="ally" id="ally">
+  <div class="ah"><span class="av">A</span><div><b>Ally</b> · <span class="sub">protocol reference</span></div><button class="ghost" id="allyClose" style="margin-left:auto;padding:4px 9px">✕</button></div>
+  <div class="deid">⚠ De-identified only. Ask in clinical terms (age, labs, meds) — never a name, DOB, or MRN. Ally never receives patient identity.</div>
+  <div class="body2" id="allyBody"><p style="color:var(--faint);font-size:12.5px">Ask a protocol, dosing, or regulatory question. Honest grades, real citations, flags what to verify.</p></div>
+  <div class="foot"><textarea id="allyIn" placeholder="e.g. renal dosing cautions for tirzepatide + sermorelin?"></textarea><button class="btn pri" id="allySend" style="align-self:flex-end">Ask</button></div>
+</aside>
+
+<div id="printArea"></div>
+
+<script src="../protocols/protocols-data.js"></script>
+<script>
+/* ───────── state (session-only; auto-clears on close) ───────── */
+var S = load() || { step:0, patient:{}, sel:[], vials:{}, start:{}, packetTab:0 };
+function load(){try{return JSON.parse(sessionStorage.getItem('allyos_ws'))}catch(e){return null}}
+function save(){sessionStorage.setItem('allyos_ws',JSON.stringify(S))}
+function clearAll(){sessionStorage.removeItem('allyos_ws');localStorage.removeItem('allyos_today');S={step:0,patient:{},sel:[],vials:{},start:{},packetTab:0};render();}
+
+var ALL = (window.RENUVIA_PROTOCOLS && window.RENUVIA_PROTOCOLS.protocols || [])
+  .filter(function(p){return p.line==='peptides' && !p.teaser && !p.is_stack});
+function byslug(s){return ALL.filter(function(p){return p.slug===s})[0]}
+
+/* ───────── local engine ───────── */
+function gradeTier(g){g=(g||'').toUpperCase();
+  if(g.indexOf('D')>-1) return 4; if(g.indexOf('C')>-1) return 3; if(g.indexOf('B')>-1) return 2;
+  if(g.indexOf('A')>-1) return 1; return 3;}
+var TIERTXT={1:'Standard — FDA-approved, on-label',2:'Enhanced — off-label / Grade B',3:'Comprehensive — investigational / Grade C',4:'Maximal — Grade D, maximum disclosure'};
+function gradeClass(g){g=(g||'').toUpperCase();return g.indexOf('D')>-1?'gD':g.indexOf('C')>-1?'gC':g.indexOf('B')>-1?'gB':'gA';}
+function stackTier(){return S.sel.reduce(function(m,s){return Math.max(m,gradeTier((byslug(s)||{}).grade))},0)||0;}
+function parseRecon(body){var m=(body||'').match(/(\d+(?:\.\d+)?)\s*mg\s*\+\s*(\d+(?:\.\d+)?)\s*mL/);
+  var d=(body||'').match(/(\d+(?:\.\d+)?)\s*mcg/);
+  return {mg:m?+m[1]:5, ml:m?+m[2]:2, dose:d?+d[1]:250};}
+function parseField(body,re){var m=(body||'').match(re);return m?m[1].trim():'';}
+function recon(mg,ml,dose){var mgml=mg/ml,mcgml=mgml*1000,vol=dose/mcgml,units=vol*100,doses=(mg*1000)/dose;
+  return {mcgml:mcgml,vol:vol,units:units,doses:isFinite(doses)?Math.floor(doses):'—'};}
+function fdate(d){if(!d)return '—';var x=new Date(d+'T00:00');return isNaN(x)?'—':x.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});}
+
+/* ───────── render ───────── */
+var panel=document.getElementById('panel'), acts=document.getElementById('acts'), ctx=document.getElementById('ctx');
+function setStep(n){if(n<0||n>3)return;S.step=n;save();render();}
+function render(){
+  document.querySelectorAll('.step').forEach(function(el){var s=+el.dataset.s;
+    el.classList.toggle('on',s===S.step);el.classList.toggle('done',s<S.step);});
+  var p=S.patient;ctx.textContent = p.name ? (p.name+(p.age?' · '+p.age+(p.sex?' '+p.sex:''):'')+' · '+(S.sel.length?S.sel.length+' agent(s)':'no protocol')) : 'New session · no patient loaded';
+  [stepPatient,stepProtocol,stepPlan,stepPacket][S.step]();
+  renderActs();save();
+}
+function renderActs(){
+  var canNext = (S.step===0 && S.patient.name) || (S.step===1 && S.sel.length) || (S.step===2) ;
+  var right = S.step<3
+    ? '<button class="btn pri" id="next" '+(canNext?'':'disabled')+'>Continue →</button>'
+    : '<button class="btn" id="saveToday">Save to today (device)</button><button class="btn pri" id="printBtn">Print packet</button>';
+  var left = S.step>0 ? '<button class="btn" id="back">← Back</button>' : '<span class="muted-sm">Step '+(S.step+1)+' of 4 · everything on this step stays on your device</span>';
+  acts.innerHTML = left + right;
+  var b=document.getElementById('back');if(b)b.onclick=function(){setStep(S.step-1)};
+  var n=document.getElementById('next');if(n)n.onclick=function(){setStep(S.step+1)};
+  var pr=document.getElementById('printBtn');if(pr)pr.onclick=doPrint;
+  var st=document.getElementById('saveToday');if(st)st.onclick=function(){var t=JSON.parse(localStorage.getItem('allyos_today')||'[]');t.push({name:S.patient.name||'(unnamed)',n:S.sel.length,at:new Date().toLocaleString()});localStorage.setItem('allyos_today',JSON.stringify(t));st.textContent='Saved ✓';};
+}
+
+/* step 1 — patient (local intake) */
+function stepPatient(){
+  var p=S.patient;
+  panel.innerHTML=''
+   +'<div class="phead"><h2>Patient encounter</h2><span class="sub">Intake — stays on this device</span></div>'
+   +'<div class="note-local">🔒 <b>On-device.</b> Entered here, individualized here, printed here. Never transmitted.</div>'
+   +'<div class="grid g4">'
+     +fld('name','Patient name','text','span2',p.name)
+     +fld('sex','Sex','sel','',p.sex,['','Female','Male'])
+     +fld('age','Age','number','',p.age)
+     +fld('weight','Weight (kg)','number','',p.weight)
+     +fld('egfr','eGFR','number','',p.egfr)
+     +fld('a1c','A1c (%)','number','',p.a1c)
+     +fld('goal','Goal / indication','text','',p.goal)
+   +'</div>'
+   +'<div class="grid" style="margin-top:14px"><div>'+lf('meds','Current medications')+'<textarea id="f_meds" rows="2" placeholder="comma-separated">'+(p.meds||'')+'</textarea></div>'
+     +'<div>'+lf('hx','Relevant history / screen notes')+'<textarea id="f_hx" rows="2" placeholder="pancreatitis, MTC/MEN2, pregnancy, GI, eating disorder…">'+(p.hx||'')+'</textarea></div></div>';
+  bindPatient();
+}
+function fld(id,label,type,cls,val,opts){
+  var inner = type==='sel'
+    ? '<select id="f_'+id+'">'+opts.map(function(o){return '<option'+(o===val?' selected':'')+'>'+o+'</option>'}).join('')+'</select>'
+    : '<input id="f_'+id+'" type="'+type+'" value="'+(val==null?'':val)+'">';
+  return '<div class="'+(cls||'')+'">'+lf(id,label)+inner+'</div>';
+}
+function lf(id,label){return '<label for="f_'+id+'">'+label+'</label>'}
+function bindPatient(){['name','sex','age','weight','egfr','a1c','goal','meds','hx'].forEach(function(k){
+  var el=document.getElementById('f_'+k);if(!el)return;
+  el.oninput=el.onchange=function(){S.patient[k]=el.value;save();ctxUpdate();var n=document.getElementById('next');if(n)n.disabled=!S.patient.name;};});}
+function ctxUpdate(){var p=S.patient;ctx.textContent=p.name?(p.name+(p.age?' · '+p.age+(p.sex?' '+p.sex:''):'')):'New session · no patient loaded';}
+
+/* step 2 — protocol selection + consent tier */
+function stepProtocol(){
+  panel.innerHTML=''
+   +'<div class="phead"><h2>Protocol</h2><span class="sub">Select agents — you decide; the engine documents</span></div>'
+   +'<div class="note-local">Consent tier escalates automatically to the highest-grade agent selected.</div>'
+   +'<div class="fmlytop"><input id="fsearch" placeholder="Search formulary ('+ALL.length+' peptides)…"></div>'
+   +'<div class="fmly" id="fmly"></div>'
+   +'<div class="lbl" style="margin:18px 0 6px">Selected</div><div class="selbar" id="selbar"></div>'
+   +'<div id="tierwrap"></div>';
+  paintFmly('');paintSel();
+  document.getElementById('fsearch').oninput=function(){paintFmly(this.value.toLowerCase())};
+}
+function paintFmly(q){
+  var rows=ALL.filter(function(p){return !q||p.name.toLowerCase().indexOf(q)>-1||(p.axis||'').toLowerCase().indexOf(q)>-1})
+   .sort(function(a,b){return a.name.localeCompare(b.name)})
+   .map(function(p){var on=S.sel.indexOf(p.slug)>-1;
+     return '<div class="frow'+(on?' sel':'')+'" data-s="'+p.slug+'"><div><div class="nm">'+p.name+'</div><div class="ax">'+(p.axis||'')+' · '+(p.primary_use||'').slice(0,54)+'</div></div>'
+       +'<span class="chip '+gradeClass(p.grade)+'">'+(p.grade||'—')+'</span>'
+       +'<span class="ax" style="width:78px;text-align:right">'+(p.status_label||'')+'</span>'
+       +'<span class="add">'+(on?'✓':'+')+'</span></div>';}).join('');
+  document.getElementById('fmly').innerHTML=rows||'<div style="padding:18px;color:var(--faint)">No match.</div>';
+  document.querySelectorAll('.frow').forEach(function(el){el.onclick=function(){toggleSel(el.dataset.s)}});
+}
+function toggleSel(s){var i=S.sel.indexOf(s);if(i>-1)S.sel.splice(i,1);else S.sel.push(s);save();
+  paintFmly(document.getElementById('fsearch').value.toLowerCase());paintSel();renderActs();}
+function paintSel(){
+  var sb=document.getElementById('selbar');
+  sb.innerHTML=S.sel.length?S.sel.map(function(s){var p=byslug(s)||{};
+    return '<span class="selchip"><b>'+p.name+'</b> <span class="chip '+gradeClass(p.grade)+'">'+(p.grade||'')+'</span> <span class="x" data-s="'+s+'">×</span></span>';}).join('')
+    :'<span style="color:var(--faint);font-size:12.5px">None selected.</span>';
+  sb.querySelectorAll('.x').forEach(function(el){el.onclick=function(){toggleSel(el.dataset.s)}});
+  var t=stackTier();
+  document.getElementById('tierwrap').innerHTML = t? '<div class="tierbox"><div class="tn">Tier '+t+'</div><div class="td"><b>Required consent: '+TIERTXT[t].split('—')[0].trim()+'</b><br>'+TIERTXT[t]+(S.sel.length>1?' · combination addendum required':'')+'</div></div>':'';
+}
+
+/* step 3 — computed plan (individualized, on device) */
+function stepPlan(){
+  if(!S.sel.length){panel.innerHTML='<div class="phead"><h2>Plan</h2></div><p style="color:var(--faint)">Select at least one protocol in step 2.</p>';return;}
+  panel.innerHTML='<div class="phead"><h2>Plan of care</h2><span class="sub">Computed on this device for '+(S.patient.name||'this patient')+'</span></div>'
+   +'<div class="note-local"><span class="ondev">computed on-device</span> Deterministic dosing math — not generated by AI.</div>'
+   + S.sel.map(specSheet).join('');
+  S.sel.forEach(bindCalc);
+}
+function specSheet(s){
+  var p=byslug(s)||{};var d=parseRecon(p.body_md);var v=S.vials[s]||{mg:d.mg,ml:d.ml,dose:d.dose};S.vials[s]=v;
+  var dose=parseField(p.body_md,/\*\*Dose:\*\*\s*([^\n]+)/)||parseField(p.body_md,/\*\*Dose[^:]*:\*\*\s*([^\n]+)/);
+  var route=parseField(p.body_md,/\*\*Route:\*\*\s*([^\n]+)/);
+  var cyc=parseField(p.body_md,/\*\*Cycle:\*\*\s*([^\n]+)/);
+  var r=recon(v.mg,v.ml,v.dose);
+  return '<div class="spec"><div class="sh"><span class="nm">'+p.name+'</span><span class="chip '+gradeClass(p.grade)+' gr">'+(p.grade||'')+'</span></div>'
+   +'<div class="specrows">'
+     +row('Mechanism',p.mechanism||'—')
+     +row('Dose',dose||'see monograph')
+     +row('Route',route||'SC')
+     +row('Cadence / cycle',cyc||'—')
+     +row('Contraindications',p.contraindications||'—')
+     +row('Start date','<input type="date" id="d_'+s+'" value="'+(S.start[s]||'')+'" style="width:180px">')
+   +'</div>'
+   +'<div class="calc"><div class="f"><label>Vial (mg)</label><input class="num" id="vm_'+s+'" value="'+v.mg+'"></div>'
+     +'<div class="f"><label>BAC water (mL)</label><input class="num" id="vl_'+s+'" value="'+v.ml+'"></div>'
+     +'<div class="f"><label>Dose (mcg)</label><input class="num" id="vd_'+s+'" value="'+v.dose+'"></div>'
+     +'<div class="out"><div class="n num" id="u_'+s+'">'+r.units.toFixed(1)+'</div><div class="u">U-100 units · '+r.doses+' doses/vial</div></div>'
+   +'</div></div>';
+}
+function row(k,v){return '<div class="k">'+k+'</div><div>'+v+'</div>'}
+function bindCalc(s){
+  ['vm','vl','vd'].forEach(function(pre){var el=document.getElementById(pre+'_'+s);if(!el)return;
+    el.oninput=function(){var v=S.vials[s];v.mg=+document.getElementById('vm_'+s).value;v.ml=+document.getElementById('vl_'+s).value;v.dose=+document.getElementById('vd_'+s).value;
+      var r=recon(v.mg,v.ml,v.dose);document.getElementById('u_'+s).textContent=r.units.toFixed(1);save();};});
+  var dd=document.getElementById('d_'+s);if(dd)dd.onchange=function(){S.start[s]=dd.value;save();};
+}
+
+/* step 4 — packet */
+var TABS=['Clinical note','Consent','Patient handout','Compliance'];
+function stepPacket(){
+  panel.innerHTML='<div class="phead"><h2>Visit packet</h2><span class="sub">'+(S.patient.name||'patient')+' · generated on-device · print or save to your EMR</span></div>'
+   +'<div class="ptabs" id="ptabs">'+TABS.map(function(t,i){return '<div class="ptab'+(i===S.packetTab?' on':'')+'" data-i="'+i+'">'+t+'</div>'}).join('')+'</div>'
+   +'<div class="doc" id="doc"></div>';
+  document.querySelectorAll('.ptab').forEach(function(el){el.onclick=function(){S.packetTab=+el.dataset.i;save();stepPacket();}});
+  document.getElementById('doc').innerHTML=[docNote,docConsent,docHandout,docCompliance][S.packetTab]();
+}
+function pinfo(){var p=S.patient;return (p.name||'________')+'  ·  '+(p.age?p.age+'y ':'')+(p.sex||'')+(p.weight?'  ·  '+p.weight+' kg':'');}
+function agentLines(){return S.sel.map(function(s){var p=byslug(s)||{};var v=S.vials[s]||{};var r=recon(v.mg,v.ml,v.dose);
+  return '<li><b>'+p.name+'</b> — '+(parseField(p.body_md,/\*\*Dose:\*\*\s*([^\n]+)/)||'per monograph')+'; reconstitute '+v.mg+' mg + '+v.ml+' mL → <b>'+r.units.toFixed(1)+' units</b>/dose'+(S.start[s]?'; start '+fdate(S.start[s]):'')+'</li>';}).join('');}
+function docNote(){var p=S.patient;return '<h3>Clinical encounter note</h3><div class="docsub">'+pinfo()+'  ·  '+new Date().toLocaleDateString()+'</div>'
+  +'<h4>Indication</h4><p>'+(p.goal||'—')+'</p>'
+  +'<h4>Pertinent data</h4><p>eGFR '+(p.egfr||'—')+' · A1c '+(p.a1c||'—')+' · Meds: '+(p.meds||'none recorded')+'</p>'
+  +(p.hx?'<h4>Screen / history</h4><p>'+p.hx+'</p>':'')
+  +'<h4>Plan</h4><ul>'+agentLines()+'</ul>'
+  +'<p style="margin-top:10px;color:var(--muted)">Consent tier '+stackTier()+' obtained'+(S.sel.length>1?'; combination addendum reviewed':'')+'. Provider counseled patient on risks, benefits, alternatives, and monitoring.</p>'
+  +'<div class="sigrow"><div class="sig">Provider signature</div><div class="sig">Date</div></div>';}
+function docConsent(){var t=stackTier();return '<h3>Informed consent — peptide therapy</h3><div class="docsub">'+pinfo()+'  ·  Consent Tier '+t+' — '+(TIERTXT[t]||'')+'</div>'
+  +'<h4>Treatment</h4><ul>'+agentLines()+'</ul>'
+  +'<h4>Disclosures</h4><ul><li>These agents are <b>not FDA-approved drugs unless otherwise noted</b>; some uses are off-label or investigational.</li>'
+  +(t>=3?'<li><b>Investigational / limited human evidence</b> — outcomes and long-term risks are uncertain.</li>':'')
+  +(S.sel.length>1?'<li><b>Combination therapy</b> — the combination is less studied than the individual agents; interactions may be unknown.</li>':'')
+  +'<li>Clinical decisions are made by the treating licensed provider, who assumes responsibility for this care.</li></ul>'
+  +'<div class="sigrow"><div class="sig">Patient signature</div><div class="sig">Date</div></div>'
+  +'<div class="sigrow"><div class="sig">Provider signature</div><div class="sig">Date</div></div>';}
+function docHandout(){return '<h3>Your treatment plan</h3><div class="docsub">For '+(S.patient.name||'you')+'</div>'
+  +'<h4>What you are starting</h4><ul>'+agentLines()+'</ul>'
+  +'<h4>How to take it</h4><p>Inject subcutaneously as directed; rotate sites. Use the unit amount shown above on a U-100 syringe.</p>'
+  +'<h4>What to expect</h4><p>Effects build over weeks. Report severe abdominal pain, persistent vomiting, or unusual symptoms promptly.</p>'
+  +'<h4>Questions</h4><p>Contact the prescribing clinic.</p>';}
+function docCompliance(){var p=S.patient;var checks=[
+   ['Patient identity recorded',!!p.name],['Indication / goal documented',!!p.goal],
+   ['Protocol selected',S.sel.length>0],['Consent tier determined',stackTier()>0],
+   ['Reconstitution computed',S.sel.every(function(s){return S.vials[s]})],
+   ['Start date set',S.sel.every(function(s){return S.start[s]})],
+   ['Contraindication screen reviewed',!!p.hx]];
+  return '<h3>Pre-visit compliance check</h3><div class="docsub">'+pinfo()+'</div>'
+   +checks.map(function(c){return '<div class="flag '+(c[1]?'g':'r')+'">'+(c[1]?'✓':'!')+' '+c[0]+(c[1]?'':' — incomplete')+'</div>'}).join('');}
+
+/* print: render current packet tab into #printArea */
+function doPrint(){
+  var html=[docNote,docConsent,docHandout,docCompliance][S.packetTab]();
+  document.getElementById('printArea').innerHTML=html;
+  window.print();
+}
+
+/* ───────── ally slideover (de-identified reference) ───────── */
+var ally=document.getElementById('ally'),scrim=document.getElementById('scrim');
+function openAlly(){ally.classList.add('open');scrim.classList.add('open');}
+function closeAlly(){ally.classList.remove('open');scrim.classList.remove('open');}
+document.getElementById('allyNav').onclick=function(e){e.preventDefault();openAlly();};
+document.getElementById('allyClose').onclick=closeAlly;scrim.onclick=closeAlly;
+document.getElementById('allySend').onclick=function(){
+  var q=document.getElementById('allyIn').value.trim();if(!q)return;
+  var b=document.getElementById('allyBody');
+  b.innerHTML+='<div style="margin:12px 0"><div class="lbl">You</div><p style="font-size:13px">'+q+'</p></div>';
+  b.innerHTML+='<div style="margin:12px 0"><div class="lbl" style="color:var(--teal)">Ally</div><p style="font-size:13px;color:var(--muted)">Connect ANTHROPIC_API_KEY in Netlify to enable live answers. Ally will answer from the curated knowledge base — honest grades, real citations, flags to verify. (De-identified questions only.)</p></div>';
+  document.getElementById('allyIn').value='';b.scrollTop=b.scrollHeight;
+};
+
+document.getElementById('stepper').onclick=function(e){var st=e.target.closest('.step');if(st&&st.classList.contains('done'))setStep(+st.dataset.s);};
+document.getElementById('endBtn').onclick=function(){if(confirm('Clear this session from the device? Anything unsaved will be lost.'))clearAll();};
+document.getElementById('tier').textContent='TOP';
+
+render();
+</script>
+</body></html>

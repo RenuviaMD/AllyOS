@@ -110,3 +110,30 @@ Two different things; opposite sides of the firewall:
 - **A. Pharmacy pays YOU (affiliate of the pharmacy, per-order or listing fee) → AVOID.** Per-order % is economically identical to brokering: physician fee-splitting / anti-kickback optics (a medical board's top red flag), breaks the disclaimer's "earn no margin on any product" line, weakens the firewall, FTC disclosure. At most a flat, disclosed, non-volume listing fee with counsel — not worth it for a named MD.
 - **B. YOU run a software affiliate program (others refer clinics to AllyOS subscriptions) → YES, recommended.** Clean B2B growth lever; money is about software seats, not Rx volume → reinforces the firewall. Affiliates: member providers (refer-a-colleague), consultants, billing cos, MedSpa groups, KOLs, even pharmacies referring clinics to the software. Structure ~20–30% first-year recurring or flat $/clinic (Rewardful/PartnerStack/Stripe). **One rule: never tie a payout to peptide volume — every dollar is about the subscription, not the molecule.**
 - Principle (same as whole platform): **monetize the software, never the molecule.**
+
+
+## 13. ⭐ TWO-ENGINE ARCHITECTURE (the keystone — resolves privacy vs. personalization)
+Individualization is NOT Ally's job — it's the local engine's job. Two engines:
+- **Ally (cloud AI)** = the *library / reasoning* — protocol-level knowledge, grades, cautions, evidence. Works on de-identified clinical parameters, **never identity**. LLM, server-side.
+- **Local engine (on-device, deterministic)** = the *individualization* — dose→units, titration calendar, contraindication screen, consent tier, filled note/consent/handout/compliance. Pure math + rules + templating, in the browser, **never transmitted**.
+Key: "patient data never goes to Ally" does NOT make the POC generic — the personalization was never Ally's job. Deterministic local math is **more private AND more correct AND more auditable** than asking an LLM to do dosing. Brand: *"We don't let a chatbot guess your patient's dose — the math is deterministic, on your device, auditable."*
+- **Print question resolved:** the patient name IS on the printed POC — entered/merged/printed **locally** (like a fillable PDF / mail-merge on your own laptop). "PHI never leaves the device" governs transmission/storage, not what renders on the local printout. The document is complete; *we* just never see it.
+- **Ally + PHI:** PHI = *identifiable* info. A de-identified vignette ("58yo M, eGFR 45, on metformin…") is case-specific reasoning with no identifiers → Ally can answer; identity/chart stays local. UI nudges de-identified phrasing.
+
+## 14. POSITIONING & COPY (local-first, personalization-led)
+- **Local-first is a PROPERTY of the patient-data layer, not a sub-brand** (no "AllyOS Local" name). Verified in code: no analytics/trackers anywhere; Visit Packet makes zero network calls (localStorage only, clear-on-close, beforeunload warning). The ONE non-local surface is Ally (must call a model server) — never call Ally "local."
+- **Copy leads with personalization, privacy is the trust badge** (never lead with the privacy-negative "data never goes to Ally" → sounds generic/blind). 
+  - Headline: *"A plan of care built for each patient — right on your device."*
+  - Support: *"Entered, individualized, and printed locally. Nothing about your patient touches our servers — no breach exposure, no BAA."*
+  - One-liner: *"Individualized for every patient. Private by design."*
+- Privacy reframed as a benefit TO the provider (they carry the breach liability) — reassuring, not limiting.
+
+## 15. DESIGN LANGUAGE (locked)
+- **DARK theme.** Premium clinical workstation, not consumer.
+- **No ornamental cards, no emoji icons, no excessive scrolling, no info-without-reason.** App-chrome (top bar + left rail + workspace), dense spec-sheet panels, hairline borders, tabular numerals, restrained palette (charcoal + teal/gold accent). Built for providers with graduate degrees — respect expertise, clinical density over hand-holding.
+- Workflow as a horizontal stepper (Patient → Protocol → Plan → Packet) that fits the viewport; panels scroll internally only if needed, never the whole page.
+
+## 16. CONFIG / BUILD STATE
+- `pricing.json` = single source of truth for prices + Stripe link slots (empty link = disabled button). Default Member/Top = $99/$199 (adjustable, one edit).
+- Auto clear-on-close is the default (sessionStorage); opt-in "Save to today" → localStorage; "End session · clear" wipes both.
+- No permit needed to BUILD. Go-live needs (from Dr. Falcon): ANTHROPIC_API_KEY into Netlify env; public Stripe Payment Link URLs into pricing.json.
