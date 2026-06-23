@@ -2369,6 +2369,8 @@ function openProto(slug){var d=detailFor(slug);if(!d)return;var p=byslug(slug)||
   if(d.candidacy)h+=pdSec('Candidacy / indication','<p>'+d.candidacy+'</p>');
   if(d.starting_dose)h+=pdSec('Starting dose','<p>'+d.starting_dose+'</p>');
   if(d.titration)h+=pdSec('Titration','<p>'+d.titration+'</p>');
+  if(d.frequency)h+=pdSec('Frequency / timing','<p>'+d.frequency+'</p>');
+  if(d.cycle_rest)h+=pdSec('Cycle / rest','<p>'+d.cycle_rest+'</p>');
   if(d.hold_rules)h+=pdSec('Hold / slow rules','<p>'+d.hold_rules+'</p>');
   if(d.ae_common)h+=pdSec('Adverse events — common',pdUl(d.ae_common));
   if(d.ae_serious)h+=pdSec('Adverse events — serious (watch)',pdUl(d.ae_serious),true);
