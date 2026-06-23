@@ -187,6 +187,7 @@ label{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:upperca
 .mcard .mh{padding:14px 18px;font-weight:700;color:var(--danger);border-bottom:1px solid var(--line);background:#1f1110}
 .mcard .mb{padding:16px 18px}.mcard .mb p{font-size:13px;margin-bottom:8px}.mcard .mb ul{margin:0 0 12px 18px}.mcard .mb li{font-size:12.5px;color:#f0a59d;margin:3px 0}
 .mcard .mf{display:flex;gap:10px;justify-content:flex-end;padding:12px 18px;border-top:1px solid var(--line)}
+.doc .pref{border-left:2px solid var(--line2);padding:4px 0 4px 10px;margin:7px 0;font-size:12.5px;line-height:1.5}.doc .pref .kk{color:var(--muted);font-weight:600}
 @media print{
   body *{visibility:hidden}
   #printArea,#printArea *{visibility:visible}
@@ -2321,6 +2322,15 @@ function plist(a){return (a&&a.length)?a.join(', '):'';}
 function agentLines(){return S.sel.map(function(s){var p=byslug(s)||{};var v=S.vials[s]||{};var r=recon(v.mg,v.ml,v.dose);
   return '<li><b>'+p.name+'</b> — '+(parseField(p.body_md,/\*\*Dose:\*\*\s*([^\n]+)/)||'per monograph')+'; reconstitute '+v.mg+' mg + '+v.ml+' mL → <b>'+r.units.toFixed(1)+' units</b>/dose'+(S.start[s]?'; start '+fdate(S.start[s]):'')+'</li>';}).join('');}
 function labLines(){var l=recLabs();return l.length?'<h4>Recommended labs</h4><ul>'+l.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>':'';}
+function noteProtocolDetail(){return S.sel.map(function(s){var d=detailFor(s);if(!d)return '';var p=byslug(s)||{};
+  var mon=(d.monitoring||[]).slice(0,3);
+  return '<div class="pref"><b>'+(p.name||s)+'</b>'
+    +(d.starting_dose?'<div><span class="kk">Start:</span> '+d.starting_dose+'</div>':'')
+    +(d.titration?'<div><span class="kk">Titration:</span> '+d.titration+'</div>':'')
+    +(d.frequency?'<div><span class="kk">Frequency:</span> '+d.frequency+'</div>':'')
+    +(mon.length?'<div><span class="kk">Monitoring:</span> '+mon.join('; ')+'</div>':'')
+    +(d.discontinuation?'<div><span class="kk">Discontinue if:</span> '+d.discontinuation+'</div>':'')
+    +'</div>';}).join('');}
 function docNote(){var p=S.patient;return '<h3>Clinical encounter note</h3><div class="docsub">'+pinfo()+'  ·  '+new Date().toLocaleDateString()+'</div>'
   +'<h4>Indication</h4><p>'+(plist(p.goals)||'—')+'</p>'
   +'<h4>Pertinent data</h4><p>BMI '+(p.bmi||'—')+' · eGFR '+(p.egfr||'—')+' · A1c '+(p.a1c||'—')+'% · Comorbid: '+(plist(p.comorbid)||'none')+' · Meds: '+(plist(p.meds)||'none recorded')+'</p>'
@@ -2328,6 +2338,7 @@ function docNote(){var p=S.patient;return '<h3>Clinical encounter note</h3><div 
   + (conflicts().length?'<p style="color:#f0a59d"><b>Conflicts:</b> '+conflicts().join('; ')+'</p>':'')
   +'<h4>Plan</h4><ul>'+agentLines()+'</ul>'
   + labLines()
+  + (S.sel.some(function(s){return detailFor(s)})?'<h4>Protocol reference — titration &amp; monitoring</h4>'+noteProtocolDetail():'')
   + (S.hsOverride?'<h4>Hard-stop override</h4><p style="color:#f0a59d">'+S.hsOverride.items.join('; ')+' — <b>rationale:</b> '+S.hsOverride.rationale+'</p>':'')
   +'<p style="margin-top:10px;color:var(--muted)">Consent tier '+consentTier()+' obtained'+(S.sel.length>1?'; combination addendum reviewed':'')+'. Provider counseled patient on risks, benefits, alternatives, and monitoring.</p>'
   +'<div class="sigrow"><div class="sig">Provider signature</div><div class="sig">Date</div></div>';}
