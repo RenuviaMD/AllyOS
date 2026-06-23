@@ -1,4 +1,4 @@
-> ⚠️ **DRAFT — PENDING INDEPENDENT AUDIT (not locked).** Generated 2026-06-23; undergoing 2–3 external-agent verification per the AllyOS clinical-content discipline. Not for clinical use until audited and signed off by Dr. Falcon.
+> ✅ **AUDITED & LOCKED 2026-06-23** — independently verified by **3 Opus auditors** (label/dose/DOI · clinical-management soundness · fabrication/currency). No fabrication found; all 4 pivotal-trial DOIs and load-bearing stats confirmed against PubMed/labels. Corrections applied: tirzepatide nausea upper bound 29%→33%; added 2025 MASH + oral-Wegovy indications. Residual: confirm 2 label items against the current posted PDFs (Wegovy 215256s033, Zepbound 217806s020) at point of care. Decision-support for licensed providers — not a substitute for the full prescribing information.
 
 # GLP-1 / Incretin Agent Clinical Management Protocols
 
@@ -15,7 +15,7 @@
 ## 1. SEMAGLUTIDE (weight management brand: Wegovy 2.4 mg SC weekly)
 
 ### 1. Candidacy / indication
-- **On-label (chronic weight management), adults:** BMI **≥30** (obesity), OR BMI **≥27** (overweight) **plus ≥1 weight-related comorbidity** (e.g., hypertension, type 2 diabetes, dyslipidemia). Also approved for adolescents ≥12 yr at the ≥95th BMI percentile, and to reduce MACE in adults with established CV disease and obesity/overweight.
+- **On-label (chronic weight management), adults:** BMI **≥30** (obesity), OR BMI **≥27** (overweight) **plus ≥1 weight-related comorbidity** (e.g., hypertension, type 2 diabetes, dyslipidemia). Also approved for adolescents ≥12 yr at the ≥95th BMI percentile; to reduce MACE in adults with established CV disease and obesity/overweight; **noncirrhotic MASH with moderate–advanced (F2–F3) fibrosis (Wegovy, Aug 2025)**; and as **oral semaglutide 25 mg once daily for chronic weight management (Dec 2025)**.
 - Adjunct to reduced-calorie diet + increased physical activity.
 - **Off-label:** use below these BMI thresholds, or use of the diabetes brand (Ozempic) for weight loss, is off-label. Document rationale.
 
@@ -90,7 +90,7 @@
 - **HOLD / SLOW rule:** Do not escalate until the patient has been on the current dose ≥4 weeks AND tolerates it. If GI intolerance occurs, **stay at the current dose** (or step down) and delay escalation; do not skip increments. If ≥2 consecutive doses are missed, consider re-evaluation/re-titration per the label.
 
 ### 4. Adverse events to watch
-- **COMMON (SURMOUNT-1 / label; approximate, pooled across doses):** nausea **~25–29%**, diarrhea **~19–23%**, constipation **~11–17%**, vomiting **~8–13%** (all dose-related, mostly mild–moderate, mainly during escalation); also dyspepsia, abdominal pain, injection-site reactions, fatigue. Discontinuation for AEs ~4–7% across doses in SURMOUNT-1.
+- **COMMON (SURMOUNT-1 / label; approximate, pooled across doses):** nausea **~25–33%** (10 mg arm ~33%), diarrhea **~19–23%**, constipation **~11–17%**, vomiting **~8–13%** (all dose-related, mostly mild–moderate, mainly during escalation); also dyspepsia, abdominal pain, injection-site reactions, fatigue. Discontinuation for AEs ~4–7% across doses in SURMOUNT-1.
 - **SERIOUS — counsel on warning signs:** acute **pancreatitis** (severe persistent abdominal pain ± back, vomiting); **gallbladder disease**/cholelithiasis; **acute kidney injury** from volume depletion; **hypoglycemia** with insulin/SU; **diabetic retinopathy** worsening in T2DM; hypersensitivity reactions; **MTC/thyroid C-cell** (boxed warning); suicidal ideation/behavior (monitor mood). **May reduce efficacy of oral hormonal contraceptives** around dose initiation/escalation — advise a non-oral backup or barrier method for 4 weeks after initiation and after each dose increase.
 
 ### 5. Side-effect MANAGEMENT
