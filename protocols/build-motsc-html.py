@@ -109,7 +109,7 @@ html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8">
 </style></head>
 <body><div class="doc">
   <div class="chead">
-    <div class="eyebrow">The Peptide Compendium · 2026 Edition · Chapter 10</div>
+    <div class="eyebrow">The Peptide Desk Reference · 2026 Edition · Chapter 10</div>
     <h1>MOTS-c for Metabolic Health &amp; Longevity</h1>
     <div class="part">Part II · Weight Loss &amp; Metabolic Peptides — Mitochondrial Peptides</div>
   </div>

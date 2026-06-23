@@ -82,7 +82,7 @@ for n, p in enumerate(peps, 1):
     html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><title>{esc(p["name"])} — Monograph</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
 <style>{CSS}</style></head><body><div class="doc">
-<div class="chead"><div class="eyebrow">The Peptide Compendium · 2026 Edition · {p["axis"]}</div>
+<div class="chead"><div class="eyebrow">The Peptide Desk Reference · 2026 Edition · {p["axis"]}</div>
 <h1>{esc(p["name"])}</h1><div class="part">{esc(p.get("primary_use",""))}</div></div>
 <div class="status">
 <div class="sf"><span class="sl">FDA Status</span><span class="sv">{esc(p["status_label"])}</span></div>
@@ -97,7 +97,7 @@ for n, p in enumerate(peps, 1):
 {('<h4>Evidence</h4><p>'+esc(p["evidence"])+'</p>') if p["evidence"] else ''}
 {cites(p)}
 <div class="sig"><b>Reviewed &amp; approved — Medical Director:</b> ____________________ · License # __________ · Signature ____________________ · Date __________</div>
-<div class="note">RenuviaMD® Compliance Division · The Peptide Compendium 2026 Edition · generated {TODAY}. Educational/clinical decision-support for licensed professionals — not medical or legal advice, prescribing authorization, or a medical-director relationship. Dated snapshot; verify current applicability.</div>
+<div class="note">RenuviaMD® Compliance Division · The Peptide Desk Reference 2026 Edition · generated {TODAY}. Educational/clinical decision-support for licensed professionals — not medical or legal advice, prescribing authorization, or a medical-director relationship. Dated snapshot; verify current applicability.</div>
 </div></body></html>'''
     (OUT / f"{p['slug']}.html").write_text(html, encoding="utf-8")
 
