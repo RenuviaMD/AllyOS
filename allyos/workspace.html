@@ -154,6 +154,14 @@ label{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:upperca
 .reclabs .t{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
 .reclabs ul{margin-left:16px;font-size:12.5px;color:#cdd7da}.reclabs li{margin:2px 0}
 
+.contra{border:1px solid var(--line);border-radius:7px;margin:7px 0;overflow:hidden;background:var(--bg2)}
+.contra .ch{padding:9px 13px;font-weight:700;border-bottom:1px solid var(--line)}
+.contra .cn{font-weight:400;font-size:10.5px;color:var(--faint)}
+.contra .ct{font-size:10px;letter-spacing:.07em;text-transform:uppercase;margin:8px 0 3px;font-weight:700}
+.contra .cabs .ct{color:var(--danger)}.contra .crel .ct{color:var(--warn)}
+.contra .cabs,.contra .crel{padding:2px 13px 4px}
+.contra ul{margin:0 0 6px 16px}.contra li{font-size:12px;color:#cdd7da;margin:2px 0}
+.contra .cabs li{color:#f0a59d}
 @media print{
   body *{visibility:hidden}
   #printArea,#printArea *{visibility:visible}
@@ -2008,16 +2016,14 @@ var ALL = (window.RENUVIA_PROTOCOLS && window.RENUVIA_PROTOCOLS.protocols || [])
   .filter(function(p){return p.line==='peptides' && !p.teaser && !p.is_stack});
 function byslug(s){return ALL.filter(function(p){return p.slug===s})[0]}
 
-/* researched intake data (general + per-peptide), loaded async; engine degrades gracefully if absent */
 var INTAKE={};
 function intakeFor(s){return INTAKE[s]}
 fetch('../protocols/intake-schema.json').then(function(r){return r.json()}).then(function(d){INTAKE=d.peptides||{};render();}).catch(function(){});
+var CONTRA={};function contraFor(s){return CONTRA[s]}
+fetch('../protocols/contraindications.json').then(function(r){return r.json()}).then(function(d){CONTRA=d.peptides||{};render();}).catch(function(){});
 
 /* ───────── structured intake vocab (pills) ───────── */
 var SEX=['Female','Male'];
-var BMI=['<25','25–29','30–34','≥35'];
-var EGFR=['≥90','60–89','45–59','30–44','<30'];
-var A1C=['<5.7','5.7–6.4','≥6.5'];
 var COMORBID=['HTN','Dyslipidemia','Prediabetes/T2DM','OSA','CVD','MASLD'];
 var GOALS=['Weight loss','Metabolic','Recovery / repair','Longevity','Cognitive','Sexual health','GH / body comp','Immune'];
 var MEDSL=['Insulin','Sulfonylurea','Metformin','GLP-1 (current)','Thyroid Rx','Anticoagulant','SSRI/SNRI'];
@@ -2036,6 +2042,16 @@ function bindPills(cb){
     el.onclick=function(){ cb(el.dataset.grp, el.dataset.v, el.parentNode.dataset.multi==='1'); };
   });
 }
+
+/* BMI computed from weight(lb) + height(ft/in) */
+function computeBMI(){var p=S.patient;var lb=+p.weight,ft=+p.heightFt||0,inch=+p.heightIn||0;var tin=ft*12+inch;
+  if(lb>0&&tin>0)return Math.round((703*lb/(tin*tin))*10)/10; return null;}
+function bmiText(){var b=computeBMI();S.patient.bmi=b;if(b==null)return '<span style="color:var(--faint)">—</span>';
+  var cls=b>=30?'gD':b>=27?'gC':b>=25?'gB':'gA';
+  var lab=b>=35?'Obese II+':b>=30?'Obese I':b>=27?'Overweight+':b>=25?'Overweight':'Normal';
+  return '<span class="num" style="font-size:19px;font-weight:700">'+b.toFixed(1)+'</span> <span class="chip '+cls+'">'+lab+'</span>';}
+function recalcBMI(){var o=document.getElementById('bmiOut');if(o)o.innerHTML=bmiText();}
+
 function conflicts(){
   var out=[],fl=S.patient.flags||[];
   S.sel.forEach(function(s){var p=byslug(s)||{};var c=(p.contraindications||'').toLowerCase();
@@ -2048,17 +2064,16 @@ function conflictAlerts(){
   return c.map(function(x){return '<div class="flag r">⚠ Contraindication conflict — '+x+'</div>'}).join('');
 }
 
-/* advisories: GLP-1 metabolic-foundation rule + per-agent researched soft_advisories */
-function advisoryActive(t){t=(t||'').toLowerCase();
-  if(t.indexOf('bmi')>-1 && (t.indexOf('30')>-1) && ['30–34','≥35'].indexOf(S.patient.bmi)>-1) return true;
+function advisoryActive(t){t=(t||'').toLowerCase();var bmi=+S.patient.bmi||0,a1c=+S.patient.a1c||0;
+  if(t.indexOf('bmi')>-1 && t.indexOf('30')>-1 && bmi>=30) return true;
   if((t.indexOf('insulin')>-1||t.indexOf('secretagogue')>-1||t.indexOf('sulfonylurea')>-1) && (S.patient.meds||[]).some(function(m){return /insulin|sulfonyl/i.test(m)})) return true;
-  if((t.indexOf('bmi < 25')>-1||t.indexOf('bmi<25')>-1||t.indexOf('normal-weight')>-1) && S.patient.bmi==='<25') return true;
-  if(t.indexOf('glucose')>-1||t.indexOf('prediab')>-1||t.indexOf('insulin resist')>-1){ if(S.patient.a1c==='5.7–6.4'||S.patient.a1c==='≥6.5'||(S.patient.comorbid||[]).indexOf('Prediabetes/T2DM')>-1) return true; }
+  if((t.indexOf('bmi < 25')>-1||t.indexOf('bmi<25')>-1||t.indexOf('normal-weight')>-1) && bmi>0 && bmi<25) return true;
+  if(t.indexOf('glucose')>-1||t.indexOf('prediab')>-1||t.indexOf('insulin resist')>-1){ if(a1c>=5.7||(S.patient.comorbid||[]).indexOf('Prediabetes/T2DM')>-1) return true; }
   return false;
 }
 function advisoryList(){
-  var out=[];
-  var bmiObese=['30–34','≥35'].indexOf(S.patient.bmi)>-1, bmiOver=S.patient.bmi==='25–29';
+  var out=[];var bmi=+S.patient.bmi||0;
+  var bmiObese=bmi>=30, bmiOver=(bmi>=27&&bmi<30);
   var hasComorb=(S.patient.comorbid||[]).length>0, hasGLP1=S.sel.some(function(s){return GLP1.indexOf(s)>-1});
   if((bmiObese||(bmiOver&&hasComorb))&&!hasGLP1){
     out.push({grade:'A',active:true,who:'Metabolic foundation',
@@ -2076,15 +2091,23 @@ function advCard(a){
 function recLabs(){var set=[];S.sel.forEach(function(s){var e=intakeFor(s);if(e&&e.baseline_labs)e.baseline_labs.forEach(function(l){if(set.indexOf(l)<0)set.push(l)})});return set;}
 function recLabsHTML(){var l=recLabs();if(!l.length)return '';return '<div class="reclabs"><div class="t">Recommended labs</div><ul>'+l.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul></div>';}
 
+function contraHTML(){
+  var blocks=S.sel.map(function(s){var c=contraFor(s);if(!c)return '';var p=byslug(s)||{};
+    var ab=(c.absolute||[]).map(function(x){return '<li>'+x+'</li>'}).join('');
+    var rl=(c.relative||[]).map(function(x){return '<li>'+x+'</li>'}).join('');
+    return '<div class="contra"><div class="ch">'+p.name+(c.note?' <span class="cn">'+c.note+'</span>':'')+'</div>'
+     +(ab?'<div class="cabs"><div class="ct">Absolute</div><ul>'+ab+'</ul></div>':'')
+     +(rl?'<div class="crel"><div class="ct">Relative</div><ul>'+rl+'</ul></div>':'')+'</div>';
+  }).filter(Boolean).join('');
+  return blocks?'<div class="lbl" style="margin:14px 0 2px">Contraindications</div>'+blocks:'';
+}
 /* ───────── local engine ───────── */
 function gradeTier(g){g=(g||'').toUpperCase();
   if(g.indexOf('D')>-1) return 4; if(g.indexOf('C')>-1) return 3; if(g.indexOf('B')>-1) return 2;
   if(g.indexOf('A')>-1) return 1; return 3;}
 var TIERTXT={1:'Standard — FDA-approved, on-label',2:'Enhanced — off-label / Grade B',3:'Comprehensive — investigational / Grade C',4:'Maximal — Grade D, maximum disclosure'};
 function gradeClass(g){g=(g||'').toUpperCase();return g.indexOf('D')>-1?'gD':g.indexOf('C')>-1?'gC':g.indexOf('B')>-1?'gB':'gA';}
-function consentTier(){
-  // prefer researched per-agent consent tier (max across selected); fall back to grade
-  var t=0;S.sel.forEach(function(s){var e=intakeFor(s);var et=e&&e.consent_tier&&parseInt(e.consent_tier.tier,10);
+function consentTier(){var t=0;S.sel.forEach(function(s){var e=intakeFor(s);var et=e&&e.consent_tier&&parseInt(e.consent_tier.tier,10);
     t=Math.max(t, et||gradeTier((byslug(s)||{}).grade));});return t;}
 function consentRationale(){var r=[];S.sel.forEach(function(s){var e=intakeFor(s);if(e&&e.consent_tier&&e.consent_tier.rationale)r.push(e.name+': '+e.consent_tier.rationale);});return r;}
 function parseRecon(body){var m=(body||'').match(/(\d+(?:\.\d+)?)\s*mg\s*\+\s*(\d+(?:\.\d+)?)\s*mL/);
@@ -2119,7 +2142,7 @@ function renderActs(){
 }
 function ctxUpdate(){var p=S.patient;ctx.textContent=p.name?(p.name+(p.age?' · '+p.age:'')+(p.sex?' '+p.sex[0]:'')+(p.bmi?' · BMI '+p.bmi:'')+(S.sel.length?' · '+S.sel.length+' agent(s)':'')):'New session · no patient loaded';}
 
-/* step 1 — patient (structured, pill-based) */
+/* step 1 — patient (free-entry vitals + pills) */
 function stepPatient(){
   var p=S.patient; p.goals=p.goals||[]; p.meds=p.meds||[]; p.flags=p.flags||[]; p.comorbid=p.comorbid||[];
   panel.innerHTML=''
@@ -2128,12 +2151,18 @@ function stepPatient(){
    +'<div class="grid g4" style="align-items:end">'
      +'<div class="span2">'+lf('name','Patient name / ID')+'<input id="f_name" value="'+(p.name||'')+'"></div>'
      +'<div>'+lf('age','Age')+'<input id="f_age" type="number" value="'+(p.age==null?'':p.age)+'"></div>'
-     +'<div>'+lf('weight','Weight (kg)')+'<input id="f_weight" type="number" value="'+(p.weight==null?'':p.weight)+'"></div>'
+     +'<div><span class="lbl">Sex</span>'+pills('sex',SEX,p.sex,false)+'</div>'
    +'</div>'
-   +'<div class="prow"><span class="lbl">Sex</span>'+pills('sex',SEX,p.sex,false)+'</div>'
-   +'<div class="prow"><span class="lbl">BMI</span>'+pills('bmi',BMI,p.bmi,false)+'</div>'
-   +'<div class="grid g2"><div class="prow"><span class="lbl">Renal · eGFR</span>'+pills('egfr',EGFR,p.egfr,false)+'</div>'
-     +'<div class="prow"><span class="lbl">A1c %</span>'+pills('a1c',A1C,p.a1c,false)+'</div></div>'
+   +'<div class="grid g4" style="align-items:end;margin-top:14px">'
+     +'<div>'+lf('wt','Weight (lb)')+'<input id="f_wt" type="number" value="'+(p.weight==null?'':p.weight)+'"></div>'
+     +'<div>'+lf('hft','Height (ft)')+'<input id="f_hft" type="number" value="'+(p.heightFt==null?'':p.heightFt)+'"></div>'
+     +'<div>'+lf('hin','Height (in)')+'<input id="f_hin" type="number" value="'+(p.heightIn==null?'':p.heightIn)+'"></div>'
+     +'<div><span class="lbl">BMI (computed)</span><div id="bmiOut" style="padding-top:5px">'+bmiText()+'</div></div>'
+   +'</div>'
+   +'<div class="grid g2" style="margin-top:14px">'
+     +'<div>'+lf('egfr','eGFR (mL/min/1.73m²)')+'<input id="f_egfr" type="number" value="'+(p.egfr==null?'':p.egfr)+'"></div>'
+     +'<div>'+lf('a1c','A1c (%)')+'<input id="f_a1c" type="number" step="0.1" value="'+(p.a1c==null?'':p.a1c)+'"></div>'
+   +'</div>'
    +'<div class="prow"><span class="lbl">Weight-related comorbidities</span>'+pills('comorbid',COMORBID,p.comorbid,true)+'</div>'
    +'<div class="prow"><span class="lbl">Goal / indication</span>'+pills('goals',GOALS,p.goals,true)+'</div>'
    +'<div class="prow"><span class="lbl">Current meds</span>'+pills('meds',MEDSL,p.meds,true)+'</div>'
@@ -2143,9 +2172,12 @@ function stepPatient(){
     else{q[grp]=q[grp]===v?'':v;}
     save();stepPatient();renderActs();});
   var nm=document.getElementById('f_name');nm.oninput=function(){S.patient.name=nm.value;save();ctxUpdate();var n=document.getElementById('next');if(n)n.disabled=!S.patient.name;};
-  document.getElementById('f_age').oninput=function(){S.patient.age=this.value;save();ctxUpdate();};
-  document.getElementById('f_weight').oninput=function(){S.patient.weight=this.value;save();};
+  bindNum('age','age');
+  [['wt','weight'],['hft','heightFt'],['hin','heightIn']].forEach(function(a){var el=document.getElementById('f_'+a[0]);
+    el.oninput=function(){S.patient[a[1]]=this.value===''?null:+this.value;recalcBMI();save();ctxUpdate();};});
+  bindNum('egfr','egfr'); bindNum('a1c','a1c');
 }
+function bindNum(id,key){var el=document.getElementById('f_'+id);if(!el)return;el.oninput=function(){S.patient[key]=this.value===''?null:+this.value;save();ctxUpdate();};}
 function lf(id,label){return '<label for="f_'+id+'">'+label+'</label>'}
 
 /* step 2 — protocol selection + consent tier */
@@ -2194,6 +2226,7 @@ function stepPlan(){
    + conflictAlerts()
    + (advs.length?'<div class="lbl" style="margin:8px 0 2px">Advisories &amp; considerations</div><div class="advs">'+advs.map(advCard).join('')+'</div>':'')
    + recLabsHTML()
+   + contraHTML()
    + S.sel.map(specSheet).join('');
   S.sel.forEach(bindCalc);
 }
@@ -2235,14 +2268,14 @@ function stepPacket(){
   document.querySelectorAll('.ptab').forEach(function(el){el.onclick=function(){S.packetTab=+el.dataset.i;save();stepPacket();}});
   document.getElementById('doc').innerHTML=[docNote,docConsent,docHandout,docCompliance][S.packetTab]();
 }
-function pinfo(){var p=S.patient;return (p.name||'________')+'  ·  '+(p.age?p.age+'y ':'')+(p.sex||'')+(p.bmi?'  ·  BMI '+p.bmi:'')+(p.weight?'  ·  '+p.weight+' kg':'');}
+function pinfo(){var p=S.patient;return (p.name||'________')+'  ·  '+(p.age?p.age+'y ':'')+(p.sex||'')+(p.bmi?'  ·  BMI '+p.bmi:'')+(p.weight?'  ·  '+p.weight+' lb':'');}
 function plist(a){return (a&&a.length)?a.join(', '):'';}
 function agentLines(){return S.sel.map(function(s){var p=byslug(s)||{};var v=S.vials[s]||{};var r=recon(v.mg,v.ml,v.dose);
   return '<li><b>'+p.name+'</b> — '+(parseField(p.body_md,/\*\*Dose:\*\*\s*([^\n]+)/)||'per monograph')+'; reconstitute '+v.mg+' mg + '+v.ml+' mL → <b>'+r.units.toFixed(1)+' units</b>/dose'+(S.start[s]?'; start '+fdate(S.start[s]):'')+'</li>';}).join('');}
 function labLines(){var l=recLabs();return l.length?'<h4>Recommended labs</h4><ul>'+l.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>':'';}
 function docNote(){var p=S.patient;return '<h3>Clinical encounter note</h3><div class="docsub">'+pinfo()+'  ·  '+new Date().toLocaleDateString()+'</div>'
   +'<h4>Indication</h4><p>'+(plist(p.goals)||'—')+'</p>'
-  +'<h4>Pertinent data</h4><p>BMI '+(p.bmi||'—')+' · eGFR '+(p.egfr||'—')+' · A1c '+(p.a1c||'—')+' · Comorbid: '+(plist(p.comorbid)||'none')+' · Meds: '+(plist(p.meds)||'none recorded')+'</p>'
+  +'<h4>Pertinent data</h4><p>BMI '+(p.bmi||'—')+' · eGFR '+(p.egfr||'—')+' · A1c '+(p.a1c||'—')+'% · Comorbid: '+(plist(p.comorbid)||'none')+' · Meds: '+(plist(p.meds)||'none recorded')+'</p>'
   +'<h4>Contraindication screen</h4><p>'+(plist(p.flags)||'No red flags reported')+'</p>'
   + (conflicts().length?'<p style="color:#f0a59d"><b>Conflicts:</b> '+conflicts().join('; ')+'</p>':'')
   +'<h4>Plan</h4><ul>'+agentLines()+'</ul>'
@@ -2272,7 +2305,6 @@ function docCompliance(){var p=S.patient;var checks=[
   return '<h3>Pre-visit compliance check</h3><div class="docsub">'+pinfo()+'</div>'
    +checks.map(function(c){return '<div class="flag '+(c[1]?'g':'r')+'">'+(c[1]?'✓':'!')+' '+c[0]+(c[1]?'':' — incomplete')+'</div>'}).join('');}
 
-/* print */
 function doPrint(){
   document.getElementById('printArea').innerHTML=[docNote,docConsent,docHandout,docCompliance][S.packetTab]();
   window.print();
