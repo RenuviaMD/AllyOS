@@ -2284,13 +2284,17 @@ function specSheet(s){
   var dose=parseField(p.body_md,/\*\*Dose:\*\*\s*([^\n]+)/);
   var route=parseField(p.body_md,/\*\*Route:\*\*\s*([^\n]+)/);
   var cyc=parseField(p.body_md,/\*\*Cycle:\*\*\s*([^\n]+)/);
+  var det=detailFor(s)||{};
+  var freq=det.frequency||parseField(p.body_md,/\*\*Frequency:\*\*\s*([^\n]+)/)||'';
+  var cycle=(det.cycle_rest? det.cycle_rest.split('. ')[0]+'.' : (cyc||'\u2014'));
   var r=recon(v.mg,v.ml,v.dose);
   return '<div class="spec"><div class="sh"><span class="nm">'+p.name+'</span><span class="chip '+gradeClass(p.grade)+' gr">'+(p.grade||'')+'</span>'+(detailFor(s)?'<button class="btn sm proto-btn" data-proto="'+s+'">Full protocol</button>':'')+'</div>'
    +'<div class="specrows">'
      +row('Mechanism',p.mechanism||'—')
      +row('Dose',dose||'see monograph')
      +row('Route',route||'SC')
-     +row('Cadence / cycle',cyc||'—')
+     +(freq?row('Frequency',freq):'')
+     +row('Cycle / rest',cycle)
      +row('Contraindications',p.contraindications||'—')
      +row('Start date','<input type="date" id="d_'+s+'" value="'+(S.start[s]||'')+'" style="width:180px">')
    +'</div>'
@@ -2351,11 +2355,31 @@ function docConsent(){var t=consentTier();var rats=consentRationale();return '<h
   +(rats.length?'<h4>Basis</h4><p style="font-size:12px;color:#9fb0b5">'+rats.join(' · ')+'</p>':'')
   +'<div class="sigrow"><div class="sig">Patient signature</div><div class="sig">Date</div></div>'
   +'<div class="sigrow"><div class="sig">Provider signature</div><div class="sig">Date</div></div>';}
-function docHandout(){return '<h3>Your treatment plan</h3><div class="docsub">For '+(S.patient.name||'you')+'</div>'
-  +'<h4>What you are starting</h4><ul>'+agentLines()+'</ul>'
-  +'<h4>How to take it</h4><p>Inject subcutaneously as directed; rotate sites. Use the unit amount shown above on a U-100 syringe.</p>'
-  +'<h4>What to expect</h4><p>Effects build over weeks. Report severe abdominal pain, persistent vomiting, or unusual symptoms promptly.</p>'
-  +'<h4>Questions</h4><p>Contact the prescribing clinic.</p>';}
+function plainFreq(f){f=(f||'').toLowerCase();
+  if(f.indexOf('twice weekly')>-1||f.indexOf('2\u00d7')>-1)return 'twice a week';
+  if(f.indexOf('weekly')>-1)return 'once a week';
+  if(f.indexOf('bedtime')>-1)return 'once a day at bedtime';
+  if(f.indexOf('daily')>-1||f.indexOf('nightly')>-1||f.indexOf('once a day')>-1)return 'once a day';
+  return (f.replace(/\s*\(.*$/,'').replace(/[;.].*$/,'').trim())||'as directed';}
+function plainAE(s){var d=detailFor(s);if(!d||!d.ae_common)return '';var out=[];
+  d.ae_common.forEach(function(x){var w=x.split(/[~(]|\d/)[0].replace(/\/.*$/,'').trim().toLowerCase();
+    if(w&&w.length>2&&w.length<28&&!/generally|note|human|minimal|defining|essentially|pronounced/.test(w)&&out.indexOf(w)<0)out.push(w);});
+  return out.slice(0,4).join(', ');}
+function handoutAgentLines(){return S.sel.map(function(s){var p=byslug(s)||{};var v=S.vials[s]||{};var r=recon(v.mg,v.ml,v.dose);var d=detailFor(s)||{};
+  return '<li><b>'+p.name+'</b> \u2014 inject about <b>'+r.units.toFixed(0)+' units</b> under the skin '+plainFreq(d.frequency)+(S.start[s]?', starting '+fdate(S.start[s]):'')+'.</li>';}).join('');}
+function handoutExpect(){var parts=S.sel.map(function(s){var p=byslug(s)||{};var ae=plainAE(s);
+  return ae?'<p>With <b>'+p.name+'</b>, the most common early effects are '+ae+'. These are usually mild and tend to ease over the first few weeks as your body adjusts.</p>':'';}).join('');
+  return parts||'<p>Most people tolerate this well. Any effects usually build gradually over several weeks.</p>';}
+function docHandout(){var p=S.patient;var nm=p.name||'you';var first=p.name?p.name.split(' ')[0]:'';
+  return '<h3>Your treatment plan</h3><div class="docsub">Prepared for '+nm+' \u00b7 '+new Date().toLocaleDateString()+'</div>'
+   +'<p>'+(first?first+', here':'Here')+'\u2019s a simple summary of the therapy we started together today \u2014 what it is, how to use it, and what to watch for. Please keep this handy, and reach out anytime you have a question.</p>'
+   +'<h4>What you\u2019re starting</h4><ul>'+handoutAgentLines()+'</ul>'
+   +'<h4>How and when to take it</h4><p>Use a U-100 insulin syringe and inject just under the skin (this is called a subcutaneous injection) \u2014 the belly or the front of the thigh works well. Pinch the skin, insert the needle, and press the plunger slowly. Use a fresh needle each time, and rotate where you inject so you don\u2019t use the same spot twice in a row. Store it the way your pharmacy tells you (most of these are kept in the refrigerator). If you miss a dose, don\u2019t double up \u2014 just call us and we\u2019ll tell you what to do.</p>'
+   +'<h4>What to expect</h4>'+handoutExpect()
+   +'<h4>Simple things that help</h4><ul><li>Drink water through the day and eat regular, balanced meals.</li><li>Go at a steady pace \u2014 we\u2019ll raise the dose slowly so your body can adjust.</li><li>Don\u2019t change your dose on your own; let us guide any changes.</li></ul>'
+   +'<h4>Call us right away if you have</h4><ul><li>Severe or constant belly pain, or vomiting that won\u2019t stop</li><li>Signs of an allergic reaction \u2014 rash, swelling of the face, lips, or tongue, or trouble breathing (for trouble breathing, call 911)</li><li>A new lump, or any symptom that worries you</li></ul>'
+   +'<h4>Your follow-up</h4><p>We\u2019ll check in at about 4 weeks to see how you\u2019re feeling'+(recLabs().length?' and review your lab work':'')+', and we\u2019ll adjust the plan together. Your start date is listed above.</p>'
+   +'<h4>Questions</h4><p>Call the clinic anytime \u2014 we\u2019re glad to help. This plan is provided and overseen by your treating clinician, who is responsible for your care.</p>';}
 function docCompliance(){var p=S.patient;var checks=[
    ['Patient identity recorded',!!p.name],['Indication / goal documented',(p.goals||[]).length>0],
    ['Protocol selected',S.sel.length>0],['Consent tier determined',consentTier()>0],['Informed consent signed',S.consentSigned===true],
