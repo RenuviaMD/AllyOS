@@ -2410,12 +2410,29 @@ function openAlly(){ally.classList.add('open');scrim.classList.add('open');}
 function closeAlly(){ally.classList.remove('open');scrim.classList.remove('open');}
 document.getElementById('allyNav').onclick=function(e){e.preventDefault();openAlly();};
 document.getElementById('allyClose').onclick=closeAlly;var pdc=document.getElementById('pdClose');if(pdc)pdc.onclick=closeProto;scrim.onclick=function(){closeAlly();closeProto();};document.getElementById('hsCancel').onclick=closeHS;document.getElementById('hsOverride').onclick=function(){var r=document.getElementById('hsrat').value.trim();if(!r){document.getElementById('hsrat').style.borderColor='var(--danger)';return;}S.hsOverride={rationale:r,items:hardStops(),at:new Date().toLocaleString()};save();closeHS();setStep(3);};
+function esc(s){return (s+'').replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
 document.getElementById('allySend').onclick=function(){
-  var q=document.getElementById('allyIn').value.trim();if(!q)return;
+  var ta=document.getElementById('allyIn');var q=ta.value.trim();if(!q)return;
   var b=document.getElementById('allyBody');
-  b.innerHTML+='<div style="margin:12px 0"><div class="lbl">You</div><p style="font-size:13px">'+q+'</p></div>';
-  b.innerHTML+='<div style="margin:12px 0"><div class="lbl" style="color:var(--teal)">Ally</div><p style="font-size:13px;color:var(--muted)">Connect ANTHROPIC_API_KEY in Netlify to enable live answers — honest grades, real citations, flags to verify. (De-identified questions only.)</p></div>';
-  document.getElementById('allyIn').value='';b.scrollTop=b.scrollHeight;
+  b.innerHTML+='<div style="margin:12px 0"><div class="lbl">You</div><p style="font-size:13px">'+esc(q)+'</p></div>';
+  var id='a'+Date.now();
+  b.innerHTML+='<div style="margin:12px 0" id="'+id+'"><div class="lbl" style="color:var(--teal)">Ally</div><p style="font-size:13px;color:var(--faint)">… thinking</p></div>';
+  ta.value='';b.scrollTop=b.scrollHeight;
+  var p=S.patient||{};var c=[];
+  if(S.sel&&S.sel.length)c.push('Considering: '+S.sel.map(function(s){var x=byslug(s)||{};return x.name||s;}).join(', '));
+  if(p.age)c.push('age '+p.age);if(p.sex)c.push(p.sex);if(p.bmi)c.push('BMI '+p.bmi);
+  if(p.egfr)c.push('eGFR '+p.egfr);if(p.a1c)c.push('A1c '+p.a1c+'%');
+  if(p.comorbid&&p.comorbid.length)c.push('comorbid: '+p.comorbid.join(', '));
+  if(p.meds&&p.meds.length)c.push('meds: '+p.meds.join(', '));
+  var ctx=c.length?'De-identified context — '+c.join('; ')+'.':'';
+  fetch('/.netlify/functions/ally',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:q,context:ctx})})
+   .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
+   .then(function(res){var el=document.getElementById(id);var t;
+     if(res.ok&&res.j.answer){t='<p style="font-size:13px;line-height:1.55;white-space:pre-wrap">'+esc(res.j.answer)+'</p>';}
+     else if(res.j&&res.j.error==='not_configured'){t='<p style="font-size:13px;color:var(--muted)">Ally isn\'t connected yet — add <b>ANTHROPIC_API_KEY</b> in Netlify (Site settings → Environment variables), then redeploy. De-identified questions only.</p>';}
+     else{t='<p style="font-size:13px;color:var(--warn)">Ally couldn\'t reach the model just now. Try again shortly.</p>';}
+     el.innerHTML='<div class="lbl" style="color:var(--teal)">Ally</div>'+t;b.scrollTop=b.scrollHeight;})
+   .catch(function(){var el=document.getElementById(id);if(el)el.innerHTML='<div class="lbl" style="color:var(--teal)">Ally</div><p style="font-size:13px;color:var(--warn)">Network error reaching Ally.</p>';});
 };
 
 document.getElementById('stepper').onclick=function(e){var st=e.target.closest('.step');if(st&&st.classList.contains('done'))setStep(+st.dataset.s);};

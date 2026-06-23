@@ -1,0 +1,8 @@
+# Netlify config for the AllyOS / RenuviaMD site.
+# Static site served from the repo root; serverless functions under netlify/functions.
+[build]
+  publish = "."
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
