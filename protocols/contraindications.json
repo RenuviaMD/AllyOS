@@ -3,95 +3,487 @@
   "updated": "2026-06-23",
   "note": "Per-peptide ABSOLUTE and RELATIVE contraindications. Only FDA-approved agents (GLP-1s, Tesamorelin, PT-141/Vyleesi, SS-31/FORZINITY) have label-established items; all others have NO formal contraindication list — their absolutes are prudent-convention and relatives are mechanism-based, marked (VERIFY) pending Dr. Falcon sign-off. Engine: absolute -> hard-stop screen; relative -> advisory layer. Full cited detail in protocols/contraindications.md.",
   "peptides": {
-    "semaglutide": { "note": "FDA-approved (Wegovy/Ozempic/Rybelsus).",
-      "absolute": ["Personal/family history of MTC — boxed warning", "MEN 2 — boxed warning", "Prior serious hypersensitivity (anaphylaxis/angioedema)", "Pregnancy — discontinue when recognized"],
-      "relative": ["Pancreatitis history — discontinue if suspected; do not restart if confirmed", "Severe gastroparesis / severe GI motility disease", "Diabetic retinopathy — monitor (SUSTAIN-6 signal)", "Cholelithiasis / gallbladder disease", "Volume depletion / CKD — AKI from GI losses", "Insulin or sulfonylureas — hypoglycemia", "Lactation; severe hepatic impairment", "Peri-procedure aspiration (retained gastric contents)"] },
-    "tirzepatide": { "note": "FDA-approved (Mounjaro/Zepbound).",
-      "absolute": ["Personal/family history of MTC — boxed warning", "MEN 2 — boxed warning", "Serious hypersensitivity to tirzepatide or excipients"],
-      "relative": ["Acute/recent pancreatitis — discontinue if suspected; do not restart if confirmed", "Severe gastroparesis / severe GI disease", "Pregnancy/planning — fetal harm; reduced oral-contraceptive efficacy (barrier/non-oral 4 wk after start & each dose increase)", "Cholelithiasis / gallbladder disease", "Diabetic retinopathy — monitor with rapid glycemic improvement", "Insulin / sulfonylureas — hypoglycemia", "Volume depletion / CKD — AKI from GI losses", "Lactation; age <18; peri-procedure aspiration"] },
-    "retatrutide": { "note": "Investigational — NOT FDA-approved (Phase 3). No label contraindication list; class-extrapolated.",
-      "absolute": ["Personal/family MTC or MEN 2 — class signal, not label-established (VERIFY)", "Hypersensitivity to peptide/diluent (VERIFY)", "Pregnancy/planning; lactation (VERIFY)"],
-      "relative": ["Acute/recent pancreatitis (VERIFY)", "Severe gastroparesis / severe GI disease (VERIFY)", "Tachyarrhythmia, uncontrolled arrhythmia, decompensated HF, ischemic heart disease — dose-dependent HR rise; arrhythmias 2-11% vs 2% placebo — baseline HR/ECG if cardiac risk (VERIFY)", "Cholelithiasis / gallbladder disease (VERIFY)", "Insulin / sulfonylureas — hypoglycemia (VERIFY)", "Volume depletion / CKD (VERIFY)", "Glucagon agonism may raise glucose/hepatic output — caution in brittle diabetes (VERIFY)", "Age <18 (VERIFY)"] },
-    "liraglutide": { "note": "FDA-approved (Saxenda/Victoza).",
-      "absolute": ["Personal/family MTC — boxed warning", "MEN 2 — boxed warning", "Serious hypersensitivity to liraglutide or excipients", "Pregnancy (Saxenda) — discontinue when recognized"],
-      "relative": ["Pancreatitis history — discontinue if suspected; do not restart if confirmed", "Severe gastroparesis / severe GI disease", "Cholelithiasis / gallbladder disease", "Insulin / sulfonylureas — hypoglycemia", "Renal impairment / volume depletion — AKI from GI losses", "Lactation; severe hepatic impairment", "Peri-procedure aspiration"] },
-    "aod-9604": { "note": "No formal contraindication list; FDA GRAS food-ingredient only, not a drug.",
-      "absolute": ["Hypersensitivity to peptide/diluent (VERIFY)", "Pregnancy / lactation — no human data (VERIFY)", "Age <18 (VERIFY)"],
-      "relative": ["Active malignancy — precautionary only; no IGF-1 stimulation so GH-axis cancer rationale is weak (VERIFY)", "Compounded/unregulated sourcing — purity/identity/dosing unverified", "No established drug-drug interaction profile (VERIFY)"] },
-    "mots-c": { "note": "No formal contraindication list; investigational/preclinical.",
-      "absolute": ["Hypersensitivity to peptide/diluent (VERIFY)", "Pregnancy / lactation — no human data (VERIFY)", "Age <18 (VERIFY)"],
-      "relative": ["Active malignancy — precautionary; mixed preclinical signals (VERIFY)", "Diabetes / glucose-lowering agents — AMPK/insulin sensitization; theoretical additive hypoglycemia; monitor glucose (VERIFY)", "Compounded/unregulated sourcing (VERIFY)", "No established drug-drug interaction profile (VERIFY)"] },
-    "ss-31": { "note": "NOW FDA-approved (FORZINITY, Barth syndrome, 2025) — metabolic/longevity use is OFF-LABEL.",
-      "absolute": ["Serious hypersensitivity to elamipretide or any excipient (FORZINITY label)"],
-      "relative": ["Hypersensitivity reactions incl. serious allergic reactions — discontinue and seek care", "Subcutaneous only — not approved for IV use", "Benzyl-alcohol excipient: NOT for neonates (fatal gasping syndrome in low-birth-weight/preterm); avoid in pregnancy/neonates absent clear need", "Injection-site reactions (most common AE)", "Pregnancy — limited human data (VERIFY for off-label use)", "Lactation — no human data (VERIFY)", "Active malignancy — precautionary in compounded longevity use; not a label contraindication (VERIFY)", "Compounded SS-31 (vs FORZINITY) — purity/benzyl-alcohol/dosing unverified (VERIFY)"] },
-    "sermorelin": { "note": "Geref discontinued; compounded off-label. No current FDA therapeutic label.",
-      "absolute": ["Active malignancy (VERIFY)", "Pregnancy / lactation / age <18 (VERIFY)", "Hypersensitivity to sermorelin or diluent (VERIFY)", "Non-functional pituitary / disrupted hypothalamic-pituitary axis — won't respond (VERIFY, extrapolated from tesamorelin label)"],
-      "relative": ["Untreated/severe hypothyroidism — treat first (VERIFY)", "Diabetes / insulin resistance — monitor glucose/A1c (VERIFY)", "Fluid retention, edema, arthralgia, carpal tunnel (VERIFY)", "OSA (VERIFY)", "Active proliferative/severe non-proliferative diabetic retinopathy (VERIFY)", "Acute critical illness — consider hold (VERIFY)", "Concurrent glucocorticoids may blunt GH response (VERIFY)"] },
-    "cjc-1295": { "note": "No formal contraindication list (compounded/research only).",
-      "absolute": ["Active malignancy (VERIFY)", "Pregnancy / lactation / age <18 (VERIFY)", "Hypersensitivity (VERIFY)", "Non-functional / disrupted pituitary axis (VERIFY, extrapolated from tesamorelin label)"],
-      "relative": ["Untreated/severe hypothyroidism — treat first (VERIFY)", "Diabetes / insulin resistance — monitor glucose (VERIFY)", "Fluid retention/edema, arthralgia, carpal tunnel (DAC = sustained exposure) (VERIFY)", "OSA (VERIFY)", "Diabetic retinopathy (VERIFY)", "Acute critical illness — consider hold (VERIFY)"] },
-    "cjc-ipamorelin-blend": { "note": "No FDA approval and NO human trials of the combination.",
-      "absolute": ["Active malignancy (VERIFY)", "Pregnancy / lactation / age <18 (VERIFY)", "Hypersensitivity to either component (VERIFY)", "Non-functional / disrupted pituitary axis (VERIFY)"],
-      "relative": ["Untreated/severe hypothyroidism (VERIFY)", "Diabetes / insulin resistance — dual-pathway GH amplification; monitor glucose (VERIFY)", "Fluid retention/edema, arthralgia, carpal tunnel (VERIFY)", "OSA (VERIFY)", "Diabetic retinopathy (VERIFY)", "Acute critical illness (VERIFY)"] },
-    "ipamorelin": { "note": "No FDA approval; two completed Phase 2 GI trials (negative). Cleanest GHRP.",
-      "absolute": ["Active malignancy (VERIFY)", "Pregnancy / lactation / age <18 (VERIFY)", "Hypersensitivity (VERIFY)"],
-      "relative": ["Untreated/severe hypothyroidism (VERIFY)", "Diabetes / insulin resistance — monitor glucose (VERIFY)", "Fluid retention/edema, arthralgia, carpal tunnel (VERIFY)", "OSA (VERIFY)", "Diabetic retinopathy (VERIFY)", "Acute critical illness (VERIFY)"] },
-    "ghrp-2": { "note": "No US therapeutic approval (diagnostic GH-stim agent abroad); no therapeutic contraindication list.",
-      "absolute": ["Active malignancy (VERIFY)", "Pregnancy / lactation / age <18 (VERIFY)", "Hypersensitivity (VERIFY)"],
-      "relative": ["Diabetes / insulin resistance — monitor glucose (VERIFY)", "Untreated/severe hypothyroidism (VERIFY)", "Cortisol and prolactin elevation — caution in hypercortisolism/hyperprolactinemia (VERIFY)", "Appetite stimulation (VERIFY)", "Fluid retention/edema, carpal tunnel; OSA; retinopathy (VERIFY)", "Acute critical illness (VERIFY)"] },
-    "ghrp-6": { "note": "No FDA approval; no human efficacy trials; no contraindication list.",
-      "absolute": ["Active malignancy (VERIFY)", "Pregnancy / lactation / age <18 (VERIFY)", "Hypersensitivity (VERIFY)"],
-      "relative": ["Marked appetite stimulation (strongest GHRP) — counsel on weight gain (VERIFY)", "Diabetes / insulin resistance (VERIFY)", "Cortisol and prolactin elevation (VERIFY)", "Untreated/severe hypothyroidism (VERIFY)", "Fluid retention/edema, carpal tunnel; OSA; retinopathy (VERIFY)", "Acute critical illness (VERIFY)"] },
-    "hexarelin": { "note": "No human therapeutic approval or efficacy trials; no contraindication list.",
-      "absolute": ["Active malignancy (VERIFY)", "Pregnancy / lactation / age <18 (VERIFY)", "Hypersensitivity (VERIFY)"],
-      "relative": ["Receptor desensitization / tachyphylaxis with continued dosing (VERIFY)", "Cortisol and prolactin elevation (potent secretagogue) (VERIFY)", "Diabetes / insulin resistance (VERIFY)", "Untreated/severe hypothyroidism (VERIFY)", "Cardiac CD36-binding activity (preclinical) — caution in cardiac disease (VERIFY)", "Fluid retention/edema, carpal tunnel; OSA; retinopathy (VERIFY)", "Acute critical illness (VERIFY)"] },
-    "tesamorelin": { "note": "FDA-approved (EGRIFTA) for HIV lipodystrophy; off-label anti-aging use not label-covered.",
-      "absolute": ["Disruption of hypothalamic-pituitary axis (hypophysectomy, hypopituitarism, pituitary tumor/surgery, head irradiation/trauma) — label", "Active malignancy — must be inactive and treatment complete before starting — label", "Pregnancy — label", "Known hypersensitivity to tesamorelin or excipients (e.g., mannitol) — label"],
-      "relative": ["IGF-1 elevation — monitor; consider discontinuation with persistent elevations", "Fluid retention — edema, arthralgia, carpal tunnel", "Glucose intolerance / new or worsening diabetes — monitor", "Acute critical illness — consider discontinuing (GH-class mortality signal)", "Recurrent malignancy — discontinue if any evidence of recurrence", "Lactation; age <18", "Untreated hypothyroidism, OSA, diabetic retinopathy"] },
-    "mk-677": { "note": "Oral non-peptide ghrelin agonist; no FDA approval; no formal contraindication list.",
-      "absolute": ["Active or prior malignancy (VERIFY)", "Pregnancy / lactation / age <18 (VERIFY)", "Hypersensitivity (VERIFY)"],
-      "relative": ["Congestive heart failure / fluid-retention risk — edema & CHF signals in older-adult trials; avoid in HF (VERIFY)", "Diabetes / insulin resistance — reproducibly raises fasting glucose, reduces insulin sensitivity; monitor (documented)", "Increased appetite — counsel (VERIFY)", "Untreated/severe hypothyroidism (VERIFY)", "OSA (VERIFY)", "Diabetic retinopathy (VERIFY)", "Elevated IGF-1 — monitor; long-term safety unknown (VERIFY)", "Acute critical illness (VERIFY)", "Splenic-rupture case report (with RAD-140) (VERIFY)"] },
-    "bpc-157": { "note": "No formal contraindication list (not FDA-approved); FDA barred from compounding (2023).",
-      "absolute": ["Active or prior malignancy — pro-angiogenic; tumor-promotion hazard (VERIFY)", "Undiagnosed mass / malignancy red-flag until worked up", "Pregnancy", "Lactation", "Age <18", "Hypersensitivity to peptide/diluent"],
-      "relative": ["Do not use to mask an undiagnosed surgical lesion — image first (VERIFY)", "Personal/family cancer history — current screening before start (VERIFY)", "Keep courses short and goal-bound — long-term human safety absent", "Source/purity risk"] },
-    "tb-500": { "note": "No formal contraindication list; consumer fragment has no completed human trial.",
-      "absolute": ["Active or prior malignancy — actin-binding, pro-angiogenic/pro-migratory (VERIFY)", "Undiagnosed mass / malignancy red-flag until worked up", "Pregnancy", "Lactation", "Age <18", "Hypersensitivity to peptide/diluent"],
-      "relative": ["Personal/family cancer history — current screening; malignancy ROS at follow-up (VERIFY)", "Conditions where unwanted cell migration/fibrosis could harm (e.g., proliferative retinopathy) (VERIFY)", "Consumer fragment != full-length Tβ4 (RGN-259); long-term safety unknown", "Source/purity risk"] },
-    "ghk-cu": { "note": "No formal contraindication list for systemic use; strongest data topical.",
-      "absolute": ["Active or prior malignancy — pro-angiogenic (VERIFY)", "Wilson disease / copper-overload state (VERIFY)", "Pregnancy", "Lactation", "Age <18", "Hypersensitivity / copper sensitivity"],
-      "relative": ["Chronic/high-dose systemic (SC) use — monitor serum copper/ceruloplasmin (VERIFY)", "Personal/family cancer history — current screening before systemic use (VERIFY)", "Evidence largely topical; injectable/systemic use empiric", "Copper-altering conditions/meds (zinc, malabsorption) (VERIFY)"] },
-    "thymosin-alpha-1": { "note": "Marketed as Zadaxin in ~35 countries but NOT FDA-approved; no US-label contraindication list.",
-      "absolute": ["Transplant on immunosuppression — Th1 modulation -> rejection/graft-failure hazard (VERIFY)", "Severe active autoimmune disease — flare risk (VERIFY)", "Pregnancy", "Lactation", "Age <18", "Hypersensitivity"],
-      "relative": ["Milder/controlled autoimmune disease — monitor for flare; hold on flare (VERIFY)", "Concurrent immunosuppressive therapy — potential antagonism; coordinate with specialist (VERIFY)", "Immune modulator, not a generic booster — use against a defined immune problem"] },
-    "kpv": { "note": "No formal contraindication list (preclinical-only).",
-      "absolute": ["Transplant on immunosuppression — anti-inflammatory; precautionary (VERIFY)", "Severe active autoimmune disease (VERIFY)", "Pregnancy", "Lactation", "Age <18", "Hypersensitivity"],
-      "relative": ["Active/unworked-up GI or skin inflammatory disease — adjunct only; do not substitute for IBD/derm work-up (VERIFY)", "Active or recent serious infection — could blunt a needed immune response (VERIFY)", "Preclinical-only evidence; human dosing/safety unestablished", "Source/purity risk"] },
-    "semax": { "note": "No formal contraindication list; not FDA-approved.",
-      "absolute": ["Hypersensitivity", "Pregnancy / lactation / age <18 (VERIFY, convention)"],
-      "relative": ["Seizure disorder / lowered seizure threshold (VERIFY)", "Acute psychiatric instability / mania / severe anxiety (VERIFY)", "Uncontrolled hypertension / significant CVD (VERIFY)", "Nasal mucosal disease (intranasal route) (VERIFY)"] },
-    "selank": { "note": "No formal contraindication list; not FDA-approved.",
-      "absolute": ["Hypersensitivity", "Pregnancy / lactation / age <18 (VERIFY, convention)"],
-      "relative": ["Concurrent benzodiazepines / CNS depressants — additive sedation theoretical (VERIFY)", "Unsupervised substance-withdrawal / opioid-dependence management (VERIFY)", "Significant psychiatric illness — adjunct only (VERIFY)", "Nasal mucosal disease (intranasal route) (VERIFY)"] },
-    "cerebrolysin": { "note": "Marketed EU/RU (not FDA-approved); some items from manufacturer labeling.",
-      "absolute": ["Hypersensitivity to product/excipients (porcine brain-derived; anaphylaxis reported)", "Status epilepticus / active uncontrolled seizures", "Severe renal impairment", "Pregnancy / lactation (VERIFY)"],
-      "relative": ["Epilepsy / lowered seizure threshold — slow infusion + monitoring (VERIFY)", "Concurrent serotonergic agents / MAOIs (VERIFY)", "Allergic diathesis / atopy — infusion reactions", "Mild-moderate renal impairment (VERIFY)", "Counterfeit/unverified source (no US-approved product)"] },
-    "dsip": { "note": "No formal contraindication list; zero registered trials.",
-      "absolute": ["Hypersensitivity", "Pregnancy / lactation / age <18 (VERIFY, convention)"],
-      "relative": ["Untreated OSA / undiagnosed primary sleep disorder — don't mask (VERIFY)", "Concurrent sedatives / hypnotics / alcohol (VERIFY)", "Endocrine instability (affects ACTH/cortisol axis) (VERIFY)", "Unpredictable inter-patient response"] },
-    "epitalon": { "note": "No formal contraindication list; zero registered trials.",
-      "absolute": ["Hypersensitivity", "Active or prior malignancy — precaution (telomerase/pineal mechanism; direction unproven) (VERIFY)", "Pregnancy / lactation / age <18 (VERIFY)"],
-      "relative": ["Cancer history without current age-appropriate screening (VERIFY)", "Pineal/melatonin-axis or circadian disorders; concurrent melatonin/hormonal therapy (VERIFY)", "Use short pulses (10-20 d) — chronic safety unknown (VERIFY)"] },
-    "pt-141": { "note": "FDA-approved (Vyleesi/bremelanotide) for HSDD in premenopausal women.",
-      "absolute": ["Uncontrolled hypertension (label)", "Known cardiovascular disease (label)", "Hypersensitivity to bremelanotide or any component"],
-      "relative": ["High cardiovascular risk — not recommended; assess CV risk and control BP", "Dose limits: <=1 dose/24 h, <=8 doses/month (bound BP effect)", "Oral naltrexone-containing products — may significantly decrease naltrexone levels; not recommended (VERIFY exact label wording)", "Nausea (most common AE)", "Focal hyperpigmentation (face, gingiva, breasts) — more with daily dosing/darker skin; may not resolve", "Severe hepatic or renal impairment (VERIFY)", "Pregnancy — discontinue if suspected"] },
-    "kisspeptin-10": { "note": "Investigational; no FDA approval; mechanism-based (KISS1R agonist).",
-      "absolute": ["Hormone-sensitive malignancy (breast, prostate, endometrial, ovarian) — precautionary (VERIFY)", "Pregnancy (outside a supervised fertility protocol) (VERIFY)", "Known hypersensitivity"],
-      "relative": ["Lactation; age <18 (VERIFY)", "Active fertility treatment / on gonadotropins — additive HPG stimulation (VERIFY)", "Unverified/compounded source", "Long-term/repeated-dose safety unstudied (VERIFY)"] },
-    "gonadorelin": { "note": "Brands (Factrel/Lutrepulse) historically FDA-approved but discontinued; US availability compounded only.",
-      "absolute": ["Hypersensitivity to gonadorelin/components (anaphylaxis reported)", "Conditions aggravated by rising gonadotropins/sex steroids (e.g., hormone-sensitive malignancy) — precautionary", "Pituitary adenoma/tumor (VERIFY against label)"],
-      "relative": ["Pregnancy — use only if clearly needed (acceptable within supervised ovulation induction)", "Pre-existing ovarian enlargement / OHSS risk — avoid; cyst rupture, ascites, thromboembolism", "Pulsatile physiology is load-bearing — continuous exposure downregulates the axis", "Source/compounding verification"] },
-    "melanotan-ii": { "note": "NOT FDA-approved; non-selective melanocortin agonist; items case-report-derived.",
-      "absolute": ["Melanoma or any pigmented/atypical/changing lesion (and personal melanoma history) — documented melanoma incl. oral mucosal after intranasal use (VERIFY)", "Uncontrolled hypertension or significant CVD — documented hypertensive crises, renal infarction (VERIFY)", "Known hypersensitivity"],
-      "relative": ["Priapism risk — avoid/counsel in predisposed men (sickle cell, prior priapism); >4 h is a urologic emergency (VERIFY)", "Severe nausea/vomiting; rhabdomyolysis (CK >5,000) and systemic toxicity reported (VERIFY)", "Numerous/dysplastic nevi or melanoma family history — baseline + interval dermatologic exam (VERIFY)", "Pregnancy, lactation, age <18 (VERIFY)", "Unregulated grey-market supply"] }
+    "semaglutide": {
+      "note": "FDA-approved (Wegovy/Ozempic/Rybelsus).",
+      "absolute": [
+        "Personal/family history of MTC — boxed warning",
+        "MEN 2 — boxed warning",
+        "Prior serious hypersensitivity (anaphylaxis/angioedema)",
+        "Pregnancy — discontinue when recognized"
+      ],
+      "relative": [
+        "Pancreatitis history — discontinue if suspected; do not restart if confirmed",
+        "Severe gastroparesis / severe GI motility disease",
+        "Diabetic retinopathy — monitor (SUSTAIN-6 signal)",
+        "Cholelithiasis / gallbladder disease",
+        "Volume depletion / CKD — AKI from GI losses",
+        "Insulin or sulfonylureas — hypoglycemia",
+        "Lactation; severe hepatic impairment",
+        "Peri-procedure aspiration (retained gastric contents)"
+      ]
+    },
+    "tirzepatide": {
+      "note": "FDA-approved (Mounjaro/Zepbound).",
+      "absolute": [
+        "Personal/family history of MTC — boxed warning",
+        "MEN 2 — boxed warning",
+        "Serious hypersensitivity to tirzepatide or excipients"
+      ],
+      "relative": [
+        "Acute/recent pancreatitis — discontinue if suspected; do not restart if confirmed",
+        "Severe gastroparesis / severe GI disease",
+        "Pregnancy/planning — fetal harm; reduced oral-contraceptive efficacy (barrier/non-oral 4 wk after start & each dose increase)",
+        "Cholelithiasis / gallbladder disease",
+        "Diabetic retinopathy — monitor with rapid glycemic improvement",
+        "Insulin / sulfonylureas — hypoglycemia",
+        "Volume depletion / CKD — AKI from GI losses",
+        "Lactation; age <18; peri-procedure aspiration"
+      ]
+    },
+    "retatrutide": {
+      "note": "Investigational — NOT FDA-approved (Phase 3). No label contraindication list; class-extrapolated.",
+      "absolute": [
+        "Personal/family MTC or MEN 2 — class signal, not label-established (VERIFY)",
+        "Hypersensitivity to peptide/diluent (VERIFY)",
+        "Pregnancy/planning; lactation (VERIFY)"
+      ],
+      "relative": [
+        "Acute/recent pancreatitis (VERIFY)",
+        "Severe gastroparesis / severe GI disease (VERIFY)",
+        "Tachyarrhythmia, uncontrolled arrhythmia, decompensated HF, ischemic heart disease — dose-dependent HR rise; arrhythmias 2-11% vs 2% placebo — baseline HR/ECG if cardiac risk (VERIFY)",
+        "Cholelithiasis / gallbladder disease (VERIFY)",
+        "Insulin / sulfonylureas — hypoglycemia (VERIFY)",
+        "Volume depletion / CKD (VERIFY)",
+        "Glucagon agonism may raise glucose/hepatic output — caution in brittle diabetes (VERIFY)",
+        "Age <18 (VERIFY)"
+      ]
+    },
+    "liraglutide": {
+      "note": "FDA-approved (Saxenda/Victoza).",
+      "absolute": [
+        "Personal/family MTC — boxed warning",
+        "MEN 2 — boxed warning",
+        "Serious hypersensitivity to liraglutide or excipients",
+        "Pregnancy (Saxenda) — discontinue when recognized"
+      ],
+      "relative": [
+        "Pancreatitis history — discontinue if suspected; do not restart if confirmed",
+        "Severe gastroparesis / severe GI disease",
+        "Cholelithiasis / gallbladder disease",
+        "Insulin / sulfonylureas — hypoglycemia",
+        "Renal impairment / volume depletion — AKI from GI losses",
+        "Lactation; severe hepatic impairment",
+        "Peri-procedure aspiration"
+      ]
+    },
+    "aod-9604": {
+      "note": "No formal contraindication list; FDA GRAS food-ingredient only, not a drug.",
+      "absolute": [
+        "Hypersensitivity to peptide/diluent (VERIFY)",
+        "Pregnancy / lactation — no human data (VERIFY)",
+        "Age <18 (VERIFY)"
+      ],
+      "relative": [
+        "Active malignancy — precautionary only; no IGF-1 stimulation so GH-axis cancer rationale is weak (VERIFY)",
+        "Compounded/unregulated sourcing — purity/identity/dosing unverified",
+        "No established drug-drug interaction profile (VERIFY)"
+      ]
+    },
+    "mots-c": {
+      "note": "No formal contraindication list; investigational/preclinical.",
+      "absolute": [
+        "Hypersensitivity to peptide/diluent (VERIFY)",
+        "Pregnancy / lactation — no human data (VERIFY)",
+        "Age <18 (VERIFY)"
+      ],
+      "relative": [
+        "Active malignancy — precautionary; mixed preclinical signals (VERIFY)",
+        "Diabetes / glucose-lowering agents — AMPK/insulin sensitization; theoretical additive hypoglycemia; monitor glucose (VERIFY)",
+        "Compounded/unregulated sourcing (VERIFY)",
+        "No established drug-drug interaction profile (VERIFY)"
+      ]
+    },
+    "ss-31": {
+      "note": "NOW FDA-approved (FORZINITY, Barth syndrome, 2025) — metabolic/longevity use is OFF-LABEL.",
+      "absolute": [
+        "Serious hypersensitivity to elamipretide or any excipient (FORZINITY label)"
+      ],
+      "relative": [
+        "Hypersensitivity reactions incl. serious allergic reactions — discontinue and seek care",
+        "Subcutaneous only — not approved for IV use",
+        "Benzyl-alcohol excipient: NOT for neonates (fatal gasping syndrome in low-birth-weight/preterm); avoid in pregnancy/neonates absent clear need",
+        "Injection-site reactions (most common AE)",
+        "Pregnancy — limited human data (VERIFY for off-label use)",
+        "Lactation — no human data (VERIFY)",
+        "Active malignancy — precautionary in compounded longevity use; not a label contraindication (VERIFY)",
+        "Compounded SS-31 (vs FORZINITY) — purity/benzyl-alcohol/dosing unverified (VERIFY)"
+      ]
+    },
+    "sermorelin": {
+      "note": "Geref discontinued; compounded off-label. No current FDA therapeutic label.",
+      "absolute": [
+        "Active malignancy (VERIFY)",
+        "Pregnancy / lactation / age <18 (VERIFY)",
+        "Hypersensitivity to sermorelin or diluent (VERIFY)",
+        "Non-functional pituitary / disrupted hypothalamic-pituitary axis — won't respond (VERIFY, extrapolated from tesamorelin label)"
+      ],
+      "relative": [
+        "Untreated/severe hypothyroidism — treat first (VERIFY)",
+        "Diabetes / insulin resistance — monitor glucose/A1c (VERIFY)",
+        "Fluid retention, edema, arthralgia, carpal tunnel (VERIFY)",
+        "OSA (VERIFY)",
+        "Active proliferative/severe non-proliferative diabetic retinopathy (VERIFY)",
+        "Acute critical illness — consider hold (VERIFY)",
+        "Concurrent glucocorticoids may blunt GH response (VERIFY)"
+      ]
+    },
+    "cjc-1295": {
+      "note": "No formal contraindication list (compounded/research only).",
+      "absolute": [
+        "Active malignancy (VERIFY)",
+        "Pregnancy / lactation / age <18 (VERIFY)",
+        "Hypersensitivity (VERIFY)",
+        "Non-functional / disrupted pituitary axis (VERIFY, extrapolated from tesamorelin label)"
+      ],
+      "relative": [
+        "Untreated/severe hypothyroidism — treat first (VERIFY)",
+        "Diabetes / insulin resistance — monitor glucose (VERIFY)",
+        "Fluid retention/edema, arthralgia, carpal tunnel (DAC = sustained exposure) (VERIFY)",
+        "OSA (VERIFY)",
+        "Diabetic retinopathy (VERIFY)",
+        "Acute critical illness — consider hold (VERIFY)"
+      ]
+    },
+    "cjc-ipamorelin-blend": {
+      "note": "No FDA approval and NO human trials of the combination.",
+      "absolute": [
+        "Active malignancy (VERIFY)",
+        "Pregnancy / lactation / age <18 (VERIFY)",
+        "Hypersensitivity to either component (VERIFY)",
+        "Non-functional / disrupted pituitary axis (VERIFY)"
+      ],
+      "relative": [
+        "Untreated/severe hypothyroidism (VERIFY)",
+        "Diabetes / insulin resistance — dual-pathway GH amplification; monitor glucose (VERIFY)",
+        "Fluid retention/edema, arthralgia, carpal tunnel (VERIFY)",
+        "OSA (VERIFY)",
+        "Diabetic retinopathy (VERIFY)",
+        "Acute critical illness (VERIFY)"
+      ]
+    },
+    "ipamorelin": {
+      "note": "No FDA approval; two completed Phase 2 GI trials (negative). Cleanest GHRP.",
+      "absolute": [
+        "Active malignancy (VERIFY)",
+        "Pregnancy / lactation / age <18 (VERIFY)",
+        "Hypersensitivity (VERIFY)"
+      ],
+      "relative": [
+        "Untreated/severe hypothyroidism (VERIFY)",
+        "Diabetes / insulin resistance — monitor glucose (VERIFY)",
+        "Fluid retention/edema, arthralgia, carpal tunnel (VERIFY)",
+        "OSA (VERIFY)",
+        "Diabetic retinopathy (VERIFY)",
+        "Acute critical illness (VERIFY)"
+      ]
+    },
+    "ghrp-2": {
+      "note": "No US therapeutic approval (diagnostic GH-stim agent abroad); no therapeutic contraindication list.",
+      "absolute": [
+        "Active malignancy (VERIFY)",
+        "Pregnancy / lactation / age <18 (VERIFY)",
+        "Hypersensitivity (VERIFY)"
+      ],
+      "relative": [
+        "Diabetes / insulin resistance — monitor glucose (VERIFY)",
+        "Untreated/severe hypothyroidism (VERIFY)",
+        "Cortisol and prolactin elevation — caution in hypercortisolism/hyperprolactinemia (VERIFY)",
+        "Appetite stimulation (VERIFY)",
+        "Fluid retention/edema, carpal tunnel; OSA; retinopathy (VERIFY)",
+        "Acute critical illness (VERIFY)"
+      ]
+    },
+    "ghrp-6": {
+      "note": "No FDA approval; no human efficacy trials; no contraindication list.",
+      "absolute": [
+        "Active malignancy (VERIFY)",
+        "Pregnancy / lactation / age <18 (VERIFY)",
+        "Hypersensitivity (VERIFY)"
+      ],
+      "relative": [
+        "Marked appetite stimulation (strongest GHRP) — counsel on weight gain (VERIFY)",
+        "Diabetes / insulin resistance (VERIFY)",
+        "Cortisol and prolactin elevation (VERIFY)",
+        "Untreated/severe hypothyroidism (VERIFY)",
+        "Fluid retention/edema, carpal tunnel; OSA; retinopathy (VERIFY)",
+        "Acute critical illness (VERIFY)"
+      ]
+    },
+    "hexarelin": {
+      "note": "No human therapeutic approval or efficacy trials; no contraindication list.",
+      "absolute": [
+        "Active malignancy (VERIFY)",
+        "Pregnancy / lactation / age <18 (VERIFY)",
+        "Hypersensitivity (VERIFY)"
+      ],
+      "relative": [
+        "Receptor desensitization / tachyphylaxis with continued dosing (VERIFY)",
+        "Cortisol and prolactin elevation (potent secretagogue) (VERIFY)",
+        "Diabetes / insulin resistance (VERIFY)",
+        "Untreated/severe hypothyroidism (VERIFY)",
+        "Cardiac CD36-binding activity (preclinical) — caution in cardiac disease (VERIFY)",
+        "Fluid retention/edema, carpal tunnel; OSA; retinopathy (VERIFY)",
+        "Acute critical illness (VERIFY)"
+      ]
+    },
+    "tesamorelin": {
+      "note": "FDA-approved (EGRIFTA) for HIV lipodystrophy; off-label anti-aging use not label-covered.",
+      "absolute": [
+        "Disruption of hypothalamic-pituitary axis (hypophysectomy, hypopituitarism, pituitary tumor/surgery, head irradiation/trauma) — label",
+        "Active malignancy — must be inactive and treatment complete before starting — label",
+        "Pregnancy — label",
+        "Known hypersensitivity to tesamorelin or excipients (e.g., mannitol) — label"
+      ],
+      "relative": [
+        "IGF-1 elevation — monitor; consider discontinuation with persistent elevations",
+        "Fluid retention — edema, arthralgia, carpal tunnel",
+        "Glucose intolerance / new or worsening diabetes — monitor",
+        "Acute critical illness — consider discontinuing (GH-class mortality signal)",
+        "Recurrent malignancy — discontinue if any evidence of recurrence",
+        "Lactation; age <18",
+        "Untreated hypothyroidism, OSA, diabetic retinopathy"
+      ]
+    },
+    "mk-677": {
+      "note": "Oral non-peptide ghrelin agonist; no FDA approval; no formal contraindication list.",
+      "absolute": [
+        "Active or prior malignancy (VERIFY)",
+        "Pregnancy / lactation / age <18 (VERIFY)",
+        "Hypersensitivity (VERIFY)"
+      ],
+      "relative": [
+        "Congestive heart failure / fluid-retention risk — edema & CHF signals in older-adult trials; avoid in HF (VERIFY)",
+        "Diabetes / insulin resistance — reproducibly raises fasting glucose, reduces insulin sensitivity; monitor (documented)",
+        "Increased appetite — counsel (VERIFY)",
+        "Untreated/severe hypothyroidism (VERIFY)",
+        "OSA (VERIFY)",
+        "Diabetic retinopathy (VERIFY)",
+        "Elevated IGF-1 — monitor; long-term safety unknown (VERIFY)",
+        "Acute critical illness (VERIFY)",
+        "Splenic-rupture case report (with RAD-140) (VERIFY)"
+      ]
+    },
+    "bpc-157": {
+      "note": "No formal contraindication list (not FDA-approved). 503A compounding status in review — placed in Category 2, removed Apr 15 2026 (not yet on the positive bulks list); PCAC review Jul 23–24 2026 (VERIFY).",
+      "absolute": [
+        "Active or prior malignancy — pro-angiogenic; tumor-promotion hazard (VERIFY)",
+        "Undiagnosed mass / malignancy red-flag until worked up",
+        "Pregnancy",
+        "Lactation",
+        "Age <18",
+        "Hypersensitivity to peptide/diluent"
+      ],
+      "relative": [
+        "Do not use to mask an undiagnosed surgical lesion — image first (VERIFY)",
+        "Personal/family cancer history — current screening before start (VERIFY)",
+        "Keep courses short and goal-bound — long-term human safety absent",
+        "Source/purity risk"
+      ]
+    },
+    "tb-500": {
+      "note": "No formal contraindication list; consumer fragment has no completed human trial.",
+      "absolute": [
+        "Active or prior malignancy — actin-binding, pro-angiogenic/pro-migratory (VERIFY)",
+        "Undiagnosed mass / malignancy red-flag until worked up",
+        "Pregnancy",
+        "Lactation",
+        "Age <18",
+        "Hypersensitivity to peptide/diluent"
+      ],
+      "relative": [
+        "Personal/family cancer history — current screening; malignancy ROS at follow-up (VERIFY)",
+        "Conditions where unwanted cell migration/fibrosis could harm (e.g., proliferative retinopathy) (VERIFY)",
+        "Consumer fragment != full-length Tβ4 (RGN-259); long-term safety unknown",
+        "Source/purity risk"
+      ]
+    },
+    "ghk-cu": {
+      "note": "No formal contraindication list for systemic use; strongest data topical.",
+      "absolute": [
+        "Active or prior malignancy — pro-angiogenic (VERIFY)",
+        "Wilson disease / copper-overload state (VERIFY)",
+        "Pregnancy",
+        "Lactation",
+        "Age <18",
+        "Hypersensitivity / copper sensitivity"
+      ],
+      "relative": [
+        "Chronic/high-dose systemic (SC) use — monitor serum copper/ceruloplasmin (VERIFY)",
+        "Personal/family cancer history — current screening before systemic use (VERIFY)",
+        "Evidence largely topical; injectable/systemic use empiric",
+        "Copper-altering conditions/meds (zinc, malabsorption) (VERIFY)"
+      ]
+    },
+    "thymosin-alpha-1": {
+      "note": "Marketed as Zadaxin in ~35 countries but NOT FDA-approved; no US-label contraindication list.",
+      "absolute": [
+        "Transplant on immunosuppression — Th1 modulation -> rejection/graft-failure hazard (VERIFY)",
+        "Severe active autoimmune disease — flare risk (VERIFY)",
+        "Pregnancy",
+        "Lactation",
+        "Age <18",
+        "Hypersensitivity"
+      ],
+      "relative": [
+        "Milder/controlled autoimmune disease — monitor for flare; hold on flare (VERIFY)",
+        "Concurrent immunosuppressive therapy — potential antagonism; coordinate with specialist (VERIFY)",
+        "Immune modulator, not a generic booster — use against a defined immune problem"
+      ]
+    },
+    "kpv": {
+      "note": "No formal contraindication list (preclinical-only).",
+      "absolute": [
+        "Transplant on immunosuppression — anti-inflammatory; precautionary (VERIFY)",
+        "Severe active autoimmune disease (VERIFY)",
+        "Pregnancy",
+        "Lactation",
+        "Age <18",
+        "Hypersensitivity"
+      ],
+      "relative": [
+        "Active/unworked-up GI or skin inflammatory disease — adjunct only; do not substitute for IBD/derm work-up (VERIFY)",
+        "Active or recent serious infection — could blunt a needed immune response (VERIFY)",
+        "Preclinical-only evidence; human dosing/safety unestablished",
+        "Source/purity risk"
+      ]
+    },
+    "semax": {
+      "note": "No formal contraindication list; not FDA-approved.",
+      "absolute": [
+        "Hypersensitivity",
+        "Pregnancy / lactation / age <18 (VERIFY, convention)"
+      ],
+      "relative": [
+        "Seizure disorder / lowered seizure threshold (VERIFY)",
+        "Acute psychiatric instability / mania / severe anxiety (VERIFY)",
+        "Uncontrolled hypertension / significant CVD (VERIFY)",
+        "Nasal mucosal disease (intranasal route) (VERIFY)"
+      ]
+    },
+    "selank": {
+      "note": "No formal contraindication list; not FDA-approved.",
+      "absolute": [
+        "Hypersensitivity",
+        "Pregnancy / lactation / age <18 (VERIFY, convention)"
+      ],
+      "relative": [
+        "Concurrent benzodiazepines / CNS depressants — additive sedation theoretical (VERIFY)",
+        "Unsupervised substance-withdrawal / opioid-dependence management (VERIFY)",
+        "Significant psychiatric illness — adjunct only (VERIFY)",
+        "Nasal mucosal disease (intranasal route) (VERIFY)"
+      ]
+    },
+    "cerebrolysin": {
+      "note": "Marketed EU/RU (not FDA-approved); some items from manufacturer labeling.",
+      "absolute": [
+        "Hypersensitivity to product/excipients (porcine brain-derived; anaphylaxis reported)",
+        "Status epilepticus / active uncontrolled seizures",
+        "Severe renal impairment",
+        "Pregnancy / lactation (VERIFY)"
+      ],
+      "relative": [
+        "Epilepsy / lowered seizure threshold — slow infusion + monitoring (VERIFY)",
+        "Concurrent serotonergic agents / MAOIs (VERIFY)",
+        "Allergic diathesis / atopy — infusion reactions",
+        "Mild-moderate renal impairment (VERIFY)",
+        "Counterfeit/unverified source (no US-approved product)"
+      ]
+    },
+    "dsip": {
+      "note": "No formal contraindication list; zero registered trials.",
+      "absolute": [
+        "Hypersensitivity",
+        "Pregnancy / lactation / age <18 (VERIFY, convention)"
+      ],
+      "relative": [
+        "Untreated OSA / undiagnosed primary sleep disorder — don't mask (VERIFY)",
+        "Concurrent sedatives / hypnotics / alcohol (VERIFY)",
+        "Endocrine instability (affects ACTH/cortisol axis) (VERIFY)",
+        "Unpredictable inter-patient response"
+      ]
+    },
+    "epitalon": {
+      "note": "No formal contraindication list; zero registered trials.",
+      "absolute": [
+        "Hypersensitivity",
+        "Active or prior malignancy — precaution (telomerase/pineal mechanism; direction unproven) (VERIFY)",
+        "Pregnancy / lactation / age <18 (VERIFY)"
+      ],
+      "relative": [
+        "Cancer history without current age-appropriate screening (VERIFY)",
+        "Pineal/melatonin-axis or circadian disorders; concurrent melatonin/hormonal therapy (VERIFY)",
+        "Use short pulses (10-20 d) — chronic safety unknown (VERIFY)"
+      ]
+    },
+    "pt-141": {
+      "note": "FDA-approved (Vyleesi/bremelanotide) for HSDD in premenopausal women.",
+      "absolute": [
+        "Uncontrolled hypertension (label)",
+        "Known cardiovascular disease (label)",
+        "Hypersensitivity to bremelanotide or any component"
+      ],
+      "relative": [
+        "High cardiovascular risk — not recommended; assess CV risk and control BP",
+        "Dose limits: <=1 dose/24 h, <=8 doses/month (bound BP effect)",
+        "Oral naltrexone-containing products — may significantly decrease naltrexone levels; not recommended (VERIFY exact label wording)",
+        "Nausea (most common AE)",
+        "Focal hyperpigmentation (face, gingiva, breasts) — more with daily dosing/darker skin; may not resolve",
+        "Severe hepatic or renal impairment (VERIFY)",
+        "Pregnancy — discontinue if suspected"
+      ]
+    },
+    "kisspeptin-10": {
+      "note": "Investigational; no FDA approval; mechanism-based (KISS1R agonist).",
+      "absolute": [
+        "Hormone-sensitive malignancy (breast, prostate, endometrial, ovarian) — precautionary (VERIFY)",
+        "Pregnancy (outside a supervised fertility protocol) (VERIFY)",
+        "Known hypersensitivity"
+      ],
+      "relative": [
+        "Lactation; age <18 (VERIFY)",
+        "Active fertility treatment / on gonadotropins — additive HPG stimulation (VERIFY)",
+        "Unverified/compounded source",
+        "Long-term/repeated-dose safety unstudied (VERIFY)"
+      ]
+    },
+    "gonadorelin": {
+      "note": "Brands (Factrel/Lutrepulse) historically FDA-approved but discontinued; US availability compounded only.",
+      "absolute": [
+        "Hypersensitivity to gonadorelin/components (anaphylaxis reported)",
+        "Conditions aggravated by rising gonadotropins/sex steroids (e.g., hormone-sensitive malignancy) — precautionary",
+        "Pituitary adenoma/tumor (VERIFY against label)"
+      ],
+      "relative": [
+        "Pregnancy — use only if clearly needed (acceptable within supervised ovulation induction)",
+        "Pre-existing ovarian enlargement / OHSS risk — avoid; cyst rupture, ascites, thromboembolism",
+        "Pulsatile physiology is load-bearing — continuous exposure downregulates the axis",
+        "Source/compounding verification"
+      ]
+    },
+    "melanotan-ii": {
+      "note": "NOT FDA-approved; non-selective melanocortin agonist; items case-report-derived.",
+      "absolute": [
+        "Melanoma or any pigmented/atypical/changing lesion (and personal melanoma history) — documented melanoma incl. oral mucosal after intranasal use (VERIFY)",
+        "Uncontrolled hypertension or significant CVD — documented hypertensive crises, renal infarction (VERIFY)",
+        "Known hypersensitivity"
+      ],
+      "relative": [
+        "Priapism risk — avoid/counsel in predisposed men (sickle cell, prior priapism); >4 h is a urologic emergency (VERIFY)",
+        "Severe nausea/vomiting; rhabdomyolysis (CK >5,000) and systemic toxicity reported (VERIFY)",
+        "Numerous/dysplastic nevi or melanoma family history — baseline + interval dermatologic exam (VERIFY)",
+        "Pregnancy, lactation, age <18 (VERIFY)",
+        "Unregulated grey-market supply"
+      ]
+    }
   }
 }

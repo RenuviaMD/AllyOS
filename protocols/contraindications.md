@@ -377,7 +377,7 @@ _Basis: NO FDA approval; no formal contraindication list. Fluid-retention/CHF an
 - Use to "mask" an undiagnosed surgical lesion — image the injury first; do not substitute for needed surgery **VERIFY**
 - Any personal/family cancer history — heightened surveillance, age-appropriate cancer screening current before start **VERIFY**
 - Chronic/open-ended dosing — keep courses short and goal-bound (4–6 wk) given absent long-term human safety data
-- Source/purity risk — FDA barred BPC-157 from compounding (2023); verify source
+- Source/purity risk — BPC-157's 503A compounding status is in review (Category 2, removed Apr 15 2026; PCAC review Jul 2026 — VERIFY); verify source
 
 _Basis: No formally established contraindications (not FDA-approved; mostly animal data). Precautions are mechanism-based — VERIFY. Mechanistic/safety context: Gwyer 2019 (doi:10.1007/s00441-019-03016-8); Seiwerth 2021 (doi:10.3389/fphar.2021.627533); Sikiric 2020 (doi:10.2174/1381612826666200424180139)._
 

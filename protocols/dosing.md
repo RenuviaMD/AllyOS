@@ -171,7 +171,7 @@ Source of record: `/home/user/renuviamd-site/protocols/protocols.json` (Tier-1, 
 - **Dose:** 250 mcg SC daily (typical); range **250–500 mcg/day**. **Route:** SC, local to injury preferred — **oral variants exist** (community-used for GI mucosal complaints; SC remains the standard for the protocol above). **Frequency:** once daily (may split BID at the higher end).
 - **Cycle:** 4–6 weeks, then reassess and stop. **Rest:** off after the course (not continuous); re-course only if goal-bound and re-screened — cancer history is an absolute contraindication (pro-angiogenic).
 - **Suggested recon (calculator default):** **5 mg vial + 2 mL BAC** → 2.5 mg/mL (2,500 mcg/mL); 250 mcg = 0.10 mL = 10 units (U-100).
-- _Basis: empiric-VERIFY. No completed published human efficacy RCT (Phase 1 NCT02637284 status unknown; Phase 2 NCT07437547 recruiting). FDA barred from compounding (2023). Mechanistic/preclinical: Gwyer 2019 (doi:10.1007/s00441-019-03016-8); Seiwerth 2021 (doi:10.3389/fphar.2021.627533); Sikiric 2020 (doi:10.2174/1381612826666200424180139)._
+- _Basis: empiric-VERIFY. No completed published human efficacy RCT (Phase 1 NCT02637284 status unknown; Phase 2 NCT07437547 recruiting). FDA placed it in 503A Category 2, then removed it Apr 15 2026 (not yet on the positive bulks list); PCAC review Jul 23–24 2026 — VERIFY. Mechanistic/preclinical: Gwyer 2019 (doi:10.1007/s00441-019-03016-8); Seiwerth 2021 (doi:10.3389/fphar.2021.627533); Sikiric 2020 (doi:10.2174/1381612826666200424180139)._
 
 ---
 
