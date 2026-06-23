@@ -1,0 +1,60 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reconstitution & Dosing Calculator · AllyOS — RenuviaMD®</title>
+<style>
+:root{--navy:#102a30;--teal:#0e8a8a;--gold:#c9870a;--ink:#1c2b32;--muted:#5b6b72;--line:#e3ecea;--soft:#f3f8f7}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:#eef4f3;line-height:1.5}
+.wrap{max-width:680px;margin:0 auto;padding:22px}
+header{background:linear-gradient(150deg,#0e3a40,#0e8a8a);color:#fff;padding:20px 0}.brand{font-weight:800}.brand span{color:#ffd98a}
+h1{font-size:1.5rem;margin:10px 0 4px}header p{color:#d4ece9;font-size:.92rem}
+.card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:20px;margin-top:18px;box-shadow:0 2px 10px rgba(16,50,58,.05)}
+label{display:block;font-size:.78rem;color:var(--muted);font-weight:600;margin:10px 0 3px}
+input,select{width:100%;border:1px solid var(--line);border-radius:9px;padding:11px 13px;font-size:1rem}
+.row{display:flex;gap:12px}.row>div{flex:1}
+.out{background:linear-gradient(120deg,#0e3a40,#0e8a8a);color:#fff;border-radius:13px;padding:22px;margin-top:18px}
+.big{display:flex;gap:18px;flex-wrap:wrap}.b{flex:1;min-width:120px}.b .n{font-size:2rem;font-weight:800;font-family:Georgia,serif}.b .l{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:#bfe6e1}
+.steps{font-size:.82rem;color:#d4ece9;margin-top:14px;border-top:1px solid rgba(255,255,255,.2);padding-top:10px}
+.gold{color:#ffd98a}
+.disc{font-size:.72rem;color:var(--muted);margin-top:16px;text-align:center}
+</style></head><body>
+<header><div class="wrap"><div class="brand">Renuvia<span>MD</span>® · AllyOS</div>
+<h1>Reconstitution &amp; Dosing Calculator</h1><p>mg/mL → mcg → U-100 insulin units. For licensed providers.</p></div></header>
+<main class="wrap">
+<div class="card">
+ <label>Peptide (optional — prefills typical vial)</label><select id="pep"><option value="">— choose —</option></select>
+ <div class="row">
+  <div><label>Peptide in vial (mg)</label><input id="mg" type="number" value="5" step="0.1"></div>
+  <div><label>BAC water added (mL)</label><input id="ml" type="number" value="2" step="0.1"></div>
+ </div>
+ <label>Desired dose (mcg)</label><input id="dose" type="number" value="250" step="10">
+</div>
+<div class="out">
+ <div class="big">
+  <div class="b"><div class="n" id="conc">—</div><div class="l">Concentration (mcg/mL)</div></div>
+  <div class="b"><div class="n" id="vol">—</div><div class="l">Volume per dose (mL)</div></div>
+  <div class="b"><div class="n gold" id="units">—</div><div class="l">U-100 units</div></div>
+  <div class="b"><div class="n" id="doses">—</div><div class="l">Doses per vial</div></div>
+ </div>
+ <div class="steps" id="steps"></div>
+</div>
+<p class="disc">Educational tool for licensed providers — verify every calculation independently before administration. Not medical advice. © 2026 RenuviaMD® AllyOS.</p>
+</main>
+<script src="protocols-data.js"></script>
+<script>
+const sel=document.getElementById('pep');
+(window.RENUVIA_PROTOCOLS&&window.RENUVIA_PROTOCOLS.protocols||[]).filter(p=>!p.teaser&&!p.is_stack&&p.line==='peptides').forEach(p=>{
+ const o=document.createElement('option');o.value=p.slug;o.textContent=p.name;o.dataset.body=p.body_md||'';sel.appendChild(o);});
+function calc(){const mg=+document.getElementById('mg').value,ml=+document.getElementById('ml').value,dose=+document.getElementById('dose').value;
+ const mgml=mg/ml, mcgml=mgml*1000, vol=dose/mcgml, units=vol*100, doses=(mg*1000)/dose;
+ const f=(x,d=2)=>isFinite(x)?x.toFixed(d):'—';
+ document.getElementById('conc').textContent=f(mcgml,0);
+ document.getElementById('vol').textContent=f(vol);
+ document.getElementById('units').textContent=f(units,1);
+ document.getElementById('doses').textContent=isFinite(doses)?Math.floor(doses):'—';
+ document.getElementById('steps').innerHTML=`<b>${mg} mg</b> ÷ <b>${ml} mL</b> = ${f(mgml)} mg/mL = <span class="gold">${f(mcgml,0)} mcg/mL</span>. &nbsp; <b>${dose} mcg</b> ÷ ${f(mcgml,0)} = <b>${f(vol)} mL</b> × 100 = <span class="gold">${f(units,1)} units</span> (U-100).`;
+}
+['mg','ml','dose'].forEach(id=>document.getElementById(id).oninput=calc);
+sel.onchange=()=>{const b=sel.selectedOptions[0].dataset.body||'';const m=b.match(/(\d+(?:\.\d+)?)\s*mg\s*\+\s*(\d+(?:\.\d+)?)\s*mL/);if(m){document.getElementById('mg').value=m[1];document.getElementById('ml').value=m[2];}
+ const dm=b.match(/(\d+)\s*mcg/);if(dm)document.getElementById('dose').value=dm[1];calc();};
+calc();
+</script><script src="../disclaimer.js"></script>
+</body></html>

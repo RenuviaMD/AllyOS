@@ -1,0 +1,28 @@
+{
+  "schema": "renuvia.pricing.v1",
+  "updated": "2026-06-22",
+  "currency": "usd",
+  "note": "Single source of truth for AllyOS pricing. Numbers adjustable; store/UI read from here. Stripe links: paste public buy.stripe.com URLs; empty = button disabled.",
+  "memberships": [
+    { "id": "free",   "label": "Base",   "price_mo": 0,   "price_yr": 0,    "ai_queries_mo": 0,   "visits": 3,    "features": ["Regulatory database", "Reconstitution calculator", "3 reference guides"] },
+    { "id": "member", "label": "Member", "price_mo": 99,  "price_yr": 990,  "ai_queries_mo": 50,  "visits": null, "features": ["Full library / compendium", "All guides", "Ally (capped)", "Update radar"] },
+    { "id": "top",    "label": "Top",    "price_mo": 199, "price_yr": 1990, "ai_queries_mo": 500, "visits": null, "features": ["Ally Pro (full conversational)", "Visit Packet — local POC", "Compliance check", "Everything in Member"] }
+  ],
+  "seats": { "label": "Team seat", "price_mo": null, "note": "per additional provider seat — TBD" },
+  "one_off": [
+    { "id": "intro",             "label": "Intro to Peptide Therapy",        "price": 49 },
+    { "id": "monograph",         "label": "Clinical Protocol Monograph",     "price": 99 },
+    { "id": "compendium",        "label": "Peptide Therapy Compendium 2026", "price": 997 },
+    { "id": "practice_pack",     "label": "Peptide Practice Pack",           "price": 295 },
+    { "id": "glp1_package",      "label": "GLP-1 Package",                   "price": 295 },
+    { "id": "transition",        "label": "GLP-1 Transition Protocol",       "price": 149 },
+    { "id": "weight_loss_stack", "label": "Weight-Loss Stack",               "price": 595 },
+    { "id": "metabolic_line",    "label": "Metabolic Line Complete",         "price": 1995 }
+  ],
+  "stripe_links": {
+    "_note": "Paste public buy.stripe.com URLs; empty string = button disabled in the store.",
+    "intro": "", "monograph": "", "compendium": "",
+    "practice_pack": "", "glp1_package": "", "transition": "", "weight_loss_stack": "", "metabolic_line": "",
+    "member_mo": "", "member_yr": "", "top_mo": "", "top_yr": ""
+  }
+}

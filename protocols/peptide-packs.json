@@ -1,0 +1,203 @@
+{
+  "schema": "renuvia.peptide-packs.v1",
+  "updated": "2026-06-22",
+  "platform": "AllyOS",
+  "line": "peptides",
+  "note": "Source of truth for AllyOS peptide product packaging. This file defines OPERATIONAL/EDUCATIONAL structure only. Consent and intake documents are generated on-device through the Visit Packet; static distribution of consent/intake is gated to the provider's own legal review. Nothing here sells peptides — it sells reference, SOPs, cadence, and software.",
+
+  "consent_tiers": {
+    "1": "Standard — FDA-approved, on-label (1–2 pg consent)",
+    "2": "Enhanced — FDA-approved off-label / Grade B (2–3 pg, off-label disclosure)",
+    "3": "Comprehensive experimental — Grade C / investigational / not-FDA-approved (4–6 pg, experimental attestation)",
+    "4": "Maximal — Grade D, generally not recommended (6–10 pg, maximum disclosure)"
+  },
+  "grade_to_tier": {
+    "A_on_label": 1,
+    "A_off_label": 2,
+    "B": 2,
+    "C": 3,
+    "D": 4,
+    "investigational_not_approved": 3
+  },
+
+  "practice_pack": {
+    "label": "Peptide Practice Pack",
+    "one_line": "Everything a clinic needs to run ONE peptide — the AmSpa per-treatment SOP value, peptide-specific.",
+    "includes": [
+      "Clinical SOP (rule-out / Rx / labs / ongoing-care / safety gate)",
+      "Dosing cadence & titration schedule",
+      "Educational monograph (the card)",
+      "Per-peptide informed consent at the peptide's matched tier",
+      "Clinical/metabolic intake screen (shared per line, reused)"
+    ],
+    "delivery": {
+      "sop_cadence_monograph": "Sold to the licensed provider — educational/operational, low-liability, sellable now.",
+      "consent_intake": "Generated on-device via the Visit Packet (PHI-free). Static distribution of signed templates is GATED to the provider's legal review."
+    }
+  },
+
+  "metabolic_line": {
+    "label": "Metabolic",
+    "shared_intake": "metabolic-screen",
+    "shared_intake_note": "One metabolic red-flag screen (MTC/MEN2, pancreatitis, pregnancy, gallbladder, eating disorder, T1DM, GFR<30) covers every peptide below — authored once, reused across any selection.",
+
+    "glp1_continuous": [
+      {
+        "slug": "semaglutide", "name": "Semaglutide", "grade": "A",
+        "consent_tier": 1, "cadence": "continuous (chronic, titrated)",
+        "stackable_with_other_glp1": false, "fda_status": "FDA-approved",
+        "class_note": "GLP-1 backbone. Continuous — not cycled. Never run concurrently with another GLP-1; TRANSITION between agents instead."
+      },
+      {
+        "slug": "tirzepatide", "name": "Tirzepatide", "grade": "A",
+        "consent_tier": 1, "cadence": "continuous (chronic, titrated)",
+        "stackable_with_other_glp1": false, "fda_status": "FDA-approved",
+        "class_note": "GIP/GLP-1 backbone. Continuous — not cycled. Transition, do not co-administer with another incretin."
+      },
+      {
+        "slug": "liraglutide", "name": "Liraglutide", "grade": "A",
+        "consent_tier": 1, "cadence": "continuous (chronic, daily)",
+        "stackable_with_other_glp1": false, "fda_status": "FDA-approved",
+        "class_note": "GLP-1 backbone (daily). Continuous — not cycled."
+      },
+      {
+        "slug": "retatrutide", "name": "Retatrutide", "grade": "B",
+        "consent_tier": 3, "cadence": "continuous (investigational)",
+        "stackable_with_other_glp1": false, "fda_status": "investigational — NOT FDA-approved (Phase 3)",
+        "class_note": "Triple agonist backbone. Continuous. NOT approved — forces Tier-3 experimental consent even though trial-grade is B."
+      }
+    ],
+
+    "cyclable_adjuncts": [
+      {
+        "slug": "aod-9604", "name": "AOD-9604", "grade": "D",
+        "consent_tier": 4, "cadence": "cycled (8–12 wk)",
+        "stackable": true, "fda_status": "investigational",
+        "class_note": "GH-fragment lipolysis adjunct. Cyclable. Grade D → maximum-disclosure consent; modest, adjunctive only."
+      },
+      {
+        "slug": "mots-c", "name": "MOTS-c", "grade": "D→C",
+        "consent_tier": 3, "cadence": "cycled",
+        "stackable": true, "fda_status": "investigational",
+        "class_note": "Mitochondrial-derived metabolic adjunct. Cyclable. PCAC review July 2026."
+      },
+      {
+        "slug": "ss-31", "name": "SS-31 (Elamipretide)", "grade": "B−",
+        "consent_tier": 3, "cadence": "cycled",
+        "stackable": true, "fda_status": "Elamipretide FDA-approved (FORZINITY, Barth syndrome 2025); compounded metabolic use is off-label/investigational",
+        "class_note": "Mitochondrial-targeting adjunct. Cyclable. Approved drug exists, but metabolic/wellness use here is off-label → Tier 3."
+      },
+      {
+        "slug": "sermorelin", "name": "Sermorelin", "grade": "B (peds/dx) → D (adult wellness)",
+        "consent_tier": 3, "cadence": "cycled (~12 wk)",
+        "stackable": true, "fda_status": "off-label (Geref was FDA-approved for pediatric dx; adult wellness use is off-label)",
+        "primary_axis": "Growth",
+        "class_note": "GHRH analog. Used in a weight-loss stack as a lean-mass / body-composition adjunct alongside a GLP-1 — complements appetite suppression, does not overlap it. Cyclable."
+      }
+    ]
+  },
+
+  "transition_protocol": {
+    "label": "GLP-1 Transition / Switch Protocol",
+    "one_line": "Because GLP-1s overlap and are never concurrent — the SOP for switching one backbone to another (sema ↔ tirze ↔ reta ↔ lira).",
+    "replaces": "any notion of a GLP-1 'stack'",
+    "includes": [
+      "Wash-out / overlap timing per agent half-life",
+      "Dose-equivalence guidance and re-titration ladder",
+      "Tolerance / GI-recovery checkpoints",
+      "Re-consent at the new agent's tier (Retatrutide → Tier 3)"
+    ]
+  },
+
+  "glp1_package": {
+    "label": "GLP-1 Package",
+    "one_line": "A single continuous GLP-1 backbone, sold as a complete package — NOT a stack.",
+    "why_not_a_stack": "GLP-1/incretins are continuous and overlap mechanistically — you never run two together, you transition between them. So a GLP-1 is sold as its own package, not stacked with another GLP-1.",
+    "choose_one_of": ["semaglutide", "tirzepatide", "retatrutide", "liraglutide"],
+    "includes": [
+      "Practice Pack for the chosen GLP-1 (SOP + titration cadence + monograph)",
+      "GLP-1 informed consent at the agent's tier (Retatrutide → Tier 3, investigational)",
+      "Shared metabolic intake screen",
+      "Optional: GLP-1 Transition / Switch Protocol add-on"
+    ],
+    "consent_tier_rule": "= the chosen agent's tier (sema/tirze/lira → Tier 1; reta → Tier 3).",
+    "delivery": "SOP/cadence/monograph sellable now; consent/intake via Visit Packet pending provider legal review.",
+    "pricing": { "model": "single package", "price_usd": null, "price_note": "TBD when Stripe links wired." }
+  },
+
+  "weight_loss_stack": {
+    "label": "Weight-Loss Stack",
+    "one_line": "Any one GLP-1 backbone + Sermorelin and/or AOD-9604 — appetite control plus lean-mass / body-composition support.",
+    "rationale": "The GLP-1 drives appetite suppression and weight loss; Sermorelin (GH axis) and AOD-9604 (lipolysis) are cyclable adjuncts that complement it — addressing the lean-mass-loss concern with GLP-1 monotherapy — without overlapping its mechanism.",
+    "rules": {
+      "glp1_backbone": { "exactly": 1, "pool": ["semaglutide", "tirzepatide", "retatrutide", "liraglutide"] },
+      "adjuncts": { "min": 1, "max": 2, "pool": ["sermorelin", "aod-9604"] },
+      "no_two_glp1": true
+    },
+    "example_valid": [
+      ["tirzepatide", "sermorelin"],
+      ["semaglutide", "aod-9604"],
+      ["tirzepatide", "sermorelin", "aod-9604"]
+    ],
+    "auto_assembles": [
+      "Practice Pack per selected peptide (SOP + cadence + monograph)",
+      "Per-peptide consent at each tier",
+      "Combination Consent Addendum (Ch.4 §5.1)",
+      "Merged calendar — continuous GLP-1 titration + cycled adjunct schedule (staggered starts)",
+      "Shared metabolic intake screen"
+    ],
+    "consent_tier_rule": "= HIGHEST tier among components (Sermorelin/AOD push to Tier 3–4; surfaced as a badge).",
+    "requires_combination_addendum": true,
+    "delivery": "Same gate — SOP/cadence/monograph sold; consent/intake via Visit Packet pending legal review.",
+    "pricing": { "model": "bundle discount vs. individual Practice Packs", "price_usd": null, "price_note": "TBD when Stripe links wired." }
+  },
+
+  "stack_builder": {
+    "label": "Metabolic Stack — Build Your Own (advanced)",
+    "one_line": "Broader builder — compose from all cyclable adjuncts (Sermorelin, AOD-9604, MOTS-c, SS-31), optionally alongside ONE continuous GLP-1 backbone.",
+    "rules": {
+      "total_components_max": 3,
+      "glp1_backbone_optional": true,
+      "glp1_backbone_max": 1,
+      "no_two_glp1_together": true,
+      "no_two_glp1_reason": "GLP-1/incretins overlap mechanistically and are continuous, not cycled — they are transitioned between, never co-administered. Selecting a second GLP-1 routes to the Transition Protocol instead.",
+      "adjuncts_min": 1,
+      "adjuncts_max": 3,
+      "adjuncts_pool": ["sermorelin", "aod-9604", "mots-c", "ss-31"],
+      "glp1_pool": ["semaglutide", "tirzepatide", "retatrutide", "liraglutide"]
+    },
+    "example_valid": [
+      ["tirzepatide", "aod-9604", "mots-c"],
+      ["semaglutide", "mots-c"],
+      ["aod-9604", "mots-c", "ss-31"]
+    ],
+    "example_invalid": [
+      {
+        "combo": ["semaglutide", "tirzepatide", "retatrutide"],
+        "why": "Three GLP-1s cannot be stacked — overlap/continuous. Routes to Transition Protocol."
+      }
+    ],
+    "auto_assembles": [
+      "One Practice Pack per selected peptide (SOP + cadence + monograph)",
+      "Per-peptide consent at each component's tier",
+      "Combination Consent Addendum (Compendium Ch.4 §5.1 — each peptide consented individually; combination carries less evidence; interactions may be unknown)",
+      "Merged titration / cycle calendar (staggered starts so a side effect is attributable to one agent)",
+      "Shared metabolic intake screen (authored once)"
+    ],
+    "consent_tier_rule": "Stack tier = the HIGHEST consent tier among the selected components (Ch.4 §1.3). Surface it as a badge, e.g. 'This stack = Tier 3 (investigational) because it includes Retatrutide / MOTS-c.'",
+    "requires_combination_addendum": true,
+    "delivery": "Same gate as Practice Pack — SOP/cadence/monograph sold; consent/intake via Visit Packet pending provider legal review.",
+    "pricing": { "model": "bundle discount vs. buying each Practice Pack individually", "price_usd": null, "price_note": "TBD — set when Stripe links are wired." }
+  },
+
+  "lineup": [
+    { "sku": "monograph", "label": "Clinical Protocol Monograph", "price_usd": 99, "liability": "low", "sell_now": true, "contents": "one peptide card, educational" },
+    { "sku": "compendium", "label": "Peptide Therapy Compendium (2026)", "price_usd": 997, "liability": "low", "sell_now": true, "contents": "all peptides + 'Intro to Peptide Therapy / How to Run a Peptide Practice' chapter; educational; annual edition" },
+    { "sku": "practice_pack", "label": "Peptide Practice Pack", "price_usd": null, "liability": "medium", "sell_now": "after legal (consent gated; SOP/cadence/monograph sellable now)", "contents": "SOP + cadence + monograph + consent/intake*" },
+    { "sku": "glp1_package", "label": "GLP-1 Package", "price_usd": null, "liability": "medium", "sell_now": "after legal", "contents": "one continuous GLP-1 backbone (sema/tirze/reta/lira) — NOT a stack" },
+    { "sku": "weight_loss_stack", "label": "Weight-Loss Stack", "price_usd": null, "liability": "medium", "sell_now": "after legal", "contents": "any GLP-1 + Sermorelin and/or AOD-9604; combination addendum; merged calendar; tier = highest component" },
+    { "sku": "metabolic_stack", "label": "Metabolic Stack — Build Your Own (advanced)", "price_usd": null, "liability": "medium", "sell_now": "after legal", "contents": "≤1 GLP-1 backbone + 1–3 cyclable adjuncts (Sermorelin/AOD/MOTS-c/SS-31)" },
+    { "sku": "transition_protocol", "label": "GLP-1 Transition / Switch Protocol", "price_usd": null, "liability": "medium", "sell_now": "after legal", "contents": "switch SOP between GLP-1 backbones" },
+    { "sku": "membership", "label": "AllyOS Membership (Member / Top)", "price_usd": null, "liability": "software", "sell_now": true, "contents": "library + Ally + Visit Packet (generates consent/intake live)" }
+  ]
+}

@@ -1,0 +1,2310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RenuviaMD — Clinical Protocol Library</title>
+<style>
+  :root{
+    --teal:#0e8a8a; --teal-d:#0b6e6e; --teal-ink:#16323a;
+    --gold:#e6a012; --gold-d:#c9870a;
+    --ink:#1c2b32; --muted:#5b6b72; --faint:#8898a0;
+    --bg:#f3f8f7; --card:#ffffff; --line:#e3ecea; --soft:#eaf4f2;
+    --green:#1e9e6a; --green-bg:#e8f7f0;
+    --amber:#d98a00; --amber-bg:#fdf3e2;
+    --red:#d7483b; --red-bg:#fdecea;
+    --shadow:0 1px 2px rgba(16,50,58,.06),0 8px 24px rgba(16,50,58,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  a{color:var(--teal-d);text-decoration:none}
+
+  /* Header */
+  header.top{background:linear-gradient(155deg,#0e3a40 0%,#0e8a8a 100%);color:#fff;padding:30px 0 26px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.15rem;letter-spacing:.02em}
+  .brand .dot{width:11px;height:11px;border-radius:3px;background:var(--gold);box-shadow:0 0 0 4px rgba(230,160,18,.25)}
+  .brand span{color:#ffd98a}
+  h1{font-size:1.9rem;line-height:1.15;margin:16px 0 6px;letter-spacing:-.01em}
+  header.top p{color:#d4ece9;max-width:640px;font-size:1.02rem}
+  .credit{margin-top:14px;display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:6px 14px;font-size:.85rem;color:#eafaf8}
+  .credit b{color:#fff}
+
+  /* Line-of-care nav */
+  nav.lines{position:sticky;top:0;z-index:30;background:rgba(243,248,247,.92);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line)}
+  nav.lines .row{display:flex;gap:8px;overflow-x:auto;padding:12px 0}
+  .ltab{flex:0 0 auto;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);
+    border-radius:999px;padding:9px 16px;font-weight:600;font-size:.92rem;color:var(--muted);cursor:pointer;
+    transition:all .15s;white-space:nowrap}
+  .ltab:hover{border-color:var(--teal);color:var(--teal-d)}
+  .ltab.active{background:var(--teal);border-color:var(--teal);color:#fff;box-shadow:var(--shadow)}
+  .ltab .soon{font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;background:var(--gold);color:#3a2a00;
+    border-radius:5px;padding:2px 6px;font-weight:800}
+  .ltab.active .soon{background:#ffe1a3}
+
+  /* Controls */
+  .controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:22px 0 10px}
+  .search{flex:1;min-width:220px;position:relative}
+  .search input{width:100%;border:1px solid var(--line);background:var(--card);border-radius:10px;
+    padding:11px 14px 11px 38px;font-size:.95rem;color:var(--ink);box-shadow:var(--shadow)}
+  .search input:focus{outline:none;border-color:var(--teal)}
+  .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.5}
+  .filters{display:flex;gap:6px;flex-wrap:wrap}
+  .fbtn{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:9px 13px;font-size:.85rem;
+    font-weight:600;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .15s}
+  .fbtn:hover{border-color:var(--teal)}
+  .fbtn.on{border-color:var(--teal);color:var(--teal-ink);background:var(--soft)}
+  .fbtn .pip{width:9px;height:9px;border-radius:50%}
+  .pg{background:var(--green)} .py{background:var(--amber)} .pr{background:var(--red)}
+
+  .legend{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:.84rem;padding:6px 0 4px}
+  .legend span{display:flex;align-items:center;gap:7px}
+  .countline{color:var(--faint);font-size:.84rem;padding:4px 0 18px}
+
+  /* Axis group */
+  .axis-h{display:flex;align-items:center;gap:12px;margin:26px 0 14px}
+  .axis-h h2{font-size:1.02rem;letter-spacing:.04em;text-transform:uppercase;color:var(--teal-ink)}
+  .axis-h .ln{flex:1;height:1px;background:var(--line)}
+  .axis-h .n{font-size:.78rem;color:var(--faint);font-weight:600}
+
+  /* Cards */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:13px;
+    padding:17px 17px 15px;box-shadow:var(--shadow);cursor:pointer;transition:transform .14s,box-shadow .14s;
+    display:flex;flex-direction:column;gap:8px}
+  .card:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(16,50,58,.12)}
+  .card.c-green{border-left-color:var(--green)} .card.c-yellow{border-left-color:var(--amber)} .card.c-red{border-left-color:var(--red)}
+  .card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .card h3{font-size:1.06rem;line-height:1.25;color:var(--ink)}
+  .card .brand-n{font-size:.78rem;color:var(--faint);margin-top:2px}
+  .badge{flex:0 0 auto;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+    padding:4px 8px;border-radius:6px;white-space:nowrap}
+  .b-green{background:var(--green-bg);color:#0c7a4d} .b-yellow{background:var(--amber-bg);color:#9a6300} .b-red{background:var(--red-bg);color:#b3372c}
+  .card .mech{font-size:.85rem;color:var(--muted)}
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+  .tag{font-size:.72rem;font-weight:600;color:var(--teal-d);background:var(--soft);border-radius:6px;padding:3px 8px}
+  .tag.status{color:var(--muted);background:#f0f3f2}
+  .tag.stack{color:#9a6300;background:var(--amber-bg)}
+  .tag.grade{color:#33444c;background:#eef3f2;font-weight:800}
+  .tag.pcac{color:#7a4a10;background:#fff3df;border:1px solid #f0cd92;font-weight:700}
+  .cites{list-style:none;margin:4px 0}
+  .cites li{font-size:.84rem;padding:3px 0 3px 16px;position:relative;color:var(--ink)}
+  .cites li::before{content:"›";position:absolute;left:2px;color:var(--teal)}
+  .cites a{color:var(--teal-d);text-decoration:underline;word-break:break-word}
+  .pcac-note{background:#fff3df;border:1px solid #f0cd92;border-radius:10px;padding:12px 14px;font-size:.84rem;color:#7a4a10;margin-top:12px}
+  .pcac-note b{color:#5a3500}
+
+  /* In-development panel */
+  .soon-panel{background:var(--card);border:1px dashed var(--teal);border-radius:16px;padding:34px;text-align:center;
+    box-shadow:var(--shadow);max-width:720px;margin:10px auto}
+  .soon-panel .ic{font-size:2rem}
+  .soon-panel h2{font-size:1.3rem;margin:8px 0 6px;color:var(--teal-ink)}
+  .soon-panel p{color:var(--muted);max-width:520px;margin:0 auto 16px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .chip{border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:.85rem;color:var(--muted);background:var(--soft)}
+
+  .empty{text-align:center;color:var(--faint);padding:50px 0}
+
+  /* Access bar + locked-tease */
+  .accessbar{background:#0b6e6e;color:#d4ece9;font-size:.82rem}
+  .accessbar .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:9px 0}
+  .accessbar b{color:#fff}
+  .accessbar .pill{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:3px 11px}
+  .ltab.locked-tab{color:var(--faint)}
+  .ltab.locked-tab .lk{font-size:.8rem;opacity:.8}
+  .card.locked{border-left-color:#cdd8d5;background:#fafcfb}
+  .card.locked h3{color:#7c8a90}
+  .card.locked .lockbadge{display:inline-flex;align-items:center;gap:5px;font-size:.66rem;font-weight:800;
+    text-transform:uppercase;letter-spacing:.05em;color:#9a6300;background:var(--amber-bg);border-radius:6px;padding:4px 8px}
+  .addbanner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    background:linear-gradient(120deg,#fdf3e2,#eaf4f2);border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin:20px 0 22px}
+  .addbanner h2{font-size:1.18rem;color:var(--teal-ink)}
+  .addbanner p{color:var(--muted);font-size:.9rem;margin-top:3px;max-width:560px}
+  .addbtn{flex:0 0 auto;background:var(--gold);color:#3a2a00;font-weight:800;border:none;border-radius:10px;
+    padding:12px 20px;font-size:.92rem;cursor:pointer;box-shadow:0 6px 18px rgba(230,160,18,.3);transition:background .15s}
+  .addbtn:hover{background:var(--gold-d)}
+
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(16,50,58,.45);backdrop-filter:blur(3px);display:none;
+    align-items:flex-start;justify-content:center;padding:40px 18px;z-index:60;overflow-y:auto}
+  .overlay.open{display:flex}
+  .modal{background:#fff;border-radius:16px;max-width:600px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);
+    overflow:hidden;animation:pop .16s ease}
+  @keyframes pop{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+  .modal .mhead{padding:22px 24px;border-bottom:1px solid var(--line);position:relative}
+  .modal .mhead.c-green{border-top:5px solid var(--green)} .modal .mhead.c-yellow{border-top:5px solid var(--amber)} .modal .mhead.c-red{border-top:5px solid var(--red)}
+  .modal h2{font-size:1.4rem;padding-right:30px}
+  .modal .x{position:absolute;top:16px;right:18px;font-size:1.5rem;color:var(--faint);cursor:pointer;line-height:1}
+  .modal .mbody{padding:20px 24px 24px}
+  .field{margin-bottom:15px}
+  .field .k{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--teal-d);font-weight:800;margin-bottom:4px}
+  .field .v{font-size:.95rem;color:var(--ink)}
+  .field.danger .k{color:var(--red)} .field.danger .v{color:#a8362b}
+  .mnote{background:var(--soft);border-radius:10px;padding:12px 14px;font-size:.85rem;color:var(--muted);margin-top:6px}
+
+  /* Full prescribing card */
+  .modal.wide{max-width:700px}
+  .cardbtns{display:flex;gap:10px;margin:2px 0 6px}
+  .linkbtn{background:none;border:1px solid var(--line);border-radius:8px;padding:8px 14px;font-weight:600;
+    font-size:.85rem;color:var(--teal-d);cursor:pointer;transition:border-color .15s}
+  .linkbtn:hover{border-color:var(--teal)}
+  .linkbtn.primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+  .fullcard h1{display:none}
+  .fullcard h2{font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;color:var(--teal-d);
+    border-bottom:1px solid var(--line);padding-bottom:5px;margin:20px 0 8px}
+  .fullcard h3{font-size:.95rem;margin:12px 0 4px;color:var(--ink)}
+  .fullcard ul{list-style:none;margin:6px 0}
+  .fullcard li{padding:3px 0 3px 22px;position:relative;font-size:.9rem}
+  .fullcard li::before{content:"•";position:absolute;left:7px;color:var(--teal)}
+  .fullcard li.chk::before{content:"☐";left:2px;color:var(--amber);font-weight:700}
+  .fullcard p{font-size:.9rem;margin:6px 0}
+  .fullcard strong{color:var(--teal-ink)}
+  .fullcard table{width:100%;border-collapse:collapse;margin:8px 0;font-size:.83rem}
+  .fullcard th,.fullcard td{border:1px solid var(--line);padding:6px 9px;text-align:left}
+  .fullcard th{background:var(--soft);color:var(--teal-ink)}
+  .stamp{font-size:.74rem;color:var(--faint);margin-top:20px;border-top:1px dashed var(--line);padding-top:10px}
+  /* Personalized ready-to-sign PDF */
+  .personalize{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:2px 0 12px;
+    font-size:.8rem;color:var(--muted);background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .personalize b{color:var(--teal-ink)}
+  .personalize input{border:1px solid var(--line);border-radius:7px;padding:7px 10px;font-size:.85rem;min-width:150px;flex:1}
+  .letterhead{text-align:center;border-bottom:2px solid var(--teal);padding-bottom:10px;margin-bottom:14px}
+  .letterhead .lh{display:block;font-size:1.15rem;font-weight:800;color:var(--teal-ink)}
+  .letterhead small{color:var(--faint);font-size:.7rem;text-transform:uppercase;letter-spacing:.09em}
+  .sigblock{margin-top:20px;border-top:1px solid var(--line);padding-top:12px;font-size:.86rem;color:var(--ink)}
+  .sigblock .row{margin:7px 0;display:flex;gap:6px;flex-wrap:wrap}
+  .sigblock b{color:var(--teal-ink)}
+  @media print{ .personalize{display:none!important} }
+  /* Footer disclaimer + compliance division — on every PDF page */
+  .pdf-footer{display:none}
+  @media print{
+    .pdf-footer{display:block;position:fixed;bottom:0;left:0;right:0;background:#fff;
+      border-top:1px solid #bbb;padding:5px 12px;text-align:center;
+      font-size:6.5pt;line-height:1.35;color:#555}
+    .pdf-footer b{color:#0b6e6e}
+    .mbody{padding-bottom:78px}
+  }
+  @media print{
+    body>*{display:none!important}
+    #overlay{display:block!important;position:static;background:#fff;padding:0;overflow:visible}
+    #overlay .modal{box-shadow:none;max-width:100%;border-radius:0}
+    .x,.cardbtns{display:none!important}
+  }
+
+  footer{margin-top:50px;padding:26px 0 40px;border-top:1px solid var(--line);color:var(--faint);font-size:.82rem}
+  footer b{color:var(--muted)}
+  @media(max-width:560px){h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a href="index.html" style="color:inherit;text-decoration:none"><div class="brand"><span class="dot"></span>Renuvia<span>MD</span> · <span style="opacity:.8;font-weight:600">← Home</span></div></a>
+    <h1>Clinical Protocol Library</h1>
+    <p>Physician-curated, evidence-graded protocols organized by line of care — the single source the practice platforms draw from.</p>
+    <div class="credit">Curated &amp; signed by&nbsp;<b>Armando Falcon, MD</b></div>
+  </div>
+</header>
+
+<div class="accessbar"><div class="wrap"><div class="row" id="accessBar"></div></div></div>
+
+<nav class="lines"><div class="wrap"><div class="row" id="lineNav"></div></div></nav>
+
+<main class="wrap">
+  <div id="activeControls">
+    <div class="controls">
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16323a" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="q" type="search" placeholder="Search protocols, mechanism, use…">
+      </div>
+      <div class="filters" id="classFilters">
+        <button class="fbtn on" data-c="all">All</button>
+        <button class="fbtn" data-c="green"><span class="pip pg"></span>Green</button>
+        <button class="fbtn" data-c="yellow"><span class="pip py"></span>Yellow</button>
+        <button class="fbtn" data-c="red"><span class="pip pr"></span>Red</button>
+      </div>
+    </div>
+    <div class="legend">
+      <span><span class="pip pg"></span> Green — FDA-approved pathway</span>
+      <span><span class="pip py"></span> Yellow — physician-review only</span>
+      <span><span class="pip pr"></span> Red — research-only / exclusion</span>
+    </div>
+    <div class="countline" id="count"></div>
+  </div>
+  <div id="content"></div>
+</main>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+
+<footer><div class="wrap">
+  <b>Internal clinical reference for licensed clinicians.</b> Each entry is a drafting aid — every dose, contraindication, and monitoring plan is reviewed, customized, and signed by the treating physician before use. Tier&nbsp;1 = curated/MD-signed; Tier&nbsp;2 = on-demand peptide engine (verified, graduates into Tier&nbsp;1). Citations from PubMed &amp; ClinicalTrials.gov. © RenuviaMD.
+</div></footer>
+
+<script>
+/* Canonical protocol library — generated by build-data.py. Do not hand-edit. */
+window.RENUVIA_PROTOCOLS = {
+  "meta": {
+    "title": "RenuviaMD Clinical Protocol Library",
+    "curated_by": "Armando Falcon, MD",
+    "tiers": {
+      "1": "Curated, MD-signed library",
+      "2": "On-demand peptide engine \u2014 verified, graduates into Tier 1"
+    },
+    "count": 61
+  },
+  "lines": [
+    {
+      "id": "peptides",
+      "name": "Peptides",
+      "tagline": "Evidence-graded peptide protocols by clinical axis",
+      "status": "active",
+      "axes": [
+        "Metabolism",
+        "Growth",
+        "Repair",
+        "Vitality",
+        "Longevity",
+        "Cognition",
+        "Immunity"
+      ]
+    },
+    {
+      "id": "bhrt",
+      "name": "BHRT",
+      "tagline": "Bio-identical hormone replacement \u2014 male & female",
+      "status": "in_development",
+      "axes": []
+    },
+    {
+      "id": "iv-nad",
+      "name": "IV / NAD+",
+      "tagline": "IV infusion & NAD+ (Niagen IV) protocols",
+      "status": "in_development",
+      "axes": []
+    },
+    {
+      "id": "glp",
+      "name": "GLP-1 / Metabolic",
+      "tagline": "Medical weight management & metabolic",
+      "status": "in_development",
+      "axes": []
+    },
+    {
+      "id": "aesthetics",
+      "name": "Aesthetics / Devices",
+      "tagline": "Injectables & energy-device protocols",
+      "status": "in_development",
+      "axes": []
+    }
+  ],
+  "protocols": [
+    {
+      "slug": "aod-9604",
+      "name": "AOD-9604",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Metabolism",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "GH fragment (176-191) \u2014 stimulates lipolysis without affecting blood glucose or IGF-1",
+      "primary_use": "Adjunct fat-loss support in metabolic/weight programs",
+      "contraindications": "pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Mild effect, clean metabolic profile \u2014 no IGF-1 or glucose impact. Best as an adjunct, not a standalone. Human weight-loss data is weak; set expectations low.",
+      "reviewed": "2026-06-10",
+      "body_md": "# AOD-9604\n\n## Indication\nAdjunct fat-loss support within a structured metabolic/weight program. <!-- NOTE: human efficacy data weak; modest at best -->\n\n## Rule out (contraindications)\n- \u2610 Pregnancy\n- \u2610 Lactation\n- \u2610 Age <18\n- \u2610 Hypersensitivity to peptide/diluent\n- \u2610 Active malignancy (precautionary)\n\n## Rx\n- **Dose:** 300 mcg SC daily; range 250\u2013500 mcg/day\n- **Route:** SC (fasted/AM)\n- **Reconstitution:** 5 mg + 2 mL BAC water = 2.5 mg/mL = 2,500 mcg/mL \u2192 300 mcg = 0.12 mL = **12 units** (U-100)\n- **Cycle:** 8\u201312 weeks\n- **Stack pairs:** tesamorelin, cjc-ipamorelin-blend, mots-c\n\n## Labs (baseline)\n- CMP, fasting glucose, lipids, weight/waist\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, site | Continue |\n| Mo 1 | Weight/waist trend | Hold or \u2191 within range |\n| Mo 3 | Body composition, lipids | Continue if benefit |\n| Mo 6 | Weight maintenance | Stop if no objective change |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_investigational_peptide`)\n- \u2610 Patient education delivered (`patiented_aod-9604`)\n- \u2610 Source pharmacy verified\n- \u2610 Baseline metabolic panel documented\n\n## Patient education key points\n- Not FDA-approved; effects are modest and adjunctive.\n- Does not replace diet and exercise \u2014 those drive results.\n- Doesn't affect blood sugar or IGF-1.\n- Report injection-site reactions or unexpected symptoms.",
+      "teaser": false,
+      "grade": "D",
+      "evidence": "Phase 2 obesity development **discontinued for lack of meaningful efficacy**; **zero registered trials**; substantive data preclinical.",
+      "citations": [
+        {
+          "label": "Heffernan 2001, Endocrinology (preclinical)",
+          "url": "https://doi.org/10.1210/endo.142.12.8522"
+        },
+        {
+          "label": "Wilding 2004, Curr Opin Investig Drugs (review, PMID 15134286)",
+          "url": ""
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "bpc-157",
+      "name": "BPC-157",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Repair",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Pentadecapeptide \u2014 upregulates VEGFR2/angiogenesis + NO pathway, promotes fibroblast migration",
+      "primary_use": "Soft-tissue/tendon/ligament injury and GI mucosal repair, plateaued on standard care",
+      "contraindications": "active/prior malignancy, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Image the injury first \u2014 don't use it to dodge a surgical lesion. Short goal-bound courses only; cancer history is an absolute no given the angiogenic mechanism.",
+      "reviewed": "2026-06-10",
+      "body_md": "# BPC-157\n\n## Indication\nAdjunct for refractory soft-tissue (tendon/ligament/muscle) injury or GI mucosal complaints that have plateaued on standard care.\n\n## Rule out (contraindications)\n- \u2610 Active or prior malignancy (pro-angiogenic \u2014 absolute)\n- \u2610 Pregnancy\n- \u2610 Lactation\n- \u2610 Age <18\n- \u2610 Hypersensitivity to peptide/diluent\n- \u2610 Undiagnosed mass / malignancy red flag\n\n## Rx\n- **Dose:** 250 mcg SC daily; range 250\u2013500 mcg/day\n- **Route:** SC (local to injury preferred)\n- **Reconstitution:** 5 mg + 2 mL BAC water = 2.5 mg/mL = 2,500 mcg/mL \u2192 250 mcg = 0.10 mL = **10 units** (U-100)\n- **Cycle:** 4\u20136 weeks, then reassess and stop\n- **Stack pairs:** tb-500, ghk-cu\n\n## Labs (baseline)\n- CBC, CMP\n- **Age-appropriate cancer screening current \u2190 gating**\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, injection site, response | \u2191 to 500 mcg or stop if no signal |\n| Mo 1 | Functional outcome (ROM/pain) | Continue short course or discontinue |\n| Mo 3 | Should be off; re-exam \u00b1 image | Pivot to definitive care if unresolved |\n| Mo 6 | Malignancy ROS | Stop + work up any red flag |\n\n## Safety & compliance gate\n- \u2610 Off-label/investigational consent signed (`consent_investigational_peptide`)\n- \u2610 Patient education delivered (`patiented_bpc-157`)\n- \u2610 Source pharmacy verified\n- \u2610 Cancer screening current \u2190 gating\n\n## Patient education key points\n- Not FDA-approved; animal data only, no human efficacy proof.\n- Theoretical cancer-promotion risk \u2014 tell us any cancer history.\n- This supports rehab; it does not replace PT or needed surgery.\n- Report any new lump, weight loss, or unusual symptom immediately.",
+      "teaser": false,
+      "grade": "D",
+      "evidence": "No completed published human efficacy RCT. One Phase 1 safety/PK (NCT02637284, status unknown); one Phase 2 *recruiting* (NCT07437547, hamstring strain). FDA barred it from compounding (2023).",
+      "citations": [
+        {
+          "label": "Gwyer 2019, Cell Tissue Res",
+          "url": "https://doi.org/10.1007/s00441-019-03016-8"
+        },
+        {
+          "label": "Seiwerth 2021, Front Pharmacol",
+          "url": "https://doi.org/10.3389/fphar.2021.627533"
+        },
+        {
+          "label": "Sikiric 2020, Curr Pharm Des",
+          "url": "https://doi.org/10.2174/1381612826666200424180139"
+        }
+      ],
+      "fda_pcac": {
+        "day": 1,
+        "date": "2026-07-23"
+      }
+    },
+    {
+      "slug": "cerebrolysin",
+      "name": "Cerebrolysin",
+      "brand_names": [
+        "Cerebrolysin"
+      ],
+      "line": "peptides",
+      "axis": "Cognition",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Porcine brain-derived neuropeptide mix \u2014 neurotrophic (BDNF/NGF-like) and neuroprotective activity",
+      "primary_use": "Cognitive support in post-stroke, TBI, and neurodegenerative decline",
+      "contraindications": "pregnancy, lactation, age <18, hypersensitivity, severe renal impairment, status epilepticus",
+      "clinical_notes": "EU/RU/AR-labeled, no US brand \u2014 fully off-shore. Given as IV/IM courses, not a quick injection. Epilepsy is a caution. Verify a legitimate source \u2014 counterfeits exist.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Cerebrolysin\n\n## Indication\nCognitive support in post-stroke, TBI, or neurodegenerative decline. <!-- NOTE: EU/RU/AR-labeled; not FDA-approved -->\n\n## Rule out (contraindications)\n- \u2610 Pregnancy\n- \u2610 Lactation\n- \u2610 Age <18\n- \u2610 Hypersensitivity\n- \u2610 Severe renal impairment\n- \u2610 Status epilepticus / uncontrolled epilepsy\n\n## Rx\n- **Dose:** 5\u201310 mL daily \u00d710\u201320 day course\n- **Route:** IM (\u22645 mL) or slow IV (larger volumes)\n- **Reconstitution:** Pre-mixed ampoule (215.2 mg/mL solution) \u2014 **no reconstitution**\n- **Cycle:** 10\u201320 day course, repeat 2\u20134\u00d7/year\n- **Stack pairs:** semax, selank, dsip\n\n## Labs (baseline)\n- CMP (renal), CBC\n- Seizure/neuro history review\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, cognition | Complete course |\n| Mo 1 | Cognitive/functional change | Reassess |\n| Mo 3 | Off-cycle status | Plan next course |\n| Mo 6 | Durable benefit | Continue vs stop |\n\n## Safety & compliance gate\n- \u2610 Off-label/investigational consent signed (`consent_investigational_peptide`)\n- \u2610 Patient education delivered (`patiented_cerebrolysin`)\n- \u2610 Source pharmacy verified (counterfeit risk)\n- \u2610 Renal function + seizure history documented\n\n## Patient education key points\n- Not FDA-approved in the US; used as IV/IM courses.\n- Porcine-derived \u2014 tell us about allergies.\n- Report any seizure activity or dizziness.\n- Source authenticity matters \u2014 we verify supply.",
+      "teaser": false,
+      "grade": "B/C",
+      "evidence": "42 trials + meta-analyses, **mixed**: favorable Alzheimer's meta-analysis + positive post-stroke RCT (CARS), but a **stroke meta-analysis found no significant efficacy.** Approved in several non-US countries.",
+      "citations": [
+        {
+          "label": "Muresanu 2016, Stroke (CARS)",
+          "url": "https://doi.org/10.1161/STROKEAHA.115.009416"
+        },
+        {
+          "label": "Gauthier 2015, Dement Geriatr Cogn Disord (AD meta)",
+          "url": "https://doi.org/10.1159/000377672"
+        },
+        {
+          "label": "Zhang 2017, Biomed Res Int (negative stroke meta)",
+          "url": "https://doi.org/10.1155/2017/4191670"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "cjc-1295",
+      "name": "CJC-1295",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Long-acting GHRH analog \u2014 sustained stimulation of pituitary GH release",
+      "primary_use": "GH-axis support paired with a ghrelin agonist for recovery and body composition",
+      "contraindications": "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Default here is no-DAC (mod GRF 1-29), dosed daily; the DAC version is weekly. Almost always paired with ipamorelin. Watch fluid retention at higher doses.",
+      "reviewed": "2026-06-10",
+      "body_md": "# CJC-1295\n\n## Indication\nGH-axis support for recovery and body composition, paired with a ghrelin agonist. <!-- NOTE: card assumes no-DAC (mod GRF 1-29), daily; DAC version is 1-2 mg weekly -->\n\n## Rule out (contraindications)\n- \u2610 Active malignancy (absolute)\n- \u2610 Untreated severe hypothyroidism\n- \u2610 Pregnancy\n- \u2610 Lactation; age <18\n- \u2610 Hypersensitivity\n\n## Rx\n- **Dose:** 100 mcg SC nightly (no-DAC); range 100\u2013200 mcg\n- **Route:** SC, bedtime\n- **Reconstitution:** 5 mg + 2.5 mL BAC water = 2 mg/mL = 2,000 mcg/mL \u2192 100 mcg = 0.05 mL = **5 units** (U-100)\n- **Cycle:** 12\u201316 weeks\n- **Stack pairs:** ipamorelin, sermorelin\n\n## Labs (baseline)\n- **IGF-1, TSH/free T4 \u2190 gating**\n- Fasting glucose, CMP, lipids\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, fluid retention | Reinforce timing |\n| Mo 1 | Symptoms, glucose | Hold/adjust |\n| Mo 3 | IGF-1, glucose | Titrate to upper-normal IGF-1 |\n| Mo 6 | IGF-1, composition | Lowest effective dose |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_gh_secretagogue`)\n- \u2610 Patient education delivered (`patiented_cjc-1295`)\n- \u2610 Source pharmacy verified\n- \u2610 Thyroid treated + cancer screen current \u2190 gating\n\n## Patient education key points\n- Not FDA-approved; compounded GH secretagogue.\n- Bedtime, empty stomach.\n- Report swelling, joint aches, or tingling.\n- We track IGF-1 and glucose.",
+      "teaser": false,
+      "grade": "C (DAC) / D (NO-DAC)",
+      "evidence": "One human PK/PD RCT of the DAC form (dose-dependent GH/IGF-1 rise, t\u00bd ~6\u20138 days); Phase 2 NCT00267527 terminated. \"No-DAC\" borrows the DAC molecule's credibility.",
+      "citations": [
+        {
+          "label": "Teichman 2006, JCEM (human DAC RCT)",
+          "url": "https://doi.org/10.1210/jc.2005-1536"
+        },
+        {
+          "label": "Ionescu & Frohman 2006, JCEM",
+          "url": "https://doi.org/10.1210/jc.2006-1702"
+        },
+        {
+          "label": "Jett\u00e9 2005, Endocrinology (rat)",
+          "url": "https://doi.org/10.1210/en.2004-1286"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "cjc-ipamorelin-blend",
+      "name": "CJC-1295 + Ipamorelin (blend)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "GHRH analog + ghrelin agonist \u2014 dual-pathway amplification of pulsatile GH release",
+      "primary_use": "Combined GH-axis support for recovery, body composition, and sleep",
+      "contraindications": "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "The workhorse growth combo \u2014 GHRH + GHRP synergy beats either alone. One bedtime shot. Watch fluid retention and glucose as you titrate.",
+      "reviewed": "2026-06-10",
+      "body_md": "# CJC-1295 + Ipamorelin (blend)\n\n## Indication\nCombined GH-axis support for recovery, body composition, and sleep in symptomatic adults with low-normal IGF-1.\n\n## Rule out (contraindications)\n- \u2610 Active malignancy (absolute)\n- \u2610 Untreated severe hypothyroidism\n- \u2610 Pregnancy\n- \u2610 Lactation; age <18\n- \u2610 Hypersensitivity\n\n## Rx\n- **Dose:** ~100 mcg CJC + 200\u2013300 mcg ipamorelin SC nightly\n- **Route:** SC, bedtime\n- **Reconstitution:** 5 mg CJC + 5 mg ipa co-vialed + 2.5 mL BAC = 2 mg/mL each = 2,000 mcg/mL \u2192 0.15 mL = **15 units** (~300 mcg each)\n- **Cycle:** 12\u201316 weeks\n- **Stack pairs:** tesamorelin, aod-9604\n\n## Labs (baseline)\n- **IGF-1, TSH/free T4 \u2190 gating**\n- Fasting glucose, CMP, lipids\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, fluid retention | Reinforce timing |\n| Mo 1 | Symptoms, glucose | Hold/adjust |\n| Mo 3 | IGF-1, glucose | Titrate to upper-normal IGF-1 |\n| Mo 6 | IGF-1, composition | Lowest effective dose |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_gh_secretagogue`)\n- \u2610 Patient education delivered (`patiented_cjc-ipamorelin-blend`)\n- \u2610 Source pharmacy verified\n- \u2610 Thyroid treated + cancer screen current \u2190 gating\n\n## Patient education key points\n- Not FDA-approved; compounded combination.\n- One bedtime injection, empty stomach.\n- Report swelling, joint pain, tingling.\n- We monitor IGF-1 and blood sugar.",
+      "teaser": false,
+      "grade": "D",
+      "evidence": "**No human trials of the combination \u2014 period.** Supporting data are animal + review-level only (a 2026 sports-medicine primer states evidence is \"limited to animal studies\").",
+      "citations": [
+        {
+          "label": "Mayfield 2026, Am J Sports Med",
+          "url": "https://doi.org/10.1177/03635465251357593"
+        },
+        {
+          "label": "Coutinho 2026, J Sports Med Phys Fitness",
+          "url": "https://doi.org/10.23736/S0022-4707.26.17773-1"
+        },
+        {
+          "label": "Mavrych 2026, Front Aging",
+          "url": "https://doi.org/10.3389/fragi.2026.1790247"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "dsip",
+      "name": "Delta sleep-inducing peptide (DSIP)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Cognition",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Nonapeptide \u2014 modulates sleep architecture and stress/neuroendocrine response",
+      "primary_use": "Sleep-onset/quality support, adjunct in stress-related insomnia",
+      "contraindications": "pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Inconsistent human data; effects are variable patient-to-patient. Bedtime SC dosing. Address sleep hygiene and OSA first \u2014 don't paper over an untreated disorder.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Delta sleep-inducing peptide (DSIP)\n\n## Indication\nSleep-onset/quality support as an adjunct in stress-related insomnia. <!-- NOTE: human evidence inconsistent -->\n\n## Rule out (contraindications)\n- \u2610 Pregnancy\n- \u2610 Lactation\n- \u2610 Age <18\n- \u2610 Hypersensitivity\n- \u2610 Untreated OSA / primary sleep disorder\n\n## Rx\n- **Dose:** 100\u2013300 mcg SC at bedtime\n- **Route:** SC\n- **Reconstitution:** 5 mg + 2 mL BAC water = 2.5 mg/mL = 2,500 mcg/mL \u2192 200 mcg = 0.08 mL = **8 units** (U-100)\n- **Cycle:** 4\u20136 weeks\n- **Stack pairs:** selank, cerebrolysin\n\n## Labs (baseline)\n- Generally none required\n- Sleep history / OSA screen\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Sleep onset/quality | Adjust dose/timing |\n| Mo 1 | Sleep metrics | Hold/adjust |\n| Mo 3 | Durable benefit | Continue vs stop |\n| Mo 6 | Sleep status | Taper if stable |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_investigational_peptide`)\n- \u2610 Patient education delivered (`patiented_dsip`)\n- \u2610 Source pharmacy verified\n- \u2610 OSA screen documented\n\n## Patient education key points\n- Not FDA-approved; effects vary person to person.\n- We address sleep hygiene and screen for sleep apnea first.\n- Inject at bedtime as directed.\n- Report daytime grogginess or unusual symptoms.",
+      "teaser": false,
+      "grade": "D",
+      "evidence": "**Zero registered trials.** Old, sparse, inconclusive human data; reviewers note DSIP does not reliably promote sleep. Modern data preclinical.",
+      "citations": [
+        {
+          "label": "Graf & Kastin 1986, Peptides",
+          "url": "https://doi.org/10.1016/0196-9781(86)90148-8"
+        },
+        {
+          "label": "Kovalzon & Strekalova 2006, J Neurochem",
+          "url": "https://doi.org/10.1111/j.1471-4159.2006.03693.x"
+        }
+      ],
+      "fda_pcac": {
+        "day": 2,
+        "date": "2026-07-24"
+      }
+    },
+    {
+      "slug": "epitalon",
+      "name": "Epitalon",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Longevity",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Tetrapeptide \u2014 proposed telomerase activation and pineal/melatonin-axis modulation",
+      "primary_use": "Longevity/sleep-axis support, short pulsed courses",
+      "contraindications": "active malignancy, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Human evidence is thin and mostly older Russian work. Dosed in short 10-20 day pulses, not chronically. Telomerase claims are unproven \u2014 set expectations honestly.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Epitalon\n\n## Indication\nLongevity and sleep-axis support delivered as short pulsed courses. <!-- NOTE: human data limited/low-quality; telomerase claims unproven -->\n\n## Rule out (contraindications)\n- \u2610 Active malignancy (precautionary \u2014 absolute)\n- \u2610 Pregnancy\n- \u2610 Lactation\n- \u2610 Age <18\n- \u2610 Hypersensitivity\n\n## Rx\n- **Dose:** 5\u201310 mg SC daily \u00d710\u201320 days per pulse\n- **Route:** SC\n- **Reconstitution:** 10 mg + 1 mL BAC water = 10 mg/mL = 10,000 mcg/mL \u2192 10 mg = 1.0 mL = **100 units** (U-100)\n- **Cycle:** 10\u201320 day pulse, repeat 1\u20132\u00d7/year\n- **Stack pairs:** mots-c, ss-31\n\n## Labs (baseline)\n- CMP, CBC\n- Cancer screen current\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, sleep | Complete pulse |\n| Mo 1 | Subjective response | Reassess |\n| Mo 3 | Off-cycle; well-being | Plan next pulse vs stop |\n| Mo 6 | Cancer ROS | Stop on any red flag |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_investigational_peptide`)\n- \u2610 Patient education delivered (`patiented_epitalon`)\n- \u2610 Source pharmacy verified\n- \u2610 Cancer screen current \u2190 gating\n\n## Patient education key points\n- Not FDA-approved; longevity claims are unproven.\n- Given in short courses, not continuously.\n- Tell us any cancer history.\n- Report any unusual symptoms.",
+      "teaser": false,
+      "grade": "D",
+      "evidence": "**Zero registered trials.** Telomere/longevity claims rest on in-vitro + animal + weak older Russian reports. No Western replication.",
+      "citations": [
+        {
+          "label": "Khavinson 2003, Bull Exp Biol Med (in vitro)",
+          "url": "https://doi.org/10.1023/a:1025493705728"
+        },
+        {
+          "label": "Anisimov 2002, Cancer Lett (rat)",
+          "url": "https://doi.org/10.1016/s0304-3835(02)00090-3"
+        },
+        {
+          "label": "Khavinson 2002, Neuro Endocrinol Lett (PMID 12374906)",
+          "url": ""
+        }
+      ],
+      "fda_pcac": {
+        "day": 2,
+        "date": "2026-07-24"
+      }
+    },
+    {
+      "slug": "ghk-cu",
+      "name": "Copper tripeptide-1 (GHK-Cu)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Repair",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Copper-binding tripeptide \u2014 modulates wound-healing genes, collagen synthesis, angiogenesis",
+      "primary_use": "Skin/connective-tissue repair, hair, and aesthetic regeneration",
+      "contraindications": "active/prior malignancy, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Most evidence is topical; injectable/SC use is empiric. Watch cumulative copper with chronic systemic dosing. Same angiogenic cancer caution.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Copper tripeptide-1 (GHK-Cu)\n\n## Indication\nSkin and connective-tissue repair, hair support, and aesthetic regeneration. <!-- NOTE: strongest data is topical; systemic SC dosing is empiric -->\n\n## Rule out (contraindications)\n- \u2610 Active or prior malignancy (pro-angiogenic \u2014 absolute)\n- \u2610 Pregnancy\n- \u2610 Lactation\n- \u2610 Age <18\n- \u2610 Hypersensitivity / copper sensitivity\n- \u2610 Wilson disease / copper-overload state\n\n## Rx\n- **Dose:** 1\u20132 mg SC daily (or topical 1\u20132% serum)\n- **Route:** SC or topical\n- **Reconstitution:** 50 mg + 5 mL BAC water = 10 mg/mL = 10,000 mcg/mL \u2192 2 mg = 0.20 mL = **20 units** (U-100)\n- **Cycle:** 4\u20138 weeks\n- **Stack pairs:** bpc-157, tb-500\n\n## Labs (baseline)\n- CBC, CMP\n- Serum copper/ceruloplasmin if chronic systemic use\n- **Age-appropriate cancer screening current \u2190 gating**\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Skin/site tolerance | Continue |\n| Mo 1 | Response, copper if dosing high | Adjust dose/route |\n| Mo 3 | Outcome, serum copper | Taper or stop |\n| Mo 6 | Malignancy ROS, copper status | Stop on any red flag/overload |\n\n## Safety & compliance gate\n- \u2610 Off-label/investigational consent signed (`consent_investigational_peptide`)\n- \u2610 Patient education delivered (`patiented_ghk-cu`)\n- \u2610 Source pharmacy verified\n- \u2610 Cancer screening current \u2190 gating\n\n## Patient education key points\n- Not FDA-approved as an injectable; topical use is better studied.\n- Don't exceed dosing \u2014 copper can accumulate.\n- Tell us any cancer history.\n- Report rash, metallic taste, or unusual symptoms.",
+      "teaser": false,
+      "grade": "C TOPICAL / D SYSTEMIC",
+      "evidence": "Mostly topical/cosmetic + in-vitro. A small topical RCT post-laser showed improved satisfaction but **no objective benefit**. Ph2 topical RCT recruiting (NCT07437586). No completed RCT for injected/systemic use.",
+      "citations": [
+        {
+          "label": "Miller 2006, Arch Facial Plast Surg",
+          "url": "https://doi.org/10.1001/archfaci.8.4.252"
+        },
+        {
+          "label": "Dymek 2023, Pharmaceutics",
+          "url": "https://doi.org/10.3390/pharmaceutics15102485"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "ghrp-2",
+      "name": "GHRP-2 (Pralmorelin)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Synthetic GH-releasing peptide / ghrelin-receptor agonist - stimulates pituitary GH release",
+      "primary_use": "GH-stimulation diagnostic agent abroad; reported off-label for GH elevation - not approved in the US",
+      "contraindications": "active malignancy, hypersensitivity; theoretical cortisol/prolactin and appetite effects",
+      "clinical_notes": "Grade D therapeutic. Recognized GH-stimulation test agent (approved in some countries) but no US therapeutic approval and no efficacy trials for anti-aging/body-composition use. Often stacked with a GHRH analog (unproven).",
+      "reviewed": "2026-06-22",
+      "body_md": "# GHRP-2 (Pralmorelin)\n\n## Indication\nNo US therapeutic approval. Diagnostic GH-stimulation use abroad; reported off-label for GH elevation. Reference entry only.\n\n## Rule out (contraindications)\n- \u2610 Active malignancy\n- \u2610 Hypersensitivity\n- \u2610 Caution: appetite/cortisol/prolactin effects\n\n## Rx\n- **Dose:** *reported* (marketplace): ~100-300 mcg SC 1-3x/day, often stacked with a GHRH analog.\n- **Route:** SC\n- **Cycle:** no validated protocol\n\n## Labs (baseline)\n- IGF-1, TSH/free T4, fasting glucose/A1c\n\n## Safety & compliance gate\n- \u2610 Contraindications excluded; honest evidence-grade (D) disclosed\n- \u2610 Source pharmacy verified\n- \u2610 Enhanced/experimental informed consent where investigational\n\n## Patient education key points\n- Evidence grade D; status reviewed and signed by the treating physician.\n- Report unexpected symptoms; source purity may be unregulated for non-approved peptides.",
+      "teaser": false,
+      "grade": "D",
+      "evidence": "GH-stimulation diagnostic agent abroad; no US therapeutic approval and no efficacy trials for wellness/anti-aging use. 2024\u201326 literature is diagnostic only.",
+      "citations": [],
+      "fda_pcac": null
+    },
+    {
+      "slug": "ghrp-6",
+      "name": "GHRP-6",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "GH-releasing hexapeptide / ghrelin-receptor agonist - GH release with marked appetite stimulation",
+      "primary_use": "Reported off-label for GH elevation and appetite - not approved; preclinical cardioprotection interest",
+      "contraindications": "active malignancy, hypersensitivity; pronounced appetite stimulation, cortisol/prolactin effects",
+      "clinical_notes": "Grade D. No human efficacy trials for wellness use; strong appetite/hunger effect. 2024-26 literature is preclinical (cardioprotective/anti-fibrotic) only. Stacked with GHRH analogs (unproven).",
+      "reviewed": "2026-06-22",
+      "body_md": "# GHRP-6\n\n## Indication\nNo approved indication. Reported off-label GH/appetite use. Reference entry only.\n\n## Rule out (contraindications)\n- \u2610 Active malignancy\n- \u2610 Hypersensitivity\n- \u2610 Marked appetite stimulation\n\n## Rx\n- **Dose:** *reported* (marketplace): ~100 mcg SC 1-3x/day.\n- **Route:** SC\n- **Cycle:** no validated protocol\n\n## Labs (baseline)\n- IGF-1, TSH/free T4, fasting glucose/A1c\n\n## Safety & compliance gate\n- \u2610 Contraindications excluded; honest evidence-grade (D) disclosed\n- \u2610 Source pharmacy verified\n- \u2610 Enhanced/experimental informed consent where investigational\n\n## Patient education key points\n- Evidence grade D; status reviewed and signed by the treating physician.\n- Report unexpected symptoms; source purity may be unregulated for non-approved peptides.",
+      "teaser": false,
+      "grade": "D",
+      "evidence": "No human efficacy trials for wellness use; marked appetite stimulation. 2024\u201326 literature is preclinical (cardioprotective/anti-fibrotic) only.",
+      "citations": [],
+      "fda_pcac": null
+    },
+    {
+      "slug": "gonadorelin",
+      "name": "Gonadorelin",
+      "brand_names": [
+        "Factrel",
+        "Lutrepulse"
+      ],
+      "line": "peptides",
+      "axis": "Vitality",
+      "status": "off_label",
+      "status_label": "Off-label",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Synthetic GnRH - stimulates pituitary LH/FSH release (pulsatile physiology)",
+      "primary_use": "Historically FDA-approved (brands discontinued); compounded use for male HPG-axis support during TRT and female ovulation induction",
+      "contraindications": "hormone-sensitive malignancy, pregnancy (unless ovulation-induction protocol), pituitary adenoma, hypersensitivity",
+      "clinical_notes": "Grade C (B for female pulsatile ovulation induction). Brand products discontinued; only US availability is compounded (reportedly Category 1). Male TRT/fertility use is off-label with limited modern evidence. Pulsatile delivery matters physiologically.",
+      "reviewed": "2026-06-22",
+      "body_md": "# Gonadorelin\n\n## Indication\nHistorically approved for diagnostic/ovulation-induction use (brands discontinued). Compounded off-label use for HPG-axis support during TRT and female ovulation induction.\n\n## Rule out (contraindications)\n- \u2610 Hormone-sensitive malignancy\n- \u2610 Pituitary adenoma\n- \u2610 Pregnancy (unless ovulation-induction protocol)\n- \u2610 Hypersensitivity\n\n## Rx\n- **Dose:** indication- and protocol-specific; pulsatile dosing for ovulation induction. Male TRT-adjunct dosing is off-label and not standardized.\n- **Route:** SC / IV (pulsatile)\n- **Cycle:** protocol-dependent\n\n## Labs (baseline)\n- LH, FSH, testosterone (men) / estradiol + cycle monitoring (women); pregnancy status\n\n## Safety & compliance gate\n- \u2610 Contraindications excluded; honest evidence-grade (C) disclosed\n- \u2610 Source pharmacy verified\n- \u2610 Enhanced/experimental informed consent where investigational\n\n## Patient education key points\n- Evidence grade C; status reviewed and signed by the treating physician.\n- Report unexpected symptoms; source purity may be unregulated for non-approved peptides.",
+      "teaser": false,
+      "grade": "C",
+      "evidence": "Brand GnRH products (Factrel/Lutrepulse) discontinued; only US availability is compounded. Female pulsatile ovulation-induction has real evidence; male TRT-adjunct use is off-label with limited modern data.",
+      "citations": [
+        {
+          "label": "Pulsatile GnRH ovulation induction 2026, Gynecol Endocrinol",
+          "url": "https://doi.org/10.1080/09513590.2026.2677994"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "hexarelin",
+      "name": "Hexarelin (Examorelin)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "GH-releasing hexapeptide / ghrelin-receptor agonist - potent GH release; cardiac CD36 binding studied",
+      "primary_use": "Reported off-label for GH elevation; preclinical cardiovascular interest - not approved",
+      "contraindications": "active malignancy, hypersensitivity; receptor desensitization with continued use, cortisol/prolactin effects",
+      "clinical_notes": "Grade D. No human therapeutic approval or efficacy trials; potent GH secretagogue prone to receptor desensitization. 2024-26 literature is preclinical/analytical only.",
+      "reviewed": "2026-06-22",
+      "body_md": "# Hexarelin (Examorelin)\n\n## Indication\nNo approved indication. Reported off-label GH-elevation use. Reference entry only.\n\n## Rule out (contraindications)\n- \u2610 Active malignancy\n- \u2610 Hypersensitivity\n- \u2610 Tachyphylaxis with continued dosing\n\n## Rx\n- **Dose:** *reported* (marketplace): ~100 mcg SC 1-2x/day.\n- **Route:** SC\n- **Cycle:** no validated protocol\n\n## Labs (baseline)\n- IGF-1, TSH/free T4, fasting glucose/A1c\n\n## Safety & compliance gate\n- \u2610 Contraindications excluded; honest evidence-grade (D) disclosed\n- \u2610 Source pharmacy verified\n- \u2610 Enhanced/experimental informed consent where investigational\n\n## Patient education key points\n- Evidence grade D; status reviewed and signed by the treating physician.\n- Report unexpected symptoms; source purity may be unregulated for non-approved peptides.",
+      "teaser": false,
+      "grade": "D",
+      "evidence": "No human therapeutic approval or efficacy trials; potent GH secretagogue prone to receptor desensitization. 2024\u201326 literature is preclinical/analytical only.",
+      "citations": [],
+      "fda_pcac": null
+    },
+    {
+      "slug": "ipamorelin",
+      "name": "Ipamorelin",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Selective ghrelin/GHSR agonist \u2014 stimulates GH pulse with minimal cortisol/prolactin effect",
+      "primary_use": "GH-axis support for recovery, body composition, and sleep, paired with a GHRH analog",
+      "contraindications": "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Cleanest GHRP \u2014 minimal hunger/cortisol vs GHRP-6. Synergistic with CJC-1295 or sermorelin. Bedtime dosing leverages the natural GH pulse.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Ipamorelin\n\n## Indication\nGH-axis support for recovery, body composition, and sleep quality, typically combined with a GHRH analog.\n\n## Rule out (contraindications)\n- \u2610 Active malignancy (absolute)\n- \u2610 Untreated severe hypothyroidism\n- \u2610 Pregnancy\n- \u2610 Lactation; age <18\n- \u2610 Hypersensitivity\n\n## Rx\n- **Dose:** 200\u2013300 mcg SC nightly (or BID)\n- **Route:** SC, bedtime\n- **Reconstitution:** 5 mg + 2.5 mL BAC water = 2 mg/mL = 2,000 mcg/mL \u2192 300 mcg = 0.15 mL = **15 units** (U-100)\n- **Cycle:** 12\u201316 weeks\n- **Stack pairs:** cjc-1295, sermorelin\n\n## Labs (baseline)\n- **IGF-1, TSH/free T4 \u2190 gating**\n- Fasting glucose, CMP, lipids\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, sleep | Reinforce timing |\n| Mo 1 | Symptoms, glucose | Hold/adjust |\n| Mo 3 | IGF-1, glucose | Titrate to upper-normal IGF-1 |\n| Mo 6 | IGF-1, composition | Lowest effective dose |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_gh_secretagogue`)\n- \u2610 Patient education delivered (`patiented_ipamorelin`)\n- \u2610 Source pharmacy verified\n- \u2610 Thyroid treated + cancer screen current \u2190 gating\n\n## Patient education key points\n- Not FDA-approved; compounded GH secretagogue.\n- Bedtime, empty stomach for best effect.\n- Report swelling, joint pain, or tingling.\n- We monitor IGF-1 and blood sugar over time.",
+      "teaser": false,
+      "grade": "C/D",
+      "evidence": "Two completed human Phase 2 trials (GI motility) \u2014 **both negative** (NCT00672074 missed primary endpoint; NCT01280344). Zero human efficacy data for anti-aging/muscle/fat use.",
+      "citations": [
+        {
+          "label": "Raun 1998, Eur J Endocrinol",
+          "url": "https://doi.org/10.1530/eje.0.1390552"
+        },
+        {
+          "label": "Beck 2014, Int J Colorectal Dis (negative human Ph2)",
+          "url": "https://doi.org/10.1007/s00384-014-2030-8"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "kisspeptin-10",
+      "name": "Kisspeptin-10",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Vitality",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "KISS1R agonist \u2014 stimulates hypothalamic GnRH release, upstream of LH/FSH",
+      "primary_use": "Libido and reproductive-axis support; investigational",
+      "contraindications": "active hormone-sensitive cancer, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Very early human data, mostly IV research dosing \u2014 SC use is empiric. Acts upstream on GnRH. Caution with hormone-sensitive conditions; consent as experimental.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Kisspeptin-10\n\n## Indication\nLibido and reproductive-axis support. <!-- NOTE: investigational; human data mostly IV research dosing, SC empiric -->\n\n## Rule out (contraindications)\n- \u2610 Active hormone-sensitive malignancy (absolute)\n- \u2610 Pregnancy\n- \u2610 Lactation\n- \u2610 Age <18\n- \u2610 Hypersensitivity\n\n## Rx\n- **Dose:** ~100 mcg SC (empiric); range narrow, start low <!-- NOTE: no validated SC regimen -->\n- **Route:** SC\n- **Reconstitution:** 5 mg + 2.5 mL BAC water = 2 mg/mL = 2,000 mcg/mL \u2192 100 mcg = 0.05 mL = **5 units** (U-100)\n- **Cycle:** 4\u20138 weeks\n- **Stack pairs:** pt-141\n\n## Labs (baseline)\n- LH/FSH, total testosterone/estradiol, prolactin\n- Hormone-sensitive cancer screen\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, libido | Continue |\n| Mo 1 | Symptoms, hormones | Hold/adjust |\n| Mo 3 | LH/testosterone, response | Continue if benefit |\n| Mo 6 | Hormone panel | Stop if no durable change |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_investigational_peptide`)\n- \u2610 Patient education delivered (`patiented_kisspeptin-10`)\n- \u2610 Source pharmacy verified\n- \u2610 Hormone-sensitive cancer screen documented\n\n## Patient education key points\n- Experimental; very limited human data.\n- Acts on the brain's hormone-control center.\n- Tell us any hormone-sensitive cancer history.\n- Report unusual symptoms; effects may be subtle.",
+      "teaser": false,
+      "grade": "C",
+      "evidence": "Genuine human Phase 1 physiology studies (reliably stimulates LH acutely) \u2014 NCT00914823, NCT03286517 \u2014 but **no completed efficacy RCTs** for libido/fertility/\"vitality.\"",
+      "citations": [
+        {
+          "label": "Ullah 2018, Andrologia",
+          "url": "https://doi.org/10.1111/and.13219"
+        },
+        {
+          "label": "Lippincott 2016, JCEM",
+          "url": "https://doi.org/10.1210/jc.2016-1545"
+        },
+        {
+          "label": "Colledge 2008, Results Probl Cell Differ",
+          "url": "https://doi.org/10.1007/400_2007_050"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "kpv",
+      "name": "KPV",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Immunity",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "\u03b1-MSH C-terminal tripeptide \u2014 anti-inflammatory via NF-\u03baB downregulation",
+      "primary_use": "Anti-inflammatory support, gut/skin inflammation adjunct",
+      "contraindications": "transplant on immunosuppression, severe active autoimmune, pregnancy, lactation, age <18",
+      "clinical_notes": "Anti-inflammatory tripeptide, oral or SC. Useful gut/skin adjunct; preclinical evidence. Pairs with T\u03b11 for an immune-axis combo. Not a substitute for IBD work-up.",
+      "reviewed": "2026-06-10",
+      "body_md": "# KPV\n\n## Indication\nAnti-inflammatory support, particularly as a gut or skin inflammation adjunct. <!-- NOTE: preclinical evidence; no human RCTs -->\n\n## Rule out (contraindications)\n- \u2610 Transplant on immunosuppression (precautionary)\n- \u2610 Severe active autoimmune disease\n- \u2610 Pregnancy\n- \u2610 Lactation; age <18\n- \u2610 Hypersensitivity\n\n## Rx\n- **Dose:** 200\u2013500 mcg SC daily (or oral capsule)\n- **Route:** SC or oral\n- **Reconstitution:** 5 mg + 2.5 mL BAC water = 2 mg/mL = 2,000 mcg/mL \u2192 500 mcg = 0.25 mL = **25 units** (U-100)\n- **Cycle:** 4\u20138 weeks\n- **Stack pairs:** thymosin-alpha-1, bpc-157\n\n## Labs (baseline)\n- CBC, CMP, CRP/ESR if inflammatory\n- GI/derm work-up as indicated\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, symptoms | Continue |\n| Mo 1 | Inflammatory markers | Hold/adjust |\n| Mo 3 | Symptom/marker response | Continue if benefit |\n| Mo 6 | Durable response | Taper/stop |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_immunomodulator`)\n- \u2610 Patient education delivered (`patiented_kpv`)\n- \u2610 Source pharmacy verified\n- \u2610 Autoimmune/transplant status documented\n\n## Patient education key points\n- Not FDA-approved; evidence is preclinical.\n- An adjunct \u2014 doesn't replace work-up of gut/skin disease.\n- Tell us about autoimmune conditions or immune-suppressing meds.\n- Report any unusual symptoms.",
+      "teaser": false,
+      "grade": "D",
+      "evidence": "**Preclinical only \u2014 zero human trials of any phase** (mouse colitis/IBD + in-vitro).",
+      "citations": [
+        {
+          "label": "Kannengiesser 2008, Inflamm Bowel Dis",
+          "url": "https://doi.org/10.1002/ibd.20334"
+        },
+        {
+          "label": "Viennois 2016, Cell Mol Gastroenterol Hepatol",
+          "url": "https://doi.org/10.1016/j.jcmgh.2016.01.006"
+        },
+        {
+          "label": "Xiao 2017, Mol Ther",
+          "url": "https://doi.org/10.1016/j.ymthe.2016.11.020"
+        }
+      ],
+      "fda_pcac": {
+        "day": 1,
+        "date": "2026-07-23"
+      }
+    },
+    {
+      "slug": "liraglutide",
+      "name": "Liraglutide",
+      "brand_names": [
+        "Victoza",
+        "Saxenda"
+      ],
+      "line": "peptides",
+      "axis": "Metabolism",
+      "status": "fda_approved",
+      "status_label": "FDA-approved",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "GLP-1 receptor agonist (once-daily) \u2014 insulin secretion, slowed gastric emptying, appetite suppression",
+      "primary_use": "Type 2 diabetes (Victoza) and chronic weight management (Saxenda); pediatric weight data",
+      "contraindications": "personal/family MTC or MEN2, pregnancy, pancreatitis history, hypersensitivity",
+      "clinical_notes": "FDA-approved, Grade A. Daily dosing (vs weekly semaglutide). First generic Victoza (2024) and generic Saxenda (2025) now available; SCALE Kids extended pediatric use. Titrate to limit GI effects.",
+      "reviewed": "2026-06-22",
+      "body_md": "# Liraglutide\n\n## Indication\nType 2 diabetes (Victoza); chronic weight management, BMI >=30 or >=27 with comorbidity (Saxenda); pediatric obesity per label.\n\n## Rule out (contraindications)\n- \u2610 Personal/family history of MTC or MEN2 (boxed)\n- \u2610 Pregnancy\n- \u2610 History of pancreatitis (caution)\n- \u2610 Hypersensitivity\n- \u2610 Severe gastroparesis\n\n## Rx\n- **Dose:** Victoza 0.6 mg SC daily x1wk -> 1.2 -> 1.8 mg. Saxenda 0.6 mg daily, +0.6 mg weekly -> 3.0 mg.\n- **Route:** SC once daily\n- **Titration:** weekly steps to limit nausea\n- **Cycle:** chronic\n\n## Labs (baseline)\n- A1c, fasting glucose, CMP, lipids, weight/BMI; pregnancy status; lipase if pancreatitis risk\n\n## Safety & compliance gate\n- \u2610 Contraindications excluded; honest evidence-grade (A) disclosed\n- \u2610 Source pharmacy verified\n- \u2610 Enhanced/experimental informed consent where investigational\n\n## Patient education key points\n- Evidence grade A; status reviewed and signed by the treating physician.\n- Report unexpected symptoms; source purity may be unregulated for non-approved peptides.",
+      "teaser": false,
+      "grade": "A",
+      "evidence": "FDA-approved (Victoza for T2D, Saxenda for weight). SCALE Kids extended pediatric data; first generics approved 2024\u20132025.",
+      "citations": [
+        {
+          "label": "Fox 2024, NEJM (SCALE Kids)",
+          "url": "https://doi.org/10.1056/NEJMoa2407379"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "melanotan-ii",
+      "name": "Melanotan II",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Vitality",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Non-selective melanocortin receptor agonist (MC1R/MC3R/MC4R) \u2014 stimulates melanogenesis (tanning) with central effects on libido and appetite",
+      "primary_use": "Reported (gray-market) for skin tanning and sexual arousal \u2014 not approved for any use",
+      "contraindications": "personal/family melanoma or atypical/dysplastic nevi, dysplastic nevus syndrome, pregnancy, lactation, hypersensitivity",
+      "clinical_notes": "Grade D, not approved. Major safety concern \u2014 case reports of melanoma and new/darkening or changing moles after use; nausea, flushing, and priapism are common. Distinct from FDA-approved afamelanotide (SCENESSE). Mandate full-body skin surveillance; many clinicians decline to prescribe.",
+      "reviewed": "2026-06-22",
+      "body_md": "# Melanotan II\n\n## Indication\nNo approved indication. Reported marketplace use for skin tanning and for sexual arousal/libido. Included as a reference entry because of high consumer demand \u2014 not a recommendation to prescribe.\n\n## Rule out (contraindications)\n- \u2610 Personal or family history of melanoma (absolute)\n- \u2610 Atypical / dysplastic nevi or dysplastic nevus syndrome\n- \u2610 Pregnancy / lactation\n- \u2610 Hypersensitivity\n- \u2610 Uncontrolled hypertension / cardiovascular instability\n- \u2610 Unverified / gray-market source\n\n## Rx\n- **Dose:** *reported* (marketplace; no validated regimen): low microgram SC dosing with cautious titration. **Not a recommended protocol.**\n- **Route:** SC\n- **Reconstitution:** per product (gray-market potency/purity unreliable \u2014 forensic analyses have found ~30% purity)\n- **Cycle:** N/A \u2014 research/gray-market\n- **Stack pairs:** none recommended\n\n## Labs (baseline)\n- Full skin/mole mapping and dermatologic baseline; BP; CMP\n\n## Ongoing care\n| When | What to check | What to adjust |\n| Baseline | Full-body skin exam, mole mapping | Do not start if atypical lesions |\n| Ongoing | New/changing pigmented lesions, BP | Stop + dermatology referral on any change |\n\n## Safety & compliance gate\n- \u2610 Melanoma / atypical-nevi history excluded (absolute)\n- \u2610 Dermatologic surveillance plan documented\n- \u2610 Patient counseled on melanoma case reports + unregulated purity\n- \u2610 Enhanced/experimental informed consent obtained\n\n## Patient education key points\n- **Not FDA-approved; not the same as afamelanotide (SCENESSE).**\n- Case reports link use to melanoma and to new/changing moles \u2014 any pigmented-lesion change requires urgent evaluation.\n- Common effects: nausea, facial flushing, spontaneous erections (priapism).\n- Source purity is unregulated and unreliable.",
+      "teaser": false,
+      "grade": "D",
+      "evidence": "No FDA approval; small/early efficacy data plus harm signals \u2014 case reports of melanoma and mucosal hyperpigmentation after use; nausea/flushing/priapism common. Distinct from FDA-approved afamelanotide.",
+      "citations": [
+        {
+          "label": "Oral mucosal melanoma after MT-II 2025, Int J Oral Maxillofac Surg",
+          "url": "https://doi.org/10.1016/j.ijom.2025.03.014"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "mk-677",
+      "name": "MK-677 (Ibutamoren)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Orally active ghrelin-receptor (GHS-R1a) agonist / GH secretagogue - raises GH and IGF-1",
+      "primary_use": "Reported for GH/IGF-1 elevation, body composition, sleep - not approved",
+      "contraindications": "active malignancy, heart failure / fluid retention risk, uncontrolled diabetes, pregnancy/lactation",
+      "clinical_notes": "Grade C/D, not approved. Raises IGF-1 but no approved indication; causes fluid retention, increased appetite, and insulin resistance. New safety signal: atraumatic splenic rupture case report (with RAD-140). Monitor glucose and edema.",
+      "reviewed": "2026-06-22",
+      "body_md": "# MK-677 (Ibutamoren)\n\n## Indication\nNo approved indication. Reported oral use for GH/IGF-1 elevation, body composition, and sleep. Reference entry, not a recommendation.\n\n## Rule out (contraindications)\n- \u2610 Active or prior malignancy\n- \u2610 Heart failure / fluid-retention risk\n- \u2610 Uncontrolled diabetes / insulin resistance\n- \u2610 Pregnancy / lactation\n- \u2610 Hypersensitivity\n\n## Rx\n- **Dose:** *reported* (marketplace): 10-25 mg orally at night. No validated regimen.\n- **Route:** oral\n- **Cycle:** reported cycling; no validated protocol\n\n## Labs (baseline)\n- IGF-1, fasting glucose/A1c, CMP, lipids; weight/edema; cardiac history\n\n## Safety & compliance gate\n- \u2610 Contraindications excluded; honest evidence-grade (C/D) disclosed\n- \u2610 Source pharmacy verified\n- \u2610 Enhanced/experimental informed consent where investigational\n\n## Patient education key points\n- Evidence grade C/D; status reviewed and signed by the treating physician.\n- Report unexpected symptoms; source purity may be unregulated for non-approved peptides.",
+      "teaser": false,
+      "grade": "C/D",
+      "evidence": "No FDA approval; raises IGF-1 but no approved indication. Causes fluid retention and insulin resistance; new atraumatic splenic-rupture case report (with RAD-140).",
+      "citations": [
+        {
+          "label": "Jaffry 2026, Cureus (splenic rupture case)",
+          "url": "https://doi.org/10.7759/cureus.106106"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "mots-c",
+      "name": "MOTS-c",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Longevity",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Mitochondrial-derived peptide \u2014 activates AMPK, improves metabolic flexibility (exercise mimetic)",
+      "primary_use": "Metabolic/healthspan support \u2014 insulin sensitivity and metabolic flexibility",
+      "contraindications": "active malignancy, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "No human therapeutic trials \u2014 preclinical only. Tie use to a number (HOMA-IR/A1c) and stop if it doesn't move. Exercise is the proven version of this mechanism.",
+      "reviewed": "2026-06-10",
+      "body_md": "# MOTS-c\n\n## Indication\nMetabolic/healthspan support targeting insulin sensitivity and metabolic flexibility. <!-- NOTE: no human therapeutic RCTs; preclinical only -->\n\n## Rule out (contraindications)\n- \u2610 Active malignancy (precautionary \u2014 absolute)\n- \u2610 Pregnancy\n- \u2610 Lactation\n- \u2610 Age <18\n- \u2610 Hypersensitivity\n\n## Rx\n- **Dose:** 5\u201310 mg SC, 2\u20133\u00d7/week\n- **Route:** SC\n- **Reconstitution:** 10 mg + 1 mL BAC water = 10 mg/mL = 10,000 mcg/mL \u2192 5 mg = 0.50 mL = **50 units** (U-100)\n- **Cycle:** 4\u20138 weeks tied to a metabolic endpoint\n- **Stack pairs:** ss-31, epitalon, tesamorelin\n\n## Labs (baseline)\n- **Fasting glucose/insulin (HOMA-IR), A1c \u2190 gating endpoint**\n- Lipids, CMP, CBC; cancer screen current\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, glucose | Reinforce diet/exercise |\n| Mo 1 | Fasting glucose/insulin | Reconsider if no signal |\n| Mo 3 | A1c, HOMA-IR | Continue only if objective benefit |\n| Mo 6 | Metabolic panel | Stop if no durable change |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_investigational_peptide`)\n- \u2610 Patient education delivered (`patiented_mots-c`)\n- \u2610 Source pharmacy verified\n- \u2610 Cancer screen current \u2190 gating\n\n## Patient education key points\n- Experimental; no human efficacy proof.\n- Exercise and diet do the proven work here.\n- We'll measure your metabolic markers and stop if they don't improve.\n- Tell us any cancer history; report unusual symptoms.",
+      "teaser": false,
+      "grade": "D\u2192C",
+      "evidence": "Preclinical-dominant; human data observational/associational. First interventional **Phase 2a RCT now recruiting** (NCT07505745, prediabetes/obesity, n=120). No completed human efficacy trials.",
+      "citations": [
+        {
+          "label": "Lee 2015, Cell Metab",
+          "url": "https://doi.org/10.1016/j.cmet.2015.02.009"
+        },
+        {
+          "label": "Kumagai 2021, Am J Physiol Endocrinol Metab",
+          "url": "https://doi.org/10.1152/ajpendo.00275.2020"
+        },
+        {
+          "label": "Zheng 2023, Front Endocrinol",
+          "url": "https://doi.org/10.3389/fendo.2023.1120533"
+        }
+      ],
+      "fda_pcac": {
+        "day": 1,
+        "date": "2026-07-23"
+      }
+    },
+    {
+      "slug": "pt-141",
+      "name": "Bremelanotide",
+      "brand_names": [
+        "Vyleesi"
+      ],
+      "line": "peptides",
+      "axis": "Vitality",
+      "status": "fda_approved",
+      "status_label": "FDA-approved",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Melanocortin (MC4R) agonist \u2014 central activation of sexual desire/arousal pathways",
+      "primary_use": "HSDD in premenopausal women (on-label); off-label ED/low desire",
+      "contraindications": "uncontrolled HTN, significant CVD, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Central, not vascular \u2014 use when desire is the problem or PDE5 fails. Set the nausea expectation up front. Respect the BP contraindication; warn about hyperpigmentation.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Bremelanotide (PT-141 / Vyleesi)\n\n## Indication\nAcquired, generalized HSDD in premenopausal women (on-label); off-label for ED or low desire.\n\n## Rule out (contraindications)\n- \u2610 Uncontrolled hypertension (absolute)\n- \u2610 Significant cardiovascular disease\n- \u2610 Pregnancy\n- \u2610 Lactation; age <18\n- \u2610 Hypersensitivity\n- \u2610 Priapism-predisposing condition (ED use)\n\n## Rx\n- **Dose:** 1.75 mg SC PRN, \u226545 min before activity; max 1/24h, \u22648/month\n- **Route:** SC PRN\n- **Reconstitution:** Vyleesi autoinjector pre-mixed (1.75 mg/0.3 mL) \u2014 **no math**. Compounded: 10 mg + 5 mL = 2 mg/mL \u2192 1.75 mg = 0.875 mL. <!-- NOTE: verify compounded concentration -->\n- **Cycle:** PRN ongoing; reassess at 8 wk\n- **Stack pairs:** kisspeptin-10\n\n## Labs (baseline)\n- **BP documented controlled \u2190 gating**\n- Pregnancy test; reversible-cause screen (TSH, meds, mood)\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Nausea, BP, efficacy | Pre-treat nausea; confirm 45-min lead |\n| Mo 1 | Efficacy, dose count | Keep \u22648/month |\n| Mo 3 | Benefit, BP, skin | Discontinue if no benefit by 8 wk |\n| Mo 6 | Efficacy, BP, skin | Continue if effective |\n\n## Safety & compliance gate\n- \u2610 Off-label consent signed (`consent_sexual_health_peptide`) \u2014 N/A if on-label\n- \u2610 Patient education delivered (`patiented_pt-141`)\n- \u2610 Source pharmacy verified\n- \u2610 BP controlled documented \u2190 gating\n\n## Patient education key points\n- Nausea is common early \u2014 take \u226545 min before activity, with food.\n- Don't use if blood pressure is uncontrolled; report chest pain.\n- Repeated use can darken skin/gums (may not fully reverse).\n- Episodic only \u2014 no more than 8 doses a month.",
+      "teaser": false,
+      "grade": "A (LABEL INDICATION)",
+      "evidence": "FDA-approved (2019) for acquired, generalized HSDD in premenopausal women. Two completed Phase 3 RCTs (RECONNECT) + Phase 2; effect modest. Grade A *for the label indication only*; male/general \"libido\" use is off-label.",
+      "citations": [
+        {
+          "label": "Kingsberg 2019, Obstet Gynecol (RECONNECT)",
+          "url": "https://doi.org/10.1097/AOG.0000000000003500"
+        },
+        {
+          "label": "Clayton 2016, Womens Health",
+          "url": "https://doi.org/10.2217/whe-2016-0018"
+        },
+        {
+          "label": "Diamond 2006, J Sex Med",
+          "url": "https://doi.org/10.1111/j.1743-6109.2006.00268.x"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "retatrutide",
+      "name": "Retatrutide",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Metabolism",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Triple GIP/GLP-1/glucagon receptor agonist \u2014 satiety + insulin sensitization + energy expenditure",
+      "primary_use": "Investigational obesity/metabolic \u2014 severe obesity not at goal on dual agonists",
+      "contraindications": "MTC/MEN-2 hx, acute pancreatitis, severe gastroparesis, pregnancy, hypersensitivity",
+      "clinical_notes": "Not FDA-approved \u2014 Phase 3 ongoing. Glucagon arm can raise heart rate and nudge glucose; monitor closely. Treat as experimental and consent accordingly.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Retatrutide\n\n## Indication\nInvestigational use for severe obesity/metabolic disease not at goal on approved incretins. <!-- NOTE: not FDA-approved; Phase 3 pending \u2014 fully investigational -->\n\n## Rule out (contraindications)\n- \u2610 Personal/family MTC or MEN-2 (absolute)\n- \u2610 Acute pancreatitis\n- \u2610 Severe gastroparesis\n- \u2610 Pregnancy / planning; lactation; age <18\n- \u2610 Hypersensitivity\n- \u2610 Uncontrolled tachyarrhythmia (glucagon-driven HR rise)\n\n## Rx\n- **Dose:** 2 mg SC weekly start; titrate slowly toward 8\u201312 mg <!-- NOTE: trial titration; compounded dosing empiric -->\n- **Route:** SC weekly\n- **Reconstitution:** 12 mg + 1.2 mL BAC water = 10 mg/mL \u2192 2 mg = 0.20 mL = **20 units** (U-100)\n- **Cycle:** Chronic (investigational)\n- **Stack pairs:** mots-c\n\n## Labs (baseline)\n- A1c, fasting glucose, CMP, lipids, **resting HR/ECG if cardiac risk**\n- Pregnancy test; **MTC/pancreatitis screen \u2190 gating**\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | GI tolerance, HR | Slow titration |\n| Mo 1 | Weight, BP, HR | Advance if tolerated |\n| Mo 3 | A1c, weight %, HR | Titrate to goal |\n| Mo 6 | A1c, lipids, HR, weight | Maintenance dose |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_investigational_peptide`)\n- \u2610 Patient education delivered (`patiented_retatrutide`)\n- \u2610 Source pharmacy verified\n- \u2610 MTC/pancreatitis screen + baseline HR \u2190 gating\n\n## Patient education key points\n- Experimental \u2014 not FDA-approved; long-term safety unknown.\n- May raise heart rate; report palpitations.\n- Same GI and pancreatitis cautions as other incretins.\n- Report severe abdominal pain immediately.",
+      "teaser": false,
+      "grade": "B",
+      "evidence": "Completed Phase 2 obesity RCT (~\u221224.2% body weight at 48 wk); Phase 3 (TRIUMPH-1 NCT05929066 completed; NCT05882045 active). Not yet approved.",
+      "citations": [
+        {
+          "label": "Jastreboff/Kaplan/Fr\u00edas 2023, NEJM",
+          "url": "https://doi.org/10.1056/NEJMoa2301972"
+        },
+        {
+          "label": "Katsi 2025, Biomolecules",
+          "url": "https://doi.org/10.3390/biom15060796"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "selank",
+      "name": "Selank",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Cognition",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Tuftsin analog \u2014 anxiolytic via GABA/serotonin modulation and BDNF, immunomodulatory",
+      "primary_use": "Anxiety/stress and cognitive support without sedation",
+      "contraindications": "pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Russian-origin anxiolytic peptide, dosed SC here, non-sedating. Pairs with Semax. SC gives tighter dose control than nasal; not a substitute for evaluating real anxiety.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Selank\n\n## Indication\nAnxiety/stress reduction and cognitive support without sedation. <!-- NOTE: not FDA-approved; Russian-origin; native Selank SC has a short half-life (intranasal is conventional) \u2014 SC dosing here is empiric; N-acetyl/amidated analogs are more stable for SC -->\n\n## Rule out (contraindications)\n- \u2610 Pregnancy\n- \u2610 Lactation\n- \u2610 Age <18\n- \u2610 Hypersensitivity\n- \u2610 Untreated primary anxiety/mood disorder needing formal care\n\n## Rx\n- **Dose:** 300 mcg SC daily; range 250\u2013500 mcg (divided if higher)\n- **Route:** SC\n- **Reconstitution:** 10 mg + 2 mL BAC water = 5 mg/mL = 5,000 mcg/mL \u2192 300 mcg = 0.06 mL = **6 units** (U-100)\n- **Cycle:** 2\u20134 weeks, pulsed\n- **Stack pairs:** semax, dsip\n\n## Labs (baseline)\n- Generally none required\n- Anxiety/mood screen\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, anxiety | Continue |\n| Mo 1 | Mood/stress effect | Hold/adjust |\n| Mo 3 | Off-cycle status | Plan next pulse |\n| Mo 6 | Durable benefit | Continue vs stop |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_investigational_peptide`)\n- \u2610 Patient education delivered (`patiented_selank`)\n- \u2610 Source pharmacy verified\n- \u2610 Mood/anxiety screen documented\n\n## Patient education key points\n- Not FDA-approved; not a treatment for diagnosed anxiety disorders.\n- Now given as a small subcutaneous injection, non-sedating \u2014 rotate sites.\n- Report worsening mood or unusual symptoms.\n- Seek formal care if anxiety is significant.",
+      "teaser": false,
+      "grade": "C/D",
+      "evidence": "**Zero genuine registered trials.** Two small Russian comparative anxiety trials (vs benzodiazepines) + preclinical. Marketed intranasally in Russia only.",
+      "citations": [
+        {
+          "label": "Zozulia 2008, Zh Nevrol Psikhiatr (PMID 18454096)",
+          "url": ""
+        },
+        {
+          "label": "Medvedev 2014, Zh Nevrol Psikhiatr (PMID 25176261)",
+          "url": ""
+        },
+        {
+          "label": "Kasian 2017, Behav Neurol (rat)",
+          "url": "https://doi.org/10.1155/2017/5091027"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "semaglutide",
+      "name": "Semaglutide",
+      "brand_names": [
+        "Ozempic",
+        "Wegovy",
+        "Rybelsus"
+      ],
+      "line": "peptides",
+      "axis": "Metabolism",
+      "status": "fda_approved",
+      "status_label": "FDA-approved",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "GLP-1 receptor agonist \u2014 glucose-dependent insulin secretion, slowed gastric emptying, central appetite suppression",
+      "primary_use": "Type 2 diabetes; chronic weight management; MASH with fibrosis (2025); CV and renal risk reduction",
+      "contraindications": "personal/family medullary thyroid carcinoma or MEN2, pregnancy, prior serious hypersensitivity, pancreatitis history (caution)",
+      "clinical_notes": "FDA-approved, Grade A \u2014 the reference GLP-1. Titrate slowly to limit GI effects. Now approved for MASH (2025) with positive renal (FLOW) and CV (SELECT) outcomes. Counsel on reduced oral-contraceptive reliability with delayed gastric emptying, and on pancreatitis/gallbladder symptoms.",
+      "reviewed": "2026-06-22",
+      "body_md": "# Semaglutide\n\n## Indication\nType 2 diabetes; chronic weight management (BMI \u226530, or \u226527 with a weight-related comorbidity); MASH with moderate\u2013advanced fibrosis (Wegovy, 2025); cardiovascular risk reduction; renal protection in T2D with CKD.\n\n## Rule out (contraindications)\n- \u2610 Personal or family history of medullary thyroid carcinoma or MEN2 (boxed warning)\n- \u2610 Pregnancy or planning pregnancy\n- \u2610 Prior serious hypersensitivity to semaglutide\n- \u2610 History of pancreatitis (caution)\n- \u2610 Severe gastroparesis\n- \u2610 Active proliferative diabetic retinopathy (caution \u2014 monitor)\n\n## Rx\n- **Dose (label, indication-specific):** Wegovy SC weekly 0.25 \u2192 0.5 \u2192 1.0 \u2192 1.7 \u2192 2.4 mg (escalate ~q4wk). Ozempic SC weekly 0.25 \u2192 0.5 \u2192 1.0 (\u21922.0) mg. Rybelsus oral 3 mg \u00d730d \u2192 7 mg \u2192 14 mg daily (fasting, plain water).\n- **Route:** SC once weekly (or oral daily \u2014 Rybelsus)\n- **Titration:** increase no faster than every 4 weeks to limit nausea/GI effects\n- **Cycle:** chronic, indication-dependent\n- **Stack pairs:** per prescriber judgment\n\n## Labs (baseline)\n- A1c, fasting glucose, CMP, lipids, weight/BMI; pregnancy status; lipase if pancreatitis risk\n\n## Ongoing care\n| When | What to check | What to adjust |\n| Wk 4 | GI tolerance, weight, glucose | Hold escalation if intolerant |\n| Mo 1 | A1c trend, weight | Up-titrate per response |\n| Mo 3 | A1c, lipids, BP | Continue / adjust dose |\n| Mo 6 | A1c, weight maintenance, renal | Maintain effective dose |\n\n## Safety & compliance gate\n- \u2610 MTC/MEN2 excluded; pancreatitis risk addressed\n- \u2610 Contraception counseling documented (delayed gastric emptying)\n- \u2610 Patient education delivered (`patient-semaglutide`)\n- \u2610 Source pharmacy verified\n\n## Patient education key points\n- FDA-approved; on-label use per prescriber judgment.\n- Inject the same day each week; rotate sites.\n- Report severe abdominal pain (pancreatitis), gallbladder symptoms, or persistent vomiting.\n- Weight/glucose effects regress if discontinued.",
+      "teaser": false,
+      "grade": "A",
+      "evidence": "Extensive Phase 3 program (SUSTAIN/STEP). FDA-approved for T2D, chronic weight management, and (2025) MASH with fibrosis; FLOW renal and SELECT cardiovascular outcomes positive.",
+      "citations": [
+        {
+          "label": "Sanyal 2025, NEJM (ESSENCE / MASH)",
+          "url": "https://doi.org/10.1056/NEJMoa2413258"
+        },
+        {
+          "label": "Perkovic 2024, NEJM (FLOW renal)",
+          "url": "https://doi.org/10.1056/NEJMoa2403347"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "semax",
+      "name": "Semax",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Cognition",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "ACTH(4-10) analog \u2014 modulates BDNF and monoaminergic tone, neuroprotective",
+      "primary_use": "Focus, cognitive support, and recovery from cognitive fatigue",
+      "contraindications": "pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Russian-origin nootropic, now dosed SC here. Short well-tolerated courses; effects are subtle. SC gives more reliable dosing than intranasal drops \u2014 verify vial concentration.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Semax\n\n## Indication\nFocus, cognitive support, and recovery from cognitive fatigue. <!-- NOTE: not FDA-approved; Russian-origin; native Semax SC has a short half-life (intranasal is the conventional route) \u2014 SC dosing here is empiric; N-acetyl/amidated analogs are more stable for SC -->\n\n## Rule out (contraindications)\n- \u2610 Pregnancy\n- \u2610 Lactation\n- \u2610 Age <18\n- \u2610 Hypersensitivity\n- \u2610 Acute psychiatric instability (precautionary)\n\n## Rx\n- **Dose:** 300 mcg SC daily; range 250\u2013600 mcg (divided if higher)\n- **Route:** SC\n- **Reconstitution:** 10 mg + 2 mL BAC water = 5 mg/mL = 5,000 mcg/mL \u2192 300 mcg = 0.06 mL = **6 units** (U-100)\n- **Cycle:** 2\u20134 weeks, pulsed\n- **Stack pairs:** selank, dsip, cerebrolysin\n\n## Labs (baseline)\n- Generally none required; BP if hypertensive\n- Psychiatric history review\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, focus | Continue |\n| Mo 1 | Cognitive/mood effect | Hold/adjust |\n| Mo 3 | Off-cycle status | Plan next pulse |\n| Mo 6 | Durable benefit | Continue vs stop |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_investigational_peptide`)\n- \u2610 Patient education delivered (`patiented_semax`)\n- \u2610 Source pharmacy verified\n- \u2610 Vial concentration confirmed\n\n## Patient education key points\n- Not FDA-approved; effects are subtle.\n- Now given as a small subcutaneous injection \u2014 rotate sites.\n- Report agitation, headache, or sleep changes.\n- Used in short courses, not indefinitely.",
+      "teaser": false,
+      "grade": "C/D",
+      "evidence": "**Zero genuine registered trials.** Best human data = a small non-randomized Russian acute-stroke study; rest preclinical. Marketed intranasally in Russia only.",
+      "citations": [
+        {
+          "label": "Gusev 1997, Zh Nevrol Psikhiatr (PMID 11517472)",
+          "url": ""
+        },
+        {
+          "label": "Dolotov 2006, J Neurochem (rat)",
+          "url": "https://doi.org/10.1111/j.1471-4159.2006.03658.x"
+        }
+      ],
+      "fda_pcac": {
+        "day": 2,
+        "date": "2026-07-24"
+      }
+    },
+    {
+      "slug": "sermorelin",
+      "name": "Sermorelin",
+      "brand_names": [
+        "Geref"
+      ],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "off_label",
+      "status_label": "Off-label",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "GHRH(1-29) analog \u2014 stimulates endogenous pulsatile GH release via pituitary GHRH receptor",
+      "primary_use": "Adult age-related GH decline with low-normal IGF-1 and consistent symptoms",
+      "contraindications": "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Brand discontinued \u2014 compounded only. Treat thyroid first or you'll mislabel a responder. Bedtime, empty stomach; chase IGF-1 upper-normal-for-age, not above.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Sermorelin (Geref \u2014 discontinued)\n\n## Indication\nAdult symptomatic age-related GH decline with low-normal/low IGF-1 after excluding other causes.\n\n## Rule out (contraindications)\n- \u2610 Active malignancy (absolute)\n- \u2610 Untreated severe hypothyroidism (treat first)\n- \u2610 Pregnancy\n- \u2610 Lactation; age <18\n- \u2610 Hypersensitivity\n- \u2610 Non-functional pituitary (won't respond)\n\n## Rx\n- **Dose:** 300 mcg SC nightly; range 200\u2013500 mcg\n- **Route:** SC, bedtime, empty stomach\n- **Reconstitution:** 5 mg + 5 mL BAC water = 1 mg/mL = 1,000 mcg/mL \u2192 300 mcg = 0.30 mL = **30 units** (U-100)\n- **Cycle:** 12\u201324 weeks; reassess\n- **Stack pairs:** ipamorelin, cjc-1295\n\n## Labs (baseline)\n- **IGF-1, TSH/free T4 \u2190 gating** (thyroid + IGF-1)\n- Fasting glucose/A1c, CMP, lipids, CBC\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, sleep | Reinforce timing |\n| Mo 1 | Symptoms, fasting glucose | Hold dose |\n| Mo 3 | IGF-1, glucose | Titrate to upper-normal IGF-1 |\n| Mo 6 | IGF-1, A1c, composition | Lowest effective dose; stop if flat |\n\n## Safety & compliance gate\n- \u2610 Off-label consent signed (`consent_gh_secretagogue`)\n- \u2610 Patient education delivered (`patiented_sermorelin`)\n- \u2610 Source pharmacy verified\n- \u2610 Thyroid treated + cancer screen current \u2190 gating\n\n## Patient education key points\n- Compounded/off-label; this is not synthetic HGH.\n- Inject at bedtime on an empty stomach \u2014 no carbs first.\n- Benefits are modest; we track IGF-1 and symptoms.\n- Report swelling, joint aches, or tingling (signs of too much).",
+      "teaser": false,
+      "grade": "B (PEDS/DX) / D (ADULT WELLNESS)",
+      "evidence": "Real FDA history \u2014 was approved (Geref) for pediatric GHD diagnosis/treatment, now discontinued; compounded use not FDA-approved. No RCTs for adult \"anti-aging\" use.",
+      "citations": [
+        {
+          "label": "Prakash & Goa 1999, BioDrugs",
+          "url": "https://doi.org/10.2165/00063030-199912020-00007"
+        },
+        {
+          "label": "Walker 2006, Clin Interv Aging",
+          "url": "https://doi.org/10.2147/ciia.2006.1.4.307"
+        },
+        {
+          "label": "Esposito 2003, Adv Drug Deliv Rev",
+          "url": "https://doi.org/10.1016/s0169-409x(03)00109-1"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "ss-31",
+      "name": "Elamipretide (SS-31)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Longevity",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Cardiolipin-binding mitochondrial peptide \u2014 stabilizes inner membrane, improves ATP/electron transport",
+      "primary_use": "Mitochondrial-dysfunction/fatigue and healthspan support",
+      "contraindications": "active malignancy, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Investigational; trials in mitochondrial myopathy mixed. Trial dose 40 mg SC; compounded longevity use is lower and empiric. Watch injection-site reactions.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Elamipretide (SS-31)\n\n## Indication\nMitochondrial-dysfunction/fatigue and healthspan support. <!-- NOTE: investigational; trial dose 40 mg SC daily, compounded use is lower/empiric -->\n\n## Rule out (contraindications)\n- \u2610 Active malignancy (precautionary \u2014 absolute)\n- \u2610 Pregnancy\n- \u2610 Lactation\n- \u2610 Age <18\n- \u2610 Hypersensitivity\n\n## Rx\n- **Dose:** 5\u201310 mg SC daily (empiric); trial dosing 40 mg SC daily\n- **Route:** SC\n- **Reconstitution:** 10 mg + 1 mL BAC water = 10 mg/mL = 10,000 mcg/mL \u2192 10 mg = 1.0 mL = **100 units** (U-100)\n- **Cycle:** 4\u20138 weeks\n- **Stack pairs:** mots-c, epitalon\n\n## Labs (baseline)\n- CMP, CBC, lipids\n- Baseline fatigue/functional metric; cancer screen current\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, site reaction | Continue |\n| Mo 1 | Energy/function | Hold/adjust |\n| Mo 3 | Functional metric | Continue if benefit |\n| Mo 6 | Sustained response | Stop if no durable change |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_investigational_peptide`)\n- \u2610 Patient education delivered (`patiented_ss-31`)\n- \u2610 Source pharmacy verified\n- \u2610 Cancer screen current \u2190 gating\n\n## Patient education key points\n- Experimental; human results so far are mixed.\n- Injection-site reactions are the most common issue.\n- We track energy/function and stop if no benefit.\n- Report unusual or persistent symptoms.",
+      "teaser": false,
+      "grade": "B\u2212",
+      "evidence": "21 registered trials, but the **pivotal Phase 3 in mitochondrial myopathy (MMPOWER-3) missed endpoints and was terminated**; AMD/Barth ongoing; a Ph2a aging trial recruiting (NCT07275424). No approved indication.",
+      "citations": [
+        {
+          "label": "Karaa 2023, Neurology (MMPOWER-3)",
+          "url": "https://doi.org/10.1212/WNL.0000000000207402"
+        },
+        {
+          "label": "Karaa 2020, J Cachexia Sarcopenia Muscle",
+          "url": "https://doi.org/10.1002/jcsm.12559"
+        },
+        {
+          "label": "Szeto 2014, Br J Pharmacol",
+          "url": "https://doi.org/10.1111/bph.12461"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "tb-500",
+      "name": "Thymosin beta-4 (TB-500)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Repair",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Actin-binding peptide \u2014 promotes cell migration, angiogenesis, and tissue regeneration",
+      "primary_use": "Soft-tissue/tendon injury and muscle recovery, adjunct to rehab",
+      "contraindications": "active/prior malignancy, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Pairs with BPC-157 for the classic repair stack. Same angiogenic cancer caution applies. Loading phase twice weekly, then taper to maintenance.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Thymosin beta-4 (TB-500)\n\n## Indication\nAdjunct for soft-tissue, tendon, or muscle injury and recovery where standard rehab has plateaued.\n\n## Rule out (contraindications)\n- \u2610 Active or prior malignancy (pro-angiogenic \u2014 absolute)\n- \u2610 Pregnancy\n- \u2610 Lactation\n- \u2610 Age <18\n- \u2610 Hypersensitivity to peptide/diluent\n- \u2610 Undiagnosed mass / malignancy red flag\n\n## Rx\n- **Dose:** 2\u20132.5 mg SC twice weekly (loading \u00d74\u20136 wk), then 2 mg weekly maintenance\n- **Route:** SC\n- **Reconstitution:** 10 mg + 2 mL BAC water = 5 mg/mL = 5,000 mcg/mL \u2192 2 mg = 0.40 mL = **40 units** (U-100)\n- **Cycle:** 6 weeks loading + 4\u20136 weeks maintenance\n- **Stack pairs:** bpc-157, ghk-cu\n\n## Labs (baseline)\n- CBC, CMP\n- **Age-appropriate cancer screening current \u2190 gating**\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, injection site | Continue loading |\n| Mo 1 | Functional response | Taper to weekly maintenance |\n| Mo 3 | Outcome \u00b1 imaging | Stop if at goal or no benefit |\n| Mo 6 | Malignancy ROS | Stop + work up red flags |\n\n## Safety & compliance gate\n- \u2610 Off-label/investigational consent signed (`consent_investigational_peptide`)\n- \u2610 Patient education delivered (`patiented_tb-500`)\n- \u2610 Source pharmacy verified\n- \u2610 Cancer screening current \u2190 gating\n\n## Patient education key points\n- Not FDA-approved; human evidence is preclinical/anecdotal.\n- Tell us any cancer history \u2014 theoretical tumor-growth risk.\n- An adjunct to rehab, not a replacement for it.\n- Report any new mass or unexplained symptom promptly.",
+      "teaser": false,
+      "grade": "D (CONSUMER FRAGMENT)",
+      "evidence": "Full-length T\u03b24 (RGN-259) has completed Phase 3 ophthalmic RCTs; the **consumer fragment has no completed human efficacy trial** (NCT07487363, Ph1/2, recruiting). PubMed coverage of literal \"TB-500\" is mostly doping analytics.",
+      "citations": [
+        {
+          "label": "Esposito 2012, Drug Test Anal",
+          "url": "https://doi.org/10.1002/dta.1402"
+        },
+        {
+          "label": "Ho 2012, J Chromatogr A",
+          "url": "https://doi.org/10.1016/j.chroma.2012.09.043"
+        }
+      ],
+      "fda_pcac": {
+        "day": 1,
+        "date": "2026-07-23"
+      }
+    },
+    {
+      "slug": "tesamorelin",
+      "name": "Tesamorelin",
+      "brand_names": [
+        "Egrifta",
+        "Egrifta SV"
+      ],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "fda_approved",
+      "status_label": "FDA-approved",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Stabilized GHRH analog \u2014 stimulates GH release, reduces visceral adipose tissue",
+      "primary_use": "Excess visceral adiposity (on-label: HIV lipodystrophy); off-label VAT reduction",
+      "contraindications": "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Strongest GH-secretagogue data for visceral fat. Brand is pricey; compounded common but verify source. Monitor IGF-1 and glucose \u2014 it can nudge insulin resistance.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Tesamorelin (Egrifta)\n\n## Indication\nReduction of excess visceral adipose tissue \u2014 on-label in HIV-associated lipodystrophy; off-label for VAT reduction. <!-- NOTE: brand Egrifta substantially more expensive than compounded; pricing reflects compounded tier -->\n\n## Rule out (contraindications)\n- \u2610 Active malignancy (absolute)\n- \u2610 Untreated severe hypothyroidism\n- \u2610 Pregnancy / disrupted HPA axis\n- \u2610 Lactation; age <18\n- \u2610 Hypersensitivity to tesamorelin/mannitol\n\n## Rx\n- **Dose:** 2 mg SC daily\n- **Route:** SC (abdomen), rotate\n- **Reconstitution:** 2 mg vial + 2.1 mL sterile water; inject 2 mL \u2248 2 mg. <!-- NOTE: per Egrifta SV labeling -->\n- **Cycle:** 12\u201326 weeks; reassess VAT\n- **Stack pairs:** cjc-ipamorelin-blend, aod-9604, mots-c\n\n## Labs (baseline)\n- **IGF-1, TSH/free T4 \u2190 gating**\n- Fasting glucose/A1c, lipids, CMP\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, site | Continue |\n| Mo 1 | Glucose, symptoms | Hold/adjust |\n| Mo 3 | IGF-1, A1c, waist | Titrate; keep IGF-1 in range |\n| Mo 6 | VAT/waist, A1c | Continue if responding |\n\n## Safety & compliance gate\n- \u2610 Off-label consent signed (`consent_gh_secretagogue`) \u2014 N/A if on-label\n- \u2610 Patient education delivered (`patiented_tesamorelin`)\n- \u2610 Source pharmacy verified\n- \u2610 Thyroid treated + cancer screen current \u2190 gating\n\n## Patient education key points\n- FDA-approved for HIV-related belly fat; other uses are off-label.\n- Daily injection; may affect blood sugar \u2014 we monitor.\n- Report swelling, joint pain, or tingling.\n- Tell us any cancer history.",
+      "teaser": false,
+      "grade": "A (LABEL INDICATION)",
+      "evidence": "FDA-approved (2010) for HIV-associated lipodystrophy. Two pivotal Phase 3 RCTs (pooled VAT \u221215.4% vs placebo, glucose-neutral) + ongoing MASLD/liver trials. Off-label for general \"anti-aging.\"",
+      "citations": [
+        {
+          "label": "Falutz 2010, JCEM (pivotal Ph3 pooled)",
+          "url": "https://doi.org/10.1210/jc.2010-0490"
+        },
+        {
+          "label": "Fourman 2020, JCI Insight",
+          "url": "https://doi.org/10.1172/jci.insight.140134"
+        },
+        {
+          "label": "Dhillon 2011, Drugs",
+          "url": "https://doi.org/10.2165/11202240-000000000-00000"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "thymosin-alpha-1",
+      "name": "Thymosin alpha-1",
+      "brand_names": [
+        "Zadaxin"
+      ],
+      "line": "peptides",
+      "axis": "Immunity",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "28-aa thymic peptide \u2014 TLR-2/9-mediated T-cell maturation and Th1 immune modulation",
+      "primary_use": "Immune modulation in chronic/recurrent infection or immunosenescence",
+      "contraindications": "transplant on immunosuppression, severe active autoimmune, pregnancy, lactation, age <18",
+      "clinical_notes": "Modulator, not a generic booster \u2014 use against a defined immune problem. Always ask about transplant/immunosuppression. Strongest data is in hepatitis; favorable safety profile.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Thymosin alpha-1 (Zadaxin \u2014 non-US)\n\n## Indication\nImmune modulation in chronic/recurrent infection or immunosenescence. <!-- NOTE: Zadaxin approved in ~35 countries; not FDA-approved in US -->\n\n## Rule out (contraindications)\n- \u2610 Transplant on immunosuppression (rejection risk \u2014 absolute)\n- \u2610 Severe active autoimmune disease\n- \u2610 Pregnancy\n- \u2610 Lactation; age <18\n- \u2610 Hypersensitivity\n\n## Rx\n- **Dose:** 1.6 mg SC twice weekly\n- **Route:** SC\n- **Reconstitution:** 5 mg + 1 mL BAC water = 5 mg/mL = 5,000 mcg/mL \u2192 1.6 mg = 0.32 mL = **32 units** (U-100)\n- **Cycle:** 8\u201324 weeks (indication-driven)\n- **Stack pairs:** kpv\n\n## Labs (baseline)\n- CBC w/ diff (\u00b1 lymphocyte subsets), CMP/LFTs\n- Autoimmune screen if history; viral serologies as indicated\n- **Transplant/immunosuppression status \u2190 gating**\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, autoimmune sx | Continue |\n| Mo 1 | CBC/diff, LFTs | Continue if tolerated |\n| Mo 3 | Subsets, viral load | Continue per response |\n| Mo 6 | Immune status, LFTs | Lowest effective regimen |\n\n## Safety & compliance gate\n- \u2610 Off-label/investigational consent signed (`consent_immunomodulator`)\n- \u2610 Patient education delivered (`patiented_thymosin-alpha-1`)\n- \u2610 Source pharmacy verified\n- \u2610 Transplant/autoimmune status documented \u2190 gating\n\n## Patient education key points\n- Not FDA-approved in the US; modulates immune tone.\n- Tell us about any transplant, immune-suppressing meds, or autoimmune disease.\n- Report new joint pain, rash, or fatigue (possible flare).\n- Generally well tolerated; report injection-site reactions.",
+      "teaser": false,
+      "grade": "B\u2013C",
+      "evidence": "Real RCTs \u2014 chronic hepatitis B (NCT00291616, NCT02366208), melanoma adjuvant (NCT00911443), pancreatitis (TRACE), colorectal adjuvant (NCT05086614 recruiting). Approved as Zadaxin abroad; not FDA-approved. Robust for *specific* indications, **not** \"vitality/anti-aging.\"",
+      "citations": [
+        {
+          "label": "Ancell 2001, Am J Health Syst Pharm",
+          "url": "https://doi.org/10.1093/ajhp/58.10.886"
+        },
+        {
+          "label": "Zhou 2020, BMJ Open",
+          "url": "https://doi.org/10.1136/bmjopen-2020-037231"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "tirzepatide",
+      "name": "Tirzepatide",
+      "brand_names": [
+        "Mounjaro",
+        "Zepbound"
+      ],
+      "line": "peptides",
+      "axis": "Metabolism",
+      "status": "fda_approved",
+      "status_label": "FDA-approved",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "Dual GIP/GLP-1 receptor agonist \u2014 central satiety + insulin sensitization",
+      "primary_use": "Type 2 diabetes and chronic weight management (BMI \u226530, or \u226527 with comorbidity)",
+      "contraindications": "MTC/MEN-2 hx, acute pancreatitis, severe gastroparesis, pregnancy, hypersensitivity",
+      "clinical_notes": "Titrate to tolerance, not by calendar \u2014 most 'non-response' is stopping at 5 mg. Cut sulfonylurea/insulin at start to avoid lows. Counsel on oral-contraceptive absorption.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Tirzepatide (Mounjaro / Zepbound)\n\n## Indication\nType 2 diabetes (Mounjaro) or chronic weight management (Zepbound) in BMI \u226530, or \u226527 with a weight-related comorbidity.\n\n## Rule out (contraindications)\n- \u2610 Personal/family MTC or MEN-2 (boxed \u2014 absolute)\n- \u2610 Acute pancreatitis (active/recent)\n- \u2610 Severe gastroparesis\n- \u2610 Pregnancy / planning pregnancy\n- \u2610 Lactation; age <18\n- \u2610 Hypersensitivity to tirzepatide\n\n## Rx\n- **Dose:** 2.5 mg SC weekly \u00d74 wk \u2192 5 mg; titrate +2.5 mg q4wk to max **15 mg**\n- **Route:** SC weekly\n- **Reconstitution:** Commercial pen/vial pre-mixed \u2014 **fixed 0.5 mL, no math**. <!-- NOTE: prefer commercial; compounded vials vary, verify concentration -->\n- **Cycle:** Chronic\n- **Stack pairs:** mots-c, aod-9604\n\n## Labs (baseline)\n- A1c, fasting glucose, CMP, lipids\n- Pregnancy test; **MTC/pancreatitis history screen \u2190 gating**\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | GI tolerance, hypoglycemia | Cut SU/insulin; manage nausea |\n| Mo 1 | Weight, BP, stepped to 5 mg | Advance dose if tolerated |\n| Mo 3 | A1c, weight % | Titrate toward goal |\n| Mo 6 | A1c, weight, lipids | Effective maintenance dose |\n\n## Safety & compliance gate\n- \u2610 Off-label/investigational consent signed (`consent_glp1_incretin`) \u2014 N/A if on-label\n- \u2610 Patient education delivered (`patiented_tirzepatide`)\n- \u2610 Source pharmacy verified\n- \u2610 MTC/pancreatitis screen documented \u2190 gating\n\n## Patient education key points\n- Nausea is common early and usually eases \u2014 eat smaller, low-fat meals.\n- Report severe abdominal pain (pancreatitis warning).\n- Oral birth control may work less well \u2014 use backup.\n- Protein + resistance training to protect muscle; weight returns if stopped.",
+      "teaser": false,
+      "grade": "A",
+      "evidence": "Extensive completed Phase 3 program (SURMOUNT-1: up to ~\u221220.9% body weight at 72 wk; SURPASS, SUMMIT, OSA). FDA-approved for T2D, chronic weight management, OSA in obesity.",
+      "citations": [
+        {
+          "label": "Jastreboff 2022, NEJM (SURMOUNT-1)",
+          "url": "https://doi.org/10.1056/NEJMoa2206038"
+        }
+      ],
+      "fda_pcac": null
+    },
+    {
+      "slug": "cognition-stack",
+      "name": "Cognition Stack (Selank + Semax + DSIP + Cerebrolysin)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Cognition",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": true,
+      "mechanism": "Neuro stack \u2014 anxiolytic (Selank) + focus/BDNF (Semax) + sleep (DSIP) + neurotrophic (Cerebrolysin)",
+      "primary_use": "Cognitive performance, stress, and sleep optimization",
+      "contraindications": "pregnancy, lactation, age <18, hypersensitivity, severe renal impairment, uncontrolled epilepsy",
+      "clinical_notes": "Cerebrolysin is the heavyweight here (IV/IM courses) and brings the renal/seizure cautions. SC peptides are subtle. Verify source authenticity for Cerebrolysin and Russian peptides.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Cognition Stack (Selank + Semax + DSIP + Cerebrolysin)\n\n## Indication\nCognitive performance, stress reduction, and sleep optimization. <!-- NOTE: none FDA-approved in US; Cerebrolysin EU/RU-labeled. Semax/Selank now dosed SC to match individual cards -->\n\n## Rule out (contraindications \u2014 union)\n- \u2610 Pregnancy\n- \u2610 Lactation; age <18\n- \u2610 Hypersensitivity\n- \u2610 Severe renal impairment (Cerebrolysin)\n- \u2610 Uncontrolled epilepsy / status epilepticus (Cerebrolysin)\n- \u2610 Untreated OSA (DSIP)\n\n## Rx\n- **Dose:** Selank 250\u2013300 mcg SC / Semax 300 mcg SC daily / DSIP 100\u2013300 mcg SC HS / Cerebrolysin 5\u201310 mL IM \u00d710\u201320 d\n- **Route:** SC + IM (Cerebrolysin)\n- **Reconstitution:** Semax/Selank 5 mg/mL \u2192 300 mcg = 0.06 mL = **6u**; DSIP 2.5 mg/mL\u21928u; Cerebrolysin pre-mixed ampoule\n- **Cycle:** Cerebrolysin 10\u201320 d course within a 12-wk program\n- **Components:** selank, semax, dsip, cerebrolysin\n\n## Labs (baseline)\n- CMP (renal), CBC\n- Seizure/OSA/psychiatric history\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, cognition/sleep | Continue course |\n| Mo 1 | Cognitive/mood/sleep change | Hold/adjust |\n| Mo 3 | Off Cerebrolysin; status | Plan next course |\n| Mo 6 | Durable benefit | Continue vs stop |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_investigational_peptide`)\n- \u2610 Patient education delivered (`patiented_cognition-stack`)\n- \u2610 Source pharmacy verified (counterfeit risk \u2014 Cerebrolysin)\n- \u2610 Renal function + seizure/OSA history documented\n\n## Patient education key points\n- None are FDA-approved in the US; effects are often subtle.\n- Cerebrolysin is given as IM/IV courses; report any seizures.\n- The peptides are small subcutaneous injections \u2014 rotate sites.\n- Report agitation, daytime grogginess, or unusual symptoms.",
+      "teaser": false,
+      "grade": "D\u2013C",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null
+    },
+    {
+      "slug": "growth-stack",
+      "name": "Growth Stack (Sermorelin + Ipamorelin)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Growth",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": true,
+      "mechanism": "GH-axis pair \u2014 GHRH analog (Sermorelin) + ghrelin/GHSR agonist (Ipamorelin) for synergistic pulsatile GH",
+      "primary_use": "Recovery, body composition, and sleep in symptomatic low-normal IGF-1 adults",
+      "contraindications": "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "One GHRH + one GHRP is the clean synergy \u2014 no need to stack two GHRH analogs. Treat thyroid first. One bedtime shot; keep IGF-1 upper-normal-for-age, not above.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Growth Stack (Sermorelin + Ipamorelin)\n\n## Indication\nRecovery, body composition, and sleep support in symptomatic adults with low-normal IGF-1. <!-- NOTE: rebuilt \u2014 dropped CJC-1295 to avoid redundant dual-GHRH; one GHRH analog + one GHRP is the standard pairing -->\n\n## Rule out (contraindications \u2014 union)\n- \u2610 Active malignancy (absolute)\n- \u2610 Untreated severe hypothyroidism (treat first)\n- \u2610 Pregnancy\n- \u2610 Lactation; age <18\n- \u2610 Hypersensitivity\n- \u2610 Non-functional pituitary (won't respond to Sermorelin)\n\n## Rx\n- **Dose:** Sermorelin 200\u2013300 mcg + Ipamorelin 200\u2013300 mcg SC nightly\n- **Route:** SC, bedtime, empty stomach\n- **Reconstitution:** Sermorelin 5 mg + 5 mL BAC = 1 mg/mL \u2192 300 mcg = 0.30 mL = **30u**; Ipamorelin 5 mg + 2.5 mL BAC = 2 mg/mL \u2192 300 mcg = 0.15 mL = **15u** (U-100)\n- **Cycle:** 12\u201316 weeks\n- **Components:** sermorelin, ipamorelin\n\n## Labs (baseline)\n- **IGF-1, TSH/free T4 \u2190 gating**\n- Fasting glucose/A1c, CMP, lipids\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, fluid retention | Reinforce timing |\n| Mo 1 | Symptoms, glucose | Hold/adjust |\n| Mo 3 | IGF-1, glucose | Titrate to upper-normal IGF-1 |\n| Mo 6 | IGF-1, composition | Lowest effective dose |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_gh_secretagogue`)\n- \u2610 Patient education delivered (`patiented_growth-stack`)\n- \u2610 Source pharmacy verified\n- \u2610 Thyroid treated + cancer screen current \u2190 gating\n\n## Patient education key points\n- Not FDA-approved; not synthetic HGH.\n- Two peptides, one bedtime injection, empty stomach.\n- Report swelling, joint pain, or tingling (too much GH).\n- We monitor IGF-1 and blood sugar over time.",
+      "teaser": false,
+      "grade": "C/D",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null
+    },
+    {
+      "slug": "immunity-stack",
+      "name": "Immunity Stack (Thymosin Alpha-1 + KPV)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Immunity",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": true,
+      "mechanism": "Immune stack \u2014 T-cell maturation/Th1 modulation (T\u03b11) + NF-\u03baB anti-inflammatory (KPV)",
+      "primary_use": "Immune modulation plus anti-inflammatory support",
+      "contraindications": "transplant on immunosuppression, severe active autoimmune, pregnancy, lactation, age <18",
+      "clinical_notes": "T\u03b11 sets immune tone, KPV calms inflammation \u2014 complementary. Always screen for transplant/immunosuppression and autoimmune disease before starting either.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Immunity Stack (Thymosin Alpha-1 + KPV)\n\n## Indication\nImmune modulation with anti-inflammatory support in chronic/recurrent infection or inflammatory states. <!-- NOTE: T\u03b11 non-US approved; KPV preclinical -->\n\n## Rule out (contraindications \u2014 union)\n- \u2610 Transplant on immunosuppression (absolute)\n- \u2610 Severe active autoimmune disease\n- \u2610 Pregnancy\n- \u2610 Lactation; age <18\n- \u2610 Hypersensitivity\n\n## Rx\n- **Dose:** T\u03b11 1.6 mg SC 2\u00d7/wk / KPV 200\u2013500 mcg SC daily\n- **Route:** SC\n- **Reconstitution:** T\u03b11 5 mg/mL\u219232u; KPV 2 mg/mL\u219225u\n- **Cycle:** 8\u201312 weeks\n- **Components:** thymosin-alpha-1, kpv\n\n## Labs (baseline)\n- CBC w/ diff, CMP/LFTs, CRP/ESR\n- Autoimmune screen; **transplant/immunosuppression status \u2190 gating**\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, autoimmune sx | Continue |\n| Mo 1 | CBC/diff, LFTs, CRP | Continue if tolerated |\n| Mo 3 | Subsets, markers | Continue per response |\n| Mo 6 | Immune status | Lowest effective regimen |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_immunomodulator`)\n- \u2610 Patient education delivered (`patiented_immunity-stack`)\n- \u2610 Source pharmacy verified\n- \u2610 Transplant/autoimmune status documented \u2190 gating\n\n## Patient education key points\n- T\u03b11 is non-US-approved; KPV is investigational.\n- Tell us about transplants, immune-suppressing meds, or autoimmune disease.\n- Report new joint pain, rash, or fatigue.\n- Generally well tolerated; report site reactions.",
+      "teaser": false,
+      "grade": "B-C / D",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null
+    },
+    {
+      "slug": "longevity-stack",
+      "name": "Longevity Stack (Epitalon + MOTS-c + SS-31)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Longevity",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": true,
+      "mechanism": "Longevity stack \u2014 telomerase/pineal (Epitalon) + AMPK (MOTS-c) + mitochondrial membrane (SS-31)",
+      "primary_use": "Healthspan, metabolic, and mitochondrial support",
+      "contraindications": "active malignancy, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "All three are early-evidence \u2014 honest expectations required. Epitalon pulses, MOTS-c and SS-31 daily/weekly. Tie continuation to objective metabolic markers.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Longevity Stack (Epitalon + MOTS-c + SS-31)\n\n## Indication\nHealthspan, metabolic, and mitochondrial support. <!-- NOTE: all components investigational/not-approved; thin human data -->\n\n## Rule out (contraindications \u2014 union)\n- \u2610 Active malignancy (all three precautionary \u2014 absolute)\n- \u2610 Pregnancy\n- \u2610 Lactation\n- \u2610 Age <18\n- \u2610 Hypersensitivity\n\n## Rx\n- **Dose:** Epitalon 5\u201310 mg \u00d710\u201320 d pulse; MOTS-c 5\u201310 mg 2\u20133\u00d7/wk; SS-31 5\u201310 mg daily\n- **Route:** SC\n- **Reconstitution:** per-component (Epitalon 10 mg/mL\u2192100u; MOTS-c 10 mg/mL\u219250u; SS-31 10 mg/mL\u2192100u)\n- **Cycle:** 6\u201312 weeks (Epitalon pulsed)\n- **Components:** epitalon, mots-c, ss-31\n\n## Labs (baseline)\n- **Fasting glucose/insulin (HOMA-IR), A1c \u2190 gating endpoint**\n- CMP, CBC, lipids; cancer screen current\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, sites | Continue |\n| Mo 1 | Glucose/insulin, energy | Reconsider if no signal |\n| Mo 3 | A1c, HOMA-IR, function | Continue only if objective benefit |\n| Mo 6 | Metabolic panel | Stop if no durable change |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_investigational_peptide`)\n- \u2610 Patient education delivered (`patiented_longevity-stack`)\n- \u2610 Source pharmacy verified\n- \u2610 Cancer screen current \u2190 gating\n\n## Patient education key points\n- Experimental; longevity claims are unproven.\n- We'll measure metabolic markers and stop if they don't improve.\n- Tell us any cancer history.\n- Report unusual or persistent symptoms.",
+      "teaser": false,
+      "grade": "D\u2013B\u2212 (MIXED)",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null
+    },
+    {
+      "slug": "metabolic-stack",
+      "name": "Metabolic Stack (Tesamorelin + CJC/Ipa Blend + AOD-9604 + MOTS-c)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Metabolism",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": true,
+      "mechanism": "Metabolic stack \u2014 GHRH analogs (VAT reduction) + GH fragment lipolysis + AMPK metabolic flexibility",
+      "primary_use": "Visceral fat reduction and metabolic optimization",
+      "contraindications": "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "Four agents \u2014 heavy stack; reserve for motivated patients with objective VAT. Tesamorelin and MOTS-c can both touch glucose, so monitor A1c. Diet/exercise still does the heavy lifting.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Metabolic Stack (Tesamorelin + CJC/Ipa Blend + AOD-9604 + MOTS-c)\n\n## Indication\nVisceral fat reduction and metabolic optimization in motivated patients with measured excess VAT.\n\n## Rule out (contraindications \u2014 union)\n- \u2610 Active malignancy (absolute)\n- \u2610 Untreated severe hypothyroidism\n- \u2610 Pregnancy\n- \u2610 Lactation; age <18\n- \u2610 Hypersensitivity\n\n## Rx\n- **Dose:** Tesamorelin 2 mg daily / CJC-Ipa blend 0.15 mL nightly / AOD-9604 300 mcg daily / MOTS-c 5\u201310 mg 2\u20133\u00d7/wk\n- **Route:** SC\n- **Reconstitution:** per-component (Tesa 2 mL\u22482 mg; blend 2 mg/mL\u219215u; AOD 2.5 mg/mL\u219212u; MOTS-c 10 mg/mL\u219250u)\n- **Cycle:** 8\u201312 weeks\n- **Components:** tesamorelin, cjc-ipamorelin-blend, aod-9604, mots-c\n\n## Labs (baseline)\n- **IGF-1, TSH/free T4, A1c/HOMA-IR \u2190 gating**\n- Lipids, CMP, waist/VAT\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, glucose | Continue |\n| Mo 1 | Glucose, waist | Hold/adjust |\n| Mo 3 | IGF-1, A1c, VAT | Titrate; keep IGF-1 in range |\n| Mo 6 | VAT, A1c, lipids | Taper to maintenance |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_gh_secretagogue`)\n- \u2610 Patient education delivered (`patiented_metabolic-stack`)\n- \u2610 Source pharmacy verified\n- \u2610 Thyroid treated + cancer screen + baseline A1c \u2190 gating\n\n## Patient education key points\n- Mostly not FDA-approved; an adjunct to diet and exercise.\n- Several agents can affect blood sugar \u2014 we monitor A1c.\n- Report swelling, joint pain, or tingling.\n- Tell us any cancer history.",
+      "teaser": false,
+      "grade": "A\u2192D (MIXED)",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null
+    },
+    {
+      "slug": "vitality-stack",
+      "name": "Vitality Stack (PT-141 + Kisspeptin-10)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Vitality",
+      "status": "investigational",
+      "status_label": "Investigational",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": true,
+      "mechanism": "Vitality stack \u2014 central melanocortin arousal (PT-141) + upstream GnRH/hormone axis (Kisspeptin)",
+      "primary_use": "Libido and sexual-function support \u2014 central + hormonal axes",
+      "contraindications": "uncontrolled HTN, significant CVD, hormone-sensitive cancer, pregnancy, lactation, age <18",
+      "clinical_notes": "PT-141 brings the BP contraindication and nausea; Kisspeptin is experimental and acts upstream. Document controlled BP and hormone-sensitive cancer screen before starting.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Vitality Stack (PT-141 + Kisspeptin-10)\n\n## Indication\nLibido and sexual-function support addressing both central arousal and the hormonal axis. <!-- NOTE: Kisspeptin investigational; PT-141 on-label only for premenopausal HSDD -->\n\n## Rule out (contraindications \u2014 union)\n- \u2610 Uncontrolled hypertension (absolute)\n- \u2610 Significant cardiovascular disease\n- \u2610 Active hormone-sensitive malignancy\n- \u2610 Pregnancy\n- \u2610 Lactation; age <18\n- \u2610 Hypersensitivity\n\n## Rx\n- **Dose:** PT-141 1.75 mg SC PRN (\u22648/mo) / Kisspeptin-10 ~100 mcg SC\n- **Route:** SC\n- **Reconstitution:** PT-141 2 mg/mL\u21920.875 mL (compounded); Kisspeptin 2 mg/mL\u21925u\n- **Cycle:** PRN/4\u20138 weeks; reassess at 8 wk\n- **Components:** pt-141, kisspeptin-10\n\n## Labs (baseline)\n- **BP controlled documented \u2190 gating**\n- LH/FSH, testosterone/estradiol, prolactin; hormone-sensitive cancer screen\n- Pregnancy test\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Nausea, BP, libido | Pre-treat nausea; confirm lead time |\n| Mo 1 | Efficacy, hormones, dose count | Keep PT-141 \u22648/mo |\n| Mo 3 | Benefit, BP, skin, LH/T | Discontinue if no benefit |\n| Mo 6 | Efficacy, BP, hormones | Continue if effective |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_sexual_health_peptide`)\n- \u2610 Patient education delivered (`patiented_vitality-stack`)\n- \u2610 Source pharmacy verified\n- \u2610 BP controlled + hormone-sensitive cancer screen \u2190 gating\n\n## Patient education key points\n- Kisspeptin is experimental; PT-141 is approved only for a specific use.\n- Don't use if blood pressure is uncontrolled; report chest pain.\n- PT-141 can cause nausea and skin darkening with repeated use.\n- Tell us any hormone-sensitive cancer history.",
+      "teaser": false,
+      "grade": "A (PT-141 LABEL) / C",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null
+    },
+    {
+      "slug": "wolverine-glow",
+      "name": "Wolverine GLOW (BPC-157 + TB-500 + GHK-Cu)",
+      "brand_names": [],
+      "line": "peptides",
+      "axis": "Repair",
+      "status": "not_approved",
+      "status_label": "Research-only",
+      "classification": "red",
+      "controlled": false,
+      "is_stack": true,
+      "mechanism": "Tri-peptide repair stack \u2014 angiogenesis (VEGFR2) + cell migration + collagen/wound-healing genes",
+      "primary_use": "Aggressive soft-tissue/tendon repair and recovery, plateaued on standard care",
+      "contraindications": "active/prior malignancy, copper overload, pregnancy, lactation, age <18, hypersensitivity",
+      "clinical_notes": "The flagship repair combo \u2014 all three are angiogenic, so cancer history is an absolute no. Image the injury first. Short goal-bound course; watch cumulative copper from GHK-Cu.",
+      "reviewed": "2026-06-10",
+      "body_md": "# Wolverine GLOW (BPC-157 + TB-500 + GHK-Cu)\n\n## Indication\nAggressive soft-tissue, tendon, or ligament repair that has plateaued on standard rehab.\n\n## Rule out (contraindications \u2014 union)\n- \u2610 Active or prior malignancy (all three angiogenic \u2014 absolute)\n- \u2610 Copper overload / Wilson disease (GHK-Cu)\n- \u2610 Pregnancy\n- \u2610 Lactation; age <18\n- \u2610 Hypersensitivity / copper sensitivity\n- \u2610 Undiagnosed mass / malignancy red flag\n\n## Rx\n- **Dose:** BPC-157 250 mcg + TB-500 2 mg (2\u00d7/wk) + GHK-Cu 1\u20132 mg, SC daily\n- **Route:** SC\n- **Reconstitution:** per-component (BPC 2.5 mg/mL\u219210u; TB-500 5 mg/mL\u219240u; GHK-Cu 10 mg/mL\u219220u)\n- **Cycle:** 6 weeks loading, up to 12 total\n- **Components:** bpc-157, tb-500, ghk-cu\n\n## Labs (baseline)\n- CBC, CMP, serum copper/ceruloplasmin\n- **Age-appropriate cancer screening current \u2190 gating**\n\n## Ongoing care\n| When | What to check | What to adjust |\n|---|---|---|\n| Wk 2 | Tolerance, sites | Continue loading |\n| Mo 1 | Functional response, copper | Taper TB-500 to weekly |\n| Mo 3 | Outcome \u00b1 imaging, copper | Stop if at goal/no benefit |\n| Mo 6 | Malignancy ROS | Stop on any red flag |\n\n## Safety & compliance gate\n- \u2610 Investigational consent signed (`consent_investigational_peptide`)\n- \u2610 Patient education delivered (`patiented_wolverine-glow`)\n- \u2610 Source pharmacy verified\n- \u2610 Cancer screen current + copper baseline \u2190 gating\n\n## Patient education key points\n- None of these are FDA-approved; evidence is preclinical.\n- Cancer history is an absolute reason not to use this.\n- Supports rehab; does not replace PT or surgery.\n- Report any new lump, weight loss, or metallic taste.",
+      "teaser": false,
+      "grade": "D",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null
+    },
+    {
+      "slug": "bhrt-testosterone-cypionate",
+      "name": "Testosterone Cypionate",
+      "brand_names": [],
+      "line": "bhrt",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "bhrt-testosterone-plus-anastrozole",
+      "name": "Testosterone + Anastrozole",
+      "brand_names": [],
+      "line": "bhrt",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "bhrt-estradiol-biest",
+      "name": "Estradiol (Biest)",
+      "brand_names": [],
+      "line": "bhrt",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "bhrt-progesterone",
+      "name": "Progesterone",
+      "brand_names": [],
+      "line": "bhrt",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "bhrt-ndt--thyroid",
+      "name": "NDT / Thyroid",
+      "brand_names": [],
+      "line": "bhrt",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "bhrt-dhea",
+      "name": "DHEA",
+      "brand_names": [],
+      "line": "bhrt",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "bhrt-hormone-pellets-te",
+      "name": "Hormone Pellets (T/E)",
+      "brand_names": [],
+      "line": "bhrt",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "iv-nad-nadplus-infusion",
+      "name": "NAD+ Infusion",
+      "brand_names": [],
+      "line": "iv-nad",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "iv-nad-myers'-cocktail",
+      "name": "Myers' Cocktail",
+      "brand_names": [],
+      "line": "iv-nad",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "iv-nad-high-dose-vitamin-c",
+      "name": "High-dose Vitamin C",
+      "brand_names": [],
+      "line": "iv-nad",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "iv-nad-glutathione-push",
+      "name": "Glutathione Push",
+      "brand_names": [],
+      "line": "iv-nad",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "iv-nad-hydration-plus-electrolytes",
+      "name": "Hydration + Electrolytes",
+      "brand_names": [],
+      "line": "iv-nad",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "iv-nad-niagen-iv-nr",
+      "name": "Niagen IV (NR)",
+      "brand_names": [],
+      "line": "iv-nad",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "glp-semaglutide",
+      "name": "Semaglutide",
+      "brand_names": [],
+      "line": "glp",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "glp-tirzepatide",
+      "name": "Tirzepatide",
+      "brand_names": [],
+      "line": "glp",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "glp-compounded-semaglutide",
+      "name": "Compounded Semaglutide",
+      "brand_names": [],
+      "line": "glp",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "glp-liraglutide",
+      "name": "Liraglutide",
+      "brand_names": [],
+      "line": "glp",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "glp-b12--mic",
+      "name": "B12 / MIC",
+      "brand_names": [],
+      "line": "glp",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "aesthetics-botulinum-toxin",
+      "name": "Botulinum Toxin",
+      "brand_names": [],
+      "line": "aesthetics",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "aesthetics-dermal-filler-ha",
+      "name": "Dermal Filler (HA)",
+      "brand_names": [],
+      "line": "aesthetics",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "aesthetics-microneedling-plus-rf",
+      "name": "Microneedling + RF",
+      "brand_names": [],
+      "line": "aesthetics",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "aesthetics-laser--ipl",
+      "name": "Laser / IPL",
+      "brand_names": [],
+      "line": "aesthetics",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "aesthetics-prp",
+      "name": "PRP",
+      "brand_names": [],
+      "line": "aesthetics",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "yellow",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    },
+    {
+      "slug": "aesthetics-kybella",
+      "name": "Kybella",
+      "brand_names": [],
+      "line": "aesthetics",
+      "axis": "",
+      "status": "",
+      "status_label": "",
+      "classification": "green",
+      "controlled": false,
+      "is_stack": false,
+      "mechanism": "",
+      "primary_use": "",
+      "contraindications": "",
+      "clinical_notes": "",
+      "reviewed": "",
+      "body_md": "",
+      "grade": "",
+      "evidence": "",
+      "citations": [],
+      "fda_pcac": null,
+      "teaser": true
+    }
+  ]
+};
+
+</script>
+<script>
+const DATA = window.RENUVIA_PROTOCOLS;
+// Demo entitlements: which lines this clinic's plan includes. Try ?plan=peptides,bhrt
+const qp = new URLSearchParams(location.search);
+const ENTITLEMENTS = (qp.get("plan") || "peptides").split(",").map(s=>s.trim()).filter(Boolean);
+const ACCOUNT = qp.get("clinic") || "Coastal Wellness (demo)";
+const entitled = id => ENTITLEMENTS.includes(id);
+const state = { line: ENTITLEMENTS[0]||"peptides", q: "", cls: "all" };
+const CLS = { green:"c-green", yellow:"c-yellow", red:"c-red" };
+const RX = { clinic: "", md: "" };  // PDF personalization (clinic letterhead + MD signature) — no PHI
+
+const lineNav = document.getElementById("lineNav");
+const content = document.getElementById("content");
+const countEl = document.getElementById("count");
+const activeControls = document.getElementById("activeControls");
+
+function lineName(id){ return (DATA.lines.find(l=>l.id===id)||{}).name||id; }
+
+function renderAccessBar(){
+  const plan = ENTITLEMENTS.map(lineName).join(" · ") || "—";
+  document.getElementById("accessBar").innerHTML =
+    `<span class="pill">🩺 Licensed provider</span>
+     <span>Clinic: <b>${ACCOUNT}</b></span>
+     <span>Plan: <b>${plan}</b></span>
+     <span style="margin-left:auto;opacity:.85">Locked lines are available to add</span>`;
+}
+
+function renderNav(){
+  lineNav.innerHTML = DATA.lines.map(l=>{
+    const lock = entitled(l.id) ? "" : '<span class="lk">🔒</span>';
+    const cls = `ltab ${l.id===state.line?'active':''} ${entitled(l.id)?'':'locked-tab'}`;
+    return `<div class="${cls}" data-line="${l.id}">${l.name}${lock}</div>`;
+  }).join("");
+  lineNav.querySelectorAll(".ltab").forEach(t=>t.onclick=()=>{state.line=t.dataset.line;state.q="";const q=document.getElementById("q");if(q)q.value="";render();});
+}
+
+function matches(p){
+  if(state.cls!=="all" && p.classification!==state.cls) return false;
+  if(!state.q) return true;
+  const s=(p.name+" "+p.brand_names.join(" ")+" "+p.mechanism+" "+p.primary_use+" "+p.axis).toLowerCase();
+  return s.includes(state.q.toLowerCase());
+}
+
+function card(p){
+  const brand = p.brand_names.length ? `<div class="brand-n">${p.brand_names.join(" · ")}</div>` : "";
+  const cn = {green:"b-green",yellow:"b-yellow",red:"b-red"}[p.classification];
+  const stackTag = p.is_stack ? '<span class="tag stack">Stack</span>' : '';
+  const gradeTag = p.grade ? `<span class="tag grade">Grade ${p.grade}</span>` : '';
+  const pcacTag = p.fda_pcac ? '<span class="tag pcac">⚖ PCAC Jul 2026</span>' : '';
+  return `<div class="card ${CLS[p.classification]}" data-slug="${p.slug}">
+    <div class="top"><div><h3>${p.name}</h3>${brand}</div>
+      <span class="badge ${cn}">${p.classification}</span></div>
+    <div class="mech">${p.mechanism||p.primary_use||""}</div>
+    <div class="tags">${p.axis?`<span class="tag">${p.axis}</span>`:""}${gradeTag}<span class="tag status">${p.status_label}</span>${stackTag}${pcacTag}</div>
+  </div>`;
+}
+
+function renderFull(){
+  const line = DATA.lines.find(l=>l.id===state.line);
+  const pool = DATA.protocols.filter(p=>p.line===state.line && !p.teaser && matches(p));
+  const total = DATA.protocols.filter(p=>p.line===state.line && !p.teaser).length;
+  countEl.textContent = `${pool.length} of ${total} protocols`;
+  if(!pool.length){ content.innerHTML='<div class="empty">No protocols match your search.</div>'; return; }
+  let html="";
+  const axes = line.axes && line.axes.length ? line.axes : [...new Set(pool.map(p=>p.axis))];
+  for(const ax of axes){
+    const grp = pool.filter(p=>!p.is_stack && p.axis===ax);
+    if(!grp.length) continue;
+    html += `<div class="axis-h"><h2>${ax||line.name}</h2><span class="ln"></span><span class="n">${grp.length}</span></div>
+      <div class="grid">${grp.map(card).join("")}</div>`;
+  }
+  const stacks = pool.filter(p=>p.is_stack);
+  if(stacks.length){
+    html += `<div class="axis-h"><h2>Combination Stacks</h2><span class="ln"></span><span class="n">${stacks.length}</span></div>
+      <div class="grid">${stacks.map(card).join("")}</div>`;
+  }
+  content.innerHTML = html;
+  content.querySelectorAll(".card").forEach(c=>c.onclick=()=>openModal(c.dataset.slug));
+}
+
+function lockedCard(p){
+  return `<div class="card locked ${CLS[p.classification]}">
+    <div class="top"><h3>${p.name}</h3><span class="lockbadge">🔒 locked</span></div>
+    ${p.axis?`<div class="tags"><span class="tag">${p.axis}</span></div>`:""}
+  </div>`;
+}
+
+function renderLocked(){
+  const line = DATA.lines.find(l=>l.id===state.line);
+  const titles = DATA.protocols.filter(p=>p.line===state.line);
+  content.innerHTML = `
+    <div class="addbanner">
+      <div><h2>${line.name} isn't in your plan</h2>
+        <p>${line.tagline}. ${titles.length} protocols available — titles shown below. Add this line to unlock full prescribing cards, doses, labs, and monitoring.</p></div>
+      <button class="addbtn" data-add="${line.id}">＋ Add ${line.name} to your plan</button>
+    </div>
+    <div class="grid">${titles.map(lockedCard).join("")}</div>`;
+  content.querySelectorAll(".card.locked").forEach(c=>c.onclick=()=>openUpsell(state.line));
+  content.querySelector(".addbtn").onclick=()=>openUpsell(state.line);
+}
+
+function openUpsell(lineId){
+  const line = DATA.lines.find(l=>l.id===lineId);
+  const n = DATA.protocols.filter(p=>p.line===lineId).length;
+  const m=document.getElementById("modal"); m.className="modal";
+  m.innerHTML = `
+    <div class="mhead c-yellow"><span class="x" onclick="closeModal()">×</span>
+      <h2>Add ${line.name}</h2>
+      <div class="tags" style="margin-top:8px"><span class="tag stack">🔒 not in plan</span><span class="tag">${n} protocols</span></div>
+    </div>
+    <div class="mbody">
+      <div class="field"><div class="k">What you unlock</div>
+        <div class="v">Full ${line.name} prescribing cards — dose, reconstitution, baseline labs, monitoring schedule, safety gate — plus reference-card PDFs, available to your licensed providers.</div></div>
+      <div class="mnote">Adding a line updates this clinic's plan; the ${line.name} tab unlocks instantly for your providers. No rebuild, billed as an add-on.</div>
+      <div style="margin-top:16px;text-align:center"><button class="addbtn" onclick="closeModal()">Request ${line.name} for ${ACCOUNT}</button></div>
+    </div>`;
+  document.getElementById("overlay").classList.add("open");
+}
+
+function renderSoon(){
+  const l = DATA.lines.find(x=>x.id===state.line);
+  const blocks = {
+    "bhrt":["Male TRT","Female HRT","Pellets","Thyroid","Monitoring labs"],
+    "iv-nad":["NAD+ titration","Myers' cocktail","Hydration","Niagen IV","Push vs drip"],
+    "glp":["Semaglutide","Tirzepatide","Titration ladders","Side-effect mgmt","Lab cadence"],
+    "aesthetics":["Neuromodulators","Dermal fillers","Microneedling/RF","Laser/IPL","Consent + settings"],
+  }[state.line]||[];
+  content.innerHTML = `<div class="soon-panel">
+    <div class="ic">🧬</div><h2>${l.name} protocols — in development</h2>
+    <p>${l.tagline}. Built on the same curated framework as the peptide library, and verified through the protocol engine before it goes live.</p>
+    <div class="chips">${blocks.map(b=>`<span class="chip">${b}</span>`).join("")}</div>
+  </div>`;
+}
+
+function render(){
+  renderAccessBar();
+  renderNav();
+  const isEntitled = entitled(state.line);
+  const hasFull = DATA.protocols.some(p=>p.line===state.line && !p.teaser);
+  activeControls.style.display = (isEntitled && hasFull) ? "" : "none";
+  if(!isEntitled) renderLocked();
+  else if(hasFull) renderFull();
+  else renderSoon();
+}
+
+function mdToHtml(md){
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const inline=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  const lines=md.split('\n'); let html=''; let i=0; let inList=false;
+  const closeList=()=>{ if(inList){ html+='</ul>'; inList=false; } };
+  while(i<lines.length){
+    const ln=lines[i];
+    if(/^\s*$/.test(ln)){ closeList(); i++; continue; }
+    if(/^\s*\|/.test(ln)){
+      closeList(); const tbl=[];
+      while(i<lines.length && /^\s*\|/.test(lines[i])){ tbl.push(lines[i]); i++; }
+      const rows=tbl.filter(r=>!/^\s*\|[\s\-:|]+\|\s*$/.test(r));
+      html+='<table>';
+      rows.forEach((r,ri)=>{
+        const cells=r.split('|').slice(1,-1).map(c=>c.trim());
+        const tag=ri===0?'th':'td';
+        html+='<tr>'+cells.map(c=>`<${tag}>${inline(c)}</${tag}>`).join('')+'</tr>';
+      });
+      html+='</table>'; continue;
+    }
+    let m;
+    if(m=ln.match(/^#\s+(.*)/)){ closeList(); html+=`<h1>${inline(m[1])}</h1>`; }
+    else if(m=ln.match(/^##\s+(.*)/)){ closeList(); html+=`<h2>${inline(m[1])}</h2>`; }
+    else if(m=ln.match(/^###\s+(.*)/)){ closeList(); html+=`<h3>${inline(m[1])}</h3>`; }
+    else if(m=ln.match(/^\s*-\s+(.*)/)){
+      if(!inList){ html+='<ul>'; inList=true; }
+      let item=m[1], cls='';
+      if(/^☐\s*/.test(item)){ cls=' class="chk"'; item=item.replace(/^☐\s*/,''); }
+      html+=`<li${cls}>${inline(item)}</li>`;
+    }
+    else { closeList(); html+=`<p>${inline(ln)}</p>`; }
+    i++;
+  }
+  closeList();
+  return html;
+}
+
+function modalHead(p){
+  const cn={green:"b-green",yellow:"b-yellow",red:"b-red"}[p.classification];
+  return `<div class="mhead ${CLS[p.classification]}"><span class="x" onclick="closeModal()">×</span>
+    <h2>${p.name}</h2>
+    <div class="tags" style="margin-top:8px">
+      <span class="badge ${cn}">${p.classification}</span>
+      ${p.grade?`<span class="tag grade">Grade ${p.grade}</span>`:""}
+      ${p.axis?`<span class="tag">${p.axis}</span>`:""}
+      <span class="tag status">${p.status_label}</span>
+      ${p.brand_names.length?`<span class="tag">${p.brand_names.join(" · ")}</span>`:""}
+      ${p.is_stack?'<span class="tag stack">Stack</span>':''}
+      ${p.controlled?'<span class="tag stack">Controlled</span>':''}
+      ${p.fda_pcac?'<span class="tag pcac">⚖ PCAC Jul 2026</span>':''}
+    </div></div>`;
+}
+
+function citesHtml(p){
+  if(!p.citations||!p.citations.length) return "";
+  const items=p.citations.map(c=> c.url
+    ? `<li><a href="${c.url}" target="_blank" rel="noopener">${c.label}</a></li>`
+    : `<li>${c.label}</li>`).join("");
+  return `<div class="field"><div class="k">Citations · PubMed / DOI</div><ul class="cites">${items}</ul></div>`;
+}
+
+function pcacNote(p){
+  if(!p.fda_pcac) return "";
+  return `<div class="pcac-note">⚖ <b>FDA PCAC — ${p.fda_pcac.date}.</b> Under Pharmacy Compounding Advisory Committee review for the 503A bulk-substances (compounding) list. The recommendation is <b>non-binding and is not FDA drug approval</b>; legal compounding still requires formal rulemaking.</div>`;
+}
+
+function openModal(slug){
+  const p = DATA.protocols.find(x=>x.slug===slug); if(!p) return;
+  const m=document.getElementById("modal"); m.className="modal";
+  const f=(k,v,danger)=> v?`<div class="field ${danger?'danger':''}"><div class="k">${k}</div><div class="v">${v}</div></div>`:"";
+  const fullBtn = (p.body_md && entitled(p.line))
+    ? `<div class="cardbtns"><button class="linkbtn primary" onclick="openFullCard('${p.slug}')">View full prescribing card →</button></div>` : "";
+  m.innerHTML = modalHead(p) + `
+    <div class="mbody">
+      ${f("Mechanism",p.mechanism)}
+      ${f("Primary use",p.primary_use)}
+      ${f("Rule out (key)",p.contraindications,true)}
+      ${f("Clinical notes",p.clinical_notes)}
+      ${f("Evidence",p.evidence)}
+      ${citesHtml(p)}
+      ${pcacNote(p)}
+      ${fullBtn}
+      <div class="mnote">This summary is a drafting aid; the treating physician reviews, customizes, and signs the final protocol before use.</div>
+    </div>`;
+  document.getElementById("overlay").classList.add("open");
+}
+
+function openFullCard(slug){
+  const p = DATA.protocols.find(x=>x.slug===slug); if(!p) return;
+  const m=document.getElementById("modal"); m.className="modal wide";
+  m.innerHTML = modalHead(p) + `
+    <div class="mbody">
+      <div class="cardbtns">
+        <button class="linkbtn" onclick="openModal('${p.slug}')">← Summary</button>
+        <button class="linkbtn primary" onclick="window.print()">🖨 Download ready-to-sign PDF</button>
+      </div>
+      <div class="personalize">
+        <b>Personalize:</b>
+        <input id="pzClinic" placeholder="Clinic / Spa name" value="${RX.clinic}"
+          oninput="RX.clinic=this.value;document.getElementById('lhName').textContent=this.value||'Your Clinic / Spa'">
+        <input id="pzMd" placeholder="Medical Director name" value="${RX.md}"
+          oninput="RX.md=this.value;document.getElementById('sigName').textContent=this.value||'________________________'">
+      </div>
+      <div class="letterhead"><span class="lh" id="lhName">${RX.clinic||'Your Clinic / Spa'}</span>
+        <small>Clinical Protocol — for medical director review &amp; signature</small></div>
+      <div class="fullcard">${mdToHtml(p.body_md)}</div>
+      ${p.evidence?`<div class="fullcard"><h2>Evidence</h2><p>${p.evidence}</p></div>`:""}
+      ${citesHtml(p)}
+      ${pcacNote(p)}
+      <div class="sigblock">
+        <div class="row"><b>Reviewed &amp; approved — Medical Director:</b> <span id="sigName">${RX.md||'________________________'}</span></div>
+        <div class="row">License #: ____________________ &nbsp;·&nbsp; Signature: ____________________ &nbsp;·&nbsp; Date: ____________</div>
+      </div>
+      <div class="stamp">RenuviaMD Clinical Protocol Library · ${p.name} · last clinical review ${p.reviewed||'—'} · generated ${new Date().toISOString().slice(0,10)}. Drafting aid — reviewed, customized, and signed by the treating physician before use. Current version always online.</div>
+      <div class="pdf-footer">For licensed healthcare professionals — educational &amp; clinical decision-support only. Not medical or legal advice, prescribing authorization, a standing order, delegation agreement, clinic or pharmacy approval, or a medical-director relationship. Dated snapshot — verify current applicability. No resale, redistribution, public upload, or white-labeling. Full terms at renuviamd.com/terms · <b>RenuviaMD® Compliance Division</b></div>
+    </div>`;
+  document.getElementById("overlay").classList.add("open");
+}
+function closeModal(){ document.getElementById("overlay").classList.remove("open"); }
+document.getElementById("overlay").onclick=e=>{ if(e.target.id==="overlay") closeModal(); };
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
+
+document.getElementById("q").addEventListener("input",e=>{state.q=e.target.value;renderFull();});
+document.getElementById("classFilters").querySelectorAll(".fbtn").forEach(b=>b.onclick=()=>{
+  state.cls=b.dataset.c;
+  document.querySelectorAll("#classFilters .fbtn").forEach(x=>x.classList.toggle("on",x===b));
+  renderFull();
+});
+
+render();
+</script>
+</body>
+</html>

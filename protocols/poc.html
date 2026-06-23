@@ -1,0 +1,133 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Point-of-Care Visit Packet · RenuviaMD® (Try mode)</title>
+<style>
+:root{--navy:#102a30;--navy2:#0e3a40;--teal:#0e8a8a;--gold:#c9870a;--ink:#1c2b32;--muted:#5b6b72;--line:#e3ecea;--soft:#f3f8f7;--red:#d7483b;--green:#1e9e6a}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:#eef4f3}
+header{background:linear-gradient(150deg,#0e3a40,#0e8a8a);color:#fff;padding:11px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.brand{font-weight:800}.brand span{color:#ffd98a}.try{background:var(--gold);color:#3a2a00;font-size:.68rem;font-weight:800;padding:3px 8px;border-radius:6px;text-transform:uppercase}
+.warn{margin-left:auto;font-size:.76rem;color:#ffe1a3}
+.phi{background:#fff3df;color:#7a4a10;font-size:.78rem;text-align:center;padding:6px;border-bottom:1px solid #f0cd92}
+.today{background:#0b2329;color:#cfe3e1;font-size:.78rem;padding:7px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.today b{color:#ffd98a}.today .v{background:#143a40;border:1px solid #1f5158;border-radius:6px;padding:2px 9px;cursor:pointer}
+.today button{margin-left:auto;background:#143a40;color:#cfe3e1;border:1px solid #1f5158;border-radius:6px;padding:5px 11px;font-size:.76rem;cursor:pointer}
+.grid{display:grid;grid-template-columns:380px 1fr;gap:0;height:calc(100vh - 120px)}
+@media(max-width:860px){.grid{grid-template-columns:1fr;height:auto}}
+.pane{overflow-y:auto;padding:16px}.form{background:#f7faf9;border-right:1px solid var(--line)}
+h2{font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;color:var(--teal);margin:14px 0 7px;border-bottom:1px solid var(--line);padding-bottom:4px}
+label{display:block;font-size:.74rem;color:var(--muted);margin:7px 0 2px;font-weight:600}
+input,select,textarea{width:100%;border:1px solid var(--line);border-radius:7px;padding:8px 10px;font-size:.86rem;font-family:inherit;background:#fff}
+.row{display:flex;gap:8px}.row>div{flex:1}
+.chk{display:flex;align-items:flex-start;gap:7px;font-size:.82rem;margin:4px 0}.chk input{width:auto;margin-top:3px}
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--teal);margin-bottom:12px;flex-wrap:wrap}
+.tab{padding:8px 13px;font-size:.82rem;font-weight:600;color:var(--muted);cursor:pointer;border-radius:7px 7px 0 0}
+.tab.on{background:var(--teal);color:#fff}
+.btns{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+button.b{border:none;border-radius:8px;padding:10px 14px;font-weight:700;font-size:.85rem;cursor:pointer}
+.gen{background:var(--teal);color:#fff}.print{background:var(--navy);color:#fff}.save{background:var(--gold);color:#3a2a00}.clear{background:#fff;color:var(--red);border:1px solid var(--line)}
+.sheet{background:#fff;border:1px solid var(--line);border-radius:10px;padding:22px;font-size:.85rem;line-height:1.55}
+.lh{text-align:center;border-bottom:2px solid var(--teal);padding-bottom:8px;margin-bottom:12px}.lh b{font-size:1.05rem;color:var(--navy)}.lh small{display:block;color:var(--muted);font-size:.66rem;text-transform:uppercase;letter-spacing:.08em}
+.sec{margin:9px 0}.sec .k{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--teal);font-weight:800}
+.sig{margin-top:14px;border-top:1px solid var(--line);padding-top:8px;font-size:.78rem}
+.ft{margin-top:12px;border-top:1px dashed var(--line);padding-top:6px;font-size:.64rem;color:var(--muted)}
+.audit li{list-style:none;padding:7px 0;border-bottom:1px solid var(--line);font-size:.9rem;display:flex;gap:8px;align-items:center}
+.ok{color:var(--green);font-weight:800}.bad{color:var(--red);font-weight:800}
+.verdict{padding:12px 16px;border-radius:9px;font-weight:700;margin-bottom:12px}.vpass{background:#e8f7f0;color:#0c7a4d}.vfail{background:#fdecea;color:#b3372c}
+@media print{body *{visibility:hidden}#sheet,#sheet *{visibility:visible}#sheet{position:absolute;inset:0;border:none}}
+</style></head><body>
+<header><div class="brand">Renuvia<span>MD</span>® · Visit Packet</div><span class="try">Try mode</span>
+<span class="warn">⚠ On-device only — Save before closing.</span></header>
+<div class="phi">🔒 Nothing leaves this device — no server, no database. Patient data stays in your browser and clears at end of day.</div>
+<div class="today" id="todayBar"></div>
+<div class="grid">
+ <div class="pane form">
+  <h2>Clinic / Provider</h2><div class="row"><div><label>Clinic / Spa</label><input id="clinic"></div><div><label>Provider</label><input id="prov"></div></div>
+  <h2>Patient (local only)</h2><div class="row"><div><label>Name</label><input id="pname"></div><div><label>DOB</label><input id="dob"></div></div>
+  <label>Date of visit</label><input id="vdate">
+  <h2>Therapy</h2><label>Peptide / protocol</label><select id="pep"></select><div id="gl" style="font-size:.74rem;color:var(--muted);margin-top:3px"></div>
+  <label>Chief complaint / goal</label><input id="cc">
+  <h2>Intake</h2><label>Allergies</label><input id="allergy" placeholder="NKDA"><label>Current medications</label><input id="meds"><label>Relevant conditions / history</label><input id="hx">
+  <h2>Eligibility / GFE — rule-outs cleared</h2><div id="ruleouts"></div>
+  <h2>Vitals (optional)</h2><div class="row"><div><label>BP</label><input id="bp"></div><div><label>HR</label><input id="hr"></div><div><label>Wt</label><input id="wt"></div></div>
+  <h2>Plan</h2><label>Dose / route</label><input id="dose"><label>Baseline / monitoring labs</label><input id="labs"><label>Follow-up</label><input id="fu" placeholder="4 weeks">
+  <div class="chk"><input type="checkbox" id="consent"><span>Informed consent obtained — grade &amp; off-label/research status disclosed</span></div>
+  <div class="btns"><button class="b gen" onclick="render()">Generate packet →</button><button class="b print" onclick="window.print()">🖨 Print current</button><button class="b save" onclick="saveToday()">＋ Save to today</button><button class="b clear" onclick="wipe()">Wipe</button></div>
+ </div>
+ <div class="pane">
+  <div class="tabs" id="tabs"></div>
+  <div class="sheet" id="sheet"><div style="color:var(--muted);text-align:center;padding:40px">Complete the visit, then <b>Generate packet</b>. Tabs: Intake · Consent · Note · Handout · Compliance.</div></div>
+ </div>
+</div>
+<script src="poc-data.js"></script>
+<script>
+const D=(window.RENUVIA_PROTOCOLS&&window.RENUVIA_PROTOCOLS.protocols||[]).filter(p=>!p.teaser&&!p.is_stack&&p.line==='peptides');
+const sel=document.getElementById('pep');D.forEach(p=>{const o=document.createElement('option');o.value=p.slug;o.textContent=p.name+(p.grade?' · Grade '+p.grade:'');sel.appendChild(o);});
+document.getElementById('vdate').value=new Date().toISOString().slice(0,10);
+const TABS=['Intake','Consent','Note','Handout','Compliance'];let tab='Note';
+const tabsEl=document.getElementById('tabs');TABS.forEach(t=>{const d=document.createElement('div');d.className='tab'+(t===tab?' on':'');d.textContent=t;d.onclick=()=>{tab=t;[...tabsEl.children].forEach(c=>c.classList.toggle('on',c.textContent===t));render();};tabsEl.appendChild(d);});
+function cur(){return D.find(p=>p.slug===sel.value)||D[0];}
+function fill(){const p=cur();if(!p)return;document.getElementById('gl').textContent=`${p.status_label} · Grade ${p.grade||'—'} · ${p.classification.toUpperCase()}`;
+ const r=(p.contraindications||'').split(',').map(s=>s.trim()).filter(Boolean);
+ document.getElementById('ruleouts').innerHTML=r.map((x,i)=>`<div class="chk"><input type="checkbox" id="ro${i}" checked><span>${x}</span></div>`).join('')||'<div style="font-size:.8rem;color:var(--muted)">None listed.</div>';
+ const dm=(p.body_md||'').match(/\*\*Dose:\*\*\s*([^\n]+)/);document.getElementById('dose').value=dm?dm[1].replace(/\*/g,''):'';
+ const lm=(p.body_md||'').match(/## Labs[^\n]*\n([^\n#]+)/);document.getElementById('labs').value=lm?lm[1].replace(/^[\s-]+/,''):'';}
+sel.onchange=fill;fill();
+const v=id=>{const e=document.getElementById(id);return e?(e.value||''):'';};const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+function ros(){return[...document.querySelectorAll('#ruleouts input:checked')].map(c=>c.nextElementSibling.textContent);}
+function head(t){return `<div class="lh"><b>${esc(v('clinic'))||'Your Clinic / Spa'}</b><small>${t}</small></div><div class="sec"><b>${esc(v('pname'))||'[Patient]'}</b> · DOB ${esc(v('dob'))||'—'} · ${v('vdate')}</div>`;}
+function foot(){return `<div class="ft">RenuviaMD® Compliance Division · template-assembled on this device · not medical/legal advice · provider reviews &amp; signs · save to your own files — not stored anywhere.</div>`;}
+function docIntake(p){return head('Patient Intake — Peptide Therapy')+
+ `<div class="sec"><span class="k">Reason for visit</span><div>${esc(v('cc'))||'—'}</div></div>
+ <div class="sec"><span class="k">Allergies</span><div>${esc(v('allergy'))||'NKDA'}</div></div>
+ <div class="sec"><span class="k">Current medications</span><div>${esc(v('meds'))||'—'}</div></div>
+ <div class="sec"><span class="k">Relevant history</span><div>${esc(v('hx'))||'—'}</div></div>
+ <div class="sec"><span class="k">Contraindication screen (${esc(p.name)})</span><ul>${ros().map(r=>'<li>☐ '+esc(r)+' — cleared</li>').join('')}</ul></div>
+ <div class="sig">Patient signature ____________________  Date ${v('vdate')}</div>`+foot();}
+function docConsent(p){const tier=p.classification==='green'?'This therapy is FDA-approved; standard informed consent applies.':p.classification==='yellow'?'This use may be off-label. I understand the off-label nature and the limits of the evidence.':'This compound is research-only / NOT FDA-approved. I understand its experimental nature, that human evidence is limited or absent, and that risks may be unknown.';
+ return head('Informed Consent — Peptide Therapy')+
+ `<div class="sec"><span class="k">Therapy</span><div>${esc(p.name)} (${p.status_label}, Grade ${p.grade||'—'}). ${esc(p.mechanism||'')}.</div></div>
+ <div class="sec"><span class="k">Nature &amp; evidence</span><div>${tier}</div></div>
+ <div class="sec"><span class="k">Risks discussed</span><div>${esc(p.contraindications||'—')}; injection-site reactions; unknown long-term effects for non-approved compounds.</div></div>
+ <div class="sec"><span class="k">Alternatives</span><div>Including no treatment and FDA-approved options, were discussed.</div></div>
+ <div class="sec"><span class="k">Acknowledgment</span><div>I have had my questions answered and consent voluntarily.</div></div>
+ <div class="sig">Patient ____________________ Date ${v('vdate')} &nbsp;·&nbsp; Provider ${esc(v('prov'))||'____________'} ____________________</div>`+foot();}
+function docNote(p){return head('Clinical Visit Note — Peptide Therapy')+
+ `<div class="sec"><span class="k">Chief complaint / goal</span><div>${esc(v('cc'))||'—'}</div></div>
+ <div class="sec"><span class="k">Assessment</span><div>${esc(p.name)} (${p.status_label}, Grade ${p.grade||'—'}). ${esc(p.primary_use||'')}. ${p.classification==='red'?'Research-only / not FDA-approved — experimental use discussed.':''}</div></div>
+ <div class="sec"><span class="k">Eligibility / GFE — rule-outs cleared</span><ul>${ros().map(r=>'<li>✓ '+esc(r)+'</li>').join('')||'<li>—</li>'}</ul></div>
+ ${(v('bp')||v('hr')||v('wt'))?`<div class="sec"><span class="k">Vitals</span><div>BP ${esc(v('bp'))||'—'} · HR ${esc(v('hr'))||'—'} · Wt ${esc(v('wt'))||'—'}</div></div>`:''}
+ <div class="sec"><span class="k">Plan</span><div>${esc(p.name)} — ${esc(v('dose'))||'[dose]'}. Labs: ${esc(v('labs'))||'—'}. Follow-up: ${esc(v('fu'))||'—'}.</div></div>
+ <div class="sec"><span class="k">Consent</span><div>${document.getElementById('consent').checked?'Informed consent obtained; grade and off-label/research status disclosed.':'⚠ Consent not documented.'}</div></div>
+ <div class="sig">Reviewed &amp; signed — ${esc(v('prov'))||'____________'} ____________________ Date ${v('vdate')}</div>`+foot();}
+function docHandout(p){const ed=(p.body_md||'').split('## Patient education')[1]||'';const pts=ed.split('\n').filter(l=>l.trim().startsWith('-')).map(l=>l.replace(/^[\s-]+/,''));
+ return head('Patient Handout — '+esc(p.name))+
+ `<div class="sec"><span class="k">What it is</span><div>${esc(p.mechanism||p.primary_use||'')}</div></div>
+ <div class="sec"><span class="k">How you'll use it</span><div>${esc(v('dose'))||'As directed by your provider.'}</div></div>
+ <div class="sec"><span class="k">Key points</span><ul>${(pts.length?pts:['Use exactly as directed.','Store as instructed.']).map(x=>'<li>• '+esc(x)+'</li>').join('')}</ul></div>
+ <div class="sec"><span class="k">When to call us</span><div>Any severe or unexpected symptom, allergic reaction, or new concern.</div></div>`+foot();}
+function docCompliance(p){const checks=[
+ ['Eligibility / GFE rule-outs all cleared', ros().length>0 && document.querySelectorAll('#ruleouts input:not(:checked)').length===0],
+ ['Informed consent documented', document.getElementById('consent').checked],
+ ['Dose / route documented', !!v('dose')],
+ ['Baseline / monitoring labs ordered', !!v('labs')],
+ ['Follow-up planned', !!v('fu')],
+ ['Provider identified for signature', !!v('prov')],
+ ['Patient identified', !!v('pname')]];
+ if(p.classification==='red')checks.push(['Research-only: experimental status disclosed in consent', document.getElementById('consent').checked]);
+ const fails=checks.filter(c=>!c[1]).length;
+ return head('Visit Compliance Check')+
+ `<div class="verdict ${fails?'vfail':'vpass'}">${fails?('⚠ '+fails+' item'+(fails>1?'s':'')+' need attention before closing'):'✓ Visit complete — all required elements documented'}</div>
+ <ul class="audit">${checks.map(c=>`<li><span class="${c[1]?'ok':'bad'}">${c[1]?'✓':'✗'}</span> ${esc(c[0])}</li>`).join('')}</ul>
+ <div class="ft">Per-visit documentation audit, RenuviaMD® Compliance Division. The provider remains responsible for clinical decisions and final sign-off.</div>`;}
+function render(){const p=cur();const fn={Intake:docIntake,Consent:docConsent,Note:docNote,Handout:docHandout,Compliance:docCompliance}[tab];document.getElementById('sheet').innerHTML=fn(p);}
+function snapshot(){const o={};document.querySelectorAll('input,select,textarea').forEach(e=>o[e.id]=e.type==='checkbox'?e.checked:e.value);return o;}
+function restore(o){for(const k in o){const e=document.getElementById(k);if(!e)continue;if(e.type==='checkbox')e.checked=o[k];else e.value=o[k];}const p=cur();document.getElementById('gl').textContent=`${p.status_label} · Grade ${p.grade||'—'} · ${p.classification.toUpperCase()}`;render();}
+function today(){try{return JSON.parse(localStorage.getItem('rmd_today')||'[]')}catch(e){return[]}}
+function saveToday(){const t=today();t.push({n:v('pname')||'(unnamed)',p:cur().name,t:new Date().toLocaleTimeString(),d:snapshot()});localStorage.setItem('rmd_today',JSON.stringify(t));paintToday();alert('Saved to today (on this device only).');}
+function paintToday(){const t=today();document.getElementById('todayBar').innerHTML=`<b>Today's visits:</b> ${t.length?'':'<span style="opacity:.6">none yet</span>'}`+t.map((x,i)=>`<span class="v" data-i="${i}">${esc(x.n)} · ${esc(x.p)} · ${x.t}</span>`).join('')+(t.length?`<button onclick="endDay()">End day — clear all</button>`:'');
+ document.querySelectorAll('.today .v').forEach(el=>el.onclick=()=>restore(today()[+el.dataset.i].d));}
+function endDay(){if(!confirm('Clear ALL of today’s visits from this device? Save anything you need first.'))return;localStorage.removeItem('rmd_today');paintToday();}
+function wipe(){if(!confirm('Wipe this visit?'))return;document.querySelectorAll('input,textarea').forEach(e=>{if(e.type==='checkbox')e.checked=false;else e.value='';});document.getElementById('vdate').value=new Date().toISOString().slice(0,10);fill();document.getElementById('sheet').innerHTML='<div style="color:var(--muted);text-align:center;padding:40px">Wiped.</div>';}
+window.addEventListener('beforeunload',e=>{e.preventDefault();e.returnValue='Save your visit before closing — unsaved patient info will be lost.';});
+paintToday();
+</script><script src="../disclaimer.js"></script>
+</body></html>

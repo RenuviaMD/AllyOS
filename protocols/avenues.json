@@ -1,0 +1,601 @@
+{
+  "_model": "Avenue \u2192 protocol families (name \u00b7 products \u00b7 focus[]) + universal protocols. 'focus' is the teaser (shows rigor, not the protocol). Names+focus are public; dosing/protocol content is gated/purchased.",
+  "avenues": [
+    {
+      "id": "peptides",
+      "name": "Peptides",
+      "icon": "\ud83e\uddec",
+      "flagship": true,
+      "note": "families = clinical axes; products = the peptides+stacks (pull names from protocols.json). focus = standard peptide protocol elements.",
+      "families": [
+        {
+          "name": "GLP-1 / Weight Loss",
+          "products": "Tirzepatide, Retatrutide, AOD-9604",
+          "focus": [
+            "GFE/eligibility",
+            "contraindications (MTC/MEN2, pancreatitis)",
+            "titration map",
+            "baseline + monitoring labs",
+            "consent"
+          ]
+        },
+        {
+          "name": "Growth",
+          "products": "Sermorelin, Tesamorelin, Ipamorelin, CJC-1295, CJC/Ipa blend",
+          "focus": [
+            "eligibility",
+            "rule-outs (malignancy, thyroid)",
+            "reconstitution/dosing",
+            "IGF-1/TSH/glucose labs",
+            "consent"
+          ]
+        },
+        {
+          "name": "Repair",
+          "products": "BPC-157, TB-500, GHK-Cu",
+          "focus": [
+            "image injury first",
+            "malignancy rule-out",
+            "reconstitution math",
+            "course limits",
+            "consent"
+          ]
+        },
+        {
+          "name": "Longevity",
+          "products": "MOTS-c, Epitalon, SS-31; Longevity Stack",
+          "focus": [
+            "patient selection",
+            "evidence honesty",
+            "dosing pulses",
+            "labs",
+            "consent"
+          ]
+        },
+        {
+          "name": "Vitality",
+          "products": "PT-141, Kisspeptin-10; Vitality Stack",
+          "focus": [
+            "eligibility",
+            "cardiovascular screen",
+            "dosing",
+            "consent"
+          ]
+        },
+        {
+          "name": "Cognition",
+          "products": "Cerebrolysin, Semax, Selank, DSIP",
+          "focus": [
+            "eligibility",
+            "route",
+            "dosing",
+            "consent"
+          ]
+        },
+        {
+          "name": "Immunity",
+          "products": "Thymosin \u03b11, KPV; Immunity Stack",
+          "focus": [
+            "eligibility",
+            "dosing",
+            "consent"
+          ]
+        }
+      ],
+      "universal": [
+        {
+          "name": "Reconstitution & Dosing Math",
+          "covers": [
+            "mg/mL \u2192 mcg \u2192 U-100 units",
+            "BAC water",
+            "storage/stability"
+          ]
+        },
+        {
+          "name": "Consent / Documentation Protocol",
+          "covers": [
+            "off-label/research disclosure",
+            "risks by evidence grade",
+            "provider signature",
+            "follow-up"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bhrt",
+      "name": "BHRT / Hormone Wellness",
+      "icon": "\u2695\ufe0f",
+      "compliance_notes": [
+        "Wellness/optimization framing for cash-pay; controlled-substance documentation where applicable.",
+        "Risk screens are mandatory gates, not optional (PSA/hct men; breast-CA/VTE/stroke women)."
+      ],
+      "families": [
+        {
+          "name": "Testosterone replacement / optimization",
+          "group": "Men",
+          "focus": []
+        },
+        {
+          "name": "Testosterone injectable protocol",
+          "group": "Men",
+          "focus": []
+        },
+        {
+          "name": "Testosterone topical protocol",
+          "group": "Men",
+          "focus": []
+        },
+        {
+          "name": "Gonadorelin / fertility-preservation adjunct (if used)",
+          "group": "Men",
+          "focus": []
+        },
+        {
+          "name": "hCG adjunct (if legal/source-appropriate)",
+          "group": "Men",
+          "focus": []
+        },
+        {
+          "name": "Anastrozole / estrogen-management adjunct (if used)",
+          "group": "Men",
+          "focus": []
+        },
+        {
+          "name": "DHEA / pregnenolone support",
+          "group": "Men",
+          "focus": []
+        },
+        {
+          "name": "Erectile-dysfunction medication pathway (if included)",
+          "group": "Men",
+          "focus": []
+        },
+        {
+          "name": "Hair-loss medication pathway (if included)",
+          "group": "Men",
+          "focus": []
+        },
+        {
+          "name": "Perimenopause / menopause hormone optimization",
+          "group": "Women",
+          "focus": []
+        },
+        {
+          "name": "Estradiol topical / transdermal protocol",
+          "group": "Women",
+          "focus": []
+        },
+        {
+          "name": "Progesterone oral / topical protocol",
+          "group": "Women",
+          "focus": []
+        },
+        {
+          "name": "Testosterone for women (if included)",
+          "group": "Women",
+          "focus": []
+        },
+        {
+          "name": "DHEA / pregnenolone support",
+          "group": "Women",
+          "focus": []
+        },
+        {
+          "name": "Thyroid-adjacent wellness review (if clinically included)",
+          "group": "Women",
+          "focus": []
+        }
+      ],
+      "universal": [
+        {
+          "name": "Male hormone intake & eligibility review"
+        },
+        {
+          "name": "Female hormone intake & eligibility review"
+        },
+        {
+          "name": "Lab review & monitoring protocol"
+        },
+        {
+          "name": "PSA / prostate-risk review (men)"
+        },
+        {
+          "name": "Hematocrit / erythrocytosis monitoring (men)"
+        },
+        {
+          "name": "Sleep-apnea / cardiovascular-risk screen (men)"
+        },
+        {
+          "name": "Fertility counseling & exclusion (men)"
+        },
+        {
+          "name": "Pregnancy / breastfeeding exclusion (women)"
+        },
+        {
+          "name": "Abnormal uterine bleeding escalation (women)"
+        },
+        {
+          "name": "Breast / estrogen-sensitive cancer risk screen (women)"
+        },
+        {
+          "name": "VTE / clotting-risk screen (women)"
+        },
+        {
+          "name": "Migraine-with-aura / stroke-risk screen (women)"
+        },
+        {
+          "name": "Mammogram / Pap / GYN-care documentation (women)"
+        },
+        {
+          "name": "Controlled-substance / prescription documentation (if applicable)"
+        },
+        {
+          "name": "Follow-up, dose-change & adverse-effect protocol"
+        }
+      ]
+    },
+    {
+      "id": "iv",
+      "name": "IV & IM Wellness",
+      "icon": "\ud83d\udca7",
+      "compliance_notes": [
+        "Wellness language only \u2014 avoid migraine, hangover, nausea, pain, detox, liver-disease, and immune-disease language unless a separate direct-medical-treatment model is built.",
+        "High-dose vitamin C, if ever allowed, is a separate HIGH-RISK protocol (G6PD screen, oxalate/renal risk).",
+        "Energy/fatigue and immune/seasonal IVs are framed in wellness language only."
+      ],
+      "families": [
+        {
+          "name": "Core IV hydration",
+          "focus": []
+        },
+        {
+          "name": "Myers / foundational wellness IV",
+          "focus": []
+        },
+        {
+          "name": "B-complex IV / IM",
+          "focus": []
+        },
+        {
+          "name": "Methyl-B12 IM",
+          "focus": []
+        },
+        {
+          "name": "Vitamin C wellness IV",
+          "focus": []
+        },
+        {
+          "name": "High-dose vitamin C (HIGH-RISK, separate)",
+          "focus": []
+        },
+        {
+          "name": "Glutathione IV push / post-drip",
+          "focus": []
+        },
+        {
+          "name": "NAD+ slow infusion",
+          "focus": []
+        },
+        {
+          "name": "Amino acid IV",
+          "focus": []
+        },
+        {
+          "name": "Trace mineral / zinc support",
+          "focus": []
+        },
+        {
+          "name": "Magnesium-containing IV",
+          "focus": []
+        },
+        {
+          "name": "Calcium-containing IV (if used)",
+          "focus": []
+        },
+        {
+          "name": "Recovery / athletic support IV",
+          "focus": []
+        },
+        {
+          "name": "Skin / glow IV",
+          "focus": []
+        },
+        {
+          "name": "Energy / fatigue-support IV (wellness language)",
+          "focus": []
+        },
+        {
+          "name": "Immune / seasonal wellness IV (wellness language)",
+          "focus": []
+        },
+        {
+          "name": "Metabolic wellness IV",
+          "focus": []
+        },
+        {
+          "name": "IM wellness injection program",
+          "focus": []
+        }
+      ],
+      "universal": [
+        {
+          "name": "IV eligibility / GFE protocol"
+        },
+        {
+          "name": "RN same-day safety screen protocol"
+        },
+        {
+          "name": "IV adverse-event / anaphylaxis / vasovagal protocol"
+        },
+        {
+          "name": "Medication storage, lot, expiration, transport protocol"
+        },
+        {
+          "name": "Mobile IV addendum (if applicable)"
+        }
+      ]
+    },
+    {
+      "id": "prp",
+      "name": "Regenerative / PRP",
+      "icon": "\ud83e\ude78",
+      "compliance_notes": [
+        "Exosome / biologic-product policy is HIGH regulatory risk \u2014 only if ever considered, separately gated.",
+        "Musculoskeletal/joint PRP is a higher-risk direct-care pathway, distinct from aesthetic PRP."
+      ],
+      "families": [
+        {
+          "name": "PRP facial / aesthetic rejuvenation",
+          "focus": []
+        },
+        {
+          "name": "PRP hair restoration",
+          "focus": []
+        },
+        {
+          "name": "PRP with microneedling",
+          "focus": []
+        },
+        {
+          "name": "PRP scar / skin-quality support",
+          "focus": []
+        },
+        {
+          "name": "PRP joint / musculoskeletal injection (HIGHER-RISK, if included)",
+          "focus": []
+        },
+        {
+          "name": "PRF (if used)",
+          "focus": []
+        }
+      ],
+      "universal": [
+        {
+          "name": "PRP general eligibility & consent"
+        },
+        {
+          "name": "PRP blood draw & processing protocol"
+        },
+        {
+          "name": "Sterile technique & infection-control protocol"
+        },
+        {
+          "name": "Centrifuge settings & processing documentation"
+        },
+        {
+          "name": "Anticoagulant / bleeding-risk screen"
+        },
+        {
+          "name": "Immunosuppression / infection-risk screen"
+        },
+        {
+          "name": "Post-procedure aftercare"
+        },
+        {
+          "name": "Adverse-event / infection / pain escalation pathway"
+        },
+        {
+          "name": "Lot / source documentation for kits or biologic materials"
+        },
+        {
+          "name": "Photo documentation (aesthetic PRP)"
+        }
+      ]
+    },
+    {
+      "id": "aesthetics",
+      "name": "Aesthetics",
+      "icon": "\u2728",
+      "families": [
+        {
+          "name": "Neurotoxin Injectables",
+          "products": "Botox, Dysport, Xeomin, Daxxify-type",
+          "focus": [
+            "GFE/eligibility",
+            "facial assessment",
+            "contraindications",
+            "dosing map",
+            "lot tracking",
+            "consent",
+            "complication pathway"
+          ]
+        },
+        {
+          "name": "Dermal Fillers",
+          "products": "HA fillers, calcium hydroxylapatite, biostimulatory fillers",
+          "focus": [
+            "anatomic risk zones",
+            "vascular occlusion protocol",
+            "hyaluronidase availability (HA)",
+            "consent",
+            "product/lot documentation",
+            "before/after photos"
+          ]
+        },
+        {
+          "name": "Biostimulators",
+          "products": "Sculptra, Radiesse-type",
+          "focus": [
+            "patient selection",
+            "dilution/prep",
+            "injection plane",
+            "delayed nodule pathway",
+            "follow-up timing"
+          ]
+        },
+        {
+          "name": "Kybella / Deoxycholic Acid",
+          "products": "Submental fat treatment",
+          "focus": [
+            "anatomy",
+            "marginal mandibular nerve risk",
+            "swelling counseling",
+            "dosing limits",
+            "treatment interval"
+          ]
+        },
+        {
+          "name": "PRP / PRF Aesthetic Procedures",
+          "products": "Hair restoration, facial rejuvenation, microneedling add-on",
+          "focus": [
+            "blood draw",
+            "centrifuge protocol",
+            "sterile handling",
+            "consent",
+            "no disease claims"
+          ]
+        },
+        {
+          "name": "Microneedling",
+          "products": "Standard + RF microneedling",
+          "focus": [
+            "skin type",
+            "infection risk",
+            "depth settings",
+            "topical use",
+            "post-care",
+            "contraindications"
+          ]
+        },
+        {
+          "name": "Chemical Peels",
+          "products": "Superficial & medium-depth",
+          "focus": [
+            "Fitzpatrick type",
+            "peel depth",
+            "neutralization",
+            "PIH risk",
+            "herpes prophylaxis policy",
+            "aftercare"
+          ]
+        },
+        {
+          "name": "Laser Hair Removal",
+          "products": "Diode, Alexandrite, Nd:YAG, IPL",
+          "focus": [
+            "skin typing",
+            "test spot",
+            "eye protection",
+            "settings log",
+            "burn protocol"
+          ]
+        },
+        {
+          "name": "IPL / Photofacial",
+          "products": "Pigment, redness, rejuvenation",
+          "focus": [
+            "not disease treatment",
+            "photosensitivity screen",
+            "Fitzpatrick limits",
+            "eye protection",
+            "burn/PIH protocol"
+          ]
+        },
+        {
+          "name": "Fractional Laser Resurfacing",
+          "products": "Ablative / non-ablative fractional",
+          "focus": [
+            "higher-risk consent",
+            "infection prevention",
+            "antiviral policy",
+            "settings log",
+            "healing follow-up"
+          ]
+        },
+        {
+          "name": "Vascular / Pigment Laser",
+          "products": "Vascular lesions, telangiectasia, pigment",
+          "focus": [
+            "lesion screening",
+            "no cancer diagnosis role",
+            "referral triggers",
+            "eye safety",
+            "settings"
+          ]
+        },
+        {
+          "name": "High-Energy Devices",
+          "products": "RF, ultrasound, plasma, energy tightening/contouring",
+          "focus": [
+            "device credentialing",
+            "settings",
+            "contraindications",
+            "implant/device screening",
+            "burns",
+            "nerve injury",
+            "fat loss/asymmetry risk"
+          ]
+        },
+        {
+          "name": "Body Contouring",
+          "products": "Cryolipolysis, RF, ultrasound cavitation, EMS-type",
+          "focus": [
+            "patient selection",
+            "contraindications",
+            "expected outcomes",
+            "paradoxical adipose hyperplasia warning",
+            "device logs"
+          ]
+        },
+        {
+          "name": "Aesthetic IV/IM Add-ons",
+          "products": "Combined aesthetic + IV/IM wellness",
+          "focus": [
+            "separate IV/IM standing orders",
+            "GFE/eligibility",
+            "vitals",
+            "ingredient ceilings",
+            "adverse-event protocol"
+          ]
+        }
+      ],
+      "universal": [
+        {
+          "name": "Post-Procedure Complication Pathway",
+          "covers": [
+            "vascular occlusion",
+            "infection",
+            "burns",
+            "allergic reaction",
+            "visual symptoms",
+            "neurologic symptoms",
+            "urgent referral/EMS triggers"
+          ]
+        },
+        {
+          "name": "Photo / Consent / Documentation Protocol",
+          "covers": [
+            "before/after photos",
+            "consent",
+            "lot numbers",
+            "treatment map",
+            "device settings",
+            "provider signature",
+            "follow-up plan"
+          ]
+        }
+      ]
+    }
+  ]
+}
