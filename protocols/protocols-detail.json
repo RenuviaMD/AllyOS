@@ -1,0 +1,59 @@
+{
+  "schema": "renuvia.protocol-detail.v1",
+  "updated": "2026-06-23",
+  "note": "Detailed clinical management protocols — the deterministic 'Full protocol' reference shown to providers per agent. AUDITED by 3 Opus auditors (no fabrication; trial DOIs + label doses verified). GLP-1s locked; remaining peptides follow the same research -> 3-auditor -> lock pipeline.",
+  "peptides": {
+    "semaglutide": {
+      "status": "FDA-approved (Wegovy / Ozempic / Rybelsus). Continuous therapy — no cycling; follow-up only.",
+      "candidacy": "Adults BMI ≥30, or ≥27 with ≥1 weight-related comorbidity. Also: adolescents ≥12 (≥95th percentile); MACE reduction in CVD + obesity; noncirrhotic MASH F2–F3 fibrosis (Wegovy, Aug 2025); oral semaglutide 25 mg daily (Dec 2025).",
+      "starting_dose": "Wegovy 0.25 mg SC once weekly ×4 weeks (initiation only).",
+      "titration": "0.25 → 0.5 → 1.0 → 1.7 → 2.4 mg (max), each step ~4 weeks.",
+      "hold_rules": "If a dose isn't tolerated, delay escalation 4 weeks at the current/prior dose — don't skip steps. If 2.4 mg not tolerated, drop to 1.7 mg ×4 wk then re-attempt; if still intolerant, discontinue. ≥2 missed weekly doses → consider reinitiate + re-titrate.",
+      "ae_common": ["Nausea ~44%", "Diarrhea ~30%", "Vomiting ~24%", "Constipation ~24%", "GI discontinuation ~4.5% (vs 0.8% placebo, STEP-1)"],
+      "ae_serious": ["Pancreatitis", "Gallbladder disease", "Acute kidney injury from volume depletion", "Diabetic retinopathy worsening (SUSTAIN-6)", "Hypoglycemia with insulin/sulfonylurea", "Medullary thyroid carcinoma — boxed warning", "Serious hypersensitivity", "Mood / suicidality — counsel"],
+      "management": ["Nausea/vomiting: small low-fat frequent meals, hydrate, HOLD escalation, ondansetron PRN (off-label adjunct), step down if severe", "Constipation: fiber, fluids, activity + osmotic laxative", "Hypoglycemia: reduce insulin/sulfonylurea at initiation", "Gallbladder symptoms: RUQ ultrasound + LFTs", "Suspected pancreatitis: STOP, evaluate; do NOT restart if confirmed", "Dehydration/AKI: hold, rehydrate, check renal, reassess diuretics/RAAS/NSAIDs"],
+      "monitoring": ["Baseline: wt/BMI, BP/HR, renal, glucose/A1c, meds, pregnancy, MTC/pancreatitis screen, mood", "~4 wk & each up-titration: tolerability, hydration, wt, HR/BP, adjust insulin/SU, mood", "3 mo: weight response, tolerability, glucose", "6 mo + every 3–6 mo: weight trend, labs, GI tolerance, mental health", "Discontinue if pregnancy"],
+      "discontinuation": "Chronic disease — substantial regain expected (~⅔ over ~1 yr). No mandated taper; restart lower + re-titrate after ≥2 missed doses.",
+      "sources": ["FDA Wegovy label (confirm current revision)", "Wilding 2021 STEP-1, NEJM, doi:10.1056/NEJMoa2032183"]
+    },
+    "tirzepatide": {
+      "status": "FDA-approved (Mounjaro / Zepbound). Continuous — no cycling; follow-up only.",
+      "candidacy": "Adults BMI ≥30, or ≥27 + ≥1 comorbidity; also moderate–severe OSA with obesity (Dec 2024).",
+      "starting_dose": "2.5 mg SC once weekly ×4 weeks (initiation only).",
+      "titration": "2.5 → 5 → 7.5 → 10 → 12.5 → 15 mg (max); +2.5 mg increments after ≥4 weeks. Maintenance 5/10/15 mg.",
+      "hold_rules": "Don't escalate until ≥4 wk and tolerated; for GI intolerance stay at current dose or step down — don't skip increments.",
+      "ae_common": ["Nausea ~25–33% (10 mg arm ~33%)", "Diarrhea ~19–23%", "Constipation ~11–17%", "Vomiting ~8–13%", "AE discontinuation ~4–7% (SURMOUNT-1)"],
+      "ae_serious": ["Pancreatitis", "Gallbladder disease", "Acute kidney injury", "Hypoglycemia with insulin/sulfonylurea", "Diabetic retinopathy", "MTC — boxed warning", "Serious hypersensitivity", "Mood / suicidality"],
+      "management": ["Same GI / constipation / hypoglycemia / gallbladder / pancreatitis / AKI approach as semaglutide", "Reduced oral-contraceptive efficacy → advise non-oral or barrier method for 4 wk after start and after each dose increase", "Suspected pancreatitis: STOP, do not restart if confirmed"],
+      "monitoring": ["Baseline (incl. oral-contraceptive review)", "~4 wk & each up-titration (reinforce contraception counseling after each increase)", "3 mo, 6 mo + every 3–6 mo", "Discontinue if pregnancy"],
+      "discontinuation": "Chronic; SURMOUNT-4 withdrawal showed substantial regain. No mandated taper; re-titrate if restarting.",
+      "sources": ["FDA Zepbound label", "Jastreboff 2022 SURMOUNT-1, NEJM, doi:10.1056/NEJMoa2206038"]
+    },
+    "liraglutide": {
+      "status": "FDA-approved (Saxenda / Victoza). Once DAILY (not weekly). Continuous — no cycling.",
+      "candidacy": "Adults BMI ≥30, or ≥27 + ≥1 comorbidity; adolescents 12–17 >60 kg with obesity.",
+      "starting_dose": "0.6 mg SC daily ×1 week.",
+      "titration": "0.6 → 1.2 → 1.8 → 2.4 → 3.0 mg (max), +0.6 mg at weekly intervals.",
+      "hold_rules": "Delay escalation ~1 extra week at current dose if intolerant; if 3.0 mg can't be tolerated, discontinue (efficacy is at 3.0 mg). ≥3 consecutive days missed → re-initiate at 0.6 mg + re-titrate.",
+      "ae_common": ["Nausea ~39%", "Diarrhea ~21%", "Constipation ~19%", "Vomiting ~16%", "(label-pooled program values)"],
+      "ae_serious": ["Pancreatitis", "Gallbladder disease", "Acute kidney injury", "Hypoglycemia with insulin/sulfonylurea", "Heart-rate increase", "Diabetic retinopathy", "MTC — boxed warning", "Mood / suicidality"],
+      "management": ["Same class approach (GI diet/hold, fiber/osmotic for constipation, reduce insulin/SU, evaluate gallbladder, STOP + no restart for pancreatitis, hold/rehydrate/check renal for AKI)"],
+      "monitoring": ["Baseline; up-titration is weekly; ~4 wk after reaching 3.0 mg", "16-week / 4% rule: if NOT ≥4% baseline weight loss by ~16 wk, unlikely effective — consider discontinuation", "6 mo + every 3–6 mo", "Discontinue if pregnancy"],
+      "discontinuation": "Chronic; regain expected (SCALE Maintenance). Restart at 0.6 mg after ≥3 missed days.",
+      "sources": ["FDA Saxenda label (note 16-wk/4% rule, weekly up-titration)", "Pi-Sunyer 2015 SCALE, NEJM, doi:10.1056/NEJMoa1411892"]
+    },
+    "retatrutide": {
+      "status": "⚠ INVESTIGATIONAL — NOT FDA-approved (Phase 3). No label, indication, or approved dose. Do not prescribe outside an authorized trial/IND. All parameters are Phase-2-derived and flagged VERIFY.",
+      "candidacy": "VERIFY — no approved indication. Phase 2: BMI ≥30, or 27–<30 + ≥1 weight-related condition.",
+      "starting_dose": "VERIFY — Phase 2 used 2 mg or 4 mg SC weekly; the lower 2 mg start mitigated GI AEs.",
+      "titration": "VERIFY — weekly SC, stepwise toward 1/4/8/12 mg; max studied 12 mg.",
+      "hold_rules": "VERIFY — lower start + slower escalation reduced GI events; stay/slow for intolerance, don't skip steps.",
+      "ae_common": ["GI events, dose-related, mostly mild–moderate (per-symptom rates are dose-stratified — VERIFY, not a single number)", "Dose-dependent heart-rate increase peaking ~wk 24, then declining"],
+      "ae_serious": ["By class, pending Phase-3/label (VERIFY): pancreatitis, gallbladder, AKI, hypoglycemia with insulin/SU, retinopathy, MTC/thyroid C-cell"],
+      "management": ["By class analogy (VERIFY): GI diet/hydrate/slow-or-hold + antiemetic; constipation fiber/osmotic; reduce insulin/SU at start; MONITOR HR; gallbladder evaluate; STOP + no restart for confirmed pancreatitis; hold/hydrate/check renal for AKI; follow the trial safety plan"],
+      "monitoring": ["Standard GLP-1 continuous cadence (baseline, ~4 wk, 3 mo, 6 mo, ongoing): wt/BMI, GI tolerance, BP, HR (emphasized), renal, glucose, mood + protocol-specific labs/ECG — VERIFY"],
+      "discontinuation": "VERIFY — long-term withdrawal data not yet established; regain expected by class analogy.",
+      "sources": ["No FDA label — VERIFY", "Jastreboff 2023 Phase-2, NEJM, doi:10.1056/NEJMoa2301972 (NCT04881760)"]
+    }
+  }
+}

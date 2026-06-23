@@ -170,6 +170,17 @@ label{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:upperca
 .docsblk .lbl2{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .docsblk .opt{font-size:10px;color:var(--gold);border:1px solid #463413;border-radius:4px;padding:1px 6px;margin-left:4px}
 .btn.sm{padding:6px 12px;font-size:12px}
+.pdraw{position:fixed;top:46px;right:0;bottom:0;width:520px;max-width:92vw;background:var(--bg2);border-left:1px solid var(--line);transform:translateX(100%);transition:transform .18s;display:flex;flex-direction:column;z-index:22}
+.pdraw.open{transform:none}
+.pdraw .ah{display:flex;align-items:center;gap:9px;padding:13px 18px;border-bottom:1px solid var(--line)}
+.pdraw .ah b{font:600 14px Georgia,serif}
+.pdraw .body2{flex:1;overflow:auto;padding:16px 18px}
+.pdraw .foot{padding:12px 16px;border-top:1px solid var(--line)}
+.pd-sec{margin-bottom:13px}.pd-sec .t{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--teal);margin-bottom:5px;font-weight:700}
+.pd-sec.warn .t{color:var(--danger)}
+.pd-sec p{font-size:12.5px;color:#cdd7da;line-height:1.55}
+.pd-sec ul{margin:0 0 0 16px}.pd-sec li{font-size:12.5px;color:#cdd7da;margin:3px 0;line-height:1.5}
+.pdraw .src{font-size:10.5px;color:var(--faint);border-top:1px solid var(--line);padding-top:8px;margin-top:8px}
 @media print{
   body *{visibility:hidden}
   #printArea,#printArea *{visibility:visible}
@@ -225,6 +236,7 @@ label{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:upperca
   <div class="foot"><textarea id="allyIn" placeholder="e.g. renal dosing cautions for tirzepatide + sermorelin?"></textarea><button class="btn pri" id="allySend" style="align-self:flex-end">Ask</button></div>
 </aside>
 
+<aside class="pdraw" id="pdraw"><div class="ah"><b id="pdtitle">Protocol</b><button class="ghost" id="pdClose" style="margin-left:auto;padding:4px 9px">✕</button></div><div class="body2" id="pdbody"></div><div class="foot"><button class="btn pri" id="pdAlly" style="width:100%">Ask Ally about this (de-identified)</button></div></aside>
 <div id="printArea"></div>
 
 <script>
@@ -2029,6 +2041,8 @@ function intakeFor(s){return INTAKE[s]}
 fetch('../protocols/intake-schema.json').then(function(r){return r.json()}).then(function(d){INTAKE=d.peptides||{};render();}).catch(function(){});
 var CONTRA={};function contraFor(s){return CONTRA[s]}
 fetch('../protocols/contraindications.json').then(function(r){return r.json()}).then(function(d){CONTRA=d.peptides||{};render();}).catch(function(){});
+var DETAIL={};function detailFor(s){return DETAIL[s]}
+fetch('../protocols/protocols-detail.json').then(function(r){return r.json()}).then(function(d){DETAIL=d.peptides||{};render();}).catch(function(){});
 
 /* ───────── structured intake vocab (pills) ───────── */
 var SEX=['Female','Male'];
@@ -2255,7 +2269,7 @@ function stepPlan(){
    + recLabsHTML()
    + contraHTML()
    + S.sel.map(specSheet).join('');
-  S.sel.forEach(bindCalc);bindDocs();
+  S.sel.forEach(bindCalc);bindDocs();bindProtoBtns();
 }
 function specSheet(s){
   var p=byslug(s)||{};var d=parseRecon(p.body_md);var v=S.vials[s]||{mg:d.mg,ml:d.ml,dose:d.dose};S.vials[s]=v;
@@ -2263,7 +2277,7 @@ function specSheet(s){
   var route=parseField(p.body_md,/\*\*Route:\*\*\s*([^\n]+)/);
   var cyc=parseField(p.body_md,/\*\*Cycle:\*\*\s*([^\n]+)/);
   var r=recon(v.mg,v.ml,v.dose);
-  return '<div class="spec"><div class="sh"><span class="nm">'+p.name+'</span><span class="chip '+gradeClass(p.grade)+' gr">'+(p.grade||'')+'</span></div>'
+  return '<div class="spec"><div class="sh"><span class="nm">'+p.name+'</span><span class="chip '+gradeClass(p.grade)+' gr">'+(p.grade||'')+'</span>'+(detailFor(s)?'<button class="btn sm proto-btn" data-proto="'+s+'">Full protocol</button>':'')+'</div>'
    +'<div class="specrows">'
      +row('Mechanism',p.mechanism||'—')
      +row('Dose',dose||'see monograph')
@@ -2337,12 +2351,34 @@ function doPrint(){
   window.print();
 }
 
+function pdSec(t,body,warn){return '<div class="pd-sec'+(warn?' warn':'')+'"><div class="t">'+t+'</div>'+body+'</div>';}
+function pdUl(a){return '<ul>'+(a||[]).map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>';}
+function bindProtoBtns(){document.querySelectorAll('.proto-btn').forEach(function(el){el.onclick=function(){openProto(el.dataset.proto)};});}
+function openProto(slug){var d=detailFor(slug);if(!d)return;var p=byslug(slug)||{};
+  document.getElementById('pdtitle').textContent=(p.name||slug)+' — full protocol';
+  var h='';
+  if(d.status)h+='<div class="pd-sec"><p style="color:var(--gold)">'+d.status+'</p></div>';
+  if(d.candidacy)h+=pdSec('Candidacy / indication','<p>'+d.candidacy+'</p>');
+  if(d.starting_dose)h+=pdSec('Starting dose','<p>'+d.starting_dose+'</p>');
+  if(d.titration)h+=pdSec('Titration','<p>'+d.titration+'</p>');
+  if(d.hold_rules)h+=pdSec('Hold / slow rules','<p>'+d.hold_rules+'</p>');
+  if(d.ae_common)h+=pdSec('Adverse events — common',pdUl(d.ae_common));
+  if(d.ae_serious)h+=pdSec('Adverse events — serious (watch)',pdUl(d.ae_serious),true);
+  if(d.management)h+=pdSec('Side-effect management',pdUl(d.management));
+  if(d.monitoring)h+=pdSec('Monitoring / follow-up',pdUl(d.monitoring));
+  if(d.discontinuation)h+=pdSec('Discontinuation','<p>'+d.discontinuation+'</p>');
+  if(d.sources)h+='<div class="src">Sources: '+(d.sources||[]).join(' · ')+'</div>';
+  document.getElementById('pdbody').innerHTML=h;
+  document.getElementById('pdAlly').onclick=function(){closeProto();var i=document.getElementById('allyIn');if(i)i.value='For a patient considering '+(p.name||slug)+', ';openAlly();};
+  document.getElementById('pdraw').classList.add('open');document.getElementById('scrim').classList.add('open');
+}
+function closeProto(){var d=document.getElementById('pdraw');if(d)d.classList.remove('open');document.getElementById('scrim').classList.remove('open');}
 /* ───────── ally slideover ───────── */
 var ally=document.getElementById('ally'),scrim=document.getElementById('scrim');
 function openAlly(){ally.classList.add('open');scrim.classList.add('open');}
 function closeAlly(){ally.classList.remove('open');scrim.classList.remove('open');}
 document.getElementById('allyNav').onclick=function(e){e.preventDefault();openAlly();};
-document.getElementById('allyClose').onclick=closeAlly;scrim.onclick=closeAlly;
+document.getElementById('allyClose').onclick=closeAlly;var pdc=document.getElementById('pdClose');if(pdc)pdc.onclick=closeProto;scrim.onclick=function(){closeAlly();closeProto();};
 document.getElementById('allySend').onclick=function(){
   var q=document.getElementById('allyIn').value.trim();if(!q)return;
   var b=document.getElementById('allyBody');
