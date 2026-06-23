@@ -49,4 +49,5 @@ async function ask(text){text=(text||qel.value).trim();if(!text)return;qel.value
   const j=await r.json();const t=j.text||j.error||'Error.';b.innerHTML=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>');msgs.push({role:'assistant',content:t});}
  catch(e){b.textContent='Connection error — is the function deployed with ANTHROPIC_API_KEY set?';}}
 qel.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask();}});
-</script></body></html>
+</script><script src="../disclaimer.js"></script>
+</body></html>

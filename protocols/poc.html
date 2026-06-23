@@ -129,4 +129,5 @@ function endDay(){if(!confirm('Clear ALL of today’s visits from this device? S
 function wipe(){if(!confirm('Wipe this visit?'))return;document.querySelectorAll('input,textarea').forEach(e=>{if(e.type==='checkbox')e.checked=false;else e.value='';});document.getElementById('vdate').value=new Date().toISOString().slice(0,10);fill();document.getElementById('sheet').innerHTML='<div style="color:var(--muted);text-align:center;padding:40px">Wiped.</div>';}
 window.addEventListener('beforeunload',e=>{e.preventDefault();e.returnValue='Save your visit before closing — unsaved patient info will be lost.';});
 paintToday();
-</script></body></html>
+</script><script src="../disclaimer.js"></script>
+</body></html>

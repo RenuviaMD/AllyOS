@@ -56,4 +56,5 @@ function calc(){const mg=+document.getElementById('mg').value,ml=+document.getEl
 sel.onchange=()=>{const b=sel.selectedOptions[0].dataset.body||'';const m=b.match(/(\d+(?:\.\d+)?)\s*mg\s*\+\s*(\d+(?:\.\d+)?)\s*mL/);if(m){document.getElementById('mg').value=m[1];document.getElementById('ml').value=m[2];}
  const dm=b.match(/(\d+)\s*mcg/);if(dm)document.getElementById('dose').value=dm[1];calc();};
 calc();
-</script></body></html>
+</script><script src="../disclaimer.js"></script>
+</body></html>

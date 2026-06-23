@@ -168,4 +168,5 @@ const tb=document.getElementById('tb'),rows=[...tb.querySelectorAll('tr')];let c
 function f(){rows.forEach(r=>{const okc=cat==='all'||r.dataset.cat===cat,okq=!q||r.dataset.s.includes(q);r.style.display=(okc&&okq)?'':'none';});}
 document.getElementById('q').oninput=e=>{q=e.target.value.toLowerCase();f();};
 document.querySelectorAll('.fbtn').forEach(b=>b.onclick=()=>{cat=b.dataset.c;document.querySelectorAll('.fbtn').forEach(x=>x.classList.toggle('on',x===b));f();});
-</script></body></html>
+</script><script src="../disclaimer.js"></script>
+</body></html>
