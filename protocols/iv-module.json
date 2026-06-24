@@ -10,7 +10,8 @@
     "scope": "Adjunctive wellness IV/IM nutrient therapy, RN/ARNP-delivered under a Medical Director's signed standing orders. Adults ≥ 18 only. NOT disease treatment, diagnosis, prescription, or a medical-director relationship. The treating provider reviews, customizes, and signs.",
     "honesty_discipline": "Every stack here is transcribed from the locked RenuviaMD® AllyOS wellness IV library (the primary library). Doses, routes, rates, ceilings, contraindications, and compatibility are quoted from MASTER-MENU-01 v3.3 and the stack standing orders — not from public clinic menus. Market additions that are NOT in the primary library are flagged in_primary_library:false and carry their own guardrails. Ally must say 'VERIFY — not in the locked IV library' for anything not encoded here, and never invent a dose, rate, or citation.",
     "regulatory_layer": true,
-    "gfe_gate_0": true
+    "gfe_gate_0": true,
+    "governance_posture": "AllyOS is educational / advisory: it tells a clinic HOW and WHAT is required to run an IV/IM bar — the gates, screens, ceilings, compatibility, and documentation — but it does NOT stop, block, or enforce any practice. The provider reviews and signs; they own every decision. The ONLY exception is a practice where RenuviaMD is the Medical Director of record — there, gate enforcement applies because RenuviaMD then carries the supervising authority and liability. In the product UI this is the 'MD-of-record' mode; the default is advisory-only (never blocks)."
   },
 
   "gates": {

@@ -97,6 +97,8 @@ button.ask:disabled{opacity:.5;cursor:default}
       <label class="chk"><input type="checkbox" id="gfeDone" onchange="analyze();updateRunState()">
         Valid GFE on file (&lt;12-mo window), patient cleared for procedure, standing orders authorize this act, FORM-02 done this visit.</label>
       <button class="btn ghost" style="margin-top:10px;width:100%" onclick="genDoc('GFE')">📄 Open GFE &amp; Consent (FORM-INTAKE-GFE-01) — sign / print before start</button>
+      <label class="chk" style="margin-top:8px;font-size:.76rem;color:var(--muted)"><input type="checkbox" id="mdMode" onchange="analyze();updateRunState()">
+        RenuviaMD is Medical Director of record for this practice — <b>enforce gates</b> (block Start until GFE confirmed and criticals resolved). Off = advisory only; AllyOS informs but never stops the provider.</label>
     </div>
 
     <!-- BASE + VOLUME -->
@@ -137,7 +139,7 @@ button.ask:disabled{opacity:.5;cursor:default}
         <button class="btn start" id="startBtn" onclick="startRun()" disabled>▶ Start infusion</button>
         <button class="btn stop" id="stopBtn" onclick="stopRun()" disabled>■ Stop</button>
       </div>
-      <div style="font-size:.7rem;color:var(--muted);margin-top:6px">Alarms at 5/10/15 min then every 15 min for vitals checks, and at end of infusion. Start requires GFE confirmation.</div>
+      <div style="font-size:.7rem;color:var(--muted);margin-top:6px">Alarms at 5/10/15 min then every 15 min for vitals checks, and at end of infusion. AllyOS is advisory — it flags what's unresolved but does not stop you; the provider owns the decision. Enable MD-of-record mode (Gate 0) to enforce the gate.</div>
     </div>
 
     <!-- DOCS -->
@@ -312,15 +314,19 @@ function analyze(){
     add(lvl,'Osmolarity — '+(concentrated?'high (concentrated bag)':'raised (estimate)'),'Base ~'+baseOsm+' mOsm/L ('+esc(baseType)+'). Hyperosmolar additive(s): '+hyper.join(', ')+'. Final osmolarity is raised — this is an ESTIMATE; verify against the compounding reference. Peripheral limit ~'+lim+' mOsm/L — if exceeded, use a larger bag, lower the dose, slow the rate, or use central access.'+(concentrated?(' This bag is low-volume ('+vol+' mL) with high-dose Vit C — strongly consider a larger bag or central access.'):''));
   }
 
-  var vClass=crit>0?'hold':(warn>0?'review':'go'),vText=crit>0?('RESOLVE — '+crit+' critical flag'+(crit>1?'s':'')):(warn>0?('PROCEED WITH REVIEW — '+warn+' advisory'+(warn>1?'ies':'y')):'No conflicts flagged — provider reviews & signs');
+  var vClass=crit>0?'hold':(warn>0?'review':'go'),vText=crit>0?('REVIEW — '+crit+' critical advisory'+(crit>1?'ies':'y')):(warn>0?('PROCEED WITH REVIEW — '+warn+' advisory'+(warn>1?'ies':'y')):'No conflicts flagged — provider reviews & signs');
   var html='<div class="verdict '+vClass+'">'+vText+'</div>';
   flags.forEach(function(f){html+='<div class="flag '+f.l+'"><b>'+f.t+'</b>'+f.b+'</div>';});
   out.innerHTML=html; updateRunState(crit);
 }
 
+function mdMode(){var el=document.getElementById('mdMode');return el&&el.checked;}
+function critCount(){return document.querySelectorAll('#analysis .flag.crit').length;}
 function updateRunState(crit){
-  if(crit===undefined){crit=document.querySelectorAll('#analysis .flag.crit').length;}
-  var ok=document.getElementById('gfeDone').checked && BAG.length>0 && crit===0 && !timer;
+  if(crit===undefined){crit=critCount();}
+  // Advisory by default: AllyOS never stops the provider — Start stays enabled.
+  // MD-of-record mode (RenuviaMD is the practice's Medical Director) enforces the gate.
+  var ok = mdMode() ? (document.getElementById('gfeDone').checked && BAG.length>0 && crit===0 && !timer) : (BAG.length>0 && !timer);
   document.getElementById('startBtn').disabled=!ok;
 }
 
@@ -329,6 +335,13 @@ function beep(ms,freq){try{var ac=new(window.AudioContext||window.webkitAudioCon
 function fmt(s){var m=Math.floor(s/60),x=s%60;return (m<10?'0':'')+m+':'+(x<10?'0':'')+x;}
 function startRun(){
   var t=parseFloat(document.getElementById('infMin').value)||0;if(!t)return;
+  // Advisory confirmation (default posture): inform, do not stop. Only MD-of-record mode hard-blocks (handled by updateRunState).
+  if(!mdMode()){
+    var issues=[];
+    if(!document.getElementById('gfeDone').checked)issues.push('GFE / consent not confirmed');
+    var c=critCount();if(c>0)issues.push(c+' critical advisory'+(c>1?'ies':'y')+' unresolved');
+    if(issues.length && !confirm('Before starting:\n• '+issues.join('\n• ')+'\n\nAllyOS is advisory — it does not stop you. You (the provider) own this clinical decision and signature. Start anyway?'))return;
+  }
   total=remain=t*60;lastMon=0;
   document.getElementById('startBtn').disabled=true;document.getElementById('stopBtn').disabled=false;
   document.getElementById('timerBox').classList.remove('alarm');
