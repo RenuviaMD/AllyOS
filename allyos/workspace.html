@@ -150,6 +150,14 @@ label{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:upperca
 .adv .appl{font-size:9px;color:var(--gold);text-transform:uppercase;letter-spacing:.06em}
 .adv .am{font-size:12.5px;color:#cdd7da;line-height:1.55}
 .adv .ac{font-size:10px;color:var(--faint);margin-top:6px;word-break:break-word}
+.ixwrap{display:flex;flex-direction:column;gap:7px;margin:2px 0 6px}
+.ixrow{border:1px solid var(--line2);border-left:3px solid var(--warn);border-radius:7px;padding:10px 13px;background:var(--bg2)}
+.ixrow .ixh{display:flex;align-items:center;gap:7px;font-size:12.5px;margin-bottom:4px}
+.ixrow .ixx{color:var(--faint);font-weight:400}
+.ixrow .ixeff{font-size:12px;color:#cdd7da;line-height:1.5}
+.ixrow .ixact{font-size:12px;color:#e7eef0;line-height:1.5;margin-top:5px}
+.ixrow .ixact .ixlab{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ok);font-weight:700;margin-right:5px}
+.ixrow .ixov{font-size:11px;color:var(--gold);line-height:1.5;margin-top:5px;border-top:1px dashed var(--line2);padding-top:5px}
 .reclabs{border:1px solid var(--line);border-radius:7px;padding:11px 14px;margin:10px 0;background:var(--bg2)}
 .reclabs .t{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
 .reclabs ul{margin-left:16px;font-size:12.5px;color:#cdd7da}.reclabs li{margin:2px 0}
@@ -2051,12 +2059,15 @@ var CONTRA={};function contraFor(s){return CONTRA[s]}
 fetch('../protocols/contraindications.json').then(function(r){return r.json()}).then(function(d){CONTRA=d.peptides||{};render();}).catch(function(){});
 var DETAIL={};function detailFor(s){return DETAIL[s]}
 fetch('../protocols/protocols-detail.json').then(function(r){return r.json()}).then(function(d){DETAIL=d.peptides||{};render();}).catch(function(){});
+var IX={};function ixClassOf(slug){var ac=IX.agent_classes||{};for(var c in ac){if((ac[c].members||[]).indexOf(slug)>-1)return c;}return null;}
+fetch('../protocols/interactions.json').then(function(r){return r.json()}).then(function(d){IX=d||{};render();}).catch(function(){});
 
 /* ───────── structured intake vocab (pills) ───────── */
 var SEX=['Female','Male'];
 var COMORBID=['HTN','Dyslipidemia','Prediabetes/T2DM','OSA','CVD','MASLD'];
 var GOALS=['Weight loss','Metabolic','Recovery / repair','Longevity','Cognitive','Sexual health','GH / body comp','Immune'];
-var MEDSL=['Insulin','Sulfonylurea','Metformin','GLP-1 (current)','Thyroid Rx','Anticoagulant','SSRI/SNRI'];
+var MEDSL=['Insulin','Sulfonylurea','Metformin','GLP-1 (current)','Statin','Oral contraceptive','Naltrexone','Thyroid Rx','Anticoagulant','SSRI/SNRI'];
+var MED2IX={'Insulin':'insulin','Sulfonylurea':'sulfonylurea','Metformin':'metformin','Statin':'statin','Oral contraceptive':'oral_contraceptive','Naltrexone':'naltrexone'};
 var FLAGS=['Pancreatitis hx','MTC / MEN2','Pregnancy / planning','Breastfeeding','Gallbladder dz','Eating disorder','Active malignancy','Prior cancer','Undiagnosed mass','Type 1 DM','Gastroparesis'];
 var FLAGKW={'Pancreatitis hx':['pancreatitis'],'MTC / MEN2':['medullary','men2','thyroid carc'],'Pregnancy / planning':['pregnan'],'Breastfeeding':['lactation','breastfeed'],'Gallbladder dz':['gallbladder'],'Eating disorder':['eating'],'Active malignancy':['malignan','cancer'],'Prior cancer':['malignan','cancer'],'Undiagnosed mass':['undiagnosed'],'Type 1 DM':['type 1'],'Gastroparesis':['gastroparesis','motility']};
 var GLP1=['semaglutide','tirzepatide','retatrutide','liraglutide'];
@@ -2120,6 +2131,53 @@ function advCard(a){
 }
 function recLabs(){var set=[];S.sel.forEach(function(s){var e=intakeFor(s);if(e&&e.baseline_labs)e.baseline_labs.forEach(function(l){if(set.indexOf(l)<0)set.push(l)})});return set;}
 function recLabsHTML(){var l=recLabs();if(!l.length)return '';return '<div class="reclabs"><div class="t">Recommended labs</div><ul>'+l.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul></div>';}
+
+/* concomitant-medication interactions — resolved from the locked interactions.json */
+function overrideRelevant(ov,mk){if(!ov)return false;var t=ov.toLowerCase();
+  if(mk==='oral_contraceptive')return /contracept|oral|estrogen/.test(t);
+  if(mk==='insulin'||mk==='sulfonylurea'||mk==='metformin')return /glucose|insulin|glyc|diabet/.test(t);
+  return false;}
+function interactionFindings(){
+  var meds=S.patient.meds||[],out=[];
+  if(IX.medications){
+    S.sel.forEach(function(s){var cls=ixClassOf(s);var p=byslug(s)||{};var ov=(IX.agent_overrides||{})[s]||null;
+      meds.forEach(function(m){var mk=MED2IX[m];if(!mk||!cls)return;
+        var md=IX.medications[mk];if(!md)return;var ix=(md.interactions||{})[cls];if(!ix)return;
+        out.push({agent:p.name||s,med:m,effect:ix.effect,severity:ix.severity,action:ix.action,grade:ix.grade,
+          override:overrideRelevant(ov,mk)?ov:null});});});
+  }
+  /* duplicate GLP-1 therapy — clinical-standard caution (not in the cross-med layer) */
+  if(meds.indexOf('GLP-1 (current)')>-1){
+    S.sel.forEach(function(s){if(GLP1.indexOf(s)>-1){var p=byslug(s)||{};
+      out.push({agent:p.name||s,med:'GLP-1 (current)',
+        effect:'Patient is already on a GLP-1 — this would be duplicate incretin therapy. Two GLP-1/incretin agonists should not be run concurrently.',
+        severity:'Moderate — duplicate class.',
+        action:'Do not stack two GLP-1s. Transition from the existing agent rather than add; reconcile the current GLP-1 before starting.',
+        grade:'B',override:null});}});
+  }
+  return out;
+}
+function ixSevColor(sev){sev=(sev||'').toLowerCase();
+  if(/serious/.test(sev))return 'var(--danger)';
+  if(/moderate/.test(sev))return 'var(--warn)';
+  if(/minor/.test(sev))return 'var(--ok)';
+  return 'var(--faint)';}
+function interactionHTML(){
+  var f=interactionFindings();if(!f.length)return '';
+  var rows=f.map(function(x){
+    return '<div class="ixrow" style="border-left-color:'+ixSevColor(x.severity)+'">'
+      +'<div class="ixh"><span class="chip '+gradeClass(x.grade)+'">'+esc(x.grade||'?')+'</span>'
+      +'<b>'+esc(x.agent)+'</b><span class="ixx">+</span><b>'+esc(x.med)+'</b>'
+      +'<span style="margin-left:auto;font-size:10.5px;color:'+ixSevColor(x.severity)+'">'+esc(x.severity||'')+'</span></div>'
+      +'<div class="ixeff">'+esc(x.effect)+'</div>'
+      +'<div class="ixact"><span class="ixlab">Action</span>'+esc(x.action)+'</div>'
+      +(x.override?'<div class="ixov">Agent-specific: '+esc(x.override)+'</div>':'')
+      +'</div>';
+  }).join('');
+  return '<div class="lbl" style="margin:14px 0 2px">Concomitant-medication interactions '
+    +'<span style="font-weight:400;color:var(--faint);font-size:10.5px">— from your locked library · decision-support only, VERIFY</span></div>'
+    +'<div class="ixwrap">'+rows+'</div>';
+}
 
 function contraHTML(){
   var blocks=S.sel.map(function(s){var c=contraFor(s);if(!c)return '';var p=byslug(s)||{};
@@ -2273,6 +2331,7 @@ function stepPlan(){
    +'<div class="note-local"><span class="ondev">computed on-device</span> Deterministic dosing math — not generated by AI.</div>'
    + docsBlock()
    + conflictAlerts()
+   + interactionHTML()
    + (advs.length?'<div class="lbl" style="margin:8px 0 2px">Advisories &amp; considerations</div><div class="advs">'+advs.map(advCard).join('')+'</div>':'')
    + recLabsHTML()
    + contraHTML()
@@ -2336,11 +2395,16 @@ function noteProtocolDetail(){return S.sel.map(function(s){var d=detailFor(s);if
     +(mon.length?'<div><span class="kk">Monitoring:</span> '+mon.join('; ')+'</div>':'')
     +(d.discontinuation?'<div><span class="kk">Discontinue if:</span> '+d.discontinuation+'</div>':'')
     +'</div>';}).join('');}
+function noteInteractionLines(){var f=interactionFindings();if(!f.length)return '';
+  return '<h4>Concomitant-medication interactions <span style="font-weight:400;font-size:11px;color:var(--muted)">(locked library · grade · VERIFY)</span></h4><ul>'
+    +f.map(function(x){return '<li><b>'+esc(x.agent)+' + '+esc(x.med)+'</b> ['+esc(x.grade||'?')+'] — '+esc(x.effect)+' <i>Action:</i> '+esc(x.action)
+      +(x.override?' <i>Agent-specific:</i> '+esc(x.override):'')+'</li>';}).join('')+'</ul>';}
 function docNote(){var p=S.patient;return '<h3>Clinical encounter note</h3><div class="docsub">'+pinfo()+'  ·  '+new Date().toLocaleDateString()+'</div>'
   +'<h4>Indication</h4><p>'+(plist(p.goals)||'—')+'</p>'
   +'<h4>Pertinent data</h4><p>BMI '+(p.bmi||'—')+' · eGFR '+(p.egfr||'—')+' · A1c '+(p.a1c||'—')+'% · Comorbid: '+(plist(p.comorbid)||'none')+' · Meds: '+(plist(p.meds)||'none recorded')+'</p>'
   +'<h4>Contraindication screen</h4><p>'+(plist(p.flags)||'No red flags reported')+'</p>'
   + (conflicts().length?'<p style="color:#f0a59d"><b>Conflicts:</b> '+conflicts().join('; ')+'</p>':'')
+  + noteInteractionLines()
   +'<h4>Plan</h4><ul>'+agentLines()+'</ul>'
   + labLines()
   + (S.sel.some(function(s){return detailFor(s)})?'<h4>Protocol reference — titration &amp; monitoring</h4>'+noteProtocolDetail():'')
@@ -2450,7 +2514,7 @@ document.getElementById('allySend').onclick=function(){
   if(p.comorbid&&p.comorbid.length)c.push('comorbid: '+p.comorbid.join(', '));
   if(p.meds&&p.meds.length)c.push('meds: '+p.meds.join(', '));
   var ctx=c.length?'De-identified context — '+c.join('; ')+'.':'';
-  fetch('/.netlify/functions/ally',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:q,context:ctx,library:{detail:DETAIL,contra:CONTRA}})})
+  fetch('/.netlify/functions/ally',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:q,context:ctx,library:{detail:DETAIL,contra:CONTRA,interactions:IX}})})
    .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
    .then(function(res){var el=document.getElementById(id);var t;
      if(res.ok&&res.j.answer){t='<div style="font-size:10px;color:var(--ok);margin-bottom:5px">\u{1F4DA} grounded in your locked library</div><p style="font-size:13px;line-height:1.55;white-space:pre-wrap">'+esc(res.j.answer)+'</p>';}

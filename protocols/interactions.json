@@ -1,0 +1,194 @@
+{
+  "schema": "allyos-interactions-v1",
+  "updated": "2026-06-24",
+  "note": "Audited concomitant-medication interaction layer for AllyOS. Covers six common chronic meds against the peptide classes that have a real or mechanistically-grounded interaction. Evidence grades A-D; 'VERIFY' = not established in primary sources, provider must confirm. IMPORTANT: peptide drug-interaction data is sparse. For most non-metabolic peptides (healing, neuro, cosmetic, gonadal) there is NO documented human interaction with these meds — this is absence of data, NOT proof of safety. Decision-support only; the treating provider decides and owns the care.",
+  "agent_classes": {
+    "glp1": {
+      "label": "GLP-1 / incretin receptor agonists",
+      "mechanism": "Incretin agonism: glucose-dependent insulinotropic effect + delayed gastric emptying. Lowers glucose and weight; does NOT cause hypoglycemia alone, but is additive with insulin/sulfonylureas.",
+      "members": ["semaglutide", "tirzepatide", "liraglutide", "retatrutide"]
+    },
+    "gh_axis": {
+      "label": "GH-axis secretagogues (GHRH analogs, GHRPs, ghrelin-receptor agonists)",
+      "mechanism": "Raise endogenous GH / IGF-1. GH antagonizes insulin action and can raise fasting glucose / reduce insulin sensitivity — so these interact with antidiabetic regimens in the OPPOSITE direction from GLP-1s.",
+      "members": ["sermorelin", "tesamorelin", "cjc-1295", "ipamorelin", "cjc-ipamorelin-blend", "ghrp-2", "ghrp-6", "hexarelin", "mk-677"]
+    },
+    "other_empiric": {
+      "label": "Other peptides — minimal/absent interaction data",
+      "mechanism": "Healing, neuro, cosmetic, mitochondrial, and gonadal peptides with no GH/IGF or incretin pharmacology. No documented human PK/PD interaction with these six meds in primary sources.",
+      "members": ["aod-9604", "bpc-157", "tb-500", "mots-c", "ss-31", "ghk-cu", "thymosin-alpha-1", "kpv", "semax", "selank", "cerebrolysin", "dsip", "epitalon", "pt-141", "kisspeptin-10", "gonadorelin", "melanotan-ii"]
+    }
+  },
+  "medications": {
+    "metformin": {
+      "drug_class": "Biguanide antihyperglycemic (insulin sensitizer)",
+      "hypoglycemia_risk_monotherapy": "Low — metformin does not by itself cause hypoglycemia.",
+      "interactions": {
+        "glp1": {
+          "effect": "No clinically significant PK interaction. Complementary glycemic and weight effects — metformin + a GLP-1 is a standard, well-studied combination (GLP-1 pivotal trials were run on a metformin background). Metformin adds little hypoglycemia risk. Main overlap is additive GI upset (nausea, diarrhea), since both are GI-active.",
+          "severity": "None-to-minor; generally compatible.",
+          "action": "Generally safe to continue together. Counsel on overlapping GI effects; titrate the GLP-1 slowly. No metformin dose change required for the peptide.",
+          "grade": "B",
+          "source": "Well-documented compatibility, not a label-grade interaction: GLP-1 pivotal trials studied add-on to a metformin background. Graded B (strong, well-documented non-interaction) rather than A, which is reserved for label-established interactions."
+        },
+        "gh_axis": {
+          "effect": "Mechanistically counteractive: GH-axis secretagogues can induce insulin resistance and modestly raise fasting glucose; metformin is an insulin sensitizer that may blunt that effect. Reasonable to continue, but no RCT proves added benefit in this specific combination.",
+          "severity": "None-to-minor; not a contraindication.",
+          "action": "May continue. Monitor fasting glucose / A1c; metformin may mitigate any GH-induced glucose rise. Note: metformin lowers B12 over time (unrelated to the peptide) — reasonable to have a baseline B12.",
+          "grade": "C",
+          "source": "Mechanistic / empiric — GH-induced insulin resistance is established; metformin benefit in this combo is inferred, not trial-proven. VERIFY if a specific claim of advantage is made."
+        },
+        "other_empiric": {
+          "effect": "No documented human interaction located (absence of evidence, not evidence of absence).",
+          "severity": "Unknown — absence of data.",
+          "action": "No specific interaction action. VERIFY against primary sources before relying on safety.",
+          "grade": "D",
+          "source": "No interaction data located."
+        }
+      }
+    },
+    "insulin": {
+      "drug_class": "Injectable antihyperglycemic (basal and/or prandial)",
+      "hypoglycemia_risk_monotherapy": "High — insulin is a leading cause of iatrogenic hypoglycemia.",
+      "interactions": {
+        "glp1": {
+          "effect": "Additive hypoglycemia risk. This is an FDA-label interaction: when a GLP-1 is added to insulin, the glucose-lowering effects are additive.",
+          "severity": "Moderate-to-serious (hypoglycemia).",
+          "action": "Reduce insulin dose when starting the GLP-1. The labels advise reducing the dose of co-administered insulin but do NOT specify a percentage; clinicians commonly reduce empirically (often roughly 10-25%) and re-titrate to glucose — VERIFY the exact reduction against the patient's regimen. If the patient is on prandial or premixed insulin, the prandial component needs review too, not only basal. Monitor glucose closely during titration. Do NOT abruptly discontinue insulin in an insulin-dependent patient (DKA risk). Do not mix in the same syringe.",
+          "grade": "A",
+          "source": "Semaglutide, tirzepatide, and liraglutide FDA labels — concomitant insulin precaution."
+        },
+        "gh_axis": {
+          "effect": "Opposite direction: GH-axis agents can raise glucose / reduce insulin sensitivity, so insulin REQUIREMENT may increase. Tesamorelin's label specifically calls for glucose monitoring.",
+          "severity": "Minor-to-moderate (loss of glycemic control).",
+          "action": "Monitor glucose; insulin dose may need an upward adjustment. Re-check A1c during the cycle.",
+          "grade": "B",
+          "source": "Tesamorelin FDA label (glucose monitoring); GH-induced insulin resistance is well established. Grade C for the purely empiric secretagogues."
+        },
+        "other_empiric": {
+          "effect": "No documented human interaction located (absence of evidence, not evidence of absence).",
+          "severity": "Unknown — absence of data.",
+          "action": "No specific interaction action. VERIFY before relying on safety.",
+          "grade": "D",
+          "source": "No interaction data located."
+        }
+      }
+    },
+    "sulfonylurea": {
+      "drug_class": "Insulin secretagogue (e.g., glipizide, glimepiride, glyburide)",
+      "hypoglycemia_risk_monotherapy": "Moderate-to-high — sulfonylureas can cause hypoglycemia on their own.",
+      "interactions": {
+        "glp1": {
+          "effect": "Additive hypoglycemia risk — FDA-label interaction, same mechanism as with insulin.",
+          "severity": "Moderate (hypoglycemia).",
+          "action": "Consider reducing the sulfonylurea dose when starting the GLP-1; monitor glucose. Labels advise considering a lower secretagogue dose to reduce hypoglycemia risk.",
+          "grade": "A",
+          "source": "Semaglutide, tirzepatide, and liraglutide FDA labels — concomitant sulfonylurea precaution."
+        },
+        "gh_axis": {
+          "effect": "GH-induced insulin resistance may blunt sulfonylurea efficacy (glucose may rise) — opposite direction from a GLP-1.",
+          "severity": "Minor-to-moderate (loss of control).",
+          "action": "Monitor glucose; sulfonylurea may need adjustment upward. Re-check A1c.",
+          "grade": "C",
+          "source": "Mechanistic / empiric (GH-induced insulin resistance)."
+        },
+        "other_empiric": {
+          "effect": "No documented human interaction located (absence of evidence, not evidence of absence).",
+          "severity": "Unknown — absence of data.",
+          "action": "No specific interaction action. VERIFY before relying on safety.",
+          "grade": "D",
+          "source": "No interaction data located."
+        }
+      }
+    },
+    "statin": {
+      "drug_class": "HMG-CoA reductase inhibitor (e.g., atorvastatin, rosuvastatin)",
+      "hypoglycemia_risk_monotherapy": "None.",
+      "interactions": {
+        "glp1": {
+          "effect": "Minor PK only: GLP-1-induced delayed gastric emptying can modestly alter the absorption of orally co-administered drugs. In PK studies semaglutide modestly increased rosuvastatin exposure (not deemed clinically significant); atorvastatin showed no clinically relevant change. No statin dose change needed.",
+          "severity": "Minor / not clinically significant.",
+          "action": "No routine action. Continue standard statin monitoring (lipid panel; LFTs/CK only if symptomatic).",
+          "grade": "B",
+          "source": "GLP-1 PK studies / FDA-label drug-interaction sections."
+        },
+        "gh_axis": {
+          "effect": "No significant direct PK interaction. GH may modestly and variably affect the lipid panel.",
+          "severity": "Minor.",
+          "action": "Routine lipid monitoring; no statin dose change attributable to the peptide.",
+          "grade": "C",
+          "source": "Mechanistic / empiric."
+        },
+        "other_empiric": {
+          "effect": "No documented human interaction located (absence of evidence, not evidence of absence).",
+          "severity": "Unknown — absence of data.",
+          "action": "No specific interaction action. VERIFY before relying on safety.",
+          "grade": "D",
+          "source": "No interaction data located."
+        }
+      }
+    },
+    "oral_contraceptive": {
+      "drug_class": "Combined oral estrogen-progestin (hormonal contraceptive)",
+      "hypoglycemia_risk_monotherapy": "None.",
+      "interactions": {
+        "glp1": {
+          "effect": "Class-dependent — this is the key within-class distinction. TIRZEPATIDE: the FDA label warns that it may REDUCE the efficacy of oral hormonal contraceptives (delayed gastric emptying, greatest after initiation and each dose increase). Semaglutide and liraglutide labels do NOT carry this warning (no clinically relevant effect on oral-contraceptive PK was shown).",
+          "severity": "Moderate for tirzepatide (contraceptive failure risk); negligible for the other GLP-1s.",
+          "action": "TIRZEPATIDE: advise switching to a non-oral contraceptive, OR add a barrier method, for 4 weeks after initiation and for 4 weeks after each dose escalation. Other GLP-1s: no specific contraceptive action.",
+          "grade": "A",
+          "source": "Tirzepatide FDA label (oral hormonal contraceptive warning)."
+        },
+        "gh_axis": {
+          "effect": "Pharmacologic interaction via the GH/IGF-1 axis: ORAL estrogen induces hepatic GH resistance and lowers IGF-1, so a patient on oral estrogen may need a higher GH-secretagogue dose to reach the IGF-1 target. Transdermal estrogen bypasses first-pass and has much less effect.",
+          "severity": "Moderate (under-dosing / blunted response if not accounted for).",
+          "action": "Account for oral estrogen when titrating to IGF-1; consider transdermal estrogen instead; re-check IGF-1 after any estrogen change. Titrate to the IGF-1 target, not a fixed dose.",
+          "grade": "B",
+          "source": "Well-documented in GH-replacement literature (oral estrogen lowers IGF-1 / induces relative GH resistance)."
+        },
+        "other_empiric": {
+          "effect": "No documented human interaction located (absence of evidence, not evidence of absence).",
+          "severity": "Unknown — absence of data.",
+          "action": "No specific interaction action. VERIFY before relying on safety.",
+          "grade": "D",
+          "source": "No interaction data located."
+        }
+      }
+    },
+    "naltrexone": {
+      "drug_class": "Opioid antagonist (full-dose ~50 mg; also used low-dose 'LDN' ~1.5-4.5 mg off-label)",
+      "hypoglycemia_risk_monotherapy": "None.",
+      "interactions": {
+        "glp1": {
+          "effect": "No PK interaction. Note that naltrexone/bupropion (Contrave) is itself an approved anti-obesity agent; combining naltrexone with a GLP-1 is off-label combination weight management — effects and GI side effects (nausea) can be additive; combination evidence is limited. Full-dose naltrexone also blocks opioid analgesia.",
+          "severity": "Minor (additive GI) plus a procedural caution (opioid blockade).",
+          "action": "If combining for weight, watch for additive nausea and titrate slowly; standard naltrexone LFT monitoring. Flag opioid blockade for any patient who may need opioid analgesia (surgery, acute pain).",
+          "grade": "C",
+          "source": "Empiric for the combination; opioid-blockade and LFT cautions are from the naltrexone label."
+        },
+        "gh_axis": {
+          "effect": "No documented PK/PD interaction. (Low-dose naltrexone is proposed to be immunomodulatory — theoretical only, no established peptide interaction.)",
+          "severity": "Unknown — absence of data.",
+          "action": "No specific interaction action; standard naltrexone monitoring. VERIFY any claimed interaction.",
+          "grade": "D",
+          "source": "No interaction data located."
+        },
+        "other_empiric": {
+          "effect": "No documented human interaction located (absence of evidence, not evidence of absence).",
+          "severity": "Unknown — absence of data.",
+          "action": "No specific interaction action. VERIFY before relying on safety.",
+          "grade": "D",
+          "source": "No interaction data located."
+        }
+      }
+    }
+  },
+  "agent_overrides": {
+    "tirzepatide": "Oral contraceptives: tirzepatide-specific FDA-label warning — may reduce oral-contraceptive efficacy; use non-oral or add barrier method for 4 weeks after initiation and after each dose increase. (This warning is specific to tirzepatide, NOT semaglutide/liraglutide.)",
+    "retatrutide": "Investigational triple agonist (GLP-1/GIP/glucagon). Treat antidiabetic interactions as for the GLP-1 class (additive hypoglycemia with insulin/sulfonylurea). The oral-contraceptive caution is not label-established for retatrutide (no approved label) — VERIFY; reasonable to apply the tirzepatide-style precaution conservatively given shared delayed-gastric-emptying mechanism.",
+    "tesamorelin": "Among GH-axis agents, tesamorelin has a FDA label that explicitly calls for glucose monitoring — strengthen the insulin/sulfonylurea/metformin glucose-monitoring action to label-level (Grade B) for this agent.",
+    "mk-677": "Ibutamoren (oral ghrelin-receptor agonist) is documented to raise fasting glucose and insulin / reduce insulin sensitivity — give the antidiabetic glucose-monitoring guidance strong weight here. (No head-to-head ranking against the other GH-axis agents — VERIFY any comparative claim.)",
+    "aod-9604": "GH fragment (176-191); marketed for lipolysis. It does NOT raise GH/IGF-1 and lacks the classic GH glucose effect, so the GH-axis glucose interactions above do NOT apply — treat as 'other_empiric' for these six meds. No documented interaction; VERIFY.",
+    "mots-c": "Mitochondrial-derived peptide proposed to improve insulin sensitivity / glucose handling (empiric). Theoretically could be additive with glucose-lowering drugs — monitor glucose if co-used with insulin/sulfonylurea. Grade D / VERIFY; no human interaction data."
+  }
+}
