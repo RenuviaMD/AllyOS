@@ -73,8 +73,10 @@ td.num input{text-align:right}
 
   <div class="disc">Inventory and sourcing are the clinic/provider's responsibility. AllyOS provides the generic clinical palette and safety logic only; it does not direct, endorse, or verify any pharmacy, outsourcing facility, SKU, or price. <b>Cost is a cost-of-goods reference for reorder and margin awareness only — AllyOS handles no billing, invoicing, or payments. Export (CSV/JSON) into your practice-management software for the financial side.</b> Verify all products against the actual label. © 2026 RenuviaMD® Compliance Division.</div>
 </div>
+<script src="allyos-auth.js"></script>
 <script>
 var MENU=[], INV={}, CUSTOM=[], KEY='allyos_iv_inventory_v1';
+if(window.AllyOSAuth){ AllyOSAuth.guard(['admin','provider']); }
 
 fetch('../protocols/iv-module.json').then(function(r){return r.json()}).then(function(d){
   MENU=(d.ingredients||[]);

@@ -90,7 +90,9 @@ a.back{color:#fff;font-size:.74rem;text-decoration:underline}
 
 </div>
 <div class="disc">Educational clinical decision-support for licensed professionals — not medical or legal advice, prescribing authorization, or a medical-director relationship. Always verify calculations against the signed order and the infusion pump. No PHI. © 2026 RenuviaMD® Compliance Division.</div>
+<script src="allyos-auth.js"></script>
 <script>
+if(window.AllyOSAuth){ AllyOSAuth.guard(['nurse','provider','admin']); }
 function drip(){
   var v=+document.getElementById('dVol').value||0,t=+document.getElementById('dMin').value||0,df=+document.getElementById('dDF').value||15;
   var o=document.getElementById('dripOut');

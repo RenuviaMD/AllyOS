@@ -1,0 +1,77 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sign in — AllyOS · RenuviaMD®</title>
+<style>
+:root{--bg:#0b1620;--bg2:#12222e;--card:#13242f;--line:#223947;--teal:#28c2b8;--gold:#e0b24a;--ink:#e9f3f2;--muted:#8aa3ad;--red:#e0594a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:radial-gradient(1200px 600px at 50% -10%,#143041,#0b1620);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:30px;max-width:400px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.logo{font-weight:800;font-size:1.25rem;margin-bottom:2px}.logo span{color:var(--gold)}
+.tag{font-size:.78rem;color:var(--muted);margin-bottom:20px}
+label{display:block;font-size:.72rem;color:var(--muted);margin:12px 0 4px}
+input{width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:10px;padding:11px 13px;color:var(--ink);font-size:.92rem;font-family:inherit}
+input:focus{outline:none;border-color:var(--teal)}
+button{width:100%;background:var(--teal);color:#06231f;border:none;border-radius:10px;padding:12px;font-weight:800;font-size:.92rem;cursor:pointer;margin-top:18px}
+button:hover{filter:brightness(1.06)}
+.err{background:#2a1512;border:1px solid #5a2a22;color:#f0b3aa;border-radius:9px;padding:9px 11px;font-size:.8rem;margin-top:14px;display:none}
+.err.show{display:block}
+.roles{margin-top:20px;border-top:1px solid var(--line);padding-top:14px}
+.roles h3{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--teal);margin-bottom:8px}
+.role{font-size:.74rem;color:var(--muted);margin:5px 0;line-height:1.4}
+.role b{color:var(--ink)}
+.demo{margin-top:14px;background:#0f2230;border:1px solid var(--line);border-radius:9px;padding:10px;font-size:.72rem;color:var(--muted)}
+.demo b{color:var(--ink)}
+.demo .chip{display:inline-block;background:#11313a;color:var(--teal);border-radius:7px;padding:2px 8px;margin:3px 4px 0 0;cursor:pointer}
+.note{font-size:.66rem;color:var(--muted);margin-top:16px;line-height:1.45}
+</style></head>
+<body>
+<div class="card">
+  <div class="logo">Renuvia<span>MD</span>® · AllyOS</div>
+  <div class="tag">Clinical decision-support for licensed providers — sign in</div>
+
+  <form onsubmit="return doLogin(event)">
+    <label>Email</label>
+    <input id="email" type="email" autocomplete="username" placeholder="you@clinic.com" required>
+    <label>Password</label>
+    <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+    <button type="submit">Sign in</button>
+    <div class="err" id="err"></div>
+  </form>
+
+  <div class="roles">
+    <h3>Access by role</h3>
+    <div class="role"><b>Provider (MD/DO/NP/PA)</b> — Good Faith Exam, authorize protocols, sign, full station, build.</div>
+    <div class="role"><b>Nurse (RN/LPN)</b> — execute only: assign chairs, run infusions, document.</div>
+    <div class="role"><b>Admin / Medical Director</b> — inventory &amp; pricing, users, audit.</div>
+  </div>
+
+  <div class="demo">
+    <b>Demo accounts</b> (password <b>demo</b>) — tap to fill:
+    <div>
+      <span class="chip" onclick="fill('md@clinic.test')">md@ (provider)</span>
+      <span class="chip" onclick="fill('np@clinic.test')">np@ (provider)</span>
+      <span class="chip" onclick="fill('rn@clinic.test')">rn@ (nurse)</span>
+      <span class="chip" onclick="fill('admin@clinic.test')">admin@ (admin)</span>
+    </div>
+  </div>
+
+  <div class="note">Demo sign-in is a role-routing scaffold, not a security boundary. Real enforcement (server-side roles) activates when the Supabase backend is connected. No PHI is stored.</div>
+</div>
+<script src="allyos-auth.js"></script>
+<script>
+function fill(email){ document.getElementById('email').value=email; document.getElementById('password').value='demo'; }
+function nextPage(){ var m=location.search.match(/[?&]next=([^&]+)/); return m?decodeURIComponent(m[1]):'nursing-station.html'; }
+function landing(role){ if(role==='admin')return 'admin.html'; if(role==='provider')return 'iv-builder.html'; return 'nursing-station.html'; }
+function doLogin(e){
+  e.preventDefault();
+  var r=AllyOSAuth.signIn(document.getElementById('email').value, document.getElementById('password').value);
+  var err=document.getElementById('err');
+  if(r.error){ err.textContent=r.error; err.className='err show'; return false; }
+  var next=nextPage();
+  // if a specific page was requested, honor it; else route by role
+  location.href = (location.search.indexOf('next=')>=0) ? next : landing(r.session.role);
+  return false;
+}
+// already signed in? bounce to role landing
+(function(){ var s=AllyOSAuth.session(); if(s){ location.href = (location.search.indexOf('next=')>=0)?nextPage():landing(s.role); } })();
+</script>
+</body></html>

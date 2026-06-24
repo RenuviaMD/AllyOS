@@ -65,13 +65,16 @@ label.fld{display:block;font-size:.68rem;color:var(--muted);margin:7px 0 2px}
 .monmsg{text-align:center;font-size:.78rem;color:var(--amber);min-height:18px;margin:4px 0}
 .disc{font-size:.66rem;color:var(--muted);padding:6px 22px 24px;line-height:1.45}
 a{color:var(--teal)}
-</style></head>
+#who{color:var(--gold)}
+</style>
+<script src="allyos-auth.js"></script></head>
 <body>
 <header>
   <div class="logo">Renuvia<span>MD</span>® · AllyOS Nurse Workstation</div>
   <div class="hd-right">
+    <span id="who"></span>
     <label title="When RenuviaMD is the Medical Director of record, gates enforce. Off = advisory only."><input type="checkbox" id="mdMode"> MD-of-record (enforce gates)</label>
-    <a href="iv-builder.html">Builder</a> · <a href="iv-inventory.html">Inventory</a> · <a href="iv-calculator.html">Calc</a>
+    <a href="iv-builder.html">Builder</a> · <a href="iv-inventory.html">Inventory</a> · <a href="iv-calculator.html">Calc</a> · <a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a>
   </div>
 </header>
 
@@ -114,9 +117,13 @@ a{color:var(--teal)}
 <script>
 var MOD=null, MENU=[], INV={}, QUEUE=[], CHAIRS=[null,null,null,null,null,null], selQ=null, modalChair=null;
 
+if(window.AllyOSAuth){ AllyOSAuth.guard(['nurse','provider','admin']); }
+
 fetch('../protocols/iv-module.json').then(function(r){return r.json()}).then(function(d){
   MOD=d; MENU=d.ingredients||[];
   try{var s=JSON.parse(localStorage.getItem('allyos_iv_inventory_v1')||'{}');INV=s.inv||{};}catch(e){INV={};}
+  var sess=window.AllyOSAuth&&AllyOSAuth.session();
+  if(sess){var w=document.getElementById('who');if(w)w.textContent=AllyOSAuth.greeting()+' · '+((AllyOSAuth.ROLES[sess.role]||{}).label||sess.role);var mm=document.getElementById('mdMode');if(mm)mm.checked=!!sess.mdOfRecord;}
   document.getElementById('disc').innerHTML='AllyOS is advisory decision-support for licensed providers — it informs how/what to run an IV/IM bar but does not stop the practice; the provider reviews and signs. Gates enforce only in MD-of-record mode. No PHI is stored (browser-local). © 2026 RenuviaMD® Compliance Division.';
   fillProtoSelect(); renderProtoRef(); renderQueue(); renderChairs();
 }).catch(function(e){ document.getElementById('chairs').innerHTML='<div class="flag crit">Could not load the IV module ('+e.message+').</div>'; });

@@ -68,7 +68,8 @@ button.ask:disabled{opacity:.5;cursor:default}
 <body>
 <header>
   <div class="brand">Renuvia<span>MD</span>® · AllyOS</div><h1>IV / IM Stack Builder &amp; Chairside Run</h1>
-  <div class="sub">Provider does the GFE first (NP/PA/MD/DO) → build the stack → set time &amp; drip → run with monitoring alarms → generate the visit docs. Decision-support for licensed providers; you review &amp; sign. No PHI is stored.</div>
+  <div class="sub">Provider does the GFE first (NP/PA/MD/DO) → build the stack → set time &amp; drip → run with monitoring alarms → generate the visit docs. Decision-support for licensed providers; you review &amp; sign. No PHI is stored. &nbsp; <a href="nursing-station.html" style="color:#9fe">Station</a> · <a href="#" style="color:#9fe" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
+  <script src="allyos-auth.js"></script>
 </header>
 <div class="wrap">
 
@@ -172,6 +173,7 @@ button.ask:disabled{opacity:.5;cursor:default}
 </div>
 <script>
 var MOD=null, BAG=[], MENU=[], timer=null, remain=0, total=0, lastMon=0;
+if(window.AllyOSAuth){ AllyOSAuth.guard(['provider','admin']); }
 
 fetch('../protocols/iv-module.json').then(function(r){return r.json()}).then(function(d){
   MOD=d; MENU=d.ingredients||[];
