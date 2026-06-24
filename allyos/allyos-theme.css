@@ -3,7 +3,7 @@
    One source of truth for every AllyOS surface.
    Inspired by the INFUSE IV BAR palette; clinical, not consumer.
    ============================================================ */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 :root{
   /* space-dark backgrounds */
@@ -19,7 +19,7 @@
   --glow-green:0 0 0 1px rgba(43,212,154,.45), 0 0 24px rgba(43,212,154,.20);
   --glow-gold:0 0 0 1px rgba(231,184,78,.45), 0 0 22px rgba(231,184,78,.18);
   --glow-red:0 0 0 1px rgba(240,99,90,.45), 0 0 24px rgba(240,99,90,.22);
-  --fdisp:'Orbitron', -apple-system, Segoe UI, sans-serif;
+  --fdisp:'Space Grotesk', -apple-system, Segoe UI, sans-serif;
   --fbody:'Inter', -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   --r:16px;
 }
