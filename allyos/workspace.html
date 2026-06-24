@@ -2072,12 +2072,17 @@ var PIX={};
 fetch('../protocols/peptide-interactions.json').then(function(r){return r.json()}).then(function(d){PIX=d||{};render();}).catch(function(){});
 var PFM={};
 fetch('../protocols/patient-factor-rules.json').then(function(r){return r.json()}).then(function(d){PFM=d||{};render();}).catch(function(){});
+var MON={};
+fetch('../protocols/monitoring-map.json').then(function(r){return r.json()}).then(function(d){MON=d||{};render();}).catch(function(){});
 /* Only send formulary-firing content to Ally (drops informational/non-stocked rules; keeps payload under the grounding cap). */
 function trimFires(o){if(!o||!o.rules)return o;var c={};for(var k in o)c[k]=o[k];
   c.rules=o.rules.filter(function(r){return r.fires_in_formulary;});
   if(o.agents){var ag={};for(var a in o.agents){if(o.agents[a].stocked!==false)ag[a]=o.agents[a];}c.agents=ag;}
   return c;}
-function buildLib(){return {detail:DETAIL,contra:CONTRA,interactions:IX,peptide_interactions:trimFires(PIX),patient_factor:trimFires(PFM)};}
+function trimMon(o){if(!o||!o.peptides)return o;var pep={};for(var s in o.peptides){var e=o.peptides[s];
+  pep[s]={pathway:e.pathway,items:(e.items||[]).map(function(it){return {lab:it.lab,category:it.category,trigger_type:it.trigger_type,evidence_level:it.evidence_level};})};}
+  return {schema:o.schema,note:o.note,agents_without_lab_monitoring:o.agents_without_lab_monitoring,peptides:pep};}
+function buildLib(){return {detail:DETAIL,contra:CONTRA,interactions:IX,peptide_interactions:trimFires(PIX),patient_factor:trimFires(PFM),monitoring:trimMon(MON)};}
 
 /* ── patient-factor engine (deterministic, on-device) ──
    Maps the intake into the rule field-namespace and evaluates each formulary-firing
@@ -2193,6 +2198,39 @@ function patientFactorHTML(){
   return '<div class="lbl" style="margin:14px 0 2px">Patient-factor flags '
     +'<span style="font-weight:400;color:var(--faint);font-size:10.5px">— locked rule engine, computed on-device · provider review, VERIFY</span></div>'
     +'<div class="ixwrap">'+rows+'</div>';
+}
+
+/* ── lab-recommendation engine (derived from locked protocol monitoring) ──
+   Recommends ONLY labs present in each selected peptide's locked monitoring map.
+   No-invention: a lab absent from the map is never suggested. */
+function labRecommendations(){
+  var sel=S.sel||[],mp=(MON.peptides||{}),byLab={},noLab=[];
+  sel.forEach(function(s){var e=mp[s];var nm=(byslug(s)||{}).name||s;
+    if(!e||!e.items||!e.items.length){if((MON.agents_without_lab_monitoring||[]).indexOf(s)>-1)noLab.push(nm);return;}
+    e.items.forEach(function(it){var k=it.lab;
+      byLab[k]=byLab[k]||{lab:it.lab,category:it.category,grade:it.evidence_level,baseline:false,followup:false,agents:[]};
+      if(it.trigger_type==='baseline')byLab[k].baseline=true;else byLab[k].followup=true;
+      if(byLab[k].agents.indexOf(nm)<0)byLab[k].agents.push(nm);
+      if(it.evidence_level==='A')byLab[k].grade='A';});});
+  return {labs:Object.keys(byLab).map(function(k){return byLab[k];}),noLab:noLab};
+}
+function labRecHTML(){
+  if(!S.sel||!S.sel.length||!MON.peptides)return '';
+  var r=labRecommendations();if(!r.labs.length&&!r.noLab.length)return '';
+  /* labs first, vitals last */
+  r.labs.sort(function(a,b){return (a.category==='vital'?1:0)-(b.category==='vital'?1:0);});
+  var rows=r.labs.map(function(x){
+    var when=[x.baseline?'baseline':'',x.followup?'follow-up':''].filter(Boolean).join(' + ');
+    return '<div class="ixrow" style="border-left-color:var(--teal)">'
+      +'<div class="ixh"><span class="chip '+gradeClass(x.grade)+'">'+esc(x.grade)+'</span><b>'+esc(x.lab)+'</b>'
+      +(x.category==='vital'?' <span style="font-size:9px;color:var(--faint)">vital</span>':'')
+      +'<span style="margin-left:auto;font-size:10px;color:var(--faint)">'+esc(when)+'</span></div>'
+      +'<div class="ixeff" style="color:var(--faint)">for '+esc(x.agents.join(', '))+'</div></div>';
+  }).join('');
+  var note=r.noLab.length?'<div class="ixeff" style="color:var(--faint);margin-top:4px">'+esc(r.noLab.join(', '))+': no peptide-specific lab in the locked protocol — condition-based evaluation only.</div>':'';
+  return '<div class="lbl" style="margin:14px 0 2px">Recommended labs '
+    +'<span style="font-weight:400;color:var(--faint);font-size:10.5px">— from locked protocol monitoring · pathway-indicated, not a generic panel · VERIFY</span></div>'
+    +'<div class="ixwrap">'+rows+'</div>'+note;
 }
 
 /* ───────── structured intake vocab (pills) ───────── */
@@ -2506,7 +2544,7 @@ function stepPlan(){
    + interactionHTML()
    + crossAgentHTML()
    + (advs.length?'<div class="lbl" style="margin:8px 0 2px">Advisories &amp; considerations</div><div class="advs">'+advs.map(advCard).join('')+'</div>':'')
-   + recLabsHTML()
+   + labRecHTML()
    + contraHTML()
    + S.sel.map(specSheet).join('');
   S.sel.forEach(bindCalc);bindDocs();bindProtoBtns();
@@ -2558,6 +2596,12 @@ function plist(a){return (a&&a.length)?a.join(', '):'';}
 function agentLines(){return S.sel.map(function(s){var p=byslug(s)||{};var v=S.vials[s]||{};var r=recon(v.mg,v.ml,v.dose);
   return '<li><b>'+p.name+'</b> — '+(parseField(p.body_md,/\*\*Dose:\*\*\s*([^\n]+)/)||'per monograph')+'; reconstitute '+v.mg+' mg + '+v.ml+' mL → <b>'+r.units.toFixed(1)+' units</b>/dose'+(S.start[s]?'; start '+fdate(S.start[s]):'')+'</li>';}).join('');}
 function labLines(){var l=recLabs();return l.length?'<h4>Recommended labs</h4><ul>'+l.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>':'';}
+function labRecLines(){if(!MON.peptides)return '';var r=labRecommendations();if(!r.labs.length&&!r.noLab.length)return '';
+  r.labs.sort(function(a,b){return (a.category==='vital'?1:0)-(b.category==='vital'?1:0);});
+  var li=r.labs.map(function(x){var when=[x.baseline?'baseline':'',x.followup?'follow-up':''].filter(Boolean).join(' + ');
+    return '<li>['+esc(x.grade)+'] <b>'+esc(x.lab)+'</b> — '+esc(when)+' (for '+esc(x.agents.join(', '))+')</li>';}).join('');
+  if(r.noLab.length)li+='<li style="color:#9aa9b0">'+esc(r.noLab.join(', '))+': no peptide-specific lab in the locked protocol — condition-based evaluation only.</li>';
+  return '<h4>Recommended labs <span style="font-weight:400;font-size:11px;color:var(--muted)">(from locked protocol monitoring · pathway-indicated, not a generic panel)</span></h4><ul>'+li+'</ul>';}
 function noteProtocolDetail(){return S.sel.map(function(s){var d=detailFor(s);if(!d)return '';var p=byslug(s)||{};
   var mon=(d.monitoring||[]).slice(0,3);
   return '<div class="pref"><b>'+(p.name||s)+'</b>'
@@ -2588,7 +2632,7 @@ function docNote(){var p=S.patient;return '<h3>Clinical encounter note</h3><div 
   + noteInteractionLines()
   + noteCrossAgentLines()
   +'<h4>Plan</h4><ul>'+agentLines()+'</ul>'
-  + labLines()
+  + labRecLines()
   + (S.sel.some(function(s){return detailFor(s)})?'<h4>Protocol reference — titration &amp; monitoring</h4>'+noteProtocolDetail():'')
   + (S.hsOverride?'<h4>Hard-stop override</h4><p style="color:#f0a59d">'+S.hsOverride.items.join('; ')+' — <b>rationale:</b> '+S.hsOverride.rationale+'</p>':'')
   +'<p style="margin-top:10px;color:var(--muted)">Consent tier '+consentTier()+' obtained'+(S.sel.length>1?'; combination addendum reviewed':'')+'. Provider counseled patient on risks, benefits, alternatives, and monitoring.</p>'

@@ -77,9 +77,9 @@
         "Suspected pancreatitis: STOP, do not restart if confirmed"
       ],
       "monitoring": [
-        "Baseline (incl. oral-contraceptive review)",
-        "~4 wk & each up-titration (reinforce contraception counseling after each increase)",
-        "3 mo, 6 mo + every 3–6 mo",
+        "Baseline: wt/BMI, BP/HR, renal, glucose/A1c, pregnancy, MTC/pancreatitis screen (incl. oral-contraceptive review)",
+        "~4 wk & each up-titration: adjust insulin/SU, HR/BP (reinforce contraception counseling after each increase)",
+        "3 mo, 6 mo + every 3–6 mo: glucose/A1c, weight, renal",
         "Discontinue if pregnancy"
       ],
       "discontinuation": "Chronic; SURMOUNT-4 withdrawal showed substantial regain. No mandated taper; re-titrate if restarting.",
@@ -116,9 +116,9 @@
         "Same class approach (GI diet/hold, fiber/osmotic for constipation, reduce insulin/SU, evaluate gallbladder, STOP + no restart for pancreatitis, hold/rehydrate/check renal for AKI)"
       ],
       "monitoring": [
-        "Baseline; up-titration is weekly; ~4 wk after reaching 3.0 mg",
+        "Baseline: wt/BMI, BP/HR, renal, glucose/A1c, pregnancy, MTC/pancreatitis screen; up-titration is weekly; ~4 wk after reaching 3.0 mg",
         "16-week / 4% rule: if NOT ≥4% baseline weight loss by ~16 wk, unlikely effective — consider discontinuation",
-        "6 mo + every 3–6 mo",
+        "6 mo + every 3–6 mo: glucose/A1c, weight, renal",
         "Discontinue if pregnancy"
       ],
       "discontinuation": "Chronic; regain expected (SCALE Maintenance). Restart at 0.6 mg after ≥3 missed days.",
