@@ -155,8 +155,14 @@ button.ask:disabled{opacity:.5;cursor:default}
   <div class="panel">
     <h2>AllyOS Analysis</h2>
     <div id="analysis"><div class="loading">Compose a stack to see analysis.</div></div>
-    <button class="ask" id="askBtn" onclick="askAlly()" disabled>Ask Ally to review this stack</button>
+    <button class="ask" id="askBtn" onclick="reviewStack()" disabled>Ask Ally to review this stack</button>
     <div id="answer"></div>
+    <div id="allyRow" style="display:none;margin-top:8px">
+      <div style="display:flex;gap:6px">
+        <input id="allyInput" placeholder="Ask Ally a follow-up…" style="flex:1" onkeydown="if(event.key==='Enter')followAlly()">
+        <button class="btn ghost" style="flex:0 0 auto" onclick="followAlly()">Send</button>
+      </div>
+    </div>
     <div class="disc" id="disclaimer"></div>
   </div>
 
@@ -230,7 +236,9 @@ function calcDrip(){
   var out=document.getElementById('dripOut');
   if(!vol||!t){out.innerHTML='<div><span>Enter volume &amp; time</span></div>';return;}
   var gtt=Math.round(vol/t*df),mlhr=Math.round(vol/t*60);
-  out.innerHTML='<div><span>Drip rate</span><b>'+gtt+' gtt/min</b></div><div><span>Pump rate</span><b>'+mlhr+' mL/hr</b></div><div><span>Volume / time</span><b>'+vol+' mL / '+t+' min</b></div>';
+  var og=(MOD&&MOD.osmolarity_guidance&&MOD.osmolarity_guidance.base_osmolarity_mOsm_L)||{};
+  var bo=og[document.getElementById('baseType').value]||308;
+  out.innerHTML='<div><span>Drip rate</span><b>'+gtt+' gtt/min</b></div><div><span>Pump rate</span><b>'+mlhr+' mL/hr</b></div><div><span>Volume / time</span><b>'+vol+' mL / '+t+' min</b></div><div><span>Base osmolarity</span><b>~'+bo+' mOsm/L</b></div>';
 }
 
 function bagTags(){var t={};BAG.forEach(function(it){var n=(it.name||'').toLowerCase();
@@ -287,6 +295,20 @@ function analyze(){
   // Composite double-dose
   if(BAG.some(function(it){return /amino blend|mineral blend|tri-immune|myer/i.test(it.name);})&&(tags.zinc||tags.selenium))
     add('warn','Composite double-dose','A composite/premade blend is present alongside a standalone mineral — confirm the blend’s label to avoid double-dosing.');
+
+  // Osmolarity (estimate)
+  var og=MOD.osmolarity_guidance||{}, baseType=document.getElementById('baseType').value;
+  var baseOsm=(og.base_osmolarity_mOsm_L||{})[baseType]||308, vol=parseFloat(document.getElementById('baseVol').value)||0;
+  var hyper=[], hiVitC=false;
+  BAG.forEach(function(it){var n=(it.name||'').toLowerCase();
+    if(/vitamin c|vit c|ascorbic/.test(n)){var g=parseGrams(it.dose);if(g!=null&&g>=7){hyper.push('high-dose Vitamin C ('+g+' g)');hiVitC=true;}}
+    if(/calcium chloride/.test(n))hyper.push('Calcium Chloride (hypertonic)');
+    if(/amino blend|amino acid/.test(n))hyper.push('amino acids');
+    if(/nad/.test(n))hyper.push('NAD+');});
+  if(hyper.length){
+    var concentrated=hiVitC&&vol&&vol<=250, lvl=concentrated?'crit':'warn', lim=og.peripheral_limit_mOsm_L||900;
+    add(lvl,'Osmolarity — '+(concentrated?'high (concentrated bag)':'raised (estimate)'),'Base ~'+baseOsm+' mOsm/L ('+esc(baseType)+'). Hyperosmolar additive(s): '+hyper.join(', ')+'. Final osmolarity is raised — this is an ESTIMATE; verify against the compounding reference. Peripheral limit ~'+lim+' mOsm/L — if exceeded, use a larger bag, lower the dose, slow the rate, or use central access.'+(concentrated?(' This bag is low-volume ('+vol+' mL) with high-dose Vit C — strongly consider a larger bag or central access.'):''));
+  }
 
   var vClass=crit>0?'hold':(warn>0?'review':'go'),vText=crit>0?('RESOLVE — '+crit+' critical flag'+(crit>1?'s':'')):(warn>0?('PROCEED WITH REVIEW — '+warn+' advisory'+(warn>1?'ies':'y')):'No conflicts flagged — provider reviews & signs');
   var html='<div class="verdict '+vClass+'">'+vText+'</div>';
@@ -362,15 +384,36 @@ function genDoc(type){
   w.document.close();
 }
 
-function askAlly(){
-  var s=stackSummary();
-  var q='A licensed provider built this wellness IV/IM stack in the AllyOS chairside builder. Review it from the locked IV module: flag any compatibility, ceiling, infusion-rate, sequence, contraindication, GFE, or scope issues, and give an honest advisory verdict. Do not invent doses.\n\nStack: '+s.name+'\nBase: '+s.base+'\nInfusion time: '+s.time+' min ('+s.gtt+' gtt/min)\nIngredients:\n'+s.items.map(function(x){return '- '+x;}).join('\n');
-  var ans=document.getElementById('answer');ans.innerHTML='<div class="ans">…</div>';document.getElementById('askBtn').disabled=true;
-  fetch('/.netlify/functions/ask',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:q}]})})
+// ---- Ally agent: multi-turn, grounded in the IV module via the standalone ask function ----
+var CONV=[], PENDING=false;
+function fmtA(t){return(''+t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>').replace(/\n/g,'<br>');}
+function renderConv(){
+  var html='';
+  CONV.forEach(function(m){
+    if(m.role==='user')html+='<div style="text-align:right;margin:6px 0"><span style="display:inline-block;background:var(--navy);color:#fff;padding:7px 10px;border-radius:10px;font-size:.82rem;max-width:90%">'+esc(m.disp||m.content)+'</span></div>';
+    else html+='<div class="ans">'+fmtA(m.content)+'</div>';
+  });
+  if(PENDING)html+='<div class="ans">…</div>';
+  document.getElementById('answer').innerHTML=html;
+  document.getElementById('allyRow').style.display=CONV.length?'block':'none';
+}
+function send(){
+  PENDING=true;renderConv();document.getElementById('askBtn').disabled=true;
+  fetch('/.netlify/functions/ask',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({messages:CONV.map(function(m){return{role:m.role,content:m.content};})})})
   .then(function(r){return r.json()}).then(function(j){
+    PENDING=false;
     var t=j.text||(j.error==='not_configured'?'Ally isn’t connected yet (set ANTHROPIC_API_KEY in Netlify, then redeploy).':('Ally couldn’t reach the model'+(j.detail?(': '+j.detail):(j.error?(' ('+j.error+')'):''))+'.'));
-    ans.innerHTML='<div class="ans">'+t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>')+'</div>';document.getElementById('askBtn').disabled=false;
-  }).catch(function(e){ans.innerHTML='<div class="ans">Network error reaching Ally ('+e.message+').</div>';document.getElementById('askBtn').disabled=false;});
+    CONV.push({role:'assistant',content:t});renderConv();document.getElementById('askBtn').disabled=false;
+  }).catch(function(e){PENDING=false;CONV.push({role:'assistant',content:'Network error reaching Ally ('+e.message+').'});renderConv();document.getElementById('askBtn').disabled=false;});
+}
+function reviewStack(){
+  var s=stackSummary();
+  var q='A licensed provider built this wellness IV/IM stack in the AllyOS chairside builder. Review it from the locked IV module: flag any compatibility, ceiling, infusion-rate, osmolarity, sequence, contraindication, GFE, or scope issues, and give an honest advisory verdict. Do not invent doses.\n\nStack: '+s.name+'\nBase: '+s.base+'\nInfusion time: '+s.time+' min ('+s.gtt+' gtt/min)\nIngredients:\n'+s.items.map(function(x){return '- '+x;}).join('\n');
+  CONV.push({role:'user',content:q,disp:'Review this stack: '+s.name});renderConv();send();
+}
+function followAlly(){
+  var el=document.getElementById('allyInput'),v=(el.value||'').trim();if(!v)return;el.value='';
+  CONV.push({role:'user',content:v});renderConv();send();
 }
 function parseGrams(s){if(!s)return null;s=(''+s).toLowerCase();var m=s.match(/([\d.]+)\s*(g|mg|mcg)/);if(!m)return null;var v=parseFloat(m[1]);if(m[2]==='mg')v=v/1000;if(m[2]==='mcg')v=v/1000000;return v;}
 function esc(s){return(''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}

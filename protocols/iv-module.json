@@ -84,6 +84,20 @@
     "fires_in_formulary": true
   },
 
+  "osmolarity_guidance": {
+    "id": "IVIM_OSMOLARITY",
+    "peripheral_limit_mOsm_L": 900,
+    "note": "Final-admixture osmolarity decides peripheral vs central access. Peripheral IV generally tolerates up to ~900 mOsm/L; above that, dilute further, use a larger-volume bag, or use central access. Any value AllyOS shows is an ESTIMATE — verify the true final osmolarity against the compounding reference / product labeling before relying on it.",
+    "base_osmolarity_mOsm_L": { "0.9% Normal Saline": 308, "Lactated Ringer's": 273, "Dedicated NAD+ bag (NS)": 308 },
+    "hyperosmolar_drivers": ["High-dose Vitamin C (markedly raises osmolarity, esp. in low-volume bags)", "Calcium Chloride (hypertonic; also a vesicant — central preferred)", "Amino acid blends", "NAD+ (concentration-dependent)", "Any dextrose-containing base"],
+    "rules": [
+      "Low volume + high-dose additive = higher osmolarity. A 10 g Vitamin C dose in 250 mL is far more concentrated than in 1 L — prefer a larger bag for high-dose Vit C.",
+      "If estimated osmolarity exceeds ~900 mOsm/L: increase the bag volume, reduce the dose, slow the infusion, or use central access.",
+      "Calcium Chloride is both hypertonic and a vesicant — Calcium Gluconate is preferred for peripheral wellness IV."
+    ],
+    "fires_in_formulary": true
+  },
+
   "ingredients": [
     { "id": "ING_NS", "name": "0.9% Normal Saline (default base fluid)", "route": "IV infusion via 22G catheter", "standard": "250/500 mL (500 mL default for most stacks); 1 L for hydration only", "rate": "30–45 min/250 mL; 45–60 min/500 mL; 60 min/1 L", "absolute_ci": "Decompensated CHF · pulmonary edema · severe hypernatremia", "relative_ci": "ESRD on dialysis · CHF (smaller volume) · severe hypertension", "in_primary_library": true, "source": "MASTER-MENU §1" },
     { "id": "ING_LR", "name": "Lactated Ringer's (alternate base)", "route": "IV infusion", "standard": "1 L (hydration only)", "absolute_ci": "Hyperkalemia · severe hepatic disease · concurrent ceftriaxone", "relative_ci": "CHF · ESRD", "note": "Do NOT use as base for high-dose Vit C bags — prefer NS", "in_primary_library": true, "source": "MASTER-MENU §1" },

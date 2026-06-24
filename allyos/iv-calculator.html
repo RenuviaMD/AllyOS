@@ -1,0 +1,118 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IV Drip &amp; Dose Calculator — AllyOS · RenuviaMD®</title>
+<style>
+:root{--navy:#102a30;--teal:#0e8a8a;--gold:#c9870a;--ink:#1c2b32;--muted:#5b6b72;--line:#e3ecea;--soft:#f3f8f7;--amber:#b9770a;--red:#c0392b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#eef4f3}
+header{background:linear-gradient(150deg,#0e3a40,#0e8a8a);color:#fff;padding:14px 20px}
+.brand{font-weight:800}.brand span{color:#ffd98a}
+header h1{font-size:1.1rem;font-family:Georgia,serif;margin-top:2px}
+header .sub{font-size:.74rem;color:#d4ece9}
+.wrap{max-width:880px;margin:0 auto;padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:720px){.wrap{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:16px;box-shadow:0 2px 8px rgba(16,50,58,.05)}
+.card.full{grid-column:1/-1}
+h2{font-size:.85rem;text-transform:uppercase;letter-spacing:.04em;color:var(--navy);margin-bottom:10px}
+label{display:block;font-size:.72rem;color:var(--muted);margin:8px 0 2px}
+input,select{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:.9rem;font-family:inherit}
+.row{display:flex;gap:10px}.row>div{flex:1}
+.out{margin-top:12px;padding:12px;background:var(--soft);border-radius:10px;display:flex;gap:18px;flex-wrap:wrap}
+.out div span{display:block;font-size:.66rem;color:var(--muted)}
+.out div b{font-size:1.5rem;color:var(--navy);font-variant-numeric:tabular-nums}
+.ref{font-size:.82rem;line-height:1.5}
+.ref .item{padding:8px 0;border-bottom:1px solid var(--soft)}
+.ref .item:last-child{border:none}
+.ref b{color:var(--navy)}
+.pill{display:inline-block;font-size:.66rem;background:#fdf4e3;color:var(--amber);border-radius:8px;padding:1px 7px;margin-left:4px}
+.pill.r{background:#fdecec;color:var(--red)}
+.disc{font-size:.68rem;color:var(--muted);max-width:880px;margin:8px auto 24px;padding:0 16px;line-height:1.45}
+a.back{color:#fff;font-size:.74rem;text-decoration:underline}
+</style></head>
+<body>
+<header><div class="brand">Renuvia<span>MD</span>® · AllyOS</div><h1>IV Drip &amp; Dose Calculator</h1>
+<div class="sub">Fast chairside reference for licensed nursing staff. Decision-support — verify against the order &amp; pump. &nbsp; <a class="back" href="iv-builder.html">→ Full stack builder</a></div></header>
+<div class="wrap">
+
+  <!-- DRIP -->
+  <div class="card">
+    <h2>Drip rate</h2>
+    <div class="row"><div><label>Volume (mL)</label><input id="dVol" type="number" value="500" oninput="drip()"></div>
+      <div><label>Time (min)</label><input id="dMin" type="number" value="45" oninput="drip()"></div></div>
+    <label>Drop factor (gtt/mL)</label>
+    <select id="dDF" onchange="drip()"><option value="15" selected>15 (macrobore — default)</option><option value="10">10</option><option value="20">20</option><option value="60">60 (microdrip)</option></select>
+    <div class="out" id="dripOut"></div>
+  </div>
+
+  <!-- REVERSE: target gtt/min -> time -->
+  <div class="card">
+    <h2>Time from a set rate</h2>
+    <div class="row"><div><label>Volume (mL)</label><input id="rVol" type="number" value="500" oninput="rev()"></div>
+      <div><label>Rate (gtt/min)</label><input id="rGtt" type="number" value="125" oninput="rev()"></div></div>
+    <label>Drop factor (gtt/mL)</label>
+    <select id="rDF" onchange="rev()"><option value="15" selected>15</option><option value="10">10</option><option value="20">20</option><option value="60">60</option></select>
+    <div class="out" id="revOut"></div>
+  </div>
+
+  <!-- DOSE / CONCENTRATION -->
+  <div class="card">
+    <h2>Dose &amp; concentration</h2>
+    <div class="row"><div><label>Vial amount</label><input id="cAmt" type="number" value="1000" oninput="conc()"></div>
+      <div><label>Unit</label><select id="cUnit" onchange="conc()"><option>mg</option><option>mcg</option><option>g</option></select></div>
+      <div><label>Vial volume (mL)</label><input id="cVol" type="number" value="10" oninput="conc()"></div></div>
+    <label>Want this dose (same unit)</label><input id="cWant" type="number" placeholder="e.g. 250" oninput="conc()">
+    <div class="out" id="concOut"></div>
+  </div>
+
+  <!-- OSMOLARITY QUICK NOTE -->
+  <div class="card">
+    <h2>Osmolarity quick note</h2>
+    <div class="ref">
+      <div class="item"><b>Peripheral limit ≈ 900 mOsm/L.</b> Above it: larger bag, lower dose, slower rate, or central access.</div>
+      <div class="item">Base fluids: 0.9% NS ≈ <b>308</b> · Lactated Ringer's ≈ <b>273</b> mOsm/L.</div>
+      <div class="item">Hyperosmolar drivers: high-dose Vitamin C, Calcium Chloride (also vesicant), amino acids, NAD+, dextrose. Low volume + high dose = higher osmolarity — prefer a larger bag.</div>
+      <div class="item" style="color:var(--muted)">Final osmolarity is an estimate — verify against the compounding reference.</div>
+    </div>
+  </div>
+
+  <!-- RATE FLOORS / GATES QUICK REFERENCE -->
+  <div class="card full">
+    <h2>Rate floors &amp; chairside gates (quick reference)</h2>
+    <div class="ref">
+      <div class="item"><b>NAD+</b> <span class="pill r">rate-sensitive</span> — 250 mg over ≥ 2 hr first session (90–120 min if tolerant); 500 mg over ≥ 3–4 hr. Start 2 mg/min, titrate to 4–5 mg/min only if asymptomatic at 30 min. <b>Dedicated bag only</b> — never co-mixed.</div>
+      <div class="item"><b>Magnesium</b> — infuse the Mg portion over <b>≥ 15 min</b> minimum (rapid push → flushing, hypotension, AV block). Calcium Gluconate 1 g IV slow is the antidote for Mg toxicity.</div>
+      <div class="item"><b>Vitamin C</b> — ≤ 0.5 g/min for 5–10 g. <b>CARD-VC verbal screen required for 6.1–10 g</b> (incl. G6PD); G6PD-deficient → cap 2 g or decline. &gt; 10 g out of wellness scope.</div>
+      <div class="item"><b>Glutathione</b> <span class="pill">IV push only</span> — post-drip, 1–2 min, via Y-port after line flush. Never in the bag, never with Vit C (redox), never piggyback/slow infusion. Ceiling 1,200 mg.</div>
+      <div class="item"><b>Calcium</b> — Gluconate preferred peripherally; <b>never in the Vit C bag</b> (precipitate). Hold if digoxin/cardiac glycoside. Calcium <i>Chloride</i> is a vesicant — central preferred.</div>
+      <div class="item"><b>GFE Gate-0</b> — valid GFE (&lt; 12-mo), patient cleared, standing orders authorize the act, FORM-02 done this visit — before chair assignment or compounding.</div>
+      <div class="item" style="color:var(--muted)">Values mirror the locked AllyOS IV module (MASTER-MENU). Not in the module → verify against primary sources.</div>
+    </div>
+  </div>
+
+</div>
+<div class="disc">Educational clinical decision-support for licensed professionals — not medical or legal advice, prescribing authorization, or a medical-director relationship. Always verify calculations against the signed order and the infusion pump. No PHI. © 2026 RenuviaMD® Compliance Division.</div>
+<script>
+function drip(){
+  var v=+document.getElementById('dVol').value||0,t=+document.getElementById('dMin').value||0,df=+document.getElementById('dDF').value||15;
+  var o=document.getElementById('dripOut');
+  if(!v||!t){o.innerHTML='<div><span>Enter volume &amp; time</span></div>';return;}
+  o.innerHTML='<div><span>Drip rate</span><b>'+Math.round(v/t*df)+'</b><span>gtt/min</span></div><div><span>Pump rate</span><b>'+Math.round(v/t*60)+'</b><span>mL/hr</span></div>';
+}
+function rev(){
+  var v=+document.getElementById('rVol').value||0,g=+document.getElementById('rGtt').value||0,df=+document.getElementById('rDF').value||15;
+  var o=document.getElementById('revOut');
+  if(!v||!g){o.innerHTML='<div><span>Enter volume &amp; rate</span></div>';return;}
+  var min=v*df/g;
+  o.innerHTML='<div><span>Infusion time</span><b>'+Math.round(min)+'</b><span>min ('+(min/60).toFixed(1)+' hr)</span></div><div><span>Pump rate</span><b>'+Math.round(v/min*60)+'</b><span>mL/hr</span></div>';
+}
+function conc(){
+  var a=+document.getElementById('cAmt').value||0,u=document.getElementById('cUnit').value,vol=+document.getElementById('cVol').value||0,want=+document.getElementById('cWant').value||0;
+  var o=document.getElementById('concOut');
+  if(!a||!vol){o.innerHTML='<div><span>Enter vial amount &amp; volume</span></div>';return;}
+  var perMl=a/vol, html='<div><span>Concentration</span><b>'+round(perMl)+'</b><span>'+u+'/mL</span></div>';
+  if(want){ var ml=want/perMl; html+='<div><span>Volume for '+want+' '+u+'</span><b>'+round(ml)+'</b><span>mL</span></div>'; }
+  o.innerHTML=html;
+}
+function round(x){ return Math.abs(x)>=10?Math.round(x):(Math.round(x*100)/100); }
+drip();rev();conc();
+</script>
+</body></html>
