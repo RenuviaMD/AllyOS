@@ -1,0 +1,1341 @@
+{
+ "schema": "allyos-monitoring-map-v1",
+ "updated": "2026-06-24",
+ "note": "Lab/vital monitoring map DERIVED from each peptide's locked protocol monitoring text. Every item is extracted ONLY from that peptide's own monitoring lines (provenance in 'from'); no lab is added that is not present in the source text (no-invention guardrail). trigger_type baseline vs followup; evidence_level A where the peptide is FDA-approved, else C (monitoring-derived, not a label-grade per-lab claim). The lab-recommendation engine may only recommend labs that appear here. No doses, no prescribing.",
+ "agents_without_lab_monitoring": [
+  "ss-31",
+  "thymosin-alpha-1",
+  "selank",
+  "dsip",
+  "epitalon"
+ ],
+ "note_empty": "These agents name no laboratory test in their locked monitoring text (monitoring is functional/symptom/screen-based); no labs are recommended for them by design.",
+ "peptides": {
+  "semaglutide": {
+   "pathway": [
+    "GLP1_RA"
+   ],
+   "items": [
+    {
+     "lab": "A1c",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: wt/BMI, BP/HR, renal, glucose/A1c, meds, pregnancy, MTC/pancreatitis screen, mood",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: wt/BMI, BP/HR, renal, glucose/A1c, meds, pregnancy, MTC/pancreatitis screen, mood",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Renal function / eGFR",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: wt/BMI, BP/HR, renal, glucose/A1c, meds, pregnancy, MTC/pancreatitis screen, mood",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Blood pressure / HR",
+     "category": "vital",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: wt/BMI, BP/HR, renal, glucose/A1c, meds, pregnancy, MTC/pancreatitis screen, mood",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Blood pressure / HR",
+     "category": "vital",
+     "trigger_type": "followup",
+     "timepoint": "~4 wk & each up-titration",
+     "from": "~4 wk & each up-titration: tolerability, hydration, wt, HR/BP, adjust insulin/SU, mood",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "3 mo",
+     "from": "3 mo: weight response, tolerability, glucose",
+     "evidence_level": "A"
+    }
+   ],
+   "sources": [
+    "FDA Wegovy label (confirm current revision)",
+    "Wilding 2021 STEP-1, NEJM, doi:10.1056/NEJMoa2032183"
+   ]
+  },
+  "tirzepatide": {
+   "pathway": [
+    "GIP_GLP1_RA"
+   ],
+   "items": [
+    {
+     "lab": "A1c",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: wt/BMI, BP/HR, renal, glucose/A1c, pregnancy, MTC/pancreatitis screen (incl. oral-contraceptive review)",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: wt/BMI, BP/HR, renal, glucose/A1c, pregnancy, MTC/pancreatitis screen (incl. oral-contraceptive review)",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Renal function / eGFR",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: wt/BMI, BP/HR, renal, glucose/A1c, pregnancy, MTC/pancreatitis screen (incl. oral-contraceptive review)",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Blood pressure / HR",
+     "category": "vital",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: wt/BMI, BP/HR, renal, glucose/A1c, pregnancy, MTC/pancreatitis screen (incl. oral-contraceptive review)",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Blood pressure / HR",
+     "category": "vital",
+     "trigger_type": "followup",
+     "timepoint": "~4 wk & each up-titration",
+     "from": "~4 wk & each up-titration: adjust insulin/SU, HR/BP (reinforce contraception counseling after each increase)",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "A1c",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "3 mo, 6 mo + every 3–6 mo",
+     "from": "3 mo, 6 mo + every 3–6 mo: glucose/A1c, weight, renal",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "3 mo, 6 mo + every 3–6 mo",
+     "from": "3 mo, 6 mo + every 3–6 mo: glucose/A1c, weight, renal",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Renal function / eGFR",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "3 mo, 6 mo + every 3–6 mo",
+     "from": "3 mo, 6 mo + every 3–6 mo: glucose/A1c, weight, renal",
+     "evidence_level": "A"
+    }
+   ],
+   "sources": [
+    "FDA Zepbound label",
+    "Jastreboff 2022 SURMOUNT-1, NEJM, doi:10.1056/NEJMoa2206038"
+   ]
+  },
+  "liraglutide": {
+   "pathway": [
+    "GLP1_RA"
+   ],
+   "items": [
+    {
+     "lab": "A1c",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: wt/BMI, BP/HR, renal, glucose/A1c, pregnancy, MTC/pancreatitis screen; up-titration is weekly; ~4 wk after rea",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: wt/BMI, BP/HR, renal, glucose/A1c, pregnancy, MTC/pancreatitis screen; up-titration is weekly; ~4 wk after rea",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Renal function / eGFR",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: wt/BMI, BP/HR, renal, glucose/A1c, pregnancy, MTC/pancreatitis screen; up-titration is weekly; ~4 wk after rea",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Blood pressure / HR",
+     "category": "vital",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: wt/BMI, BP/HR, renal, glucose/A1c, pregnancy, MTC/pancreatitis screen; up-titration is weekly; ~4 wk after rea",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "A1c",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "6 mo + every 3–6 mo",
+     "from": "6 mo + every 3–6 mo: glucose/A1c, weight, renal",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "6 mo + every 3–6 mo",
+     "from": "6 mo + every 3–6 mo: glucose/A1c, weight, renal",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Renal function / eGFR",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "6 mo + every 3–6 mo",
+     "from": "6 mo + every 3–6 mo: glucose/A1c, weight, renal",
+     "evidence_level": "A"
+    }
+   ],
+   "sources": [
+    "FDA Saxenda label (note 16-wk/4% rule, weekly up-titration)",
+    "Pi-Sunyer 2015 SCALE, NEJM, doi:10.1056/NEJMoa1411892"
+   ]
+  },
+  "retatrutide": {
+   "pathway": [
+    "GIP_GLP1_glucagon_RA"
+   ],
+   "items": [
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "on therapy",
+     "from": "Standard GLP-1 continuous cadence (baseline, ~4 wk, 3 mo, 6 mo, ongoing): wt/BMI, GI tolerance, BP, HR (emphasized), ren",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Renal function / eGFR",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "on therapy",
+     "from": "Standard GLP-1 continuous cadence (baseline, ~4 wk, 3 mo, 6 mo, ongoing): wt/BMI, GI tolerance, BP, HR (emphasized), ren",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Blood pressure / HR",
+     "category": "vital",
+     "trigger_type": "followup",
+     "timepoint": "on therapy",
+     "from": "Standard GLP-1 continuous cadence (baseline, ~4 wk, 3 mo, 6 mo, ongoing): wt/BMI, GI tolerance, BP, HR (emphasized), ren",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "No FDA label — VERIFY",
+    "Jastreboff 2023 Phase-2, NEJM, doi:10.1056/NEJMoa2301972 (NCT04881760)"
+   ]
+  },
+  "sermorelin": {
+   "pathway": [
+    "GH_IGF1_axis"
+   ],
+   "items": [
+    {
+     "lab": "IGF-1",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1 and TSH/free T4 (treat hypothyroidism first), fasting glucose/A1c, CMP, lipids; exclude active ",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "A1c",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1 and TSH/free T4 (treat hypothyroidism first), fasting glucose/A1c, CMP, lipids; exclude active ",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1 and TSH/free T4 (treat hypothyroidism first), fasting glucose/A1c, CMP, lipids; exclude active ",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Lipid panel",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1 and TSH/free T4 (treat hypothyroidism first), fasting glucose/A1c, CMP, lipids; exclude active ",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "CMP / electrolytes",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1 and TSH/free T4 (treat hypothyroidism first), fasting glucose/A1c, CMP, lipids; exclude active ",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "TSH / thyroid",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1 and TSH/free T4 (treat hypothyroidism first), fasting glucose/A1c, CMP, lipids; exclude active ",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "Mo 1",
+     "from": "Mo 1: symptoms + glucose",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "IGF-1",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "Mo 3",
+     "from": "Mo 3: IGF-1 + glucose (titrate to upper-normal IGF-1)",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "Empiric — VERIFY",
+    "Walker 2006 (review)",
+    "Prakash & Goa 1999 (review)",
+    "Geref FDA history (discontinued)"
+   ]
+  },
+  "tesamorelin": {
+   "pathway": [
+    "GH_IGF1_axis"
+   ],
+   "items": [
+    {
+     "lab": "IGF-1",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, fasting glucose/A1c, exclude active malignancy and pituitary-axis disruption, pregnancy status",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "A1c",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, fasting glucose/A1c, exclude active malignancy and pituitary-axis disruption, pregnancy status",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, fasting glucose/A1c, exclude active malignancy and pituitary-axis disruption, pregnancy status",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "IGF-1",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "On therapy",
+     "from": "On therapy: periodic IGF-1 (consider discontinuation with persistent elevation), glucose/A1c, edema / carpal-tunnel symp",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "A1c",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "On therapy",
+     "from": "On therapy: periodic IGF-1 (consider discontinuation with persistent elevation), glucose/A1c, edema / carpal-tunnel symp",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "On therapy",
+     "from": "On therapy: periodic IGF-1 (consider discontinuation with persistent elevation), glucose/A1c, edema / carpal-tunnel symp",
+     "evidence_level": "A"
+    }
+   ],
+   "sources": [
+    "FDA LABEL (EGRIFTA / EGRIFTA SV prescribing information)",
+    "Falutz 2010, JCEM — ~15% VAT reduction vs placebo, glucose-neutral (doi:10.1210/jc.2010-0490)"
+   ]
+  },
+  "cjc-1295": {
+   "pathway": [
+    "GH_IGF1_axis"
+   ],
+   "items": [
+    {
+     "lab": "IGF-1",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1 and TSH/free T4 (treat thyroid first), fasting glucose, CMP, lipids; cancer screen current",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1 and TSH/free T4 (treat thyroid first), fasting glucose, CMP, lipids; cancer screen current",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Lipid panel",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1 and TSH/free T4 (treat thyroid first), fasting glucose, CMP, lipids; cancer screen current",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "CMP / electrolytes",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1 and TSH/free T4 (treat thyroid first), fasting glucose, CMP, lipids; cancer screen current",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "TSH / thyroid",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1 and TSH/free T4 (treat thyroid first), fasting glucose, CMP, lipids; cancer screen current",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "Mo 1",
+     "from": "Mo 1: symptoms + glucose",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "IGF-1",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "Mo 3",
+     "from": "Mo 3: IGF-1 + glucose (titrate to upper-normal IGF-1)",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "Empiric — VERIFY",
+    "Teichman 2006, JCEM (human DAC RCT; t½ ~6–8 d; doi:10.1210/jc.2005-1536)",
+    "Ionescu & Frohman 2006, JCEM (doi:10.1210/jc.2006-1702)",
+    "Jetté 2005, Endocrinology, rat (doi:10.1210/en.2004-1286)"
+   ]
+  },
+  "ipamorelin": {
+   "pathway": [
+    "GH_IGF1_axis"
+   ],
+   "items": [
+    {
+     "lab": "IGF-1",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1 and TSH/free T4, fasting glucose, CMP, lipids; cancer screen current",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1 and TSH/free T4, fasting glucose, CMP, lipids; cancer screen current",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Lipid panel",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1 and TSH/free T4, fasting glucose, CMP, lipids; cancer screen current",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "CMP / electrolytes",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1 and TSH/free T4, fasting glucose, CMP, lipids; cancer screen current",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "TSH / thyroid",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1 and TSH/free T4, fasting glucose, CMP, lipids; cancer screen current",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "Mo 1",
+     "from": "Mo 1: symptoms + glucose",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "IGF-1",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "Mo 3",
+     "from": "Mo 3: IGF-1 + glucose (titrate to upper-normal IGF-1)",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "Empiric — VERIFY",
+    "Raun 1998, Eur J Endocrinol (doi:10.1530/eje.0.1390552)",
+    "Beck 2014, Int J Colorectal Dis — negative human Ph2 (GI motility)"
+   ]
+  },
+  "bpc-157": {
+   "pathway": [
+    "repair"
+   ],
+   "items": [
+    {
+     "lab": "CBC",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: CBC, CMP; age-appropriate cancer screening current (gating)",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "CMP / electrolytes",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: CBC, CMP; age-appropriate cancer screening current (gating)",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "Empiric — VERIFY",
+    "Gwyer 2019, Cell Tissue Res (doi:10.1007/s00441-019-03016-8)",
+    "Seiwerth 2021, Front Pharmacol (doi:10.3389/fphar.2021.627533)",
+    "Sikiric 2020, Curr Pharm Des (doi:10.2174/1381612826666200424180139)",
+    "Trials: NCT02637284 (Ph1), NCT07437547 (Ph2 recruiting)",
+    "Compounding: removed from 503A Category 2 Apr 15 2026; PCAC review Jul 23–24 2026 — VERIFY"
+   ]
+  },
+  "tb-500": {
+   "pathway": [
+    "repair"
+   ],
+   "items": [
+    {
+     "lab": "CBC",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: CBC, CMP; age-appropriate cancer screening current (gating); retinal status if at risk",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "CMP / electrolytes",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: CBC, CMP; age-appropriate cancer screening current (gating); retinal status if at risk",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "Empiric — VERIFY",
+    "Esposito 2012 (doping analytics, doi:10.1002/dta.1402)",
+    "Ho 2012 (doi:10.1016/j.chroma.2012.09.043)",
+    "Consumer-fragment trial NCT07487363 (Ph1/2 recruiting)",
+    "Full-length Tβ4/RGN-259 is a distinct molecule — do not conflate"
+   ]
+  },
+  "cjc-ipamorelin-blend": {
+   "pathway": [
+    "GH_IGF1_axis"
+   ],
+   "items": [
+    {
+     "lab": "IGF-1",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1, TSH/free T4; fasting glucose, CMP, lipids",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1, TSH/free T4; fasting glucose, CMP, lipids",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Lipid panel",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1, TSH/free T4; fasting glucose, CMP, lipids",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "CMP / electrolytes",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1, TSH/free T4; fasting glucose, CMP, lipids",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "TSH / thyroid",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline (gating): IGF-1, TSH/free T4; fasting glucose, CMP, lipids",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "Mo 1",
+     "from": "Mo 1: symptoms / glucose",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "IGF-1",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "Mo 3",
+     "from": "Mo 3: IGF-1 + glucose (titrate to upper-normal)",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "Empiric (combination: no human trials — VERIFY)",
+    "Mayfield 2026, Am J Sports Med (doi:10.1177/03635465251357593)",
+    "Coutinho 2026, J Sports Med Phys Fitness (doi:10.23736/S0022-4707.26.17773-1)",
+    "Mavrych 2026, Front Aging (doi:10.3389/fragi.2026.1790247)"
+   ]
+  },
+  "ghrp-2": {
+   "pathway": [
+    "GH_IGF1_axis"
+   ],
+   "items": [
+    {
+     "lab": "IGF-1",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c; consider prolactin/cortisol",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "A1c",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c; consider prolactin/cortisol",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c; consider prolactin/cortisol",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "TSH / thyroid",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c; consider prolactin/cortisol",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Prolactin",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c; consider prolactin/cortisol",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Cortisol / ACTH",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c; consider prolactin/cortisol",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "IGF-1",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "On-treatment",
+     "from": "On-treatment: glucose/A1c, IGF-1 (upper-normal), edema/appetite",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "A1c",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "On-treatment",
+     "from": "On-treatment: glucose/A1c, IGF-1 (upper-normal), edema/appetite",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "On-treatment",
+     "from": "On-treatment: glucose/A1c, IGF-1 (upper-normal), edema/appetite",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "No DOI citations in the curated library (citations: []). Diagnostic agent abroad; 2024–26 literature diagnostic only. VERIFY — no fabricated reference."
+   ]
+  },
+  "ghrp-6": {
+   "pathway": [
+    "GH_IGF1_axis"
+   ],
+   "items": [
+    {
+     "lab": "IGF-1",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c; weight/appetite each visit",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "A1c",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c; weight/appetite each visit",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c; weight/appetite each visit",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "TSH / thyroid",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c; weight/appetite each visit",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "IGF-1",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "on therapy",
+     "from": "Glucose/A1c; IGF-1 (upper-normal)",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "A1c",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "on therapy",
+     "from": "Glucose/A1c; IGF-1 (upper-normal)",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "on therapy",
+     "from": "Glucose/A1c; IGF-1 (upper-normal)",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "No DOI citations in the curated library (citations: []). No human efficacy trials; 2024–26 preclinical. VERIFY — no fabricated citation."
+   ]
+  },
+  "hexarelin": {
+   "pathway": [
+    "GH_IGF1_axis"
+   ],
+   "items": [
+    {
+     "lab": "IGF-1",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c; cardiac history (CD36) — gate",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "A1c",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c; cardiac history (CD36) — gate",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c; cardiac history (CD36) — gate",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "TSH / thyroid",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c; cardiac history (CD36) — gate",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "IGF-1",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "On-treatment",
+     "from": "On-treatment: glucose/A1c, IGF-1 (upper-normal), watch for waning response and cardiac symptoms",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "A1c",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "On-treatment",
+     "from": "On-treatment: glucose/A1c, IGF-1 (upper-normal), watch for waning response and cardiac symptoms",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "On-treatment",
+     "from": "On-treatment: glucose/A1c, IGF-1 (upper-normal), watch for waning response and cardiac symptoms",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "No DOI citations in the curated library (citations: []). No approval/efficacy trials; 2024–26 preclinical/analytical. VERIFY — no fabricated citation."
+   ]
+  },
+  "mk-677": {
+   "pathway": [
+    "GH_IGF1_axis"
+   ],
+   "items": [
+    {
+     "lab": "IGF-1",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c, CMP, lipids; weight/edema/BP",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "A1c",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c, CMP, lipids; weight/edema/BP",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c, CMP, lipids; weight/edema/BP",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Lipid panel",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c, CMP, lipids; weight/edema/BP",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "CMP / electrolytes",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c, CMP, lipids; weight/edema/BP",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "TSH / thyroid",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c, CMP, lipids; weight/edema/BP",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Blood pressure / HR",
+     "category": "vital",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: IGF-1, TSH/free T4, fasting glucose/A1c, CMP, lipids; weight/edema/BP",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "IGF-1",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "Priority on-treatment checks",
+     "from": "Priority on-treatment checks: glucose/A1c and edema; IGF-1 upper-normal; periodic reassessment",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "A1c",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "Priority on-treatment checks",
+     "from": "Priority on-treatment checks: glucose/A1c and edema; IGF-1 upper-normal; periodic reassessment",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "Priority on-treatment checks",
+     "from": "Priority on-treatment checks: glucose/A1c and edema; IGF-1 upper-normal; periodic reassessment",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "Jaffry 2026, Cureus (atraumatic splenic-rupture case report w/ RAD-140). Glucose/insulin-resistance and edema/CHF effects documented per library. VERIFY; no fabrication."
+   ]
+  },
+  "aod-9604": {
+   "pathway": [
+    "metabolic"
+   ],
+   "items": [
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: CMP, fasting glucose, lipids, weight/waist",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Lipid panel",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: CMP, fasting glucose, lipids, weight/waist",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "CMP / electrolytes",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: CMP, fasting glucose, lipids, weight/waist",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Lipid panel",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "Mo 3",
+     "from": "Mo 3: composition / lipids",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "Empiric — VERIFY",
+    "Heffernan 2001, Endocrinology (preclinical, doi:10.1210/endo.142.12.8522)",
+    "Wilding 2004, Curr Opin Investig Drugs (review, PMID 15134286)"
+   ]
+  },
+  "mots-c": {
+   "pathway": [
+    "mitochondrial_metabolic"
+   ],
+   "items": [
+    {
+     "lab": "A1c",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: fasting glucose/A1c, HOMA-IR, CMP, lipids",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: fasting glucose/A1c, HOMA-IR, CMP, lipids",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "HOMA-IR",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: fasting glucose/A1c, HOMA-IR, CMP, lipids",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Lipid panel",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: fasting glucose/A1c, HOMA-IR, CMP, lipids",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "CMP / electrolytes",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: fasting glucose/A1c, HOMA-IR, CMP, lipids",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "A1c",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "on therapy",
+     "from": "Glucose/A1c & HOMA-IR at endpoint; reassess 1–6 months; malignancy precaution",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Fasting glucose",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "on therapy",
+     "from": "Glucose/A1c & HOMA-IR at endpoint; reassess 1–6 months; malignancy precaution",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "HOMA-IR",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "on therapy",
+     "from": "Glucose/A1c & HOMA-IR at endpoint; reassess 1–6 months; malignancy precaution",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "Empiric — VERIFY",
+    "Lee 2015, Cell Metab",
+    "Kumagai 2021",
+    "Zheng 2023 (DOIs not enumerated in dosing.md — confirm against library; no fabrication)"
+   ]
+  },
+  "ss-31": {
+   "pathway": [
+    "mitochondrial"
+   ],
+   "items": [],
+   "sources": [
+    "FDA LABEL (FORZINITY / elamipretide; Barth syndrome, Sept 2025) — VERIFY exact dosing against the PI",
+    "Karaa 2023, Neurology (MMPOWER-3 — missed its co-primary endpoints: 6MWT and fatigue)",
+    "Karaa 2020",
+    "Szeto 2014 (DOIs not enumerated — confirm against library)",
+    "Off-label dosing = empiric, NOT validated → VERIFY"
+   ]
+  },
+  "ghk-cu": {
+   "pathway": [
+    "repair"
+   ],
+   "items": [
+    {
+     "lab": "Copper / ceruloplasmin",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: exclude Wilson disease / copper overload; cancer screening current",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Liver function (LFTs)",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "Chronic systemic use",
+     "from": "Chronic systemic use: serum copper + ceruloplasmin (± LFTs)",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Copper / ceruloplasmin",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "Chronic systemic use",
+     "from": "Chronic systemic use: serum copper + ceruloplasmin (± LFTs)",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "Empiric — VERIFY (systemic)",
+    "Miller 2006 (doi:10.1001/archfaci.8.4.252)",
+    "Dymek 2023 (doi:10.3390/pharmaceutics15102485)",
+    "Ph2 topical NCT07437586"
+   ]
+  },
+  "thymosin-alpha-1": {
+   "pathway": [
+    "immune"
+   ],
+   "items": [],
+   "sources": [
+    "Empiric — VERIFY for US",
+    "Ancell 2001 (doi:10.1093/ajhp/58.10.886)",
+    "Zhou 2020 (doi:10.1136/bmjopen-2020-037231)",
+    "hep B NCT00291616 / NCT02366208; melanoma NCT00911443; colorectal NCT05086614"
+   ]
+  },
+  "kpv": {
+   "pathway": [
+    "immune"
+   ],
+   "items": [
+    {
+     "lab": "CRP / ESR / calprotectin",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: define target + markers (calprotectin/CRP); exclude active infection / transplant immunosuppression / severe a",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "Empiric — VERIFY",
+    "Kannengiesser 2008 (doi:10.1002/ibd.20334)",
+    "Viennois 2016 (doi:10.1016/j.jcmgh.2016.01.006)",
+    "Xiao 2017 (doi:10.1016/j.ymthe.2016.11.020)"
+   ]
+  },
+  "semax": {
+   "pathway": [
+    "neuro"
+   ],
+   "items": [
+    {
+     "lab": "Blood pressure / HR",
+     "category": "vital",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: psychiatric/seizure history, BP, nasal exam",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Blood pressure / HR",
+     "category": "vital",
+     "trigger_type": "followup",
+     "timepoint": "During pulse",
+     "from": "During pulse: BP / mood / sleep; cognitive response",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "Empiric — VERIFY",
+    "Gusev 1997 (PMID 11517472)",
+    "Dolotov 2006 (doi:10.1111/j.1471-4159.2006.03658.x)"
+   ]
+  },
+  "selank": {
+   "pathway": [
+    "neuro"
+   ],
+   "items": [],
+   "sources": [
+    "Empiric — VERIFY",
+    "Zozulia 2008 (PMID 18454096)",
+    "Medvedev 2014 (PMID 25176261)",
+    "Kasian 2017 (doi:10.1155/2017/5091027)"
+   ]
+  },
+  "cerebrolysin": {
+   "pathway": [
+    "neuro"
+   ],
+   "items": [
+    {
+     "lab": "Renal function / eGFR",
+     "category": "lab",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: renal function, allergy/atopy, seizure history, serotonergic/MAOI meds",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "Real RCT dosing",
+    "Muresanu 2016, Stroke (CARS trial, doi:10.1161/STROKEAHA.115.009416)",
+    "Gauthier 2015 (doi:10.1159/000377672)",
+    "MIXED: Zhang 2017 (doi:10.1155/2017/4191670) — no significant efficacy"
+   ]
+  },
+  "dsip": {
+   "pathway": [
+    "neuro"
+   ],
+   "items": [],
+   "sources": [
+    "Empiric — VERIFY",
+    "Graf & Kastin 1986 (doi:10.1016/0196-9781(86)90148-8)",
+    "Kovalzon & Strekalova 2006 (doi:10.1111/j.1471-4159.2006.03693.x)"
+   ]
+  },
+  "epitalon": {
+   "pathway": [
+    "longevity"
+   ],
+   "items": [],
+   "sources": [
+    "Empiric — VERIFY",
+    "Khavinson 2003 (doi:10.1023/a:1025493705728)",
+    "Khavinson 2002 (PMID 12374906)",
+    "(A mismatched Anisimov DOI was removed in audit — VERIFY any additional citation.)"
+   ]
+  },
+  "pt-141": {
+   "pathway": [
+    "melanocortin_axis"
+   ],
+   "items": [
+    {
+     "lab": "Blood pressure / HR",
+     "category": "vital",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: BP + CV risk (gating); oral-naltrexone review; pregnancy",
+     "evidence_level": "A"
+    },
+    {
+     "lab": "Blood pressure / HR",
+     "category": "vital",
+     "trigger_type": "followup",
+     "timepoint": "On therapy",
+     "from": "On therapy: BP; benefit reassessment ~8 wk; hyperpigmentation watch",
+     "evidence_level": "A"
+    }
+   ],
+   "sources": [
+    "FDA LABEL (Vyleesi / bremelanotide, 2019; acquired/generalized HSDD premenopausal women) — 1.75 mg SC PRN, max 1/24 h & ≤8/month"
+   ]
+  },
+  "kisspeptin-10": {
+   "pathway": [
+    "reproductive_HPG_axis"
+   ],
+   "items": [
+    {
+     "lab": "LH / FSH / sex steroids",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "on therapy",
+     "from": "Consider LH / sex-steroid checks",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "Empiric/community-protocol — VERIFY",
+    "Investigational; Phase 1 acute LH rise only; no validated SC regimen",
+    "No specific kisspeptin DOIs in library — VERIFY any citation"
+   ]
+  },
+  "gonadorelin": {
+   "pathway": [
+    "reproductive_HPG_axis"
+   ],
+   "items": [
+    {
+     "lab": "LH / FSH / sex steroids",
+     "category": "lab",
+     "trigger_type": "followup",
+     "timepoint": "Male",
+     "from": "Male: LH/FSH, total/free testosterone, semen params as indicated",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "Compounded only — VERIFY (male TRT-adjunct off-label/empiric); female pulsatile ovulation-induction has real evidence",
+    "Factrel/Lutrepulse discontinued",
+    "No specific gonadorelin DOIs in library — VERIFY any citation"
+   ]
+  },
+  "melanotan-ii": {
+   "pathway": [
+    "melanocortin_axis"
+   ],
+   "items": [
+    {
+     "lab": "Blood pressure / HR",
+     "category": "vital",
+     "trigger_type": "baseline",
+     "timepoint": "baseline",
+     "from": "Baseline: full-body skin/dermatologic exam (gating) + BP/CV (gating)",
+     "evidence_level": "C"
+    },
+    {
+     "lab": "Blood pressure / HR",
+     "category": "vital",
+     "trigger_type": "followup",
+     "timepoint": "On therapy",
+     "from": "On therapy: interval full-body skin surveillance; BP; priapism counseling; CK if symptomatic",
+     "evidence_level": "C"
+    }
+   ],
+   "sources": [
+    "Empiric / gray-market — VERIFY",
+    "NOT FDA-approved; ≠ afamelanotide (SCENESSE)",
+    "Case reports: melanoma and new/changing moles; nausea/flushing/priapism common",
+    "No specific Melanotan II DOIs in library (case-report-derived) — VERIFY any citation"
+   ]
+  }
+ }
+}

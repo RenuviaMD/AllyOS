@@ -88,11 +88,13 @@ exports.handler = async (event) => {
       type: "text",
       text:
         "GROUNDING — AllyOS LOCKED LIBRARY (physician-curated, 3-auditor-verified, JSON below). " +
-        "The library has five parts: 'detail' (per-peptide protocols), 'contra' (contraindications), " +
+        "The library has six parts: 'detail' (per-peptide protocols), 'contra' (contraindications), " +
         "'interactions' (concomitant-medication interaction layer keyed by medication and peptide class, with per-agent overrides), " +
         "'peptide_interactions' (an audited peptide-PEPTIDE / cross-agent stacking layer: agents with a 'stocked' flag, and rules with " +
-        "agent_slugs, interaction_type, direct_combination_evidence, confidence, action, and source_ids), and " +
-        "'patient_factor' (a label-anchored patient-factor rule engine: rules with trigger_logic over intake/lab/medication/comorbidity/symptom fields, a 'fires_in_formulary' flag, an action such as HOLD_FOR_CLINICIAN_REVIEW / REQUEST_MISSING_DATA, evidence_level, and source_ids). " +
+        "agent_slugs, interaction_type, direct_combination_evidence, confidence, action, and source_ids), " +
+        "'patient_factor' (a label-anchored patient-factor rule engine: rules with trigger_logic over intake/lab/medication/comorbidity/symptom fields, a 'fires_in_formulary' flag, an action such as HOLD_FOR_CLINICIAN_REVIEW / REQUEST_MISSING_DATA, evidence_level, and source_ids), and " +
+        "'monitoring' (a lab/vital monitoring map per peptide, each item with lab, category, trigger_type baseline/followup, and evidence_level, derived from the locked protocol monitoring). " +
+        "LAB NO-INVENTION RULE: when recommending labs, you may ONLY recommend labs that appear in the 'monitoring' map for the relevant peptide(s) (or a separately cited source). If a peptide is in monitoring.agents_without_lab_monitoring or has no item for a needed lab, say no peptide-specific lab is supported from the locked protocol and to consider condition-based evaluation only — do NOT invent a lab panel. " +
         "For ANY dose, reconstitution, titration, frequency, cycle, monitoring, discontinuation, " +
         "contraindication, drug-drug / concomitant-medication interaction, peptide-peptide stacking interaction, or protocol parameter, answer ONLY from this library. " +
         "When asked whether a medication can be combined with a peptide, resolve the peptide to its interaction class and check agent_overrides, then answer from the interactions layer citing its grade. " +
