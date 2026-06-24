@@ -2061,6 +2061,8 @@ var DETAIL={};function detailFor(s){return DETAIL[s]}
 fetch('../protocols/protocols-detail.json').then(function(r){return r.json()}).then(function(d){DETAIL=d.peptides||{};render();}).catch(function(){});
 var IX={};function ixClassOf(slug){var ac=IX.agent_classes||{};for(var c in ac){if((ac[c].members||[]).indexOf(slug)>-1)return c;}return null;}
 fetch('../protocols/interactions.json').then(function(r){return r.json()}).then(function(d){IX=d||{};render();}).catch(function(){});
+var PIX={};
+fetch('../protocols/peptide-interactions.json').then(function(r){return r.json()}).then(function(d){PIX=d||{};render();}).catch(function(){});
 
 /* ───────── structured intake vocab (pills) ───────── */
 var SEX=['Female','Male'];
@@ -2176,6 +2178,36 @@ function interactionHTML(){
   }).join('');
   return '<div class="lbl" style="margin:14px 0 2px">Concomitant-medication interactions '
     +'<span style="font-weight:400;color:var(--faint);font-size:10.5px">— from your locked library · decision-support only, VERIFY</span></div>'
+    +'<div class="ixwrap">'+rows+'</div>';
+}
+
+/* peptide-peptide (cross-agent stacking) — resolved from the locked peptide-interactions.json */
+function pixActionColor(a){if(a==='FLAG_FOR_PROVIDER_REVIEW')return 'var(--warn)';if(a==='LANGUAGE_GUARDRAIL')return 'var(--faint)';return 'var(--teal)';}
+function crossAgentFindings(){
+  var out=[],rules=(PIX.rules||[]),sel=S.sel||[];
+  if(sel.length<2)return out;
+  rules.forEach(function(r){
+    if(!r.fires_in_formulary)return;
+    var matched=(r.agent_slugs||[]).filter(function(s){return sel.indexOf(s)>-1;});
+    if(matched.length<2)return;
+    out.push({names:matched.map(function(s){var p=byslug(s)||{};return p.name||s;}),
+      type:r.interaction_type,basis:r.evidence_basis,action:r.action,ai:r.ai_action,
+      direct:r.direct_combination_evidence});
+  });
+  return out;
+}
+function crossAgentHTML(){
+  var f=crossAgentFindings();if(!f.length)return '';
+  var rows=f.map(function(x){var col=pixActionColor(x.action);
+    return '<div class="ixrow" style="border-left-color:'+col+'">'
+      +'<div class="ixh"><b>'+x.names.map(esc).join('</b><span class="ixx">+</span><b>')+'</b>'
+      +'<span style="margin-left:auto;font-size:10px;color:'+col+'">'+esc((x.action||'').replace(/_/g,' '))+'</span></div>'
+      +'<div class="ixeff"><b>'+esc((x.type||'').replace(/_/g,' '))+(x.direct?' · direct human combination evidence':' · inference, no direct trial')+'</b> — '+esc(x.basis||'')+'</div>'
+      +'<div class="ixact"><span class="ixlab">Note</span>'+esc(x.ai||'')+'</div>'
+      +'</div>';
+  }).join('');
+  return '<div class="lbl" style="margin:14px 0 2px">Peptide-peptide (stacking) interactions '
+    +'<span style="font-weight:400;color:var(--faint);font-size:10.5px">— locked cross-agent library · decision-support only, VERIFY</span></div>'
     +'<div class="ixwrap">'+rows+'</div>';
 }
 
@@ -2332,6 +2364,7 @@ function stepPlan(){
    + docsBlock()
    + conflictAlerts()
    + interactionHTML()
+   + crossAgentHTML()
    + (advs.length?'<div class="lbl" style="margin:8px 0 2px">Advisories &amp; considerations</div><div class="advs">'+advs.map(advCard).join('')+'</div>':'')
    + recLabsHTML()
    + contraHTML()
@@ -2399,12 +2432,17 @@ function noteInteractionLines(){var f=interactionFindings();if(!f.length)return 
   return '<h4>Concomitant-medication interactions <span style="font-weight:400;font-size:11px;color:var(--muted)">(locked library · grade · VERIFY)</span></h4><ul>'
     +f.map(function(x){return '<li><b>'+esc(x.agent)+' + '+esc(x.med)+'</b> ['+esc(x.grade||'?')+'] — '+esc(x.effect)+' <i>Action:</i> '+esc(x.action)
       +(x.override?' <i>Agent-specific:</i> '+esc(x.override):'')+'</li>';}).join('')+'</ul>';}
+function noteCrossAgentLines(){var f=crossAgentFindings();if(!f.length)return '';
+  return '<h4>Peptide-peptide (stacking) interactions <span style="font-weight:400;font-size:11px;color:var(--muted)">(locked cross-agent library · VERIFY)</span></h4><ul>'
+    +f.map(function(x){return '<li><b>'+x.names.map(esc).join(' + ')+'</b> — '+esc((x.type||'').replace(/_/g,' '))
+      +(x.direct?' (direct human combination evidence)':' (inference, no direct trial)')+'. '+esc(x.ai||'')+'</li>';}).join('')+'</ul>';}
 function docNote(){var p=S.patient;return '<h3>Clinical encounter note</h3><div class="docsub">'+pinfo()+'  ·  '+new Date().toLocaleDateString()+'</div>'
   +'<h4>Indication</h4><p>'+(plist(p.goals)||'—')+'</p>'
   +'<h4>Pertinent data</h4><p>BMI '+(p.bmi||'—')+' · eGFR '+(p.egfr||'—')+' · A1c '+(p.a1c||'—')+'% · Comorbid: '+(plist(p.comorbid)||'none')+' · Meds: '+(plist(p.meds)||'none recorded')+'</p>'
   +'<h4>Contraindication screen</h4><p>'+(plist(p.flags)||'No red flags reported')+'</p>'
   + (conflicts().length?'<p style="color:#f0a59d"><b>Conflicts:</b> '+conflicts().join('; ')+'</p>':'')
   + noteInteractionLines()
+  + noteCrossAgentLines()
   +'<h4>Plan</h4><ul>'+agentLines()+'</ul>'
   + labLines()
   + (S.sel.some(function(s){return detailFor(s)})?'<h4>Protocol reference — titration &amp; monitoring</h4>'+noteProtocolDetail():'')
@@ -2514,7 +2552,7 @@ document.getElementById('allySend').onclick=function(){
   if(p.comorbid&&p.comorbid.length)c.push('comorbid: '+p.comorbid.join(', '));
   if(p.meds&&p.meds.length)c.push('meds: '+p.meds.join(', '));
   var ctx=c.length?'De-identified context — '+c.join('; ')+'.':'';
-  fetch('/.netlify/functions/ally',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:q,context:ctx,library:{detail:DETAIL,contra:CONTRA,interactions:IX}})})
+  fetch('/.netlify/functions/ally',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:q,context:ctx,library:{detail:DETAIL,contra:CONTRA,interactions:IX,peptide_interactions:PIX}})})
    .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
    .then(function(res){var el=document.getElementById(id);var t;
      if(res.ok&&res.j.answer){t='<div style="font-size:10px;color:var(--ok);margin-bottom:5px">\u{1F4DA} grounded in your locked library</div><p style="font-size:13px;line-height:1.55;white-space:pre-wrap">'+esc(res.j.answer)+'</p>';}
