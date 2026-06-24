@@ -1,0 +1,3904 @@
+{
+ "schema": "allyos-patient-factor-rules-v1",
+ "updated": "2026-06-24",
+ "note": "Patient-factor modifier engine: rules keyed to intake/lab/medication/comorbidity/symptom/procedure fields that modify risk classification for a candidate peptide pathway. Scope: lock-all / fire-formulary — each rule carries fires_in_formulary; rules whose agent groups have no stocked member (amylin, exenatide, desmopressin/ADH, PTH) are retained as informational and never fire. Single-visit threshold logic only (no longitudinal/trend firing). No doses, no prescribing, no regulatory status. Decision-support; the provider decides.",
+ "grades": {
+  "A": "label/guideline/direct human evidence",
+  "B": "human pathway/signal evidence, not exact combo/subgroup",
+  "C": "mechanistic/indirect/limited human evidence",
+  "D": "evidence gap / methodological guardrail"
+ },
+ "non_formulary_groups": [
+  "amylin_analog",
+  "exendin_based_GLP1_RA",
+  "vasopressin_ADH_axis",
+  "PTH_PTHrP_axis"
+ ],
+ "rules": [
+  {
+   "rule_id": "PFM_MISSING_001",
+   "name": "Missing renal function before renal/water-clearance-sensitive pathway",
+   "domain": "labs_missing",
+   "rule_type": "missing_data_gate",
+   "applies_to_agent_groups": [
+    "exendin_based_GLP1_RA",
+    "vasopressin_ADH_axis",
+    "PTH_PTHrP_axis",
+    "GH_IGF1_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "tesamorelin"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "any_missing": [
+     "eGFR",
+     "serum_creatinine"
+    ],
+    "and_candidate_group_in": [
+     "exendin_based_GLP1_RA",
+     "vasopressin_ADH_axis",
+     "PTH_PTHrP_axis",
+     "GH_IGF1_axis"
+    ]
+   },
+   "risk_signal": "renal_data_required_for_risk_classification",
+   "severity": "yellow",
+   "action": "REQUEST_MISSING_DATA",
+   "provider_behavior": "Do not classify renal-risk pathways as low risk when eGFR/creatinine are missing; request renal function data or hold final risk classification for clinician review.",
+   "rationale": "Renal thresholds appear in exenatide, desmopressin, teriparatide, and related labeling; absent renal data prevents accurate rule firing.",
+   "evidence_level": "A",
+   "evidence_directness": "operational gate supported by label-based renal rules",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_BYETTA_DAILYMED_EXENATIDE",
+    "SRC_DESMOPRESSIN_PFIZER_INJECTION",
+    "SRC_NOCDURNA_FDA_DESMOPRESSIN",
+    "SRC_TERIPARATIDE_DAILYMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_MISSING_002",
+   "name": "Missing serum sodium before vasopressin/desmopressin-axis pathway",
+   "domain": "labs_missing",
+   "rule_type": "missing_data_gate",
+   "applies_to_agent_groups": [
+    "vasopressin_ADH_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "any_missing": [
+     "serum_sodium"
+    ],
+    "and_candidate_group_in": [
+     "vasopressin_ADH_axis"
+    ]
+   },
+   "risk_signal": "sodium_data_required",
+   "severity": "yellow_to_red",
+   "action": "REQUEST_MISSING_DATA_OR_HOLD_FOR_REVIEW",
+   "provider_behavior": "Do not classify desmopressin/ADH-axis agents as low risk when sodium is missing; request sodium or clinician review.",
+   "rationale": "Desmopressin labeling centers on hyponatremia risk and sodium monitoring.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label supported",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_NOCDURNA_FDA_DESMOPRESSIN",
+    "SRC_DESMOPRESSIN_PFIZER_INJECTION"
+   ]
+  },
+  {
+   "rule_id": "PFM_MISSING_003",
+   "name": "Missing diabetes control metrics before incretin/amylin or GH-axis pathway",
+   "domain": "labs_missing",
+   "rule_type": "missing_data_gate",
+   "applies_to_agent_groups": [
+    "GLP1_RA",
+    "GIP_GLP1_RA",
+    "GIP_GLP1_glucagon_RA",
+    "amylin_analog",
+    "GH_IGF1_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "cjc-1295",
+    "ipamorelin",
+    "retatrutide",
+    "semaglutide",
+    "sermorelin",
+    "tesamorelin",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "any_missing": [
+     "A1c",
+     "fasting_glucose"
+    ],
+    "and_candidate_group_in": [
+     "GLP1_RA",
+     "GIP_GLP1_RA",
+     "GIP_GLP1_glucagon_RA",
+     "amylin_analog",
+     "GH_IGF1_axis"
+    ]
+   },
+   "risk_signal": "glycemic_baseline_required",
+   "severity": "yellow",
+   "action": "REQUEST_MISSING_DATA",
+   "provider_behavior": "Request A1c and/or glucose baseline before final glycemic-risk classification.",
+   "rationale": "Incretin/amylin agents and GH-axis agents can intersect with glycemic control, hypoglycemia risk, or glucose intolerance.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for labels; pathway extrapolation for research agents",
+   "confidence": "high_for_labeled_agents_moderate_for_research",
+   "source_ids": [
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE",
+    "SRC_SYMLIN_DAILYMED_PRAMLINTIDE",
+    "SRC_EGRIFTA_FDA_TESAMORELIN",
+    "SRC_HUMATROPE_DAILYMED_SOMATROPIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_MISSING_004",
+   "name": "Missing medication list before medication-interaction-sensitive pathway",
+   "domain": "medications_missing",
+   "rule_type": "missing_data_gate",
+   "applies_to_agent_groups": [
+    "GLP1_RA",
+    "GIP_GLP1_RA",
+    "amylin_analog",
+    "vasopressin_ADH_axis",
+    "melanocortin_axis",
+    "PTH_PTHrP_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "pt-141",
+    "semaglutide",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "any_missing": [
+     "current_medication_list"
+    ],
+    "and_candidate_group_in": [
+     "GLP1_RA",
+     "GIP_GLP1_RA",
+     "amylin_analog",
+     "vasopressin_ADH_axis",
+     "melanocortin_axis",
+     "PTH_PTHrP_axis"
+    ]
+   },
+   "risk_signal": "medication_interaction_screen_incomplete",
+   "severity": "yellow",
+   "action": "REQUEST_MISSING_DATA",
+   "provider_behavior": "Do not clear interaction-sensitive pathways when medication list is absent; request current medications, including OTC NSAIDs and supplements.",
+   "rationale": "Several label-supported rules depend on concomitant insulin/SU, hyponatremia-risk drugs, naltrexone, oral contraceptives, digoxin, and oral drug absorption.",
+   "evidence_level": "A",
+   "evidence_directness": "operational gate supported by label-based interaction rules",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE",
+    "SRC_SYMLIN_DAILYMED_PRAMLINTIDE",
+    "SRC_NOCDURNA_FDA_DESMOPRESSIN",
+    "SRC_VYLEESI_FDA_BREMELANOTIDE",
+    "SRC_TERIPARATIDE_DAILYMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_MISSING_005",
+   "name": "Missing GI history before delayed-gastric-emptying pathway",
+   "domain": "history_missing",
+   "rule_type": "missing_data_gate",
+   "applies_to_agent_groups": [
+    "GLP1_RA",
+    "GIP_GLP1_RA",
+    "GIP_GLP1_glucagon_RA",
+    "amylin_analog",
+    "melanocortin_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "pt-141",
+    "retatrutide",
+    "semaglutide",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "any_missing": [
+     "gastroparesis_history",
+     "severe_GI_disease_history"
+    ],
+    "and_candidate_group_in": [
+     "GLP1_RA",
+     "GIP_GLP1_RA",
+     "GIP_GLP1_glucagon_RA",
+     "amylin_analog",
+     "melanocortin_axis"
+    ]
+   },
+   "risk_signal": "GI_motility_data_required",
+   "severity": "yellow",
+   "action": "REQUEST_MISSING_DATA",
+   "provider_behavior": "Ask for gastroparesis/severe GI disease history before classifying delayed-gastric-emptying pathway risk.",
+   "rationale": "Pramlintide and tirzepatide labels specifically address gastroparesis/severe GI disease; GLP-1 and melanocortin labeling include gastric emptying/oral absorption language.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for pramlintide/tirzepatide/bremelanotide; class/pathway inference for investigational agents",
+   "confidence": "high_for_labeled_agents_moderate_for_investigational",
+   "source_ids": [
+    "SRC_SYMLIN_DAILYMED_PRAMLINTIDE",
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE",
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_VYLEESI_FDA_BREMELANOTIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_MISSING_006",
+   "name": "Missing endocrine tumor/family history before incretin pathway",
+   "domain": "history_missing",
+   "rule_type": "missing_data_gate",
+   "applies_to_agent_groups": [
+    "GLP1_RA",
+    "GIP_GLP1_RA",
+    "GIP_GLP1_glucagon_RA"
+   ],
+   "applies_to_agents_mapped": [
+    "liraglutide",
+    "retatrutide",
+    "semaglutide",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "any_missing": [
+     "personal_or_family_MTC",
+     "MEN2_history"
+    ],
+    "and_candidate_group_in": [
+     "GLP1_RA",
+     "GIP_GLP1_RA",
+     "GIP_GLP1_glucagon_RA"
+    ]
+   },
+   "risk_signal": "MTC_MEN2_screen_incomplete",
+   "severity": "yellow",
+   "action": "REQUEST_MISSING_DATA",
+   "provider_behavior": "Request MTC/MEN2 history before final risk classification for GLP-1/GIP incretin pathways.",
+   "rationale": "Semaglutide and tirzepatide labels include MTC/MEN2 contraindication language.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for semaglutide/tirzepatide; class/pathway inference for retatrutide",
+   "confidence": "high_for_labeled_agents_moderate_for_retatrutide",
+   "source_ids": [
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_MISSING_007",
+   "name": "Missing malignancy history before GH/IGF or regenerative/angiogenic pathway",
+   "domain": "history_missing",
+   "rule_type": "missing_data_gate",
+   "applies_to_agent_groups": [
+    "GH_IGF1_axis",
+    "wound_repair_regenerative_axis",
+    "immune_modulating_research_peptides"
+   ],
+   "applies_to_agents_mapped": [
+    "bpc-157",
+    "cjc-1295",
+    "ghk-cu",
+    "ghrp-2",
+    "ghrp-6",
+    "hexarelin",
+    "ipamorelin",
+    "sermorelin",
+    "tb-500",
+    "tesamorelin"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "any_missing": [
+     "active_malignancy",
+     "prior_malignancy",
+     "current_cancer_treatment"
+    ],
+    "and_candidate_group_in": [
+     "GH_IGF1_axis",
+     "wound_repair_regenerative_axis",
+     "immune_modulating_research_peptides"
+    ]
+   },
+   "risk_signal": "oncology_context_required",
+   "severity": "yellow_to_red",
+   "action": "REQUEST_MISSING_DATA_OR_HOLD_FOR_REVIEW",
+   "provider_behavior": "Do not provide low-risk wording for GH/IGF or regenerative/immune-modulating pathways without malignancy history.",
+   "rationale": "Tesamorelin/somatropin labels support strong malignancy-context rules; regenerative/angiogenic peptide claims are lower-confidence and should not be made without oncology context.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for tesamorelin/somatropin; low-confidence mechanistic for regenerative research peptides",
+   "confidence": "high_for_GH_axis_moderate_to_low_for_regenerative_peptides",
+   "source_ids": [
+    "SRC_EGRIFTA_FDA_TESAMORELIN",
+    "SRC_HUMATROPE_DAILYMED_SOMATROPIN",
+    "SRC_BPC157_REVIEW_PUBMED",
+    "SRC_GHK_CU_REVIEW",
+    "SRC_LL37_REVIEW"
+   ]
+  },
+  {
+   "rule_id": "PFM_MISSING_008",
+   "name": "Missing pregnancy/lactation status before reproductive, metabolic, GH, ADH, PTH, or research pathway",
+   "domain": "history_missing",
+   "rule_type": "missing_data_gate",
+   "applies_to_agent_groups": [
+    "reproductive_HPG_axis",
+    "GLP1_RA",
+    "GIP_GLP1_RA",
+    "GH_IGF1_axis",
+    "vasopressin_ADH_axis",
+    "PTH_PTHrP_axis",
+    "research_peptides_general"
+   ],
+   "applies_to_agents_mapped": [
+    "dsip",
+    "epitalon",
+    "kisspeptin-10",
+    "mots-c",
+    "pt-141",
+    "selank",
+    "semaglutide",
+    "semax",
+    "ss-31",
+    "tesamorelin",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "any_missing": [
+     "pregnancy_status",
+     "lactation_status"
+    ],
+    "and_candidate_group_in": [
+     "reproductive_HPG_axis",
+     "GLP1_RA",
+     "GIP_GLP1_RA",
+     "GH_IGF1_axis",
+     "vasopressin_ADH_axis",
+     "PTH_PTHrP_axis",
+     "research_peptides_general"
+    ]
+   },
+   "risk_signal": "pregnancy_lactation_context_required",
+   "severity": "yellow_to_red",
+   "action": "REQUEST_MISSING_DATA_OR_HOLD_FOR_REVIEW",
+   "provider_behavior": "Request pregnancy/lactation status before final risk classification; do not infer absence.",
+   "rationale": "Multiple labels include pregnancy-related risk language; for investigational/research peptides, human pregnancy/lactation data are commonly insufficient.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for labeled agents; evidence-gap rule for research peptides",
+   "confidence": "high_for_data_gate",
+   "source_ids": [
+    "SRC_VYLEESI_FDA_BREMELANOTIDE",
+    "SRC_EGRIFTA_FDA_TESAMORELIN",
+    "SRC_TERIPARATIDE_DAILYMED",
+    "SRC_NOCDURNA_FDA_DESMOPRESSIN",
+    "SRC_KISSPEPTIN_REVIEW",
+    "SRC_MOTSC_REVIEW"
+   ]
+  },
+  {
+   "rule_id": "PFM_MISSING_009",
+   "name": "Missing upcoming anesthesia/deep-sedation procedure status before incretin/amylin pathway",
+   "domain": "procedure_status_missing",
+   "rule_type": "missing_data_gate",
+   "applies_to_agent_groups": [
+    "GLP1_RA",
+    "GIP_GLP1_RA",
+    "GIP_GLP1_glucagon_RA",
+    "amylin_analog"
+   ],
+   "applies_to_agents_mapped": [
+    "retatrutide",
+    "semaglutide",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "any_missing": [
+     "upcoming_anesthesia_or_deep_sedation"
+    ],
+    "and_candidate_group_in": [
+     "GLP1_RA",
+     "GIP_GLP1_RA",
+     "GIP_GLP1_glucagon_RA",
+     "amylin_analog"
+    ]
+   },
+   "risk_signal": "procedure_aspiration_context_required",
+   "severity": "yellow",
+   "action": "REQUEST_MISSING_DATA",
+   "provider_behavior": "Ask about upcoming general anesthesia/deep sedation before final delayed-gastric-emptying risk classification.",
+   "rationale": "Tirzepatide labeling includes pulmonary aspiration reports during general anesthesia or deep sedation and delayed gastric emptying language.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for tirzepatide; pathway inference for GLP-1/amylin/polyagonist agents",
+   "confidence": "high_for_tirzepatide_moderate_for_pathway",
+   "source_ids": [
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE",
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_SYMLIN_DAILYMED_PRAMLINTIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_MISSING_010",
+   "name": "Missing calcium/bone-risk history before PTH/PTHrP pathway",
+   "domain": "labs_or_history_missing",
+   "rule_type": "missing_data_gate",
+   "applies_to_agent_groups": [
+    "PTH_PTHrP_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "any_missing": [
+     "serum_calcium",
+     "urolithiasis_history",
+     "Paget_disease",
+     "bone_metastases_or_skeletal_malignancy",
+     "skeletal_radiation_history"
+    ],
+    "and_candidate_group_in": [
+     "PTH_PTHrP_axis"
+    ]
+   },
+   "risk_signal": "calcium_bone_risk_screen_incomplete",
+   "severity": "yellow_to_red",
+   "action": "REQUEST_MISSING_DATA_OR_HOLD_FOR_REVIEW",
+   "provider_behavior": "Request calcium and bone-risk history before final PTH/PTHrP pathway risk classification.",
+   "rationale": "Teriparatide labeling supports specific calcium, urolithiasis, skeletal malignancy/radiation, Paget, and osteosarcoma-risk screening concepts.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for teriparatide; class inference for PTHrP analogues",
+   "confidence": "high_for_teriparatide_moderate_for_class",
+   "source_ids": [
+    "SRC_TERIPARATIDE_DAILYMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_METABOLIC_001",
+   "name": "Insulin or insulin secretagogue with GLP-1/GIP/amylin pathway",
+   "domain": "medication_class",
+   "rule_type": "medication_class_modifier",
+   "applies_to_agent_groups": [
+    "GLP1_RA",
+    "GIP_GLP1_RA",
+    "GIP_GLP1_glucagon_RA",
+    "amylin_analog"
+   ],
+   "applies_to_agents_mapped": [
+    "liraglutide",
+    "retatrutide",
+    "semaglutide",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "medications.class",
+      "operator": "intersects",
+      "value": [
+       "insulin",
+       "sulfonylurea",
+       "meglitinide"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "GLP1_RA",
+       "GIP_GLP1_RA",
+       "GIP_GLP1_glucagon_RA",
+       "amylin_analog"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "hypoglycemia_risk_overlap",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag increased hypoglycemia risk; do not classify as low risk without clinician review and a glucose-monitoring concept.",
+   "rationale": "GLP-1/GIP and amylin pathways have low intrinsic hypoglycemia risk in some contexts, but labels support increased hypoglycemia risk when combined with insulin or insulin secretagogues.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for labeled semaglutide/tirzepatide/pramlintide; pathway inference for retatrutide/cagrilintide",
+   "confidence": "high_for_labeled_agents_moderate_for_investigational",
+   "source_ids": [
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE",
+    "SRC_SYMLIN_DAILYMED_PRAMLINTIDE",
+    "SRC_CAGRILINTIDE_SEMAGLUTIDE_PUBMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_METABOLIC_002",
+   "name": "Pramlintide plus insulin severe hypoglycemia gate",
+   "domain": "medication_class",
+   "rule_type": "medication_class_modifier",
+   "applies_to_agent_groups": [
+    "amylin_analog"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "candidate.agent",
+      "operator": "equals",
+      "value": "pramlintide"
+     },
+     {
+      "field": "medications.class",
+      "operator": "contains",
+      "value": "insulin"
+     }
+    ]
+   },
+   "risk_signal": "severe_hypoglycemia_boxed_warning",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate pramlintide-insulin combinations for clinician review; never present as routine low-risk logic.",
+   "rationale": "Pramlintide labeling contains boxed warning language for severe hypoglycemia with insulin.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_SYMLIN_DAILYMED_PRAMLINTIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_METABOLIC_003",
+   "name": "Hypoglycemia unawareness with amylin pathway",
+   "domain": "comorbidity",
+   "rule_type": "comorbidity_modifier",
+   "applies_to_agent_groups": [
+    "amylin_analog"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history.hypoglycemia_unawareness",
+      "operator": "equals",
+      "value": true
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "contains",
+      "value": "amylin_analog"
+     }
+    ]
+   },
+   "risk_signal": "hypoglycemia_unawareness_risk",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate; do not issue nonchalant or low-risk language for amylin-pathway agents when hypoglycemia unawareness is present.",
+   "rationale": "Pramlintide labeling lists hypoglycemia unawareness as a contraindication; extension to non-pramlintide amylin analogues is a conservative pathway inference.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for pramlintide; extrapolated for cagrilintide",
+   "confidence": "high_for_pramlintide_moderate_for_cagrilintide",
+   "source_ids": [
+    "SRC_SYMLIN_DAILYMED_PRAMLINTIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_METABOLIC_004",
+   "name": "Recurrent severe hypoglycemia history with amylin/incretin pathway and glucose-lowering meds",
+   "domain": "history_plus_medications",
+   "rule_type": "history_modifier",
+   "applies_to_agent_groups": [
+    "amylin_analog",
+    "GLP1_RA",
+    "GIP_GLP1_RA"
+   ],
+   "applies_to_agents_mapped": [
+    "semaglutide",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history.recurrent_severe_hypoglycemia",
+      "operator": "equals",
+      "value": true
+     },
+     {
+      "field": "medications.class",
+      "operator": "intersects",
+      "value": [
+       "insulin",
+       "sulfonylurea",
+       "meglitinide"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "amylin_analog",
+       "GLP1_RA",
+       "GIP_GLP1_RA"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "recurrent_severe_hypoglycemia_context",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate for clinician review; patient history suggests higher consequence if glycemic therapy is intensified or gastric emptying changes.",
+   "rationale": "Pramlintide labeling excludes recurrent severe hypoglycemia; incretin labels support hypoglycemia risk with insulin/secretagogues.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for pramlintide and GLP-1/GIP labels; class inference for cagrilintide",
+   "confidence": "high_to_moderate",
+   "source_ids": [
+    "SRC_SYMLIN_DAILYMED_PRAMLINTIDE",
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_METABOLIC_005",
+   "name": "High HbA1c context with pramlintide",
+   "domain": "A1c",
+   "rule_type": "lab_threshold_modifier",
+   "applies_to_agent_groups": [
+    "amylin_analog"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "labs.A1c",
+      "operator": ">",
+      "value": 9.0
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "equals",
+      "value": "pramlintide"
+     }
+    ]
+   },
+   "risk_signal": "pramlintide_patient_selection_signal",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag as label-based patient-selection concern for clinician review.",
+   "rationale": "Pramlintide labeling includes patient-selection language involving HbA1c above 9%.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_SYMLIN_DAILYMED_PRAMLINTIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_METABOLIC_006",
+   "name": "Gastroparesis with pramlintide or amylin analogue",
+   "domain": "GI_history",
+   "rule_type": "comorbidity_modifier",
+   "applies_to_agent_groups": [
+    "amylin_analog"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history.confirmed_gastroparesis",
+      "operator": "equals",
+      "value": true
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "contains",
+      "value": "amylin_analog"
+     }
+    ]
+   },
+   "risk_signal": "delayed_gastric_emptying_risk",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate; do not present amylin pathway as low-risk in confirmed gastroparesis.",
+   "rationale": "Pramlintide labeling contraindicates confirmed gastroparesis; cagrilintide extension is pathway-based rather than direct.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for pramlintide; extrapolated for cagrilintide",
+   "confidence": "high_for_pramlintide_moderate_for_cagrilintide",
+   "source_ids": [
+    "SRC_SYMLIN_DAILYMED_PRAMLINTIDE",
+    "SRC_CAGRILINTIDE_SEMAGLUTIDE_PUBMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_METABOLIC_007",
+   "name": "Severe gastroparesis or severe GI disease with tirzepatide/GLP-1 pathway",
+   "domain": "GI_history",
+   "rule_type": "comorbidity_modifier",
+   "applies_to_agent_groups": [
+    "GIP_GLP1_RA",
+    "GLP1_RA",
+    "GIP_GLP1_glucagon_RA"
+   ],
+   "applies_to_agents_mapped": [
+    "retatrutide",
+    "semaglutide",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history.severe_gastroparesis_or_severe_GI_disease",
+      "operator": "equals",
+      "value": true
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "GIP_GLP1_RA",
+       "GLP1_RA",
+       "GIP_GLP1_glucagon_RA"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "severe_GI_motility_context",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate; delayed-gastric-emptying pathway can be clinically relevant in severe GI disease.",
+   "rationale": "Tirzepatide labeling states it is not recommended in severe gastroparesis and includes severe GI disease warnings; semaglutide label supports delayed gastric emptying language.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for tirzepatide; class/pathway inference for semaglutide/retatrutide",
+   "confidence": "high_for_tirzepatide_moderate_for_other_pathway_agents",
+   "source_ids": [
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE",
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_RETATRUTIDE_PUBMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_METABOLIC_008",
+   "name": "Oral medication absorption caution with delayed-gastric-emptying agents",
+   "domain": "medication_class",
+   "rule_type": "medication_class_modifier",
+   "applies_to_agent_groups": [
+    "GLP1_RA",
+    "GIP_GLP1_RA",
+    "amylin_analog",
+    "melanocortin_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "pt-141",
+    "semaglutide",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "medications.requires_threshold_or_rapid_absorption",
+      "operator": "equals",
+      "value": true
+     },
+     {
+      "field": "candidate.pathway",
+      "operator": "contains_any",
+      "value": [
+       "delayed_gastric_emptying"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "oral_absorption_timing_risk",
+   "severity": "yellow",
+   "action": "CAUTION_DOCUMENT_RATIONALE",
+   "provider_behavior": "Flag possible altered oral medication absorption/timing; do not make a blanket no-interaction claim.",
+   "rationale": "Semaglutide, tirzepatide, pramlintide, and bremelanotide labeling include delayed gastric emptying or oral medication absorption warnings.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for listed labeled agents; pathway inference for analogues",
+   "confidence": "high_for_labeled_agents_moderate_for_analogues",
+   "source_ids": [
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE",
+    "SRC_SYMLIN_DAILYMED_PRAMLINTIDE",
+    "SRC_VYLEESI_FDA_BREMELANOTIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_METABOLIC_009",
+   "name": "Oral hormonal contraceptive with tirzepatide",
+   "domain": "medication_class",
+   "rule_type": "medication_class_modifier",
+   "applies_to_agent_groups": [
+    "GIP_GLP1_RA"
+   ],
+   "applies_to_agents_mapped": [
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "medications.class",
+      "operator": "contains",
+      "value": "oral_hormonal_contraceptive"
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "equals",
+      "value": "tirzepatide"
+     }
+    ]
+   },
+   "risk_signal": "oral_contraceptive_exposure_risk",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag label-specific oral contraceptive interaction; do not provide final clearance without clinician review.",
+   "rationale": "Tirzepatide labeling states delayed gastric emptying may reduce oral hormonal contraceptive exposure.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_METABOLIC_010",
+   "name": "Upcoming anesthesia/deep sedation with GLP-1/GIP/amylin delayed-gastric-emptying pathway",
+   "domain": "procedure",
+   "rule_type": "procedure_modifier",
+   "applies_to_agent_groups": [
+    "GLP1_RA",
+    "GIP_GLP1_RA",
+    "GIP_GLP1_glucagon_RA",
+    "amylin_analog"
+   ],
+   "applies_to_agents_mapped": [
+    "retatrutide",
+    "semaglutide",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "upcoming_anesthesia_or_deep_sedation",
+      "operator": "equals",
+      "value": true
+     },
+     {
+      "field": "candidate.pathway",
+      "operator": "contains_any",
+      "value": [
+       "delayed_gastric_emptying",
+       "incretin_amylin"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "peri_procedural_aspiration_context",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag peri-procedural review; do not generate simplistic stop/continue instructions.",
+   "rationale": "Tirzepatide labeling includes pulmonary aspiration reports during general anesthesia/deep sedation in patients receiving GLP-1 receptor agonists and delayed gastric emptying context.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for tirzepatide label; pathway inference for delayed-gastric-emptying agents",
+   "confidence": "high_for_tirzepatide_moderate_for_pathway",
+   "source_ids": [
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE",
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_SYMLIN_DAILYMED_PRAMLINTIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_METABOLIC_011",
+   "name": "Severe GI symptoms with incretin/amylin pathway",
+   "domain": "symptoms",
+   "rule_type": "symptom_trigger",
+   "applies_to_agent_groups": [
+    "GLP1_RA",
+    "GIP_GLP1_RA",
+    "GIP_GLP1_glucagon_RA",
+    "amylin_analog"
+   ],
+   "applies_to_agents_mapped": [
+    "retatrutide",
+    "semaglutide",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "symptoms",
+      "operator": "intersects",
+      "value": [
+       "severe_persistent_abdominal_pain",
+       "persistent_vomiting",
+       "severe_dehydrating_diarrhea"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "GLP1_RA",
+       "GIP_GLP1_RA",
+       "GIP_GLP1_glucagon_RA",
+       "amylin_analog"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "pancreatitis_gallbladder_or_volume_depletion_signal",
+   "severity": "red",
+   "action": "HOLD_FOR_URGENT_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate severe/persistent abdominal pain or dehydrating GI symptoms; do not provide reassurance-only output.",
+   "rationale": "GLP-1/GIP labels include pancreatitis, gallbladder disease, severe GI adverse reactions, and acute kidney injury due volume depletion warnings.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for semaglutide/tirzepatide; pathway inference for retatrutide/amylin combinations",
+   "confidence": "high_for_labeled_agents_moderate_for_investigational",
+   "source_ids": [
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE",
+    "SRC_RETATRUTIDE_PUBMED",
+    "SRC_CAGRILINTIDE_SEMAGLUTIDE_PUBMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_METABOLIC_012",
+   "name": "Volume depletion or AKI risk with GLP-1/GIP pathway",
+   "domain": "renal_hydration",
+   "rule_type": "symptom_lab_medication_modifier",
+   "applies_to_agent_groups": [
+    "GLP1_RA",
+    "GIP_GLP1_RA",
+    "GIP_GLP1_glucagon_RA"
+   ],
+   "applies_to_agents_mapped": [
+    "retatrutide",
+    "semaglutide",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "current_state",
+      "operator": "intersects",
+      "value": [
+       "dehydration",
+       "persistent_vomiting",
+       "persistent_diarrhea",
+       "AKI",
+       "rapid_eGFR_decline"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "GLP1_RA",
+       "GIP_GLP1_RA",
+       "GIP_GLP1_glucagon_RA"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "AKI_volume_depletion_risk",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate dehydration/AKI context; do not present GI adverse effects as cosmetic or trivial.",
+   "rationale": "Semaglutide, tirzepatide, and exenatide labels contain renal injury warnings related to GI fluid losses/dehydration.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for semaglutide/tirzepatide/exenatide; inference for retatrutide",
+   "confidence": "high_for_labeled_agents_moderate_for_retatrutide",
+   "source_ids": [
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE",
+    "SRC_BYETTA_DAILYMED_EXENATIDE",
+    "SRC_RETATRUTIDE_PUBMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_METABOLIC_013",
+   "name": "History of pancreatitis with incretin/amylin pathway",
+   "domain": "history",
+   "rule_type": "history_modifier",
+   "applies_to_agent_groups": [
+    "GLP1_RA",
+    "GIP_GLP1_RA",
+    "GIP_GLP1_glucagon_RA",
+    "amylin_analog"
+   ],
+   "applies_to_agents_mapped": [
+    "retatrutide",
+    "semaglutide",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history.pancreatitis",
+      "operator": "equals",
+      "value": true
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "GLP1_RA",
+       "GIP_GLP1_RA",
+       "GIP_GLP1_glucagon_RA",
+       "amylin_analog"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "pancreatitis_history_caution",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag history of pancreatitis for clinician review; do not claim absence of risk.",
+   "rationale": "Semaglutide and tirzepatide labels include pancreatitis warnings; direct data for every analogue/combination are incomplete.",
+   "evidence_level": "A",
+   "evidence_directness": "direct warning for labeled agents; pathway inference for investigational agents",
+   "confidence": "high_for_labeled_agents_moderate_for_investigational",
+   "source_ids": [
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE",
+    "SRC_CAGRILINTIDE_SEMAGLUTIDE_PUBMED",
+    "SRC_RETATRUTIDE_PUBMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_METABOLIC_014",
+   "name": "Gallbladder disease or biliary symptoms with GLP-1/GIP/amylin pathway",
+   "domain": "history_or_symptoms",
+   "rule_type": "history_symptom_modifier",
+   "applies_to_agent_groups": [
+    "GLP1_RA",
+    "GIP_GLP1_RA",
+    "GIP_GLP1_glucagon_RA",
+    "amylin_analog"
+   ],
+   "applies_to_agents_mapped": [
+    "retatrutide",
+    "semaglutide",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history_or_symptoms",
+      "operator": "intersects",
+      "value": [
+       "gallstones",
+       "cholecystitis",
+       "biliary_colic",
+       "RUQ_pain"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "GLP1_RA",
+       "GIP_GLP1_RA",
+       "GIP_GLP1_glucagon_RA",
+       "amylin_analog"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "gallbladder_biliary_signal",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag gallbladder/biliary history or symptoms; do not classify as no known issue.",
+   "rationale": "Semaglutide and tirzepatide labels include acute gallbladder disease warnings.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for semaglutide/tirzepatide; class/pathway inference for combinations",
+   "confidence": "high_for_labeled_agents_moderate_for_combinations",
+   "source_ids": [
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE",
+    "SRC_CAGRILINTIDE_SEMAGLUTIDE_PUBMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_METABOLIC_015",
+   "name": "Diabetic retinopathy with rapid glycemic-improvement pathways",
+   "domain": "comorbidity",
+   "rule_type": "comorbidity_modifier",
+   "applies_to_agent_groups": [
+    "GLP1_RA",
+    "GIP_GLP1_RA",
+    "GH_IGF1_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "semaglutide",
+    "tesamorelin",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history.diabetic_retinopathy",
+      "operator": "equals",
+      "value": true
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "GLP1_RA",
+       "GIP_GLP1_RA",
+       "GH_IGF1_axis"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "diabetic_retinopathy_context",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag retinopathy context; do not ignore baseline eye disease when glycemic or GH/IGF axis may shift.",
+   "rationale": "Semaglutide and tirzepatide labels include retinopathy complication warnings; tesamorelin/somatropin labels also address diabetes/retinopathy context in GH-axis treatment.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported for named agents; pathway inference for GH secretagogues",
+   "confidence": "high_for_labeled_agents_moderate_for_secretagogues",
+   "source_ids": [
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE",
+    "SRC_EGRIFTA_FDA_TESAMORELIN",
+    "SRC_HUMATROPE_DAILYMED_SOMATROPIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_METABOLIC_016",
+   "name": "MTC/MEN2 history with GLP-1/GIP incretin pathway",
+   "domain": "family_personal_history",
+   "rule_type": "history_modifier",
+   "applies_to_agent_groups": [
+    "GLP1_RA",
+    "GIP_GLP1_RA",
+    "GIP_GLP1_glucagon_RA"
+   ],
+   "applies_to_agents_mapped": [
+    "retatrutide",
+    "semaglutide",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history.personal_or_family_MTC_or_MEN2",
+      "operator": "equals",
+      "value": true
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "GLP1_RA",
+       "GIP_GLP1_RA",
+       "GIP_GLP1_glucagon_RA"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "MTC_MEN2_label_contraindication_context",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate for clinician review; do not provide low-risk wording for GLP-1/GIP pathway in MTC/MEN2 history.",
+   "rationale": "Semaglutide and tirzepatide labeling includes contraindication language for personal/family MTC or MEN2.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for semaglutide/tirzepatide; pathway inference for retatrutide",
+   "confidence": "high_for_labeled_agents_moderate_for_retatrutide",
+   "source_ids": [
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_METABOLIC_017",
+   "name": "Active suicidal ideation or serious psychiatric instability with weight-management incretin pathway",
+   "domain": "psychiatric_history",
+   "rule_type": "history_modifier",
+   "applies_to_agent_groups": [
+    "GLP1_RA",
+    "GIP_GLP1_RA",
+    "GIP_GLP1_glucagon_RA"
+   ],
+   "applies_to_agents_mapped": [
+    "retatrutide",
+    "semaglutide",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history.active_suicidal_ideation_or_recent_attempt",
+      "operator": "equals",
+      "value": true
+     },
+     {
+      "field": "candidate.use_context",
+      "operator": "contains_any",
+      "value": [
+       "weight_management",
+       "body_composition"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "psychiatric_safety_context",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate active suicidality/recent attempt; do not generate weight-loss optimization recommendations without clinician review.",
+   "rationale": "Semaglutide weight-management labeling contains suicidal behavior/ideation monitoring and avoidance language in patients with active ideation or history of attempt.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for semaglutide weight-management labeling; not direct for all incretin agents",
+   "confidence": "moderate",
+   "source_ids": [
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_METABOLIC_018",
+   "name": "Resting tachycardia/palpitations with retatrutide or glucagon-containing polyagonist",
+   "domain": "vitals_or_symptoms",
+   "rule_type": "symptom_vital_modifier",
+   "applies_to_agent_groups": [
+    "GIP_GLP1_glucagon_RA"
+   ],
+   "applies_to_agents_mapped": [
+    "retatrutide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "vitals_or_symptoms",
+      "operator": "intersects",
+      "value": [
+       "resting_tachycardia",
+       "palpitations",
+       "unexplained_heart_rate_increase"
+      ]
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "equals",
+      "value": "retatrutide"
+     }
+    ]
+   },
+   "risk_signal": "heart_rate_signal",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag heart-rate/palpitations context for retatrutide; do not claim cardiac neutrality.",
+   "rationale": "Human retatrutide trial reporting includes heart-rate increase signals.",
+   "evidence_level": "B",
+   "evidence_directness": "direct human trial signal but not label-based broad rule",
+   "confidence": "moderate",
+   "source_ids": [
+    "SRC_RETATRUTIDE_PUBMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_RENAL_001",
+   "name": "CrCl/eGFR below 30 with exenatide",
+   "domain": "renal_function",
+   "rule_type": "renal_threshold_modifier",
+   "applies_to_agent_groups": [
+    "exendin_based_GLP1_RA"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "renal.CrCl_or_eGFR",
+      "operator": "<",
+      "value": 30
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "equals",
+      "value": "exenatide"
+     }
+    ]
+   },
+   "risk_signal": "severe_renal_impairment_exenatide",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag label-based severe renal impairment concern for exenatide.",
+   "rationale": "Exenatide labeling states it is not recommended in severe renal impairment or ESRD.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_BYETTA_DAILYMED_EXENATIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_RENAL_002",
+   "name": "Moderate renal impairment with exenatide",
+   "domain": "renal_function",
+   "rule_type": "renal_threshold_modifier",
+   "applies_to_agent_groups": [
+    "exendin_based_GLP1_RA"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "renal.CrCl_or_eGFR",
+      "operator": "between_inclusive",
+      "value": [
+       30,
+       50
+      ]
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "equals",
+      "value": "exenatide"
+     }
+    ]
+   },
+   "risk_signal": "moderate_renal_impairment_exenatide_caution",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag moderate renal impairment context for exenatide.",
+   "rationale": "Exenatide labeling urges caution in moderate renal impairment and notes renal injury reports.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_BYETTA_DAILYMED_EXENATIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_RENAL_003",
+   "name": "Renal transplant with exenatide",
+   "domain": "renal_history",
+   "rule_type": "renal_history_modifier",
+   "applies_to_agent_groups": [
+    "exendin_based_GLP1_RA"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history.renal_transplant",
+      "operator": "equals",
+      "value": true
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "equals",
+      "value": "exenatide"
+     }
+    ]
+   },
+   "risk_signal": "renal_transplant_exenatide_caution",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag renal transplant context for exenatide; do not present as standard low-risk.",
+   "rationale": "Exenatide labeling notes not studied in renal transplantation.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported",
+   "confidence": "moderate_to_high",
+   "source_ids": [
+    "SRC_BYETTA_DAILYMED_EXENATIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_RENAL_004",
+   "name": "eGFR below 50 with desmopressin/ADH-axis agent",
+   "domain": "renal_function",
+   "rule_type": "renal_threshold_modifier",
+   "applies_to_agent_groups": [
+    "vasopressin_ADH_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "renal.eGFR",
+      "operator": "<",
+      "value": 50
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "contains",
+      "value": "vasopressin_ADH_axis"
+     }
+    ]
+   },
+   "risk_signal": "desmopressin_renal_hyponatremia_risk",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate eGFR below 50 for desmopressin/ADH-axis pathway.",
+   "rationale": "Desmopressin labeling includes renal impairment/eGFR below 50 as contraindication context due hyponatremia/water retention risk.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for desmopressin; pathway inference for ADH-axis agents",
+   "confidence": "high_for_desmopressin",
+   "source_ids": [
+    "SRC_NOCDURNA_FDA_DESMOPRESSIN",
+    "SRC_DESMOPRESSIN_PFIZER_INJECTION"
+   ]
+  },
+  {
+   "rule_id": "PFM_RENAL_005",
+   "name": "Hyponatremia or history of hyponatremia with desmopressin",
+   "domain": "sodium",
+   "rule_type": "lab_history_modifier",
+   "applies_to_agent_groups": [
+    "vasopressin_ADH_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "labs_or_history.hyponatremia_or_history",
+      "operator": "equals",
+      "value": true
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "equals",
+      "value": "desmopressin"
+     }
+    ]
+   },
+   "risk_signal": "hyponatremia_worsening_risk",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate; do not output desmopressin/ADH-axis clearance in hyponatremia or history of hyponatremia.",
+   "rationale": "Desmopressin labeling contraindicates use in hyponatremia or history of hyponatremia.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_NOCDURNA_FDA_DESMOPRESSIN",
+    "SRC_DESMOPRESSIN_PFIZER_INJECTION"
+   ]
+  },
+  {
+   "rule_id": "PFM_RENAL_006",
+   "name": "Loop diuretic or systemic/inhaled glucocorticoid with desmopressin",
+   "domain": "medication_class",
+   "rule_type": "medication_class_modifier",
+   "applies_to_agent_groups": [
+    "vasopressin_ADH_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "medications.class",
+      "operator": "intersects",
+      "value": [
+       "loop_diuretic",
+       "systemic_glucocorticoid",
+       "inhaled_glucocorticoid"
+      ]
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "equals",
+      "value": "desmopressin"
+     }
+    ]
+   },
+   "risk_signal": "severe_hyponatremia_risk_interaction",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate label-supported interaction risk; do not treat as routine monitoring-only.",
+   "rationale": "Desmopressin nocturia labeling lists loop diuretics and systemic/inhaled glucocorticoids as contraindicated concomitant therapies because of hyponatremia risk.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_NOCDURNA_FDA_DESMOPRESSIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_RENAL_007",
+   "name": "Hyponatremia-risk medications with desmopressin",
+   "domain": "medication_class",
+   "rule_type": "medication_class_modifier",
+   "applies_to_agent_groups": [
+    "vasopressin_ADH_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "medications.class_or_name",
+      "operator": "intersects",
+      "value": [
+       "SSRI",
+       "SNRI",
+       "TCA",
+       "NSAID",
+       "thiazide_diuretic",
+       "carbamazepine",
+       "lamotrigine",
+       "chlorpromazine",
+       "opiate_analgesic",
+       "chlorpropamide"
+      ]
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "equals",
+      "value": "desmopressin"
+     }
+    ]
+   },
+   "risk_signal": "additive_hyponatremia_risk",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag additive hyponatremia risk and sodium-monitoring need; do not issue low-risk language.",
+   "rationale": "Desmopressin labeling identifies several drug classes that can increase hyponatremia risk and recommends more frequent sodium monitoring.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_NOCDURNA_FDA_DESMOPRESSIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_RENAL_008",
+   "name": "Age 65 or older with desmopressin",
+   "domain": "age",
+   "rule_type": "age_modifier",
+   "applies_to_agent_groups": [
+    "vasopressin_ADH_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "age",
+      "operator": ">=",
+      "value": 65
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "equals",
+      "value": "desmopressin"
+     }
+    ]
+   },
+   "risk_signal": "age_related_hyponatremia_risk",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag higher sodium-monitoring risk context in older adults.",
+   "rationale": "Desmopressin nocturia labeling states more frequent sodium monitoring is recommended for patients aged 65 or older and those at risk for hyponatremia.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_NOCDURNA_FDA_DESMOPRESSIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_RENAL_009",
+   "name": "Heart failure or uncontrolled hypertension with desmopressin",
+   "domain": "cardiovascular_history",
+   "rule_type": "comorbidity_modifier",
+   "applies_to_agent_groups": [
+    "vasopressin_ADH_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history",
+      "operator": "intersects",
+      "value": [
+       "heart_failure",
+       "uncontrolled_hypertension"
+      ]
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "equals",
+      "value": "desmopressin"
+     }
+    ]
+   },
+   "risk_signal": "fluid_retention_worsening_risk",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate heart failure/uncontrolled hypertension for desmopressin/water-retention pathway.",
+   "rationale": "Desmopressin nocturia labeling contraindicates heart failure or uncontrolled hypertension because fluid retention may worsen these conditions.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_NOCDURNA_FDA_DESMOPRESSIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_RENAL_010",
+   "name": "Polydipsia/SIADH/fluid-electrolyte illness with desmopressin",
+   "domain": "fluid_electrolyte_history",
+   "rule_type": "comorbidity_modifier",
+   "applies_to_agent_groups": [
+    "vasopressin_ADH_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history_or_current_state",
+      "operator": "intersects",
+      "value": [
+       "polydipsia",
+       "SIADH",
+       "gastroenteritis",
+       "systemic_infection",
+       "salt_wasting_nephropathy",
+       "fluid_electrolyte_imbalance"
+      ]
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "equals",
+      "value": "desmopressin"
+     }
+    ]
+   },
+   "risk_signal": "severe_hyponatremia_context",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate desmopressin/ADH-axis logic when conditions predisposing to fluid/electrolyte imbalance are present.",
+   "rationale": "Desmopressin labeling includes polydipsia, SIADH, and illnesses causing fluid/electrolyte imbalance among contraindication/risk contexts.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_NOCDURNA_FDA_DESMOPRESSIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_RENAL_011",
+   "name": "Raised intracranial pressure risk or urinary retention history with desmopressin",
+   "domain": "history",
+   "rule_type": "comorbidity_modifier",
+   "applies_to_agent_groups": [
+    "vasopressin_ADH_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history",
+      "operator": "intersects",
+      "value": [
+       "increased_intracranial_pressure_risk",
+       "urinary_retention"
+      ]
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "equals",
+      "value": "desmopressin"
+     }
+    ]
+   },
+   "risk_signal": "fluid_retention_special_context",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag raised intracranial pressure or urinary retention history for clinician review.",
+   "rationale": "Desmopressin nocturia labeling says it is not recommended in patients at risk for increased intracranial pressure or with history of urinary retention.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_NOCDURNA_FDA_DESMOPRESSIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_GHIGF_001",
+   "name": "Active malignancy with GH/IGF-1 axis",
+   "domain": "oncology_history",
+   "rule_type": "oncology_modifier",
+   "applies_to_agent_groups": [
+    "GH_IGF1_axis",
+    "GHRH_analogue",
+    "GHS_ghrelin_secretagogue"
+   ],
+   "applies_to_agents_mapped": [
+    "aod-9604",
+    "cjc-1295",
+    "ghrp-2",
+    "ghrp-6",
+    "hexarelin",
+    "ipamorelin",
+    "sermorelin",
+    "tesamorelin"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history.active_malignancy",
+      "operator": "equals",
+      "value": true
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "GH_IGF1_axis",
+       "GHRH_analogue",
+       "GHS_ghrelin_secretagogue"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "malignancy_GH_IGF1_axis_signal",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate active malignancy; do not present GH/IGF-1-axis agents as low-risk or anti-aging routine.",
+   "rationale": "Tesamorelin and somatropin labeling contain active malignancy/neoplasm risk language; application to secretagogues is a pathway inference.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for tesamorelin/somatropin; indirect for GHRH/GHS research peptides",
+   "confidence": "high_for_labeled_agents_moderate_for_secretagogues",
+   "source_ids": [
+    "SRC_EGRIFTA_FDA_TESAMORELIN",
+    "SRC_HUMATROPE_DAILYMED_SOMATROPIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_GHIGF_002",
+   "name": "Prior malignancy or current surveillance with GH/IGF-1 axis",
+   "domain": "oncology_history",
+   "rule_type": "oncology_modifier",
+   "applies_to_agent_groups": [
+    "GH_IGF1_axis",
+    "GHRH_analogue",
+    "GHS_ghrelin_secretagogue"
+   ],
+   "applies_to_agents_mapped": [
+    "aod-9604",
+    "cjc-1295",
+    "ghrp-2",
+    "ghrp-6",
+    "hexarelin",
+    "ipamorelin",
+    "sermorelin",
+    "tesamorelin"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history.prior_malignancy_or_current_surveillance",
+      "operator": "equals",
+      "value": true
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "GH_IGF1_axis",
+       "GHRH_analogue",
+       "GHS_ghrelin_secretagogue"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "preexisting_malignancy_context",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Require documented oncology-context review; do not describe as routine wellness synergy.",
+   "rationale": "Tesamorelin labeling states preexisting malignancy should be carefully evaluated and treatment discontinued with recurrent malignancy; somatropin labeling includes neoplasm monitoring language.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for tesamorelin/somatropin; indirect for secretagogues",
+   "confidence": "high_to_moderate",
+   "source_ids": [
+    "SRC_EGRIFTA_FDA_TESAMORELIN",
+    "SRC_HUMATROPE_DAILYMED_SOMATROPIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_GHIGF_003",
+   "name": "Elevated IGF-1 with GH/IGF-1 axis",
+   "domain": "IGF1",
+   "rule_type": "lab_threshold_modifier",
+   "applies_to_agent_groups": [
+    "GH_IGF1_axis",
+    "GHRH_analogue",
+    "GHS_ghrelin_secretagogue"
+   ],
+   "applies_to_agents_mapped": [
+    "aod-9604",
+    "cjc-1295",
+    "ghrp-2",
+    "ghrp-6",
+    "hexarelin",
+    "ipamorelin",
+    "sermorelin",
+    "tesamorelin"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "labs.IGF1_status",
+      "operator": "in",
+      "value": [
+       "above_reference_range",
+       "persistent_elevation",
+       ">3_SDS"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "GH_IGF1_axis",
+       "GHRH_analogue",
+       "GHS_ghrelin_secretagogue"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "IGF1_excess_pathway_load",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate elevated/persistently elevated IGF-1; do not add GH-axis load without clinician review.",
+   "rationale": "Tesamorelin labeling includes IGF-1 monitoring and persistent elevation language.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for tesamorelin; pathway inference for GH secretagogues and GHRH analogues",
+   "confidence": "high_for_tesamorelin_moderate_for_secretagogues",
+   "source_ids": [
+    "SRC_EGRIFTA_FDA_TESAMORELIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_GHIGF_004",
+   "name": "Diabetes, prediabetes, or elevated A1c with GH/IGF-1 axis",
+   "domain": "glycemic_status",
+   "rule_type": "comorbidity_lab_modifier",
+   "applies_to_agent_groups": [
+    "GH_IGF1_axis",
+    "GHRH_analogue",
+    "GHS_ghrelin_secretagogue"
+   ],
+   "applies_to_agents_mapped": [
+    "aod-9604",
+    "cjc-1295",
+    "ghrp-2",
+    "ghrp-6",
+    "hexarelin",
+    "ipamorelin",
+    "sermorelin",
+    "tesamorelin"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history_or_labs",
+      "operator": "intersects",
+      "value": [
+       "type_2_diabetes",
+       "type_1_diabetes",
+       "prediabetes",
+       "A1c_>=6.5",
+       "fasting_glucose_high"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "GH_IGF1_axis",
+       "GHRH_analogue",
+       "GHS_ghrelin_secretagogue"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "glucose_intolerance_risk",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag baseline diabetes/prediabetes for GH-axis agents; do not assume glucose neutrality.",
+   "rationale": "Tesamorelin labeling includes glucose intolerance/diabetes risk and HbA1c monitoring concepts.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for tesamorelin; pathway inference for other GH-axis agents",
+   "confidence": "high_for_tesamorelin_moderate_for_secretagogues",
+   "source_ids": [
+    "SRC_EGRIFTA_FDA_TESAMORELIN",
+    "SRC_HUMATROPE_DAILYMED_SOMATROPIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_GHIGF_005",
+   "name": "Active proliferative or severe non-proliferative diabetic retinopathy with GH-axis",
+   "domain": "ophthalmology_history",
+   "rule_type": "comorbidity_modifier",
+   "applies_to_agent_groups": [
+    "GH_IGF1_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "cjc-1295",
+    "ghrp-2",
+    "ghrp-6",
+    "ipamorelin",
+    "sermorelin",
+    "tesamorelin"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history.retinal_disease",
+      "operator": "intersects",
+      "value": [
+       "active_proliferative_diabetic_retinopathy",
+       "severe_nonproliferative_diabetic_retinopathy"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "contains",
+      "value": "GH_IGF1_axis"
+     }
+    ]
+   },
+   "risk_signal": "retinopathy_GH_axis_signal",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate active/severe diabetic retinopathy; do not issue routine GH-axis clearance.",
+   "rationale": "Somatropin labeling includes active proliferative or severe non-proliferative diabetic retinopathy contraindication; tesamorelin labeling includes diabetic retinopathy monitoring.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for somatropin; direct monitoring warning for tesamorelin; extrapolated for secretagogues",
+   "confidence": "high_for_labeled_agents_moderate_for_secretagogues",
+   "source_ids": [
+    "SRC_HUMATROPE_DAILYMED_SOMATROPIN",
+    "SRC_EGRIFTA_FDA_TESAMORELIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_GHIGF_006",
+   "name": "Edema, heart failure, carpal tunnel, or fluid retention history with GH/IGF pathway",
+   "domain": "fluid_retention_history",
+   "rule_type": "comorbidity_modifier",
+   "applies_to_agent_groups": [
+    "GH_IGF1_axis",
+    "GHRH_analogue",
+    "GHS_ghrelin_secretagogue"
+   ],
+   "applies_to_agents_mapped": [
+    "aod-9604",
+    "cjc-1295",
+    "ghrp-2",
+    "ghrp-6",
+    "hexarelin",
+    "ipamorelin",
+    "sermorelin",
+    "tesamorelin"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history",
+      "operator": "intersects",
+      "value": [
+       "edema",
+       "heart_failure",
+       "carpal_tunnel_syndrome",
+       "fluid_retention"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "GH_IGF1_axis",
+       "GHRH_analogue",
+       "GHS_ghrelin_secretagogue"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "fluid_retention_GH_axis_signal",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag fluid-retention-prone history before GH-axis agents.",
+   "rationale": "Tesamorelin labeling includes fluid retention warnings; somatropin class labeling also supports fluid-retention concern.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for tesamorelin/somatropin; indirect for secretagogues",
+   "confidence": "moderate_to_high",
+   "source_ids": [
+    "SRC_EGRIFTA_FDA_TESAMORELIN",
+    "SRC_HUMATROPE_DAILYMED_SOMATROPIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_GHIGF_007",
+   "name": "Acute critical illness, post-operative complication, trauma, or respiratory failure with GH-axis",
+   "domain": "acute_illness",
+   "rule_type": "acute_illness_modifier",
+   "applies_to_agent_groups": [
+    "GH_IGF1_axis",
+    "GHRH_analogue",
+    "GHS_ghrelin_secretagogue"
+   ],
+   "applies_to_agents_mapped": [
+    "aod-9604",
+    "cjc-1295",
+    "ghrp-2",
+    "ghrp-6",
+    "hexarelin",
+    "ipamorelin",
+    "sermorelin",
+    "tesamorelin"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "current_state",
+      "operator": "intersects",
+      "value": [
+       "acute_critical_illness",
+       "postoperative_complications",
+       "acute_respiratory_failure",
+       "multiple_accidental_trauma"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "GH_IGF1_axis",
+       "GHRH_analogue",
+       "GHS_ghrelin_secretagogue"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "acute_critical_illness_GH_risk",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate acute critical illness/post-op/respiratory failure context; no wellness optimization language.",
+   "rationale": "Somatropin labeling contraindicates use in acute critical illness due complications following open heart/abdominal surgery, multiple accidental trauma, or acute respiratory failure; tesamorelin label also contains acute critical illness language.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for somatropin/tesamorelin; pathway inference for secretagogues",
+   "confidence": "high_for_labeled_agents_moderate_for_secretagogues",
+   "source_ids": [
+    "SRC_HUMATROPE_DAILYMED_SOMATROPIN",
+    "SRC_EGRIFTA_FDA_TESAMORELIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_GHIGF_008",
+   "name": "Hypothalamic-pituitary disruption with tesamorelin/GHRH-axis",
+   "domain": "pituitary_history",
+   "rule_type": "history_modifier",
+   "applies_to_agent_groups": [
+    "GHRH_analogue",
+    "GH_IGF1_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "cjc-1295",
+    "sermorelin",
+    "tesamorelin"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history",
+      "operator": "intersects",
+      "value": [
+       "hypophysectomy",
+       "hypopituitarism",
+       "pituitary_tumor",
+       "pituitary_surgery",
+       "head_irradiation",
+       "head_trauma"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "GHRH_analogue",
+       "GH_IGF1_axis"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "hypothalamic_pituitary_axis_disruption",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate hypothalamic-pituitary axis disruption; do not assume secretagogue response or safety.",
+   "rationale": "Tesamorelin labeling includes contraindication around disruption of the hypothalamic-pituitary axis due tumor/surgery/hypopituitarism/head irradiation/head trauma.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for tesamorelin; inference for CJC-1295/sermorelin",
+   "confidence": "high_for_tesamorelin_moderate_for_other_GHRH_agents",
+   "source_ids": [
+    "SRC_EGRIFTA_FDA_TESAMORELIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_GHIGF_009",
+   "name": "Pregnancy with tesamorelin/GH-axis or research secretagogue",
+   "domain": "pregnancy",
+   "rule_type": "pregnancy_modifier",
+   "applies_to_agent_groups": [
+    "GH_IGF1_axis",
+    "GHRH_analogue",
+    "GHS_ghrelin_secretagogue"
+   ],
+   "applies_to_agents_mapped": [
+    "aod-9604",
+    "cjc-1295",
+    "ghrp-2",
+    "ghrp-6",
+    "hexarelin",
+    "ipamorelin",
+    "sermorelin",
+    "tesamorelin"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "pregnancy_status",
+      "operator": "in",
+      "value": [
+       "pregnant",
+       "possible_pregnancy"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "GH_IGF1_axis",
+       "GHRH_analogue",
+       "GHS_ghrelin_secretagogue"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "pregnancy_GH_axis_context",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate pregnancy/possible pregnancy; do not generate routine GH-axis recommendations.",
+   "rationale": "Tesamorelin labeling lists pregnancy as a contraindication context for its indicated use; research secretagogue pregnancy data are insufficient.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for tesamorelin; evidence gap for research secretagogues",
+   "confidence": "high_for_tesamorelin_low_for_research_agents",
+   "source_ids": [
+    "SRC_EGRIFTA_FDA_TESAMORELIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_GHIGF_010",
+   "name": "Glucocorticoid replacement or suspected hypoadrenalism with GH/GHRH pathway",
+   "domain": "endocrine_medications",
+   "rule_type": "medication_endocrine_modifier",
+   "applies_to_agent_groups": [
+    "GH_IGF1_axis",
+    "GHRH_analogue"
+   ],
+   "applies_to_agents_mapped": [
+    "cjc-1295",
+    "sermorelin",
+    "tesamorelin"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history_or_medications",
+      "operator": "intersects",
+      "value": [
+       "hypoadrenalism",
+       "adrenal_insufficiency",
+       "glucocorticoid_replacement"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "GH_IGF1_axis",
+       "GHRH_analogue"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "HPA_axis_interaction_context",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag adrenal/glucocorticoid replacement context; endocrine review before final classification.",
+   "rationale": "Tesamorelin labeling includes language about possible interactions in patients treated with glucocorticoid replacement for hypoadrenalism.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for tesamorelin; indirect for other GH/GHRH agents",
+   "confidence": "moderate_to_high",
+   "source_ids": [
+    "SRC_EGRIFTA_FDA_TESAMORELIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_PTH_001",
+   "name": "Hypercalcemia or hypercalcemic disorder with PTH/PTHrP analogue",
+   "domain": "calcium",
+   "rule_type": "lab_comorbidity_modifier",
+   "applies_to_agent_groups": [
+    "PTH_PTHrP_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "labs_or_history",
+      "operator": "intersects",
+      "value": [
+       "hypercalcemia",
+       "primary_hyperparathyroidism",
+       "hypercalcemic_disorder"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "contains",
+      "value": "PTH_PTHrP_axis"
+     }
+    ]
+   },
+   "risk_signal": "hypercalcemia_worsening_risk",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate hypercalcemia context; do not classify PTH/PTHrP pathway as low risk.",
+   "rationale": "Teriparatide labeling advises avoidance in pre-existing hypercalcemia or hypercalcemic disorders.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for teriparatide; class inference for abaloparatide/PTHrP analogues",
+   "confidence": "high_for_teriparatide_moderate_for_class",
+   "source_ids": [
+    "SRC_TERIPARATIDE_DAILYMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_PTH_002",
+   "name": "Osteosarcoma-risk conditions with PTH/PTHrP analogue",
+   "domain": "bone_oncology_history",
+   "rule_type": "oncology_bone_modifier",
+   "applies_to_agent_groups": [
+    "PTH_PTHrP_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history",
+      "operator": "intersects",
+      "value": [
+       "Paget_disease_of_bone",
+       "bone_metastases",
+       "skeletal_malignancy",
+       "skeletal_radiation",
+       "open_epiphyses",
+       "hereditary_osteosarcoma_syndrome"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "contains",
+      "value": "PTH_PTHrP_axis"
+     }
+    ]
+   },
+   "risk_signal": "osteosarcoma_risk_context",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate osteosarcoma-risk conditions; no routine clearance.",
+   "rationale": "Teriparatide labeling advises avoiding use in patients with increased baseline osteosarcoma risk, including Paget disease, bone metastases/skeletal malignancy, skeletal radiation, open epiphyses, or hereditary osteosarcoma predisposition.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for teriparatide; class inference for PTHrP analogues",
+   "confidence": "high_for_teriparatide_moderate_for_class",
+   "source_ids": [
+    "SRC_TERIPARATIDE_DAILYMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_PTH_003",
+   "name": "Urolithiasis or hypercalciuria with PTH/PTHrP analogue",
+   "domain": "renal_stone_history",
+   "rule_type": "renal_bone_modifier",
+   "applies_to_agent_groups": [
+    "PTH_PTHrP_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history_or_labs",
+      "operator": "intersects",
+      "value": [
+       "active_urolithiasis",
+       "recent_urolithiasis",
+       "hypercalciuria"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "contains",
+      "value": "PTH_PTHrP_axis"
+     }
+    ]
+   },
+   "risk_signal": "urolithiasis_hypercalciuria_context",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag stone/hypercalciuria context.",
+   "rationale": "Teriparatide labeling warns around active or recent urolithiasis and hypercalciuria.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for teriparatide; class inference for PTHrP analogues",
+   "confidence": "high_for_teriparatide_moderate_for_class",
+   "source_ids": [
+    "SRC_TERIPARATIDE_DAILYMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_PTH_004",
+   "name": "Digoxin with PTH/PTHrP analogue or hypercalcemia",
+   "domain": "medication_class",
+   "rule_type": "medication_class_modifier",
+   "applies_to_agent_groups": [
+    "PTH_PTHrP_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "medications.name_or_class",
+      "operator": "contains",
+      "value": "digoxin"
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "contains",
+      "value": "PTH_PTHrP_axis"
+     }
+    ]
+   },
+   "risk_signal": "digoxin_toxicity_hypercalcemia_context",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag digoxin; avoid no-interaction language.",
+   "rationale": "Teriparatide labeling cautions that hypercalcemia may predispose to digitalis toxicity and advises caution with digoxin.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_TERIPARATIDE_DAILYMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_PTH_005",
+   "name": "Calciphylaxis-risk context with PTH/PTHrP analogue",
+   "domain": "calciphylaxis_risk",
+   "rule_type": "comorbidity_medication_modifier",
+   "applies_to_agent_groups": [
+    "PTH_PTHrP_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history_or_medications",
+      "operator": "intersects",
+      "value": [
+       "kidney_failure",
+       "autoimmune_disorder",
+       "systemic_corticosteroid_use",
+       "warfarin_use"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "contains",
+      "value": "PTH_PTHrP_axis"
+     }
+    ]
+   },
+   "risk_signal": "calciphylaxis_cutaneous_calcification_context",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag calciphylaxis/cutaneous calcification risk context.",
+   "rationale": "Teriparatide labeling notes calciphylaxis/cutaneous calcification has been reported and risk factors include autoimmune disease, kidney failure, and concomitant warfarin or systemic corticosteroids.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for teriparatide; class inference for PTHrP analogues",
+   "confidence": "high_for_teriparatide_moderate_for_class",
+   "source_ids": [
+    "SRC_TERIPARATIDE_DAILYMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_PTH_006",
+   "name": "Orthostatic hypotension/falls/syncope history with PTH/PTHrP analogue",
+   "domain": "orthostasis_history",
+   "rule_type": "vital_history_modifier",
+   "applies_to_agent_groups": [
+    "PTH_PTHrP_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history",
+      "operator": "intersects",
+      "value": [
+       "orthostatic_hypotension",
+       "recurrent_syncope",
+       "falls_high_risk"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "contains",
+      "value": "PTH_PTHrP_axis"
+     }
+    ]
+   },
+   "risk_signal": "orthostatic_hypotension_context",
+   "severity": "yellow",
+   "action": "CAUTION_DOCUMENT_RATIONALE",
+   "provider_behavior": "Flag orthostatic/fall-risk context.",
+   "rationale": "Teriparatide labeling describes transient orthostatic hypotension.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for teriparatide; class inference for PTHrP analogues",
+   "confidence": "high_for_teriparatide_moderate_for_class",
+   "source_ids": [
+    "SRC_TERIPARATIDE_DAILYMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_PTH_007",
+   "name": "Severe renal impairment with teriparatide/PTH analogue",
+   "domain": "renal_function",
+   "rule_type": "renal_threshold_modifier",
+   "applies_to_agent_groups": [
+    "PTH_PTHrP_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "renal.CrCl_or_eGFR",
+      "operator": "<",
+      "value": 30
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "contains",
+      "value": "PTH_PTHrP_axis"
+     }
+    ]
+   },
+   "risk_signal": "severe_renal_impairment_PTH_context",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag severe renal impairment; consider CKD-mineral bone context.",
+   "rationale": "Teriparatide labeling notes altered pharmacokinetics in severe renal impairment.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for teriparatide; class inference for PTHrP analogues",
+   "confidence": "moderate_to_high",
+   "source_ids": [
+    "SRC_TERIPARATIDE_DAILYMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_PTH_008",
+   "name": "Pregnancy or lactation with PTH/PTHrP analogue",
+   "domain": "pregnancy_lactation",
+   "rule_type": "pregnancy_lactation_modifier",
+   "applies_to_agent_groups": [
+    "PTH_PTHrP_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "pregnancy_or_lactation_status",
+      "operator": "in",
+      "value": [
+       "pregnant",
+       "possible_pregnancy",
+       "lactating"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "contains",
+      "value": "PTH_PTHrP_axis"
+     }
+    ]
+   },
+   "risk_signal": "pregnancy_lactation_PTH_context",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag pregnancy/lactation context for clinician review.",
+   "rationale": "Teriparatide labeling includes pregnancy and lactation sections; production CDS should not assume safety in pregnancy/lactation.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for teriparatide; class inference for PTHrP analogues",
+   "confidence": "moderate",
+   "source_ids": [
+    "SRC_TERIPARATIDE_DAILYMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_MELANO_001",
+   "name": "Uncontrolled hypertension or known cardiovascular disease with bremelanotide/PT-141",
+   "domain": "cardiovascular_history",
+   "rule_type": "cardiovascular_modifier",
+   "applies_to_agent_groups": [
+    "melanocortin_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "pt-141"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history",
+      "operator": "intersects",
+      "value": [
+       "uncontrolled_hypertension",
+       "known_cardiovascular_disease"
+      ]
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "in",
+      "value": [
+       "bremelanotide",
+       "PT-141"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "BP_HR_cardiovascular_signal",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate uncontrolled hypertension or known CVD; do not treat PT-141 as a cosmetic low-risk add-on.",
+   "rationale": "Bremelanotide labeling contraindicates use in uncontrolled hypertension or known cardiovascular disease and describes BP/HR effects.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported for bremelanotide/PT-141",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_VYLEESI_FDA_BREMELANOTIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_MELANO_002",
+   "name": "High cardiovascular risk or multiple uncontrolled risk factors with bremelanotide/PT-141",
+   "domain": "cardiovascular_risk",
+   "rule_type": "cardiovascular_modifier",
+   "applies_to_agent_groups": [
+    "melanocortin_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "pt-141"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "risk_profile",
+      "operator": "intersects",
+      "value": [
+       "multiple_uncontrolled_CV_risk_factors",
+       "recent_chest_pain",
+       "recent_stroke_TIA",
+       "arrhythmia_symptoms"
+      ]
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "in",
+      "value": [
+       "bremelanotide",
+       "PT-141"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "BP_HR_cardiovascular_precaution",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag cardiovascular risk context; do not describe as free of hemodynamic effect.",
+   "rationale": "Bremelanotide labeling warns about transient BP increases and HR decreases; cardiovascular context requires clinician interpretation.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported signal; patient risk stratification is CDS inference",
+   "confidence": "moderate_to_high",
+   "source_ids": [
+    "SRC_VYLEESI_FDA_BREMELANOTIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_MELANO_003",
+   "name": "Oral naltrexone-containing product with bremelanotide/PT-141",
+   "domain": "medication_class",
+   "rule_type": "medication_class_modifier",
+   "applies_to_agent_groups": [
+    "melanocortin_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "pt-141"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "medications.name_or_class",
+      "operator": "contains",
+      "value": "oral_naltrexone"
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "in",
+      "value": [
+       "bremelanotide",
+       "PT-141"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "naltrexone_absorption_reduction",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate oral naltrexone interaction; do not classify as no known issue.",
+   "rationale": "Bremelanotide labeling says it may significantly decrease systemic exposure of orally administered naltrexone and recommends avoiding use with oral naltrexone-containing products intended to treat alcohol or opioid addiction.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_VYLEESI_FDA_BREMELANOTIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_MELANO_004",
+   "name": "Threshold-dependent oral medication with bremelanotide/PT-141",
+   "domain": "medication_class",
+   "rule_type": "medication_class_modifier",
+   "applies_to_agent_groups": [
+    "melanocortin_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "pt-141"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "medications.requires_threshold_or_rapid_absorption",
+      "operator": "equals",
+      "value": true
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "in",
+      "value": [
+       "bremelanotide",
+       "PT-141"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "delayed_gastric_emptying_oral_med_absorption",
+   "severity": "yellow",
+   "action": "CAUTION_DOCUMENT_RATIONALE",
+   "provider_behavior": "Flag oral medication absorption/timing issue.",
+   "rationale": "Bremelanotide labeling states it may slow gastric emptying and potentially reduce rate/extent of absorption of oral medications.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_VYLEESI_FDA_BREMELANOTIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_MELANO_005",
+   "name": "Pregnancy or possible pregnancy with bremelanotide/PT-141",
+   "domain": "pregnancy",
+   "rule_type": "pregnancy_modifier",
+   "applies_to_agent_groups": [
+    "melanocortin_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "pt-141"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "pregnancy_status",
+      "operator": "in",
+      "value": [
+       "pregnant",
+       "possible_pregnancy"
+      ]
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "in",
+      "value": [
+       "bremelanotide",
+       "PT-141"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "pregnancy_context",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate pregnancy/possible pregnancy; no routine PT-141 recommendation.",
+   "rationale": "Bremelanotide labeling contains pregnancy-risk language.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_VYLEESI_FDA_BREMELANOTIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_MELANO_006",
+   "name": "Hyperpigmentation risk context with bremelanotide/PT-141",
+   "domain": "skin_history",
+   "rule_type": "dermatologic_modifier",
+   "applies_to_agent_groups": [
+    "melanocortin_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "pt-141"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history_or_characteristics",
+      "operator": "intersects",
+      "value": [
+       "prior_hyperpigmentation",
+       "melasma",
+       "darkening_scars",
+       "darker_skin_high_concern"
+      ]
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "in",
+      "value": [
+       "bremelanotide",
+       "PT-141"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "focal_hyperpigmentation_signal",
+   "severity": "yellow",
+   "action": "INFORM_AND_MONITOR",
+   "provider_behavior": "Flag hyperpigmentation counseling/monitoring concept; do not overstate reversibility.",
+   "rationale": "Bremelanotide labeling includes focal hyperpigmentation warning.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported",
+   "confidence": "high",
+   "source_ids": [
+    "SRC_VYLEESI_FDA_BREMELANOTIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_HPG_001",
+   "name": "Fertility therapy or gonadotropin/GnRH-active medication with kisspeptin/GnRH pathway",
+   "domain": "reproductive_medications",
+   "rule_type": "medication_endocrine_modifier",
+   "applies_to_agent_groups": [
+    "reproductive_HPG_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "kisspeptin-10"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "medications_or_treatment_context",
+      "operator": "intersects",
+      "value": [
+       "fertility_treatment",
+       "gonadotropins",
+       "GnRH_agonist",
+       "GnRH_antagonist",
+       "clomiphene",
+       "letrozole_for_ovulation"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "contains",
+      "value": "reproductive_HPG_axis"
+     }
+    ]
+   },
+   "risk_signal": "HPG_axis_additive_or_interfering_signal",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag HPG-axis overlap; do not claim synergy or safety without reproductive endocrinology context.",
+   "rationale": "Kisspeptin stimulates GnRH/LH pathways; direct combination evidence with fertility regimens is context-dependent.",
+   "evidence_level": "B",
+   "evidence_directness": "human/mechanistic endocrine evidence; not direct safety rule for all combinations",
+   "confidence": "moderate",
+   "source_ids": [
+    "SRC_KISSPEPTIN_REVIEW"
+   ]
+  },
+  {
+   "rule_id": "PFM_HPG_002",
+   "name": "Hormone-sensitive malignancy history with HPG-axis stimulant",
+   "domain": "oncology_history",
+   "rule_type": "oncology_modifier",
+   "applies_to_agent_groups": [
+    "reproductive_HPG_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "kisspeptin-10"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history.hormone_sensitive_malignancy",
+      "operator": "equals",
+      "value": true
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "contains",
+      "value": "reproductive_HPG_axis"
+     }
+    ]
+   },
+   "risk_signal": "sex_steroid_axis_context",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag hormone-sensitive cancer history; classify interaction as theoretical unless direct agent-specific evidence exists.",
+   "rationale": "Kisspeptin/GnRH-axis agents stimulate reproductive neuroendocrine signaling; oncology implications require disease-specific clinician interpretation.",
+   "evidence_level": "C",
+   "evidence_directness": "mechanistic inference",
+   "confidence": "low_to_moderate",
+   "source_ids": [
+    "SRC_KISSPEPTIN_REVIEW"
+   ]
+  },
+  {
+   "rule_id": "PFM_HPG_003",
+   "name": "Pregnancy or possible pregnancy with HPG-axis investigational peptide",
+   "domain": "pregnancy",
+   "rule_type": "pregnancy_modifier",
+   "applies_to_agent_groups": [
+    "reproductive_HPG_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "kisspeptin-10"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "pregnancy_status",
+      "operator": "in",
+      "value": [
+       "pregnant",
+       "possible_pregnancy"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "contains",
+      "value": "reproductive_HPG_axis"
+     }
+    ]
+   },
+   "risk_signal": "pregnancy_reproductive_axis_context",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag pregnancy context; do not generate fertility/hormonal optimization output without clinician review.",
+   "rationale": "Kisspeptin is a reproductive-axis peptide; pregnancy-specific use and combination safety are not established generically.",
+   "evidence_level": "C",
+   "evidence_directness": "mechanistic/evidence-gap",
+   "confidence": "low_to_moderate",
+   "source_ids": [
+    "SRC_KISSPEPTIN_REVIEW"
+   ]
+  },
+  {
+   "rule_id": "PFM_RESEARCH_001",
+   "name": "Autoimmune disease or biologic immunomodulator with immune-modulating research peptide",
+   "domain": "immune_history_medications",
+   "rule_type": "immune_modifier",
+   "applies_to_agent_groups": [
+    "immune_modulating_research_peptides",
+    "wound_repair_regenerative_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "bpc-157",
+    "ghk-cu",
+    "kpv",
+    "tb-500",
+    "thymosin-alpha-1"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history_or_medications",
+      "operator": "intersects",
+      "value": [
+       "autoimmune_disease",
+       "immunosuppressant",
+       "biologic_immunomodulator",
+       "JAK_inhibitor",
+       "systemic_steroids"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "immune_modulating_research_peptides",
+       "wound_repair_regenerative_axis"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "immune_modulation_uncertainty",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag immune-modulation uncertainty; use cautious wording and avoid direct safety/synergy claims.",
+   "rationale": "Thymosin alpha-1, LL-37, GHK-Cu, BPC-157 and related peptides have immune/regenerative pathway evidence, but direct patient-factor interaction data are limited.",
+   "evidence_level": "C",
+   "evidence_directness": "mechanistic/indirect; evidence gap for most clinical combinations",
+   "confidence": "low_to_moderate",
+   "source_ids": [
+    "SRC_THYMOSIN_ALPHA1_REVIEW",
+    "SRC_LL37_REVIEW",
+    "SRC_GHK_CU_REVIEW",
+    "SRC_BPC157_REVIEW_PUBMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_RESEARCH_002",
+   "name": "Transplant or major immunosuppression with immune-modulating research peptide",
+   "domain": "immune_history_medications",
+   "rule_type": "immune_modifier",
+   "applies_to_agent_groups": [
+    "immune_modulating_research_peptides"
+   ],
+   "applies_to_agents_mapped": [
+    "bpc-157",
+    "ghk-cu",
+    "kpv",
+    "tb-500",
+    "thymosin-alpha-1"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history_or_medications",
+      "operator": "intersects",
+      "value": [
+       "solid_organ_transplant",
+       "bone_marrow_transplant",
+       "calcineurin_inhibitor",
+       "anti_rejection_therapy",
+       "major_immunosuppression"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "contains",
+      "value": "immune_modulating_research_peptides"
+     }
+    ]
+   },
+   "risk_signal": "transplant_immunomodulation_uncertainty",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate transplant/immunosuppression context; do not make immune-boosting claims.",
+   "rationale": "Immune-modulating peptide literature is insufficient to support broad safety claims in transplant/immunosuppressed patients.",
+   "evidence_level": "C",
+   "evidence_directness": "mechanistic/evidence gap",
+   "confidence": "low",
+   "source_ids": [
+    "SRC_THYMOSIN_ALPHA1_REVIEW",
+    "SRC_LL37_REVIEW",
+    "SRC_BPC157_REVIEW_PUBMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_RESEARCH_003",
+   "name": "Active malignancy/history with regenerative or angiogenic research peptides",
+   "domain": "oncology_history",
+   "rule_type": "oncology_modifier",
+   "applies_to_agent_groups": [
+    "wound_repair_regenerative_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "bpc-157",
+    "ghk-cu",
+    "tb-500"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history",
+      "operator": "intersects",
+      "value": [
+       "active_malignancy",
+       "recent_malignancy",
+       "current_cancer_treatment",
+       "unexplained_mass"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "contains",
+      "value": "wound_repair_regenerative_axis"
+     }
+    ]
+   },
+   "risk_signal": "regenerative_angiogenic_oncology_uncertainty",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag oncology context; use low-confidence language and do not claim cancer safety.",
+   "rationale": "GHK-Cu and LL-37 literature involves tissue remodeling/angiogenesis/wound biology; BPC-157 evidence is largely preclinical/translational. This supports caution, not a proven cancer interaction.",
+   "evidence_level": "C",
+   "evidence_directness": "mechanistic/indirect/evidence gap",
+   "confidence": "low",
+   "source_ids": [
+    "SRC_GHK_CU_REVIEW",
+    "SRC_LL37_REVIEW",
+    "SRC_BPC157_REVIEW_PUBMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_RESEARCH_004",
+   "name": "Active infection with immune/wound peptide marketed as anti-infective or immune support",
+   "domain": "infection_status",
+   "rule_type": "infection_modifier",
+   "applies_to_agent_groups": [
+    "immune_modulating_research_peptides",
+    "wound_repair_regenerative_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "bpc-157",
+    "ghk-cu",
+    "kpv",
+    "tb-500",
+    "thymosin-alpha-1"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "current_state.active_significant_infection",
+      "operator": "equals",
+      "value": true
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "intersects",
+      "value": [
+       "immune_modulating_research_peptides",
+       "wound_repair_regenerative_axis"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "infection_claim_guardrail",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Do not allow the AI to substitute peptide logic for standard infection evaluation/treatment.",
+   "rationale": "LL-37 and thymosin alpha-1 have immune/antimicrobial pathway literature, but this does not establish that research peptides replace standard infectious disease care.",
+   "evidence_level": "C",
+   "evidence_directness": "mechanistic/indirect",
+   "confidence": "low_to_moderate",
+   "source_ids": [
+    "SRC_LL37_REVIEW",
+    "SRC_THYMOSIN_ALPHA1_REVIEW"
+   ]
+  },
+  {
+   "rule_id": "PFM_RESEARCH_005",
+   "name": "Pregnancy/lactation with research peptides lacking direct human data",
+   "domain": "pregnancy_lactation",
+   "rule_type": "pregnancy_lactation_modifier",
+   "applies_to_agent_groups": [
+    "research_peptides_general",
+    "immune_modulating_research_peptides",
+    "wound_repair_regenerative_axis",
+    "mitochondrial_peptides",
+    "neuropeptide_research"
+   ],
+   "applies_to_agents_mapped": [
+    "bpc-157",
+    "dsip",
+    "epitalon",
+    "ghk-cu",
+    "kpv",
+    "mots-c",
+    "selank",
+    "semax",
+    "ss-31",
+    "tb-500"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "pregnancy_or_lactation_status",
+      "operator": "in",
+      "value": [
+       "pregnant",
+       "possible_pregnancy",
+       "lactating"
+      ]
+     },
+     {
+      "field": "candidate.evidence_level",
+      "operator": "in",
+      "value": [
+       "C",
+       "D"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "pregnancy_data_gap",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate; absence of direct data must not be converted into reassurance.",
+   "rationale": "For many research peptides, direct human pregnancy/lactation safety data are insufficient; mechanism-only evidence is not adequate for a no-risk claim.",
+   "evidence_level": "D",
+   "evidence_directness": "evidence gap",
+   "confidence": "low",
+   "source_ids": [
+    "SRC_BPC157_REVIEW_PUBMED",
+    "SRC_MOTSC_REVIEW",
+    "SRC_ELAMIPRETIDE_SS31_TRIAL",
+    "SRC_KISSPEPTIN_REVIEW"
+   ]
+  },
+  {
+   "rule_id": "PFM_RESEARCH_006",
+   "name": "Research peptide with no direct human combination data",
+   "domain": "evidence_quality",
+   "rule_type": "evidence_guardrail",
+   "applies_to_agent_groups": [
+    "research_peptides_general"
+   ],
+   "applies_to_agents_mapped": [
+    "bpc-157",
+    "cerebrolysin",
+    "dsip",
+    "epitalon",
+    "ghk-cu",
+    "kpv",
+    "mots-c",
+    "selank",
+    "semax",
+    "ss-31",
+    "tb-500"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "candidate.direct_human_combination_data",
+      "operator": "equals",
+      "value": false
+     },
+     {
+      "field": "candidate.evidence_level",
+      "operator": "in",
+      "value": [
+       "C",
+       "D"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "do_not_claim_direct_safety_or_synergy",
+   "severity": "blue_informational",
+   "action": "LANGUAGE_GUARDRAIL",
+   "provider_behavior": "Force the AI agent to say 'theoretical/mechanistic' and not 'proven safe' or 'proven synergistic'.",
+   "rationale": "Mechanistic and preclinical literature cannot establish direct clinical combination safety.",
+   "evidence_level": "D",
+   "evidence_directness": "evidence gap / methodological guardrail",
+   "confidence": "high_for_language_control",
+   "source_ids": [
+    "SRC_BPC157_REVIEW_PUBMED",
+    "SRC_MOTSC_REVIEW",
+    "SRC_LL37_REVIEW",
+    "SRC_GHK_CU_REVIEW"
+   ]
+  },
+  {
+   "rule_id": "PFM_RESEARCH_007",
+   "name": "MOTS-c or metabolic research peptide with diabetes/glucose medications",
+   "domain": "glycemic_status_medications",
+   "rule_type": "metabolic_research_modifier",
+   "applies_to_agent_groups": [
+    "mitochondrial_peptides",
+    "metabolic_research_peptides"
+   ],
+   "applies_to_agents_mapped": [
+    "aod-9604",
+    "mots-c"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history_or_medications",
+      "operator": "intersects",
+      "value": [
+       "diabetes",
+       "prediabetes",
+       "insulin",
+       "sulfonylurea",
+       "metformin",
+       "SGLT2_inhibitor"
+      ]
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "in",
+      "value": [
+       "MOTS-c",
+       "AOD-9604"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "metabolic_pathway_uncertainty",
+   "severity": "yellow",
+   "action": "CAUTION_DOCUMENT_RATIONALE",
+   "provider_behavior": "Use theoretical language; do not claim direct glucose-safety or fat-loss synergy.",
+   "rationale": "MOTS-c is a mitochondrial-derived peptide involved in metabolic biology, but review literature notes clinical translation remains uncertain.",
+   "evidence_level": "C",
+   "evidence_directness": "mechanistic/evidence gap",
+   "confidence": "low",
+   "source_ids": [
+    "SRC_MOTSC_REVIEW"
+   ]
+  },
+  {
+   "rule_id": "PFM_RESEARCH_008",
+   "name": "Mitochondrial disease/cardiomyopathy context with SS-31/elamipretide",
+   "domain": "specialist_disease_context",
+   "rule_type": "mitochondrial_modifier",
+   "applies_to_agent_groups": [
+    "mitochondrial_peptides"
+   ],
+   "applies_to_agents_mapped": [
+    "ss-31"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history",
+      "operator": "intersects",
+      "value": [
+       "mitochondrial_disease",
+       "cardiomyopathy",
+       "neuromuscular_mitochondrial_syndrome"
+      ]
+     },
+     {
+      "field": "candidate.agent",
+      "operator": "in",
+      "value": [
+       "SS-31",
+       "elamipretide"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "specialist_trial_context_required",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag specialist-disease context; do not extrapolate trial findings to unsupervised broad use.",
+   "rationale": "Elamipretide/SS-31 has human trial literature in selected mitochondrial disease contexts, but those data do not justify broad patient-factor claims.",
+   "evidence_level": "B",
+   "evidence_directness": "direct human trial context but limited generalizability",
+   "confidence": "moderate",
+   "source_ids": [
+    "SRC_ELAMIPRETIDE_SS31_TRIAL"
+   ]
+  },
+  {
+   "rule_id": "PFM_RESEARCH_009",
+   "name": "Neuropsychiatric instability or seizure disorder with neuropeptide research agents",
+   "domain": "neuropsychiatric_history",
+   "rule_type": "neuropsychiatric_modifier",
+   "applies_to_agent_groups": [
+    "neuropeptide_research"
+   ],
+   "applies_to_agents_mapped": [
+    "cerebrolysin",
+    "dsip",
+    "selank",
+    "semax"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "history",
+      "operator": "intersects",
+      "value": [
+       "bipolar_mania",
+       "psychosis",
+       "seizure_disorder",
+       "recent_suicidal_ideation",
+       "severe_insomnia"
+      ]
+     },
+     {
+      "field": "candidate.agent_group",
+      "operator": "contains",
+      "value": "neuropeptide_research"
+     }
+    ]
+   },
+   "risk_signal": "neuropsychiatric_evidence_gap",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Use uncertainty language and require clinician review; do not claim no neuropsychiatric interaction.",
+   "rationale": "For Semax/Selank/DSIP/Cerebrolysin-type neuropeptide research agents, accessible evidence does not establish robust patient-factor interaction rules for psychiatric instability, seizure disorder, or combinations; conservative clinician review is a language-safety rule.",
+   "evidence_level": "D",
+   "evidence_directness": "evidence gap",
+   "confidence": "low",
+   "source_ids": [
+    "SRC_NEUROPEPTIDE_RESEARCH_LIMITED"
+   ]
+  },
+  {
+   "rule_id": "PFM_AXIS_001",
+   "name": "High cumulative GI-motility load",
+   "domain": "axis_load",
+   "rule_type": "axis_load_modifier",
+   "applies_to_agent_groups": [
+    "GLP1_RA",
+    "GIP_GLP1_RA",
+    "GIP_GLP1_glucagon_RA",
+    "amylin_analog",
+    "melanocortin_axis"
+   ],
+   "applies_to_agents_mapped": [
+    "pt-141",
+    "retatrutide",
+    "semaglutide",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "axis_load.GI_motility",
+      "operator": ">=",
+      "value": 2
+     },
+     {
+      "field": "symptoms_or_history",
+      "operator": "intersects",
+      "value": [
+       "nausea",
+       "vomiting",
+       "gastroparesis",
+       "constipation",
+       "oral_med_absorption_concern"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "cumulative_delayed_gastric_emptying_load",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag combined GI-motility burden; avoid stacking-as-synergy language.",
+   "rationale": "Multiple cited labels support delayed gastric emptying/oral absorption or GI adverse-event signals for GLP-1/GIP, amylin, and bremelanotide pathways.",
+   "evidence_level": "A",
+   "evidence_directness": "class/polypathway inference from direct labels",
+   "confidence": "moderate_to_high",
+   "source_ids": [
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE",
+    "SRC_SYMLIN_DAILYMED_PRAMLINTIDE",
+    "SRC_VYLEESI_FDA_BREMELANOTIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_AXIS_002",
+   "name": "High cumulative glycemic-lowering load",
+   "domain": "axis_load",
+   "rule_type": "axis_load_modifier",
+   "applies_to_agent_groups": [
+    "GLP1_RA",
+    "GIP_GLP1_RA",
+    "amylin_analog"
+   ],
+   "applies_to_agents_mapped": [
+    "retatrutide",
+    "semaglutide",
+    "tirzepatide"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "axis_load.glycemic_lowering",
+      "operator": ">=",
+      "value": 2
+     },
+     {
+      "field": "medications.class",
+      "operator": "intersects",
+      "value": [
+       "insulin",
+       "sulfonylurea",
+       "meglitinide"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "cumulative_hypoglycemia_load",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag combined glycemic-lowering burden with insulin/secretagogues.",
+   "rationale": "Labels support hypoglycemia risk when incretin/amylin agents interact with insulin or secretagogues.",
+   "evidence_level": "A",
+   "evidence_directness": "direct label-supported classes; cumulative load is CDS inference",
+   "confidence": "high_to_moderate",
+   "source_ids": [
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE",
+    "SRC_SYMLIN_DAILYMED_PRAMLINTIDE"
+   ]
+  },
+  {
+   "rule_id": "PFM_AXIS_003",
+   "name": "High cumulative GH/IGF-1 pathway load",
+   "domain": "axis_load",
+   "rule_type": "axis_load_modifier",
+   "applies_to_agent_groups": [
+    "GH_IGF1_axis",
+    "GHRH_analogue",
+    "GHS_ghrelin_secretagogue"
+   ],
+   "applies_to_agents_mapped": [
+    "aod-9604",
+    "cjc-1295",
+    "ghrp-2",
+    "ghrp-6",
+    "hexarelin",
+    "ipamorelin",
+    "sermorelin",
+    "tesamorelin"
+   ],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "axis_load.GH_IGF1",
+      "operator": ">=",
+      "value": 2
+     },
+     {
+      "field": "labs_or_history",
+      "operator": "intersects",
+      "value": [
+       "IGF1_high",
+       "diabetes",
+       "edema",
+       "active_malignancy_history"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "cumulative_GH_IGF1_load",
+   "severity": "yellow_to_red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Flag stacked GH/IGF-axis logic; avoid claiming clean synergy unless direct evidence supports the exact combination.",
+   "rationale": "Tesamorelin and somatropin labels support IGF-1, glucose, fluid retention, malignancy and retinopathy concern domains.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for labels; cumulative stack is pathway inference",
+   "confidence": "moderate",
+   "source_ids": [
+    "SRC_EGRIFTA_FDA_TESAMORELIN",
+    "SRC_HUMATROPE_DAILYMED_SOMATROPIN"
+   ]
+  },
+  {
+   "rule_id": "PFM_AXIS_004",
+   "name": "High cumulative sodium/water-retention load",
+   "domain": "axis_load",
+   "rule_type": "axis_load_modifier",
+   "applies_to_agent_groups": [
+    "vasopressin_ADH_axis"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": false,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "axis_load.water_retention_or_hyponatremia",
+      "operator": ">=",
+      "value": 1
+     },
+     {
+      "field": "risk_factors",
+      "operator": "intersects",
+      "value": [
+       "hyponatremia_risk_medication",
+       "low_sodium",
+       "CHF",
+       "uncontrolled_HTN",
+       "eGFR_below_50",
+       "age_65_or_older"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "cumulative_water_sodium_risk",
+   "severity": "red",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "Escalate cumulative water/sodium risk; no low-risk label when any major sodium risk factor exists.",
+   "rationale": "Desmopressin labeling supports hyponatremia/water-retention risk factors and interacting medication rules.",
+   "evidence_level": "A",
+   "evidence_directness": "direct for desmopressin; pathway inference for ADH-related agents",
+   "confidence": "high_for_desmopressin",
+   "source_ids": [
+    "SRC_NOCDURNA_FDA_DESMOPRESSIN",
+    "SRC_DESMOPRESSIN_PFIZER_INJECTION"
+   ]
+  },
+  {
+   "rule_id": "PFM_OUTPUT_001",
+   "name": "No direct combination evidence means no direct safety/synergy claim",
+   "domain": "evidence_quality",
+   "rule_type": "language_guardrail",
+   "applies_to_agent_groups": [
+    "all_agent_groups"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "candidate.direct_combination_evidence",
+      "operator": "equals",
+      "value": false
+     },
+     {
+      "field": "rule.evidence_directness",
+      "operator": "in",
+      "value": [
+       "mechanistic",
+       "indirect",
+       "evidence gap"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "claim_calibration_required",
+   "severity": "blue_informational",
+   "action": "LANGUAGE_GUARDRAIL",
+   "provider_behavior": "Use calibrated terms: theoretical, mechanistic, indirect, uncertain. Do not claim proven safety, proven synergy, or proven harm.",
+   "rationale": "Direct human evidence is not interchangeable with preclinical or mechanism-only literature.",
+   "evidence_level": "D",
+   "evidence_directness": "methodological guardrail",
+   "confidence": "high_for_output_quality",
+   "source_ids": [
+    "SRC_BPC157_REVIEW_PUBMED",
+    "SRC_MOTSC_REVIEW",
+    "SRC_LL37_REVIEW",
+    "SRC_GHK_CU_REVIEW",
+    "SRC_KISSPEPTIN_REVIEW"
+   ]
+  },
+  {
+   "rule_id": "PFM_OUTPUT_002",
+   "name": "Red-rule override requires clinician review",
+   "domain": "runtime_state",
+   "rule_type": "runtime_priority_rule",
+   "applies_to_agent_groups": [
+    "all_agent_groups"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "any_fired_rule.severity",
+      "operator": "equals",
+      "value": "red"
+     }
+    ]
+   },
+   "risk_signal": "clinician_review_required",
+   "severity": "blue_informational",
+   "action": "HOLD_FOR_CLINICIAN_REVIEW",
+   "provider_behavior": "If any red rule fires, the AI must not produce an a low-risk classification or low-risk recommendation.",
+   "rationale": "This operational rule prevents high-consequence label-supported or evidence-gap risk signals from being overridden by weaker synergy logic.",
+   "evidence_level": "D",
+   "evidence_directness": "operational safety rule derived from CDS design",
+   "confidence": "high_for_runtime_behavior",
+   "source_ids": [
+    "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE",
+    "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE",
+    "SRC_NOCDURNA_FDA_DESMOPRESSIN",
+    "SRC_EGRIFTA_FDA_TESAMORELIN",
+    "SRC_TERIPARATIDE_DAILYMED"
+   ]
+  },
+  {
+   "rule_id": "PFM_OUTPUT_003",
+   "name": "Missing critical intake fields blocks low-risk classification",
+   "domain": "runtime_state",
+   "rule_type": "runtime_priority_rule",
+   "applies_to_agent_groups": [
+    "all_agent_groups"
+   ],
+   "applies_to_agents_mapped": [],
+   "fires_in_formulary": true,
+   "trigger_logic": {
+    "all": [
+     {
+      "field": "any_fired_rule.rule_type",
+      "operator": "equals",
+      "value": "missing_data_gate"
+     },
+     {
+      "field": "any_fired_rule.severity",
+      "operator": "in",
+      "value": [
+       "yellow_to_red",
+       "red"
+      ]
+     }
+    ]
+   },
+   "risk_signal": "incomplete_profile_blocks_clearance",
+   "severity": "blue_informational",
+   "action": "REQUEST_MISSING_DATA",
+   "provider_behavior": "If required intake fields are missing, the AI must ask for missing data or output an incomplete-profile risk statement.",
+   "rationale": "Patient-factor rules depend on lab, medication, comorbidity and procedure data; absent data cannot be assumed normal.",
+   "evidence_level": "D",
+   "evidence_directness": "operational data-quality rule",
+   "confidence": "high_for_runtime_behavior",
+   "source_ids": [
+    "SRC_BYETTA_DAILYMED_EXENATIDE",
+    "SRC_NOCDURNA_FDA_DESMOPRESSIN",
+    "SRC_SYMLIN_DAILYMED_PRAMLINTIDE"
+   ]
+  }
+ ],
+ "sources": {
+  "SRC_WEGOVY_DAILYMED_SEMAGLUTIDE": {
+   "title": "DailyMed label: WEGOVY (semaglutide)",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/fda/fdaDrugXsl.cfm?setid=f5e548d0-cc79-4c34-a3f5-e20a5b8b6564&type=display",
+   "type": "US prescribing label / DailyMed",
+   "directness": "direct for semaglutide; class inference for other GLP-1-based or investigational agents",
+   "audit_status": "verified_supported",
+   "limitations": "Does not establish risk magnitude for every investigational incretin/amylin/glucagon analogue or for all combinations."
+  },
+  "SRC_MOUNJARO_DAILYMED_TIRZEPATIDE": {
+   "title": "DailyMed label: MOUNJARO (tirzepatide)",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=d2d7da5d-ad07-4228-955f-cf7e355c8cc0",
+   "type": "US prescribing label / DailyMed",
+   "directness": "direct for tirzepatide; pathway inference for GLP-1/GIP/glucagon polyagonists",
+   "audit_status": "verified_supported",
+   "limitations": "Does not directly establish effects for retatrutide or other investigational polyagonists."
+  },
+  "SRC_SYMLIN_DAILYMED_PRAMLINTIDE": {
+   "title": "DailyMed label: SYMLIN (pramlintide)",
+   "url": "https://www.dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?audience=consumer&setid=4aea30ff-eb0d-45c1-b114-3127966328ff",
+   "type": "US prescribing label / DailyMed",
+   "directness": "direct for pramlintide; pathway inference for amylin analogues such as cagrilintide",
+   "audit_status": "verified_supported",
+   "limitations": "Pramlintide data should not be over-applied to all amylin analogues without direct evidence."
+  },
+  "SRC_BYETTA_DAILYMED_EXENATIDE": {
+   "title": "DailyMed label: BYETTA (exenatide)",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=c621d002-b7bf-4f3a-af68-4f70fd298d05",
+   "type": "US prescribing label / DailyMed",
+   "directness": "direct for exenatide",
+   "audit_status": "verified_supported",
+   "limitations": "Does not apply automatically to all GLP-1 receptor agonists; semaglutide/tirzepatide have different renal pharmacology but can still carry dehydration/AKI warnings."
+  },
+  "SRC_NOCDURNA_FDA_DESMOPRESSIN": {
+   "title": "FDA label: NOCDURNA (desmopressin acetate)",
+   "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2018/022517s000lbl.pdf",
+   "type": "US prescribing label / FDA PDF",
+   "directness": "direct for desmopressin; class inference for vasopressin/ADH-axis agents",
+   "audit_status": "verified_supported",
+   "limitations": "Nocdurna label is indication-specific and notes it may not be the latest FDA label; cross-application to injectable/desmopressin formulations requires clinician review."
+  },
+  "SRC_DESMOPRESSIN_PFIZER_INJECTION": {
+   "title": "Pfizer label: desmopressin acetate injection",
+   "url": "https://labeling.pfizer.com/ShowLabeling.aspx?id=4403",
+   "type": "Manufacturer labeling",
+   "directness": "direct for desmopressin injection",
+   "audit_status": "verified_supported",
+   "limitations": "Does not cover every peptide with possible ADH-like biology."
+  },
+  "SRC_EGRIFTA_FDA_TESAMORELIN": {
+   "title": "FDA label: EGRIFTA (tesamorelin)",
+   "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2019/022505s012s013lbl.pdf",
+   "type": "US prescribing label / FDA PDF",
+   "directness": "direct for tesamorelin; pathway inference for GHRH/GHS/GH-axis research peptides",
+   "audit_status": "verified_supported",
+   "limitations": "Does not directly establish safety rules for CJC-1295, sermorelin, ipamorelin, GHRP-2/6, or hexarelin; those are lower-confidence pathway extrapolations."
+  },
+  "SRC_HUMATROPE_DAILYMED_SOMATROPIN": {
+   "title": "DailyMed label: HUMATROPE (somatropin)",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/fda/fdaDrugXsl.cfm?setid=a774e1ae-3997-49ee-8b0e-99a2b315d409",
+   "type": "US prescribing label / DailyMed",
+   "directness": "direct for somatropin; indirect for secretagogues and GHRH analogues",
+   "audit_status": "verified_supported",
+   "limitations": "Somatropin is exogenous GH, not the same as all GH secretagogues; extrapolation should be marked indirect."
+  },
+  "SRC_TERIPARATIDE_DAILYMED": {
+   "title": "DailyMed label: teriparatide injection",
+   "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=d38b470a-2e62-487b-b3e7-134d3d1958b5",
+   "type": "US prescribing label / DailyMed",
+   "directness": "direct for teriparatide; PTH/PTHrP class inference for abaloparatide",
+   "audit_status": "verified_supported",
+   "limitations": "Specific abaloparatide rules should be confirmed against its own label if used in production."
+  },
+  "SRC_VYLEESI_FDA_BREMELANOTIDE": {
+   "title": "FDA label: VYLEESI (bremelanotide)",
+   "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2020/210557s002lbl.pdf",
+   "type": "US prescribing label / FDA PDF",
+   "directness": "direct for bremelanotide; indirect for PT-141 research framing where PT-141 refers to bremelanotide",
+   "audit_status": "verified_supported",
+   "limitations": "Does not cover non-bremelanotide melanocortin analogues."
+  },
+  "SRC_CAGRILINTIDE_SEMAGLUTIDE_PUBMED": {
+   "title": "Cagrilintide plus semaglutide human clinical studies (PubMed-indexed)",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/37364590/",
+   "type": "PubMed human clinical evidence",
+   "directness": "direct for cagrilintide/semaglutide combination; indirect for other amylin/incretin combinations",
+   "audit_status": "verified_supported",
+   "limitations": "Not a universal safety endorsement; studies have defined protocols, inclusion/exclusion criteria, and follow-up periods."
+  },
+  "SRC_RETATRUTIDE_PUBMED": {
+   "title": "Retatrutide phase 2 obesity trial (PubMed)",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/37366315/",
+   "type": "PubMed human clinical evidence",
+   "directness": "direct for retatrutide; indirect for other GLP-1/GIP/glucagon polyagonists",
+   "audit_status": "verified_supported",
+   "limitations": "Phase 2 trial data do not establish broad patient-factor rules for all populations or combinations."
+  },
+  "SRC_BPC157_REVIEW_PUBMED": {
+   "title": "BPC-157 review / translational evidence (PubMed-indexed)",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/40789979/",
+   "type": "Review / translational evidence",
+   "directness": "evidence gap / preclinical-mechanistic",
+   "audit_status": "verified_as_low_confidence_only",
+   "limitations": "Does not support direct safety, efficacy, or combination claims in humans."
+  },
+  "SRC_THYMOSIN_ALPHA1_REVIEW": {
+   "title": "Thymosin alpha-1 immunomodulatory review",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7747025/",
+   "type": "Review / human and mechanistic immunology literature",
+   "directness": "mechanistic/human indirect",
+   "audit_status": "verified_as_indirect",
+   "limitations": "Does not establish patient-specific safety rules for autoimmune disease, transplant, biologics, or all combinations."
+  },
+  "SRC_LL37_REVIEW": {
+   "title": "LL-37/cathelicidin immunomodulatory and wound-healing review literature",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7246396/",
+   "type": "Review / mechanistic evidence",
+   "directness": "mechanistic",
+   "audit_status": "verified_as_indirect",
+   "limitations": "Does not establish safety of exogenous LL-37 use or combinations in clinic."
+  },
+  "SRC_GHK_CU_REVIEW": {
+   "title": "GHK-Cu wound-healing and skin-regeneration review literature",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6073405/",
+   "type": "Review / mechanistic and clinical dermatology literature",
+   "directness": "mechanistic/limited human topical or skin context",
+   "audit_status": "verified_as_indirect",
+   "limitations": "Does not establish systemic peptide interaction rules or oncologic safety claims."
+  },
+  "SRC_MOTSC_REVIEW": {
+   "title": "MOTS-c review: mitochondrial-derived peptide and metabolic biology",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9905433/",
+   "type": "Review / mechanistic evidence",
+   "directness": "mechanistic/evidence gap",
+   "audit_status": "verified_as_low_confidence_only",
+   "limitations": "Does not support direct patient-factor safety rules in humans."
+  },
+  "SRC_ELAMIPRETIDE_SS31_TRIAL": {
+   "title": "Elamipretide/SS-31 human trial safety literature",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10382259/",
+   "type": "Human trial / mitochondrial peptide analogue",
+   "directness": "direct for elamipretide in studied populations; not generalizable to all mitochondrial peptide use",
+   "audit_status": "verified_as_indirect",
+   "limitations": "Does not establish broad CDS rules for all comorbidities or combinations."
+  },
+  "SRC_KISSPEPTIN_REVIEW": {
+   "title": "Kisspeptin/GnRH axis review literature",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9125910/",
+   "type": "Review / reproductive neuroendocrinology",
+   "directness": "mechanistic/human endocrine literature",
+   "audit_status": "verified_as_indirect",
+   "limitations": "Does not establish safety or contraindications for every clinical context or combination."
+  },
+  "SRC_NEUROPEPTIDE_RESEARCH_LIMITED": {
+   "title": "Selank/Semax neuropeptide research (PubMed-indexed); DSIP evidence-gap",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/32342318/",
+   "type": "PubMed-indexed neuropeptide research / evidence-gap source",
+   "directness": "evidence gap / indirect",
+   "audit_status": "verified_as_low_confidence_only",
+   "limitations": "Search results and accessible snippets do not provide robust patient-factor safety rules; use only to support uncertainty language, not direct clinical claims."
+  }
+ }
+}

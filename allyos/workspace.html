@@ -2063,6 +2063,14 @@ var IX={};function ixClassOf(slug){var ac=IX.agent_classes||{};for(var c in ac){
 fetch('../protocols/interactions.json').then(function(r){return r.json()}).then(function(d){IX=d||{};render();}).catch(function(){});
 var PIX={};
 fetch('../protocols/peptide-interactions.json').then(function(r){return r.json()}).then(function(d){PIX=d||{};render();}).catch(function(){});
+var PFM={};
+fetch('../protocols/patient-factor-rules.json').then(function(r){return r.json()}).then(function(d){PFM=d||{};render();}).catch(function(){});
+/* Only send formulary-firing content to Ally (drops informational/non-stocked rules; keeps payload under the grounding cap). */
+function trimFires(o){if(!o||!o.rules)return o;var c={};for(var k in o)c[k]=o[k];
+  c.rules=o.rules.filter(function(r){return r.fires_in_formulary;});
+  if(o.agents){var ag={};for(var a in o.agents){if(o.agents[a].stocked!==false)ag[a]=o.agents[a];}c.agents=ag;}
+  return c;}
+function buildLib(){return {detail:DETAIL,contra:CONTRA,interactions:IX,peptide_interactions:trimFires(PIX),patient_factor:trimFires(PFM)};}
 
 /* ───────── structured intake vocab (pills) ───────── */
 var SEX=['Female','Male'];
@@ -2552,7 +2560,7 @@ document.getElementById('allySend').onclick=function(){
   if(p.comorbid&&p.comorbid.length)c.push('comorbid: '+p.comorbid.join(', '));
   if(p.meds&&p.meds.length)c.push('meds: '+p.meds.join(', '));
   var ctx=c.length?'De-identified context — '+c.join('; ')+'.':'';
-  fetch('/.netlify/functions/ally',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:q,context:ctx,library:{detail:DETAIL,contra:CONTRA,interactions:IX,peptide_interactions:PIX}})})
+  fetch('/.netlify/functions/ally',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:q,context:ctx,library:buildLib()})})
    .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
    .then(function(res){var el=document.getElementById(id);var t;
      if(res.ok&&res.j.answer){t='<div style="font-size:10px;color:var(--ok);margin-bottom:5px">\u{1F4DA} grounded in your locked library</div><p style="font-size:13px;line-height:1.55;white-space:pre-wrap">'+esc(res.j.answer)+'</p>';}
