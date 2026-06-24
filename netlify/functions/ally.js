@@ -64,7 +64,7 @@ exports.handler = async (event) => {
   let libraryText = "";
   try {
     if (body.library) {
-      libraryText = (typeof body.library === "string" ? body.library : JSON.stringify(body.library)).slice(0, 220000);
+      libraryText = (typeof body.library === "string" ? body.library : JSON.stringify(body.library)).slice(0, 280000);
     }
   } catch (e) { libraryText = ""; }
 
@@ -74,13 +74,16 @@ exports.handler = async (event) => {
       type: "text",
       text:
         "GROUNDING — AllyOS LOCKED LIBRARY (physician-curated, 3-auditor-verified, JSON below). " +
-        "The library has four parts: 'detail' (per-peptide protocols), 'contra' (contraindications), " +
-        "'interactions' (concomitant-medication interaction layer keyed by medication and peptide class, with per-agent overrides), and " +
+        "The library has five parts: 'detail' (per-peptide protocols), 'contra' (contraindications), " +
+        "'interactions' (concomitant-medication interaction layer keyed by medication and peptide class, with per-agent overrides), " +
         "'peptide_interactions' (an audited peptide-PEPTIDE / cross-agent stacking layer: agents with a 'stocked' flag, and rules with " +
-        "agent_slugs, interaction_type, direct_combination_evidence, confidence, action, and source_ids). For ANY dose, reconstitution, titration, frequency, cycle, monitoring, discontinuation, " +
+        "agent_slugs, interaction_type, direct_combination_evidence, confidence, action, and source_ids), and " +
+        "'patient_factor' (a label-anchored patient-factor rule engine: rules with trigger_logic over intake/lab/medication/comorbidity/symptom fields, a 'fires_in_formulary' flag, an action such as HOLD_FOR_CLINICIAN_REVIEW / REQUEST_MISSING_DATA, evidence_level, and source_ids). " +
+        "For ANY dose, reconstitution, titration, frequency, cycle, monitoring, discontinuation, " +
         "contraindication, drug-drug / concomitant-medication interaction, peptide-peptide stacking interaction, or protocol parameter, answer ONLY from this library. " +
         "When asked whether a medication can be combined with a peptide, resolve the peptide to its interaction class and check agent_overrides, then answer from the interactions layer citing its grade. " +
-        "When asked whether two PEPTIDES can be stacked, use peptide_interactions: only reason about agents with stocked=true; match rules whose agent_slugs include the peptides; report interaction_type, whether it is direct evidence vs inference, and the action — never assert synergy that the rule marks as inference. If a specific fact " +
+        "When asked whether two PEPTIDES can be stacked, use peptide_interactions: only reason about agents with stocked=true; match rules whose agent_slugs include the peptides; report interaction_type, whether it is direct evidence vs inference, and the action — never assert synergy that the rule marks as inference. " +
+        "When the de-identified context (meds, labs, comorbidities, symptoms) plus the candidate peptide could trigger a patient_factor rule, evaluate only rules with fires_in_formulary=true; surface each as a provider-review flag with its action and grade; if a rule needs a field the context does not provide, raise its REQUEST_MISSING_DATA rule rather than assuming the value is normal. If a specific fact " +
         "is not present here, say it is not in the locked library and to verify against primary sources " +
         "\u2014 do NOT invent or recall a dose/contraindication from general knowledge. You may use clinical " +
         "reasoning to explain or contextualize, but state facts only from the library, and prefer its exact " +
