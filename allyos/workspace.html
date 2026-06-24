@@ -211,6 +211,13 @@ label{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:upperca
     <span class="tag">local-first</span>
     <span class="ctx" id="ctx">New session · no patient loaded</span>
     <div class="right">
+      <input id="provName" placeholder="Your name" title="Your name (provider) — stored on this device only, so Ally can greet you. Never patient data."
+        style="background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:6px;padding:4px 9px;font-size:12.5px;width:130px"/>
+      <select id="provCred" title="Your credential — MD/DO are addressed as 'Dr. [last name]'; others by first name"
+        style="background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:6px;padding:4px 6px;font-size:12.5px">
+        <option value="">Title</option><option value="MD">MD</option><option value="DO">DO</option>
+        <option value="NP">NP</option><option value="PA">PA</option><option value="PharmD">PharmD</option>
+        <option value="RN">RN</option><option value="Other">Other</option></select>
       <span class="lock"><span class="dot"></span> Local · on-device</span>
       <span class="tierpill" id="tier">TOP</span>
       <button class="ghost" id="endBtn">End session · clear</button>
@@ -2541,7 +2548,25 @@ function showHS(){var hs=hardStops();document.getElementById('hslist').innerHTML
 function closeHS(){document.getElementById('hsmodal').classList.remove('open');}
 /* ───────── ally slideover ───────── */
 var ally=document.getElementById('ally'),scrim=document.getElementById('scrim');
-function openAlly(){ally.classList.add('open');scrim.classList.add('open');}
+/* provider identity — stored on this device only (provider, not patient); used so Ally can greet by name */
+var provInput=document.getElementById('provName'),provCred=document.getElementById('provCred');
+(function(){if(provInput){provInput.value=localStorage.getItem('allyos_provider')||'';
+    provInput.oninput=function(){localStorage.setItem('allyos_provider',provInput.value.trim());};}
+  if(provCred){provCred.value=localStorage.getItem('allyos_provider_cred')||'';
+    provCred.onchange=function(){localStorage.setItem('allyos_provider_cred',provCred.value);};}})();
+/* MD/DO -> "Dr. [last name]"; all other providers -> first name */
+function providerAddress(){
+  var name=(provInput&&provInput.value||'').trim();if(!name)return '';
+  var cred=(provCred&&provCred.value||'').trim();
+  var parts=name.replace(/^dr\.?\s+/i,'').split(/\s+/).filter(Boolean);if(!parts.length)return '';
+  if(cred==='MD'||cred==='DO')return 'Dr. '+parts[parts.length-1];
+  return parts[0];
+}
+function greetWord(){var h=new Date().getHours();return h<12?'Good morning':h<18?'Good afternoon':'Good evening';}
+function allyGreeting(){var n=providerAddress();return greetWord()+(n?', '+esc(n):'')+'. I’m Ally — ask a protocol, dosing, interaction, or regulatory question. Honest grades, real citations, and I’ll flag what to verify.';}
+function openAlly(){ally.classList.add('open');scrim.classList.add('open');
+  var b=document.getElementById('allyBody');
+  if(b&&!b.querySelector('[data-msg]')){b.innerHTML='<p data-greet style="color:var(--faint);font-size:12.5px;line-height:1.5">'+allyGreeting()+'</p>';}}
 function closeAlly(){ally.classList.remove('open');scrim.classList.remove('open');}
 document.getElementById('allyNav').onclick=function(e){e.preventDefault();openAlly();};
 document.getElementById('allyClose').onclick=closeAlly;var pdc=document.getElementById('pdClose');if(pdc)pdc.onclick=closeProto;scrim.onclick=function(){closeAlly();closeProto();};document.getElementById('hsCancel').onclick=closeHS;document.getElementById('hsOverride').onclick=function(){var r=document.getElementById('hsrat').value.trim();if(!r){document.getElementById('hsrat').style.borderColor='var(--danger)';return;}S.hsOverride={rationale:r,items:hardStops(),at:new Date().toLocaleString()};save();closeHS();setStep(3);};
@@ -2549,9 +2574,10 @@ function esc(s){return (s+'').replace(/[&<>]/g,function(c){return {'&':'&amp;','
 document.getElementById('allySend').onclick=function(){
   var ta=document.getElementById('allyIn');var q=ta.value.trim();if(!q)return;
   var b=document.getElementById('allyBody');
-  b.innerHTML+='<div style="margin:12px 0"><div class="lbl">You</div><p style="font-size:13px">'+esc(q)+'</p></div>';
+  var g=b.querySelector('[data-greet]');if(g)g.remove();
+  b.innerHTML+='<div data-msg style="margin:12px 0"><div class="lbl">You</div><p style="font-size:13px">'+esc(q)+'</p></div>';
   var id='a'+Date.now();
-  b.innerHTML+='<div style="margin:12px 0" id="'+id+'"><div class="lbl" style="color:var(--teal)">Ally</div><p style="font-size:13px;color:var(--faint)">… thinking</p></div>';
+  b.innerHTML+='<div data-msg style="margin:12px 0" id="'+id+'"><div class="lbl" style="color:var(--teal)">Ally</div><p style="font-size:13px;color:var(--faint)">… thinking</p></div>';
   ta.value='';b.scrollTop=b.scrollHeight;
   var p=S.patient||{};var c=[];
   if(S.sel&&S.sel.length)c.push('Considering: '+S.sel.map(function(s){var x=byslug(s)||{};return x.name||s;}).join(', '));
@@ -2560,7 +2586,7 @@ document.getElementById('allySend').onclick=function(){
   if(p.comorbid&&p.comorbid.length)c.push('comorbid: '+p.comorbid.join(', '));
   if(p.meds&&p.meds.length)c.push('meds: '+p.meds.join(', '));
   var ctx=c.length?'De-identified context — '+c.join('; ')+'.':'';
-  fetch('/.netlify/functions/ally',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:q,context:ctx,library:buildLib()})})
+  fetch('/.netlify/functions/ally',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:q,context:ctx,provider:providerAddress(),library:buildLib()})})
    .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
    .then(function(res){var el=document.getElementById(id);var t;
      if(res.ok&&res.j.answer){t='<div style="font-size:10px;color:var(--ok);margin-bottom:5px">\u{1F4DA} grounded in your locked library</div><p style="font-size:13px;line-height:1.55;white-space:pre-wrap">'+esc(res.j.answer)+'</p>';}

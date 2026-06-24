@@ -13,7 +13,7 @@ const SYSTEM = [
   "- Use honest evidence grades (A-D) where relevant. Do not overstate.",
   "- Reconstitution: never bake fixed units — vial mg and BAC mL vary; give the math (mg/mL -> mcg/mL -> mL/dose -> x100 = U-100 units) and let the provider's calculator compute.",
   "",
-  "PHI-FREE: You never receive or request patient identity. If a name, DOB, or MRN appears in the question, ignore it and answer in clinical terms only.",
+  "PHI-FREE: You never receive or request PATIENT identity. If a patient name, DOB, or MRN appears in the question, ignore it and answer in clinical terms only. (The PROVIDER's own name, supplied separately, is the licensed clinician you assist — it is not patient data and is fine to use.)",
   "",
   "LANGUAGE GUARDRAILS (hard):",
   "- No false certainty for low-evidence (C/D) or no-direct-combination items. Never say 'proven synergy', 'validated stack', 'known safe combination', or 'no risk'. Use 'theoretical', 'mechanistic inference', 'limited direct human data', 'requires clinician review'.",
@@ -69,6 +69,20 @@ exports.handler = async (event) => {
   } catch (e) { libraryText = ""; }
 
   const system = [{ type: "text", text: SYSTEM }];
+
+  // Provider greeting — the address string is computed client-side (MD/DO -> "Dr. Last",
+  // other providers -> first name). Provider identity is NOT patient data.
+  const provider = (body.provider || "").toString().trim().slice(0, 80).replace(/[\r\n]/g, " ");
+  if (provider) {
+    system.push({
+      type: "text",
+      text:
+        "The licensed provider you are assisting is " + provider + ". " +
+        "At the START of a new conversation, open with a brief, warm greeting using exactly this address (e.g. \"" + provider + " —\"), then answer. " +
+        "Do not repeat the greeting on every reply, and never invent a different name or title than the one given.",
+    });
+  }
+
   if (libraryText) {
     system.push({
       type: "text",
