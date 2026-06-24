@@ -231,9 +231,9 @@ function loadStack(code){var s=null;(MOD.stacks||[]).forEach(function(x){if(x.co
   var comps=(s.components||[]).concat(s.post_drip||[]).concat(s.optional_add_ons||[]).concat(s.same_visit_add_ons||[]);
   comps.forEach(function(c){var ing=matchByName(c.ingredient);BAG.push({id:ing?ing.id:'',name:c.ingredient,dose:c.dose||'',ref:ing});});
   renderBag();calcDrip();analyze();}
-function loadNiagen(){var m=(MOD.market_additions&&MOD.market_additions.entries||[])[0];
-  BAG=[];document.getElementById('stackName').value='Niagen / NR IV (market addition)';document.getElementById('baseType').value='Dedicated NAD+ bag (NS)';document.getElementById('infMin').value=120;
-  BAG.push({id:'ADD_NIAGEN_NR',name:(m?m.name:'Niagen / NR'),dose:'per protocol',ref:m});renderBag();calcDrip();analyze();}
+function loadNiagen(){var m=(MOD.market_additions&&MOD.market_additions.entries||[])[0];var so=m&&m.standing_order&&m.standing_order.evidence_supported_default;
+  BAG=[];document.getElementById('stackName').value='Niagen / NR IV (standing order DRAFT — MD sign-off)';document.getElementById('baseType').value='Dedicated NAD+ bag (NS)';document.getElementById('baseVol').value='500';document.getElementById('infMin').value=40;
+  BAG.push({id:'ADD_NIAGEN_NR',name:(m?m.name:'Niagen / NR'),dose:(so?so.dose:'500 mg'),ref:m});renderBag();calcDrip();analyze();}
 function matchByName(name){var n=(name||'').toLowerCase();
   for(var i=0;i<MENU.length;i++){var mn=(MENU[i].name||'').toLowerCase();if(n.indexOf(mn.split(' ')[0])>=0||mn.indexOf(n.split(' ')[0])>=0)return MENU[i];}return null;}
 

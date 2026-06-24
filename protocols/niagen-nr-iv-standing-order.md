@@ -6,9 +6,13 @@
 > it does not stop a practice. It enforces only where RenuviaMD is the Medical Director of record.**
 > NR / Niagen® is an **NAD+ precursor — NOT the same as NAD+ IV**, and there is **no proven
 > peptide-synergy benefit.**
-> **⚠ Citations in §13 are UNDER AllyOS citation audit and are NOT yet verified or locked.** Do not rely
-> on the 500 mg evidence basis (which rests on a single 2026 paper) until that audit completes and the
-> Medical Director signs. This file is a work-in-progress draft on a feature branch.
+> **✅ Citations in §13 VERIFIED by the AllyOS citation audit (2026-06-24)** — all three primary sources are
+> real and accurately represented: Reyna et al. *Frontiers in Aging* 2026 (DOI 10.3389/fragi.2026.1652582,
+> PMC12907335; n=14, 500 mg NAD+/NR IV ×4 days), Hawkins et al. *medRxiv* 2024 (preprint, single 500 mg
+> NR IV), Conze et al. *Scientific Reports* 2019 (oral NR — background only). **Verified ≠ proven:** the
+> evidence is a small retrospective (n=8 NR) + a non-peer-reviewed preprint, so confidence is *moderate for
+> short-term tolerability, low for outcomes.* This remains a DRAFT — **the Medical Director must still sign
+> before clinical use.**
 
 **Date updated:** 2026-06-24
 **Intended users:** licensed healthcare providers only

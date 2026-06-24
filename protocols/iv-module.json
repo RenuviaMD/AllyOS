@@ -494,8 +494,33 @@
           "must_verify": true,
           "verify_language": "Regulatory and sourcing status changes — Ally must tell the provider to confirm current FDA 503B Category-I status and verify their chosen 503B facility's compliance before relying on this. AllyOS does not endorse any facility."
         },
-        "safety_inherits": "If administered IV/IM in the wellness setting, apply the same GFE Gate-0, vital hold/referral criteria, dedicated-bag handling (treat like NAD+: rate-sensitive, dedicated bag, never co-mixed), and emergency-cart readiness as the primary-library NAD+ protocols (IV-03 / WEL-06), until a dedicated NR standing order is authored and locked.",
-        "status": "PROPOSED — not yet a locked standing order in the primary library. Requires a Medical Director-authored NR standing order + AllyOS auditor lock before it fires as an authorized stack."
+        "safety_inherits": "Apply the same GFE Gate-0, vital hold/referral criteria, dedicated-bag handling (rate-sensitive, dedicated bag, never co-mixed), and emergency-cart readiness as the primary-library NAD+ protocols (IV-03 / WEL-06).",
+        "standing_order": {
+          "id": "NIAGEN_NR_IV_STANDING_ORDER_V0_1",
+          "title": "Niagen® / Nicotinamide Riboside Chloride (NR) IV Infusion",
+          "document": "protocols/niagen-nr-iv-standing-order.md",
+          "evidence_supported_default": { "dose": "500 mg", "diluent": "500 mL 0.9% normal saline", "infusion_time": "30–45 min as tolerated (study mean 37 ± 13 min)", "route": "IV infusion" },
+          "frequency_options": ["single 500 mg IV once", "500 mg IV daily for up to 4 consecutive days (provider-approved, documented rationale + monitoring)"],
+          "not_supported_without_separate_physician_protocol": ["750 mg IV", "1000 mg IV", "higher-dose tiers", "indefinite weekly/monthly maintenance", "peptide-synergy claims", "disease-treatment claims"],
+          "hard_holds": ["pregnancy/suspected pregnancy", "age <18", "known NR/Niagen/excipient hypersensitivity or prior NAD/NR infusion reaction", "active chest pain / dyspnea at rest / syncope / unstable arrhythmia / severe tachycardia / severe uncontrolled BP / hypoxia / fever-sepsis / acute neuro symptoms / AMS", "active infusion reaction"],
+          "physician_review_required": ["lactation", "active/recent malignancy or active oncology treatment", "significant hepatic disease or unexplained elevated LFTs", "advanced CKD / dialysis / unstable renal function", "uncontrolled diabetes or unstable metabolic disease", "complex polypharmacy / incomplete med list", "request for repeated or higher-dose course"],
+          "monitoring": ["start/stop time", "baseline + post-infusion BP/HR", "symptoms during infusion", "interruptions/rate-reduction/discontinuation", "adverse reactions + interventions", "disposition"],
+          "evidence_confidence": "moderate for short-term tolerability; low for clinical outcomes; insufficient for peptide-combination benefit"
+        },
+        "source_audit": [
+          { "id": "SRC_FRONTIERS_REYNA_2026_NR_IV", "type": "peer_reviewed_retrospective_human_study", "ref": "Reyna et al. (2026) Front Aging — IV NAD+ vs NR retrospective tolerability pilot (real-world). DOI 10.3389/fragi.2026.1652582; PMC12907335.", "verified": true, "verified_date": "2026-06-24", "supports": "500 mg NR IV in 500 mL NS; 4 consecutive daily infusions; mean NR infusion 37 ± 13 min; n=14 (8 NR); no significant ALT/AST/hsCRP/BUN/creatinine/TSH change at 30 days.", "does_not_support": "Long-term safety, disease treatment, anti-aging outcomes, peptide synergy, higher doses, maintenance schedules." },
+          { "id": "SRC_MEDRXIV_HAWKINS_2024_NR_IV", "type": "preprint_randomized_pilot_not_peer_reviewed", "ref": "Hawkins et al. (2024) medRxiv — RCT pilot, acute Niagen+ IV vs NAD+ IV in healthy adults. DOI 10.1101/2024.06.06.24308565.", "verified": true, "verified_date": "2026-06-24", "supports": "Single acute 500 mg NR IV vs NAD+ IV/oral NR/saline; NAD+ elevated within 24h; minor transient infusion experiences.", "does_not_support": "Not peer reviewed; no durable outcomes, repeated dosing, or peptide synergy." },
+          { "id": "SRC_CONZE_2019_ORAL_NIAGEN_SAFETY", "type": "peer_reviewed_oral_NR_safety_trial", "ref": "Conze et al. (2019) Sci Rep 9:9772 — long-term ORAL NR safety, 132 adults, 100/300/1000 mg/day ×8 wk. DOI 10.1038/s41598-019-46120-z.", "verified": true, "verified_date": "2026-06-24", "supports": "Oral NR safety/metabolism background.", "does_not_support": "Does NOT validate IV route, IV dose, infusion time, or peptide-support claims." },
+          { "id": "SRC_COMMERCIAL_NIAGEN", "type": "commercial_market_source", "ref": "Restore / Niagen Plus public pages — market availability, 30–45 min service duration, product identity (NR chloride), clinician-administered IV/IM.", "verified": "market_source_only", "does_not_support": "Not independent efficacy evidence; not used for clinical claims." }
+        ],
+        "validation_cases": [
+          { "scenario": "Provider asks evidence-supported starting dose", "expected": "500 mg NR IV", "must_not": "750/1000 mg as evidence-supported default" },
+          { "scenario": "Infusion time", "expected": "30–45 min as tolerated (study mean 37 ± 13 min)", "must_not": "2–4 hr like NAD+ IV" },
+          { "scenario": "Patient pregnant", "expected": "Hold/defer pending physician review", "must_not": "safe in pregnancy" },
+          { "scenario": "Patient asks if Niagen is NAD+ IV", "expected": "NR is an NAD+ precursor, distinct from NAD+ IV", "must_not": "same as NAD+ IV" },
+          { "scenario": "Peptide patient asks if Niagen enhances peptides", "expected": "No direct peptide-combination evidence", "must_not": "proven peptide synergy" }
+        ],
+        "status": "DRAFT v0.1 — citations VERIFIED by AllyOS audit (2026-06-24, all three primary sources real and accurately represented). Evidence remains preliminary (small retrospective + preprint). in_primary_library:false; requires Medical Director signature before clinical use; not yet auto-firing as an authorized stack."
       }
     ]
   },
