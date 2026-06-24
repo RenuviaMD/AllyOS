@@ -1,0 +1,122 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pricing (DRAFT) — AllyOS · RenuviaMD®</title>
+<style>
+:root{--bg:#0b1620;--bg2:#12222e;--card:#13242f;--line:#223947;--teal:#28c2b8;--blue:#3aa8e0;--gold:#e0b24a;--purple:#a78bfa;--ink:#e9f3f2;--muted:#8aa3ad;--green:#1fb87a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:radial-gradient(1200px 700px at 50% -10%,#143041,#0b1620);min-height:100vh}
+header{text-align:center;padding:40px 20px 10px}
+.brand{font-weight:800;font-size:1.05rem}.brand span{color:var(--gold)}
+h1{font-family:Georgia,serif;font-size:2rem;margin-top:8px}
+.tag{color:var(--muted);font-size:.92rem;max-width:680px;margin:10px auto 0;line-height:1.5}
+.draft{display:inline-block;background:#3a2f12;color:var(--gold);border:1px solid #5a4a1e;border-radius:8px;padding:4px 12px;font-size:.74rem;font-weight:700;margin-top:14px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:1100px;margin:28px auto;padding:0 18px}
+@media(max-width:900px){.cards{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column}
+.card.feat{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal),0 30px 60px rgba(0,0,0,.4)}
+.card.prem{border-color:var(--gold)}
+.badge{align-self:flex-start;font-size:.62rem;font-weight:800;letter-spacing:.06em;border-radius:7px;padding:3px 9px;margin-bottom:8px}
+.badge.pop{background:#103a40;color:var(--teal)}
+.badge.moat{background:#3a3012;color:var(--gold)}
+.name{font-size:1.15rem;font-weight:800}
+.who{font-size:.74rem;color:var(--muted);margin-top:2px;min-height:32px}
+.price{font-size:2.1rem;font-weight:800;margin:12px 0 2px}
+.price small{font-size:.8rem;color:var(--muted);font-weight:600}
+.sub{font-size:.74rem;color:var(--muted);min-height:34px}
+ul{list-style:none;margin:14px 0;flex:1}
+li{font-size:.84rem;padding:6px 0 6px 22px;position:relative;line-height:1.4}
+li:before{content:"✓";position:absolute;left:0;color:var(--teal);font-weight:800}
+li.x:before{content:"–";color:var(--muted)}
+.addon{font-size:.74rem;color:var(--gold);background:#1c2a12;border:1px solid #2e3a1e;border-radius:8px;padding:8px 10px;margin:8px 0}
+.btn{display:block;text-align:center;border-radius:10px;padding:12px;font-weight:800;font-size:.9rem;text-decoration:none;margin-top:8px}
+.btn.p{background:var(--teal);color:#06231f}.btn.g{background:transparent;border:1px solid var(--line);color:var(--teal)}.btn.gold{background:var(--gold);color:#231a06}
+.diff{max-width:1100px;margin:24px auto;padding:0 18px;display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+@media(max-width:900px){.diff{grid-template-columns:1fr 1fr}}
+.d{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+.d b{display:block;font-size:.8rem;margin-bottom:4px}.d span{font-size:.72rem;color:var(--muted);line-height:1.4}
+.note{max-width:1100px;margin:8px auto 40px;padding:0 18px;font-size:.72rem;color:var(--muted);line-height:1.5}
+.note b{color:var(--ink)}
+a.inline{color:var(--teal)}
+</style></head>
+<body>
+<header>
+  <div class="brand">Renuvia<span>MD</span>® · AllyOS</div>
+  <h1>Pricing</h1>
+  <div class="tag">More than a clinical chatbot — AllyOS is the operating system for a compliant wellness IV/IM, peptide & BHRT practice, with a real Medical Director option that the new "genuine oversight" rules now require.</div>
+  <div class="draft">⚠ DRAFT pricing — for internal review, not published. Numbers are proposed ranges to react to.</div>
+</header>
+
+<div class="cards">
+
+  <!-- FREE -->
+  <div class="card">
+    <span class="badge" style="background:#1b2a33;color:var(--muted)">LEAD-IN</span>
+    <div class="name">Free</div>
+    <div class="who">Browse + verify the platform before you buy.</div>
+    <div class="price">$0</div>
+    <div class="sub">NPI / licensed-professional access. No card.</div>
+    <ul>
+      <li>Locked clinical module — browse (12 stacks, master menu, guardrails)</li>
+      <li>IV drip &amp; dose calculator</li>
+      <li>Evidence / regulatory references</li>
+      <li class="x">No chairside run, inventory, or Ally co-pilot</li>
+    </ul>
+    <a class="btn g" href="login.html">Create free account</a>
+  </div>
+
+  <!-- PLATFORM -->
+  <div class="card feat">
+    <span class="badge pop">MOST POPULAR · BRING YOUR OWN MD</span>
+    <div class="name">Platform</div>
+    <div class="who">For a clinic or solo operator that already has a Medical Director.</div>
+    <div class="price">$199<small> /mo · per location</small></div>
+    <div class="sub">Unlimited RN/LPN executor seats included.</div>
+    <ul>
+      <li>Everything in Free</li>
+      <li><b>Ally</b> — honest AI co-pilot grounded in the locked, audited brain</li>
+      <li>Full IV/IM <b>builder</b> + chairside <b>nursing station</b> (queue, chairs, timers, alarms)</li>
+      <li>Clinic <b>inventory</b> — your SKU/price/stock, CSV/JSON export to your PM software</li>
+      <li>Real-time <b>docs</b> — GFE + consent, FORM-02/05/03</li>
+      <li><b>Role-based team seats</b> — unlimited nurse executors, audit trail</li>
+      <li>Advisory guardrail engine (compatibility · ceilings · osmolarity · rate floors)</li>
+    </ul>
+    <div class="addon">+ per <b>authorizing provider</b> (MD/DO/NP/PA who signs GFEs) — license-bound seat</div>
+    <a class="btn p" href="login.html">Start Platform</a>
+  </div>
+
+  <!-- MD OF RECORD -->
+  <div class="card prem">
+    <span class="badge moat">THE MOAT · GENUINE OVERSIGHT</span>
+    <div class="name">MD-of-Record</div>
+    <div class="who">We are your Medical Director. The rent-a-doc era is over — this is documented oversight.</div>
+    <div class="price">$1,500+<small> /mo · solo &nbsp;·&nbsp; clinic custom</small></div>
+    <div class="sub">Florida. Capacity-limited (real oversight = finite).</div>
+    <ul>
+      <li>Everything in Platform</li>
+      <li><b>RenuviaMD (Armando A. Falcon, MD) as your Medical Director of record</b></li>
+      <li>Signed standing orders + Good Faith Exam oversight</li>
+      <li>Genuine documented oversight — chart review, availability, audit trail</li>
+      <li>Gate <b>enforcement</b> (MD-of-record mode) where we carry the liability</li>
+      <li>Replaces a standalone MD retainer ($1,500–8,000/mo) — and includes the platform</li>
+    </ul>
+    <div class="addon" style="color:var(--teal);background:#0f2a2a;border-color:#1e3a3a">Required anyway: every IV practice needs an authorizing provider. Here it's us.</div>
+    <a class="btn gold" href="login.html">Talk to us</a>
+  </div>
+
+</div>
+
+<div class="diff">
+  <div class="d"><b>🩺 Genuine MD oversight</b><span>A real Medical Director, not a matchmaker platform</span></div>
+  <div class="d"><b>🔒 PHI-free</b><span>No patient data stored — lower risk, simpler</span></div>
+  <div class="d"><b>🚫 No drug brokering</b><span>We sell software + oversight, never products</span></div>
+  <div class="d"><b>✅ Honest CDS</b><span>Evidence grades, named failed trials, no fabrication</span></div>
+  <div class="d"><b>🆔 Licensed-only</b><span>NPI / credential-gated access</span></div>
+</div>
+
+<div class="note">
+  <b>How the seats work (no seat-sharing trap):</b> the only per-seat unit is the <b>authorizing provider</b> — and it can't be shared because a GFE/authorization is a named legal signature tied to one license &amp; NPI. <b>Nurse/LPN executors are unlimited and free</b> under a location. So a solo mobile RN = one Platform location + one authorizing-provider seat (her MD, or us); a 6-chair clinic = one location + its Medical Director + 6 free nurses.
+  <br><br>
+  <b>Scope note:</b> AllyOS is advisory clinical decision-support; it informs how/what to run a practice and does not regulate scope or who may perform a GFE — that is the practice's Medical Director and the state board. Gates enforce only in MD-of-record mode, where RenuviaMD carries the supervising authority. Not medical or legal advice. © 2026 RenuviaMD® Compliance Division.
+</div>
+
+<script src="allyos-auth.js"></script>
+</body></html>
