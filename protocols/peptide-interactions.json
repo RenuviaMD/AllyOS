@@ -1,0 +1,2305 @@
+{
+ "schema": "allyos-peptide-interactions-v1",
+ "updated": "2026-06-24",
+ "note": "Peptide-peptide (cross-agent) interaction layer. Derived from a physician-built, citation-audited research library and re-keyed to the AllyOS formulary. Each agent carries a 'stocked' flag: only rules involving at least one stocked (formulary) agent fire in the POC/Ally; non-stocked agents are retained as informational and never produce a recommendation. Grades A-D. 'direct_combination_evidence' false = inference, not a trial. No doses, no prescribing, no regulatory status. Decision-support only.",
+ "grades": {
+  "A": "Direct human trial/pharmacology or strong human physiology for the specific agent/pathway.",
+  "B": "Human mechanistic evidence or well-supported physiology; direct combo evidence may be absent.",
+  "C": "Preclinical/cell/animal evidence with plausible mechanism; clinical transfer uncertain.",
+  "D": "Sparse, conflicting, legacy, or formulation-transfer evidence; low-confidence flags only."
+ },
+ "actions": {
+  "FLAG_FOR_PROVIDER_REVIEW": "Surface to the treating provider for review; never an autonomous decision.",
+  "INFORM": "Informational context (complementary/convergent/context-dependent); not proven synergy.",
+  "LANGUAGE_GUARDRAIL": "Evidence-quality / identity caution; force uncertainty language."
+ },
+ "formulary_coverage_gaps": [
+  "mk-677",
+  "cjc-ipamorelin-blend"
+ ],
+ "agents": {
+  "semaglutide": {
+   "label": "Semaglutide",
+   "lib_id": "semaglutide",
+   "class": "incretin/metabolic",
+   "stocked": true,
+   "targets": [
+    "GLP1R"
+   ],
+   "mechanism_tags": [
+    "glucose_dependent_insulin↑",
+    "glucagon↓",
+    "gastric_emptying↓",
+    "satiety↑"
+   ],
+   "adverse_tags": [
+    "GI_slowing",
+    "nausea_vomiting",
+    "hypoglycemia_when_combined_with_insulin_secretagogues"
+   ],
+   "evidence_level": "A",
+   "source_ids": [
+    "S01",
+    "S02"
+   ]
+  },
+  "liraglutide": {
+   "label": "Liraglutide",
+   "lib_id": "liraglutide",
+   "class": "incretin/metabolic",
+   "stocked": true,
+   "targets": [
+    "GLP1R"
+   ],
+   "mechanism_tags": [
+    "glucose_dependent_insulin↑",
+    "glucagon↓",
+    "gastric_emptying↓",
+    "satiety↑"
+   ],
+   "adverse_tags": [
+    "GI_slowing",
+    "nausea_vomiting",
+    "hypoglycemia_when_combined_with_insulin_secretagogues"
+   ],
+   "evidence_level": "A",
+   "source_ids": [
+    "S01",
+    "S02"
+   ]
+  },
+  "tirzepatide": {
+   "label": "Tirzepatide",
+   "lib_id": "tirzepatide",
+   "class": "incretin/metabolic",
+   "stocked": true,
+   "targets": [
+    "GIPR",
+    "GLP1R"
+   ],
+   "mechanism_tags": [
+    "incretin_dual_agonism",
+    "satiety↑",
+    "glycemic_control↑"
+   ],
+   "adverse_tags": [
+    "GI_slowing",
+    "nausea_vomiting",
+    "hypoglycemia_when_combined_with_insulin_secretagogues",
+    "incretin_receptor_redundancy"
+   ],
+   "evidence_level": "A",
+   "source_ids": [
+    "S03",
+    "S01"
+   ]
+  },
+  "retatrutide": {
+   "label": "Retatrutide",
+   "lib_id": "retatrutide",
+   "class": "incretin/metabolic",
+   "stocked": true,
+   "targets": [
+    "GIPR",
+    "GLP1R",
+    "GCGR"
+   ],
+   "mechanism_tags": [
+    "triple_receptor_agonism",
+    "satiety_energy_expenditure_axis",
+    "glucagon_axis"
+   ],
+   "adverse_tags": [
+    "GI_slowing",
+    "nausea_vomiting",
+    "heart_rate_signal",
+    "incretin_receptor_redundancy"
+   ],
+   "evidence_level": "A",
+   "source_ids": [
+    "S04"
+   ]
+  },
+  "lib:cagrilintide": {
+   "label": "Cagrilintide",
+   "lib_id": "cagrilintide",
+   "class": "amylin/metabolic",
+   "stocked": false,
+   "targets": [
+    "amylin_receptors",
+    "calcitonin_receptor"
+   ],
+   "mechanism_tags": [
+    "satiety↑",
+    "food_intake↓",
+    "amylin_axis"
+   ],
+   "adverse_tags": [
+    "GI_slowing",
+    "nausea_vomiting",
+    "satiety_overlap"
+   ],
+   "evidence_level": "A",
+   "source_ids": [
+    "S05"
+   ]
+  },
+  "lib:pramlintide": {
+   "label": "Pramlintide",
+   "lib_id": "pramlintide",
+   "class": "amylin/metabolic",
+   "stocked": false,
+   "targets": [
+    "amylin_receptors"
+   ],
+   "mechanism_tags": [
+    "glucagon_postprandial↓",
+    "gastric_emptying↓",
+    "satiety↑"
+   ],
+   "adverse_tags": [
+    "GI_slowing",
+    "nausea",
+    "hypoglycemia_when_combined_with_insulin"
+   ],
+   "evidence_level": "A",
+   "source_ids": [
+    "S06"
+   ]
+  },
+  "aod-9604": {
+   "label": "AOD-9604",
+   "lib_id": "aod_9604",
+   "class": "metabolic/hGH-fragment",
+   "stocked": true,
+   "targets": [
+    "uncertain_non_GHR_lipolytic_pathway"
+   ],
+   "mechanism_tags": [
+    "lipolysis_preclinical",
+    "fat_oxidation_preclinical"
+   ],
+   "adverse_tags": [
+    "evidence_gap_human_efficacy",
+    "metabolic_uncertainty"
+   ],
+   "evidence_level": "C",
+   "source_ids": [
+    "S07"
+   ]
+  },
+  "sermorelin": {
+   "label": "Sermorelin",
+   "lib_id": "sermorelin",
+   "class": "GH/IGF-axis",
+   "stocked": true,
+   "targets": [
+    "GHRHR"
+   ],
+   "mechanism_tags": [
+    "pituitary_GH_release↑",
+    "IGF1_downstream↑"
+   ],
+   "adverse_tags": [
+    "GH_IGF_load",
+    "glucose_insulin_axis_load",
+    "growth_factor_signal"
+   ],
+   "evidence_level": "B",
+   "source_ids": [
+    "S08",
+    "S12",
+    "S13"
+   ]
+  },
+  "tesamorelin": {
+   "label": "Tesamorelin",
+   "lib_id": "tesamorelin",
+   "class": "GH/IGF-axis",
+   "stocked": true,
+   "targets": [
+    "GHRHR"
+   ],
+   "mechanism_tags": [
+    "pituitary_GH_release↑",
+    "IGF1_downstream↑",
+    "visceral_adipose_axis"
+   ],
+   "adverse_tags": [
+    "GH_IGF_load",
+    "glucose_insulin_axis_load",
+    "growth_factor_signal"
+   ],
+   "evidence_level": "A",
+   "source_ids": [
+    "S09",
+    "S13"
+   ]
+  },
+  "cjc-1295": {
+   "label": "CJC-1295",
+   "lib_id": "cjc_1295",
+   "class": "GH/IGF-axis",
+   "stocked": true,
+   "targets": [
+    "GHRHR"
+   ],
+   "mechanism_tags": [
+    "GH_pulse_mean↑",
+    "IGF1↑",
+    "long_acting_GHRH"
+   ],
+   "adverse_tags": [
+    "GH_IGF_load",
+    "glucose_insulin_axis_load",
+    "growth_factor_signal"
+   ],
+   "evidence_level": "B",
+   "source_ids": [
+    "S08",
+    "S13",
+    "S14"
+   ]
+  },
+  "ghrp-2": {
+   "label": "GHRP-2",
+   "lib_id": "ghrp_2",
+   "class": "GH/IGF-axis",
+   "stocked": true,
+   "targets": [
+    "GHSR1a/ghrelin_receptor"
+   ],
+   "mechanism_tags": [
+    "GH_release↑",
+    "ghrelin_mimetic"
+   ],
+   "adverse_tags": [
+    "GH_IGF_load",
+    "ACTH_cortisol_signal",
+    "prolactin_signal",
+    "appetite_signal"
+   ],
+   "evidence_level": "B",
+   "source_ids": [
+    "S11",
+    "S12"
+   ]
+  },
+  "ghrp-6": {
+   "label": "GHRP-6",
+   "lib_id": "ghrp_6",
+   "class": "GH/IGF-axis",
+   "stocked": true,
+   "targets": [
+    "GHSR1a/ghrelin_receptor"
+   ],
+   "mechanism_tags": [
+    "GH_release↑",
+    "ghrelin_mimetic",
+    "appetite_signal"
+   ],
+   "adverse_tags": [
+    "GH_IGF_load",
+    "ACTH_cortisol_signal",
+    "prolactin_signal",
+    "appetite_signal"
+   ],
+   "evidence_level": "B",
+   "source_ids": [
+    "S10",
+    "S11",
+    "S12"
+   ]
+  },
+  "ipamorelin": {
+   "label": "Ipamorelin",
+   "lib_id": "ipamorelin",
+   "class": "GH/IGF-axis",
+   "stocked": true,
+   "targets": [
+    "GHSR1a/ghrelin_receptor"
+   ],
+   "mechanism_tags": [
+    "GH_release↑",
+    "GHSR_selective"
+   ],
+   "adverse_tags": [
+    "GH_IGF_load",
+    "lower_ACTH_cortisol_signal_than_GHRP2_6_based_on_available_models"
+   ],
+   "evidence_level": "B/C",
+   "source_ids": [
+    "S10",
+    "S12"
+   ]
+  },
+  "hexarelin": {
+   "label": "Hexarelin",
+   "lib_id": "hexarelin",
+   "class": "GH/IGF-axis",
+   "stocked": true,
+   "targets": [
+    "GHSR1a/ghrelin_receptor"
+   ],
+   "mechanism_tags": [
+    "GH_release↑",
+    "ghrelin_mimetic"
+   ],
+   "adverse_tags": [
+    "GH_IGF_load",
+    "ACTH_cortisol_signal",
+    "prolactin_signal"
+   ],
+   "evidence_level": "B",
+   "source_ids": [
+    "S11"
+   ]
+  },
+  "lib:ghrelin": {
+   "label": "Ghrelin",
+   "lib_id": "ghrelin",
+   "class": "GH/IGF-axis/metabolic",
+   "stocked": false,
+   "targets": [
+    "GHSR1a"
+   ],
+   "mechanism_tags": [
+    "GH_release↑",
+    "appetite_signal",
+    "GI_motility_axis"
+   ],
+   "adverse_tags": [
+    "appetite_signal",
+    "GH_IGF_load",
+    "glucose_axis_complexity"
+   ],
+   "evidence_level": "B",
+   "source_ids": [
+    "S12"
+   ]
+  },
+  "lib:igf1_lr3": {
+   "label": "IGF-1 LR3",
+   "lib_id": "igf1_lr3",
+   "class": "growth-factor/IGF-axis",
+   "stocked": false,
+   "targets": [
+    "IGF1R"
+   ],
+   "mechanism_tags": [
+    "cell_survival↑",
+    "cell_proliferation_signal",
+    "anabolic_signal"
+   ],
+   "adverse_tags": [
+    "growth_factor_signal",
+    "hypoglycemia_theoretical",
+    "tumor_biology_theoretical"
+   ],
+   "evidence_level": "C",
+   "source_ids": [
+    "S14"
+   ]
+  },
+  "lib:mgf": {
+   "label": "Mechano Growth Factor",
+   "lib_id": "mgf",
+   "class": "growth-factor/IGF-axis",
+   "stocked": false,
+   "targets": [
+    "IGF1_splice_variant_E_peptide_axis"
+   ],
+   "mechanism_tags": [
+    "myoblast_progenitor_signal_mixed",
+    "repair_signal_preclinical"
+   ],
+   "adverse_tags": [
+    "growth_factor_signal",
+    "evidence_conflict",
+    "PEGylation_transfer_uncertainty"
+   ],
+   "evidence_level": "C/D",
+   "source_ids": [
+    "S35",
+    "S14"
+   ]
+  },
+  "mots-c": {
+   "label": "MOTS-c",
+   "lib_id": "mots_c",
+   "class": "mitochondrial/metabolic",
+   "stocked": true,
+   "targets": [
+    "AMPK_related_metabolic_axis",
+    "mitochondrial_nuclear_signaling"
+   ],
+   "mechanism_tags": [
+    "insulin_sensitivity_preclinical↑",
+    "metabolic_homeostasis_preclinical"
+   ],
+   "adverse_tags": [
+    "metabolic_uncertainty",
+    "exercise_mimetic_claim_gap"
+   ],
+   "evidence_level": "C",
+   "source_ids": [
+    "S15"
+   ]
+  },
+  "ss-31": {
+   "label": "SS-31",
+   "lib_id": "ss_31",
+   "class": "mitochondrial/cytoprotective",
+   "stocked": true,
+   "targets": [
+    "mitochondrial_inner_membrane",
+    "cardiolipin_interface"
+   ],
+   "mechanism_tags": [
+    "mitochondrial_membrane_stabilization",
+    "ROS_stress_axis"
+   ],
+   "adverse_tags": [
+    "mitochondrial_signal_overlap",
+    "clinical_context_specificity"
+   ],
+   "evidence_level": "B/C",
+   "source_ids": [
+    "S16"
+   ]
+  },
+  "lib:humanin": {
+   "label": "Humanin",
+   "lib_id": "humanin",
+   "class": "mitochondrial/cytoprotective",
+   "stocked": false,
+   "targets": [
+    "apoptosis_survival_axis",
+    "IGFBP3_interaction_reported"
+   ],
+   "mechanism_tags": [
+    "cytoprotection_preclinical",
+    "insulin_sensitivity_axis",
+    "inflammatory_marker_axis"
+   ],
+   "adverse_tags": [
+    "mitochondrial_signal_overlap",
+    "growth_survival_signal_theoretical"
+   ],
+   "evidence_level": "C",
+   "source_ids": [
+    "S17"
+   ]
+  },
+  "epitalon": {
+   "label": "Epitalon",
+   "lib_id": "epitalon",
+   "class": "longevity/telomere-experimental",
+   "stocked": true,
+   "targets": [
+    "telomerase_telomere_axis_reported"
+   ],
+   "mechanism_tags": [
+    "telomere_cell_line_signal",
+    "pineal_peptide_legacy_literature"
+   ],
+   "adverse_tags": [
+    "telomerase_growth_theoretical",
+    "evidence_gap_human"
+   ],
+   "evidence_level": "D",
+   "source_ids": [
+    "S18",
+    "S14"
+   ]
+  },
+  "bpc-157": {
+   "label": "BPC-157",
+   "lib_id": "bpc_157",
+   "class": "tissue-repair/experimental",
+   "stocked": true,
+   "targets": [
+    "NO_system_reported",
+    "angiogenesis_reported",
+    "tendon_fibroblast_axis_reported"
+   ],
+   "mechanism_tags": [
+    "angiogenesis_repair_signal",
+    "collagen_fibroblast_signal",
+    "cytoprotection_reported"
+   ],
+   "adverse_tags": [
+    "angiogenesis_signal",
+    "tumor_biology_theoretical",
+    "human_evidence_gap"
+   ],
+   "evidence_level": "C",
+   "source_ids": [
+    "S19",
+    "S20"
+   ]
+  },
+  "tb-500": {
+   "label": "Thymosin beta-4",
+   "lib_id": "tb4",
+   "class": "tissue-repair/actin-binding",
+   "stocked": true,
+   "targets": [
+    "G_actin_binding",
+    "cell_migration_axis",
+    "angiogenesis_axis"
+   ],
+   "mechanism_tags": [
+    "wound_healing_preclinical",
+    "cell_migration",
+    "angiogenesis"
+   ],
+   "adverse_tags": [
+    "angiogenesis_signal",
+    "repair_signal_overlap",
+    "TB500_identity_uncertainty"
+   ],
+   "evidence_level": "C",
+   "source_ids": [
+    "S21"
+   ]
+  },
+  "ghk-cu": {
+   "label": "GHK-Cu",
+   "lib_id": "ghk_cu",
+   "class": "tissue-repair/copper-peptide",
+   "stocked": true,
+   "targets": [
+    "copper_binding",
+    "extracellular_matrix_remodeling"
+   ],
+   "mechanism_tags": [
+    "collagen_turnover",
+    "wound_healing",
+    "anti_inflammatory_reported"
+   ],
+   "adverse_tags": [
+    "copper_signal",
+    "collagen_remodeling_overlap",
+    "route_formulation_uncertainty"
+   ],
+   "evidence_level": "B/C",
+   "source_ids": [
+    "S22"
+   ]
+  },
+  "kpv": {
+   "label": "KPV",
+   "lib_id": "kpv",
+   "class": "anti-inflammatory/melanocortin-derived",
+   "stocked": true,
+   "targets": [
+    "alpha_MSH_tripeptide_axis",
+    "PepT1_context_in_colitis"
+   ],
+   "mechanism_tags": [
+    "anti_inflammatory_preclinical",
+    "NFkB_context_reported"
+   ],
+   "adverse_tags": [
+    "immune_modulation_overlap",
+    "route_context_uncertainty"
+   ],
+   "evidence_level": "C",
+   "source_ids": [
+    "S23"
+   ]
+  },
+  "lib:ll_37": {
+   "label": "LL-37",
+   "lib_id": "ll_37",
+   "class": "antimicrobial/immune",
+   "stocked": false,
+   "targets": [
+    "innate_immune_membrane_activity",
+    "TLR_autoimmune_context",
+    "anti_biofilm_axis"
+   ],
+   "mechanism_tags": [
+    "antimicrobial",
+    "wound_healing",
+    "immunomodulation_context_dependent"
+   ],
+   "adverse_tags": [
+    "immune_activation",
+    "autoimmune_inflammation_context",
+    "cytotoxicity_context"
+   ],
+   "evidence_level": "B/C",
+   "source_ids": [
+    "S25",
+    "S26"
+   ]
+  },
+  "thymosin-alpha-1": {
+   "label": "Thymosin alpha-1",
+   "lib_id": "thymosin_alpha1",
+   "class": "immune/thymic",
+   "stocked": true,
+   "targets": [
+    "T_cell_dendritic_cell_axis",
+    "TLR_immune_modulation_reported"
+   ],
+   "mechanism_tags": [
+    "immune_modulation",
+    "T_cell_function_context",
+    "infection_sepsis_context"
+   ],
+   "adverse_tags": [
+    "immune_modulation_overlap",
+    "autoimmune_context_uncertainty"
+   ],
+   "evidence_level": "B",
+   "source_ids": [
+    "S24"
+   ]
+  },
+  "pt-141": {
+   "label": "Bremelanotide",
+   "lib_id": "bremelanotide",
+   "class": "melanocortin/sexual-neuroendocrine",
+   "stocked": true,
+   "targets": [
+    "MC3R",
+    "MC4R",
+    "melanocortin_receptors"
+   ],
+   "mechanism_tags": [
+    "central_sexual_desire_signal",
+    "dopamine_mPOA_hypothesis",
+    "melanocortin_axis"
+   ],
+   "adverse_tags": [
+    "nausea_flushing_signal",
+    "autonomic_BP_signal",
+    "melanocortin_redundancy"
+   ],
+   "evidence_level": "A/B",
+   "source_ids": [
+    "S27"
+   ]
+  },
+  "melanotan-ii": {
+   "label": "Melanotan II",
+   "lib_id": "melanotan_ii",
+   "class": "melanocortin/pigmentation-sexual",
+   "stocked": true,
+   "targets": [
+    "MC1R",
+    "MC3R",
+    "MC4R",
+    "MC5R"
+   ],
+   "mechanism_tags": [
+    "melanogenesis",
+    "sexual_behavior_signal",
+    "appetite_signal"
+   ],
+   "adverse_tags": [
+    "melanocortin_redundancy",
+    "pigmentation_signal",
+    "nausea_flushing_signal",
+    "autonomic_signal"
+   ],
+   "evidence_level": "B/C",
+   "source_ids": [
+    "S27"
+   ]
+  },
+  "kisspeptin-10": {
+   "label": "Kisspeptin-10",
+   "lib_id": "kisspeptin_10",
+   "class": "HPG-axis",
+   "stocked": true,
+   "targets": [
+    "KISS1R"
+   ],
+   "mechanism_tags": [
+    "GnRH_release↑",
+    "LH_FSH_axis↑",
+    "HPG_upstream_signal"
+   ],
+   "adverse_tags": [
+    "HPG_axis_load",
+    "sex_hormone_axis_variability"
+   ],
+   "evidence_level": "B",
+   "source_ids": [
+    "S28",
+    "S29"
+   ]
+  },
+  "gonadorelin": {
+   "label": "Gonadorelin",
+   "lib_id": "gonadorelin",
+   "class": "HPG-axis",
+   "stocked": true,
+   "targets": [
+    "GnRH_receptor_pituitary"
+   ],
+   "mechanism_tags": [
+    "LH_FSH_release",
+    "pulse_frequency_dependent_effects"
+   ],
+   "adverse_tags": [
+    "HPG_axis_load",
+    "pituitary_axis_desensitization_context"
+   ],
+   "evidence_level": "A/B",
+   "source_ids": [
+    "S29",
+    "S28"
+   ]
+  },
+  "lib:oxytocin": {
+   "label": "Oxytocin",
+   "lib_id": "oxytocin",
+   "class": "neuropeptide/social-reproductive",
+   "stocked": false,
+   "targets": [
+    "OXTR",
+    "AVPR_cross_reactivity_context"
+   ],
+   "mechanism_tags": [
+    "social_salience",
+    "bonding_context",
+    "uterine_lactation_axis"
+   ],
+   "adverse_tags": [
+    "autonomic_context",
+    "water_balance_context",
+    "CNS_behavior_context"
+   ],
+   "evidence_level": "A/B",
+   "source_ids": [
+    "S30"
+   ]
+  },
+  "lib:vasopressin": {
+   "label": "Vasopressin",
+   "lib_id": "vasopressin",
+   "class": "neuropeptide/water-balance-social",
+   "stocked": false,
+   "targets": [
+    "V1aR",
+    "V1bR",
+    "V2R"
+   ],
+   "mechanism_tags": [
+    "water_retention_axis",
+    "vascular_autonomic_axis",
+    "social_behavior_context"
+   ],
+   "adverse_tags": [
+    "hyponatremia_water_balance",
+    "BP_vascular_signal",
+    "CNS_behavior_context"
+   ],
+   "evidence_level": "A/B",
+   "source_ids": [
+    "S30"
+   ]
+  },
+  "semax": {
+   "label": "Semax",
+   "lib_id": "semax",
+   "class": "neuroactive/experimental",
+   "stocked": true,
+   "targets": [
+    "ACTH_fragment_related",
+    "BDNF_signal_reported",
+    "melanocortin_related_uncertain"
+   ],
+   "mechanism_tags": [
+    "neuroprotection_preclinical",
+    "BDNF_signal",
+    "cognition_claim_uncertain"
+   ],
+   "adverse_tags": [
+    "CNS_signal_overlap",
+    "evidence_regionality",
+    "ACTH_fragment_confusion"
+   ],
+   "evidence_level": "C",
+   "source_ids": [
+    "S31"
+   ]
+  },
+  "selank": {
+   "label": "Selank",
+   "lib_id": "selank",
+   "class": "neuroactive/experimental",
+   "stocked": true,
+   "targets": [
+    "tuftsin_related",
+    "GABA_serotonin_expression_context_reported"
+   ],
+   "mechanism_tags": [
+    "anxiolytic_signal",
+    "nootropic_claim_uncertain",
+    "stress_axis_context"
+   ],
+   "adverse_tags": [
+    "CNS_signal_overlap",
+    "sedation_anxiolysis_overlap",
+    "evidence_regionality"
+   ],
+   "evidence_level": "C",
+   "source_ids": [
+    "S32"
+   ]
+  },
+  "dsip": {
+   "label": "Delta sleep-inducing peptide",
+   "lib_id": "dsip",
+   "class": "sleep/neuroendocrine-experimental",
+   "stocked": true,
+   "targets": [
+    "unknown_receptor",
+    "sleep_neuroendocrine_axis_uncertain"
+   ],
+   "mechanism_tags": [
+    "sleep_signal_conflicting",
+    "stress_axis_claims_uncertain"
+   ],
+   "adverse_tags": [
+    "sedation_sleep_overlap",
+    "unresolved_mechanism",
+    "evidence_conflict"
+   ],
+   "evidence_level": "D",
+   "source_ids": [
+    "S33"
+   ]
+  },
+  "cerebrolysin": {
+   "label": "Cerebrolysin",
+   "lib_id": "cerebrolysin",
+   "class": "neurotrophic-peptide-mixture",
+   "stocked": true,
+   "targets": [
+    "mixed_low_molecular_weight_peptides",
+    "neurotrophic_like_activity"
+   ],
+   "mechanism_tags": [
+    "neuroprotection_models",
+    "neuroplasticity_context"
+   ],
+   "adverse_tags": [
+    "CNS_signal_overlap",
+    "mixture_identity_uncertainty",
+    "disease_context_specificity"
+   ],
+   "evidence_level": "B/C",
+   "source_ids": [
+    "S34"
+   ]
+  }
+ },
+ "rules": [
+  {
+   "id": "IR001",
+   "name": "GLP-1 + amylin complementary satiety/GI interaction",
+   "category": "metabolic",
+   "agent_slugs": [
+    "semaglutide",
+    "lib:cagrilintide",
+    "lib:pramlintide"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Any GLP-1 receptor agonist or dual/triple incretin plus amylin agonist",
+   "interaction_type": "complementary_but_GI_overlap",
+   "direct_combination_evidence": true,
+   "confidence": "high for CagriSema; moderate/low for extrapolated pairs",
+   "evidence_basis": "GLP-1 and amylin pathways both reduce intake and affect gastric/glucagon physiology; cagrilintide+semaglutide has direct human combination evidence, while other GLP/amylin pairings require inference.",
+   "action": "INFORM",
+   "ai_action": "Flag as potentially complementary for satiety/weight biology but also flag additive GI slowing/nausea/vomiting and glycemic interaction risk when insulin/secretagogues are present.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S01",
+    "S05",
+    "S06"
+   ]
+  },
+  {
+   "id": "IR002",
+   "name": "GLP-1 receptor agonist redundancy",
+   "category": "metabolic",
+   "agent_slugs": [
+    "semaglutide",
+    "liraglutide",
+    "tirzepatide",
+    "retatrutide"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Any two agents sharing GLP1R agonism",
+   "interaction_type": "redundancy_risk_overlap",
+   "direct_combination_evidence": false,
+   "confidence": "high mechanistic; low direct clinical for stacking",
+   "evidence_basis": "GLP1R agonism is already present in each agent; stacking GLP1R agonists has receptor and adverse-signal redundancy unless a direct combination trial says otherwise.",
+   "action": "FLAG_FOR_PROVIDER_REVIEW",
+   "ai_action": "Detect duplicate GLP1R agonism and mark as redundant receptor load; do not infer additive benefit.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S01",
+    "S03",
+    "S04"
+   ]
+  },
+  {
+   "id": "IR003",
+   "name": "Tirzepatide-retatrutide overlap",
+   "category": "metabolic",
+   "agent_slugs": [
+    "tirzepatide",
+    "retatrutide"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Dual GIP/GLP-1 plus triple GIP/GLP-1/glucagon agonist",
+   "interaction_type": "redundancy_plus_glucagon_axis",
+   "direct_combination_evidence": false,
+   "confidence": "high mechanistic; insufficient direct clinical",
+   "evidence_basis": "Retatrutide shares GIPR and GLP1R with tirzepatide and adds GCGR agonism; no direct stack evidence identified.",
+   "action": "FLAG_FOR_PROVIDER_REVIEW",
+   "ai_action": "Mark as overlapping incretin receptor load with added glucagon-axis uncertainty; do not infer superiority.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S03",
+    "S04"
+   ]
+  },
+  {
+   "id": "IR004",
+   "name": "Retatrutide with any GLP-1/amylin agent",
+   "category": "metabolic",
+   "agent_slugs": [
+    "retatrutide",
+    "semaglutide",
+    "tirzepatide",
+    "lib:cagrilintide",
+    "lib:pramlintide"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Retatrutide plus GLP1R or amylin pathway agents",
+   "interaction_type": "unknown_stack_with_GI_HR_signal",
+   "direct_combination_evidence": false,
+   "confidence": "moderate mechanistic; insufficient direct clinical",
+   "evidence_basis": "Retatrutide trial reports GI and heart-rate signals; GLP/amylin agents also carry GI satiety/gastric effects. Direct retatrutide-amylin or retatrutide-GLP stack evidence is not established here.",
+   "action": "FLAG_FOR_PROVIDER_REVIEW",
+   "ai_action": "Require 'no direct evidence found' annotation and flag GI/heart-rate/adverse-signal overlap.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S04",
+    "S05",
+    "S06"
+   ]
+  },
+  {
+   "id": "IR005",
+   "name": "AOD-9604 vs GH-secretagogue distinction",
+   "category": "metabolic_GH",
+   "agent_slugs": [
+    "aod-9604",
+    "cjc-1295",
+    "sermorelin",
+    "tesamorelin",
+    "ipamorelin",
+    "ghrp-2",
+    "ghrp-6",
+    "hexarelin"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "hGH fragment plus GH-axis secretagogues",
+   "interaction_type": "uncertain_nonoverlap",
+   "direct_combination_evidence": false,
+   "confidence": "low/moderate mechanistic",
+   "evidence_basis": "AOD9604 preclinical work suggests a lipolytic hGH-fragment pathway not mediated by hGH receptor in that model, whereas GH secretagogues act through GH/IGF-axis. Human combo evidence is absent.",
+   "action": "INFORM",
+   "ai_action": "Do not call AOD a GH secretagogue. Mark combo with GH-axis agents as mechanistically distinct but clinically unvalidated.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S07",
+    "S08",
+    "S09"
+   ]
+  },
+  {
+   "id": "IR006",
+   "name": "GHRH analog + GHSR agonist GH synergy",
+   "category": "GH_IGF",
+   "agent_slugs": [
+    "sermorelin",
+    "tesamorelin",
+    "cjc-1295",
+    "lib:ghrelin",
+    "ipamorelin",
+    "ghrp-2",
+    "ghrp-6",
+    "hexarelin"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "GHRH receptor agonist plus ghrelin/GHSR agonist",
+   "interaction_type": "possible_synergy_and_axis_load",
+   "direct_combination_evidence": false,
+   "confidence": "moderate for class inference",
+   "evidence_basis": "Human ghrelin plus GHRH data show synergistic GH release; applying to synthetic GHRH analogs plus GHSR agonists is class inference.",
+   "action": "FLAG_FOR_PROVIDER_REVIEW",
+   "ai_action": "Flag possible GH/IGF amplification and downstream glucose/growth-factor monitoring concepts; label as inference unless exact pair has direct data.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S12",
+    "S08",
+    "S09",
+    "S10",
+    "S11"
+   ]
+  },
+  {
+   "id": "IR007",
+   "name": "GHRH analog redundancy",
+   "category": "GH_IGF",
+   "agent_slugs": [
+    "sermorelin",
+    "tesamorelin",
+    "cjc-1295"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Any two GHRH receptor agonists",
+   "interaction_type": "redundancy_risk_overlap",
+   "direct_combination_evidence": false,
+   "confidence": "high mechanistic",
+   "evidence_basis": "All act primarily at GHRH receptor/pituitary GH axis; CJC and tesamorelin evidence both show GH/IGF-axis activation.",
+   "action": "FLAG_FOR_PROVIDER_REVIEW",
+   "ai_action": "Mark as redundant GHRH receptor load; do not infer additional benefit.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S08",
+    "S09"
+   ]
+  },
+  {
+   "id": "IR008",
+   "name": "Nonselective GHRP endocrine off-target overlap",
+   "category": "GH_IGF",
+   "agent_slugs": [
+    "ghrp-2",
+    "ghrp-6",
+    "hexarelin",
+    "ipamorelin"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "GHSR agonists, especially GHRP-2/GHRP-6/hexarelin",
+   "interaction_type": "risk_overlap",
+   "direct_combination_evidence": false,
+   "confidence": "moderate",
+   "evidence_basis": "GHRP-2/GHRP-6/hexarelin can increase ACTH/cortisol/prolactin, whereas ipamorelin appears more selective in available models.",
+   "action": "FLAG_FOR_PROVIDER_REVIEW",
+   "ai_action": "Differentiate ipamorelin from GHRP-2/GHRP-6/hexarelin; flag ACTH/cortisol/prolactin overlap for nonselective GHRPs.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S10",
+    "S11"
+   ]
+  },
+  {
+   "id": "IR009",
+   "name": "GH/IGF axis vs insulin sensitivity",
+   "category": "GH_IGF_metabolic",
+   "agent_slugs": [
+    "sermorelin",
+    "tesamorelin",
+    "cjc-1295",
+    "ipamorelin",
+    "ghrp-2",
+    "ghrp-6",
+    "hexarelin",
+    "mots-c",
+    "semaglutide",
+    "tirzepatide",
+    "retatrutide"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "GH-axis agents plus metabolic insulin-sensitizing/satiety agents",
+   "interaction_type": "opposing_or_mixed_metabolic_signals",
+   "direct_combination_evidence": false,
+   "confidence": "moderate mechanistic",
+   "evidence_basis": "GH can oppose insulin action through lipolysis/FFA and insulin signaling pathways, while GLP-1 and MOTS-c literature supports glucose/insulin-sensitivity biology through other mechanisms.",
+   "action": "INFORM",
+   "ai_action": "When GH-axis and metabolic agents appear together, mark glucose/insulin signal as mixed rather than automatically synergistic.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S13",
+    "S01",
+    "S15"
+   ]
+  },
+  {
+   "id": "IR010",
+   "name": "GH/IGF/proliferation pathway load",
+   "category": "growth_factor",
+   "agent_slugs": [
+    "cjc-1295",
+    "sermorelin",
+    "tesamorelin",
+    "ipamorelin",
+    "ghrp-2",
+    "ghrp-6",
+    "hexarelin",
+    "lib:igf1_lr3",
+    "lib:mgf",
+    "epitalon"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "GH/IGF axis plus direct IGF/MGF/telomere-axis agents",
+   "interaction_type": "theoretical_growth_signal_stack",
+   "direct_combination_evidence": false,
+   "confidence": "moderate for GH/IGF biology; low for epitalon-specific interaction",
+   "evidence_basis": "GH/IGF and IGF-1 receptor biology are growth-promoting; epitalon/telomere claims remain weak but should trigger theoretical pro-growth caution in an AI agent.",
+   "action": "FLAG_FOR_PROVIDER_REVIEW",
+   "ai_action": "Flag as theoretical growth-factor/telomerase pathway load; do not state proven cancer risk from a specific combination.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S14",
+    "S08",
+    "S09",
+    "S18",
+    "S35"
+   ]
+  },
+  {
+   "id": "IR011",
+   "name": "MOTS-c + GLP/amylin metabolic convergence",
+   "category": "mitochondrial_metabolic",
+   "agent_slugs": [
+    "mots-c",
+    "semaglutide",
+    "tirzepatide",
+    "retatrutide",
+    "lib:cagrilintide",
+    "lib:pramlintide"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Mitochondrial metabolic peptide plus incretin/amylin agents",
+   "interaction_type": "convergent_metabolic_inference",
+   "direct_combination_evidence": false,
+   "confidence": "low/moderate",
+   "evidence_basis": "MOTS-c preclinical metabolic effects converge conceptually with incretin/amylin weight/glucose axes, but direct combination evidence is absent.",
+   "action": "INFORM",
+   "ai_action": "Mark as convergent metabolic biology with no direct combo evidence; avoid benefit claims.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S15",
+    "S01",
+    "S05",
+    "S06"
+   ]
+  },
+  {
+   "id": "IR012",
+   "name": "SS-31 + MOTS-c/Humanin mitochondrial convergence",
+   "category": "mitochondrial",
+   "agent_slugs": [
+    "ss-31",
+    "mots-c",
+    "lib:humanin"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Mitochondrial membrane/cytoprotective/metabolic peptides",
+   "interaction_type": "convergent_but_distinct_nodes",
+   "direct_combination_evidence": false,
+   "confidence": "low/moderate",
+   "evidence_basis": "SS-31 acts at mitochondrial membranes, MOTS-c is a mitochondrial-derived metabolic signal, and Humanin is cytoprotective; no direct stack evidence identified.",
+   "action": "INFORM",
+   "ai_action": "Represent as different mitochondrial nodes; do not collapse into one 'mitochondrial booster' mechanism.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S15",
+    "S16",
+    "S17"
+   ]
+  },
+  {
+   "id": "IR013",
+   "name": "Epitalon with growth-factor or mitochondrial agents",
+   "category": "longevity_growth",
+   "agent_slugs": [
+    "epitalon",
+    "lib:igf1_lr3",
+    "lib:mgf",
+    "cjc-1295",
+    "tesamorelin",
+    "mots-c",
+    "ss-31",
+    "lib:humanin"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Epitalon/telomere-axis plus pro-growth or mitochondrial agents",
+   "interaction_type": "uncertain_theoretical",
+   "direct_combination_evidence": false,
+   "confidence": "low",
+   "evidence_basis": "Epitalon evidence is limited/heterogeneous; interaction with GH/IGF or mitochondrial peptides is theoretical and unsupported by direct studies.",
+   "action": "INFORM",
+   "ai_action": "Force low-confidence annotation. Do not let the AI agent produce strong longevity claims.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S18",
+    "S14",
+    "S15",
+    "S16",
+    "S17"
+   ]
+  },
+  {
+   "id": "IR014",
+   "name": "BPC-157 + TB4/TB-500 + GHK-Cu tissue-repair stack",
+   "category": "tissue_repair",
+   "agent_slugs": [
+    "bpc-157",
+    "tb-500",
+    "ghk-cu"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Repair/angiogenesis/collagen remodeling peptides",
+   "interaction_type": "possible_overlap_synergy_but_preclinical",
+   "direct_combination_evidence": false,
+   "confidence": "low/moderate",
+   "evidence_basis": "These agents converge on wound/tissue remodeling, collagen/fibroblast, cell migration and angiogenesis-related biology. Direct combination evidence is not established and much is preclinical.",
+   "action": "FLAG_FOR_PROVIDER_REVIEW",
+   "ai_action": "Flag possible repair-pathway overlap and angiogenesis signal; label clinical synergy as unproven.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S19",
+    "S20",
+    "S21",
+    "S22"
+   ]
+  },
+  {
+   "id": "IR015",
+   "name": "BPC-157 and NO/angiogenesis interaction context",
+   "category": "tissue_repair_vascular",
+   "agent_slugs": [
+    "bpc-157",
+    "tb-500",
+    "ghk-cu",
+    "lib:ll_37"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "BPC-157 plus angiogenesis/wound-healing peptides",
+   "interaction_type": "risk_overlap",
+   "direct_combination_evidence": false,
+   "confidence": "low/moderate",
+   "evidence_basis": "BPC-157 literature links to NO-system and angiogenesis; TB4/GHK/LL-37 also have wound or angiogenesis/immunomodulatory biology.",
+   "action": "FLAG_FOR_PROVIDER_REVIEW",
+   "ai_action": "Add angiogenesis/remodeling overlap tag. Do not claim tumor promotion as proven; mark theoretical only when relevant.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S20",
+    "S21",
+    "S22",
+    "S25"
+   ]
+  },
+  {
+   "id": "IR016",
+   "name": "KPV + LL-37 inflammatory-direction contrast",
+   "category": "immune",
+   "agent_slugs": [
+    "kpv",
+    "lib:ll_37"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Anti-inflammatory melanocortin-derived peptide plus antimicrobial immunomodulatory peptide",
+   "interaction_type": "opposing_or_context_dependent",
+   "direct_combination_evidence": false,
+   "confidence": "moderate mechanistic/contextual",
+   "evidence_basis": "KPV is anti-inflammatory in murine colitis models; LL-37 can be antimicrobial/wound-healing but also participates in autoimmune inflammation contexts.",
+   "action": "INFORM",
+   "ai_action": "Mark immune direction as context-dependent, not simply synergistic or antagonistic.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S23",
+    "S25",
+    "S26"
+   ]
+  },
+  {
+   "id": "IR017",
+   "name": "Thymosin alpha-1 + LL-37 immune modulation overlap",
+   "category": "immune",
+   "agent_slugs": [
+    "thymosin-alpha-1",
+    "lib:ll_37"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Adaptive/innate immunomodulatory peptides",
+   "interaction_type": "immune_activation_context_overlap",
+   "direct_combination_evidence": false,
+   "confidence": "low/moderate",
+   "evidence_basis": "Tα1 modulates immune function; LL-37 is antimicrobial and immunomodulatory with autoimmune-inflammatory context evidence.",
+   "action": "INFORM",
+   "ai_action": "Flag immune-context dependence and autoimmune/inflammatory phenotype caution; no generic 'immune boost' claim.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S24",
+    "S25",
+    "S26"
+   ]
+  },
+  {
+   "id": "IR018",
+   "name": "Thymosin alpha-1 + KPV immune-direction balance",
+   "category": "immune",
+   "agent_slugs": [
+    "thymosin-alpha-1",
+    "kpv"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Immune modulation plus anti-inflammatory peptide",
+   "interaction_type": "context_dependent",
+   "direct_combination_evidence": false,
+   "confidence": "low",
+   "evidence_basis": "Tα1 immune modulation and KPV anti-inflammatory effects can point in different immunologic directions depending on disease model.",
+   "action": "INFORM",
+   "ai_action": "Represent as context-dependent immune modulation, not automatic synergy.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S24",
+    "S23"
+   ]
+  },
+  {
+   "id": "IR019",
+   "name": "PT-141 + Melanotan II melanocortin redundancy",
+   "category": "melanocortin",
+   "agent_slugs": [
+    "pt-141",
+    "melanotan-ii"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Melanocortin receptor agonists",
+   "interaction_type": "redundancy_risk_overlap",
+   "direct_combination_evidence": false,
+   "confidence": "moderate/high mechanistic",
+   "evidence_basis": "Both are melanocortin agonists; MT-II has broader MC receptor activity while PT-141/bremelanotide is primarily reasoned through CNS melanocortin sexual-desire pathways.",
+   "action": "FLAG_FOR_PROVIDER_REVIEW",
+   "ai_action": "Flag melanocortin receptor redundancy and additive nausea/flushing/autonomic/pigmentation-signal possibilities; no benefit stacking assumption.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S27"
+   ]
+  },
+  {
+   "id": "IR020",
+   "name": "PT-141 + Kisspeptin complementary arousal vs HPG-axis",
+   "category": "reproductive_neuroendocrine",
+   "agent_slugs": [
+    "pt-141",
+    "kisspeptin-10"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Melanocortin sexual-desire pathway plus upstream HPG axis peptide",
+   "interaction_type": "complementary_but_no_direct_combo",
+   "direct_combination_evidence": false,
+   "confidence": "low/moderate",
+   "evidence_basis": "PT-141 is CNS melanocortin/arousal biology; kisspeptin stimulates GnRH/LH axis. They are mechanistically distinct but direct combination evidence was not established.",
+   "action": "INFORM",
+   "ai_action": "Mark as complementary theoretical central-arousal plus HPG-axis, not proven clinical synergy.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S27",
+    "S28",
+    "S29"
+   ]
+  },
+  {
+   "id": "IR021",
+   "name": "Kisspeptin + Gonadorelin upstream/downstream redundancy",
+   "category": "HPG_axis",
+   "agent_slugs": [
+    "kisspeptin-10",
+    "gonadorelin"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "KISS1R agonism plus GnRH receptor agonism",
+   "interaction_type": "redundancy_axis_load",
+   "direct_combination_evidence": false,
+   "confidence": "high physiologic; low direct stack outcome",
+   "evidence_basis": "Kisspeptin stimulates GnRH release; gonadorelin is GnRH. This is an upstream/downstream HPG-axis relationship.",
+   "action": "FLAG_FOR_PROVIDER_REVIEW",
+   "ai_action": "Flag HPG-axis redundancy/load. Do not infer improved sex hormones without context and pulsatility logic.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S28",
+    "S29"
+   ]
+  },
+  {
+   "id": "IR022",
+   "name": "Oxytocin + Vasopressin receptor-family cross-talk",
+   "category": "neuropeptide",
+   "agent_slugs": [
+    "lib:oxytocin",
+    "lib:vasopressin"
+   ],
+   "fires_in_formulary": false,
+   "class_scope": "Related posterior-pituitary nonapeptides",
+   "interaction_type": "context_dependent_cross_talk",
+   "direct_combination_evidence": false,
+   "confidence": "moderate",
+   "evidence_basis": "Oxytocin and vasopressin are related neuropeptides with overlapping social/stress contexts but vasopressin has strong water-balance/vascular actions.",
+   "action": "INFORM",
+   "ai_action": "Mark behavioral effects as context-dependent and add water-balance/BP flags when vasopressin is present.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S30"
+   ]
+  },
+  {
+   "id": "IR023",
+   "name": "Melanocortin + oxytocin/vasopressin CNS-social-sexual overlap",
+   "category": "neuropeptide",
+   "agent_slugs": [
+    "pt-141",
+    "melanotan-ii",
+    "lib:oxytocin",
+    "lib:vasopressin"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Melanocortin sexual behavior axis plus social neuropeptides",
+   "interaction_type": "CNS_behavior_overlap",
+   "direct_combination_evidence": false,
+   "confidence": "low",
+   "evidence_basis": "Both melanocortin and oxytocin/vasopressin systems participate in sexual/social/autonomic behavior networks, but direct clinical combination evidence is not established.",
+   "action": "INFORM",
+   "ai_action": "Add CNS/autonomic/behavioral overlap; avoid deterministic claims about libido or bonding.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S27",
+    "S30"
+   ]
+  },
+  {
+   "id": "IR024",
+   "name": "Semax + Selank CNS peptide overlap",
+   "category": "neuroactive",
+   "agent_slugs": [
+    "semax",
+    "selank"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Experimental neuroactive peptides",
+   "interaction_type": "CNS_signal_overlap",
+   "direct_combination_evidence": false,
+   "confidence": "low",
+   "evidence_basis": "Semax has ACTH-fragment/neurotrophic literature; Selank has anxiolytic/nootropic literature. Direct combination evidence is sparse.",
+   "action": "INFORM",
+   "ai_action": "Mark CNS effects as overlapping and evidence-limited; avoid claims of additive nootropic benefit.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S31",
+    "S32"
+   ]
+  },
+  {
+   "id": "IR025",
+   "name": "DSIP with Semax/Selank or sedating agents",
+   "category": "neuroactive_sleep",
+   "agent_slugs": [
+    "dsip",
+    "semax",
+    "selank"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "DSIP plus neuroactive peptides",
+   "interaction_type": "evidence_conflict_overlap",
+   "direct_combination_evidence": false,
+   "confidence": "low",
+   "evidence_basis": "DSIP evidence remains unresolved; combining with CNS-active peptides should be treated as unknown, not as a known sleep/anxiety stack.",
+   "action": "INFORM",
+   "ai_action": "Force 'unknown/insufficient evidence' unless direct study found.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S33",
+    "S31",
+    "S32"
+   ]
+  },
+  {
+   "id": "IR026",
+   "name": "Cerebrolysin with Semax/Selank neurotrophic overlap",
+   "category": "neuroactive",
+   "agent_slugs": [
+    "cerebrolysin",
+    "semax",
+    "selank"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Neurotrophic peptide mixture plus neuroactive peptides",
+   "interaction_type": "CNS_neurotrophic_overlap",
+   "direct_combination_evidence": false,
+   "confidence": "low",
+   "evidence_basis": "Cerebrolysin is a peptide mixture with neurotrophic-like activity; Semax/Selank are defined peptides with heterogeneous neuroactive evidence.",
+   "action": "INFORM",
+   "ai_action": "Do not equate mechanisms. Mark as neurotrophic/CNS overlap with poor direct combination evidence.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S34",
+    "S31",
+    "S32"
+   ]
+  },
+  {
+   "id": "IR027",
+   "name": "GH/IGF axis + tissue-repair angiogenesis peptides",
+   "category": "repair_growth",
+   "agent_slugs": [
+    "cjc-1295",
+    "tesamorelin",
+    "sermorelin",
+    "ipamorelin",
+    "ghrp-2",
+    "ghrp-6",
+    "hexarelin",
+    "bpc-157",
+    "tb-500",
+    "ghk-cu",
+    "lib:mgf"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "GH/IGF/proliferative axis plus repair/remodeling peptides",
+   "interaction_type": "theoretical_growth_repair_stack",
+   "direct_combination_evidence": false,
+   "confidence": "low/moderate",
+   "evidence_basis": "GH/IGF signaling is anabolic/growth-factor biology; BPC/TB4/GHK/MGF converge on repair/remodeling/angiogenesis/progenitor-cell signals. Direct stack evidence is lacking.",
+   "action": "FLAG_FOR_PROVIDER_REVIEW",
+   "ai_action": "Flag growth/remodeling pathway load and absence of direct combination data.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S14",
+    "S19",
+    "S20",
+    "S21",
+    "S22",
+    "S35"
+   ]
+  },
+  {
+   "id": "IR028",
+   "name": "GLP/amylin GI slowing with oral/absorption-sensitive agents",
+   "category": "metabolic_absorption",
+   "agent_slugs": [
+    "semaglutide",
+    "liraglutide",
+    "tirzepatide",
+    "retatrutide",
+    "lib:cagrilintide",
+    "lib:pramlintide"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Agents that slow gastric emptying",
+   "interaction_type": "PK_PD_absorption_overlap",
+   "direct_combination_evidence": false,
+   "confidence": "high mechanism; agent-specific clinical relevance varies",
+   "evidence_basis": "GLP-1 and amylin physiology can slow gastric emptying; this may matter for absorption-sensitive agents even if not peptide-peptide interaction.",
+   "action": "FLAG_FOR_PROVIDER_REVIEW",
+   "ai_action": "When oral co-agents are present in a broader medication graph, flag possible absorption timing uncertainty without giving dosing instructions.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S01",
+    "S06",
+    "S05"
+   ]
+  },
+  {
+   "id": "IR029",
+   "name": "Insulin/pramlintide/GLP glycemic load rule",
+   "category": "metabolic_glycemic",
+   "agent_slugs": [
+    "lib:pramlintide",
+    "semaglutide",
+    "liraglutide",
+    "tirzepatide",
+    "retatrutide"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Amylin/GLP agents plus insulin or insulin secretagogue context",
+   "interaction_type": "glycemic_risk_overlap",
+   "direct_combination_evidence": false,
+   "confidence": "moderate/high mechanism",
+   "evidence_basis": "Pramlintide/amylin and GLP-1 agents lower postprandial glycemic excursions through glucagon, gastric emptying, satiety and insulin-related mechanisms; hypoglycemia risk is context-dependent especially with insulin/secretagogues.",
+   "action": "FLAG_FOR_PROVIDER_REVIEW",
+   "ai_action": "If insulin or secretagogue appears in patient medication graph, raise glycemic-risk flag. No dosing instructions.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S01",
+    "S06"
+   ]
+  },
+  {
+   "id": "IR030",
+   "name": "LL-37 + tissue-repair peptides in infected wound research context",
+   "category": "immune_repair",
+   "agent_slugs": [
+    "lib:ll_37",
+    "bpc-157",
+    "tb-500",
+    "ghk-cu",
+    "kpv"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Antimicrobial/wound peptide plus repair or anti-inflammatory peptides",
+   "interaction_type": "context_dependent_potential_complementarity",
+   "direct_combination_evidence": false,
+   "confidence": "low/moderate",
+   "evidence_basis": "LL-37 has antimicrobial/anti-biofilm/wound-healing literature; BPC/TB4/GHK/KPV have repair or anti-inflammatory signals. Direct combinations are not established.",
+   "action": "INFORM",
+   "ai_action": "Mark possible complementary wound biology but require direct-evidence=false and infection/inflammation context notes.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S25",
+    "S19",
+    "S21",
+    "S22",
+    "S23"
+   ]
+  },
+  {
+   "id": "IR031",
+   "name": "Epitalon/DSIP legacy peptide evidence caution",
+   "category": "evidence_quality",
+   "agent_slugs": [
+    "epitalon",
+    "dsip"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Legacy/heterogeneous peptide literature",
+   "interaction_type": "evidence_quality_warning",
+   "direct_combination_evidence": false,
+   "confidence": "high for evidence-quality caution",
+   "evidence_basis": "Both have older or heterogeneous literatures with unresolved clinical mechanisms compared with stronger metabolic peptide evidence.",
+   "action": "LANGUAGE_GUARDRAIL",
+   "ai_action": "When either appears, downgrade certainty and prevent strong clinical claims.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S18",
+    "S33"
+   ]
+  },
+  {
+   "id": "IR032",
+   "name": "Route/formulation identity warning for fragment/proxy peptides",
+   "category": "evidence_quality",
+   "agent_slugs": [
+    "tb-500",
+    "lib:mgf",
+    "ghk-cu",
+    "bpc-157",
+    "aod-9604"
+   ],
+   "fires_in_formulary": true,
+   "class_scope": "Commercial/research fragments or formulations with evidence transferred from related molecules",
+   "interaction_type": "identity_transfer_uncertainty",
+   "direct_combination_evidence": false,
+   "confidence": "high for methodology warning",
+   "evidence_basis": "TB-500 vs TB4, PEG-MGF vs MGF-E, topical vs injectable GHK-Cu, hGH fragments vs GH, and varied BPC-157 models are not always interchangeable.",
+   "action": "LANGUAGE_GUARDRAIL",
+   "ai_action": "Require exact molecule/formulation matching before applying evidence to an interaction.",
+   "hard_limits": [
+    "No dose suggestions",
+    "No treatment recommendations",
+    "No regulatory-status reasoning",
+    "Mark all non-direct combinations as inference"
+   ],
+   "source_ids": [
+    "S21",
+    "S22",
+    "S35",
+    "S07",
+    "S19"
+   ]
+  }
+ ],
+ "sources": {
+  "S01": {
+   "title": "GLP-1 mechanisms: insulin secretion, glucagon suppression, gastric emptying, food intake",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/29617641/",
+   "pmid": "29617641",
+   "doi": null,
+   "supports": [
+    "GLP-1 receptor agonism increases glucose-dependent insulin secretion, suppresses glucagon, slows gastric emptying, and reduces food intake"
+   ],
+   "limits": [
+    "Does not validate arbitrary stacking of GLP-1 agents"
+   ]
+  },
+  "S02": {
+   "title": "GLP-1 biology review",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6812410/",
+   "pmid": null,
+   "doi": null,
+   "supports": [
+    "GLP-1 has metabolic effects including glucose-dependent insulin secretion, slower gastric emptying, and reduced food intake"
+   ],
+   "limits": [
+    "General biology; not a specific combination study"
+   ]
+  },
+  "S03": {
+   "title": "Tirzepatide dual GIP/GLP-1 receptor co-agonist",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/36050763/",
+   "pmid": "36050763",
+   "doi": null,
+   "supports": [
+    "Tirzepatide is engineered to activate both GIP and GLP-1 receptors"
+   ],
+   "limits": [
+    "Does not establish safety or efficacy of tirzepatide with other incretin/amylin agents"
+   ]
+  },
+  "S04": {
+   "title": "Retatrutide triple GIP/GLP-1/glucagon receptor agonist phase 2 trial",
+   "url": "https://www.nejm.org/doi/full/10.1056/NEJMoa2301972",
+   "pmid": "37366315",
+   "doi": "10.1056/NEJMoa2301972",
+   "supports": [
+    "Retatrutide is a GIP, GLP-1, and glucagon receptor agonist; GI adverse events and heart-rate signal were reported in the phase 2 obesity trial"
+   ],
+   "limits": [
+    "Does not test retatrutide stacked with semaglutide, tirzepatide, or cagrilintide"
+   ]
+  },
+  "S05": {
+   "title": "Cagrilintide-semaglutide coadministration in obesity/type 2 diabetes",
+   "url": "https://www.nejm.org/doi/full/10.1056/NEJMoa2502082",
+   "pmid": "40544432",
+   "doi": "10.1056/NEJMoa2502082",
+   "supports": [
+    "Cagrilintide plus semaglutide has direct human trial evidence as a fixed combination; rationale is complementary amylin and GLP-1 mechanisms; GI adverse events were common"
+   ],
+   "limits": [
+    "Specific to studied combination and population; does not generalize to every amylin/GLP-1 stack"
+   ]
+  },
+  "S06": {
+   "title": "Pramlintide/amylin mechanism review",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2496974/",
+   "pmid": null,
+   "doi": null,
+   "supports": [
+    "Amylin/pramlintide lowers postprandial glucagon, delays gastric emptying, and increases satiety"
+   ],
+   "limits": [
+    "Pramlintide evidence should not be automatically transferred to cagrilintide without agent-specific data"
+   ]
+  },
+  "S07": {
+   "title": "AOD9604/hGH fragment metabolic effects in obese mice",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/11673763/",
+   "pmid": "11673763",
+   "doi": null,
+   "supports": [
+    "AOD9604/hGH C-terminal fragment increased fat oxidation/lipolysis in obese mice and did not interact with the hGH receptor in that study"
+   ],
+   "limits": [
+    "Preclinical animal evidence; not proof of human clinical efficacy"
+   ]
+  },
+  "S08": {
+   "title": "CJC-1295 long-acting GHRH analog increases GH and IGF-1",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/16352683/",
+   "pmid": "16352683",
+   "doi": null,
+   "supports": [
+    "CJC-1295 produced sustained dose-dependent GH and IGF-1 increases in healthy adults"
+   ],
+   "limits": [
+    "Small pharmacology study; not long-term clinical outcomes"
+   ]
+  },
+  "S09": {
+   "title": "Tesamorelin GHRH analogue effects on VAT and IGF-1 in HIV-associated abdominal fat",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/18057338/",
+   "pmid": "18057338",
+   "doi": "10.1056/NEJMoa072375",
+   "supports": [
+    "Tesamorelin, a GHRH analogue, decreased visceral adipose tissue and increased IGF-1 in a randomized trial"
+   ],
+   "limits": [
+    "Population-specific; not evidence for general anti-aging or stacking with other GH secretagogues"
+   ]
+  },
+  "S10": {
+   "title": "Ipamorelin selective GH secretagogue",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/9849822/",
+   "pmid": "9849822",
+   "doi": null,
+   "supports": [
+    "Ipamorelin released GH with little ACTH/cortisol effect compared with GHRP-2/GHRP-6 in the reported model"
+   ],
+   "limits": [
+    "Much of the selectivity evidence is preclinical; direct human clinical outcome evidence is limited"
+   ]
+  },
+  "S11": {
+   "title": "GHRP-2 and hexarelin effects on GH, prolactin, ACTH and cortisol in humans",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/9285939/",
+   "pmid": "9285939",
+   "doi": null,
+   "supports": [
+    "GHRP-2 and hexarelin stimulate GH and can also increase prolactin, ACTH, and cortisol in humans"
+   ],
+   "limits": [
+    "Does not establish outcomes of multi-agent GH-secretagogue stacks"
+   ]
+  },
+  "S12": {
+   "title": "Combined ghrelin and GHRH stimulate GH synergistically in humans",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/11549707/",
+   "pmid": "11549707",
+   "doi": null,
+   "supports": [
+    "Ghrelin plus GHRH produced synergistic GH release in humans"
+   ],
+   "limits": [
+    "Class inference is required when applying to synthetic GHSR agonists plus synthetic GHRH analogues"
+   ]
+  },
+  "S13": {
+   "title": "Growth hormone effects on insulin signaling and glucose metabolism",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7606590/",
+   "pmid": null,
+   "doi": null,
+   "supports": [
+    "Chronic GH signaling can oppose insulin action through lipolysis/FFA flux and insulin signaling effects"
+   ],
+   "limits": [
+    "Does not quantify risk for any specific peptide combination"
+   ]
+  },
+  "S14": {
+   "title": "GH/IGF/insulin axis and cancer biology",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/20956999/",
+   "pmid": "20956999",
+   "doi": null,
+   "supports": [
+    "GH, IGF-I and insulin have growth-promoting/anabolic actions and have been studied in relation to tumor promotion/progression"
+   ],
+   "limits": [
+    "Does not prove a direct clinical cancer risk for a given research-peptide stack"
+   ]
+  },
+  "S15": {
+   "title": "MOTS-c promotes metabolic homeostasis and reduces obesity/insulin resistance in mice",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/25738459/",
+   "pmid": "25738459",
+   "doi": "10.1016/j.cmet.2015.02.009",
+   "supports": [
+    "MOTS-c is a mitochondrial-derived peptide with preclinical metabolic effects involving obesity and insulin resistance models"
+   ],
+   "limits": [
+    "Predominantly preclinical; not proof of human clinical benefit or stacking safety"
+   ]
+  },
+  "S16": {
+   "title": "SS-31/elamipretide mitochondrial membrane/cardiolipin interaction",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/32273339/",
+   "pmid": "32273339",
+   "doi": null,
+   "supports": [
+    "SS-31/elamipretide partitions into mitochondrial membrane interfaces and is linked to mitoprotective effects"
+   ],
+   "limits": [
+    "Mechanistic; not evidence for all longevity claims or combinations"
+   ]
+  },
+  "S17": {
+   "title": "Humanin/mitochondrial-derived peptides regulate apoptosis, insulin sensitivity, inflammatory markers",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4925829/",
+   "pmid": "27070352",
+   "doi": null,
+   "supports": [
+    "Humanin and related mitochondrial-derived peptides are linked to apoptosis, insulin sensitivity, and inflammatory-marker regulation"
+   ],
+   "limits": [
+    "Mostly mechanistic/preclinical; not direct combination evidence"
+   ]
+  },
+  "S18": {
+   "title": "Epitalon overview and telomerase/telomere cell-line evidence",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11943447/",
+   "pmid": null,
+   "doi": null,
+   "supports": [
+    "Epitalon is a tetrapeptide studied for telomerase/telomere and aging-related biology, largely in experimental models"
+   ],
+   "limits": [
+    "Evidence is limited/heterogeneous; not a validated human clinical interaction base"
+   ]
+  },
+  "S19": {
+   "title": "BPC-157 narrative/scoping review: investigational, clinical evidence limited",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12446177/",
+   "pmid": "40789979",
+   "doi": null,
+   "supports": [
+    "BPC-157 evidence is primarily preclinical; review recommends caution until well-designed clinical trials exist"
+   ],
+   "limits": [
+    "Narrative/scoping review; some literature from same research groups"
+   ]
+  },
+  "S20": {
+   "title": "BPC-157 wound/NO/angiogenesis literature",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/17713731/",
+   "pmid": "17713731",
+   "doi": null,
+   "supports": [
+    "BPC-157 has been linked in the literature to wound healing, NO-system effects, and angiogenesis-related mechanisms"
+   ],
+   "limits": [
+    "Mostly preclinical; does not establish human musculoskeletal efficacy"
+   ]
+  },
+  "S21": {
+   "title": "Thymosin beta-4 accelerates wound healing in rat model",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/10469335/",
+   "pmid": "10469335",
+   "doi": null,
+   "supports": [
+    "Thymosin beta-4 enhanced wound healing in a rat full-thickness wound model"
+   ],
+   "limits": [
+    "Animal evidence; TB-500 commercial derivatives may not be identical to native TB4 evidence"
+   ]
+  },
+  "S22": {
+   "title": "GHK/GHK-Cu tissue remodeling and wound healing",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/26236730/",
+   "pmid": "26236730",
+   "doi": null,
+   "supports": [
+    "GHK-Cu is associated with wound healing, skin repair, collagen turnover, and tissue remodeling"
+   ],
+   "limits": [
+    "Evidence varies by route/formulation/model; not general proof for injectable systemic use"
+   ]
+  },
+  "S23": {
+   "title": "KPV anti-inflammatory effects in murine colitis models",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/18092346/",
+   "pmid": "18092346",
+   "doi": null,
+   "supports": [
+    "KPV showed anti-inflammatory effects in murine colitis models"
+   ],
+   "limits": [
+    "Preclinical disease models; direct human systemic interaction data are sparse"
+   ]
+  },
+  "S24": {
+   "title": "Thymosin alpha-1 comprehensive immune-modulation review",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7747025/",
+   "pmid": "33362999",
+   "doi": null,
+   "supports": [
+    "Thymosin alpha-1 is recognized as an immunomodulatory thymic peptide"
+   ],
+   "limits": [
+    "Clinical effects vary by disease context; not direct evidence for arbitrary immune stacks"
+   ]
+  },
+  "S25": {
+   "title": "LL-37 antimicrobial and immunomodulatory peptide review",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8227053/",
+   "pmid": null,
+   "doi": null,
+   "supports": [
+    "LL-37 has broad antimicrobial, anti-biofilm, wound-healing and immunomodulatory roles"
+   ],
+   "limits": [
+    "Context-dependent biology; antimicrobial peptide activity does not equal safe systemic use"
+   ]
+  },
+  "S26": {
+   "title": "LL-37 as a T-cell autoantigen in psoriasis",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/25470744/",
+   "pmid": "25470744",
+   "doi": null,
+   "supports": [
+    "LL-37 can be involved in autoimmune/inflammatory pathways such as psoriasis"
+   ],
+   "limits": [
+    "Disease-specific immunology; not a direct adverse-event prediction for every subject"
+   ]
+  },
+  "S27": {
+   "title": "Bremelanotide/PT-141 melanocortin pathway and sexual desire",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/33455598/",
+   "pmid": "33455598",
+   "doi": null,
+   "supports": [
+    "Bremelanotide acts through melanocortin receptor pathways; proposed CNS mechanism includes MC4R-related dopaminergic sexual desire signaling"
+   ],
+   "limits": [
+    "Does not establish direct interaction with kisspeptin, oxytocin, or other agents"
+   ]
+  },
+  "S28": {
+   "title": "Kisspeptin directly stimulates GnRH/LH pathway",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/15665093/",
+   "pmid": "15665093",
+   "doi": null,
+   "supports": [
+    "Kisspeptin directly stimulates GnRH release, driving gonadotropin signaling"
+   ],
+   "limits": [
+    "Physiology evidence does not equal clinical outcome from stacking with GnRH analogues"
+   ]
+  },
+  "S29": {
+   "title": "GnRH physiology and pulsatile LH/FSH regulation",
+   "url": "https://www.ncbi.nlm.nih.gov/books/NBK558992/",
+   "pmid": null,
+   "doi": null,
+   "supports": [
+    "GnRH pulsatility regulates LH and FSH synthesis/secretion patterns"
+   ],
+   "limits": [
+    "Reference physiology; not a peptide-stack trial"
+   ]
+  },
+  "S30": {
+   "title": "Oxytocin and vasopressin in social behavior and physiology",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9337272/",
+   "pmid": "35863332",
+   "doi": null,
+   "supports": [
+    "Oxytocin and vasopressin are related neuropeptides involved in social behavior, stress, reproductive and water-balance physiology"
+   ],
+   "limits": [
+    "Effects are context-dependent; not direct evidence for combination protocols"
+   ]
+  },
+  "S31": {
+   "title": "Semax ACTH fragment analog and BDNF/neuroprotection literature",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/16635254/",
+   "pmid": "16635254",
+   "doi": null,
+   "supports": [
+    "Semax is an ACTH(4-10)/ACTH(4-7)-related synthetic peptide studied for neurotrophic/neuroprotective signals such as BDNF in animal models"
+   ],
+   "limits": [
+    "Evidence base is regionally concentrated and largely preclinical/heterogeneous"
+   ]
+  },
+  "S32": {
+   "title": "Selank molecular aspects and anxiolytic/nootropic effects",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/30255741/",
+   "pmid": "30255741",
+   "doi": null,
+   "supports": [
+    "Selank is a heptapeptide studied for prolonged anti-anxiety and nootropic effects"
+   ],
+   "limits": [
+    "Direct high-quality human interaction evidence is sparse"
+   ]
+  },
+  "S33": {
+   "title": "DSIP unresolved evidence base",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/16539679/",
+   "pmid": "16539679",
+   "doi": null,
+   "supports": [
+    "Delta sleep-inducing peptide remains biologically and clinically unresolved"
+   ],
+   "limits": [
+    "Older heterogeneous evidence; no reliable basis for strong AI recommendations"
+   ]
+  },
+  "S34": {
+   "title": "Cerebrolysin peptide mixture mimics neurotrophic factor actions in models",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3073377/",
+   "pmid": null,
+   "doi": null,
+   "supports": [
+    "Cerebrolysin is a peptide preparation with neurotrophic-like effects studied in neurodegeneration/stroke models"
+   ],
+   "limits": [
+    "Mixture product; mechanism and evidence are not interchangeable with single defined peptides"
+   ]
+  },
+  "S35": {
+   "title": "Mechano growth factor/MGF-E evidence and contradictory findings",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/21354439/",
+   "pmid": "21354439",
+   "doi": null,
+   "supports": [
+    "MGF-E peptide has been studied in human muscle progenitor cells; reports exist for activation/fusion potential"
+   ],
+   "limits": [
+    "PEG-MGF specifically has very limited direct peer-reviewed evidence; MGF findings are not necessarily transferable"
+   ]
+  }
+ }
+}
