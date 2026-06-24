@@ -62,13 +62,16 @@ td.num input{text-align:right}
   <div class="toolbar">
     <input class="search" id="search" placeholder="Search agents…" oninput="render()">
     <button class="btn g" onclick="addCustom()">+ Add custom item</button>
+    <button class="btn g" onclick="exportCSV()">⬇ Export CSV</button>
+    <button class="btn g" onclick="exportJSON()">⬇ Export JSON</button>
+    <label class="btn g" style="cursor:pointer">⬆ Import JSON<input type="file" accept=".json,application/json" style="display:none" onchange="importJSON(event)"></label>
     <button class="btn p" onclick="save(true)">💾 Save</button>
     <span class="saved" id="saved"></span>
   </div>
 
   <div id="rows"><div style="color:var(--muted);padding:20px">Loading master menu…</div></div>
 
-  <div class="disc">Inventory and sourcing are the clinic/provider's responsibility. AllyOS provides the generic clinical palette and safety logic only; it does not direct, endorse, or verify any pharmacy, outsourcing facility, SKU, or price. Verify all products against the actual label. © 2026 RenuviaMD® Compliance Division.</div>
+  <div class="disc">Inventory and sourcing are the clinic/provider's responsibility. AllyOS provides the generic clinical palette and safety logic only; it does not direct, endorse, or verify any pharmacy, outsourcing facility, SKU, or price. <b>Cost is a cost-of-goods reference for reorder and margin awareness only — AllyOS handles no billing, invoicing, or payments. Export (CSV/JSON) into your practice-management software for the financial side.</b> Verify all products against the actual label. © 2026 RenuviaMD® Compliance Division.</div>
 </div>
 <script>
 var MENU=[], INV={}, CUSTOM=[], KEY='allyos_iv_inventory_v1';
@@ -146,6 +149,21 @@ function stats(){
   var a=document.getElementById('alert');
   if(low+out>0){a.className='alert show';a.textContent='⚠ '+(low+out)+' item(s) at/below par or out: '+lowNames.slice(0,6).join(', ')+(lowNames.length>6?'…':'');}
   else a.className='alert';
+}
+// ---- import / export (bridge to practice-management software; AllyOS handles no billing/payments) ----
+function dl(name,content,type){var b=new Blob([content],{type:type}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
+function csvCell(v){v=''+(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function exportCSV(){
+  var rows=[['Agent','AgentID','Category','SKU','Supplier','Size','Cost','Stock','Par']];
+  allItems().forEach(function(it){var r=INV[it.id]||{};rows.push([it.name,it.id,it.cat,r.sku||'',r.supplier||'',r.size||'',r.cost||'',(+r.stock||0),(r.par==null?'':r.par)]);});
+  dl('allyos-iv-inventory.csv',rows.map(function(row){return row.map(csvCell).join(',');}).join('\n'),'text/csv');
+}
+function exportJSON(){ dl('allyos-iv-inventory.json',JSON.stringify({inv:INV,custom:CUSTOM},null,2),'application/json'); }
+function importJSON(ev){
+  var f=ev.target.files&&ev.target.files[0];if(!f)return;
+  var rd=new FileReader();
+  rd.onload=function(){try{var d=JSON.parse(rd.result);if(d.inv)INV=d.inv;if(d.custom)CUSTOM=d.custom;save();render();alert('Inventory imported.');}catch(e){alert('Could not parse file: '+e.message);}};
+  rd.readAsText(f);ev.target.value='';
 }
 function esc(s){return(''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 </script>

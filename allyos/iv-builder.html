@@ -222,12 +222,13 @@ function loadStack(code){var s=null;(MOD.stacks||[]).forEach(function(x){if(x.co
   else if(/100 mL|access/i.test(s.base||'')){document.getElementById('baseVol').value='100';}
   else {document.getElementById('baseVol').value='500';}
   document.getElementById('baseType').value=/LR|lactated/i.test(s.base||'')?"Lactated Ringer's":/dedicated/i.test(s.base||'')?'Dedicated NAD+ bag (NS)':/access/i.test(s.base||'')?'IV access / push only (no bag)':'0.9% Normal Saline';
+  var tm=parseTimeMin(s.infusion_time); if(tm) document.getElementById('infMin').value=tm;
   var comps=(s.components||[]).concat(s.post_drip||[]).concat(s.optional_add_ons||[]).concat(s.same_visit_add_ons||[]);
   comps.forEach(function(c){var ing=matchByName(c.ingredient);BAG.push({id:ing?ing.id:'',name:c.ingredient,dose:c.dose||'',ref:ing});});
   renderBag();calcDrip();analyze();}
 function loadNiagen(){var m=(MOD.market_additions&&MOD.market_additions.entries||[])[0];
-  BAG=[];document.getElementById('stackName').value='Niagen / NR IV (market addition)';document.getElementById('baseType').value='Dedicated NAD+ bag (NS)';
-  BAG.push({id:'ADD_NIAGEN_NR',name:(m?m.name:'Niagen / NR'),dose:'per protocol',ref:m});renderBag();analyze();}
+  BAG=[];document.getElementById('stackName').value='Niagen / NR IV (market addition)';document.getElementById('baseType').value='Dedicated NAD+ bag (NS)';document.getElementById('infMin').value=120;
+  BAG.push({id:'ADD_NIAGEN_NR',name:(m?m.name:'Niagen / NR'),dose:'per protocol',ref:m});renderBag();calcDrip();analyze();}
 function matchByName(name){var n=(name||'').toLowerCase();
   for(var i=0;i<MENU.length;i++){var mn=(MENU[i].name||'').toLowerCase();if(n.indexOf(mn.split(' ')[0])>=0||mn.indexOf(n.split(' ')[0])>=0)return MENU[i];}return null;}
 
@@ -416,6 +417,10 @@ function followAlly(){
   CONV.push({role:'user',content:v});renderConv();send();
 }
 function parseGrams(s){if(!s)return null;s=(''+s).toLowerCase();var m=s.match(/([\d.]+)\s*(g|mg|mcg)/);if(!m)return null;var v=parseFloat(m[1]);if(m[2]==='mg')v=v/1000;if(m[2]==='mcg')v=v/1000000;return v;}
+function parseTimeMin(s){ if(!s)return null; s=(''+s).toLowerCase();
+  var h=s.match(/([\d.]+)\s*(?:–|-|to)?\s*([\d.]+)?\s*hr/); if(h)return Math.round((parseFloat(h[1])||0)*60);
+  var m=s.match(/([\d.]+)\s*(?:–|-|to)?\s*([\d.]+)?\s*min/); if(m)return Math.round(parseFloat(m[1])||0);
+  return null; }
 function esc(s){return(''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>
 </body></html>
