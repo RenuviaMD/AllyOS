@@ -4,9 +4,12 @@
 :root{--navy:#102a30;--navy2:#0e3a40;--teal:#0e8a8a;--gold:#c9870a;--ink:#1c2b32;--muted:#5b6b72;--line:#e3ecea;--soft:#f3f8f7;--green:#1e9e6a}
 *{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:#eef4f3;line-height:1.5}
 .wrap{max-width:1040px;margin:0 auto;padding:0 22px}
-header{background:linear-gradient(150deg,#0e3a40,#0e8a8a);color:#fff;padding:30px 0}
+header{background:linear-gradient(150deg,#0e3a40,#0e8a8a);color:#fff;padding:24px 0 30px}
+.topbar{display:flex;justify-content:space-between;align-items:center}
 .brand{font-weight:800;font-size:1.1rem}.brand span{color:#ffd98a}
-h1{font-size:2.1rem;margin:14px 0 6px;font-family:Georgia,serif}header p{color:#d4ece9;max-width:640px}
+.nav a{color:#fff;text-decoration:none;font-size:.82rem;margin-left:16px;opacity:.9}
+.nav a.cta{background:#ffd98a;color:#3a2a00;padding:7px 14px;border-radius:8px;font-weight:800;opacity:1}
+h1{font-size:2.1rem;margin:16px 0 6px;font-family:Georgia,serif}header p{color:#d4ece9;max-width:680px}
 .lines{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 .line{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:6px 14px;font-size:.85rem}
 section{padding:34px 0}h2{font-size:1.1rem;color:var(--navy);margin-bottom:6px}.sub{color:var(--muted);font-size:.92rem;margin-bottom:18px}
@@ -16,41 +19,55 @@ section{padding:34px 0}h2{font-size:1.1rem;color:var(--navy);margin-bottom:6px}.
 .tool .ic{font-size:1.7rem}.tool h3{font-size:1.1rem;margin:8px 0 4px;color:var(--navy)}.tool p{font-size:.88rem;color:var(--muted)}
 .tier{position:absolute;top:16px;right:16px;font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:6px}
 .free{background:#e8f7f0;color:#0c7a4d}.member{background:#e6f6f6;color:#0b6e6e}.top{background:#fff3df;color:#9a6300}
-.ladder{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:10px}
-.tg{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}.tg b{color:var(--navy)}.tg ul{list-style:none;margin-top:8px;font-size:.84rem;color:var(--muted)}.tg li{padding:2px 0}
+.ladder{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:10px}
+.tg{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}.tg b{color:var(--navy)}.tg .pr{font-size:.78rem;color:var(--teal);font-weight:700;margin-top:2px}.tg ul{list-style:none;margin-top:8px;font-size:.84rem;color:var(--muted)}.tg li{padding:2px 0}
+.diffrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.diffrow .d{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:.8rem;color:var(--muted);flex:1;min-width:150px}.diffrow .d b{color:var(--navy)}
 footer{background:var(--navy);color:#9fb4b8;font-size:.78rem;padding:24px 0}footer b{color:#dfeae8}
 @media screen{
  :root{--navy:#dfeae8;--teal:#29b8a8;--gold:#d4a548;--ink:#e8eef0;--muted:#9aa9b0;--line:#222d32;--soft:#161e22;--green:#3fcf8e}
  body{background:#0b0f11}
- .tool,.tg{background:#11181b;box-shadow:none}
+ .tool,.tg,.diffrow .d{background:#11181b;box-shadow:none}
  .free{background:#0e2a1d;color:#7fe0b4}
  .member{background:#0e2436;color:#7fc6e0}
  .top{background:#241a06;color:#e0c48a}
  footer{background:#0d1417}
 }
 </style></head><body>
-<header><div class="wrap"><div class="brand">Ally<span>OS</span> · by RenuviaMD®</div>
+<header><div class="wrap">
+<div class="topbar"><div class="brand">Ally<span>OS</span> · by RenuviaMD®</div>
+<div class="nav"><a href="pricing.html">Pricing</a><a href="verify-npi.html">Verify NPI</a><a class="cta" href="login.html">Sign in</a></div></div>
 <h1>The honest clinical operating system</h1>
-<p>Physician-curated protocols, regulatory intelligence, an honest AI, and on-device documentation — across every line of care, for licensed providers.</p>
-<div class="lines"><span class="line">🧬 Peptides</span><span class="line">⚕️ BHRT</span><span class="line">💧 IV &amp; IM</span><span class="line">🩸 PRP</span><span class="line">✨ Aesthetics</span></div></div></header>
+<p>Physician-curated protocols, an honest AI, a full IV/IM chairside platform, and on-device documentation — for wellness practices and the licensed providers who run them. We inform how and what; we don't broker drugs, we hold no PHI, and we only enforce where we're your Medical Director.</p>
+<div class="lines"><span class="line">🧬 Advanced Peptides</span><span class="line">⚕️ BHRT</span><span class="line">💧 IV &amp; IM Wellness</span></div></div></header>
 <main class="wrap">
-<section><h2>The platform</h2><p class="sub">Five tools, one honest source of truth. (Prototype links — final app gates these by membership.)</p>
+
+<section><h2>The platform</h2><p class="sub">The IV/IM line is live now — the chairside operating system, not just a chatbot. (Sign in to use the gated tools; demo accounts on the login page.)</p>
 <div class="tools">
- <a class="tool" href="../protocols/regulatory-database.html"><span class="tier free">Free</span><div class="ic">⚖️</div><h3>Regulatory Database</h3><p>FDA classification + 503A status for 30+ compounds, kept current. Your SEO front door.</p></a>
- <a class="tool" href="../protocols/calculator.html"><span class="tier free">Free</span><div class="ic">🧮</div><h3>Reconstitution Calculator</h3><p>mg/mL → mcg → U-100 units, per peptide. Top-of-funnel utility.</p></a>
- <a class="tool" href="../protocols/library.html"><span class="tier member">Member</span><div class="ic">📚</div><h3>Protocols</h3><p>Evidence-graded monographs, honestly graded, with citations and the update radar. (Annual snapshot available as the Peptide Desk Reference.)</p></a>
- <a class="tool" href="../ally/index.html"><span class="tier member">Member</span><div class="ic">💬</div><h3>Ally — clinical AI</h3><p>The honest assistant across all five lines. Grades D, names the failures, never invents. No PHI.</p></a>
- <a class="tool" href="../protocols/poc.html"><span class="tier top">Top tier</span><div class="ic">🩺</div><h3>Visit Packet</h3><p>Intake · consent · note · handout · compliance check — on-device, PHI-free. The retention engine.</p></a>
- <a class="tool" href="../protocols/index.html"><span class="tier member">Member</span><div class="ic">🗂️</div><h3>Line-of-care catalog</h3><p>Peptides · BHRT · IV · PRP · aesthetics — protocol families, packages, delegation.</p></a>
+ <a class="tool" href="nursing-station.html"><span class="tier member">Platform</span><div class="ic">🪑</div><h3>Nurse Workstation</h3><p>Chairside command center — patient queue, 6-chair grid, live timers &amp; vitals alarms, the guardrail engine, and one-click GFE/consent + monitoring docs.</p></a>
+ <a class="tool" href="iv-builder.html"><span class="tier member">Platform</span><div class="ic">🧪</div><h3>IV/IM Stack Builder</h3><p>Drag-and-drop a custom stack or load a template — live compatibility, ceilings, osmolarity, rate floors, drip calc, and an Ally review.</p></a>
+ <a class="tool" href="iv-inventory.html"><span class="tier member">Platform</span><div class="ic">📦</div><h3>Inventory</h3><p>Your SKU · supplier · price · stock (generic clinical stays locked). CSV/JSON export to your practice-management software. No billing, ever.</p></a>
+ <a class="tool" href="iv-calculator.html"><span class="tier free">Free</span><div class="ic">🧮</div><h3>IV Drip &amp; Dose Calculator</h3><p>Drip rate, time-from-rate, dose/concentration, osmolarity &amp; the rate-floor quick reference. Fast chairside utility.</p></a>
+ <a class="tool" href="../ally/index.html"><span class="tier member">Platform</span><div class="ic">💬</div><h3>Ally — clinical AI</h3><p>The honest assistant across the wellness lines. States evidence grades, names the failed trials, never invents. No PHI.</p></a>
+ <a class="tool" href="../protocols/library.html"><span class="tier member">Platform</span><div class="ic">📚</div><h3>Protocols</h3><p>Evidence-graded monographs with citations and the update radar — the locked clinical brain behind Ally and the builder.</p></a>
+ <a class="tool" href="../protocols/regulatory-database.html"><span class="tier free">Free</span><div class="ic">⚖️</div><h3>Regulatory Database</h3><p>FDA classification + 503A/503B status for 30+ compounds, kept current. Your front door.</p></a>
+ <a class="tool" href="verify-npi.html"><span class="tier free">Free</span><div class="ic">🆔</div><h3>Verify NPI</h3><p>Licensed-professional access checked against the live federal NPPES registry. Access only — never clinical scope.</p></a>
 </div></section>
-<section><h2>Membership ladder</h2>
+
+<section><h2>Membership ladder</h2><p class="sub">Two products: the platform you run your bar on, and us as your Medical Director. <a href="pricing.html" style="color:var(--teal)">See full pricing →</a></p>
 <div class="ladder">
- <div class="tg"><b>Free</b><ul><li>Regulatory database</li><li>Calculator</li><li>(SEO funnel)</li></ul></div>
- <div class="tg"><b>Member</b><ul><li>+ Protocols</li><li>+ Ally AI</li><li>+ Update radar</li></ul></div>
- <div class="tg"><b>Top tier</b><ul><li>+ Visit Packet (POC)</li><li>+ Compliance check</li><li>The sticky daily driver</li></ul></div>
- <div class="tg"><b>MD engagement</b><ul><li>Dr. Falcon as your MD</li><li>Signed protocols + oversight</li><li>Implementation packages</li></ul></div>
+ <div class="tg"><b>Free</b><div class="pr">$0</div><ul><li>Browse the clinical module</li><li>IV drip &amp; dose calculator</li><li>NPI / licensed access</li></ul></div>
+ <div class="tg"><b>Platform</b><div class="pr">per location · BYO Medical Director</div><ul><li>+ Nurse station + builder</li><li>+ Inventory + real-time docs</li><li>+ Ally + unlimited nurse seats</li></ul></div>
+ <div class="tg"><b>MD-of-Record</b><div class="pr">the moat · we are your MD</div><ul><li>+ RenuviaMD as Medical Director</li><li>+ Signed standing orders + GFE oversight</li><li>+ Genuine documented oversight</li></ul></div>
+</div>
+<div class="diffrow">
+ <div class="d"><b>🩺 Genuine MD oversight</b> — a real Medical Director, not a matchmaker.</div>
+ <div class="d"><b>🔒 PHI-free</b> — no patient data stored.</div>
+ <div class="d"><b>🚫 No drug brokering</b> — software + oversight only.</div>
+ <div class="d"><b>✅ Honest CDS</b> — grades, named failures, no fabrication.</div>
 </div></section>
+
 </main>
-<footer><div class="wrap"><b>AllyOS by RenuviaMD® Compliance Division.</b> The honest clinical operating system for licensed providers. &nbsp;·&nbsp; <a href="../privacy.html" style="color:#bfe0dc">Privacy</a> &nbsp;·&nbsp; <a href="../terms.html" style="color:#bfe0dc">Terms</a></div></footer>
+<footer><div class="wrap"><b>AllyOS by RenuviaMD® Compliance Division.</b> Advisory clinical decision-support for licensed providers — not medical/legal advice, and not a medical-director relationship except where contracted. &nbsp;·&nbsp; <a href="pricing.html" style="color:#bfe0dc">Pricing</a> &nbsp;·&nbsp; <a href="login.html" style="color:#bfe0dc">Sign in</a> &nbsp;·&nbsp; <a href="../privacy.html" style="color:#bfe0dc">Privacy</a> &nbsp;·&nbsp; <a href="../terms.html" style="color:#bfe0dc">Terms</a></div></footer>
 <script src="../disclaimer.js"></script>
 </body></html>
