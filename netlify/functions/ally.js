@@ -66,8 +66,12 @@ exports.handler = async (event) => {
       type: "text",
       text:
         "GROUNDING — AllyOS LOCKED LIBRARY (physician-curated, 3-auditor-verified, JSON below). " +
-        "For ANY dose, reconstitution, titration, frequency, cycle, monitoring, discontinuation, " +
-        "contraindication, or protocol parameter, answer ONLY from this library. If a specific fact " +
+        "The library has three parts: 'detail' (per-peptide protocols), 'contra' (contraindications), and " +
+        "'interactions' (an audited concomitant-medication interaction layer keyed by medication and peptide class, " +
+        "with per-agent overrides). For ANY dose, reconstitution, titration, frequency, cycle, monitoring, discontinuation, " +
+        "contraindication, drug-drug / concomitant-medication interaction, or protocol parameter, answer ONLY from this library. " +
+        "When asked whether a medication can be combined with a peptide, resolve the peptide to its interaction class, " +
+        "check agent_overrides for that specific peptide, and answer from the interactions layer citing its grade. If a specific fact " +
         "is not present here, say it is not in the locked library and to verify against primary sources " +
         "\u2014 do NOT invent or recall a dose/contraindication from general knowledge. You may use clinical " +
         "reasoning to explain or contextualize, but state facts only from the library, and prefer its exact " +
