@@ -1,0 +1,107 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Team Seats — AllyOS · RenuviaMD®</title>
+<style>
+:root{--bg:#0b1620;--bg2:#12222e;--card:#13242f;--line:#223947;--teal:#28c2b8;--gold:#e0b24a;--ink:#e9f3f2;--muted:#8aa3ad;--green:#1fb87a;--red:#e0594a;--blue:#3aa8e0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:linear-gradient(160deg,#0b1620,#0e2330);min-height:100vh}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;border-bottom:1px solid var(--line);flex-wrap:wrap;gap:10px}
+.brand{font-weight:800}.brand span{color:var(--gold)}
+.hd-right{font-size:.78rem;color:var(--muted);display:flex;gap:12px;align-items:center}
+.hd-right a{color:var(--teal)}
+.wrap{max-width:1000px;margin:0 auto;padding:18px}
+h1{font-family:Georgia,serif;font-size:1.4rem;margin-bottom:4px}
+.tag{color:var(--muted);font-size:.82rem;margin-bottom:16px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+.stat b{display:block;font-size:1.6rem}.stat span{font-size:.7rem;color:var(--muted)}
+.stat.bill b{color:var(--gold)}.stat.free b{color:var(--green)}
+.add{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:16px;display:grid;grid-template-columns:1.3fr 1.3fr .8fr 1fr auto;gap:8px;align-items:end}
+@media(max-width:760px){.add{grid-template-columns:1fr 1fr}}
+label{display:block;font-size:.66rem;color:var(--muted);margin-bottom:3px}
+input,select{width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink);font-size:.85rem;font-family:inherit}
+.btn{border:none;border-radius:8px;padding:9px 14px;font-weight:700;font-size:.82rem;cursor:pointer}
+.btn.p{background:var(--teal);color:#06231f}.btn.x{background:#3a1a16;color:var(--red);padding:6px 10px}
+table{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th{font-size:.64rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:left;padding:10px;border-bottom:1px solid var(--line)}
+td{padding:9px 10px;font-size:.84rem;border-bottom:1px solid #16313c;vertical-align:middle}
+tr:last-child td{border:none}
+td select{width:auto;min-width:120px}
+.pill{font-size:.62rem;border-radius:7px;padding:2px 8px;font-weight:700}
+.pill.prov{background:#3a3012;color:var(--gold)}.pill.nurse{background:#0f2a1f;color:var(--green)}.pill.admin{background:#11283a;color:var(--blue)}
+.bill{font-size:.6rem;color:var(--gold)}
+.note{font-size:.72rem;color:var(--muted);margin-top:16px;line-height:1.5}
+.note b{color:var(--ink)}
+</style>
+<script src="allyos-auth.js"></script></head>
+<body>
+<header>
+  <div class="brand">Renuvia<span>MD</span>® · AllyOS · Team Seats</div>
+  <div class="hd-right"><span id="who"></span><a href="nursing-station.html">Station</a><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
+</header>
+<div class="wrap">
+  <h1>Team seats &amp; roles</h1>
+  <div class="tag">You (the clinic) assign each staff member's seat. AllyOS routes by role — it never decides who may perform a clinical act. Only authorizing-provider seats are billable; nurse/LPN executors are unlimited and free.</div>
+
+  <div class="stats">
+    <div class="stat bill"><b id="sProv">0</b><span>Authorizing-provider seats (billable)</span></div>
+    <div class="stat free"><b id="sNurse">0</b><span>Nurse / LPN executors (free)</span></div>
+    <div class="stat"><b id="sAdmin">0</b><span>Admins</span></div>
+  </div>
+
+  <div class="add">
+    <div><label>Name</label><input id="nName" placeholder="Last name"></div>
+    <div><label>Email</label><input id="nEmail" placeholder="name@clinic.com"></div>
+    <div><label>Credential</label><input id="nCred" placeholder="MD / NP / RN"></div>
+    <div><label>Role</label><select id="nRole"><option value="provider">Provider (authorizes)</option><option value="nurse" selected>Nurse / LPN (executes)</option><option value="admin">Admin</option></select></div>
+    <button class="btn p" onclick="addSeat()">+ Add seat</button>
+  </div>
+
+  <table><thead><tr><th>Name</th><th>Email</th><th>Credential</th><th>NPI</th><th>Role</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table>
+
+  <div class="note">
+    <b>Why provider seats are billable and nurses aren't:</b> an authorizing provider's GFE/standing-order signature is a named legal act tied to one license &amp; NPI — it can't be shared, so each provider needs their own seat. Nurses execute under that authorization and are covered by the location license. <a href="verify-npi.html" style="color:var(--teal)">Verify a provider's NPI →</a>
+    <br><br>
+    <b>Demo note:</b> seats are stored in this browser only and are not a security boundary. Real, server-enforced roles activate with the Supabase backend. No PHI stored.
+  </div>
+</div>
+<script>
+if(window.AllyOSAuth){ AllyOSAuth.guard(['admin','provider']); }
+var KEY='allyos_seats_v1', SEATS=[];
+(function init(){
+  var s=window.AllyOSAuth&&AllyOSAuth.session();
+  if(s){var w=document.getElementById('who');if(w)w.textContent=AllyOSAuth.greeting()+' · '+((AllyOSAuth.ROLES[s.role]||{}).label||s.role);}
+  try{SEATS=JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){SEATS=[];}
+  if(!SEATS.length){ SEATS=[{id:id(),name:'Falcon',email:'md@clinic',cred:'MD',npi:'',role:'provider',status:'active'},{id:id(),name:'Chen',email:'rn@clinic',cred:'RN',npi:'',role:'nurse',status:'active'}]; save(); }
+  render();
+})();
+function id(){return 's'+(SEATS.length)+'_'+Math.floor(performance.now());}
+function save(){localStorage.setItem(KEY,JSON.stringify(SEATS));}
+function addSeat(){
+  var name=document.getElementById('nName').value.trim();if(!name)return;
+  SEATS.push({id:id(),name:name,email:document.getElementById('nEmail').value.trim(),cred:document.getElementById('nCred').value.trim(),npi:'',role:document.getElementById('nRole').value,status:'invited'});
+  document.getElementById('nName').value='';document.getElementById('nEmail').value='';document.getElementById('nCred').value='';
+  save();render();
+}
+function setRole(i,v){SEATS[i].role=v;save();render();}
+function setNpi(i,v){SEATS[i].npi=v;save();}
+function rm(i){SEATS.splice(i,1);save();render();}
+function render(){
+  var html='';
+  SEATS.forEach(function(s,i){
+    html+='<tr><td><b>'+esc(s.name)+'</b></td><td>'+esc(s.email||'')+'</td><td>'+esc(s.cred||'')+'</td>'+
+      '<td><input value="'+esc(s.npi||'')+'" placeholder="NPI" style="width:110px" oninput="setNpi('+i+',this.value)"></td>'+
+      '<td><select onchange="setRole('+i+',this.value)">'+
+        opt('provider','Provider',s.role)+opt('nurse','Nurse/LPN',s.role)+opt('admin','Admin',s.role)+
+        '</select>'+(s.role==='provider'?' <span class="bill">billable</span>':'')+'</td>'+
+      '<td><span class="pill '+(s.role)+'">'+esc(s.status)+'</span></td>'+
+      '<td><button class="btn x" onclick="rm('+i+')">×</button></td></tr>';
+  });
+  document.getElementById('rows').innerHTML=html||'<tr><td colspan="7" style="color:var(--muted);padding:16px">No seats yet.</td></tr>';
+  document.getElementById('sProv').textContent=SEATS.filter(function(s){return s.role==='provider';}).length;
+  document.getElementById('sNurse').textContent=SEATS.filter(function(s){return s.role==='nurse';}).length;
+  document.getElementById('sAdmin').textContent=SEATS.filter(function(s){return s.role==='admin';}).length;
+}
+function opt(v,l,cur){return '<option value="'+v+'"'+(cur===v?' selected':'')+'>'+l+'</option>';}
+function esc(s){return(''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+</script>
+</body></html>
