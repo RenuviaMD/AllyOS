@@ -2079,6 +2079,122 @@ function trimFires(o){if(!o||!o.rules)return o;var c={};for(var k in o)c[k]=o[k]
   return c;}
 function buildLib(){return {detail:DETAIL,contra:CONTRA,interactions:IX,peptide_interactions:trimFires(PIX),patient_factor:trimFires(PFM)};}
 
+/* ── patient-factor engine (deterministic, on-device) ──
+   Maps the intake into the rule field-namespace and evaluates each formulary-firing
+   rule. Conservative: a field the intake does not provide is UNKNOWN, so the rule
+   does not fire (no false positives) — Ally still reasons over the full rule set. */
+var PEPGROUPS={
+ "semaglutide":["GLP1_RA"],"liraglutide":["GLP1_RA"],"tirzepatide":["GIP_GLP1_RA"],"retatrutide":["GIP_GLP1_glucagon_RA"],
+ "sermorelin":["GH_IGF1_axis","GHRH_analogue"],"tesamorelin":["GH_IGF1_axis","GHRH_analogue"],"cjc-1295":["GH_IGF1_axis","GHRH_analogue"],
+ "ipamorelin":["GH_IGF1_axis","GHS_ghrelin_secretagogue"],"ghrp-2":["GH_IGF1_axis","GHS_ghrelin_secretagogue"],"ghrp-6":["GH_IGF1_axis","GHS_ghrelin_secretagogue"],
+ "hexarelin":["GH_IGF1_axis","GHS_ghrelin_secretagogue"],"mk-677":["GH_IGF1_axis","GHS_ghrelin_secretagogue"],
+ "cjc-ipamorelin-blend":["GH_IGF1_axis","GHRH_analogue","GHS_ghrelin_secretagogue"],
+ "pt-141":["melanocortin_axis"],"melanotan-ii":["melanocortin_axis"],
+ "kisspeptin-10":["reproductive_HPG_axis"],"gonadorelin":["reproductive_HPG_axis"],
+ "thymosin-alpha-1":["immune_modulating_research_peptides","research_peptides_general"],
+ "kpv":["immune_modulating_research_peptides","research_peptides_general"],
+ "bpc-157":["immune_modulating_research_peptides","wound_repair_regenerative_axis","research_peptides_general"],
+ "tb-500":["wound_repair_regenerative_axis","research_peptides_general"],"ghk-cu":["wound_repair_regenerative_axis","research_peptides_general"],
+ "mots-c":["mitochondrial_peptides","metabolic_research_peptides","research_peptides_general"],"ss-31":["mitochondrial_peptides","research_peptides_general"],
+ "aod-9604":["metabolic_research_peptides","research_peptides_general"],
+ "semax":["neuropeptide_research","research_peptides_general"],"selank":["neuropeptide_research","research_peptides_general"],"dsip":["neuropeptide_research","research_peptides_general"],
+ "epitalon":["research_peptides_general"],"cerebrolysin":["neuropeptide_research","research_peptides_general"]
+};
+var MEDCLASS={'Insulin':'insulin','Sulfonylurea':'sulfonylurea','Metformin':'metformin','GLP-1 (current)':'glp1','Statin':'statin','Oral contraceptive':'oral_hormonal_contraceptive','Naltrexone':'oral_naltrexone','Thyroid Rx':'thyroid','Anticoagulant':'anticoagulant','SSRI/SNRI':'SSRI'};
+/* intake token -> rule tokens (history / symptom vocabularies the rules check) */
+var FLAGTOK={'Pancreatitis hx':['pancreatitis'],'MTC / MEN2':['personal_or_family_MTC_or_MEN2'],'Active malignancy':['active_malignancy'],'Prior cancer':['prior_malignancy_or_current_surveillance','recent_malignancy'],'Undiagnosed mass':['unexplained_mass'],'Gallbladder dz':['gallstones','cholecystitis'],'Gastroparesis':['confirmed_gastroparesis','severe_gastroparesis_or_severe_GI_disease']};
+var COMORTOK={'Prediabetes/T2DM':['type_2_diabetes','prediabetes','diabetes'],'CVD':['known_cardiovascular_disease'],'Dyslipidemia':[]};
+var SYMPTOK={'Severe abdominal pain':['severe_persistent_abdominal_pain'],'Persistent vomiting':['persistent_vomiting'],'Severe diarrhea':['severe_dehydrating_diarrhea'],'Palpitations / tachycardia':['resting_tachycardia','palpitations'],'New edema':['edema'],'Carpal tunnel':['carpal_tunnel_syndrome'],'Biliary / RUQ pain':['RUQ_pain','biliary_colic']};
+
+function pfProfile(){
+  var p=S.patient||{};
+  var medClasses=(p.meds||[]).map(function(m){return MEDCLASS[m]||m.toLowerCase();});
+  var groups=[],agents=[];
+  (S.sel||[]).forEach(function(s){if(agents.indexOf(s)<0)agents.push(s);(PEPGROUPS[s]||[]).forEach(function(g){if(groups.indexOf(g)<0)groups.push(g);});});
+  var hist={}; (p.flags||[]).forEach(function(f){(FLAGTOK[f]||[]).forEach(function(t){hist[t]=true;});});
+  (p.comorbid||[]).forEach(function(c){(COMORTOK[c]||[]).forEach(function(t){hist[t]=true;});});
+  var symp={}; (p.symptoms||[]).forEach(function(s){(SYMPTOK[s]||[]).forEach(function(t){symp[t]=true;});});
+  var labs={}; if(p.a1c!=null)labs.A1c=+p.a1c; if(p.igf1sel&&IGF1MAP[p.igf1sel])labs.IGF1_status=IGF1MAP[p.igf1sel];
+  if(p.sodium!=null)labs.serum_sodium=+p.sodium; if(p.calcium!=null)labs.serum_calcium=+p.calcium;
+  /* derived lab/glycemic tokens used by *_or_labs intersects rules */
+  var labTok={}; if(p.a1c!=null&&+p.a1c>=6.5)labTok['A1c_>=6.5']=true;
+  if((p.comorbid||[]).indexOf('Prediabetes/T2DM')>-1){labTok.type_2_diabetes=true;labTok.prediabetes=true;labTok.diabetes=true;}
+  var preg=((p.flags||[]).indexOf('Pregnancy / planning')>-1)?'possible_pregnancy':((p.flags||[]).indexOf('Breastfeeding')>-1?'lactating':null);
+  function merge(){var o={};for(var i=0;i<arguments.length;i++){var s=arguments[i];for(var k in s)if(s[k])o[k]=true;}return o;}
+  return {
+    medications:{class:medClasses},
+    candidate:{agent_group:groups, agent:agents,
+      pathway:groups.concat(groups.some(function(g){return /GLP1|GIP|amylin/.test(g);})?['delayed_gastric_emptying']:[]),
+      use_context:(p.goals||[]).indexOf('Weight loss')>-1?['weight_management']:[]},
+    labs:labs, renal:{eGFR:(p.egfr==null?undefined:+p.egfr), CrCl_or_eGFR:(p.egfr==null?undefined:+p.egfr)},
+    history:hist, history_or_symptoms:merge(hist,symp), history_or_labs:merge(hist,labTok),
+    history_plus_medications:hist, symptoms:symp, vitals_or_symptoms:symp, current_state:symp,
+    age:(p.age==null?undefined:+p.age), pregnancy_status:preg, pregnancy_or_lactation_status:preg,
+    upcoming_anesthesia_or_deep_sedation:!!p.procedure
+  };
+}
+function pfGet(prof,path){var parts=(path||'').split('.');var v=prof;for(var i=0;i<parts.length;i++){if(v==null)return undefined;v=v[parts[i]];}return v;}
+function asArr(v){if(v==null)return [];if(Array.isArray(v))return v;
+  if(typeof v==='object')return Object.keys(v).filter(function(k){return v[k];});return [v];}
+function pfCond(c,prof){
+  var f=pfGet(prof,c.field);var op=c.operator,val=c.value;
+  if(op==='intersects'||op==='contains_any'){var a=asArr(f);return a.some(function(x){return asArr(val).indexOf(x)>-1;});}
+  if(op==='contains'){return asArr(f).indexOf(val)>-1;}
+  if(op==='equals'){return f===val;}
+  if(op==='in'){if(f===undefined)return false;return asArr(val).indexOf(f)>-1;}
+  if(op==='<'){return typeof f==='number'&&f<val;}
+  if(op==='>'){return typeof f==='number'&&f>val;}
+  if(op==='>='){return typeof f==='number'&&f>=val;}
+  if(op==='between_inclusive'){return typeof f==='number'&&f>=val[0]&&f<=val[1];}
+  return false; /* unknown operator -> do not fire */
+}
+function pfEval(trig,prof){
+  if(!trig)return false;
+  if(trig.all)return trig.all.every(function(c){return pfCond(c,prof);});
+  if(trig.any)return trig.any.some(function(c){return pfCond(c,prof);});
+  if(trig.any_missing){ // missing-data gate
+    var grpOk=true;
+    if(trig.and_candidate_group_in){grpOk=asArr(prof.candidate.agent_group).some(function(g){return trig.and_candidate_group_in.indexOf(g)>-1;});}
+    if(!grpOk)return false;
+    return trig.any_missing.some(function(field){
+      var k=({'eGFR':'renal.eGFR','serum_creatinine':'renal.eGFR','serum_sodium':'labs.serum_sodium','A1c':'labs.A1c','fasting_glucose':'labs.A1c','serum_calcium':'labs.serum_calcium','current_medication_list':null,'upcoming_anesthesia_or_deep_sedation':'upcoming_anesthesia_or_deep_sedation'})[field];
+      if(k===null)return false; /* can't assess -> skip */
+      if(k===undefined)return false;
+      return pfGet(prof,k)===undefined;
+    });
+  }
+  return false;
+}
+function patientFactorFindings(){
+  if(!PFM.rules||!S.sel||!S.sel.length)return [];
+  var prof=pfProfile();var out=[];
+  PFM.rules.forEach(function(r){
+    if(!r.fires_in_formulary)return;
+    if(r.domain==='evidence_quality'||r.domain==='runtime_state')return; /* meta/output rules are Ally-side */
+    if(pfEval(r.trigger_logic,prof)){
+      out.push({id:r.rule_id,name:r.name,action:r.action,severity:r.severity,grade:r.evidence_level,
+        why:r.provider_behavior||r.rationale,rationale:r.rationale,sources:r.source_ids,
+        known:r.rationale,directness:r.evidence_directness});
+    }
+  });
+  return out;
+}
+function pfSevColor(sev){sev=(sev||'').toLowerCase();return sev.indexOf('red')===0?'var(--danger)':(sev.indexOf('yellow')===0?'var(--warn)':'var(--teal)');}
+function patientFactorHTML(){
+  var f=patientFactorFindings();if(!f.length)return '';
+  var rows=f.map(function(x){var col=pfSevColor(x.severity);
+    return '<div class="ixrow" style="border-left-color:'+col+'">'
+      +'<div class="ixh"><span class="chip '+gradeClass(x.grade)+'">'+esc(x.grade||'?')+'</span><b>'+esc(x.name)+'</b>'
+      +'<span style="margin-left:auto;font-size:10px;color:'+col+'">'+esc((x.action||'').replace(/_/g,' '))+'</span></div>'
+      +'<div class="ixeff">'+esc(x.why||'')+'</div>'
+      +(x.directness?'<div class="ixact"><span class="ixlab">Evidence</span>'+esc(x.grade)+' · '+esc(x.directness)+'</div>':'')
+      +'</div>';
+  }).join('');
+  return '<div class="lbl" style="margin:14px 0 2px">Patient-factor flags '
+    +'<span style="font-weight:400;color:var(--faint);font-size:10.5px">— locked rule engine, computed on-device · provider review, VERIFY</span></div>'
+    +'<div class="ixwrap">'+rows+'</div>';
+}
+
 /* ───────── structured intake vocab (pills) ───────── */
 var SEX=['Female','Male'];
 var COMORBID=['HTN','Dyslipidemia','Prediabetes/T2DM','OSA','CVD','MASLD'];
@@ -2088,6 +2204,9 @@ var MED2IX={'Insulin':'insulin','Sulfonylurea':'sulfonylurea','Metformin':'metfo
 var FLAGS=['Pancreatitis hx','MTC / MEN2','Pregnancy / planning','Breastfeeding','Gallbladder dz','Eating disorder','Active malignancy','Prior cancer','Undiagnosed mass','Type 1 DM','Gastroparesis'];
 var FLAGKW={'Pancreatitis hx':['pancreatitis'],'MTC / MEN2':['medullary','men2','thyroid carc'],'Pregnancy / planning':['pregnan'],'Breastfeeding':['lactation','breastfeed'],'Gallbladder dz':['gallbladder'],'Eating disorder':['eating'],'Active malignancy':['malignan','cancer'],'Prior cancer':['malignan','cancer'],'Undiagnosed mass':['undiagnosed'],'Type 1 DM':['type 1'],'Gastroparesis':['gastroparesis','motility']};
 var GLP1=['semaglutide','tirzepatide','retatrutide','liraglutide'];
+var SYMPTOMS=['Severe abdominal pain','Persistent vomiting','Severe diarrhea','Palpitations / tachycardia','New edema','Carpal tunnel','Biliary / RUQ pain'];
+var IGF1OPTS=['Normal','Above range','Below range'];
+var IGF1MAP={'Normal':'within_reference_range','Above range':'above_reference_range','Below range':'below_reference_range'};
 
 function pills(grp,opts,sel,multi,danger){
   return '<div class="pills" data-multi="'+(multi?1:0)+'">'+opts.map(function(o){
@@ -2312,14 +2431,19 @@ function stepPatient(){
      +'<div>'+lf('hin','Height (in)')+'<input id="f_hin" type="number" value="'+(p.heightIn==null?'':p.heightIn)+'"></div>'
      +'<div><span class="lbl">BMI (computed)</span><div id="bmiOut" style="padding-top:5px">'+bmiText()+'</div></div>'
    +'</div>'
-   +'<div class="grid g2" style="margin-top:14px">'
+   +'<div class="grid g4" style="margin-top:14px;align-items:end">'
      +'<div>'+lf('egfr','eGFR (mL/min/1.73m²)')+'<input id="f_egfr" type="number" value="'+(p.egfr==null?'':p.egfr)+'"></div>'
      +'<div>'+lf('a1c','A1c (%)')+'<input id="f_a1c" type="number" step="0.1" value="'+(p.a1c==null?'':p.a1c)+'"></div>'
+     +'<div>'+lf('na','Sodium (mEq/L)')+'<input id="f_na" type="number" value="'+(p.sodium==null?'':p.sodium)+'"></div>'
+     +'<div>'+lf('ca','Calcium (mg/dL)')+'<input id="f_ca" type="number" step="0.1" value="'+(p.calcium==null?'':p.calcium)+'"></div>'
    +'</div>'
+   +'<div class="prow"><span class="lbl">IGF-1 (for GH-axis agents)</span>'+pills('igf1sel',IGF1OPTS,p.igf1sel,false)+'</div>'
    +'<div class="prow"><span class="lbl">Weight-related comorbidities</span>'+pills('comorbid',COMORBID,p.comorbid,true)+'</div>'
    +'<div class="prow"><span class="lbl">Goal / indication</span>'+pills('goals',GOALS,p.goals,true)+'</div>'
    +'<div class="prow"><span class="lbl">Current meds</span>'+pills('meds',MEDSL,p.meds,true)+'</div>'
-   +'<div class="prow"><span class="lbl" style="color:var(--danger)">Contraindication screen — flag any present</span>'+pills('flags',FLAGS,p.flags,true,true)+'</div>';
+   +'<div class="prow"><span class="lbl" style="color:var(--danger)">Contraindication screen — flag any present</span>'+pills('flags',FLAGS,p.flags,true,true)+'</div>'
+   +'<div class="prow"><span class="lbl">Active symptoms</span>'+pills('symptoms',SYMPTOMS,p.symptoms,true,true)+'</div>'
+   +'<div class="prow"><span class="lbl">Procedure status</span>'+pills('procedure',['Upcoming anesthesia / deep sedation'],p.procedure,false)+'</div>';
   bindPills(function(grp,v,multi){var q=S.patient;
     if(multi){q[grp]=q[grp]||[];var i=q[grp].indexOf(v);if(i>-1)q[grp].splice(i,1);else q[grp].push(v);}
     else{q[grp]=q[grp]===v?'':v;}
@@ -2328,7 +2452,7 @@ function stepPatient(){
   bindNum('age','age');
   [['wt','weight'],['hft','heightFt'],['hin','heightIn']].forEach(function(a){var el=document.getElementById('f_'+a[0]);
     el.oninput=function(){S.patient[a[1]]=this.value===''?null:+this.value;recalcBMI();save();ctxUpdate();};});
-  bindNum('egfr','egfr'); bindNum('a1c','a1c');
+  bindNum('egfr','egfr'); bindNum('a1c','a1c'); bindNum('na','sodium'); bindNum('ca','calcium');
 }
 function bindNum(id,key){var el=document.getElementById('f_'+id);if(!el)return;el.oninput=function(){S.patient[key]=this.value===''?null:+this.value;save();ctxUpdate();};}
 function lf(id,label){return '<label for="f_'+id+'">'+label+'</label>'}
@@ -2378,6 +2502,7 @@ function stepPlan(){
    +'<div class="note-local"><span class="ondev">computed on-device</span> Deterministic dosing math — not generated by AI.</div>'
    + docsBlock()
    + conflictAlerts()
+   + patientFactorHTML()
    + interactionHTML()
    + crossAgentHTML()
    + (advs.length?'<div class="lbl" style="margin:8px 0 2px">Advisories &amp; considerations</div><div class="advs">'+advs.map(advCard).join('')+'</div>':'')
@@ -2447,6 +2572,9 @@ function noteInteractionLines(){var f=interactionFindings();if(!f.length)return 
   return '<h4>Concomitant-medication interactions <span style="font-weight:400;font-size:11px;color:var(--muted)">(locked library · grade · VERIFY)</span></h4><ul>'
     +f.map(function(x){return '<li><b>'+esc(x.agent)+' + '+esc(x.med)+'</b> ['+esc(x.grade||'?')+'] — '+esc(x.effect)+' <i>Action:</i> '+esc(x.action)
       +(x.override?' <i>Agent-specific:</i> '+esc(x.override):'')+'</li>';}).join('')+'</ul>';}
+function noteFactorLines(){var f=patientFactorFindings();if(!f.length)return '';
+  return '<h4>Patient-factor flags <span style="font-weight:400;font-size:11px;color:var(--muted)">(locked rule engine · grade · provider review)</span></h4><ul>'
+    +f.map(function(x){return '<li><b>'+esc(x.name)+'</b> ['+esc(x.grade||'?')+' · '+esc((x.action||'').replace(/_/g,' '))+'] — '+esc(x.why||'')+'</li>';}).join('')+'</ul>';}
 function noteCrossAgentLines(){var f=crossAgentFindings();if(!f.length)return '';
   return '<h4>Peptide-peptide (stacking) interactions <span style="font-weight:400;font-size:11px;color:var(--muted)">(locked cross-agent library · VERIFY)</span></h4><ul>'
     +f.map(function(x){return '<li><b>'+x.names.map(esc).join(' + ')+'</b> — '+esc((x.type||'').replace(/_/g,' '))
@@ -2456,6 +2584,7 @@ function docNote(){var p=S.patient;return '<h3>Clinical encounter note</h3><div 
   +'<h4>Pertinent data</h4><p>BMI '+(p.bmi||'—')+' · eGFR '+(p.egfr||'—')+' · A1c '+(p.a1c||'—')+'% · Comorbid: '+(plist(p.comorbid)||'none')+' · Meds: '+(plist(p.meds)||'none recorded')+'</p>'
   +'<h4>Contraindication screen</h4><p>'+(plist(p.flags)||'No red flags reported')+'</p>'
   + (conflicts().length?'<p style="color:#f0a59d"><b>Conflicts:</b> '+conflicts().join('; ')+'</p>':'')
+  + noteFactorLines()
   + noteInteractionLines()
   + noteCrossAgentLines()
   +'<h4>Plan</h4><ul>'+agentLines()+'</ul>'
@@ -2583,7 +2712,11 @@ document.getElementById('allySend').onclick=function(){
   if(S.sel&&S.sel.length)c.push('Considering: '+S.sel.map(function(s){var x=byslug(s)||{};return x.name||s;}).join(', '));
   if(p.age)c.push('age '+p.age);if(p.sex)c.push(p.sex);if(p.bmi)c.push('BMI '+p.bmi);
   if(p.egfr)c.push('eGFR '+p.egfr);if(p.a1c)c.push('A1c '+p.a1c+'%');
+  if(p.igf1sel)c.push('IGF-1 '+p.igf1sel);if(p.sodium)c.push('Na '+p.sodium);if(p.calcium)c.push('Ca '+p.calcium);
   if(p.comorbid&&p.comorbid.length)c.push('comorbid: '+p.comorbid.join(', '));
+  if(p.flags&&p.flags.length)c.push('flags: '+p.flags.join(', '));
+  if(p.symptoms&&p.symptoms.length)c.push('symptoms: '+p.symptoms.join(', '));
+  if(p.procedure)c.push('upcoming anesthesia/deep sedation');
   if(p.meds&&p.meds.length)c.push('meds: '+p.meds.join(', '));
   var ctx=c.length?'De-identified context — '+c.join('; ')+'.':'';
   fetch('/.netlify/functions/ally',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:q,context:ctx,provider:providerAddress(),library:buildLib()})})
