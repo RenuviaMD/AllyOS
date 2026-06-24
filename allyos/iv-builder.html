@@ -1,0 +1,331 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IV/IM Stack Builder — AllyOS · RenuviaMD®</title>
+<style>
+:root{--navy:#102a30;--navy2:#0e3a40;--teal:#0e8a8a;--gold:#c9870a;--ink:#1c2b32;--muted:#5b6b72;--line:#e3ecea;--soft:#f3f8f7;--red:#c0392b;--amber:#b9770a;--green:#1e7d57}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#eef4f3}
+header{background:linear-gradient(150deg,#0e3a40,#0e8a8a);color:#fff;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.brand{font-weight:800}.brand span{color:#ffd98a}
+header h1{font-size:1.15rem;font-family:Georgia,serif;margin-top:2px}
+header .sub{font-size:.74rem;color:#d4ece9}
+.wrap{max-width:1280px;margin:0 auto;padding:16px;display:grid;grid-template-columns:300px 1fr 360px;gap:16px;align-items:start}
+@media(max-width:1080px){.wrap{grid-template-columns:1fr}}
+.panel{background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px;box-shadow:0 2px 8px rgba(16,50,58,.05)}
+.panel h2{font-size:.82rem;text-transform:uppercase;letter-spacing:.04em;color:var(--navy);margin-bottom:10px}
+.search{width:100%;border:1px solid var(--line);border-radius:9px;padding:8px 11px;font-size:.85rem;margin-bottom:10px}
+.cat{margin-bottom:12px}
+.cat h3{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:8px 0 5px;border-bottom:1px solid var(--soft);padding-bottom:3px}
+.ing{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;margin:4px 0;cursor:grab;font-size:.82rem;background:#fbfdfd}
+.ing:hover{border-color:var(--teal);background:#f3faf9}
+.ing.caution{border-left:3px solid var(--amber)}
+.ing .add{border:none;background:var(--teal);color:#fff;border-radius:6px;width:22px;height:22px;font-weight:800;cursor:pointer;flex:0 0 auto}
+.tag{font-size:.6rem;background:#fdecec;color:var(--red);border-radius:8px;padding:1px 6px;margin-left:4px}
+.bagmeta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.bagmeta input,.bagmeta select{border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:.85rem}
+#stackName{flex:1;min-width:160px}
+.bagitem{display:grid;grid-template-columns:1fr 120px 26px;gap:8px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:9px;margin:5px 0;background:#fbfdfd}
+.bagitem .nm{font-size:.84rem;font-weight:600}
+.bagitem .rt{font-size:.68rem;color:var(--muted)}
+.bagitem input{border:1px solid var(--line);border-radius:7px;padding:5px 7px;font-size:.8rem;width:100%}
+.bagitem .rm{border:none;background:#f1dede;color:var(--red);border-radius:6px;height:26px;font-weight:800;cursor:pointer}
+.empty{color:var(--muted);font-size:.85rem;padding:18px;text-align:center;border:1px dashed var(--line);border-radius:9px}
+.tpl{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.tpl button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 11px;font-size:.74rem;color:var(--teal);cursor:pointer}
+.tpl button:hover{border-color:var(--teal)}
+.flag{border-radius:9px;padding:9px 11px;margin:6px 0;font-size:.82rem;line-height:1.45;border-left:4px solid}
+.flag.crit{background:#fdecec;border-color:var(--red);color:#7a2018}
+.flag.warn{background:#fdf4e3;border-color:var(--amber);color:#7a560a}
+.flag.info{background:#eef6f5;border-color:var(--teal);color:#0c4f4f}
+.flag.ok{background:#eaf6f0;border-color:var(--green);color:#135a3d}
+.flag b{display:block;font-size:.78rem;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px}
+.verdict{font-weight:800;font-size:.95rem;padding:10px;border-radius:9px;text-align:center;margin-bottom:8px}
+.verdict.go{background:#eaf6f0;color:var(--green)}
+.verdict.review{background:#fdf4e3;color:var(--amber)}
+.verdict.hold{background:#fdecec;color:var(--red)}
+button.ask{width:100%;background:var(--teal);color:#fff;border:none;border-radius:10px;padding:11px;font-weight:700;cursor:pointer;margin-top:8px}
+button.ask:disabled{opacity:.5;cursor:default}
+.ans{background:#fff;border:1px solid var(--line);border-radius:9px;padding:11px;font-size:.84rem;line-height:1.5;white-space:pre-wrap;margin-top:8px}
+.ans a{color:var(--teal)}
+.disc{font-size:.68rem;color:var(--muted);margin-top:10px;line-height:1.45}
+.loading{color:var(--muted);font-size:.85rem;padding:10px}
+</style></head>
+<body>
+<header>
+  <div><div class="brand">Renuvia<span>MD</span>® · AllyOS</div><h1>IV / IM Stack Builder</h1>
+  <div class="sub">Build a custom wellness stack from the generic master menu — AllyOS analyzes safety, compatibility &amp; ceilings live. Decision-support for licensed providers; you review &amp; sign.</div></div>
+</header>
+<div class="wrap">
+
+  <!-- LEFT: master menu -->
+  <div class="panel">
+    <h2>Master Menu</h2>
+    <input class="search" id="search" placeholder="Search ingredients…" oninput="renderMenu()">
+    <div id="menu"><div class="loading">Loading master menu…</div></div>
+  </div>
+
+  <!-- CENTER: the bag -->
+  <div class="panel">
+    <h2>Your Stack</h2>
+    <div class="tpl" id="templates"></div>
+    <div class="bagmeta">
+      <input id="stackName" placeholder="Name this stack (e.g. Recovery Glow)">
+      <select id="baseFluid">
+        <option value="0.9% NS 500 mL">0.9% NS 500 mL</option>
+        <option value="0.9% NS 250 mL">0.9% NS 250 mL</option>
+        <option value="0.9% NS 1 L">0.9% NS 1 L (hydration)</option>
+        <option value="LR 1 L">Lactated Ringer's 1 L</option>
+        <option value="Dedicated NAD+ bag">Dedicated NAD+ bag</option>
+        <option value="IV access / push only">IV access / push only</option>
+      </select>
+    </div>
+    <div id="bag"><div class="empty">Add ingredients from the master menu, or load a template above.</div></div>
+  </div>
+
+  <!-- RIGHT: AllyOS analysis -->
+  <div class="panel">
+    <h2>AllyOS Analysis</h2>
+    <div id="analysis"><div class="loading">Compose a stack to see analysis.</div></div>
+    <button class="ask" id="askBtn" onclick="askAlly()" disabled>Ask Ally to review this stack</button>
+    <div id="answer"></div>
+    <div class="disc" id="disclaimer"></div>
+  </div>
+
+</div>
+<script>
+var MOD=null, BAG=[], MENU=[];
+
+fetch('../protocols/iv-module.json').then(function(r){return r.json()}).then(function(d){
+  MOD=d; MENU=d.ingredients||[];
+  document.getElementById('disclaimer').textContent =
+    (d.meta&&d.meta.scope?d.meta.scope+' ':'') +
+    'AllyOS provides advisory decision-support and disclaimers, not governance — it names no pharmacy and mandates no sourcing. No PHI. Verify current FDA status at fda.gov.';
+  renderMenu(); renderTemplates(); analyze();
+}).catch(function(e){
+  document.getElementById('menu').innerHTML='<div class="flag crit">Could not load the IV module ('+e.message+').</div>';
+});
+
+// ---- client-side categorization (UI grouping only; data stays in the module) ----
+function catOf(ing){
+  var id=ing.id||'';
+  if(id==='ING_NS'||id==='ING_LR') return 'Base fluids';
+  if(/B12|VITAComplex|VITACOMPLEX|VITC|BIOTIN|ING_B5|ING_B6|VITD3/i.test(id)) return 'Vitamins';
+  if(/MGCL|CAGLUC|CACL|ZINC|SELENIUM|TRACE|MINERALBLEND/i.test(id)) return 'Minerals & electrolytes';
+  if(/LYSINE|TAURINE|CARNITINE|GLUTAMINE|AMINOBLEND|ARGININE|PROLINE|GLYCINE/i.test(id)) return 'Amino acids';
+  if(/GLUTATHIONE|NAD|ING_ALA|NAC|TRIIMMUNE|METHYLENE|COQ10/i.test(id)) return 'Antioxidants & specialty';
+  if(/LIPOTROPIC|MICC/i.test(id)) return 'Lipotropic / metabolic';
+  if(/ONDANSETRON|KETOROLAC|FAMOTIDINE/i.test(id)) return 'Rx & administration adjuncts';
+  return 'Other';
+}
+var CAT_ORDER=['Base fluids','Vitamins','Minerals & electrolytes','Amino acids','Antioxidants & specialty','Lipotropic / metabolic','Rx & administration adjuncts','Other'];
+
+function renderMenu(){
+  var q=(document.getElementById('search').value||'').toLowerCase();
+  var byCat={};
+  MENU.forEach(function(ing){
+    if(q && (ing.name||'').toLowerCase().indexOf(q)<0) return;
+    var c=catOf(ing); (byCat[c]=byCat[c]||[]).push(ing);
+  });
+  var html='';
+  CAT_ORDER.forEach(function(c){
+    if(!byCat[c]) return;
+    html+='<div class="cat"><h3>'+c+'</h3>';
+    byCat[c].forEach(function(ing){
+      var caution=ing.guardrail?' caution':'';
+      var tag=ing.guardrail?'<span class="tag">caution</span>':'';
+      var primary=ing.in_primary_library===false?'':'';
+      html+='<div class="ing'+caution+'"><span>'+esc(ing.name)+tag+'</span>'+
+            '<button class="add" title="Add" onclick="addIng(\''+ing.id+'\')">+</button></div>';
+    });
+    html+='</div>';
+  });
+  document.getElementById('menu').innerHTML=html||'<div class="loading">No match.</div>';
+}
+
+function findIng(id){ for(var i=0;i<MENU.length;i++) if(MENU[i].id===id) return MENU[i]; return null; }
+
+function addIng(id){
+  var ing=findIng(id); if(!ing) return;
+  BAG.push({id:id, name:ing.name, dose:ing.standard||'', ref:ing});
+  renderBag(); analyze();
+}
+function rmIng(i){ BAG.splice(i,1); renderBag(); analyze(); }
+function setDose(i,v){ BAG[i].dose=v; analyze(); }
+
+function renderBag(){
+  var el=document.getElementById('bag');
+  if(!BAG.length){ el.innerHTML='<div class="empty">Add ingredients from the master menu, or load a template above.</div>'; return; }
+  var html='';
+  BAG.forEach(function(it,i){
+    var route=(it.ref&&it.ref.route)?it.ref.route:'';
+    html+='<div class="bagitem"><div><div class="nm">'+esc(it.name)+'</div><div class="rt">'+esc(route)+'</div></div>'+
+          '<input value="'+esc(it.dose)+'" oninput="setDose('+i+',this.value)" placeholder="dose">'+
+          '<button class="rm" onclick="rmIng('+i+')">×</button></div>';
+  });
+  el.innerHTML=html;
+  document.getElementById('askBtn').disabled=false;
+}
+
+// ---- templates: the locked stacks + a Niagen IV market template ----
+function renderTemplates(){
+  var el=document.getElementById('templates'); var html='';
+  (MOD.stacks||[]).forEach(function(s){
+    html+='<button onclick="loadStack(\''+s.code+'\')">'+esc(s.code)+'</button>';
+  });
+  html+='<button onclick="loadNiagen()" title="Market addition — distinct NAD+ precursor">Niagen IV*</button>';
+  el.innerHTML=html;
+}
+function loadStack(code){
+  var s=null; (MOD.stacks||[]).forEach(function(x){ if(x.code===code) s=x; });
+  if(!s) return;
+  BAG=[];
+  document.getElementById('stackName').value=s.title||code;
+  if(s.base) document.getElementById('baseFluid').value =
+    /250/.test(s.base)?'0.9% NS 250 mL':/1 L|LR/.test(s.base)?(/LR/.test(s.base)?'LR 1 L':'0.9% NS 1 L'):/dedicated/i.test(s.base)?'Dedicated NAD+ bag':/100 mL|access/i.test(s.base)?'IV access / push only':'0.9% NS 500 mL';
+  var comps=(s.components||[]).concat(s.post_drip||[]).concat(s.optional_add_ons||[]).concat(s.same_visit_add_ons||[]);
+  comps.forEach(function(c){
+    var ing=matchByName(c.ingredient);
+    BAG.push({id:ing?ing.id:'', name:c.ingredient, dose:c.dose||'', ref:ing});
+  });
+  renderBag(); analyze();
+}
+function loadNiagen(){
+  var m=(MOD.market_additions&&MOD.market_additions.entries||[])[0];
+  BAG=[]; document.getElementById('stackName').value='Niagen / NR IV (market addition)';
+  document.getElementById('baseFluid').value='Dedicated NAD+ bag';
+  BAG.push({id:'ADD_NIAGEN_NR', name:(m?m.name:'Niagen / NR'), dose:'per protocol', ref:m});
+  renderBag(); analyze();
+}
+function matchByName(name){
+  var n=(name||'').toLowerCase();
+  for(var i=0;i<MENU.length;i++){
+    var mn=(MENU[i].name||'').toLowerCase();
+    if(n.indexOf(mn.split(' ')[0])>=0 || mn.indexOf(n.split(' ')[0])>=0) return MENU[i];
+  }
+  return null;
+}
+
+// ---- the guardrail engine: data-driven from the module ----
+function bagTags(){
+  // map bag contents to canonical tags used by the compatibility matrix
+  var t={};
+  BAG.forEach(function(it){
+    var n=(it.name||'').toLowerCase();
+    if(/vitamin c|vit c|ascorbic/.test(n)) t.vitc=it;
+    if(/calcium/.test(n)) t.calcium=it;
+    if(/glutathione/.test(n)) t.glutathione=it;
+    if(/magnesium|(^|\b)mg\b/.test(n)) t.mg=it;
+    if(/nad/.test(n)) t.nad=it;
+    if(/trace mineral/.test(n)) t.trace=it;
+    if(/zinc|(^|\b)zn\b/.test(n)) t.zinc=it;
+    if(/selenium/.test(n)) t.selenium=it;
+    if(/b-complex|vita complex/.test(n)) t.bcomplex=it;
+    if(/lactated|(^|\b)lr\b/.test(document.getElementById('baseFluid').value.toLowerCase())) t.lr=true;
+    if(/ceftriaxone/.test(n)) t.ceftriaxone=it;
+  });
+  return t;
+}
+
+function analyze(){
+  var out=document.getElementById('analysis');
+  if(!MOD){ return; }
+  if(!BAG.length){ out.innerHTML='<div class="loading">Compose a stack to see analysis.</div>'; document.getElementById('askBtn').disabled=true; return; }
+  var flags=[]; var crit=0, warn=0;
+  function add(level,title,body){ flags.push({l:level,t:title,b:body}); if(level==='crit')crit++; if(level==='warn')warn++; }
+
+  // 1) GFE Gate-0 (advisory, always)
+  add('info','GFE Gate-0','Confirm a valid Good Faith Exam is on file (within its 12-month window), signed standing orders authorize this act, and FORM-02 is completed this visit — before chair assignment or compounding.');
+
+  var tags=bagTags();
+
+  // 2) Compatibility matrix (data-driven)
+  var keymap={'vit c':'vitc','vitamin c':'vitc','ascorbic':'vitc','calcium':'calcium','glutathione':'glutathione','mg':'mg','magnesium':'mg','ca':'calcium','nad':'nad','trace':'trace','zn':'zinc','zinc':'zinc','se':'selenium','selenium':'selenium','b-complex':'bcomplex','lr':'lr','ceftriaxone':'ceftriaxone'};
+  (MOD.compatibility_matrix&&MOD.compatibility_matrix.rules||[]).forEach(function(rule){
+    var combo=(rule.combination||'').toLowerCase();
+    var need=[];
+    Object.keys(keymap).forEach(function(k){ if(combo.indexOf(k)>=0 && need.indexOf(keymap[k])<0) need.push(keymap[k]); });
+    if(need.length<2) return;
+    var allPresent=need.every(function(tg){ return !!tags[tg]; });
+    if(!allPresent) return;
+    var st=(rule.status||'').toUpperCase();
+    var level=st.indexOf('INCOMPAT')>=0?'crit':(st==='COMPATIBLE'?'ok':'warn');
+    add(level,'Compatibility — '+rule.status, esc(rule.combination)+'. '+esc(rule.rationale||'')+(rule.action?(' → '+esc(rule.action)):''));
+  });
+
+  // 3) Structural handling rules
+  if(tags.glutathione){
+    add('warn','Glutathione handling','Glutathione is IV PUSH only (post-drip) — never in the bag, never with Vitamin C, never piggyback or slow infusion. Give as a separate slow push after a line flush.');
+  }
+  if(tags.nad && BAG.length>1){
+    add('warn','NAD+ dedicated bag','NAD+ is rate-sensitive and must run in a dedicated bag — never co-mixed with other ingredients. Move other components to a separate bag/visit.');
+  }
+
+  // 4) Vit C CARD-VC trigger
+  if(tags.vitc){
+    var g=parseGrams(tags.vitc.dose);
+    if(g!=null && g>6) add('warn','CARD-VC screen required','Vitamin C '+g+' g exceeds 6 g — the CARD-VC verbal screen (incl. G6PD) is required; if G6PD-deficient, cap at 2 g or decline. >10 g is out of wellness scope.');
+  }
+
+  // 5) Ceiling checks
+  BAG.forEach(function(it){
+    if(!it.ref||!it.ref.ceiling) return;
+    var dv=parseGrams(it.dose), cv=parseGrams(it.ref.ceiling);
+    if(dv!=null&&cv!=null&&dv>cv) add('crit','Ceiling exceeded — '+esc(it.name),'Dose '+it.dose+' is above the wellness ceiling ('+it.ref.ceiling+'). Above ceiling is outside wellness scope without written Medical Director authorization.');
+  });
+
+  // 6) High-caution agents (surface the module's own guardrail text)
+  BAG.forEach(function(it){
+    if(it.ref&&it.ref.guardrail){
+      var lvl=/serotonin|insulin autoimmune|vesicant|safety-critical/i.test(it.ref.guardrail)?'crit':'warn';
+      add(lvl,'Caution — '+esc(it.name), esc(it.ref.guardrail));
+    }
+  });
+
+  // 7) Niagen/NR distinct-precursor note
+  if(BAG.some(function(it){return /niagen|nicotinamide riboside|(^|\b)nr\b/i.test(it.name);})){
+    add('warn','Niagen / NR — distinct precursor','Niagen/NR is a NAD+ PRECURSOR, not IV NAD+, and is a market addition (not in the locked primary library). Not a proven peptide synergy. Sourcing is the provider’s decision — AllyOS advises and discloses, names no supplier; VERIFY current FDA 503B status.');
+  }
+
+  // 8) Composite double-dose
+  var hasComposite=BAG.some(function(it){return /amino blend|mineral blend|tri-immune|myer/i.test(it.name);});
+  if(hasComposite && (tags.zinc||tags.selenium)) add('warn','Composite double-dose','A composite/premade blend is present alongside a standalone mineral — confirm the blend’s label to avoid double-dosing Zn/Se/etc.');
+
+  // verdict
+  var vEl='', vClass='', vText='';
+  if(crit>0){ vClass='hold'; vText='REVIEW — '+crit+' critical flag'+(crit>1?'s':'')+' to resolve'; }
+  else if(warn>0){ vClass='review'; vText='PROCEED WITH REVIEW — '+warn+' advisory flag'+(warn>1?'s':''); }
+  else { vClass='go'; vText='No conflicts flagged — provider reviews & signs'; }
+  vEl='<div class="verdict '+vClass+'">'+vText+'</div>';
+
+  var html=vEl;
+  flags.forEach(function(f){ html+='<div class="flag '+f.l+'"><b>'+f.t+'</b>'+f.b+'</div>'; });
+  out.innerHTML=html;
+}
+
+function parseGrams(s){
+  if(!s) return null; s=(''+s).toLowerCase();
+  var m=s.match(/([\d.]+)\s*(g|mg|mcg)/);
+  if(!m) return null;
+  var v=parseFloat(m[1]);
+  if(m[2]==='mg') v=v/1000; if(m[2]==='mcg') v=v/1000000;
+  return v; // grams
+}
+
+// ---- Ask Ally (standalone IV-grounded function) ----
+function askAlly(){
+  var name=document.getElementById('stackName').value||'Custom stack';
+  var base=document.getElementById('baseFluid').value;
+  var lines=BAG.map(function(it){return '- '+it.name+(it.dose?(': '+it.dose):'');}).join('\n');
+  var q='A licensed provider built this custom wellness IV/IM stack in the AllyOS builder. Review it from the locked IV module: flag any compatibility, ceiling, sequence, contraindication, GFE, or scope issues, and give an honest advisory verdict. Do not invent doses.\n\nStack: '+name+'\nBase: '+base+'\nIngredients:\n'+lines;
+  var ans=document.getElementById('answer'); ans.innerHTML='<div class="ans">…</div>';
+  document.getElementById('askBtn').disabled=true;
+  fetch('/.netlify/functions/ask',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:q}]})})
+  .then(function(r){return r.json()}).then(function(j){
+    var t=j.text||(j.error==='not_configured'?'Ally isn’t connected yet (set ANTHROPIC_API_KEY in Netlify, then redeploy).':('Ally couldn’t reach the model'+(j.detail?(': '+j.detail):(j.error?(' ('+j.error+')'):''))+'.'));
+    ans.innerHTML='<div class="ans">'+t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>')+'</div>';
+    document.getElementById('askBtn').disabled=false;
+  }).catch(function(e){ ans.innerHTML='<div class="ans">Network error reaching Ally ('+e.message+').</div>'; document.getElementById('askBtn').disabled=false; });
+}
+
+function esc(s){ return (''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body></html>
