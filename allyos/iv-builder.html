@@ -96,6 +96,7 @@ button.ask:disabled{opacity:.5;cursor:default}
       </div>
       <label class="chk"><input type="checkbox" id="gfeDone" onchange="analyze();updateRunState()">
         Valid GFE on file (&lt;12-mo window), patient cleared for procedure, standing orders authorize this act, FORM-02 done this visit.</label>
+      <button class="btn ghost" style="margin-top:10px;width:100%" onclick="genDoc('GFE')">📄 Open GFE &amp; Consent (FORM-INTAKE-GFE-01) — sign / print before start</button>
     </div>
 
     <!-- BASE + VOLUME -->
@@ -357,10 +358,31 @@ function stackSummary(){
 }
 function genDoc(type){
   var s=stackSummary(),today=new Date().toLocaleDateString();
-  var title={'FORM-02':'FORM-02 — Pre-Infusion Verify Checklist','FORM-05':'FORM-05 — Wellness IV Infusion Monitoring Sheet','FORM-03':'FORM-03 — Post-IV Aftercare Handout'}[type];
+  var title={'GFE':'FORM-INTAKE-GFE-01 — Patient Intake, Consent & Wellness IV GFE','FORM-02':'FORM-02 — Pre-Infusion Verify Checklist','FORM-05':'FORM-05 — Wellness IV Infusion Monitoring Sheet','FORM-03':'FORM-03 — Post-IV Aftercare Handout'}[type];
   var body='';
   var ing='<ul>'+s.items.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>';
-  if(type==='FORM-02'){
+  if(type==='GFE'){
+    body='<p style="color:#5b6b72">Adult patients (≥ 18). Completed at first visit; valid 12 months unless a material health change, new med/allergy, adverse event, or new protocol. The provider (NP/PA/MD/DO) performs the GFE; the RN/LPN runs the infusion under it.</p>'+
+    '<h3>A. Patient Information</h3><p>Name ____________________  DOB __________  Date '+today+'<br>Phone ______________  Email ______________  MRN __________</p>'+
+    '<h3>B. Brief Health History (check all that apply)</h3><ul class="ck">'+['Diabetes','High blood pressure','Heart disease / stroke','Kidney disease / dialysis','Liver disease','Asthma / COPD','Active cancer / cancer treatment','Pregnancy or breastfeeding','Bleeding disorder / blood thinners','G6PD deficiency','Hospitalization or surgery &lt; 30 days','None of the above'].map(function(x){return '<li>☐ '+x+'</li>';}).join('')+'</ul><p>Other history: ____________________________________</p>'+
+    '<h3>C. Allergies</h3><p>☐ No known drug allergies &nbsp;&nbsp; ☐ Yes — describe: ____________________________</p>'+
+    '<h3>D. Current Medications / Supplements</h3><p>(Rx, OTC, vitamins, supplements, injections, hormones, weight-loss meds)<br>____________________________________________________</p>'+
+    '<h3>E. Patient Acknowledgment &amp; Consent</h3><ul class="ck">'+[
+      'I understand IV/IM nutrient therapy is for supportive wellness only and is not intended to diagnose, treat, cure, reverse, prevent, or manage any disease.',
+      'I authorize a Good Faith Exam (GFE) / wellness eligibility evaluation before IV/IM therapy.',
+      'I understand the provider may hold treatment and refer me to PCP, specialist, urgent care, ED, or EMS/911 if clinically indicated.',
+      'I understand possible risks include vein irritation, bruising, infiltration, flushing, dizziness, nausea, allergic or vasovagal reaction, or rare serious reaction.',
+      'I consent to IV/IM nutrient therapy under the clinic’s active wellness protocols.',
+      'I consent to emergency measures and EMS/911 activation if a serious adverse event occurs.'
+    ].map(function(x){return '<li>☐ '+x+'</li>';}).join('')+'</ul>'+
+    '<p>Patient signature ____________________________  Date / Time __________<br>Printed name ____________________  Clinic witness ____________________</p>'+
+    '<h3 style="border-top:2px solid #0e3a40;padding-top:10px">Provider Use — GFE / Eligibility</h3>'+
+    '<p>Vitals — BP ____/____  HR ______  RR ______  Temp ______  SpO2 ______%</p>'+
+    '<p>Focused review: ☐ Intake ☐ Allergies ☐ Meds/supplements ☐ Consent ☐ Alert/oriented ☐ No acute distress ☐ No red-flag symptoms ☐ No contraindication to selected protocol ☐ Meets wellness IV/IM eligibility</p>'+
+    '<p>Requested protocol(s): <b>'+esc(s.name||'________________')+'</b></p>'+
+    '<p>Decision: ☐ Eligible today &nbsp; ☐ Eligible with limitation &nbsp; ☐ Treatment held<br>Referred to: ☐ PCP ☐ Specialist ☐ Urgent care ☐ ED ☐ EMS/911 &nbsp; Reason if held/referred: ________________</p>'+
+    '<p>Provider signature ____________________________  Credential ______  Lic # __________  Date __________  Time __________</p>';
+  } else if(type==='FORM-02'){
     body='<p><b>Stack:</b> '+esc(s.name)+' &nbsp; <b>Base:</b> '+esc(s.base)+' &nbsp; <b>Infusion:</b> '+esc(s.time)+' min ('+s.gtt+' gtt/min · '+s.mlhr+' mL/hr)</p>'+
     '<p><b>Components:</b></p>'+ing+
     '<h3>Pre-infusion checklist (complete before compounding)</h3><ul class="ck">'+
