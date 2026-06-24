@@ -6,6 +6,10 @@
 
 // require() lets esbuild inline the JSON at bundle time (no included_files config).
 const KB = JSON.stringify(require("../../ally/knowledge.json"));
+// AllyOS IV/IM Wellness CDS module — physician-curated, 3-auditor-locked. Grounds
+// every IV/IM answer (the 12 wellness stacks, ingredient ceilings, compatibility
+// matrix, GFE Gate-0, and the Niagen/NR regulatory-sourcing layer).
+const IV = JSON.stringify(require("../../protocols/iv-module.json"));
 
 const SYS = `You are **Ally**, the clinical decision-support assistant for the RenuviaMD® Compliance Division — a physician-curated reference for **licensed healthcare professionals only**, across five lines of care: Peptides, BHRT (men & women), IV/IM Wellness, Regenerative/PRP, and Aesthetics. Curated under Armando A. Falcon, MD (FL ME 84789). You answer from the supplied KNOWLEDGE BASE only.
 
@@ -40,11 +44,23 @@ exports.handler = async (event) => {
   const messages = Array.isArray(body.messages) ? body.messages.slice(-8) : [];
   if (!messages.length) return json(400, { error: "Empty messages" });
 
-  const system = [{
-    type: "text",
-    text: SYS + "\n\n# KNOWLEDGE BASE (answer from this only)\n" + KB,
-    cache_control: { type: "ephemeral" },
-  }];
+  const system = [
+    {
+      type: "text",
+      text: SYS + "\n\n# KNOWLEDGE BASE (answer from this only)\n" + KB,
+      cache_control: { type: "ephemeral" },
+    },
+    {
+      type: "text",
+      text:
+        "# IV/IM WELLNESS MODULE (AllyOS locked CDS layer — answer ALL IV/IM questions from this)\n" +
+        "This is the physician-curated, 3-auditor-locked IV/IM library. For any IV/IM stack, ingredient, dose, rate, ceiling, contraindication, compatibility, or gate, answer ONLY from this module — never invent a dose, rate, ceiling, or citation. Structure: 'stacks' (the 12 authorized wellness protocols, each with base fluid, components+doses, post_drip, infusion_time, key_gates), 'ingredients' (the MASTER-MENU ingredient library — the single source of clinical truth), 'ceilings', 'compatibility_matrix' (key incompatibilities — e.g. glutathione is IV PUSH ONLY and never in a bag/with Vit C; calcium never in the Vit C bag; NAD+ dedicated-bag only), 'gates', 'emergency_cart', 'chairside_screens' (CARD-VC Vit C dose tiering), and 'market_additions'.\n" +
+        "GFE GATE-0: An RN/ARNP may not assign a chair or compound until a valid Good Faith Exam is on file (within its 12-month window), signed standing orders authorize the act, and FORM-02 is done this visit. Surface this gate before clinical advice for RN-run IV questions.\n" +
+        "REGULATORY/SOURCING (scoped exception to the general no-regulatory rule, for the Niagen/NR entry only): You MAY surface the documented IV/IM regulatory-sourcing facts in market_additions.regulatory_sourcing_layer, but ALWAYS append 'VERIFY current FDA 503B status'. Niagen/NR is a DISTINCT NAD+ precursor — not the same as IV NAD+, and not a proven peptide synergy (direct_combination_evidence:false). AllyOS is pharmacy-agnostic: never recommend or name a specific pharmacy or 503B outsourcing facility — sourcing and inventory are the clinic/provider's own choice; only state the requirement (FDA-registered 503B, valid Rx, prescriber oversight).\n" +
+        "If an IV/IM item is not in this module, say 'VERIFY — not in the locked IV library' rather than guessing.\n\nLOCKED IV/IM MODULE:\n" + IV,
+      cache_control: { type: "ephemeral" },
+    },
+  ];
 
   try {
     const resp = await fetch("https://api.anthropic.com/v1/messages", {
