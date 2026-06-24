@@ -127,10 +127,14 @@
   ],
 
   "line_crossover": {
-    "note": "Items found in clinic IV/IM inventory that belong to OTHER AllyOS lines, not the IV/IM wellness line. AllyOS does not duplicate them here — it routes to the owning module so guardrails are not split.",
+    "note": "Agents sometimes seen on clinic order sheets that are NOT part of the IV/IM wellness bar and are NOT inventoried as office stock. The IV bar runs on 503B office-use stock (generic vials, administered chairside). The agents below are 503A patient-specific prescriptions, direct-shipped to the patient and self-administered — a provider Rx workflow, not chairside bar stock. AllyOS handles them in the Peptide module (prescribing decision-support), never the IV inventory or builder, so guardrails are not split.",
+    "compliance_distinction": {
+      "iv_bar": "503B outsourcing-facility office-use stock — generic vials kept and administered at the clinic (this IV/IM module).",
+      "peptides": "503A patient-specific compounded prescriptions — prescribed by the provider, shipped direct to the patient, self-administered at home. NOT inventoried by the clinic."
+    },
     "entries": [
-      { "agents": ["Semaglutide", "Tirzepatide (± glycine + B12)"], "owning_line": "Peptides / GLP-1 (weight management)", "route_to": "AllyOS peptide layers (interactions.json, peptide-interactions.json, patient-factor-rules.json, monitoring-map.json). These are prescription GLP-1 medications, not wellness IV nutrients." },
-      { "agents": ["Sermorelin"], "owning_line": "Peptides / GH-secretagogue", "route_to": "AllyOS peptide layers." }
+      { "agents": ["Semaglutide", "Tirzepatide (± glycine + B12)"], "owning_line": "Peptides / GLP-1 (weight management)", "handling": "503A patient-specific, direct-to-patient shipping, provider-prescribed (Rx) — do NOT inventory. Not a chairside IV/IM bar agent.", "route_to": "AllyOS peptide layers (interactions.json, peptide-interactions.json, patient-factor-rules.json, monitoring-map.json)." },
+      { "agents": ["Sermorelin"], "owning_line": "Peptides / GH-secretagogue", "handling": "503A patient-specific, direct-to-patient shipping, provider-prescribed (Rx) — do NOT inventory.", "route_to": "AllyOS peptide layers." }
     ]
   },
 
