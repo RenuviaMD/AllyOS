@@ -1,5 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AllyOS Chairside — Nurse Workstation · RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar.png">
 <link rel="stylesheet" href="allyos-theme.css">
 <style>
 .topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#070d18ee;backdrop-filter:blur(8px);z-index:20}
@@ -88,8 +89,9 @@
 .flag.ok{background:#0f2a1f;border-color:#1e5a40;border-left-color:var(--green);color:#bfe6cf}
 .flag.ok b{color:var(--green)}
 /* Ask Ally floating button + drawer */
-#allyBtn{position:fixed;right:18px;bottom:18px;z-index:50;background:linear-gradient(135deg,var(--teal),#1aa89b);color:#04121a;border:none;border-radius:999px;padding:12px 18px;font-weight:700;font-family:var(--fdisp);font-size:.85rem;cursor:pointer;box-shadow:var(--glow-teal)}
+#allyBtn{position:fixed;right:18px;bottom:18px;z-index:50;background:linear-gradient(135deg,var(--teal),#1aa89b);color:#04121a;border:none;border-radius:999px;padding:10px 18px 10px 11px;font-weight:700;font-family:var(--fdisp);font-size:.85rem;cursor:pointer;box-shadow:var(--glow-teal);display:inline-flex;align-items:center;gap:8px}
 #allyBtn:hover{filter:brightness(1.08)}
+.allyface{width:24px;height:24px;border-radius:50%;object-fit:cover;flex:0 0 auto;background:#0b1626;vertical-align:middle}
 #allyDrawer{position:fixed;right:0;top:0;bottom:0;width:380px;max-width:92vw;background:var(--bg2);border-left:1px solid var(--line2);box-shadow:-12px 0 40px #04080fcc;z-index:70;display:none;flex-direction:column}
 #allyDrawer.show{display:flex}
 .allyhead{display:flex;justify-content:space-between;align-items:center;padding:13px 15px;border-bottom:1px solid var(--line)}
@@ -167,9 +169,9 @@
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
 
 <!-- Ask Ally -->
-<button id="allyBtn" onclick="allyOpen()">💬 Ask Ally</button>
+<button id="allyBtn" onclick="allyOpen()"><img src="ally-avatar.png" alt="" class="allyface" onerror="this.replaceWith(document.createTextNode('💬'))"> Ask Ally</button>
 <div id="allyDrawer">
-  <div class="allyhead"><b>💬 Ally <span style="color:var(--teal)">· clinical assistant</span></b><button class="x" onclick="allyClose()">×</button></div>
+  <div class="allyhead"><b><img src="ally-avatar.png" alt="" class="allyface" style="width:28px;height:28px" onerror="this.replaceWith(document.createTextNode('💬'))"> Ally <span style="color:var(--teal)">· clinical assistant</span></b><button class="x" onclick="allyClose()">×</button></div>
   <div class="allyctx" id="allyCtx">Grounded in the locked IV/IM module. PHI-free — sees only the bench build, never the patient.</div>
   <div id="allyLog"></div>
   <div class="allyin"><input id="allyInput" placeholder="Ask about a stack, dose, compatibility…" onkeydown="if(event.key==='Enter')allySend()"><button class="btn neon" onclick="allySend()" style="padding:9px 13px">Send</button></div>
