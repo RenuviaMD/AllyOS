@@ -7,16 +7,38 @@
 .topbar .r{display:flex;align-items:center;gap:14px;font-size:.78rem;color:var(--muted)}
 .topbar .r a{color:var(--teal);text-decoration:none}
 #who{color:var(--gold)}
-.board{display:grid;grid-template-columns:250px 1fr 330px;gap:14px;padding:14px;align-items:start}
-@media(max-width:1200px){.board{grid-template-columns:220px 1fr 300px}}
+.board{display:grid;grid-template-columns:330px 1fr 360px;gap:14px;padding:14px;align-items:start}
+@media(max-width:1200px){.board{grid-template-columns:290px 1fr 320px}}
 .col-h{font-family:var(--fdisp);font-weight:600;font-size:.82rem;color:var(--teal);letter-spacing:.04em;margin-bottom:10px;text-transform:uppercase}
-/* queue */
-.qcard{background:linear-gradient(180deg,#0f1f33,#0b1626);border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:11px;padding:11px;margin-bottom:9px;cursor:pointer}
-.qcard:hover{border-color:var(--teal)}.qcard.sel{box-shadow:var(--glow-teal);border-color:var(--teal)}
-.qcard .nm{font-weight:700}.qcard .pr{font-size:.66rem;color:var(--teal);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
-.qcard .alacarte{color:var(--gold)}
-.addq{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
-.addq input,.addq select{background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:7px 9px;color:var(--ink);font-size:.8rem;font-family:inherit}
+/* search */
+.search{width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--ink);font-size:.84rem;font-family:inherit;margin-bottom:8px}
+.search:focus{outline:none;border-color:var(--teal);box-shadow:var(--glow-teal)}
+/* patient ID card (left) */
+.pcard{background:linear-gradient(180deg,#0f1f33,#0b1626);border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:12px;padding:11px 12px;margin-bottom:9px;cursor:pointer;transition:border-color .12s}
+.pcard:hover{border-color:var(--teal)}.pcard.sel{box-shadow:var(--glow-teal);border-color:var(--teal)}
+.pcard.s-ready{border-left-color:var(--green)}.pcard.s-caution{border-left-color:var(--amber)}.pcard.s-hold{border-left-color:var(--red)}.pcard.s-missing{border-left-color:var(--muted)}
+.pcard .ptop{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pcard .nm{font-weight:700;font-size:.95rem}
+.pcard .pmeta{font-size:.7rem;color:var(--muted);margin-top:2px}
+.pcard .pr{font-size:.66rem;color:var(--teal);letter-spacing:.05em;text-transform:uppercase}
+.pcard .alacarte{color:var(--gold)}
+.spill{font-size:.6rem;font-weight:800;letter-spacing:.06em;padding:3px 8px;border-radius:999px;text-transform:uppercase;white-space:nowrap}
+.spill.s-ready{background:#0e2a1f;color:var(--green);border:1px solid #1e5a40}
+.spill.s-caution{background:#2a2310;color:var(--amber);border:1px solid #5a4a22}
+.spill.s-hold{background:#2a1512;color:#f0b3aa;border:1px solid #5a2a22}
+.spill.s-missing{background:#1a222c;color:var(--muted);border:1px solid var(--line)}
+.pflags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.fchip{font-size:.6rem;padding:2px 7px;border-radius:6px;border:1px solid var(--line);color:var(--muted);display:inline-flex;align-items:center;gap:3px}
+.fchip.ok{color:var(--green);border-color:#1e5a40}
+.fchip.bad{color:#f0b3aa;border-color:#5a2a22}
+.fchip.alert{color:var(--amber);border-color:#5a4a22}
+.pexpand{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.gaterow{display:flex;gap:7px;margin-bottom:8px}
+.gatebtn{flex:1;border-radius:9px;padding:8px;text-align:center;cursor:pointer;font-size:.72rem;font-weight:700;border:1px solid}
+.gatebtn.done{background:#0e2a1f;border-color:#1e5a40;color:var(--green)}
+.gatebtn.pending{background:#2a1512;border-color:#5a2a22;color:#f0b3aa}
+.gatebtn.expired{background:#2a2310;border-color:#5a4a22;color:var(--amber)}
+.alertline{font-size:.74rem;color:var(--amber);margin:3px 0;display:flex;gap:6px;align-items:flex-start}
 /* emergency bar */
 .embar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .embtn{flex:1;min-width:130px;background:#1e0f0f;border:1px solid #5a2a22;color:#f0b3aa;border-radius:10px;padding:9px;font-weight:700;font-size:.74rem;cursor:pointer;text-transform:uppercase;letter-spacing:.04em}
@@ -79,34 +101,28 @@
     <a href="iv-inventory.html">Inventory</a><a href="iv-calculator.html">Calc</a><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
 </div>
 
-<div style="padding:14px 14px 0"><div class="stats" id="stats"></div></div>
-
-<div class="board" style="padding-top:10px">
-  <!-- QUEUE -->
+<div class="board">
+  <!-- LEFT · PATIENTS (all patient data) -->
   <div>
-    <div class="col-h">📋 Waiting</div>
-    <div class="addq">
-      <input id="qName" placeholder="Patient name">
-      <select id="qProto"></select>
-      <button class="btn ghost" onclick="addPatient()" style="font-size:.74rem;padding:7px">+ Add to queue</button>
-    </div>
+    <div class="col-h">👥 Waiting patients</div>
+    <input id="search" class="search" placeholder="🔍 Search patients…" oninput="renderQueue()">
+    <button class="btn ghost" onclick="openIntake()" style="width:100%;font-size:.78rem;padding:9px;margin-bottom:12px">+ New patient</button>
     <div id="queue"></div>
   </div>
 
-  <!-- CENTER -->
+  <!-- CENTER · THE FLOOR -->
   <div>
     <div class="col-h">🚨 Emergency protocols</div>
     <div class="embar" id="embar"></div>
     <div class="col-h" style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">🪑 Treatment chairs <span id="chairStat" class="muted" style="font-weight:400;font-size:.72rem"></span></div>
     <div class="chairgrid" id="chairs"></div>
-    <!-- PREP TABLE -->
-    <div class="prep" id="prep"><div class="empty">Select a waiting patient → choose their protocol or à-la-carte, and the preparation table opens here (the compounding bench).</div></div>
   </div>
 
-  <!-- DETAIL -->
+  <!-- RIGHT · NURSE STATION (what the nurse adds / handles) -->
   <div class="detail">
-    <div class="col-h">👤 Patient</div>
-    <div id="detail"><div class="empty">Tap a patient in the queue.</div></div>
+    <div class="col-h">🧴 Nurse station</div>
+    <div id="detail"><div class="empty">Select a patient on the left. When the card reads <b style="color:var(--green)">READY</b>, choose a pre-made stack or build à la carte here.</div></div>
+    <div class="prep" id="prep" style="margin-top:12px;display:none"></div>
   </div>
 </div>
 <div class="disc" id="disc"></div>
@@ -126,46 +142,131 @@ fetch('../protocols/iv-module.json').then(function(r){return r.json()}).then(fun
 
 function load(){try{var s=JSON.parse(localStorage.getItem(KEY)||'{}');QUEUE=s.q||seedQueue();}catch(e){QUEUE=seedQueue();}}
 function save(){localStorage.setItem(KEY,JSON.stringify({q:QUEUE}));}
-function seedQueue(){return [{id:pid(),name:'Sarah Martinez',proto:'IV-05',gfe:false,consent:false},{id:pid(),name:'Michael Chen',proto:'IV-08',gfe:true,consent:false},{id:pid(),name:'Emily Rodriguez',proto:'ALACARTE',gfe:true,consent:true}];}
+function seedQueue(){return [
+  {id:pid(),first:'Sarah',last:'Martinez',name:'Sarah Martinez',dob:'1990-03-12',sex:'F',proto:'IV-05',alerts:[],gfe:false,gfeDate:'',consent:false},
+  {id:pid(),first:'Michael',last:'Chen',name:'Michael Chen',dob:'1985-07-22',sex:'M',proto:'IV-08',alerts:['G6PD deficiency'],gfe:true,gfeDate:'2026-04-30',consent:false},
+  {id:pid(),first:'Emily',last:'Rodriguez',name:'Emily Rodriguez',dob:'1995-11-02',sex:'F',proto:'ALACARTE',alerts:[],gfe:true,gfeDate:'2026-06-10',consent:true}
+];}
 function pid(){return 'p'+Math.floor(performance.now()*1000%1e9);}
+// ---- patient identity / status helpers ----
+var ALERT_CATALOG=['G6PD deficiency','Pregnancy / breastfeeding','Anticoagulant / bleeding risk','Renal impairment / dialysis','Cardiac / CHF','Severe allergy / anaphylaxis hx','Acute illness / infection'];
+function dispName(p){var f=p.first||((p.name||'').split(' ')[0]||'');var l=p.last||((p.name||'').split(' ').slice(1).join(' ')||'');return f+(l?(' '+l.charAt(0)+'.'):'');}
+function ageOf(p){if(!p.dob)return null;var d=new Date(p.dob+'T00:00:00'),n=new Date();var a=n.getFullYear()-d.getFullYear();if(n.getMonth()<d.getMonth()||(n.getMonth()===d.getMonth()&&n.getDate()<d.getDate()))a--;return a>=0&&a<130?a:null;}
+function gfeState(p){if(!p.gfe)return{k:'missing',label:'GFE NEEDED'};if(p.gfeDate){var d=new Date(p.gfeDate+'T00:00:00'),n=new Date(),mo=(n-d)/(1000*60*60*24*30.44);if(mo>12)return{k:'expired',label:'GFE EXPIRED'};}return{k:'done',label:'GFE current'};}
+function alertLevel(p){var a=p.alerts||[];if(a.indexOf('Acute illness / infection')>=0)return'hold';return a.length?'caution':'ok';}
+function patientStatus(p){var g=gfeState(p),lvl=alertLevel(p);
+  if(g.k==='missing')return{k:'missing',label:'GFE NEEDED'};
+  if(lvl==='hold')return{k:'hold',label:'HOLD'};
+  if(g.k==='expired')return{k:'caution',label:'GFE EXPIRED'};
+  if(!p.consent)return{k:'caution',label:'CONSENT'};
+  if(lvl==='caution')return{k:'caution',label:'CAUTION'};
+  return{k:'ready',label:'READY'};}
 function mdMode(){return document.getElementById('mdMode').checked;}
 function stackByCode(c){var s=null;(MOD.stacks||[]).forEach(function(x){if(x.code===c)s=x;});return s;}
 function findIng(id){for(var i=0;i<MENU.length;i++)if(MENU[i].id===id)return MENU[i];return null;}
 function matchByName(n){n=(n||'').toLowerCase();for(var i=0;i<MENU.length;i++){var m=(MENU[i].name||'').toLowerCase();if(n.indexOf(m.split(' ')[0])>=0||m.indexOf(n.split(' ')[0])>=0)return MENU[i];}return null;}
 function qById(id){for(var i=0;i<QUEUE.length;i++)if(QUEUE[i].id===id)return QUEUE[i];return null;}
 
-function fillProto(){var h='<option value="ALACARTE">À la carte (custom)</option>';(MOD.stacks||[]).forEach(function(s){h+='<option value="'+s.code+'">'+esc(s.code)+' — '+esc(s.title)+'</option>';});document.getElementById('qProto').innerHTML=h;}
+function fillProto(){var el=document.getElementById('qProto');if(!el)return;var h='<option value="ALACARTE">À la carte (custom)</option>';(MOD.stacks||[]).forEach(function(s){h+='<option value="'+s.code+'">'+esc(s.code)+' — '+esc(s.title)+'</option>';});el.innerHTML=h;}
+function todayISO(){var n=new Date();return n.getFullYear()+'-'+('0'+(n.getMonth()+1)).slice(-2)+'-'+('0'+n.getDate()).slice(-2);}
 function renderStats(){var el=document.getElementById('stats');if(!el)return;var occ=CHAIRS.filter(Boolean).length,avail=6-occ,wait=QUEUE.length,ending=CHAIRS.filter(function(c){return c&&c.state==='ended';}).length,inf=CHAIRS.filter(function(c){return c&&c.state==='infusing';}).length;
   el.innerHTML=stat('blue','Scheduled',wait+occ)+stat('amber','Waiting',wait)+stat('','In chair',inf)+stat('green','Available',avail)+stat('violet','Ending / done',ending);}
 function stat(cls,lbl,n){return '<div class="stat '+cls+'"><div class="lbl">'+lbl+'</div><div class="num">'+n+'</div></div>';}
 
-// ---------- QUEUE ----------
-function addPatient(){var n=document.getElementById('qName').value.trim();if(!n)return;QUEUE.push({id:pid(),name:n,proto:document.getElementById('qProto').value,gfe:false,consent:false});document.getElementById('qName').value='';save();renderQueue();}
-function renderQueue(){renderStats();var el=document.getElementById('queue');if(!QUEUE.length){el.innerHTML='<div class="empty">Queue empty.</div>';return;}
-  el.innerHTML=QUEUE.map(function(p){var s=stackByCode(p.proto);var pr=p.proto==='ALACARTE'?'<span class="alacarte">À LA CARTE</span>':esc(p.proto)+(s?' · '+esc(s.title):'');
-    return '<div class="qcard'+(selId===p.id?' sel':'')+'" onclick="selectPatient(\''+p.id+'\')"><div class="nm">'+esc(p.name)+'</div><div class="pr">'+pr+'</div></div>';}).join('');
+// ---------- QUEUE (Patient ID cards) ----------
+function openIntake(){
+  var alerts=ALERT_CATALOG.map(function(a){return '<label class="muted" style="font-size:.76rem;display:flex;gap:6px;align-items:center;width:48%"><input type="checkbox" class="ialert" value="'+esc(a)+'"> '+esc(a)+'</label>';}).join('');
+  var protoOpts='<option value="ALACARTE">À la carte (choose later)</option>'+(MOD.stacks||[]).map(function(s){return '<option value="'+s.code+'">'+esc(s.code)+' — '+esc(s.title)+'</option>';}).join('');
+  var h='<button class="x" onclick="closeModal()">×</button><h3>New patient</h3><div class="sub">PHI stays on this device only — nothing is sent to a server.</div>'+
+    '<div class="frow"><div><label>First name</label><input id="iFirst" placeholder="Sarah"></div><div><label>Last name</label><input id="iLast" placeholder="Martinez"></div></div>'+
+    '<div class="frow"><div><label>Date of birth</label><input id="iDob" type="date" oninput="document.getElementById(\'iAge\').textContent=intakeAge()"></div><div><label>Age</label><input value="" id="iAgeBox" placeholder="auto" readonly style="opacity:.7"><span id="iAge" style="display:none"></span></div><div><label>Sex</label><select id="iSex"><option>F</option><option>M</option><option>Other</option></select></div></div>'+
+    '<label style="font-size:.7rem;color:var(--muted);display:block;margin:8px 0 4px">Health flags (feed the prep guardrails)</label>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:4px 0">'+alerts+'</div>'+
+    '<div class="frow" style="margin-top:8px"><div><label>Last GFE date (if any)</label><input id="iGfeDate" type="date"></div><div><label>Today\'s treatment</label><select id="iProto">'+protoOpts+'</select></div></div>'+
+    '<button class="btn neon" style="width:100%;margin-top:10px" onclick="saveIntake()">Add to waiting room</button>';
+  showModal(h);
 }
+function intakeAge(){var v=val('iDob');if(!v)return'';var p={dob:v};var a=ageOf(p);document.getElementById('iAgeBox').value=(a==null?'':a);return a==null?'':a;}
+function saveIntake(){var f=val('iFirst').trim(),l=val('iLast').trim();if(!f){alert('First name required.');return;}
+  var alerts=[];Array.prototype.forEach.call(document.querySelectorAll('.ialert:checked'),function(c){alerts.push(c.value);});
+  var gd=val('iGfeDate');
+  QUEUE.push({id:pid(),first:f,last:l,name:(f+' '+l).trim(),dob:val('iDob'),sex:val('iSex'),proto:val('iProto'),alerts:alerts,gfe:!!gd,gfeDate:gd,consent:false});
+  save();closeModal();renderQueue();}
+function matchSearch(p,q){if(!q)return true;q=q.toLowerCase();return (p.name||'').toLowerCase().indexOf(q)>=0||(p.proto||'').toLowerCase().indexOf(q)>=0;}
+function renderQueue(){var el=document.getElementById('queue');var q=(document.getElementById('search')||{}).value||'';
+  var list=QUEUE.filter(function(p){return matchSearch(p,q);});
+  if(!list.length){el.innerHTML='<div class="empty">'+(QUEUE.length?'No match.':'Waiting room empty.')+'</div>';renderChairs();return;}
+  el.innerHTML=list.map(function(p){return pcardHTML(p);}).join('');
+  renderChairs();
+}
+function pcardHTML(p){
+  var st=patientStatus(p),s=stackByCode(p.proto),sel=selId===p.id;
+  var pr=p.proto==='ALACARTE'?'<span class="alacarte">À LA CARTE</span>':esc(p.proto)+(s?' · '+esc(s.title):'');
+  var age=ageOf(p),meta=[(age!=null?age:'—'),(p.sex||'—')].join(' ')+' · '+pr;
+  var g=gfeState(p);
+  var flags='<span class="fchip '+(g.k==='done'?'ok':(g.k==='expired'?'alert':'bad'))+'">'+(g.k==='done'?'✓':(g.k==='expired'?'⏱':'✗'))+' GFE</span>'+
+    '<span class="fchip '+(p.consent?'ok':'bad')+'">'+(p.consent?'✓':'✗')+' Consent</span>'+
+    (p.alerts||[]).map(function(a){return '<span class="fchip alert">⚠ '+esc(a.split(' /')[0].split(' (')[0])+'</span>';}).join('');
+  var h='<div class="pcard s-'+st.k+(sel?' sel':'')+'" onclick="selectPatient(\''+p.id+'\')">'+
+    '<div class="ptop"><span class="nm">'+esc(dispName(p))+'</span><span class="spill s-'+st.k+'">'+st.label+'</span></div>'+
+    '<div class="pmeta">'+esc(meta)+'</div>'+
+    '<div class="pflags">'+flags+'</div>';
+  if(sel){
+    h+='<div class="pexpand" onclick="event.stopPropagation()">'+
+      '<div class="gaterow">'+
+      '<div class="gatebtn '+(g.k==='done'?'done':(g.k==='expired'?'expired':'pending'))+'" onclick="openGFE(\''+p.id+'\')">'+g.label+'</div>'+
+      '<div class="gatebtn '+(p.consent?'done':'pending')+'" onclick="openConsent(\''+p.id+'\')">'+(p.consent?'Consent ✓':'Consent ✗')+'</div>'+
+      '</div>'+
+      ((p.alerts||[]).length?('<div style="margin-bottom:6px">'+(p.alerts||[]).map(function(a){return '<div class="alertline">⚠ '+esc(a)+'</div>';}).join('')+'</div>'):'')+
+      '<button class="btn ghost" style="width:100%;font-size:.72rem;padding:6px" onclick="editAlerts(\''+p.id+'\')">Edit flags</button>'+
+      '</div>';
+  }
+  return h+'</div>';
+}
+function editAlerts(id){var p=qById(id);if(!p)return;
+  var alerts=ALERT_CATALOG.map(function(a){var on=(p.alerts||[]).indexOf(a)>=0;return '<label class="muted" style="font-size:.78rem;display:flex;gap:6px;align-items:center;width:48%"><input type="checkbox" class="ealert" value="'+esc(a)+'"'+(on?' checked':'')+'> '+esc(a)+'</label>';}).join('');
+  var h='<button class="x" onclick="closeModal()">×</button><h3>Health flags — '+esc(dispName(p))+'</h3><div class="sub">These feed the prep-table guardrails (e.g. G6PD + Vitamin C).</div>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:4px 0">'+alerts+'</div>'+
+    '<button class="btn neon" style="width:100%;margin-top:10px" onclick="saveAlerts(\''+id+'\')">Save flags</button>';
+  showModal(h);}
+function saveAlerts(id){var p=qById(id);if(!p)return;var a=[];Array.prototype.forEach.call(document.querySelectorAll('.ealert:checked'),function(c){a.push(c.value);});p.alerts=a;save();closeModal();renderQueue();renderDetail();}
 function selectPatient(id){selId=id;renderQueue();renderDetail();}
 
-// ---------- DETAIL ----------
-function renderDetail(){var el=document.getElementById('detail');var p=qById(selId);if(!p){el.innerHTML='<div class="empty">Tap a patient in the queue.</div>';return;}
-  var s=stackByCode(p.proto);
-  var h='<div class="qcard sel" style="cursor:default"><div class="nm">'+esc(p.name)+'</div><div class="demo muted" style="font-size:.72rem">Adult · on-device record only</div></div>';
-  // GFE / Consent chips (hard gates)
-  h+='<div class="chips"><div class="chip '+(p.gfe?'done':'pending')+'" onclick="openGFE(\''+p.id+'\')">GFE '+(p.gfe?'✓ done':'✗ pending')+'</div>'+
-     '<div class="chip '+(p.consent?'done':'pending')+'" onclick="openConsent(\''+p.id+'\')">Consent '+(p.consent?'✓ done':'✗ pending')+'</div></div>';
-  // order
-  if(p.proto==='ALACARTE'){
-    h+='<div style="font-size:.8rem;color:var(--gold);margin-bottom:8px">À la carte — add ingredients to the prep table (Mode B, under standing orders):</div>';
-    h+='<button class="btn neon" style="width:100%;margin-bottom:10px" onclick="startPrep(\''+p.id+'\',null)">Open prep table</button>';
-    h+='<div id="palette">'+paletteHTML()+'</div>';
+// ---------- NURSE STATION (right · build) ----------
+function renderDetail(){var el=document.getElementById('detail');var p=qById(selId);
+  if(!p){el.innerHTML='<div class="empty">Select a patient on the left. When the card reads <b style="color:var(--green)">READY</b>, choose a pre-made stack or build à la carte here.</div>';return;}
+  var st=patientStatus(p),s=stackByCode(p.proto);
+  // context header
+  var h='<div class="pcard s-'+st.k+'" style="cursor:default"><div class="ptop"><span class="nm">'+esc(dispName(p))+'</span><span class="spill s-'+st.k+'">'+st.label+'</span></div><div class="pmeta">Review the card on the left · on-device record only</div></div>';
+  // readiness gate banner
+  if(st.k==='missing'||st.k==='hold'||(st.k==='caution'&&!p.consent)||(st.k==='caution'&&gfeState(p).k==='expired')){
+    var why=gfeState(p).k!=='done'?'A current Good Faith Exam is required':(!p.consent?'Signed consent is required':'Resolve the hold');
+    h+='<div class="flag warn" style="margin:10px 0"><b>Not cleared yet</b>'+why+' before sending to a chair. You can still build the bag — the gate is checked at "send to chair."</div>';
+  }
+  // choose mode
+  var aMode=p.proto==='ALACARTE'||p.buildMode==='ala';
+  h+='<div class="chips" style="margin:12px 0 10px">'+
+     '<div class="chip '+(!aMode?'done':'')+'" style="cursor:pointer'+(!aMode?'':';background:#0e1c2e;border-color:var(--line);color:var(--muted)')+'" onclick="setMode(\''+p.id+'\',\'stack\')">🧪 Pre-made stack</div>'+
+     '<div class="chip '+(aMode?'done':'')+'" style="cursor:pointer'+(aMode?'':';background:#0e1c2e;border-color:var(--line);color:var(--muted)')+'" onclick="setMode(\''+p.id+'\',\'ala\')">🎛 À la carte</div></div>';
+  if(!aMode){
+    // PROTOCOLS card
+    h+='<div class="card" style="border-left:3px solid var(--teal);padding:13px">'+
+       '<div class="eyebrow" style="color:var(--teal)">Protocol</div>'+
+       '<div class="h-disp" style="font-size:1.05rem;margin:2px 0 2px">'+esc(p.proto)+' — '+esc(s?s.title:'')+'</div>'+
+       (s&&s.purpose?'<div class="muted" style="font-size:.76rem;margin-bottom:8px">'+esc(s.purpose)+'</div>':'')+
+       '<div class="muted" style="font-size:.7rem;margin-bottom:4px">'+esc(s?(s.base||'0.9% NS'):'')+' · '+esc(s?s.infusion_time:'')+'</div>'+
+       (s?('<div style="margin:6px 0">'+(s.components||[]).map(function(c){return '<div class="ingrow"><span>'+esc(c.ingredient)+' <span class="muted">'+esc(c.dose||'')+'</span></span></div>';}).join('')+'</div>'):'')+
+       '<button class="btn neon" style="width:100%;margin-top:6px" onclick="startPrep(\''+p.id+'\',\''+p.proto+'\')">Prepare on the bench →</button>'+
+       '<div class="muted" style="font-size:.7rem;margin-top:8px;text-align:center">or <a href="#" onclick="setMode(\''+p.id+'\',\'ala\');return false" style="color:var(--gold)">customize à la carte</a></div>'+
+       '</div>';
   } else {
-    h+='<div class="ingrow" style="margin-bottom:8px"><span><b>'+esc(s?s.title:p.proto)+'</b><div class="muted" style="font-size:.68rem">'+esc(s?s.infusion_time:'')+'</div></span></div>';
-    h+='<button class="btn neon" style="width:100%" onclick="startPrep(\''+p.id+'\',\''+p.proto+'\')">Prepare this protocol</button>';
-    h+='<div class="muted" style="font-size:.72rem;margin-top:8px">Need custom? <a href="#" onclick="startPrep(\''+p.id+'\',null);return false" style="color:var(--teal)">switch to à la carte</a></div>';
+    h+='<div style="font-size:.78rem;color:var(--gold);margin-bottom:8px">À la carte — add the broth + ingredients to the prep bench (Mode B, under standing orders):</div>';
+    h+='<button class="btn neon" style="width:100%;margin-bottom:10px" onclick="startPrep(\''+p.id+'\',null)">Open prep bench</button>';
+    h+='<div id="palette">'+paletteHTML()+'</div>';
   }
   el.innerHTML=h;
 }
+function setMode(id,m,silent){var p=qById(id);if(!p)return;p.buildMode=m;if(!silent)renderDetail();}
 function paletteHTML(){
   var byCat={};MENU.forEach(function(i){if(i.in_primary_library===false&&/KETOROLAC|FAMOTIDINE|METHYLENE/.test(i.id))return;var c=catOf(i);(byCat[c]=byCat[c]||[]).push(i);});
   var order=['Base fluids','Vitamins','Minerals & electrolytes','Amino acids','Antioxidants & specialty','Lipotropic / metabolic','Rx & administration adjuncts','Other'];
@@ -186,8 +287,8 @@ function rmPrep(i){PREP.items.splice(i,1);autoTime();renderPrep();}
 function setPrep(f,v){PREP[f]=v;if(f!=='time')autoTime();renderPrep();}
 // NAD overrides the default 45-min drip with its rate-sensitive duration
 function autoTime(){if(!PREP)return;var nad=PREP.items.filter(function(it){return /nad/i.test(it.name);})[0];if(nad){var g=parseGrams(nad.dose),mg=g!=null?g*1000:250;PREP.time=mg>=500?210:120;PREP.nadFloor=PREP.time;}else{PREP.nadFloor=null;if(PREP.time===120||PREP.time===210)PREP.time=45;}}
-function renderPrep(){var el=document.getElementById('prep');if(!PREP){el.className='prep';el.innerHTML='<div class="empty">Select a waiting patient → choose protocol or à-la-carte; the prep table (compounding bench) opens here.</div>';return;}
-  var p=qById(PREP.pid);el.className='prep active';
+function renderPrep(){var el=document.getElementById('prep');if(!PREP){el.style.display='none';el.className='prep';el.innerHTML='';return;}
+  var p=qById(PREP.pid);el.style.display='block';el.className='prep active';
   var an=analyzePrep();var drip=dripCalc();
   var items=PREP.items.length?PREP.items.map(function(it,i){return '<div class="ingrow"><span>'+esc(it.name)+' <span class="muted">'+esc(it.dose)+'</span></span><button class="rm" onclick="rmPrep('+i+')">×</button></div>';}).join(''):'<div class="empty">Add the broth (base) and ingredients.</div>';
   var bases=['0.9% NS',"Lactated Ringer's",'Dedicated NAD+ bag'];
@@ -224,6 +325,13 @@ function analyzePrep(){var bag=PREP.items,t=PREP.time,flags=[],crit=0,warn=0;
   // osmolarity
   var hyper=[],hi=false;bag.forEach(function(it){var n=(it.name||'').toLowerCase();if(/vitamin c|vit c|ascorbic/.test(n)){var g=parseGrams(it.dose);if(g!=null&&g>=7){hyper.push('Vit C '+g+'g');hi=true;}}if(/calcium chloride/.test(n))hyper.push('CaCl');if(/amino/.test(n))hyper.push('amino acids');if(/nad/.test(n))hyper.push('NAD+');});
   if(hyper.length){var conc=hi&&PREP.vol<=250;add(conc?'crit':'warn','Osmolarity '+(conc?'high':'raised'),'Hyperosmolar: '+hyper.join(', ')+'. Peripheral limit ~900 mOsm/L'+(conc?' — low volume + high Vit C: larger bag/central.':'.'));}
+  // ---- patient health flags × bag contents ----
+  var pat=qById(PREP.pid),pa=(pat&&pat.alerts)||[];
+  if(pa.indexOf('G6PD deficiency')>=0&&tags.vitc){var gg=parseGrams(tags.vitc.dose);add((gg!=null&&gg>2)?'crit':'warn','G6PD + Vitamin C','Patient flagged G6PD-deficient. High-dose IV Vit C risks acute hemolysis'+(gg!=null&&gg>2?' — hard stop at '+gg+' g.':' — keep dose low / reconsider.'));}
+  if(pa.indexOf('Pregnancy / breastfeeding')>=0)add('warn','Pregnancy / breastfeeding','Patient flagged pregnant/breastfeeding — confirm each additive is appropriate; many wellness IVs are avoided.');
+  if(pa.indexOf('Anticoagulant / bleeding risk')>=0)add('warn','Bleeding / anticoagulant','Patient on anticoagulant or bleeding risk — IM routes & ketorolac add risk; prefer IV, hold pressure.');
+  if(pa.indexOf('Renal impairment / dialysis')>=0&&(tags.mg||tags.calcium))add('warn','Renal + electrolytes','Renal impairment flagged with Mg/Ca in bag — risk of accumulation; provider should set dosing.');
+  if(pa.indexOf('Cardiac / CHF')>=0&&PREP.vol>=1000)add('warn','Cardiac + volume','CHF flagged with a 1 L bag — consider smaller volume / slower rate to avoid overload.');
   var key=flags.filter(function(f){return f.l==='crit';}).map(function(f){return f.t;}).join('|');
   var newCrit=key!==''&&key!==lastCritKey;lastCritKey=key;
   return {flags:flags,crit:crit,warn:warn,newCrit:newCrit};
@@ -350,7 +458,7 @@ function openGFE(id){var p=qById(id);if(!p)return;
     '<button class="btn neon" style="width:100%;margin-top:8px" onclick="signGFE(\''+id+'\')">Sign GFE — cleared</button>';
   showModal(h);
 }
-function signGFE(id){var p=qById(id);if(p)p.gfe=true;save();closeModal();renderDetail();renderQueue();}
+function signGFE(id){var p=qById(id);if(p){p.gfe=true;p.gfeDate=todayISO();}save();closeModal();renderDetail();renderQueue();}
 function openConsent(id){var p=qById(id);if(!p)return;
   if(p.consent){return showModal('<button class="x" onclick="closeModal()">×</button><h3>Consent on file ✓</h3><div class="sub">'+esc(p.name)+' — wellness IV/IM consent signed.</div>');}
   var h='<button class="x" onclick="closeModal()">×</button><h3>Consent — '+esc(p.name)+'</h3><div class="sub">Hard gate: no consent → no IV.</div>'+
