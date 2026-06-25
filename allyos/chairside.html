@@ -61,6 +61,12 @@
 @keyframes pulseRed{from{box-shadow:0 0 16px rgba(240,99,90,.3)}to{box-shadow:0 0 36px rgba(240,99,90,.7)}}
 .chairbtns{display:flex;gap:5px;margin-top:6px}
 .chairbtns .btn{flex:1;font-size:.66rem;padding:6px}
+/* auto-surface: a chair just freed and someone is staged */
+#seatPrompt:empty{display:none}
+.seatbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#0e2a2433;border:1px solid #1e5a52;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:.82rem;color:var(--teal);animation:seatGlow 1.2s ease-out}
+.seatbar b{color:var(--ink)}
+.seatbar .btn{margin-left:auto;font-size:.74rem;padding:7px 13px;white-space:nowrap}
+@keyframes seatGlow{from{box-shadow:0 0 0 rgba(46,230,214,0)}40%{box-shadow:0 0 22px rgba(46,230,214,.45)}to{box-shadow:0 0 0 rgba(46,230,214,0)}}
 /* prep table */
 .prep{margin-top:16px;background:linear-gradient(180deg,#10202f,#0b1622);border:1px dashed var(--line2);border-radius:16px;padding:16px}
 .prep.active{border-style:solid;box-shadow:var(--glow-teal)}
@@ -154,6 +160,7 @@
     <div class="col-h">🚨 Emergency protocols</div>
     <div class="embar" id="embar"></div>
     <div class="col-h" style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">🪑 Treatment chairs <span id="chairStat" class="muted" style="font-weight:400;font-size:.72rem"></span></div>
+    <div id="seatPrompt"></div>
     <div class="chairgrid" id="chairs"></div>
     <!-- PREP BENCH — cook the soup, fix alerts, send to chair -->
     <div class="prep" id="prep"></div>
@@ -485,6 +492,16 @@ function renderChairs(){var el=document.getElementById('chairs');var h='';
   }
   el.innerHTML=h;
   renderStats();var cs=document.getElementById('chairStat');if(cs)cs.textContent=CHAIRS.filter(Boolean).length+' / 6 occupied';
+  renderSeatPrompt();
+}
+// when a chair is free and a patient is staged, auto-surface a one-click seat
+function renderSeatPrompt(){var el=document.getElementById('seatPrompt');if(!el)return;
+  var freeIdx=CHAIRS.indexOf(null);
+  var staged=QUEUE.filter(function(p){return p.staged&&p.prep;});
+  if(freeIdx<0||!staged.length){el.innerHTML='';return;}
+  var p=staged[0],more=staged.length-1;
+  el.innerHTML='<div class="seatbar">🪑 <b>Chair '+(freeIdx+1)+' open</b> · ⏸ '+esc(dispName(p))+' is prepared ('+esc(txLabel(p))+')'+(more>0?' · +'+more+' more staged':'')+
+    '<button class="btn neon-green" onclick="sendStaged(\''+p.id+'\')">▶ Seat '+esc(dispName(p).split(' ')[0])+'</button></div>';
 }
 function startInfusion(i){var c=CHAIRS[i];if(!c)return;
   var h='<button class="x" onclick="closeModal()">×</button><h3>Start — Chair '+(i+1)+'</h3><div class="sub">'+esc(c.patient.name)+' · '+esc(c.protoLabel)+' · '+c.base+' '+c.vol+' mL · '+c.time+' min</div>'+
