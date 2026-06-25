@@ -18,6 +18,7 @@
 .pcard:hover{border-color:var(--teal)}.pcard.sel{box-shadow:var(--glow-teal);border-color:var(--teal)}
 .pcard.s-ready{border-left-color:var(--green)}.pcard.s-caution{border-left-color:var(--amber)}.pcard.s-hold{border-left-color:var(--red)}.pcard.s-missing{border-left-color:var(--muted)}
 .pcard .ptop{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pcard .chev{color:var(--muted);font-size:.7rem;flex:0 0 auto}
 .pcard .nm{font-weight:700;font-size:.95rem}
 .pcard .pmeta{font-size:.7rem;color:var(--muted);margin-top:2px}
 .pcard .pr{font-size:.66rem;color:var(--teal);letter-spacing:.05em;text-transform:uppercase}
@@ -251,7 +252,7 @@ function pcardHTML(p){
     '<span class="fchip '+(p.consent?'ok':'bad')+'">'+(p.consent?'✓':'✗')+' Consent</span>'+
     (p.alerts||[]).map(function(a){return '<span class="fchip note">'+esc(a.split(' /')[0].split(' (')[0])+'</span>';}).join('');
   var h='<div class="pcard s-'+st.k+(sel?' sel':'')+'" onclick="selectPatient(\''+p.id+'\')">'+
-    '<div class="ptop"><span class="nm">'+esc(dispName(p))+'</span><span class="spill s-'+st.k+'">'+st.label+'</span></div>'+
+    '<div class="ptop"><span class="nm">'+esc(dispName(p))+'</span><span class="spill s-'+st.k+'">'+st.label+'</span><span class="chev">'+(sel?'▴':'▾')+'</span></div>'+
     '<div class="pmeta">'+esc(meta)+'</div>'+
     '<div class="pflags">'+flags+'</div>';
   if(sel){
@@ -261,7 +262,8 @@ function pcardHTML(p){
       '<div class="gatebtn '+(p.consent?'done':'pending')+'" onclick="openConsent(\''+p.id+'\')">'+(p.consent?'Consent ✓':'Consent ✗')+'</div>'+
       '</div>'+
       ((p.alerts||[]).length?('<div style="margin-bottom:6px"><div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Noted conditions (what the patient brings)</div>'+(p.alerts||[]).map(function(a){return '<div class="noteline">• '+esc(a)+'</div>';}).join('')+'</div>'):'')+
-      '<button class="btn ghost" style="width:100%;font-size:.72rem;padding:6px" onclick="editAlerts(\''+p.id+'\')">Edit conditions</button>'+
+      '<div style="display:flex;gap:6px"><button class="btn ghost" style="flex:1;font-size:.72rem;padding:6px" onclick="editAlerts(\''+p.id+'\')">Edit conditions</button>'+
+      '<button class="btn ghost" style="flex:1;font-size:.72rem;padding:6px" onclick="selectPatient(\''+p.id+'\')">▲ Close card</button></div>'+
       '</div>';
   }
   return h+'</div>';
@@ -273,7 +275,7 @@ function editAlerts(id){var p=qById(id);if(!p)return;
     '<button class="btn neon" style="width:100%;margin-top:10px" onclick="saveAlerts(\''+id+'\')">Save flags</button>';
   showModal(h);}
 function saveAlerts(id){var p=qById(id);if(!p)return;var a=[];Array.prototype.forEach.call(document.querySelectorAll('.ealert:checked'),function(c){a.push(c.value);});p.alerts=a;save();closeModal();renderQueue();renderDetail();}
-function selectPatient(id){selId=id;renderQueue();renderDetail();}
+function selectPatient(id){selId=(selId===id?null:id);renderQueue();renderDetail();}
 
 // ---------- NURSE STATION (right · build) ----------
 function renderDetail(){var el=document.getElementById('detail');var p=qById(selId);
@@ -286,16 +288,20 @@ function renderDetail(){var el=document.getElementById('detail');var p=qById(sel
     var why=gfeState(p).k!=='done'?'A current Good Faith Exam is required':(!p.consent?'Signed consent is required':'Resolve the hold');
     h+='<div class="flag warn" style="margin:10px 0"><b>Not cleared yet</b>'+why+' before sending to a chair. You can still build the bag — the gate is checked at "send to chair."</div>';
   }
-  // choose what I give (independent of how the patient arrived)
-  var aMode=(p.buildMode||(p.proto==='ALACARTE'?'ala':'stack'))==='ala';
+  // bench-busy notice — one shared bench, so flag when it belongs to someone else
+  if(PREP&&PREP.pid!==p.id){var ob=qById(PREP.pid);h+='<div class="flag info" style="margin:10px 0"><b>Bench in use</b>The prep bench is open for '+esc(ob?dispName(ob):'another patient')+'. Send that one, or <a href="#" onclick="clearBench();return false" style="color:var(--teal)">clear the bench</a> to build for '+esc(dispName(p))+'.</div>';}
+  // choose what I give — nothing is assigned until the nurse picks
+  var chosen=(p.buildMode==='stack'||p.buildMode==='ala');
   h+='<div class="chips" style="margin:12px 0 10px">'+
-     '<div class="chip '+(!aMode?'done':'')+'" style="cursor:pointer'+(!aMode?'':';background:#0e1c2e;border-color:var(--line);color:var(--muted)')+'" onclick="setMode(\''+p.id+'\',\'stack\')">🧪 Pre-made protocol</div>'+
-     '<div class="chip '+(aMode?'done':'')+'" style="cursor:pointer'+(aMode?'':';background:#0e1c2e;border-color:var(--line);color:var(--muted)')+'" onclick="setMode(\''+p.id+'\',\'ala\')">🎛 À la carte</div></div>';
-  if(!aMode){
-    // PROTOCOLS card — pick any pre-made protocol from the menu
+     '<div class="chip '+(p.buildMode==='stack'?'done':'')+'" style="cursor:pointer'+(p.buildMode==='stack'?'':';background:#0e1c2e;border-color:var(--line);color:var(--muted)')+'" onclick="setMode(\''+p.id+'\',\'stack\')">🧪 Pre-made protocol</div>'+
+     '<div class="chip '+(p.buildMode==='ala'?'done':'')+'" style="cursor:pointer'+(p.buildMode==='ala'?'':';background:#0e1c2e;border-color:var(--line);color:var(--muted)')+'" onclick="setMode(\''+p.id+'\',\'ala\')">🎛 À la carte</div></div>';
+  if(!chosen){
+    h+='<div class="empty">Choose what to give <b>'+esc(dispName(p))+'</b> — a <b style="color:var(--teal)">pre-made protocol</b> or build <b style="color:var(--gold)">à la carte</b>. Nothing is assigned until you pick.</div>';
+  } else if(p.buildMode==='stack'){
+    // PROTOCOL — change with the menu, clear with the button
     var code=(p.proto&&p.proto!=='ALACARTE')?p.proto:((MOD.stacks&&MOD.stacks[0]||{}).code||'');
     s=stackByCode(code);
-    h+='<label style="font-size:.7rem;color:var(--muted);display:block;margin-bottom:4px">Protocol menu</label>'+
+    h+='<label style="font-size:.7rem;color:var(--muted);display:block;margin-bottom:4px">Protocol menu — change anytime</label>'+
        '<select class="search" onchange="setProto(\''+p.id+'\',this.value)">'+(MOD.stacks||[]).map(function(x){return '<option value="'+x.code+'"'+sel(code,x.code)+'>'+esc(x.code)+' — '+esc(x.title)+'</option>';}).join('')+'</select>'+
        '<div class="card" style="border-left:3px solid var(--teal);padding:13px;margin-top:6px">'+
        '<div class="eyebrow" style="color:var(--teal)">Protocol</div>'+
@@ -305,16 +311,20 @@ function renderDetail(){var el=document.getElementById('detail');var p=qById(sel
        (s?('<div style="margin:6px 0">'+(s.components||[]).map(function(c){return '<div class="ingrow"><span>'+esc(c.ingredient)+' <span class="muted">'+esc(c.dose||'')+'</span></span></div>';}).join('')+'</div>'):'')+
        '<button class="btn neon" style="width:100%;margin-top:6px" onclick="startPrep(\''+p.id+'\',\''+code+'\')">Prepare on the bench →</button>'+
        '<div class="muted" style="font-size:.7rem;margin-top:8px;text-align:center">or <a href="#" onclick="setMode(\''+p.id+'\',\'ala\');return false" style="color:var(--gold)">customize à la carte</a></div>'+
-       '</div>';
+       '</div>'+
+       '<button class="btn ghost" style="width:100%;margin-top:8px;font-size:.74rem;padding:7px" onclick="clearGive(\''+p.id+'\')">✕ Clear — give nothing yet</button>';
   } else {
     h+='<div style="font-size:.78rem;color:var(--gold);margin-bottom:8px">À la carte — add the broth + ingredients to the prep bench (Mode B, under standing orders):</div>';
     h+='<button class="btn neon" style="width:100%;margin-bottom:10px" onclick="startPrep(\''+p.id+'\',null)">Open prep bench</button>';
     h+='<div id="palette">'+paletteHTML()+'</div>';
+    h+='<button class="btn ghost" style="width:100%;margin-top:10px;font-size:.74rem;padding:7px" onclick="clearGive(\''+p.id+'\')">✕ Clear — give nothing yet</button>';
   }
   el.innerHTML=h;
 }
 function setMode(id,m,silent){var p=qById(id);if(!p)return;p.buildMode=m;if(!silent)renderDetail();}
 function setProto(id,code){var p=qById(id);if(!p)return;p.proto=code;p.buildMode='stack';save();renderDetail();}
+function clearGive(id){var p=qById(id);if(!p)return;p.buildMode=null;if(PREP&&PREP.pid===id)PREP=null;save();renderPrep();renderDetail();}
+function clearBench(){PREP=null;renderPrep();renderDetail();}
 function paletteHTML(){
   var byCat={};MENU.forEach(function(i){if(i.in_primary_library===false&&/KETOROLAC|FAMOTIDINE|METHYLENE/.test(i.id))return;var c=catOf(i);(byCat[c]=byCat[c]||[]).push(i);});
   var order=['Base fluids','Vitamins','Minerals & electrolytes','Amino acids','Antioxidants & specialty','Lipotropic / metabolic','Rx & administration adjuncts','Other'];
