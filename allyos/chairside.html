@@ -32,13 +32,14 @@
 .fchip.ok{color:var(--green);border-color:#1e5a40}
 .fchip.bad{color:#f0b3aa;border-color:#5a2a22}
 .fchip.alert{color:var(--amber);border-color:#5a4a22}
+.fchip.note{color:var(--muted);border-color:var(--line);background:#0e1c2e}
 .pexpand{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
 .gaterow{display:flex;gap:7px;margin-bottom:8px}
 .gatebtn{flex:1;border-radius:9px;padding:8px;text-align:center;cursor:pointer;font-size:.72rem;font-weight:700;border:1px solid}
 .gatebtn.done{background:#0e2a1f;border-color:#1e5a40;color:var(--green)}
 .gatebtn.pending{background:#2a1512;border-color:#5a2a22;color:#f0b3aa}
 .gatebtn.expired{background:#2a2310;border-color:#5a4a22;color:var(--amber)}
-.alertline{font-size:.74rem;color:var(--amber);margin:3px 0;display:flex;gap:6px;align-items:flex-start}
+.noteline{font-size:.74rem;color:var(--muted);margin:2px 0}
 /* emergency bar */
 .embar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .embtn{flex:1;min-width:130px;background:#1e0f0f;border:1px solid #5a2a22;color:#f0b3aa;border-radius:10px;padding:9px;font-weight:700;font-size:.74rem;cursor:pointer;text-transform:uppercase;letter-spacing:.04em}
@@ -64,8 +65,39 @@
 .prep select,.prep input{background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:7px 9px;color:var(--ink);font-size:.82rem;font-family:inherit}
 .ingrow{display:flex;justify-content:space-between;align-items:center;background:#0e1c2e;border:1px solid var(--line);border-radius:8px;padding:6px 9px;margin:4px 0;font-size:.82rem}
 .ingrow .rm{background:#3a1a16;border:none;color:#f0b3aa;border-radius:6px;width:22px;height:22px;cursor:pointer;font-weight:800}
-.drip{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;padding:9px;background:#0c1a28;border-radius:9px}
-.drip div span{display:block;font-size:.6rem;color:var(--muted)}.drip div b{font-family:var(--fdisp);font-size:1.05rem}
+.drip{display:flex;gap:9px;flex-wrap:wrap;margin-top:8px}
+.dz{flex:1;min-width:115px;padding:8px 11px;border-radius:9px;border:1px solid;background:#0c1a28}
+.dz span{display:block;font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.dz b{font-family:var(--fdisp);font-size:1.1rem;display:block;margin-top:2px}
+.dz.vol{border-color:#1e4a52}.dz.vol b{color:var(--teal)}
+.dz.drop{border-color:#5a4a22}.dz.drop b{color:var(--gold)}
+.dz.pump{border-color:#243a6a}.dz.pump b{color:var(--blue)}
+/* alert flags — title on its own line, coloured by severity */
+.flag{border-radius:9px;padding:9px 11px;margin:6px 0;font-size:.82rem;line-height:1.45;border:1px solid;border-left-width:3px}
+.flag b{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.flag.crit{background:#2a1512;border-color:#5a2a22;border-left-color:var(--red);color:#e6c2bd}
+.flag.crit b{color:var(--red)}
+.flag.warn{background:#2a2212;border-color:#5a4a22;border-left-color:var(--amber);color:#e6d4a6}
+.flag.warn b{color:var(--amber)}
+.flag.info{background:#11262b;border-color:#1e4a52;border-left-color:var(--teal);color:#bfe6e1}
+.flag.info b{color:var(--teal)}
+.flag.ok{background:#0f2a1f;border-color:#1e5a40;border-left-color:var(--green);color:#bfe6cf}
+.flag.ok b{color:var(--green)}
+/* Ask Ally floating button + drawer */
+#allyBtn{position:fixed;right:18px;bottom:18px;z-index:50;background:linear-gradient(135deg,var(--teal),#1aa89b);color:#04121a;border:none;border-radius:999px;padding:12px 18px;font-weight:700;font-family:var(--fdisp);font-size:.85rem;cursor:pointer;box-shadow:var(--glow-teal)}
+#allyBtn:hover{filter:brightness(1.08)}
+#allyDrawer{position:fixed;right:0;top:0;bottom:0;width:380px;max-width:92vw;background:var(--bg2);border-left:1px solid var(--line2);box-shadow:-12px 0 40px #04080fcc;z-index:70;display:none;flex-direction:column}
+#allyDrawer.show{display:flex}
+.allyhead{display:flex;justify-content:space-between;align-items:center;padding:13px 15px;border-bottom:1px solid var(--line)}
+.allyhead b{font-family:var(--fdisp)}.allyhead .x{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer}
+#allyLog{flex:1;overflow:auto;padding:13px 15px;display:flex;flex-direction:column;gap:9px}
+.amsg{font-size:.84rem;line-height:1.5;padding:9px 11px;border-radius:10px;max-width:92%;white-space:pre-wrap}
+.amsg.u{align-self:flex-end;background:#0e2e2b;border:1px solid #1e5a52;color:var(--ink)}
+.amsg.a{align-self:flex-start;background:#0f1c2e;border:1px solid var(--line);color:var(--ink)}
+.amsg.sys{align-self:center;font-size:.7rem;color:var(--muted);text-align:center}
+.allyin{display:flex;gap:7px;padding:11px;border-top:1px solid var(--line)}
+.allyin input{flex:1;background:#0e1f29;border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--ink);font-size:.84rem;font-family:inherit}
+.allyctx{font-size:.66rem;color:var(--muted);padding:0 15px 8px}
 .alertbox{margin-top:8px}
 .empty{color:var(--muted);font-size:.82rem;padding:14px;text-align:center}
 /* detail */
@@ -130,8 +162,17 @@
 <div class="disc" id="disc"></div>
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
 
+<!-- Ask Ally -->
+<button id="allyBtn" onclick="allyOpen()">💬 Ask Ally</button>
+<div id="allyDrawer">
+  <div class="allyhead"><b>💬 Ally <span style="color:var(--teal)">· clinical assistant</span></b><button class="x" onclick="allyClose()">×</button></div>
+  <div class="allyctx" id="allyCtx">Grounded in the locked IV/IM module. PHI-free — sees only the bench build, never the patient.</div>
+  <div id="allyLog"></div>
+  <div class="allyin"><input id="allyInput" placeholder="Ask about a stack, dose, compatibility…" onkeydown="if(event.key==='Enter')allySend()"><button class="btn neon" onclick="allySend()" style="padding:9px 13px">Send</button></div>
+</div>
+
 <script>
-var MOD=null, MENU=[], INV={}, QUEUE=[], CHAIRS=[null,null,null,null,null,null], PREP=null, selId=null, emActive=null;
+var MOD=null, MENU=[], INV={}, QUEUE=[], CHAIRS=[null,null,null,null,null,null], PREP=null, selId=null, emActive=null, ALLY_HIST=[];
 var KEY='allyos_chairside_v1';
 
 fetch('../protocols/iv-module.json').then(function(r){return r.json()}).then(function(d){
@@ -155,13 +196,13 @@ var ALERT_CATALOG=['G6PD deficiency','Pregnancy / breastfeeding','Anticoagulant 
 function dispName(p){var f=p.first||((p.name||'').split(' ')[0]||'');var l=p.last||((p.name||'').split(' ').slice(1).join(' ')||'');return f+(l?(' '+l.charAt(0)+'.'):'');}
 function ageOf(p){if(!p.dob)return null;var d=new Date(p.dob+'T00:00:00'),n=new Date();var a=n.getFullYear()-d.getFullYear();if(n.getMonth()<d.getMonth()||(n.getMonth()===d.getMonth()&&n.getDate()<d.getDate()))a--;return a>=0&&a<130?a:null;}
 function gfeState(p){if(!p.gfe)return{k:'missing',label:'GFE NEEDED'};if(p.gfeDate){var d=new Date(p.gfeDate+'T00:00:00'),n=new Date(),mo=(n-d)/(1000*60*60*24*30.44);if(mo>12)return{k:'expired',label:'GFE EXPIRED'};}return{k:'done',label:'GFE current'};}
-function alertLevel(p){var a=p.alerts||[];if(a.indexOf('Acute illness / infection')>=0)return'hold';return a.length?'caution':'ok';}
-function patientStatus(p){var g=gfeState(p),lvl=alertLevel(p);
+// Status reflects the GATES only (GFE + consent). A noted health condition is
+// NOT an alert by itself — it only becomes one at the bench, if the build
+// actually conflicts with it.
+function patientStatus(p){var g=gfeState(p);
   if(g.k==='missing')return{k:'missing',label:'GFE NEEDED'};
-  if(lvl==='hold')return{k:'hold',label:'HOLD'};
   if(g.k==='expired')return{k:'caution',label:'GFE EXPIRED'};
   if(!p.consent)return{k:'caution',label:'CONSENT'};
-  if(lvl==='caution')return{k:'caution',label:'CAUTION'};
   return{k:'ready',label:'READY'};}
 function mdMode(){return document.getElementById('mdMode').checked;}
 function stackByCode(c){var s=null;(MOD.stacks||[]).forEach(function(x){if(x.code===c)s=x;});return s;}
@@ -208,7 +249,7 @@ function pcardHTML(p){
   var g=gfeState(p);
   var flags='<span class="fchip '+(g.k==='done'?'ok':(g.k==='expired'?'alert':'bad'))+'">'+(g.k==='done'?'✓':(g.k==='expired'?'⏱':'✗'))+' GFE</span>'+
     '<span class="fchip '+(p.consent?'ok':'bad')+'">'+(p.consent?'✓':'✗')+' Consent</span>'+
-    (p.alerts||[]).map(function(a){return '<span class="fchip alert">⚠ '+esc(a.split(' /')[0].split(' (')[0])+'</span>';}).join('');
+    (p.alerts||[]).map(function(a){return '<span class="fchip note">'+esc(a.split(' /')[0].split(' (')[0])+'</span>';}).join('');
   var h='<div class="pcard s-'+st.k+(sel?' sel':'')+'" onclick="selectPatient(\''+p.id+'\')">'+
     '<div class="ptop"><span class="nm">'+esc(dispName(p))+'</span><span class="spill s-'+st.k+'">'+st.label+'</span></div>'+
     '<div class="pmeta">'+esc(meta)+'</div>'+
@@ -219,8 +260,8 @@ function pcardHTML(p){
       '<div class="gatebtn '+(g.k==='done'?'done':(g.k==='expired'?'expired':'pending'))+'" onclick="openGFE(\''+p.id+'\')">'+g.label+'</div>'+
       '<div class="gatebtn '+(p.consent?'done':'pending')+'" onclick="openConsent(\''+p.id+'\')">'+(p.consent?'Consent ✓':'Consent ✗')+'</div>'+
       '</div>'+
-      ((p.alerts||[]).length?('<div style="margin-bottom:6px">'+(p.alerts||[]).map(function(a){return '<div class="alertline">⚠ '+esc(a)+'</div>';}).join('')+'</div>'):'')+
-      '<button class="btn ghost" style="width:100%;font-size:.72rem;padding:6px" onclick="editAlerts(\''+p.id+'\')">Edit flags</button>'+
+      ((p.alerts||[]).length?('<div style="margin-bottom:6px"><div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Noted conditions (what the patient brings)</div>'+(p.alerts||[]).map(function(a){return '<div class="noteline">• '+esc(a)+'</div>';}).join('')+'</div>'):'')+
+      '<button class="btn ghost" style="width:100%;font-size:.72rem;padding:6px" onclick="editAlerts(\''+p.id+'\')">Edit conditions</button>'+
       '</div>';
   }
   return h+'</div>';
@@ -315,7 +356,10 @@ function renderPrep(){var el=document.getElementById('prep');if(!PREP){el.style.
   // popup only on a NEW critical
   if(an.crit>0 && an.newCrit) showAlertPopup(an);
 }
-function dripCalc(){var df=15,v=PREP.vol,t=PREP.time;if(!v||!t)return '<div><span>set time</span></div>';return '<div><span>Drip</span><b>'+Math.round(v/t*df)+' gtt/min</b></div><div><span>Pump</span><b>'+Math.round(v/t*60)+' mL/hr</b></div><div><span>Bag / time</span><b>'+v+' mL / '+t+' min</b></div>';}
+function dripCalc(){var df=15,v=PREP.vol,t=PREP.time;if(!v||!t)return '<div class="dz"><span>set time</span></div>';
+  return '<div class="dz vol"><span>Volume · bag / time</span><b>'+v+' mL / '+t+' min</b></div>'+
+         '<div class="dz drop"><span>Drip rate</span><b>'+Math.round(v/t*df)+' gtt/min</b></div>'+
+         '<div class="dz pump"><span>Pump rate</span><b>'+Math.round(v/t*60)+' mL/hr</b></div>';}
 function renderAlertSummary(an){if(an.crit===0&&an.warn===0)return '<div class="flag ok"><b>Ally</b>No conflicts — nurse confirms &amp; signs.</div>';
   var h='';an.flags.filter(function(f){return f.l!=='ok'&&f.l!=='info';}).slice(0,4).forEach(function(f){h+='<div class="flag '+f.l+'"><b>'+f.t+'</b>'+f.b+'</div>';});return h;}
 
@@ -479,6 +523,20 @@ function openConsent(id){var p=qById(id);if(!p)return;
   showModal(h);
 }
 function signConsent(id){var p=qById(id);if(p)p.consent=true;save();closeModal();renderDetail();renderQueue();}
+
+// ---------- ASK ALLY (chat drawer · PHI-free, grounded in the locked module) ----------
+function allyOpen(){document.getElementById('allyDrawer').classList.add('show');if(!ALLY_HIST.length)allyAppend('sys','Ally answers from the locked IV/IM library — evidence-graded, no invented doses or citations. Defer the final call & signature to the provider.');allyUpdateCtx();document.getElementById('allyInput').focus();}
+function allyClose(){document.getElementById('allyDrawer').classList.remove('show');}
+function allyUpdateCtx(){var el=document.getElementById('allyCtx');if(!el)return;el.textContent=PREP?('Ally can see the current bench: '+(PREP.items.length||'0')+' item(s), '+PREP.base+' '+PREP.vol+' mL / '+PREP.time+' min. PHI-free.'):'Grounded in the locked IV/IM module. PHI-free — no patient data is sent.';}
+function allyCtx(){if(!PREP)return '';var items=PREP.items.map(function(it){return it.name+(it.dose?(' '+it.dose):'');}).join('; ');var an=analyzePrep();var al=an.flags.filter(function(f){return f.l==='crit'||f.l==='warn';}).map(function(f){return f.t;}).join('; ');
+  return 'Current bench (PHI-free, no identifiers): base '+PREP.base+', volume '+PREP.vol+' mL, infusion time '+PREP.time+' min. Ingredients: '+(items||'none yet')+'.'+(al?(' Active Ally alerts on this build: '+al+'.'):'');}
+function allyAppend(cls,txt){var log=document.getElementById('allyLog');var d=document.createElement('div');d.className='amsg '+cls;d.textContent=txt;log.appendChild(d);log.scrollTop=log.scrollHeight;return d;}
+function allySend(){var inp=document.getElementById('allyInput');var q=(inp.value||'').trim();if(!q)return;inp.value='';
+  var ctx=allyCtx();ALLY_HIST.push({role:'user',content:ctx?(q+'\n\n['+ctx+']'):q});
+  allyAppend('u',q);var bubble=allyAppend('a','…');
+  fetch('/.netlify/functions/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:ALLY_HIST.slice(-8)})})
+   .then(function(r){return r.json();}).then(function(d){var t=d.text||(d.error==='not_configured'?'Ally isn\'t configured on this deploy yet (no API key).':(d.error||'No response.'));bubble.textContent=t;if(d.text)ALLY_HIST.push({role:'assistant',content:d.text});var log=document.getElementById('allyLog');log.scrollTop=log.scrollHeight;})
+   .catch(function(e){bubble.textContent='Ally unreachable — '+e.message;});}
 
 // ---------- utils ----------
 function showModal(h){document.getElementById('modal').className='modal';document.getElementById('modal').innerHTML=h;document.getElementById('overlay').classList.add('show');}
