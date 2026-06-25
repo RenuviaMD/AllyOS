@@ -61,6 +61,18 @@
 @keyframes pulseRed{from{box-shadow:0 0 16px rgba(240,99,90,.3)}to{box-shadow:0 0 36px rgba(240,99,90,.7)}}
 .chairbtns{display:flex;gap:5px;margin-top:6px}
 .chairbtns .btn{flex:1;font-size:.66rem;padding:6px}
+/* chair detail + infusion progress */
+.cmeta{font-size:.58rem;color:var(--muted);margin:2px 0;line-height:1.3}
+.cprog{height:5px;background:#0c1a28;border-radius:99px;overflow:hidden;margin:6px 0 2px}
+.cbar{height:100%;width:0;background:var(--teal);transition:width 1s linear;border-radius:99px}
+.chair.warn .cbar{background:var(--amber)}
+.chair.ended .cbar{background:var(--red)}
+/* persistent active-emergency banner — stays until resolved / false alarm */
+#emBanner:empty{display:none}
+.embanner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#2a1210;border:1px solid var(--red);border-radius:10px;padding:9px 13px;margin-bottom:10px;color:#f0b3aa;font-weight:700;box-shadow:var(--glow-red);animation:pulseRed 1.1s infinite alternate}
+.embanner .lbl{font-family:var(--fdisp);letter-spacing:.03em}
+.embanner .btn{font-size:.72rem;padding:6px 11px}
+.embanner .sp{margin-left:auto;display:flex;gap:6px}
 /* auto-surface: a chair just freed and someone is staged */
 #seatPrompt:empty{display:none}
 .seatbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#0e2a2433;border:1px solid #1e5a52;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:.82rem;color:var(--teal);animation:seatGlow 1.2s ease-out}
@@ -158,6 +170,7 @@
   <!-- CENTER · THE FLOOR + PREP BENCH -->
   <div>
     <div class="col-h">🚨 Emergency protocols</div>
+    <div id="emBanner"></div>
     <div class="embar" id="embar"></div>
     <div class="col-h" style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">🪑 Treatment chairs <span id="chairStat" class="muted" style="font-weight:400;font-size:.72rem"></span></div>
     <div id="seatPrompt"></div>
@@ -483,7 +496,11 @@ function renderChairs(){var el=document.getElementById('chairs');var h='';
     if(!c){h+='<div class="chair"><div class="num">'+(i+1)+'</div><div class="st">AVAILABLE</div></div>';continue;}
     var cls=c.state==='ended'?'ended':(c.state==='infusing'&&c.remain<=300?'warn':'occupied');
     var clk=c.state==='ended'?'INFUSION ENDED':fmt(c.remain);
-    h+='<div class="chair '+cls+'"><div class="num" style="font-size:.95rem">Chair '+(i+1)+'</div><div class="pt">'+esc(initials(c.patient.name))+'</div><div class="pr">'+esc(c.protoLabel)+'</div><div class="clk" id="clk'+i+'">'+clk+'</div>'+
+    var pct=c.total?Math.min(100,Math.round((c.total-c.remain)/c.total*100)):0;
+    h+='<div class="chair '+cls+'"><div class="num" style="font-size:.95rem">Chair '+(i+1)+'</div><div class="pt">'+esc(dispName(c.patient))+'</div><div class="pr">'+esc(c.protoLabel)+'</div>'+
+      '<div class="cmeta">'+esc(c.base)+' · '+c.vol+' mL · '+c.time+' min'+(c.startedStr?' · ⏱ '+esc(c.startedStr):'')+'</div>'+
+      '<div class="clk" id="clk'+i+'">'+clk+'</div>'+
+      ((c.state==='infusing'||c.state==='ended')?'<div class="cprog"><div class="cbar" id="bar'+i+'" style="width:'+pct+'%"></div></div>':'')+
       '<div class="chairbtns">'+
       (c.state==='ready'?'<button class="btn neon-green" onclick="startInfusion('+i+')">▶ Start</button>':'')+
       (c.state==='infusing'?'<button class="btn ghost" onclick="openMonitor('+i+')">Monitor</button>':'')+
@@ -511,8 +528,9 @@ function startInfusion(i){var c=CHAIRS[i];if(!c)return;
     '<button class="btn neon-green" style="width:100%" onclick="reallyStart('+i+')">▶ Start infusion</button>';
   showModal(h);
 }
-function reallyStart(i){var c=CHAIRS[i];c.preVitals={bp:val('vBP'),hr:val('vHR'),o2:val('vO2'),t:val('vT')};c.state='infusing';closeModal();runChair(i);renderChairs();}
+function reallyStart(i){var c=CHAIRS[i];c.preVitals={bp:val('vBP'),hr:val('vHR'),o2:val('vO2'),t:val('vT')};c.state='infusing';c.startedStr=fmtClock(new Date());closeModal();runChair(i);renderChairs();}
 function runChair(i){var c=CHAIRS[i];beep(140,660);c.timer=setInterval(function(){c.remain--;var e=document.getElementById('clk'+i);if(e&&c.state==='infusing')e.textContent=fmt(Math.max(0,c.remain));
+  var b=document.getElementById('bar'+i);if(b)b.style.width=(c.total?Math.min(100,Math.round((c.total-c.remain)/c.total*100)):0)+'%';
   var rem=c.remain;
   if(rem===300){beep(220,990);setTimeout(function(){beep(220,990);},300);flash(i);}
   if(rem===120){beep(260,1100);setTimeout(function(){beep(260,1100);},250);setTimeout(function(){beep(260,1100);},500);}
@@ -560,13 +578,22 @@ var EM={
  EXTRAV:{t:'Infiltration / extravasation',steps:['STOP infusion; do not flush. Disconnect, aspirate residual if able.','Remove catheter; elevate limb; cold compress (warm for vesicant per agent).','Mark the area; photo-document. Assess for vesicant (e.g., Calcium Chloride).','Document FORM-05 (AE section if injury); notify MD.']}
 };
 function renderEmergency(){document.getElementById('embar').innerHTML=Object.keys(EM).map(function(k){return '<button class="embtn" onclick="emProtocol(\''+k+'\')">'+esc(EM[k].t.split(' · ')[0].split(' /')[0])+'</button>';}).join('');}
-function emProtocol(k){var e=EM[k];emActive=k;document.getElementById('embar').classList.add('active');
-  var h='<button class="x" onclick="closeEm()">×</button><h3 style="color:var(--red)">🚨 '+esc(e.t)+'</h3><div class="sub">Stays open until resolved or marked false alarm.</div>'+
+function emProtocol(k){var e=EM[k];emActive=k;document.getElementById('embar').classList.add('active');renderEmActive();
+  var h='<button class="x" onclick="closeModal()">×</button><h3 style="color:var(--red)">🚨 '+esc(e.t)+'</h3><div class="sub">Stays active on the floor until you mark it resolved or a false alarm — closing this window keeps it running.</div>'+
     '<ol class="steps">'+e.steps.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')+'</ol>'+
-    '<div class="frow" style="margin-top:8px"><div><button class="btn neon-green" style="width:100%" onclick="closeEm()">Resolved</button></div><div><button class="btn ghost" style="width:100%" onclick="closeEm()">False alarm</button></div></div>';
+    '<div class="frow" style="margin-top:8px"><div><button class="btn neon-green" style="width:100%" onclick="closeEm()">✓ Resolved</button></div><div><button class="btn ghost" style="width:100%" onclick="closeModal()">Keep open · back to floor</button></div><div><button class="btn ghost" style="width:100%" onclick="closeEm()">False alarm</button></div></div>';
   showModalEm(h);
 }
-function closeEm(){emActive=null;document.getElementById('embar').classList.remove('active');closeModal();}
+// persistent banner on the floor while an emergency is active
+function renderEmActive(){var el=document.getElementById('emBanner');if(!el)return;
+  if(!emActive){el.innerHTML='';return;}
+  var e=EM[emActive];
+  el.innerHTML='<div class="embanner"><span class="lbl">🚨 '+esc(e.t.split(' · ')[0])+' — ACTIVE</span>'+
+    '<span class="sp"><button class="btn ghost" onclick="emProtocol(\''+emActive+'\')">Reopen steps</button>'+
+    '<button class="btn neon-green" onclick="closeEm()">✓ Resolved</button>'+
+    '<button class="btn ghost" onclick="closeEm()">False alarm</button></span></div>';
+}
+function closeEm(){emActive=null;document.getElementById('embar').classList.remove('active');renderEmActive();closeModal();}
 
 // ---------- GFE / CONSENT POPUPS ----------
 function openGFE(id){var p=qById(id);if(!p)return;
@@ -611,6 +638,7 @@ function val(id){var e=document.getElementById(id);return e?e.value:'';}
 function initials(n){return (n||'').split(' ').map(function(x){return x[0];}).join('').toUpperCase()+' ('+(n||'').split(' ')[0]+')';}
 function beep(ms,f){try{var a=new(window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=f;o.start();g.gain.setValueAtTime(.22,a.currentTime);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+ms/1000);o.stop(a.currentTime+ms/1000);}catch(e){}}
 function fmt(s){s=Math.max(0,s|0);var m=Math.floor(s/60),x=s%60;return (m<10?'0':'')+m+':'+(x<10?'0':'')+x;}
+function fmtClock(d){var h=d.getHours(),m=d.getMinutes(),ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+(m<10?'0':'')+m+' '+ap;}
 function parseGrams(s){if(!s)return null;s=(''+s).toLowerCase();var m=s.match(/([\d.]+)\s*(g|mg|mcg)/);if(!m)return null;var v=parseFloat(m[1]);if(m[2]==='mg')v/=1000;if(m[2]==='mcg')v/=1000000;return v;}
 function parseTimeMin(s){if(!s)return null;s=(''+s).toLowerCase();var h=s.match(/([\d.]+)\s*(?:–|-|to)?\s*([\d.]+)?\s*hr/);if(h)return Math.round((parseFloat(h[1])||0)*60);var m=s.match(/([\d.]+)\s*(?:–|-|to)?\s*([\d.]+)?\s*min/);if(m)return Math.round(parseFloat(m[1])||0);return null;}
 function esc(s){return(''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
