@@ -74,12 +74,14 @@
 <body class="allyos">
 <div class="topbar">
   <div class="brand">Renuvia<b>MD</b>® · AllyOS <span style="color:var(--teal)">Chairside</span></div>
-  <div class="r"><span id="who"></span>
+  <div class="r"><span class="pill green" id="opstat">● OPERATIONAL</span><span id="who"></span>
     <label title="Where RenuviaMD is the Medical Director, gates enforce absolutely."><input type="checkbox" id="mdMode"> MD-of-record</label>
     <a href="iv-inventory.html">Inventory</a><a href="iv-calculator.html">Calc</a><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
 </div>
 
-<div class="board">
+<div style="padding:14px 14px 0"><div class="stats" id="stats"></div></div>
+
+<div class="board" style="padding-top:10px">
   <!-- QUEUE -->
   <div>
     <div class="col-h">📋 Waiting</div>
@@ -93,8 +95,9 @@
 
   <!-- CENTER -->
   <div>
-    <div class="col-h">🚨 Emergency · 🪑 Chairs</div>
+    <div class="col-h">🚨 Emergency protocols</div>
     <div class="embar" id="embar"></div>
+    <div class="col-h" style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">🪑 Treatment chairs <span id="chairStat" class="muted" style="font-weight:400;font-size:.72rem"></span></div>
     <div class="chairgrid" id="chairs"></div>
     <!-- PREP TABLE -->
     <div class="prep" id="prep"><div class="empty">Select a waiting patient → choose their protocol or à-la-carte, and the preparation table opens here (the compounding bench).</div></div>
@@ -132,10 +135,13 @@ function matchByName(n){n=(n||'').toLowerCase();for(var i=0;i<MENU.length;i++){v
 function qById(id){for(var i=0;i<QUEUE.length;i++)if(QUEUE[i].id===id)return QUEUE[i];return null;}
 
 function fillProto(){var h='<option value="ALACARTE">À la carte (custom)</option>';(MOD.stacks||[]).forEach(function(s){h+='<option value="'+s.code+'">'+esc(s.code)+' — '+esc(s.title)+'</option>';});document.getElementById('qProto').innerHTML=h;}
+function renderStats(){var el=document.getElementById('stats');if(!el)return;var occ=CHAIRS.filter(Boolean).length,avail=6-occ,wait=QUEUE.length,ending=CHAIRS.filter(function(c){return c&&c.state==='ended';}).length,inf=CHAIRS.filter(function(c){return c&&c.state==='infusing';}).length;
+  el.innerHTML=stat('blue','Scheduled',wait+occ)+stat('amber','Waiting',wait)+stat('','In chair',inf)+stat('green','Available',avail)+stat('violet','Ending / done',ending);}
+function stat(cls,lbl,n){return '<div class="stat '+cls+'"><div class="lbl">'+lbl+'</div><div class="num">'+n+'</div></div>';}
 
 // ---------- QUEUE ----------
 function addPatient(){var n=document.getElementById('qName').value.trim();if(!n)return;QUEUE.push({id:pid(),name:n,proto:document.getElementById('qProto').value,gfe:false,consent:false});document.getElementById('qName').value='';save();renderQueue();}
-function renderQueue(){var el=document.getElementById('queue');if(!QUEUE.length){el.innerHTML='<div class="empty">Queue empty.</div>';return;}
+function renderQueue(){renderStats();var el=document.getElementById('queue');if(!QUEUE.length){el.innerHTML='<div class="empty">Queue empty.</div>';return;}
   el.innerHTML=QUEUE.map(function(p){var s=stackByCode(p.proto);var pr=p.proto==='ALACARTE'?'<span class="alacarte">À LA CARTE</span>':esc(p.proto)+(s?' · '+esc(s.title):'');
     return '<div class="qcard'+(selId===p.id?' sel':'')+'" onclick="selectPatient(\''+p.id+'\')"><div class="nm">'+esc(p.name)+'</div><div class="pr">'+pr+'</div></div>';}).join('');
 }
@@ -267,6 +273,7 @@ function renderChairs(){var el=document.getElementById('chairs');var h='';
       '</div></div>';
   }
   el.innerHTML=h;
+  renderStats();var cs=document.getElementById('chairStat');if(cs)cs.textContent=CHAIRS.filter(Boolean).length+' / 6 occupied';
 }
 function startInfusion(i){var c=CHAIRS[i];if(!c)return;
   var h='<button class="x" onclick="closeModal()">×</button><h3>Start — Chair '+(i+1)+'</h3><div class="sub">'+esc(c.patient.name)+' · '+esc(c.protoLabel)+' · '+c.base+' '+c.vol+' mL · '+c.time+' min</div>'+
