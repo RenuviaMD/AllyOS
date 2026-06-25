@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AllyOS Chairside — Nurse Workstation · RenuviaMD®</title>
-<link rel="icon" type="image/png" href="ally-avatar.png">
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
 <link rel="stylesheet" href="allyos-theme.css">
 <style>
 .topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#070d18ee;backdrop-filter:blur(8px);z-index:20}
@@ -191,9 +191,9 @@
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
 
 <!-- Ask Ally -->
-<button id="allyBtn" onclick="allyOpen()"><img src="ally-avatar.png" alt="" class="allyface" onerror="this.replaceWith(document.createTextNode('💬'))"> Ask Ally</button>
+<button id="allyBtn" onclick="allyOpen()"><img src="ally-avatar-64.png" alt="" class="allyface" onerror="this.replaceWith(document.createTextNode('💬'))"> Ask Ally</button>
 <div id="allyDrawer">
-  <div class="allyhead"><b><img src="ally-avatar.png" alt="" class="allyface" style="width:28px;height:28px" onerror="this.replaceWith(document.createTextNode('💬'))"> Ally <span style="color:var(--teal)">· clinical assistant</span></b><button class="x" onclick="allyClose()">×</button></div>
+  <div class="allyhead"><b><img src="ally-avatar-64.png" alt="" class="allyface" style="width:28px;height:28px" onerror="this.replaceWith(document.createTextNode('💬'))"> Ally <span style="color:var(--teal)">· clinical assistant</span></b><button class="x" onclick="allyClose()">×</button></div>
   <div class="allyctx" id="allyCtx">Grounded in the locked IV/IM module. PHI-free — sees only the bench build, never the patient.</div>
   <div id="allyLog"></div>
   <div class="allyin"><input id="allyInput" placeholder="Ask about a stack, dose, compatibility…" onkeydown="if(event.key==='Enter')allySend()"><button class="btn neon" onclick="allySend()" style="padding:9px 13px">Send</button></div>
