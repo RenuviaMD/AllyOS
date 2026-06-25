@@ -17,6 +17,9 @@
 .pcard{background:linear-gradient(180deg,#0f1f33,#0b1626);border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:12px;padding:11px 12px;margin-bottom:9px;cursor:pointer;transition:border-color .12s}
 .pcard:hover{border-color:var(--teal)}.pcard.sel{box-shadow:var(--glow-teal);border-color:var(--teal)}
 .pcard.s-ready{border-left-color:var(--green)}.pcard.s-caution{border-left-color:var(--amber)}.pcard.s-hold{border-left-color:var(--red)}.pcard.s-missing{border-left-color:var(--muted)}
+.pcard.staged{border-left-color:var(--teal)}
+.qgroup{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin:4px 0 7px}
+.stagedbadge{font-size:.66rem;color:var(--teal);background:#0e2a2433;border:1px solid #1e5a52;border-radius:7px;padding:4px 8px;margin-top:7px;display:inline-block}
 .pcard .ptop{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .pcard .chev{color:var(--muted);font-size:.7rem;flex:0 0 auto}
 .pcard .nm{font-weight:700;font-size:.95rem}
@@ -240,7 +243,11 @@ function matchSearch(p,q){if(!q)return true;q=q.toLowerCase();return (p.name||''
 function renderQueue(){var el=document.getElementById('queue');var q=(document.getElementById('search')||{}).value||'';
   var list=QUEUE.filter(function(p){return matchSearch(p,q);});
   if(!list.length){el.innerHTML='<div class="empty">'+(QUEUE.length?'No match.':'Waiting room empty.')+'</div>';renderChairs();return;}
-  el.innerHTML=list.map(function(p){return pcardHTML(p);}).join('');
+  var staged=list.filter(function(p){return p.staged;}),waiting=list.filter(function(p){return !p.staged;});
+  var html='';
+  if(staged.length)html+='<div class="qgroup" style="color:var(--teal)">⏸ Prepared · waiting for a chair</div>'+staged.map(pcardHTML).join('');
+  if(waiting.length)html+=(staged.length?'<div class="qgroup">🪑 Waiting</div>':'')+waiting.map(pcardHTML).join('');
+  el.innerHTML=html;
   renderChairs();
 }
 function fmtDob(d){if(!d)return'';var p=d.split('-');return p.length===3?(p[1]+'/'+p[2]+'/'+p[0]):d;}
@@ -251,10 +258,11 @@ function pcardHTML(p){
   var flags='<span class="fchip '+(g.k==='done'?'ok':(g.k==='expired'?'alert':'bad'))+'">'+(g.k==='done'?'✓':(g.k==='expired'?'⏱':'✗'))+' GFE</span>'+
     '<span class="fchip '+(p.consent?'ok':'bad')+'">'+(p.consent?'✓':'✗')+' Consent</span>'+
     (p.alerts||[]).map(function(a){return '<span class="fchip note">'+esc(a.split(' /')[0].split(' (')[0])+'</span>';}).join('');
-  var h='<div class="pcard s-'+st.k+(sel?' sel':'')+'" onclick="selectPatient(\''+p.id+'\')">'+
+  var h='<div class="pcard s-'+st.k+(p.staged?' staged':'')+(sel?' sel':'')+'" onclick="selectPatient(\''+p.id+'\')">'+
     '<div class="ptop"><span class="nm">'+esc(dispName(p))+'</span><span class="spill s-'+st.k+'">'+st.label+'</span><span class="chev">'+(sel?'▴':'▾')+'</span></div>'+
     '<div class="pmeta">'+esc(meta)+'</div>'+
-    '<div class="pflags">'+flags+'</div>';
+    '<div class="pflags">'+flags+'</div>'+
+    (p.staged&&p.prep?'<div class="stagedbadge">⏸ Prepared · '+esc(txLabel(p))+' · '+(p.prep.items.length)+' items — needs a chair</div>':'');
   if(sel){
     h+='<div class="pexpand" onclick="event.stopPropagation()">'+
       '<div class="gaterow">'+
@@ -282,14 +290,29 @@ function renderDetail(){var el=document.getElementById('detail');var p=qById(sel
   if(!p){el.innerHTML='<div class="empty">Select a patient on the left. When the card reads <b style="color:var(--green)">READY</b>, choose a pre-made stack or build à la carte here.</div>';return;}
   var st=patientStatus(p),s=stackByCode(p.proto);
   // context header
-  var h='<div class="pcard s-'+st.k+'" style="cursor:default"><div class="ptop"><span class="nm">'+esc(dispName(p))+'</span><span class="spill s-'+st.k+'">'+st.label+'</span></div><div class="pmeta">Review the card on the left · on-device record only</div></div>';
+  var h='<div class="pcard s-'+st.k+(p.staged?' staged':'')+'" style="cursor:default"><div class="ptop"><span class="nm">'+esc(dispName(p))+'</span><span class="spill s-'+st.k+'">'+st.label+'</span></div><div class="pmeta">Review the card on the left · on-device record only</div></div>';
+  // STAGED patient — already prepared, parked in the queue, waiting for a chair
+  if(p.staged&&p.prep){
+    var freeN=CHAIRS.filter(function(c){return !c;}).length;
+    h+='<div class="card" style="border-left:3px solid var(--teal);padding:13px;margin-top:10px">'+
+       '<div class="eyebrow" style="color:var(--teal)">⏸ Prepared — order staged</div>'+
+       '<div class="h-disp" style="font-size:1.02rem;margin:2px 0">'+esc(txLabel(p))+'</div>'+
+       '<div class="muted" style="font-size:.72rem;margin-bottom:6px">'+esc(p.prep.base)+' · '+p.prep.vol+' mL · '+p.prep.time+' min · '+p.prep.items.length+' items</div>'+
+       p.prep.items.map(function(it){return '<div class="ingrow"><span>'+esc(it.name)+' <span class="muted">'+esc(it.dose||'')+'</span></span></div>';}).join('')+
+       '<div class="muted" style="font-size:.66rem;margin:8px 0">Mix the bag when seating — staged = approved order, not a pre-mixed bag.</div>'+
+       '<button class="btn neon-green" style="width:100%" onclick="sendStaged(\''+p.id+'\')">▶ Send to chair'+(freeN?' ('+freeN+' free)':' — all full')+'</button>'+
+       '<div style="display:flex;gap:8px;margin-top:8px"><button class="btn ghost" style="flex:1;font-size:.74rem" onclick="resumeBench(\''+p.id+'\')">✎ Edit on bench</button>'+
+       '<button class="btn ghost" style="flex:1;font-size:.74rem" onclick="clearGive(\''+p.id+'\')">✕ Discard</button></div>'+
+       '</div>';
+    el.innerHTML=h;return;
+  }
   // readiness gate banner
   if(st.k==='missing'||st.k==='hold'||(st.k==='caution'&&!p.consent)||(st.k==='caution'&&gfeState(p).k==='expired')){
     var why=gfeState(p).k!=='done'?'A current Good Faith Exam is required':(!p.consent?'Signed consent is required':'Resolve the hold');
     h+='<div class="flag warn" style="margin:10px 0"><b>Not cleared yet</b>'+why+' before sending to a chair. You can still build the bag — the gate is checked at "send to chair."</div>';
   }
-  // bench-busy notice — one shared bench, so flag when it belongs to someone else
-  if(PREP&&PREP.pid!==p.id){var ob=qById(PREP.pid);h+='<div class="flag info" style="margin:10px 0"><b>Bench in use</b>The prep bench is open for '+esc(ob?dispName(ob):'another patient')+'. Send that one, or <a href="#" onclick="clearBench();return false" style="color:var(--teal)">clear the bench</a> to build for '+esc(dispName(p))+'.</div>';}
+  // bench-busy notice — flag when the bench is open for a different patient
+  if(PREP&&PREP.pid!==p.id){var ob=qById(PREP.pid);h+='<div class="flag info" style="margin:10px 0"><b>Bench in use</b>The prep bench is open for '+esc(ob?dispName(ob):'another patient')+'. <a href="#" onclick="stageBack();return false" style="color:var(--teal)">Stage it (back to waiting)</a> to free the bench, or <a href="#" onclick="clearBench();return false" style="color:var(--muted)">discard it</a>.</div>';}
   // choose what I give — nothing is assigned until the nurse picks
   var chosen=(p.buildMode==='stack'||p.buildMode==='ala');
   h+='<div class="chips" style="margin:12px 0 10px">'+
@@ -323,8 +346,9 @@ function renderDetail(){var el=document.getElementById('detail');var p=qById(sel
 }
 function setMode(id,m,silent){var p=qById(id);if(!p)return;p.buildMode=m;if(!silent)renderDetail();}
 function setProto(id,code){var p=qById(id);if(!p)return;p.proto=code;p.buildMode='stack';save();renderDetail();}
-function clearGive(id){var p=qById(id);if(!p)return;p.buildMode=null;if(PREP&&PREP.pid===id)PREP=null;save();renderPrep();renderDetail();}
-function clearBench(){PREP=null;renderPrep();renderDetail();}
+function clearGive(id){var p=qById(id);if(!p)return;p.buildMode=null;p.staged=false;delete p.prep;if(PREP&&PREP.pid===id)PREP=null;save();renderQueue();renderPrep();renderDetail();}
+function clearBench(){if(PREP){var p=qById(PREP.pid);if(p){delete p.prep;p.staged=false;}}PREP=null;save();renderQueue();renderPrep();renderDetail();}
+function txLabel(p){return p.proto==='ALACARTE'?'À la carte build':(p.proto?(p.proto+(stackByCode(p.proto)?' — '+stackByCode(p.proto).title:'')):'Custom build');}
 function paletteHTML(){
   var byCat={};MENU.forEach(function(i){if(i.in_primary_library===false&&/KETOROLAC|FAMOTIDINE|METHYLENE/.test(i.id))return;var c=catOf(i);(byCat[c]=byCat[c]||[]).push(i);});
   var order=['Base fluids','Vitamins','Minerals & electrolytes','Amino acids','Antioxidants & specialty','Lipotropic / metabolic','Rx & administration adjuncts','Other'];
@@ -333,21 +357,27 @@ function paletteHTML(){
 }
 function catOf(i){var id=i.id||'';if(id==='ING_NS'||id==='ING_LR')return'Base fluids';if(/B12|VITACOMPLEX|VITC|BIOTIN|ING_B5|ING_B6|VITD3/i.test(id))return'Vitamins';if(/MGCL|CAGLUC|CACL|ZINC|SELENIUM|TRACE|MINERALBLEND/i.test(id))return'Minerals & electrolytes';if(/LYSINE|TAURINE|CARNITINE|GLUTAMINE|AMINOBLEND|ARGININE|PROLINE|GLYCINE/i.test(id))return'Amino acids';if(/GLUTATHIONE|NAD|ING_ALA|NAC|TRIIMMUNE|COQ10|METHYLENE/i.test(id))return'Antioxidants & specialty';if(/LIPOTROPIC|MICC/i.test(id))return'Lipotropic / metabolic';if(/ONDANSETRON|KETOROLAC|FAMOTIDINE/i.test(id))return'Rx & administration adjuncts';return'Other';}
 
-// ---------- PREP TABLE ----------
-function startPrep(pid,code){var p=qById(pid);if(!p)return;PREP={pid:pid,base:'0.9% NS',vol:500,time:45,items:[],chair:null};
-  if(code){var s=stackByCode(code);if(s){(s.components||[]).concat(s.post_drip||[]).concat(s.optional_add_ons||[]).concat(s.same_visit_add_ons||[]).forEach(function(c){var ing=matchByName(c.ingredient);PREP.items.push({id:ing?ing.id:'',name:c.ingredient,dose:c.dose||'',ref:ing});});
-    if(/250/.test(s.base||''))PREP.vol=250;else if(/1 L|1000/.test(s.base||''))PREP.vol=1000;if(/LR|lactated/i.test(s.base||''))PREP.base="Lactated Ringer's";if(/dedicated/i.test(s.base||''))PREP.base='Dedicated NAD+ bag';
-    var tm=parseTimeMin(s.infusion_time);if(tm)PREP.time=tm;}}
-  autoTime();renderPrep();renderDetail();
+// ---------- PREP BENCH (per-patient — each patient carries their own build) ----------
+function newBag(pid){return {pid:pid,base:'0.9% NS',vol:500,time:45,items:[],nadFloor:null,override:''};}
+function startPrep(pid,code){var p=qById(pid);if(!p)return;
+  if(code){p.prep=newBag(pid);var s=stackByCode(code);if(s){(s.components||[]).concat(s.post_drip||[]).concat(s.optional_add_ons||[]).concat(s.same_visit_add_ons||[]).forEach(function(c){var ing=matchByName(c.ingredient);p.prep.items.push({id:ing?ing.id:'',name:c.ingredient,dose:c.dose||'',ref:ing});});
+      if(/250/.test(s.base||''))p.prep.vol=250;else if(/1 L|1000/.test(s.base||''))p.prep.vol=1000;if(/LR|lactated/i.test(s.base||''))p.prep.base="Lactated Ringer's";if(/dedicated/i.test(s.base||''))p.prep.base='Dedicated NAD+ bag';
+      var tm=parseTimeMin(s.infusion_time);if(tm)p.prep.time=tm;}}
+  else if(!p.prep){p.prep=newBag(pid);}
+  p.prep.pid=pid;PREP=p.prep;p.staged=false;autoTime();save();renderPrep();renderDetail();
 }
-function addToPrep(ingId){if(!PREP){if(selId)startPrep(selId,null);else return;}var ing=findIng(ingId);if(!ing)return;PREP.items.push({id:ingId,name:ing.name,dose:ing.standard||'',ref:ing});autoTime();renderPrep();renderDetail();}
+function addToPrep(ingId){if(!PREP){if(selId)startPrep(selId,null);else return;}var ing=findIng(ingId);if(!ing)return;PREP.items.push({id:ingId,name:ing.name,dose:ing.standard||'',ref:ing});autoTime();save();renderPrep();renderDetail();}
 // cart toggle — click a menu item to add it, click again to take it back out (incl. items that came from a protocol)
 function toggleIng(ingId){if(!PREP){if(selId)startPrep(selId,null);else return;}
   var idx=-1;for(var k=0;k<PREP.items.length;k++){if(PREP.items[k].id===ingId){idx=k;break;}}
   if(idx>=0){PREP.items.splice(idx,1);}else{var ing=findIng(ingId);if(!ing)return;PREP.items.push({id:ingId,name:ing.name,dose:ing.standard||'',ref:ing});}
-  autoTime();renderPrep();renderDetail();}
-function rmPrep(i){PREP.items.splice(i,1);autoTime();renderPrep();renderDetail();}
-function setPrep(f,v){PREP[f]=v;if(f!=='time')autoTime();renderPrep();}
+  autoTime();save();renderPrep();renderDetail();}
+function rmPrep(i){PREP.items.splice(i,1);autoTime();save();renderPrep();renderDetail();}
+function setPrep(f,v){PREP[f]=v;if(f!=='time')autoTime();save();renderPrep();}
+// the two exits from the bench
+function stageBack(){if(!PREP)return;var p=qById(PREP.pid);if(p)p.staged=true;PREP=null;save();renderQueue();renderPrep();renderDetail();}
+function resumeBench(id){var p=qById(id);if(!p||!p.prep)return;p.staged=false;p.prep.pid=id;PREP=p.prep;save();renderQueue();renderPrep();renderDetail();}
+function sendStaged(id){resumeBench(id);sendToChair();}
 // NAD overrides the default 45-min drip with its rate-sensitive duration
 function autoTime(){if(!PREP)return;var nad=PREP.items.filter(function(it){return /nad/i.test(it.name);})[0];if(nad){var g=parseGrams(nad.dose),mg=g!=null?g*1000:250;PREP.time=mg>=500?210:120;PREP.nadFloor=PREP.time;}else{PREP.nadFloor=null;if(PREP.time===120||PREP.time===210)PREP.time=45;}}
 function renderPrep(){var el=document.getElementById('prep');if(!PREP){el.style.display='block';el.className='prep';el.innerHTML='<div class="empty">🧪 Preparation bench — pick a pre-made protocol or an à-la-carte item on the right; it lands here to cook. Fix any Ally alert, then send to a chair.</div>';return;}
@@ -357,12 +387,16 @@ function renderPrep(){var el=document.getElementById('prep');if(!PREP){el.style.
   var bases=['0.9% NS',"Lactated Ringer's",'Dedicated NAD+ bag'];
   var baseSel='<select onchange="setPrep(\'base\',this.value)">'+bases.map(function(b){return '<option'+sel(PREP.base,b)+'>'+esc(b)+'</option>';}).join('')+'</select>';
   var volSel='<select onchange="setPrep(\'vol\',+this.value)">'+[250,500,1000].map(function(v){return '<option'+sel(PREP.vol,v)+'>'+v+' mL</option>';}).join('')+'</select>';
-  el.innerHTML='<div class="ph"><b>🧪 Preparation table — '+esc(p?p.name:'')+(PREP.chair!=null?(' → Chair '+(PREP.chair+1)):'')+'</b></div>'+
+  el.innerHTML='<div class="ph"><b>🧪 Preparation bench — '+esc(p?dispName(p):'')+'</b></div>'+
     '<div class="bag">'+baseSel+volSel+'<input type="number" value="'+PREP.time+'" style="width:110px" oninput="setPrep(\'time\',+this.value)" title="minutes"> min'+(PREP.nadFloor?' <span class="pill gold">NAD floor '+PREP.nadFloor+'m</span>':'')+'</div>'+
     items+
     '<div class="drip">'+drip+'</div>'+
     '<div class="alertbox" id="alertbox">'+renderAlertSummary(an)+'</div>'+
-    '<button class="btn neon-green" style="width:100%;margin-top:10px" onclick="sendToChair()">✓ Confirm &amp; send to chair</button>';
+    '<div style="display:flex;gap:8px;margin-top:10px">'+
+      '<button class="btn neon-green" style="flex:1" onclick="sendToChair()">▶ Send to chair</button>'+
+      '<button class="btn ghost" style="flex:1" onclick="stageBack()">⏸ Back to waiting</button>'+
+    '</div>'+
+    '<div class="muted" style="font-size:.66rem;text-align:center;margin-top:6px">Staging parks the approved order — mix the bag when a chair opens (beyond-use dating).</div>';
   // popup only on a NEW critical
   if(an.crit>0 && an.newCrit) showAlertPopup(an);
 }
@@ -422,9 +456,10 @@ function sendToChair(){var p=qById(PREP.pid);if(!p)return;
   if(!p.gfe){return hardStop('GFE',p);}
   if(!p.consent){return hardStop('consent',p);}
   var an=analyzePrep();if(an.crit>0&&!PREP.override&&mdMode()){showAlertPopup(an);return;}
-  var free=CHAIRS.indexOf(null);if(free<0){alert('No chair available.');return;}
-  PREP.chair=free;CHAIRS[free]={patient:p,protoLabel:(p.proto==='ALACARTE'?'À LA CARTE':p.proto),bag:PREP.items.slice(),base:PREP.base,vol:PREP.vol,time:PREP.time,remain:PREP.time*60,total:PREP.time*60,state:'ready',timer:null,lastBeep:0,monitoring:[]};
-  QUEUE=QUEUE.filter(function(x){return x.id!==p.id;});var keepId=p.id;PREP=null;selId=null;save();renderQueue();renderChairs();renderPrep();renderDetail();
+  var free=CHAIRS.indexOf(null);if(free<0){alert('All 6 chairs are full — keeping them on the bench. Tap "Back to waiting" to stage, then send when a chair frees.');return;}
+  CHAIRS[free]={patient:p,protoLabel:(p.proto==='ALACARTE'?'À LA CARTE':p.proto),bag:PREP.items.slice(),base:PREP.base,vol:PREP.vol,time:PREP.time,remain:PREP.time*60,total:PREP.time*60,state:'ready',timer:null,lastBeep:0,monitoring:[]};
+  delete p.prep;p.staged=false;
+  QUEUE=QUEUE.filter(function(x){return x.id!==p.id;});PREP=null;selId=null;save();renderQueue();renderChairs();renderPrep();renderDetail();
 }
 function hardStop(what,p){
   var msg=what==='GFE'?'No valid Good Faith Exam on file — no infusion.':'No signed consent — no IV.';
