@@ -78,6 +78,7 @@
 .palette{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .pi{background:#0e1c2e;border:1px solid var(--line);border-radius:8px;padding:7px;font-size:.74rem;cursor:pointer}
 .pi:hover{border-color:var(--teal)}.pi.caut{border-left:2px solid var(--amber)}
+.pi.sel{border-color:var(--teal);background:#0e2a2433;box-shadow:inset 0 0 0 1px var(--teal);color:var(--teal)}.pi.sel .d{color:var(--teal)}
 .pi .d{font-size:.6rem;color:var(--muted)}
 /* overlay/modal */
 .overlay{position:fixed;inset:0;background:#04080fcc;display:none;align-items:flex-start;justify-content:center;padding:28px 14px;overflow:auto;z-index:60}
@@ -276,7 +277,7 @@ function setProto(id,code){var p=qById(id);if(!p)return;p.proto=code;p.buildMode
 function paletteHTML(){
   var byCat={};MENU.forEach(function(i){if(i.in_primary_library===false&&/KETOROLAC|FAMOTIDINE|METHYLENE/.test(i.id))return;var c=catOf(i);(byCat[c]=byCat[c]||[]).push(i);});
   var order=['Base fluids','Vitamins','Minerals & electrolytes','Amino acids','Antioxidants & specialty','Lipotropic / metabolic','Rx & administration adjuncts','Other'];
-  var h='';order.forEach(function(c){if(!byCat[c]||c==='Base fluids')return;h+='<div class="cat"><h4>'+c+'</h4><div class="palette">'+byCat[c].map(function(i){return '<div class="pi'+(i.guardrail?' caut':'')+'" onclick="addToPrep(\''+i.id+'\')">'+esc(i.name.split(' (')[0])+'<div class="d">'+esc(i.standard||'')+'</div></div>';}).join('')+'</div></div>';});
+  var h='';order.forEach(function(c){if(!byCat[c]||c==='Base fluids')return;h+='<div class="cat"><h4>'+c+'</h4><div class="palette">'+byCat[c].map(function(i){var inc=PREP&&PREP.items.some(function(it){return it.id===i.id;});return '<div class="pi'+(i.guardrail?' caut':'')+(inc?' sel':'')+'" onclick="toggleIng(\''+i.id+'\')">'+(inc?'✓ ':'')+esc(i.name.split(' (')[0])+'<div class="d">'+esc(i.standard||'')+'</div></div>';}).join('')+'</div></div>';});
   return h;
 }
 function catOf(i){var id=i.id||'';if(id==='ING_NS'||id==='ING_LR')return'Base fluids';if(/B12|VITACOMPLEX|VITC|BIOTIN|ING_B5|ING_B6|VITD3/i.test(id))return'Vitamins';if(/MGCL|CAGLUC|CACL|ZINC|SELENIUM|TRACE|MINERALBLEND/i.test(id))return'Minerals & electrolytes';if(/LYSINE|TAURINE|CARNITINE|GLUTAMINE|AMINOBLEND|ARGININE|PROLINE|GLYCINE/i.test(id))return'Amino acids';if(/GLUTATHIONE|NAD|ING_ALA|NAC|TRIIMMUNE|COQ10|METHYLENE/i.test(id))return'Antioxidants & specialty';if(/LIPOTROPIC|MICC/i.test(id))return'Lipotropic / metabolic';if(/ONDANSETRON|KETOROLAC|FAMOTIDINE/i.test(id))return'Rx & administration adjuncts';return'Other';}
@@ -288,8 +289,13 @@ function startPrep(pid,code){var p=qById(pid);if(!p)return;PREP={pid:pid,base:'0
     var tm=parseTimeMin(s.infusion_time);if(tm)PREP.time=tm;}}
   autoTime();renderPrep();renderDetail();
 }
-function addToPrep(ingId){if(!PREP){if(selId)startPrep(selId,null);else return;}var ing=findIng(ingId);if(!ing)return;PREP.items.push({id:ingId,name:ing.name,dose:ing.standard||'',ref:ing});autoTime();renderPrep();}
-function rmPrep(i){PREP.items.splice(i,1);autoTime();renderPrep();}
+function addToPrep(ingId){if(!PREP){if(selId)startPrep(selId,null);else return;}var ing=findIng(ingId);if(!ing)return;PREP.items.push({id:ingId,name:ing.name,dose:ing.standard||'',ref:ing});autoTime();renderPrep();renderDetail();}
+// cart toggle — click a menu item to add it, click again to take it back out (incl. items that came from a protocol)
+function toggleIng(ingId){if(!PREP){if(selId)startPrep(selId,null);else return;}
+  var idx=-1;for(var k=0;k<PREP.items.length;k++){if(PREP.items[k].id===ingId){idx=k;break;}}
+  if(idx>=0){PREP.items.splice(idx,1);}else{var ing=findIng(ingId);if(!ing)return;PREP.items.push({id:ingId,name:ing.name,dose:ing.standard||'',ref:ing});}
+  autoTime();renderPrep();renderDetail();}
+function rmPrep(i){PREP.items.splice(i,1);autoTime();renderPrep();renderDetail();}
 function setPrep(f,v){PREP[f]=v;if(f!=='time')autoTime();renderPrep();}
 // NAD overrides the default 45-min drip with its rate-sensitive duration
 function autoTime(){if(!PREP)return;var nad=PREP.items.filter(function(it){return /nad/i.test(it.name);})[0];if(nad){var g=parseGrams(nad.dose),mg=g!=null?g*1000:250;PREP.time=mg>=500?210:120;PREP.nadFloor=PREP.time;}else{PREP.nadFloor=null;if(PREP.time===120||PREP.time===210)PREP.time=45;}}
