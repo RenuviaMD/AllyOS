@@ -215,14 +215,16 @@ fetch('../protocols/iv-module.json').then(function(r){return r.json()}).then(fun
   load(); fillProto(); renderEmergency(); renderQueue(); renderChairs(); renderPrep(); renderDetail();
 }).catch(function(e){document.getElementById('chairs').innerHTML='<div class="flag crit">Could not load IV module ('+e.message+')</div>';});
 
-function load(){try{var s=JSON.parse(localStorage.getItem(KEY)||'{}');QUEUE=s.q||seedQueue();}catch(e){QUEUE=seedQueue();}}
+function load(){try{var s=JSON.parse(localStorage.getItem(KEY)||'{}');QUEUE=s.q||seedQueue();}catch(e){QUEUE=seedQueue();}
+  // heal duplicate / missing ids saved by older builds (performance.now() could collide)
+  var seen={},fixed=false;QUEUE.forEach(function(p){if(!p.id||seen[p.id]){p.id=pid();fixed=true;}seen[p.id]=1;});if(fixed)save();}
 function save(){localStorage.setItem(KEY,JSON.stringify({q:QUEUE}));}
 function seedQueue(){return [
   {id:pid(),first:'Sarah',last:'Martinez',name:'Sarah Martinez',dob:'1990-03-12',sex:'F',proto:'IV-05',alerts:[],gfe:false,gfeDate:'',consent:false},
   {id:pid(),first:'Michael',last:'Chen',name:'Michael Chen',dob:'1985-07-22',sex:'M',proto:'IV-08',alerts:['G6PD deficiency'],gfe:true,gfeDate:'2026-04-30',consent:false},
   {id:pid(),first:'Emily',last:'Rodriguez',name:'Emily Rodriguez',dob:'1995-11-02',sex:'F',proto:'ALACARTE',alerts:[],gfe:true,gfeDate:'2026-06-10',consent:true}
 ];}
-function pid(){return 'p'+Math.floor(performance.now()*1000%1e9);}
+var _pidSeq=0;function pid(){return 'p'+(++_pidSeq)+'x'+Math.floor(Math.random()*1e9);}
 // ---- patient identity / status helpers ----
 var ALERT_CATALOG=['G6PD deficiency','Pregnancy / breastfeeding','Anticoagulant / bleeding risk','Renal impairment / dialysis','Cardiac / CHF','Severe allergy / anaphylaxis hx','Acute illness / infection'];
 function dispName(p){var f=p.first||((p.name||'').split(' ')[0]||'');var l=p.last||((p.name||'').split(' ').slice(1).join(' ')||'');return f+(l?(' '+l.charAt(0)+'.'):'');}
