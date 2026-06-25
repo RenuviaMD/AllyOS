@@ -22,7 +22,9 @@
 .qgroup{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin:4px 0 7px}
 .stagedbadge{font-size:.66rem;color:var(--teal);background:#0e2a2433;border:1px solid #1e5a52;border-radius:7px;padding:4px 8px;margin-top:7px;display:inline-block}
 .pcard .ptop{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.pcard .chev{color:var(--muted);font-size:.7rem;flex:0 0 auto}
+.pcard .chev{color:var(--teal);font-size:.7rem;flex:0 0 auto;width:22px;height:22px;line-height:20px;text-align:center;border:1px solid var(--line);border-radius:50%;background:#0e1c2e}
+.pcard:hover .chev{border-color:var(--teal);box-shadow:var(--glow-teal)}
+.pcard.open{box-shadow:var(--glow-teal)}
 .pcard .nm{font-weight:700;font-size:.95rem}
 .pcard .pmeta{font-size:.7rem;color:var(--muted);margin-top:2px}
 .pcard .pr{font-size:.66rem;color:var(--teal);letter-spacing:.05em;text-transform:uppercase}
@@ -279,15 +281,11 @@ function renderQueue(){var el=document.getElementById('queue');var q=(document.g
 function fmtDob(d){if(!d)return'';var p=d.split('-');return p.length===3?(p[1]+'/'+p[2]+'/'+p[0]):d;}
 function pcardHTML(p){
   var st=patientStatus(p),sel=selId===p.id;
-  var age=ageOf(p),meta=(age!=null?age+'y':'—')+' · '+(p.sex||'—')+(p.dob?(' · DOB '+fmtDob(p.dob)):'');
-  var g=gfeState(p);
-  var flags='<span class="fchip '+(g.k==='done'?'ok':(g.k==='expired'?'alert':'bad'))+'">'+(g.k==='done'?'✓':(g.k==='expired'?'⏱':'✗'))+' GFE</span>'+
-    '<span class="fchip '+(p.consent?'ok':'bad')+'">'+(p.consent?'✓':'✗')+' Consent</span>'+
-    (p.alerts||[]).map(function(a){return '<span class="fchip note">'+esc(a.split(' /')[0].split(' (')[0])+'</span>';}).join('');
-  var h='<div class="pcard s-'+st.k+(p.staged?' staged':'')+(sel?' sel':'')+'" onclick="selectPatient(\''+p.id+'\')">'+
-    '<div class="ptop"><span class="nm">'+esc(dispName(p))+'</span><span class="spill s-'+st.k+'">'+st.label+'</span><span class="chev">'+(sel?'▴':'▾')+'</span></div>'+
-    '<div class="pmeta">'+esc(meta)+'</div>'+
-    '<div class="pflags">'+flags+'</div>'+
+  var age=ageOf(p),g=gfeState(p);
+  // COLLAPSED = compact (name + status + age/sex). Details show only when open.
+  var h='<div class="pcard s-'+st.k+(p.staged?' staged':'')+(sel?' sel open':'')+'" onclick="selectPatient(\''+p.id+'\')">'+
+    '<div class="ptop"><span class="nm">'+esc(dispName(p))+'</span><span class="spill s-'+st.k+'">'+st.label+'</span><span class="chev">'+(sel?'▲':'▼')+'</span></div>'+
+    '<div class="pmeta">'+(age!=null?age+'y':'—')+' · '+(p.sex||'—')+(sel&&p.dob?(' · DOB '+fmtDob(p.dob)):'')+'</div>'+
     (p.staged&&p.prep?'<div class="stagedbadge">⏸ Prepared · '+esc(txLabel(p))+' · '+(p.prep.items.length)+' items — needs a chair</div>':'');
   if(sel){
     h+='<div class="pexpand" onclick="event.stopPropagation()">'+
