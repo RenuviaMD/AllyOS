@@ -102,7 +102,7 @@
 </div>
 
 <div class="board">
-  <!-- LEFT · PATIENTS (all patient data) -->
+  <!-- LEFT · PATIENT (only what the patient brings to the chair) -->
   <div>
     <div class="col-h">👥 Waiting patients</div>
     <input id="search" class="search" placeholder="🔍 Search patients…" oninput="renderQueue()">
@@ -110,19 +110,20 @@
     <div id="queue"></div>
   </div>
 
-  <!-- CENTER · THE FLOOR -->
+  <!-- CENTER · THE FLOOR + PREP BENCH -->
   <div>
     <div class="col-h">🚨 Emergency protocols</div>
     <div class="embar" id="embar"></div>
     <div class="col-h" style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">🪑 Treatment chairs <span id="chairStat" class="muted" style="font-weight:400;font-size:.72rem"></span></div>
     <div class="chairgrid" id="chairs"></div>
+    <!-- PREP BENCH — cook the soup, fix alerts, send to chair -->
+    <div class="prep" id="prep"></div>
   </div>
 
-  <!-- RIGHT · NURSE STATION (what the nurse adds / handles) -->
+  <!-- RIGHT · WHAT I GIVE (the menu) -->
   <div class="detail">
-    <div class="col-h">🧴 Nurse station</div>
-    <div id="detail"><div class="empty">Select a patient on the left. When the card reads <b style="color:var(--green)">READY</b>, choose a pre-made stack or build à la carte here.</div></div>
-    <div class="prep" id="prep" style="margin-top:12px;display:none"></div>
+    <div class="col-h">🧴 What I give</div>
+    <div id="detail"><div class="empty">Select a patient on the left, then choose a pre-made protocol or build à la carte — it drops onto the prep bench to cook.</div></div>
   </div>
 </div>
 <div class="disc" id="disc"></div>
@@ -199,10 +200,10 @@ function renderQueue(){var el=document.getElementById('queue');var q=(document.g
   el.innerHTML=list.map(function(p){return pcardHTML(p);}).join('');
   renderChairs();
 }
+function fmtDob(d){if(!d)return'';var p=d.split('-');return p.length===3?(p[1]+'/'+p[2]+'/'+p[0]):d;}
 function pcardHTML(p){
-  var st=patientStatus(p),s=stackByCode(p.proto),sel=selId===p.id;
-  var pr=p.proto==='ALACARTE'?'<span class="alacarte">À LA CARTE</span>':esc(p.proto)+(s?' · '+esc(s.title):'');
-  var age=ageOf(p),meta=[(age!=null?age:'—'),(p.sex||'—')].join(' ')+' · '+pr;
+  var st=patientStatus(p),sel=selId===p.id;
+  var age=ageOf(p),meta=(age!=null?age+'y':'—')+' · '+(p.sex||'—')+(p.dob?(' · DOB '+fmtDob(p.dob)):'');
   var g=gfeState(p);
   var flags='<span class="fchip '+(g.k==='done'?'ok':(g.k==='expired'?'alert':'bad'))+'">'+(g.k==='done'?'✓':(g.k==='expired'?'⏱':'✗'))+' GFE</span>'+
     '<span class="fchip '+(p.consent?'ok':'bad')+'">'+(p.consent?'✓':'✗')+' Consent</span>'+
@@ -243,20 +244,24 @@ function renderDetail(){var el=document.getElementById('detail');var p=qById(sel
     var why=gfeState(p).k!=='done'?'A current Good Faith Exam is required':(!p.consent?'Signed consent is required':'Resolve the hold');
     h+='<div class="flag warn" style="margin:10px 0"><b>Not cleared yet</b>'+why+' before sending to a chair. You can still build the bag — the gate is checked at "send to chair."</div>';
   }
-  // choose mode
-  var aMode=p.proto==='ALACARTE'||p.buildMode==='ala';
+  // choose what I give (independent of how the patient arrived)
+  var aMode=(p.buildMode||(p.proto==='ALACARTE'?'ala':'stack'))==='ala';
   h+='<div class="chips" style="margin:12px 0 10px">'+
-     '<div class="chip '+(!aMode?'done':'')+'" style="cursor:pointer'+(!aMode?'':';background:#0e1c2e;border-color:var(--line);color:var(--muted)')+'" onclick="setMode(\''+p.id+'\',\'stack\')">🧪 Pre-made stack</div>'+
+     '<div class="chip '+(!aMode?'done':'')+'" style="cursor:pointer'+(!aMode?'':';background:#0e1c2e;border-color:var(--line);color:var(--muted)')+'" onclick="setMode(\''+p.id+'\',\'stack\')">🧪 Pre-made protocol</div>'+
      '<div class="chip '+(aMode?'done':'')+'" style="cursor:pointer'+(aMode?'':';background:#0e1c2e;border-color:var(--line);color:var(--muted)')+'" onclick="setMode(\''+p.id+'\',\'ala\')">🎛 À la carte</div></div>';
   if(!aMode){
-    // PROTOCOLS card
-    h+='<div class="card" style="border-left:3px solid var(--teal);padding:13px">'+
+    // PROTOCOLS card — pick any pre-made protocol from the menu
+    var code=(p.proto&&p.proto!=='ALACARTE')?p.proto:((MOD.stacks&&MOD.stacks[0]||{}).code||'');
+    s=stackByCode(code);
+    h+='<label style="font-size:.7rem;color:var(--muted);display:block;margin-bottom:4px">Protocol menu</label>'+
+       '<select class="search" onchange="setProto(\''+p.id+'\',this.value)">'+(MOD.stacks||[]).map(function(x){return '<option value="'+x.code+'"'+sel(code,x.code)+'>'+esc(x.code)+' — '+esc(x.title)+'</option>';}).join('')+'</select>'+
+       '<div class="card" style="border-left:3px solid var(--teal);padding:13px;margin-top:6px">'+
        '<div class="eyebrow" style="color:var(--teal)">Protocol</div>'+
-       '<div class="h-disp" style="font-size:1.05rem;margin:2px 0 2px">'+esc(p.proto)+' — '+esc(s?s.title:'')+'</div>'+
+       '<div class="h-disp" style="font-size:1.05rem;margin:2px 0 2px">'+esc(code)+' — '+esc(s?s.title:'')+'</div>'+
        (s&&s.purpose?'<div class="muted" style="font-size:.76rem;margin-bottom:8px">'+esc(s.purpose)+'</div>':'')+
        '<div class="muted" style="font-size:.7rem;margin-bottom:4px">'+esc(s?(s.base||'0.9% NS'):'')+' · '+esc(s?s.infusion_time:'')+'</div>'+
        (s?('<div style="margin:6px 0">'+(s.components||[]).map(function(c){return '<div class="ingrow"><span>'+esc(c.ingredient)+' <span class="muted">'+esc(c.dose||'')+'</span></span></div>';}).join('')+'</div>'):'')+
-       '<button class="btn neon" style="width:100%;margin-top:6px" onclick="startPrep(\''+p.id+'\',\''+p.proto+'\')">Prepare on the bench →</button>'+
+       '<button class="btn neon" style="width:100%;margin-top:6px" onclick="startPrep(\''+p.id+'\',\''+code+'\')">Prepare on the bench →</button>'+
        '<div class="muted" style="font-size:.7rem;margin-top:8px;text-align:center">or <a href="#" onclick="setMode(\''+p.id+'\',\'ala\');return false" style="color:var(--gold)">customize à la carte</a></div>'+
        '</div>';
   } else {
@@ -267,6 +272,7 @@ function renderDetail(){var el=document.getElementById('detail');var p=qById(sel
   el.innerHTML=h;
 }
 function setMode(id,m,silent){var p=qById(id);if(!p)return;p.buildMode=m;if(!silent)renderDetail();}
+function setProto(id,code){var p=qById(id);if(!p)return;p.proto=code;p.buildMode='stack';save();renderDetail();}
 function paletteHTML(){
   var byCat={};MENU.forEach(function(i){if(i.in_primary_library===false&&/KETOROLAC|FAMOTIDINE|METHYLENE/.test(i.id))return;var c=catOf(i);(byCat[c]=byCat[c]||[]).push(i);});
   var order=['Base fluids','Vitamins','Minerals & electrolytes','Amino acids','Antioxidants & specialty','Lipotropic / metabolic','Rx & administration adjuncts','Other'];
@@ -287,7 +293,7 @@ function rmPrep(i){PREP.items.splice(i,1);autoTime();renderPrep();}
 function setPrep(f,v){PREP[f]=v;if(f!=='time')autoTime();renderPrep();}
 // NAD overrides the default 45-min drip with its rate-sensitive duration
 function autoTime(){if(!PREP)return;var nad=PREP.items.filter(function(it){return /nad/i.test(it.name);})[0];if(nad){var g=parseGrams(nad.dose),mg=g!=null?g*1000:250;PREP.time=mg>=500?210:120;PREP.nadFloor=PREP.time;}else{PREP.nadFloor=null;if(PREP.time===120||PREP.time===210)PREP.time=45;}}
-function renderPrep(){var el=document.getElementById('prep');if(!PREP){el.style.display='none';el.className='prep';el.innerHTML='';return;}
+function renderPrep(){var el=document.getElementById('prep');if(!PREP){el.style.display='block';el.className='prep';el.innerHTML='<div class="empty">🧪 Preparation bench — pick a pre-made protocol or an à-la-carte item on the right; it lands here to cook. Fix any Ally alert, then send to a chair.</div>';return;}
   var p=qById(PREP.pid);el.style.display='block';el.className='prep active';
   var an=analyzePrep();var drip=dripCalc();
   var items=PREP.items.length?PREP.items.map(function(it,i){return '<div class="ingrow"><span>'+esc(it.name)+' <span class="muted">'+esc(it.dose)+'</span></span><button class="rm" onclick="rmPrep('+i+')">×</button></div>';}).join(''):'<div class="empty">Add the broth (base) and ingredients.</div>';
