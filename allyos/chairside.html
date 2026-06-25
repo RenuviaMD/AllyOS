@@ -158,6 +158,7 @@
   <div class="brand">Renuvia<b>MD</b>® · AllyOS <span style="color:var(--teal)">Chairside</span></div>
   <div class="r"><span class="pill green" id="opstat">● OPERATIONAL</span><span id="who"></span>
     <label title="Where RenuviaMD is the Medical Director, gates enforce absolutely."><input type="checkbox" id="mdMode"> MD-of-record</label>
+    <label title="Demo only: shows a ⏩ button to fast-forward an infusion to the 5-min / 2-min / end alarms so you can preview them."><input type="checkbox" id="demoMode"> Demo</label>
     <a href="iv-inventory.html">Inventory</a><a href="iv-calculator.html">Calc</a><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
 </div>
 
@@ -510,6 +511,7 @@ function renderChairs(){var el=document.getElementById('chairs');var h='';
       (c.state==='paused'?'<button class="btn neon-green" onclick="resumeChair('+i+')">▶ Resume</button><button class="btn ghost" onclick="openMonitor('+i+')">Monitor</button>':'')+
       (c.state==='ended'?'<button class="btn ghost" onclick="dischargeChair('+i+')">Discharge</button>':'')+
       ((c.state==='infusing'||c.state==='paused'||c.state==='ended')?'<button class="btn ghost allychairbtn" onclick="allyAskChair('+i+')" title="Ask Ally about this build"><img src="ally-avatar-64.png" alt="Ally" class="allyface" style="width:18px;height:18px" onerror="this.replaceWith(document.createTextNode(\'💬\'))"></button>':'')+
+      ((c.state==='infusing'&&demoMode())?'<button class="btn ghost allychairbtn" onclick="skipToNext('+i+')" title="Demo: jump to the next alarm">⏩</button>':'')+
       '</div></div>';
   }
   el.innerHTML=h;
@@ -533,18 +535,21 @@ function startInfusion(i){var c=CHAIRS[i];if(!c)return;
     '<button class="btn neon-green" style="width:100%" onclick="reallyStart('+i+')">▶ Start infusion</button>';
   showModal(h);
 }
-function reallyStart(i){var c=CHAIRS[i];c.preVitals={bp:val('vBP'),hr:val('vHR'),o2:val('vO2'),t:val('vT')};c.state='infusing';c.startedStr=fmtClock(new Date());closeModal();runChair(i);renderChairs();}
+function reallyStart(i){var c=CHAIRS[i];c.preVitals={bp:val('vBP'),hr:val('vHR'),o2:val('vO2'),t:val('vT')};c.state='infusing';c.startedStr=fmtClock(new Date());c.warned300=false;c.warned120=false;closeModal();runChair(i);renderChairs();}
+function demoMode(){var e=document.getElementById('demoMode');return e&&e.checked;}
+// demo only: jump the running infusion to just above the next alarm threshold
+function skipToNext(i){var c=CHAIRS[i];if(!c||c.state!=='infusing')return;if(!c.warned300){c.remain=301;}else if(!c.warned120){c.remain=121;}else{c.remain=1;}renderChairs();}
 // pause / resume — hold the drip without ending it (line check, bathroom, mild reaction)
 function pauseChair(i){var c=CHAIRS[i];if(!c||c.state!=='infusing')return;if(c.timer){clearInterval(c.timer);c.timer=null;}c.state='paused';c.pausedStr=fmtClock(new Date());renderChairs();}
 function resumeChair(i){var c=CHAIRS[i];if(!c||c.state!=='paused')return;c.state='infusing';runChair(i);renderChairs();}
 function runChair(i){var c=CHAIRS[i];beep(140,660);c.timer=setInterval(function(){c.remain--;var e=document.getElementById('clk'+i);if(e&&c.state==='infusing')e.textContent=fmt(Math.max(0,c.remain));
   var b=document.getElementById('bar'+i);if(b)b.style.width=(c.total?Math.min(100,Math.round((c.total-c.remain)/c.total*100)):0)+'%';
-  var rem=c.remain;
-  if(rem===300){beep(220,990);setTimeout(function(){beep(220,990);},300);flash(i);}
-  if(rem===120){beep(260,1100);setTimeout(function(){beep(260,1100);},250);setTimeout(function(){beep(260,1100);},500);}
-  if(rem<=300&&rem>0&&!document.querySelector('.chair'))renderChairs();
-  if(rem===300||rem===120)renderChairs();
-  if(rem<=0){clearInterval(c.timer);c.timer=null;c.state='ended';beep(700,880);setTimeout(function(){beep(700,880);},800);setTimeout(function(){beep(700,880);},1600);renderChairs();}
+  // 5-minute ORANGE warning — two mid beeps, chair goes amber (fires once)
+  if(c.remain<=300&&!c.warned300){c.warned300=true;beep(220,990);setTimeout(function(){beep(220,990);},300);renderChairs();}
+  // 2-minute RED warning — three sharper beeps (fires once)
+  if(c.remain<=120&&!c.warned120){c.warned120=true;beep(260,1100);setTimeout(function(){beep(260,1100);},250);setTimeout(function(){beep(260,1100);},500);renderChairs();}
+  // ended — long triple tone, chair turns red 'INFUSION ENDED'
+  if(c.remain<=0){clearInterval(c.timer);c.timer=null;c.state='ended';beep(700,880);setTimeout(function(){beep(700,880);},800);setTimeout(function(){beep(700,880);},1600);renderChairs();}
 },1000);}
 function flash(i){renderChairs();}
 function dischargeChair(i){var c=CHAIRS[i];if(!c)return;
