@@ -59,8 +59,9 @@
 .chair.ended .clk,.chair.ended .num{color:var(--red)}
 @keyframes pulseAmber{from{box-shadow:0 0 16px rgba(224,162,58,.25)}to{box-shadow:0 0 32px rgba(224,162,58,.6)}}
 @keyframes pulseRed{from{box-shadow:0 0 16px rgba(240,99,90,.3)}to{box-shadow:0 0 36px rgba(240,99,90,.7)}}
-.chairbtns{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.chairbtns{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;align-items:center}
 .chairbtns .btn{flex:1;font-size:.66rem;padding:6px;min-width:0}
+.chairbtns .allychairbtn{flex:0 0 auto;padding:4px 7px;display:inline-flex;align-items:center;justify-content:center}
 .chair.paused{border-color:var(--blue);box-shadow:0 0 18px rgba(90,150,230,.32)}
 .chair.paused .clk,.chair.paused .num{color:var(--blue)}
 /* chair detail + infusion progress */
@@ -508,7 +509,7 @@ function renderChairs(){var el=document.getElementById('chairs');var h='';
       (c.state==='infusing'?'<button class="btn ghost" onclick="pauseChair('+i+')">⏸ Pause</button><button class="btn ghost" onclick="openMonitor('+i+')">Monitor</button>':'')+
       (c.state==='paused'?'<button class="btn neon-green" onclick="resumeChair('+i+')">▶ Resume</button><button class="btn ghost" onclick="openMonitor('+i+')">Monitor</button>':'')+
       (c.state==='ended'?'<button class="btn ghost" onclick="dischargeChair('+i+')">Discharge</button>':'')+
-      ((c.state==='infusing'||c.state==='paused'||c.state==='ended')?'<button class="btn ghost" onclick="allyAskChair('+i+')" title="Ask Ally about this build">💬</button>':'')+
+      ((c.state==='infusing'||c.state==='paused'||c.state==='ended')?'<button class="btn ghost allychairbtn" onclick="allyAskChair('+i+')" title="Ask Ally about this build"><img src="ally-avatar-64.png" alt="Ally" class="allyface" style="width:18px;height:18px" onerror="this.replaceWith(document.createTextNode(\'💬\'))"></button>':'')+
       '</div></div>';
   }
   el.innerHTML=h;
