@@ -59,8 +59,10 @@
 .chair.ended .clk,.chair.ended .num{color:var(--red)}
 @keyframes pulseAmber{from{box-shadow:0 0 16px rgba(224,162,58,.25)}to{box-shadow:0 0 32px rgba(224,162,58,.6)}}
 @keyframes pulseRed{from{box-shadow:0 0 16px rgba(240,99,90,.3)}to{box-shadow:0 0 36px rgba(240,99,90,.7)}}
-.chairbtns{display:flex;gap:5px;margin-top:6px}
-.chairbtns .btn{flex:1;font-size:.66rem;padding:6px}
+.chairbtns{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.chairbtns .btn{flex:1;font-size:.66rem;padding:6px;min-width:0}
+.chair.paused{border-color:var(--blue);box-shadow:0 0 18px rgba(90,150,230,.32)}
+.chair.paused .clk,.chair.paused .num{color:var(--blue)}
 /* chair detail + infusion progress */
 .cmeta{font-size:.58rem;color:var(--muted);margin:2px 0;line-height:1.3}
 .cprog{height:5px;background:#0c1a28;border-radius:99px;overflow:hidden;margin:6px 0 2px}
@@ -408,7 +410,7 @@ function renderPrep(){var el=document.getElementById('prep');if(!PREP){el.style.
   var items=PREP.items.length?PREP.items.map(function(it,i){return '<div class="ingrow"><span>'+esc(it.name)+' <span class="muted">'+esc(it.dose)+'</span></span><button class="rm" onclick="rmPrep('+i+')">×</button></div>';}).join(''):'<div class="empty">Add the broth (base) and ingredients.</div>';
   var bases=['0.9% NS',"Lactated Ringer's",'Dedicated NAD+ bag'];
   var baseSel='<select onchange="setPrep(\'base\',this.value)">'+bases.map(function(b){return '<option'+sel(PREP.base,b)+'>'+esc(b)+'</option>';}).join('')+'</select>';
-  var volSel='<select onchange="setPrep(\'vol\',+this.value)">'+[250,500,1000].map(function(v){return '<option'+sel(PREP.vol,v)+'>'+v+' mL</option>';}).join('')+'</select>';
+  var volSel='<select onchange="setPrep(\'vol\',+this.value)">'+[250,500,1000].map(function(v){return '<option value="'+v+'"'+sel(PREP.vol,v)+'>'+v+' mL</option>';}).join('')+'</select>';
   el.innerHTML='<div class="ph"><b>🧪 Preparation bench — '+esc(p?dispName(p):'')+'</b></div>'+
     '<div class="bag">'+baseSel+volSel+'<input type="number" value="'+PREP.time+'" style="width:110px" oninput="setPrep(\'time\',+this.value)" title="minutes"> min'+(PREP.nadFloor?' <span class="pill gold">NAD floor '+PREP.nadFloor+'m</span>':'')+'</div>'+
     items+
@@ -494,17 +496,19 @@ function overrideGate(id,what){var r=prompt('Override '+what+' hard-stop — rea
 function renderChairs(){var el=document.getElementById('chairs');var h='';
   for(var i=0;i<6;i++){var c=CHAIRS[i];
     if(!c){h+='<div class="chair"><div class="num">'+(i+1)+'</div><div class="st">AVAILABLE</div></div>';continue;}
-    var cls=c.state==='ended'?'ended':(c.state==='infusing'&&c.remain<=300?'warn':'occupied');
-    var clk=c.state==='ended'?'INFUSION ENDED':fmt(c.remain);
+    var cls=c.state==='ended'?'ended':(c.state==='paused'?'paused':(c.state==='infusing'&&c.remain<=300?'warn':'occupied'));
+    var clk=c.state==='ended'?'INFUSION ENDED':(c.state==='paused'?fmt(c.remain)+' ⏸':fmt(c.remain));
     var pct=c.total?Math.min(100,Math.round((c.total-c.remain)/c.total*100)):0;
     h+='<div class="chair '+cls+'"><div class="num" style="font-size:.95rem">Chair '+(i+1)+'</div><div class="pt">'+esc(dispName(c.patient))+'</div><div class="pr">'+esc(c.protoLabel)+'</div>'+
       '<div class="cmeta">'+esc(c.base)+' · '+c.vol+' mL · '+c.time+' min'+(c.startedStr?' · ⏱ '+esc(c.startedStr):'')+'</div>'+
       '<div class="clk" id="clk'+i+'">'+clk+'</div>'+
-      ((c.state==='infusing'||c.state==='ended')?'<div class="cprog"><div class="cbar" id="bar'+i+'" style="width:'+pct+'%"></div></div>':'')+
+      ((c.state==='infusing'||c.state==='paused'||c.state==='ended')?'<div class="cprog"><div class="cbar" id="bar'+i+'" style="width:'+pct+'%"></div></div>':'')+
       '<div class="chairbtns">'+
       (c.state==='ready'?'<button class="btn neon-green" onclick="startInfusion('+i+')">▶ Start</button>':'')+
-      (c.state==='infusing'?'<button class="btn ghost" onclick="openMonitor('+i+')">Monitor</button>':'')+
+      (c.state==='infusing'?'<button class="btn ghost" onclick="pauseChair('+i+')">⏸ Pause</button><button class="btn ghost" onclick="openMonitor('+i+')">Monitor</button>':'')+
+      (c.state==='paused'?'<button class="btn neon-green" onclick="resumeChair('+i+')">▶ Resume</button><button class="btn ghost" onclick="openMonitor('+i+')">Monitor</button>':'')+
       (c.state==='ended'?'<button class="btn ghost" onclick="dischargeChair('+i+')">Discharge</button>':'')+
+      ((c.state==='infusing'||c.state==='paused'||c.state==='ended')?'<button class="btn ghost" onclick="allyAskChair('+i+')" title="Ask Ally about this build">💬</button>':'')+
       '</div></div>';
   }
   el.innerHTML=h;
@@ -529,6 +533,9 @@ function startInfusion(i){var c=CHAIRS[i];if(!c)return;
   showModal(h);
 }
 function reallyStart(i){var c=CHAIRS[i];c.preVitals={bp:val('vBP'),hr:val('vHR'),o2:val('vO2'),t:val('vT')};c.state='infusing';c.startedStr=fmtClock(new Date());closeModal();runChair(i);renderChairs();}
+// pause / resume — hold the drip without ending it (line check, bathroom, mild reaction)
+function pauseChair(i){var c=CHAIRS[i];if(!c||c.state!=='infusing')return;if(c.timer){clearInterval(c.timer);c.timer=null;}c.state='paused';c.pausedStr=fmtClock(new Date());renderChairs();}
+function resumeChair(i){var c=CHAIRS[i];if(!c||c.state!=='paused')return;c.state='infusing';runChair(i);renderChairs();}
 function runChair(i){var c=CHAIRS[i];beep(140,660);c.timer=setInterval(function(){c.remain--;var e=document.getElementById('clk'+i);if(e&&c.state==='infusing')e.textContent=fmt(Math.max(0,c.remain));
   var b=document.getElementById('bar'+i);if(b)b.style.width=(c.total?Math.min(100,Math.round((c.total-c.remain)/c.total*100)):0)+'%';
   var rem=c.remain;
@@ -616,11 +623,16 @@ function openConsent(id){var p=qById(id);if(!p)return;
 function signConsent(id){var p=qById(id);if(p)p.consent=true;save();closeModal();renderDetail();renderQueue();}
 
 // ---------- ASK ALLY (chat drawer · PHI-free, grounded in the locked module) ----------
-function allyOpen(){document.getElementById('allyDrawer').classList.add('show');if(!ALLY_HIST.length)allyAppend('sys','Ally answers from the locked IV/IM library — evidence-graded, no invented doses or citations. Defer the final call & signature to the provider.');allyUpdateCtx();document.getElementById('allyInput').focus();}
+function allyOpen(){document.getElementById('allyDrawer').classList.add('show');if(!ALLY_HIST.length)allyAppend('sys','Ally answers from the locked IV/IM library — evidence-graded, no invented doses or citations. It sees the bench + chair builds by number (bag contents only, never names). Defer the final call & signature to the provider.');allyUpdateCtx();document.getElementById('allyInput').focus();}
+function allyAskChair(i){var c=CHAIRS[i];allyOpen();var inp=document.getElementById('allyInput');if(inp&&c){inp.value='For Chair '+(i+1)+' ('+c.protoLabel+'): ';inp.focus();}}
 function allyClose(){document.getElementById('allyDrawer').classList.remove('show');}
-function allyUpdateCtx(){var el=document.getElementById('allyCtx');if(!el)return;el.textContent=PREP?('Ally can see the current bench: '+(PREP.items.length||'0')+' item(s), '+PREP.base+' '+PREP.vol+' mL / '+PREP.time+' min. PHI-free.'):'Grounded in the locked IV/IM module. PHI-free — no patient data is sent.';}
-function allyCtx(){if(!PREP)return '';var items=PREP.items.map(function(it){return it.name+(it.dose?(' '+it.dose):'');}).join('; ');var an=analyzePrep();var al=an.flags.filter(function(f){return f.l==='crit'||f.l==='warn';}).map(function(f){return f.t;}).join('; ');
-  return 'Current bench (PHI-free, no identifiers): base '+PREP.base+', volume '+PREP.vol+' mL, infusion time '+PREP.time+' min. Ingredients: '+(items||'none yet')+'.'+(al?(' Active Ally alerts on this build: '+al+'.'):'');}
+function bagDesc(b){var items=(b.items||[]).map(function(it){return it.name+(it.dose?(' '+it.dose):'');}).join('; ');return b.base+' '+b.vol+' mL / '+b.time+' min — '+(items||'no additives yet');}
+function floorParts(){var parts=[];
+  if(PREP){var an=analyzePrep();var al=an.flags.filter(function(f){return f.l==='crit'||f.l==='warn';}).map(function(f){return f.t;}).join('; ');parts.push('Prep bench: '+bagDesc(PREP)+(al?(' [active alerts: '+al+']'):''));}
+  CHAIRS.forEach(function(c,i){if(c)parts.push('Chair '+(i+1)+' ('+c.protoLabel+', '+c.state+'): '+bagDesc({base:c.base,vol:c.vol,time:c.time,items:c.bag}));});
+  return parts;}
+function allyUpdateCtx(){var el=document.getElementById('allyCtx');if(!el)return;var n=floorParts().length;el.textContent=n?('Ally can see '+n+' active build'+(n>1?'s':'')+' (bench + chairs by number) — bag contents only, never names or DOB.'):'Grounded in the locked IV/IM module. PHI-free — no patient identity is ever sent.';}
+function allyCtx(){var parts=floorParts();if(!parts.length)return '';return 'PHI-FREE floor snapshot (clinical builds only — NO patient names, DOB, or identifiers): '+parts.join(' | ');}
 function allyAppend(cls,txt){var log=document.getElementById('allyLog');var d=document.createElement('div');d.className='amsg '+cls;d.textContent=txt;log.appendChild(d);log.scrollTop=log.scrollHeight;return d;}
 function allySend(){var inp=document.getElementById('allyInput');var q=(inp.value||'').trim();if(!q)return;inp.value='';
   var ctx=allyCtx();ALLY_HIST.push({role:'user',content:ctx?(q+'\n\n['+ctx+']'):q});
