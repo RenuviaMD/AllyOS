@@ -29,7 +29,10 @@ window.AllyOSAuth = (function () {
     { email: 'md@clinic.test',    password: 'demo', name: 'Falcon', credential: 'MD', role: 'provider' },
     { email: 'np@clinic.test',    password: 'demo', name: 'Rivera', credential: 'NP', role: 'provider' },
     { email: 'rn@clinic.test',    password: 'demo', name: 'Chen',   credential: 'RN', role: 'nurse' },
-    { email: 'admin@clinic.test', password: 'demo', name: 'Office', credential: '',   role: 'admin' }
+    { email: 'admin@clinic.test', password: 'demo', name: 'Office', credential: '',   role: 'admin' },
+    // --- Lemus pilot (interim localStorage auth; swap to Supabase before real multi-user). ---
+    { email: 'lemus@allyos.app',  password: 'pilot', name: 'Lemus NP', credential: 'NP', role: 'provider',
+      clinic: 'Lemus Natural Medicine', md_of_record: true, pilot: true }
   ];
   // Clinic context (in Supabase this is a row in `clinics`). md_of_record = is RenuviaMD the MD here?
   var CLINIC = { id: 'demo-clinic', name: 'Demo Wellness Clinic', md_of_record: false };
@@ -45,7 +48,9 @@ window.AllyOSAuth = (function () {
     if (!u) return { error: 'Invalid email or password. Demo accounts: md@ / np@ / rn@ / admin@clinic.test — password "demo".' };
     var s = {
       userId: email, email: email, name: u.name, credential: u.credential, role: u.role,
-      clinicId: CLINIC.id, clinic: CLINIC.name, mdOfRecord: CLINIC.md_of_record, demo: true
+      clinicId: u.clinicId || CLINIC.id, clinic: u.clinic || CLINIC.name,
+      mdOfRecord: (u.md_of_record != null ? u.md_of_record : CLINIC.md_of_record),
+      demo: true, pilot: !!u.pilot
     };
     setSession(s);
     return { session: s };

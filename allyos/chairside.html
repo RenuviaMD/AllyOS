@@ -225,12 +225,12 @@
   <div class="r"><span class="pill green" id="opstat">● OPERATIONAL</span><span id="who"></span>
     <label title="Where RenuviaMD is the Medical Director, gates enforce absolutely."><input type="checkbox" id="mdMode"> MD-of-record</label>
     <label title="Demo only: shows a ⏩ button to fast-forward an infusion to the 5-min / 2-min / end alarms so you can preview them."><input type="checkbox" id="demoMode"> Demo</label>
-    <a href="#" onclick="refOpen();return false">📖 Reference</a><a href="iv-inventory.html">Inventory</a><a href="iv-calculator.html">Calc</a><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
+    <a href="#" onclick="refOpen();return false">📖 Reference</a><a href="#" onclick="openFeedback();return false" style="color:var(--gold)">💬 Feedback</a><a href="iv-inventory.html">Inventory</a><a href="iv-calculator.html">Calc</a><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
 </div>
 
 <!-- lead capture (Netlify Forms — submissions appear in the Netlify dashboard, exportable) -->
 <form name="allyos-leads" data-netlify="true" netlify-honeypot="bot-field" hidden>
-  <input type="email" name="email"><input name="clinic"><input name="role"><input name="context"><input name="bot-field">
+  <input type="email" name="email"><input name="clinic"><input name="role"><input name="context"><input name="message"><input name="bot-field">
 </form>
 <div id="demobar" style="display:none;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;background:linear-gradient(90deg,#2a2310,#1a1606);border-bottom:1px solid #5a4a22;color:var(--gold);font-size:.78rem;padding:8px 16px;text-align:center"></div>
 
@@ -948,6 +948,18 @@ function captureEmail(context){var saved='';try{saved=localStorage.getItem('ally
     '<button class="btn neon" style="width:100%;margin-top:10px" onclick="submitLead(\''+esc(context)+'\')">Unlock more Ally →</button>'+
     '<div class="muted" style="font-size:.7rem;text-align:center;margin-top:8px">We only use this to help set up your AllyOS.</div>';
   showModal(h);}
+// pilot feedback — straight to the AllyOS team (no PHI)
+function openFeedback(){var ses=(window.AllyOSAuth&&AllyOSAuth.session())||{};
+  var h='<button class="x" onclick="closeModal()">×</button><h3>💬 Send feedback</h3><div class="sub">Bug, rough edge, or an idea? It goes straight to the AllyOS team — exactly how we fine-tune. Please, no patient identifiers.</div>'+
+    '<textarea id="fbMsg" rows="4" placeholder="What happened / what would make this better?" style="width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:10px;color:var(--ink);font-family:inherit;font-size:.9rem"></textarea>'+
+    '<div class="frow" style="margin-top:8px"><div><label>Your email (optional)</label><input id="fbEmail" type="email" value="'+esc(ses.email||'')+'" placeholder="so we can follow up"></div></div>'+
+    '<button class="btn neon" style="width:100%;margin-top:10px" onclick="submitFeedback()">Send feedback →</button>';
+  showModal(h);}
+function submitFeedback(){var m=(val('fbMsg')||'').trim();if(!m){alert('Add a quick note first.');return;}
+  var ses=(window.AllyOSAuth&&AllyOSAuth.session())||{};
+  var body='form-name=allyos-leads&context=pilot-feedback&email='+encodeURIComponent(val('fbEmail')||ses.email||'')+'&clinic='+encodeURIComponent(ses.clinic||'')+'&role='+encodeURIComponent(ses.credential||ses.role||'')+'&message='+encodeURIComponent(m);
+  fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body}).catch(function(){});
+  showModal('<button class="x" onclick="closeModal()">×</button><h3 style="color:var(--teal)">✓ Sent — thank you</h3><div class="sub">Your feedback reached the AllyOS team. This is exactly how we make it better.</div><button class="btn neon" style="width:100%" onclick="closeModal()">Close</button>');}
 function submitLead(context){var e=(val('leadEmail')||'').trim();if(!/.+@.+\..+/.test(e)){alert('Please enter a valid work email.');return;}
   var body='form-name=allyos-leads&email='+encodeURIComponent(e)+'&clinic='+encodeURIComponent(val('leadClinic')||'')+'&role='+encodeURIComponent(val('leadRole')||'')+'&context='+encodeURIComponent(context||'');
   fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body}).catch(function(){});
