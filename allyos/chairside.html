@@ -309,10 +309,25 @@ Promise.all([
   load(); fillProto(); renderEmergency(); renderQueue(); renderChairs(); renderPrep(); renderDetail();
 }).catch(function(e){document.getElementById('chairs').innerHTML='<div class="flag crit">Could not load IV module ('+e.message+')</div>';});
 
-function load(){try{var s=JSON.parse(localStorage.getItem(KEY)||'{}');QUEUE=s.q||seedQueue();}catch(e){QUEUE=seedQueue();}
+function load(){try{var s=JSON.parse(localStorage.getItem(KEY)||'{}');QUEUE=s.q||seedQueue();
+    if(s.chairs&&s.chairs.length===6){CHAIRS=s.chairs.map(reviveChair);}
+    if(s.ally&&s.ally.length){ALLY_HIST=s.ally;}
+  }catch(e){QUEUE=seedQueue();}
   // heal duplicate / missing ids saved by older builds (performance.now() could collide)
-  var seen={},fixed=false;QUEUE.forEach(function(p){if(!p.id||seen[p.id]){p.id=pid();fixed=true;}seen[p.id]=1;});if(fixed)save();}
-function save(){localStorage.setItem(KEY,JSON.stringify({q:QUEUE}));}
+  var seen={},fixed=false;QUEUE.forEach(function(p){if(!p.id||seen[p.id]){p.id=pid();fixed=true;}seen[p.id]=1;});if(fixed)save();
+  // resume live countdowns for chairs that were mid-infusion when the page was unloaded (refresh / tablet sleep / nav)
+  CHAIRS.forEach(function(c,i){if(c&&c.state==='infusing'&&c.remain>0)runChair(i,true);});}
+// serialize a chair for on-device persistence — strips the live timer handle; stores an
+// absolute deadline so a reload/sleep doesn't "freeze" or lose elapsed infusion time.
+function serializeChair(c){if(!c)return null;var o={};for(var k in c){if(k==='timer')continue;o[k]=c[k];}
+  if(c.state==='infusing')o.endAt=Date.now()+Math.max(0,c.remain)*1000;
+  return o;}
+function reviveChair(o){if(!o)return null;o.timer=null;
+  if(o.state==='infusing'){if(o.endAt)o.remain=Math.round((o.endAt-Date.now())/1000);
+    if(o.remain<=0){o.remain=0;o.state='ended';if(!o.endedStr)o.endedStr=fmtClock(new Date());}}
+  return o;}
+// PHI stays on THIS device only — localStorage, never a server. Survives refresh / sleep / navigation.
+function save(){try{localStorage.setItem(KEY,JSON.stringify({q:QUEUE,chairs:CHAIRS.map(serializeChair),ally:ALLY_HIST.slice(-40)}));}catch(e){}}
 function seedQueue(){return [
   {id:pid(),first:'Sarah',last:'Martinez',name:'Sarah Martinez',dob:'1990-03-12',sex:'F',proto:'IV-05',alerts:[],gfe:false,gfeDate:'',consent:false},
   {id:pid(),first:'Michael',last:'Chen',name:'Michael Chen',dob:'1985-07-22',sex:'M',proto:'IV-08',alerts:['G6PD deficiency'],gfe:true,gfeDate:'2026-04-30',consent:false},
@@ -603,8 +618,8 @@ function overrideGate(id,what){var r=prompt('Override '+what+' hard-stop — rea
 function renderChairs(){var el=document.getElementById('chairs');var h='';
   for(var i=0;i<6;i++){var c=CHAIRS[i];
     if(!c){h+='<div class="chair"><div class="num">'+(i+1)+'</div><div class="st">AVAILABLE</div></div>';continue;}
-    var cls=c.state==='ended'?'ended':(c.state==='paused'?'paused':(c.state==='infusing'&&c.remain<=300?'warn':'occupied'));
-    var clk=c.state==='ended'?'INFUSION ENDED':(c.state==='paused'?fmt(c.remain)+' ⏸':fmt(c.remain));
+    var cls=c.suspended?'warn':(c.state==='ended'?'ended':(c.state==='paused'?'paused':(c.state==='infusing'&&c.remain<=300?'warn':'occupied')));
+    var clk=c.suspended?'⏹ SUSPENDED':(c.state==='ended'?'INFUSION ENDED':(c.state==='paused'?fmt(c.remain)+' ⏸':fmt(c.remain)));
     var pct=c.total?Math.min(100,Math.round((c.total-c.remain)/c.total*100)):0;
     h+='<div class="chair '+cls+'"><div class="num" style="font-size:.95rem">Chair '+(i+1)+'</div><div class="pt">'+esc(dispName(c.patient))+'</div><div class="pr">'+esc(c.protoLabel)+'</div>'+
       '<div class="cmeta">'+esc(c.base)+' · '+c.vol+' mL · '+c.time+' min'+(c.startedStr?' · ⏱ '+esc(c.startedStr):'')+'</div>'+
@@ -612,8 +627,8 @@ function renderChairs(){var el=document.getElementById('chairs');var h='';
       ((c.state==='infusing'||c.state==='paused'||c.state==='ended')?'<div class="cprog"><div class="cbar" id="bar'+i+'" style="width:'+pct+'%"></div></div>':'')+
       '<div class="chairbtns">'+
       (c.state==='ready'?'<button class="btn neon-green" onclick="startInfusion('+i+')">▶ Start</button>':'')+
-      (c.state==='infusing'?'<button class="btn ghost" onclick="pauseChair('+i+')">⏸ Pause</button><button class="btn ghost" onclick="openMonitor('+i+')">Monitor</button>':'')+
-      (c.state==='paused'?'<button class="btn neon-green" onclick="resumeChair('+i+')">▶ Resume</button><button class="btn ghost" onclick="openMonitor('+i+')">Monitor</button>':'')+
+      (c.state==='infusing'?'<button class="btn ghost" onclick="pauseChair('+i+')">⏸ Pause</button><button class="btn ghost" onclick="openMonitor('+i+')">Monitor</button><button class="btn ghost" onclick="endChair('+i+')">⏹ End</button>':'')+
+      (c.state==='paused'?'<button class="btn neon-green" onclick="resumeChair('+i+')">▶ Resume</button><button class="btn ghost" onclick="openMonitor('+i+')">Monitor</button><button class="btn ghost" onclick="endChair('+i+')">⏹ End</button>':'')+
       (c.state==='ended'?'<button class="btn ghost" onclick="dischargeChair('+i+')">Discharge</button>':'')+
       ((c.state==='infusing'||c.state==='paused'||c.state==='ended')?'<button class="btn ghost allychairbtn" onclick="allyAskChair('+i+')" title="Ask Ally about this build"><img src="ally-avatar-64.png" alt="Ally" class="allyface" style="width:18px;height:18px" onerror="this.replaceWith(document.createTextNode(\'💬\'))"></button>':'')+
       ((c.state==='infusing'&&demoMode())?'<button class="btn ghost allychairbtn" onclick="skipToNext('+i+')" title="Demo: jump to the next alarm">⏩</button>':'')+
@@ -635,40 +650,67 @@ function renderSeatPrompt(){var el=document.getElementById('seatPrompt');if(!el)
 function startInfusion(i){var c=CHAIRS[i];if(!c)return;
   var h='<button class="x" onclick="closeModal()">×</button><h3>Start — Chair '+(i+1)+'</h3><div class="sub">'+esc(c.patient.name)+' · '+esc(c.protoLabel)+' · '+c.base+' '+c.vol+' mL · '+c.time+' min</div>'+
     '<div class="flag info"><b>Pre-start vitals (universal hold check)</b>BP/HR/SpO2/Temp within range; no red-flag symptom.</div>'+
-    '<div class="frow"><div><label>BP</label><input id="vBP" placeholder="120/78"></div><div><label>HR</label><input id="vHR" placeholder="72"></div><div><label>SpO2 %</label><input id="vO2" placeholder="98"></div><div><label>Temp</label><input id="vT" placeholder="98.4"></div></div>'+
+    '<div class="frow"><div><label>BP</label><input id="vBP" inputmode="numeric" oninput="bpMask(this)" placeholder="120/78"></div><div><label>HR</label><input id="vHR" placeholder="72"></div><div><label>SpO2 %</label><input id="vO2" placeholder="98"></div><div><label>Temp</label><input id="vT" placeholder="98.4"></div></div>'+
     '<div class="frow"><div><label>IV site</label><select id="vSite"><option value="">—</option><option>L AC</option><option>R AC</option><option>L forearm</option><option>R forearm</option><option>L hand</option><option>R hand</option></select></div><div><label>Gauge</label><select id="vGauge"><option value="">—</option><option>20G</option><option selected>22G</option><option>24G</option></select></div><div><label>Delivery</label><select id="vDel"><option>Gravity</option><option>Pump</option></select></div></div>'+
     '<div class="muted" style="font-size:.72rem;margin-bottom:8px">Confirm venipuncture / catheter placed &amp; patent.</div>'+
     '<button class="btn neon-green" style="width:100%" onclick="reallyStart('+i+')">▶ Start infusion</button>';
   showModal(h);
 }
-function reallyStart(i){var c=CHAIRS[i];c.preVitals={bp:val('vBP'),hr:val('vHR'),o2:val('vO2'),t:val('vT')};c.site=val('vSite');c.gauge=val('vGauge');c.delivery=val('vDel');c.state='infusing';c.startedStr=fmtClock(new Date());c.endedStr='';c.warned300=false;c.warned120=false;closeModal();runChair(i);renderChairs();}
+function reallyStart(i){var c=CHAIRS[i];c.preVitals={bp:val('vBP'),hr:val('vHR'),o2:val('vO2'),t:val('vT')};c.site=val('vSite');c.gauge=val('vGauge');c.delivery=val('vDel');c.state='infusing';c.startedStr=fmtClock(new Date());c.endedStr='';c.warned300=false;c.warned120=false;closeModal();runChair(i);save();renderChairs();}
 function demoMode(){var e=document.getElementById('demoMode');return e&&e.checked;}
 // demo only: jump the running infusion to just above the next alarm threshold
 function skipToNext(i){var c=CHAIRS[i];if(!c||c.state!=='infusing')return;if(!c.warned300){c.remain=301;}else if(!c.warned120){c.remain=121;}else{c.remain=1;}renderChairs();}
 // pause / resume — hold the drip without ending it (line check, bathroom, mild reaction)
-function pauseChair(i){var c=CHAIRS[i];if(!c||c.state!=='infusing')return;if(c.timer){clearInterval(c.timer);c.timer=null;}c.state='paused';c.pausedStr=fmtClock(new Date());renderChairs();}
-function resumeChair(i){var c=CHAIRS[i];if(!c||c.state!=='paused')return;c.state='infusing';runChair(i);renderChairs();}
-function runChair(i){var c=CHAIRS[i];beep(140,660);c.timer=setInterval(function(){c.remain--;var e=document.getElementById('clk'+i);if(e&&c.state==='infusing')e.textContent=fmt(Math.max(0,c.remain));
+function pauseChair(i){var c=CHAIRS[i];if(!c||c.state!=='infusing')return;if(c.timer){clearInterval(c.timer);c.timer=null;}c.state='paused';c.pausedStr=fmtClock(new Date());save();renderChairs();}
+function resumeChair(i){var c=CHAIRS[i];if(!c||c.state!=='paused')return;c.state='infusing';runChair(i);save();renderChairs();}
+function runChair(i,silent){var c=CHAIRS[i];if(!silent)beep(140,660);c.timer=setInterval(function(){c.remain--;var e=document.getElementById('clk'+i);if(e&&c.state==='infusing')e.textContent=fmt(Math.max(0,c.remain));
   var b=document.getElementById('bar'+i);if(b)b.style.width=(c.total?Math.min(100,Math.round((c.total-c.remain)/c.total*100)):0)+'%';
   // 5-minute ORANGE warning — two mid beeps, chair goes amber (fires once)
   if(c.remain<=300&&!c.warned300){c.warned300=true;beep(220,990);setTimeout(function(){beep(220,990);},300);renderChairs();}
   // 2-minute RED warning — three sharper beeps (fires once)
   if(c.remain<=120&&!c.warned120){c.warned120=true;beep(260,1100);setTimeout(function(){beep(260,1100);},250);setTimeout(function(){beep(260,1100);},500);renderChairs();}
   // ended — long triple tone, chair turns red 'INFUSION ENDED'
-  if(c.remain<=0){clearInterval(c.timer);c.timer=null;c.state='ended';c.endedStr=fmtClock(new Date());beep(700,880);setTimeout(function(){beep(700,880);},800);setTimeout(function(){beep(700,880);},1600);renderChairs();}
+  if(c.remain<=0){clearInterval(c.timer);c.timer=null;c.state='ended';c.endedStr=fmtClock(new Date());beep(700,880);setTimeout(function(){beep(700,880);},800);setTimeout(function(){beep(700,880);},1600);save();renderChairs();}
 },1000);}
 function flash(i){renderChairs();}
+// ---------- END / SUSPEND (a stopped infusion MUST stay on the record) ----------
+var SUSPEND_REASONS=['Adverse reaction','Patient request / declined to continue','IV access issue (infiltration / extravasation / lost line)','Clinical decision — provider','Vasovagal / felt unwell','Equipment / supply issue','Other'];
+function endChair(i){var c=CHAIRS[i];if(!c)return;
+  var done=Math.max(0,c.total-c.remain);var pct=c.total?Math.round(done/c.total*100):100;var ml=c.vol?Math.round(c.vol*done/c.total):'';
+  var h='<button class="x" onclick="closeModal()">×</button><h3>⏹ End infusion — Chair '+(i+1)+'</h3>'+
+    '<div class="sub">'+esc(dispName(c.patient))+' · '+esc(c.protoLabel)+' · ~'+pct+'% delivered ('+ml+' of '+c.vol+' mL).</div>'+
+    '<label class="chk" style="margin:8px 0 4px"><input type="radio" name="endmode" value="complete" checked onchange="document.getElementById(\'suspBox\').style.display=\'none\'"> ✓ Infusion completed — discharge normally</label>'+
+    '<label class="chk" style="margin:0 0 4px"><input type="radio" name="endmode" value="suspend" onchange="document.getElementById(\'suspBox\').style.display=\'block\'"> ⏹ Stopped / suspended early — keep on record</label>'+
+    '<div id="suspBox" style="display:none;margin-top:6px">'+
+      '<label class="muted" style="font-size:.74rem">Reason (required)</label>'+
+      '<select id="suspReason" style="width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:9px;color:var(--ink);font-family:inherit;margin-bottom:6px"><option value="">— select —</option>'+SUSPEND_REASONS.map(function(r){return '<option>'+esc(r)+'</option>';}).join('')+'</select>'+
+      '<textarea id="suspNote" rows="2" placeholder="What happened / action taken (e.g. line removed, provider notified, CARD-V used)" style="width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:9px;color:var(--ink);font-family:inherit;font-size:.86rem"></textarea>'+
+      '<div class="muted" style="font-size:.7rem;margin-top:4px">If this was an adverse event, also complete <b>FORM-04</b> and notify the provider — it carries into the infusion note &amp; the MD audit.</div>'+
+    '</div>'+
+    '<button class="btn neon" style="width:100%;margin-top:10px" onclick="finalizeEnd('+i+')">Continue to discharge →</button>';
+  showModal(h);
+}
+function finalizeEnd(i){var c=CHAIRS[i];if(!c)return;
+  var mode=(document.querySelector('input[name=endmode]:checked')||{}).value||'complete';
+  if(mode==='suspend'){var r=val('suspReason');if(!r){alert('Select a reason for stopping the infusion.');return;}
+    var n=(val('suspNote')||'').trim();c.suspended=true;c.suspendReason=r+(n?(' — '+n):'');c.suspendAt=fmtClock(new Date());}
+  if(c.timer){clearInterval(c.timer);c.timer=null;}
+  c.mlGiven=c.vol?Math.round(c.vol*Math.max(0,c.total-c.remain)/c.total):null;
+  c.endedStr=c.endedStr||fmtClock(new Date());c.state='ended';
+  save();renderChairs();dischargeChair(i);
+}
 function dischargeChair(i){var c=CHAIRS[i];if(!c)return;
   var h='<button class="x" onclick="closeModal()">×</button><h3>Discharge — Chair '+(i+1)+'</h3><div class="sub">'+esc(dispName(c.patient))+' · recheck vitals, remove catheter, aftercare.</div>'+
-    '<div class="frow"><div><label>Post BP</label><input id="dBP" placeholder="118/76"></div><div><label>HR</label><input id="dHR" placeholder="70"></div><div><label>SpO2</label><input id="dO2" placeholder="99"></div></div>'+
+    (c.suspended?'<div class="flag warn" style="margin-bottom:8px"><b>⏹ Infusion suspended</b>'+esc(c.suspendReason)+' · ~'+(c.mlGiven!=null?c.mlGiven:'?')+' of '+c.vol+' mL infused. This is recorded on the note &amp; in the MD audit.</div>':'')+
+    '<div class="frow"><div><label>Post BP</label><input id="dBP" inputmode="numeric" oninput="bpMask(this)" placeholder="118/76"></div><div><label>HR</label><input id="dHR" placeholder="70"></div><div><label>SpO2</label><input id="dO2" placeholder="99"></div></div>'+
     '<label class="muted" style="font-size:.74rem;display:flex;gap:6px;align-items:center;margin:4px 0"><input type="checkbox" id="dAmb" checked> Ambulates without orthostatic symptoms · aftercare handout given</label>'+
-    '<label class="muted" style="font-size:.74rem;display:flex;gap:6px;align-items:center"><input type="checkbox" id="dTol" checked> Patient tolerated infusion well · discharged stable</label>'+
+    '<label class="muted" style="font-size:.74rem;display:flex;gap:6px;align-items:center"><input type="checkbox" id="dTol" '+(c.suspended?'':'checked')+'> Patient tolerated infusion well · discharged stable</label>'+
     '<button class="btn ghost" style="width:100%;margin-top:8px" onclick="openAftercare('+i+')">🖨 Patient aftercare handout (take-home)</button>'+
     '<button class="btn neon" style="width:100%;margin-top:8px" onclick="toNote('+i+')">📄 Generate infusion note →</button>';
   showModal(h);
 }
 function toNote(i){var c=CHAIRS[i];if(!c)return;c.postVitals={bp:val('dBP'),hr:val('dHR'),o2:val('dO2')};c.dAmb=!!(document.getElementById('dAmb')||{}).checked;c.dTol=!!(document.getElementById('dTol')||{}).checked;openInfusionNote(i);}
-function freeChair(i){if(CHAIRS[i]&&CHAIRS[i].timer)clearInterval(CHAIRS[i].timer);CHAIRS[i]=null;closeModal();renderChairs();}
+function freeChair(i){if(CHAIRS[i]&&CHAIRS[i].timer)clearInterval(CHAIRS[i].timer);CHAIRS[i]=null;save();closeModal();renderChairs();}
 
 // ---------- IV INFUSION NOTE (one-page, auto-composed, provider-signed + date-stamped) ----------
 function nowStamp(){var d=new Date();return fmtDob(todayISO())+' '+fmtClock(d);}
@@ -703,7 +745,7 @@ function composeNote(i){var c=CHAIRS[i],p=c.patient,df=15,g=gfeState(p);
       '<div style="margin-top:4px"><span class="nk">Monitoring</span>'+monStr+'</div></div>'+
     '<div class="nsec"><h3>Outcome</h3><div class="nrow"><span class="nk">Post-vitals</span><span>BP '+(esc(post.bp||'—'))+' · HR '+(esc(post.hr||'—'))+' · SpO2 '+(esc(post.o2||'—'))+'</span></div>'+
       '<div class="nrow"><span class="nk">Tolerance</span><span>'+aeLine+'</span></div>'+
-      '<div class="nrow"><span class="nk">Discharge</span><span>'+(c.dTol?'Stable':'See note')+(c.dAmb?' · ambulating without orthostatic symptoms · aftercare reviewed':'')+'</span></div></div>'+
+      '<div class="nrow"><span class="nk">Discharge</span><span>'+(c.suspended?('<b style="color:#b3261e">Infusion SUSPENDED</b> — '+esc(c.suspendReason)+' · ~'+(c.mlGiven!=null?c.mlGiven:'?')+' of '+c.vol+' mL infused'):(c.dTol?'Stable':'See note'))+(c.dAmb?' · ambulating without orthostatic symptoms · aftercare reviewed':'')+'</span></div></div>'+
     '<div class="nsec"><h3>Compliance attestation</h3><div class="ncomp">'+
       '✓ Valid GFE '+(g.k==='done'?'current':'('+esc(g.label)+')')+' &nbsp; ✓ Consent on file &nbsp; ✓ Ingredient contraindication screen performed &nbsp; ✓ Within adult wellness scope (non-disease) &nbsp; ✓ Emergency escalation pathway available'+
       (aes.length?' &nbsp; ⚠ FORM-04 adverse-event report required':'')+'</div></div>'+
@@ -715,7 +757,7 @@ function composeNote(i){var c=CHAIRS[i],p=c.patient,df=15,g=gfeState(p);
     '<div class="noprint" style="display:flex;gap:8px;margin-top:12px">'+(sig?'<button class="btn neon" style="flex:1" onclick="window.print()">🖨 Print / Save PDF</button><button class="btn ghost" style="flex:1" onclick="freeChair('+i+')">Close chart &amp; free chair</button>':'<button class="btn ghost" style="flex:1" onclick="closeModal()">Back</button>')+'</div>';
 }
 function openInfusionNote(i){showModal(composeNote(i));}
-function signNote(i){var c=CHAIRS[i];var prov=val('noteProv').trim()||((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||'Provider');c.noteSigned={provider:prov,stamp:nowStamp()};if(!c.encounterId)logEncounter(i);openInfusionNote(i);}
+function signNote(i){var c=CHAIRS[i];var prov=val('noteProv').trim()||((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||'Provider');c.noteSigned={provider:prov,stamp:nowStamp()};if(!c.encounterId)logEncounter(i);save();openInfusionNote(i);}
 // ---------- AUDIT LOG (de-identified encounter registry — for MD audit, PHI-free) ----------
 function loadAudit(){try{return JSON.parse(localStorage.getItem('allyos_audit_v1')||'[]');}catch(e){return [];}}
 function saveAudit(a){try{localStorage.setItem('allyos_audit_v1',JSON.stringify(a));}catch(e){}}
@@ -736,6 +778,7 @@ function encounterRisk(c){var p=c.patient,bag=c.bag||[],flags=[];
   if((p.alerts||[]).length)flags.push('Comorbidity: '+(p.alerts||[]).map(function(a){return a.split(' /')[0].split(' (')[0];}).join(', '));
   if(c.override)flags.push('Override used');
   if((c.monitoring||[]).some(function(m){return m.ae;}))flags.push('Adverse event');
+  if(c.suspended)flags.push('Infusion suspended');
   return flags;}
 function logEncounter(i){var c=CHAIRS[i],p=c.patient,g=gfeState(p),s=stackByCode(p.proto),eid=nextEncounterId();c.encounterId=eid.id;
   var rf=encounterRisk(c);
@@ -745,7 +788,8 @@ function logEncounter(i){var c=CHAIRS[i],p=c.patient,g=gfeState(p),s=stackByCode
     override:c.override||'',ae:(c.monitoring||[]).some(function(m){return m.ae;}),monCount:(c.monitoring||[]).length,
     riskFlags:rf,risk:rf.length,ing:(c.bag||[]).map(function(it){return (it.name||'').split(' (')[0];}),
     preVit:!!(c.preVitals&&(c.preVitals.bp||c.preVitals.hr)),postVit:!!(c.postVitals&&(c.postVitals.bp||c.postVitals.hr)),aftercare:!!c.dAmb,
-    provider:(c.noteSigned&&c.noteSigned.provider)||'',outcome:(c.dTol?'stable':'see note')};
+    suspended:!!c.suspended,suspendReason:c.suspendReason||'',mlGiven:(c.mlGiven!=null?c.mlGiven:''),
+    provider:(c.noteSigned&&c.noteSigned.provider)||'',outcome:(c.suspended?'suspended':(c.dTol?'stable':'see note'))};
   var a=loadAudit();a.push(rec);saveAudit(a);}
 // patient take-home aftercare handout (FORM-03) — printed before they leave
 function composeAftercare(i){var c=CHAIRS[i],p=c.patient,a=REF.aftercare||{},s=stackByCode(p.proto);
@@ -785,7 +829,7 @@ function openMonitor(i){var c=CHAIRS[i];if(!c)return;c._sym=c._sym||{};c._int=c.
     '<label style="font-size:.7rem;color:var(--muted)">Symptoms — tap any (or Feels OK)</label><div class="mchips">'+sym+'</div>'+
     '<label style="font-size:.7rem;color:var(--muted)">Interventions (if any)</label><div class="mchips">'+intc+'</div>'+
     '<label style="font-size:.7rem;color:var(--muted)">Vitals (optional)</label>'+
-    '<div class="frow"><div><label>BP</label><input id="mBP" value="'+esc(v.bp||'')+'"></div><div><label>HR</label><input id="mHR" value="'+esc(v.hr||'')+'"></div><div><label>RR</label><input id="mRR" value="'+esc(v.rr||'')+'"></div><div><label>SpO2</label><input id="mO2" value="'+esc(v.o2||'')+'"></div></div>'+
+    '<div class="frow"><div><label>BP</label><input id="mBP" inputmode="numeric" oninput="bpMask(this)" value="'+esc(v.bp||'')+'"></div><div><label>HR</label><input id="mHR" value="'+esc(v.hr||'')+'"></div><div><label>RR</label><input id="mRR" value="'+esc(v.rr||'')+'"></div><div><label>SpO2</label><input id="mO2" value="'+esc(v.o2||'')+'"></div></div>'+
     '<input id="mNote" placeholder="Note (optional)" value="'+esc(v.note||'')+'" style="width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink);font-size:.85rem;font-family:inherit">'+
     '<button class="btn neon-green" style="width:100%;margin-top:10px" onclick="logCheckpoint('+i+')">✓ Log checkpoint</button>'+
     '<div style="margin-top:10px"><div class="col-h" style="font-size:.7rem">Checkpoints</div>'+log+'</div>';
@@ -800,7 +844,7 @@ function logCheckpoint(i){var c=CHAIRS[i];saveMonVit(i);var v=c._vit||{};
   var mid=c.total>3600&&(c.total-c.remain)>=(c.total/2-300)&&(c.total-c.remain)<=(c.total/2+300);
   c.monitoring.push({t:'+'+Math.round((c.total-c.remain)/60)+'m',note:note,ae:red,mid:mid});
   var em=null;syms.forEach(function(k){var s=symByK(k);if(s&&s.em&&!em)em=s.em;});
-  c._sym={};c._int={};c._vit={};
+  c._sym={};c._int={};c._vit={};save();
   if(red&&em){closeModal();monRedFlag(i,em);}else openMonitor(i);
 }
 function monRedFlag(i,em){var label=em==='ANAPHYLAXIS'?'CARD-A · Anaphylaxis':em==='VASOVAGAL'?'CARD-V · Vasovagal':'Infiltration / extravasation';
@@ -959,7 +1003,13 @@ function refBench(q){var b=REF.quick_reference;if(!b)return '<div class="empty">
   return out;}
 
 // ---------- ASK ALLY (chat drawer · PHI-free, grounded in the locked module) ----------
-function allyOpen(){document.getElementById('allyDrawer').classList.add('show');if(!ALLY_HIST.length)allyAppend('sys','Ally answers from the locked IV/IM library — evidence-graded, no invented doses or citations. It sees the bench + chair builds by number (bag contents only, never names). Defer the final call & signature to the provider.');allyUpdateCtx();document.getElementById('allyInput').focus();}
+function allyOpen(){document.getElementById('allyDrawer').classList.add('show');
+  var log=document.getElementById('allyLog');
+  if(log&&!log.children.length){ // fresh open OR after a reload — rebuild from saved history
+    allyAppend('sys','Ally answers from the locked IV/IM library — evidence-graded, no invented doses or citations. It sees the bench + chair builds by number (bag contents only, never names). Defer the final call & signature to the provider.');
+    ALLY_HIST.forEach(function(m){allyAppend(m.role==='user'?'u':'a',m.role==='user'?m.content.replace(/\n\n\[[\s\S]*\]$/,''):m.content);});
+  }
+  allyUpdateCtx();document.getElementById('allyInput').focus();}
 function allyAskChair(i){var c=CHAIRS[i];allyOpen();var inp=document.getElementById('allyInput');if(inp&&c){inp.value='For Chair '+(i+1)+' ('+c.protoLabel+'): ';inp.focus();}}
 function allyClose(){document.getElementById('allyDrawer').classList.remove('show');}
 function bagDesc(b){var items=(b.items||[]).map(function(it){return it.name+(it.dose?(' '+it.dose):'');}).join('; ');return b.base+' '+b.vol+' mL / '+b.time+' min — '+(items||'no additives yet');}
@@ -1003,10 +1053,10 @@ function allySend(){var inp=document.getElementById('allyInput');var q=(inp.valu
   // demo: the ONLY hard limit — cap Ally API calls, then capture email to continue
   if(IS_DEMO && !demoLeadOk() && ALLY_USED>=ALLY_CAP){captureEmail('ally-cap');return;}
   inp.value='';
-  var ctx=allyCtx();ALLY_HIST.push({role:'user',content:ctx?(q+'\n\n['+ctx+']'):q});
+  var ctx=allyCtx();ALLY_HIST.push({role:'user',content:ctx?(q+'\n\n['+ctx+']'):q});save();
   allyAppend('u',q);var bubble=allyAppend('a','…');if(IS_DEMO)ALLY_USED++;allyUpdateCtx();
   fetch('/.netlify/functions/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:ALLY_HIST.slice(-8)})})
-   .then(function(r){return r.json();}).then(function(d){var t=d.text||(d.error==='not_configured'?'Ally isn\'t configured on this deploy yet (no API key).':(d.error||'No response.'));bubble.textContent=t;if(d.text)ALLY_HIST.push({role:'assistant',content:d.text});var log=document.getElementById('allyLog');log.scrollTop=log.scrollHeight;})
+   .then(function(r){return r.json();}).then(function(d){var t=d.text||(d.error==='not_configured'?'Ally isn\'t configured on this deploy yet (no API key).':(d.error||'No response.'));bubble.textContent=t;if(d.text){ALLY_HIST.push({role:'assistant',content:d.text});save();}var log=document.getElementById('allyLog');log.scrollTop=log.scrollHeight;})
    .catch(function(e){bubble.textContent='Ally unreachable — '+e.message;});}
 
 // ---------- DEMO COACH GUIDE (non-blocking, step-by-step, highlights the area) ----------
@@ -1033,6 +1083,10 @@ function showModalEm(h){document.getElementById('modal').className='modal em';do
 function closeModal(){document.getElementById('overlay').classList.remove('show');}
 function sel(a,b){return a==b?' selected':'';}
 function val(id){var e=document.getElementById(id);return e?e.value:'';}
+// blood-pressure input mask → forces the "xx/xx" shape (digits + a single slash)
+function bpMask(el){var raw=el.value;
+  if(raw.indexOf('/')>=0){var p=raw.split('/');el.value=p[0].replace(/\D/g,'').slice(0,3)+'/'+p.slice(1).join('').replace(/\D/g,'').slice(0,3);return;}
+  var d=raw.replace(/\D/g,'').slice(0,6);el.value=d.length>3?(d.slice(0,3)+'/'+d.slice(3)):d;}
 function initials(n){return (n||'').split(' ').map(function(x){return x[0];}).join('').toUpperCase()+' ('+(n||'').split(' ')[0]+')';}
 function beep(ms,f){try{var a=new(window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=f;o.start();g.gain.setValueAtTime(.22,a.currentTime);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+ms/1000);o.stop(a.currentTime+ms/1000);}catch(e){}}
 function fmt(s){s=Math.max(0,s|0);var m=Math.floor(s/60),x=s%60;return (m<10?'0':'')+m+':'+(x<10?'0':'')+x;}
