@@ -163,6 +163,7 @@ function composeReport(){
   var audited=all.filter(function(r){return r.audited;});
   var corr=audited.filter(function(r){return r.auditPass===false;});
   var aes=all.filter(function(r){return r.ae;});
+  var susp=all.filter(function(r){return r.suspended;});
   var lbl=ym()?monthLabel(ym()):'—';
   var today=new Date().toISOString().slice(0,10);
   var del=addDays(today,30);
@@ -190,6 +191,7 @@ function composeReport(){
   // clinic status
   var status,scls;
   if(aes.length){status='Needs follow-up — adverse event(s) this period';scls='def';}
+  else if(susp.length){status='Review — infusion(s) suspended early this period';scls='def';}
   else if(corr.length||defs.length){status='Compliant with corrections';scls='def';}
   else if(!all.length){status='No encounters this period';scls='na';}
   else{status='Compliant';scls='ok';}
@@ -240,6 +242,10 @@ function composeReport(){
   // 5. Incidents / adverse events
   H+='<h3>5 · Incidents &amp; Adverse Events</h3>';
   H+=aes.length?('<table><tr><th>Encounter</th><th>Protocol</th><th>Monitoring checkpoints</th><th>Override</th></tr>'+aes.map(function(x){return '<tr><td><b>'+esc(x.id)+'</b></td><td>'+esc(x.protocol)+'</td><td>'+(x.monCount||0)+'</td><td>'+(x.override?esc(x.override):'—')+'</td></tr>';}).join('')+'</table><div style="font-size:.74rem;color:#5b6b72">Confirm FORM-04 completion and MD notification in the clinic chart for each event above.</div>'):'<div class="ok" style="font-size:.82rem">No adverse events reported this period.</div>';
+
+  // 5b. Suspended / stopped-early infusions
+  H+='<h3>5b · Suspended / Stopped-Early Infusions</h3>';
+  H+=susp.length?('<table><tr><th>Encounter</th><th>Protocol</th><th>Reason</th><th>Given</th></tr>'+susp.map(function(x){return '<tr><td><b>'+esc(x.id)+'</b></td><td>'+esc(x.protocol)+'</td><td>'+esc(x.suspendReason||'—')+'</td><td>'+(x.mlGiven!==''&&x.mlGiven!=null?esc(x.mlGiven)+' mL':'—')+'</td></tr>';}).join('')+'</table><div style="font-size:.74rem;color:#5b6b72">An infusion stopped before completion is on the record by design. Confirm the reason and any required follow-up in the clinic chart.</div>'):'<div class="ok" style="font-size:.82rem">No infusions suspended this period.</div>';
 
   // 6. Deficiencies
   H+='<h3>6 · Deficiencies Identified</h3>';
