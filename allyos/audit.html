@@ -76,7 +76,7 @@ body.reporting>.wrap{display:none}
     <h1>Practice Audit · <b>AllyOS</b></h1>
     <div class="noprint"><a href="chairside.html">← Chairside</a> &nbsp; <a href="#" onclick="exportCsv();return false">⬇ CSV</a> &nbsp; <a href="#" onclick="window.print();return false">🖨 Print</a></div>
   </div>
-  <div class="sub">Medical-Director risk-based review. <b>PHI-free</b> — no names/DOB. The tool ranks encounters by clinical risk (per the screening reference: IV NAD+, high-dose Vit C, Mg+Ca together, glutathione+asthma, comorbidities, overrides, adverse events) so you pull the highest-risk charts. Each encounter carries an ID; the clinic maps the ID to its own chart to verify GFE / consent / monitoring.</div>
+  <div class="sub">Medical-Director risk-based review. <b>PHI-free</b> — no names/DOB. Each encounter gets a <b>1–5 risk score</b>: <b>5 = mandatory review</b> (adverse event, suspended infusion, override), 4 = high-risk ingredient or missing gate, 3 = comorbidity/doc gap. The monthly sample pulls <b>100% of score-5 charts + the highest-risk remaining to reach 5</b>. Each encounter carries an ID; the clinic maps the ID to its own chart to verify GFE / consent / monitoring.</div>
   <div class="ctrls noprint">
     <label class="muted" style="font-size:.8rem">Month</label><select id="month" onchange="render()"></select>
     <span class="seg"><button id="vAll" class="on" onclick="setView('all')">All encounters</button><button id="vRisk" onclick="setView('risk')">🎯 Risk sample</button></span>
@@ -106,18 +106,44 @@ function ym(){return document.getElementById('month').value;}
 function rows(){return load().filter(function(r){return r.ym===ym();}).sort(function(a,b){return (b.risk||0)-(a.risk||0);});}
 function setView(v){VIEW=v;document.getElementById('vAll').classList.toggle('on',v==='all');document.getElementById('vRisk').classList.toggle('on',v==='risk');render();}
 function riskColor(r){return r>=3?'var(--red)':r>=1?'var(--gold)':'var(--green)';}
-function render(){var all=rows();var view=VIEW==='risk'?all.filter(function(r){return (r.risk||0)>0;}).slice(0,5):all;
+// ---- shared audit spine (v1.5 §14): 1–5 risk score + mandatory-review tiers ----
+// 5 = mandatory MD review · 4 = high · 3 = moderate · 2 = routine complete · 1 = low/admin
+function riskScore(r){
+  if(r.ae||r.suspended||r.override)return 5;                 // mandatory MD review (§14.6)
+  var rf=(r.riskFlags||[]);
+  if(rf.some(function(f){return /nad|high-dose|mg \+ ca|glutathione/i.test(f);}))return 4; // high-risk ingredient
+  if(r.gfe!=='current'||!r.consent)return 4;                 // missing hard gate
+  if(rf.length)return 3;                                     // comorbidity / other flag
+  if((r.monCount||0)===0||!r.preVit||!r.postVit)return 3;    // documentation gap
+  return 2;                                                  // routine, complete
+}
+function scoreColor(s){return s>=4?'var(--red)':s>=3?'var(--gold)':'var(--green)';}
+function mandatoryReasons(r){var z=[];if(r.ae)z.push('adverse event');if(r.suspended)z.push('infusion suspended');if(r.override)z.push('override used');return z;}
+// §14.2 sample: 100% of mandatory (score 5) charts + highest-risk remaining to reach ≥5
+function riskSample(all){
+  var scored=all.map(function(r){return {r:r,s:riskScore(r)};}).sort(function(a,b){return b.s-a.s;});
+  var mand=scored.filter(function(x){return x.s>=5;}).length;
+  return scored.slice(0,Math.min(Math.max(5,mand),scored.length)).map(function(x){return x.r;});
+}
+// defect severity (§14.5) for a missing/failed element
+function defSeverity(item){
+  if(/GFE|consent|MD chart review|contraindication/i.test(item))return 'Critical';
+  if(/vitals|monitoring|aftercare/i.test(item))return 'Major';
+  return 'Minor';
+}
+function render(){var all=rows();var view=VIEW==='risk'?riskSample(all):all;
   var audited=all.filter(function(r){return r.audited;}).length;
   var corr=all.filter(function(r){return r.audited&&r.auditPass===false;});
+  var mand=all.filter(function(r){return riskScore(r)>=5;}).length;
   document.getElementById('stats').innerHTML=
     stat('','Encounters (30d)',all.length)+
-    stat('amber','High-risk',all.filter(function(r){return (r.risk||0)>0;}).length)+
-    stat('teal','Audited',audited+' / '+Math.min(5,all.filter(function(r){return (r.risk||0)>0;}).length||all.length))+
+    stat(mand?'red':'green','Mandatory review',mand)+
+    stat('teal','Audited',audited+' / '+Math.max(5,mand))+
     stat(corr.length?'red':'green','Corrections open',corr.length)+
     stat('green','Adverse events',all.filter(function(r){return r.ae;}).length);
-  var th='<tr><th>Risk</th><th>Encounter ID</th><th>Date</th><th>Protocol</th><th>Risk signals</th><th>GFE</th><th>Consent</th><th>Monitor</th><th>Audit</th></tr>';
-  var body=view.length?view.map(function(x){var rf=x.riskFlags||[];
-    return '<tr class="'+((x.risk||0)>0?'hi':'')+'"><td><span class="rdot" style="background:'+riskColor(x.risk||0)+'"></span>'+(x.risk||0)+'</td>'+
+  var th='<tr><th>Score</th><th>Encounter ID</th><th>Date</th><th>Protocol</th><th>Risk signals</th><th>GFE</th><th>Consent</th><th>Monitor</th><th>Audit</th></tr>';
+  var body=view.length?view.map(function(x){var rf=x.riskFlags||[];var sc=riskScore(x);
+    return '<tr class="'+(sc>=4?'hi':'')+'"><td><span class="rdot" style="background:'+scoreColor(sc)+'"></span>'+sc+(sc>=5?' <span class="rf red" title="'+esc(mandatoryReasons(x).join(', '))+'">MD</span>':'')+'</td>'+
       '<td class="eid">'+esc(x.id)+'</td><td>'+esc(x.date)+'</td><td>'+esc(x.protocol)+'</td>'+
       '<td>'+(rf.length?rf.map(function(f){return '<span class="rf'+(/adverse|nad|mg \+ ca|asthma|high-dose/i.test(f)?' red':'')+'">'+esc(f)+'</span>';}).join(''):'<span class="muted">—</span>')+'</td>'+
       '<td>'+(x.gfe==='current'?'<span class="tick">✓</span>':'<span class="cross">'+esc(x.gfe)+'</span>')+'</td>'+
@@ -158,8 +184,8 @@ function ynn(v){return v?'<span class="ok">Y</span>':'<span class="na">—</span
 function composeReport(){
   var ses=(window.AllyOSAuth&&AllyOSAuth.session())||{};
   var all=rows();
-  var sample=all.filter(function(r){return (r.risk||0)>0;}).slice(0,5);
-  if(!sample.length)sample=all.slice(0,Math.min(5,all.length)); // low-risk month: still pull up to 5
+  var sample=riskSample(all);                                 // §14.2: 100% mandatory + fill to ≥5
+  var mand=all.filter(function(r){return riskScore(r)>=5;});
   var audited=all.filter(function(r){return r.audited;});
   var corr=audited.filter(function(r){return r.auditPass===false;});
   var aes=all.filter(function(r){return r.ae;});
@@ -212,17 +238,17 @@ function composeReport(){
   // 2. Monthly encounter review
   H+='<h3>2 · Monthly Encounter Review</h3><div class="meta">'+
     '<div><span>Total infusion visits (period)</span> <b>'+all.length+'</b></div>'+
-    '<div><span>Charts flagged high-risk</span> <b>'+all.filter(function(r){return (r.risk||0)>0;}).length+'</b></div>'+
+    '<div><span>Mandatory-review charts (score 5)</span> <b>'+mand.length+'</b></div>'+
     '<div><span>Charts selected for review</span> <b>'+sample.length+'</b></div>'+
     '<div><span>Charts reviewed by MD</span> <b>'+audited.length+'</b></div></div>'+
-    '<div style="font-size:.76rem;color:#5b6b72">Selection logic: highest clinical-risk charts first — IV NAD+, high-dose vitamin C (≥7.5 g), magnesium + calcium together, glutathione with asthma, comorbidity, protocol override, or any adverse event (per the published ingredient-screening reference).</div>';
+    '<div style="font-size:.76rem;color:#5b6b72">Selection logic (risk score 1–5): <b>100% of mandatory score-5 charts</b> — any adverse event, suspended infusion, or protocol override — plus the highest-risk remaining charts to reach a minimum sample of 5. Score 4 = high-risk ingredient (NAD+, Vit C ≥7.5 g, Mg + Ca, glutathione) or a missing GFE/consent gate; score 3 = comorbidity or documentation gap.</div>';
 
   // 3. Reviewed-chart matrix (clinical elements per encounter, Y/N/—)
   H+='<h3>3 · Reviewed-Chart Compliance Matrix</h3>';
   if(sample.length){
-    H+='<table><tr><th>Encounter</th><th>Protocol</th><th>GFE</th><th>Consent</th><th>Pre-vitals</th><th>Monitoring</th><th>Post-vitals</th><th>Aftercare</th><th>AE</th><th>MD verdict</th></tr>';
+    H+='<table><tr><th>Score</th><th>Encounter</th><th>Protocol</th><th>GFE</th><th>Consent</th><th>Pre-vitals</th><th>Monitoring</th><th>Post-vitals</th><th>Aftercare</th><th>AE</th><th>MD verdict</th></tr>';
     H+=sample.map(function(x){
-      return '<tr><td><b>'+esc(x.id)+'</b></td><td>'+esc(x.protocol)+'</td>'+
+      return '<tr><td><b>'+riskScore(x)+(riskScore(x)>=5?' ⚑':'')+'</b></td><td><b>'+esc(x.id)+'</b></td><td>'+esc(x.protocol)+'</td>'+
         '<td>'+(x.gfe==='current'?'<span class="ok">Y</span>':'<span class="def">N</span>')+'</td>'+
         '<td>'+yn(x.consent)+'</td><td>'+ynn(x.preVit)+'</td>'+
         '<td>'+((x.monCount||0)>0?'<span class="ok">Y·'+x.monCount+'</span>':'<span class="def">N</span>')+'</td>'+
@@ -249,7 +275,15 @@ function composeReport(){
 
   // 6. Deficiencies
   H+='<h3>6 · Deficiencies Identified</h3>';
-  H+=defs.length?('<table><tr><th>Encounter</th><th>Deficiency</th></tr>'+defs.map(function(d){return '<tr><td><b>'+esc(d.id)+'</b></td><td>'+d.items.map(esc).join('; ')+'</td></tr>';}).join('')+'</table>'):'<div class="ok" style="font-size:.82rem">No deficiencies identified in the reviewed charts.</div>';
+  if(defs.length){
+    var sevCount={Critical:0,Major:0,Minor:0};
+    var rowsH=defs.map(function(d){return d.items.map(function(it){var sev=defSeverity(it);sevCount[sev]++;
+      var cls=sev==='Critical'?'def':(sev==='Major'?'def':'na');
+      return '<tr><td><b>'+esc(d.id)+'</b></td><td><span class="'+cls+'">'+sev+'</span></td><td>'+esc(it)+'</td></tr>';}).join('');}).join('');
+    H+='<div style="font-size:.78rem;margin-bottom:6px"><b>Defect summary (§14.5):</b> <span class="def">Critical '+sevCount.Critical+'</span> · <span class="def">Major '+sevCount.Major+'</span> · <span class="na">Minor '+sevCount.Minor+'</span></div>';
+    H+='<table><tr><th>Encounter</th><th>Severity</th><th>Deficiency</th></tr>'+rowsH+'</table>'+
+      '<div style="font-size:.72rem;color:#94a3ab">Critical = GFE/consent/contraindication or MD-review flag (hold until corrected). Major = vitals/monitoring/aftercare documentation. Minor = administrative.</div>';
+  }else{H+='<div class="ok" style="font-size:.82rem">No deficiencies identified in the reviewed charts.</div>';}
 
   // 7. Corrective actions
   H+='<h3>7 · Corrective Actions</h3>';
