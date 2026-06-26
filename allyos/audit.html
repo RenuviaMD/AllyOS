@@ -80,6 +80,7 @@ body.reporting>.wrap{display:none}
   <div class="ctrls noprint">
     <label class="muted" style="font-size:.8rem">Month</label><select id="month" onchange="render()"></select>
     <span class="seg"><button id="vAll" class="on" onclick="setView('all')">All encounters</button><button id="vRisk" onclick="setView('risk')">🎯 Risk sample</button></span>
+    <button class="btn-s" onclick="openManual()" style="border-color:var(--teal)">＋ Add encounter (paper chart)</button>
     <a href="#" onclick="showReport();return false" style="font-size:.85rem;color:var(--gold)">📄 MD Oversight Report</a>
     <span class="muted" style="font-size:.78rem" id="who"></span>
   </div>
@@ -317,6 +318,55 @@ function composeReport(){
 }
 function showReport(){if(!ym()){alert('No encounters to report yet.');return;}document.getElementById('report').innerHTML=composeReport();document.getElementById('report').style.display='block';document.body.classList.add('reporting');window.scrollTo(0,0);}
 function hideReport(){document.getElementById('report').style.display='none';document.body.classList.remove('reporting');}
+
+// ---------- MANUAL ENTRY (paper-chart clinics) — de-identified, no PHI ----------
+function nextManualId(){var ses=(window.AllyOSAuth&&AllyOSAuth.session())||{};
+  var code=((ses.clinic||'CLINIC').replace(/[^A-Za-z]/g,'').slice(0,5)||'CLINIC').toUpperCase();
+  var y=ym()||(new Date()).toISOString().slice(0,7).replace('-','');
+  var n=load().filter(function(r){return r.ym===y;}).length+1;
+  return code+'-'+y+'-'+('000'+n).slice(-4);}
+function mField(id,label,ph,w){return '<div style="flex:1;min-width:'+(w||120)+'px"><label style="display:block;font-size:.7rem;color:var(--muted);margin-bottom:3px">'+label+'</label><input id="'+id+'" placeholder="'+(ph||'')+'" style="width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink);font-family:inherit;font-size:.86rem"></div>';}
+function mYN(id,label){return '<label class="chk" style="flex:1;min-width:150px"><input type="checkbox" id="'+id+'"> '+label+'</label>';}
+function openManual(){
+  var lbl=ym()?monthLabel(ym()):'current month';
+  document.getElementById('md').innerHTML='<button class="x" onclick="closeM()">×</button><h3>Add encounter · <span style="color:var(--teal)">paper chart</span></h3>'+
+    '<div class="muted" style="font-size:.78rem;margin-bottom:8px">De-identified — read the chart, tick what is documented. <b>No patient name or DOB.</b> Recording into '+esc(lbl)+'.</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">'+mField('mDate','Date of service','MM/DD/YYYY',120)+mField('mProto','Protocol','e.g. Myers / NAD+ / à-la-carte',180)+'</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">'+mField('mProv','Provider (initials/credential)','Milagro NP',120)+mField('mVitC','Vitamin C grams (if used)','e.g. 12',90)+'</div>'+
+    '<div class="muted" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;margin:8px 0 4px">Risk signals (tick if present)</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+mYN('mNad','IV NAD+')+mYN('mMgCa','Mg + Ca together')+'</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+mYN('mGluAsth','Glutathione + asthma')+mYN('mComorb','Comorbidity present')+'</div>'+
+    '<div class="muted" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;margin:8px 0 4px">Compliance elements (tick if documented)</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+mYN('mGfe','GFE valid &amp; on file')+mYN('mConsent','Consent signed')+'</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+mYN('mPre','Pre-infusion vitals')+mYN('mPost','Post-infusion vitals')+'</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+mYN('mMon','Monitoring documented')+mYN('mAfter','Aftercare given')+'</div>'+
+    '<div class="muted" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;margin:8px 0 4px">Events</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+mYN('mAe','Adverse event')+mYN('mSusp','Infusion suspended/stopped early')+mYN('mOver','Protocol override')+'</div>'+
+    '<textarea id="mNote" rows="2" placeholder="Optional note (reason for suspension / override / deficiency)" style="width:100%;margin-top:8px;background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:9px;color:var(--ink);font-family:inherit;font-size:.86rem"></textarea>'+
+    '<button class="btn" onclick="saveManual()">Add encounter</button>';
+  document.getElementById('ov').classList.add('show');}
+function saveManual(){
+  function ck(id){var e=document.getElementById(id);return!!(e&&e.checked);}
+  function tv(id){var e=document.getElementById(id);return e?(e.value||'').trim():'';}
+  var vitc=parseFloat(tv('mVitC')); var note=tv('mNote');
+  var flags=[];
+  if(ck('mNad'))flags.push('IV NAD+');
+  if(!isNaN(vitc)&&vitc>=7.5)flags.push('High-dose Vit C '+vitc+'g');
+  if(ck('mMgCa'))flags.push('Mg + Ca together');
+  if(ck('mGluAsth'))flags.push('Glutathione + asthma');
+  if(ck('mComorb'))flags.push('Comorbidity');
+  if(ck('mOver'))flags.push('Override used');
+  if(ck('mAe'))flags.push('Adverse event');
+  if(ck('mSusp'))flags.push('Infusion suspended');
+  var y=ym()||(new Date()).toISOString().slice(0,7).replace('-','');
+  var rec={id:nextManualId(),ym:y,date:tv('mDate')||'—',protocol:tv('mProto')||'—',
+    gfe:ck('mGfe')?'current':'GFE NEEDED',consent:ck('mConsent'),screen:true,scope:true,
+    preVit:ck('mPre'),postVit:ck('mPost'),monCount:ck('mMon')?1:0,aftercare:ck('mAfter'),
+    override:ck('mOver')?(note||'override'):'',ae:ck('mAe'),suspended:ck('mSusp'),
+    suspendReason:ck('mSusp')?(note||'stopped early'):'',mlGiven:'',
+    riskFlags:flags,risk:flags.length,ing:[],provider:tv('mProv')||'',
+    outcome:ck('mSusp')?'suspended':'stable',auditNote:note,manual:true};
+  var a=load();a.push(rec);save(a);closeM();fill();}
 fill();
 </script>
 </body></html>
