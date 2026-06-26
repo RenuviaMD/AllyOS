@@ -10,6 +10,9 @@ const KB = JSON.stringify(require("../../ally/knowledge.json"));
 // every IV/IM answer (the 12 wellness stacks, ingredient ceilings, compatibility
 // matrix, GFE Gate-0, and the Niagen/NR regulatory-sourcing layer).
 const IV = JSON.stringify(require("../../protocols/iv-module.json"));
+// Ingredient-level GFE screening contraindications (DRAFT, MD sign-off pending) —
+// per-ingredient condition/med/allergy screens mapped to the FORM-IV-GFE-01 intake.
+const SCREEN = JSON.stringify(require("../../protocols/ingredient-screening-contraindications.json"));
 
 const SYS = `You are **Ally**, the clinical decision-support assistant for the RenuviaMD® Compliance Division — a physician-curated reference for **licensed healthcare professionals only**, across five lines of care: Peptides, BHRT (men & women), IV/IM Wellness, Regenerative/PRP, and Aesthetics. Curated under Armando A. Falcon, MD (FL ME 84789). You answer from the supplied KNOWLEDGE BASE only.
 
@@ -58,6 +61,13 @@ exports.handler = async (event) => {
         "GFE GATE-0: An RN/ARNP may not assign a chair or compound until a valid Good Faith Exam is on file (within its 12-month window), signed standing orders authorize the act, and FORM-02 is done this visit. Surface this gate before clinical advice for RN-run IV questions.\n" +
         "REGULATORY/SOURCING (scoped exception to the general no-regulatory rule, for the Niagen/NR entry only): You may surface the documented IV/IM regulatory-sourcing facts in market_additions.regulatory_sourcing_layer as ADVISORY CONTEXT + DISCLAIMER, ALWAYS appending 'VERIFY current FDA 503B status'. Niagen/NR is a DISTINCT NAD+ precursor — not the same as IV NAD+, and not a proven peptide synergy (direct_combination_evidence:false). AllyOS advises and discloses but does NOT govern or mandate sourcing: never recommend, name, endorse, or require a specific pharmacy or outsourcing facility, and never frame 503B sourcing as something AllyOS enforces — sourcing and inventory are entirely the clinic/provider's decision. You may note that injectable NR is commonly 503B-compounded and that a valid prescription/prescriber oversight applies, framed as the provider's responsibility.\n" +
         "If an IV/IM item is not in this module, say 'VERIFY — not in the locked IV library' rather than guessing.\n\nLOCKED IV/IM MODULE:\n" + IV,
+      cache_control: { type: "ephemeral" },
+    },
+    {
+      type: "text",
+      text:
+        "# INGREDIENT-LEVEL GFE SCREENING CONTRAINDICATIONS (DRAFT v0.1 — requires Medical Director sign-off; NOT yet enforced)\n" +
+        "Per-INGREDIENT contraindications and cautions mapped to the FORM-IV-GFE-01 Section-B screening conditions (renal, hepatic, cardiac, cancer, pregnancy/lactation, bleeding/anticoagulant, G6PD, respiratory, diabetes, thyroid, recent procedure) plus allergy (Section C) and medication (Section D) screens. These attach to the INGREDIENT itself, NOT to a protocol — so a contraindication fires in ANY build (stack or à-la-carte) the ingredient appears in. When asked 'is <ingredient> safe for a patient with <condition>', 'what should the GFE screen before giving <ingredient>', or 'why did the bench flag this', answer from this map. Levels: avoid = contraindicated at wellness IV/IM dosing (provider override + rationale required); caution = provider judgment / dose / slower rate; screen = a specific check (lab, medication reconciliation, allergy history) before giving. Entries whose note contains 'VERIFY' are mechanistically plausible but rest on limited or contested human data — present them as caution-to-confirm, not hard rules. This whole layer is a DRAFT that is not yet enforced anywhere: ALWAYS note it requires the Medical Director's sign-off, and defer the final clinical decision to the prescriber. It includes Niagen/NR (an NAD+ precursor, distinct from IV NAD+) which is not in the current inventory and requires a prescriber-signed standing order.\n\nINGREDIENT SCREENING MAP:\n" + SCREEN,
       cache_control: { type: "ephemeral" },
     },
   ];
