@@ -743,7 +743,8 @@ function logEncounter(i){var c=CHAIRS[i],p=c.patient,g=gfeState(p),s=stackByCode
     protocol:c.protoLabel+(s?' — '+s.title:''),base:c.base,vol:c.vol,time:c.time,items:(c.bag||[]).length,
     gfe:(g.k==='done'?'current':g.label),consent:!!p.consent,screen:true,scope:true,
     override:c.override||'',ae:(c.monitoring||[]).some(function(m){return m.ae;}),monCount:(c.monitoring||[]).length,
-    riskFlags:rf,risk:rf.length,
+    riskFlags:rf,risk:rf.length,ing:(c.bag||[]).map(function(it){return (it.name||'').split(' (')[0];}),
+    preVit:!!(c.preVitals&&(c.preVitals.bp||c.preVitals.hr)),postVit:!!(c.postVitals&&(c.postVitals.bp||c.postVitals.hr)),aftercare:!!c.dAmb,
     provider:(c.noteSigned&&c.noteSigned.provider)||'',outcome:(c.dTol?'stable':'see note')};
   var a=loadAudit();a.push(rec);saveAudit(a);}
 // patient take-home aftercare handout (FORM-03) — printed before they leave
