@@ -137,6 +137,19 @@ section{padding:clamp(56px,9vw,104px) 0;position:relative}
 .why{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 @media(max-width:820px){.why{grid-template-columns:1fr 1fr}}
 .why .w{padding:20px}.why .w .ic{font-size:1.4rem}.why .w h4{font-family:var(--fdisp);font-size:.98rem;margin:8px 0 4px}.why .w p{font-size:.82rem;color:var(--muted)}
+/* how-it-works steps */
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+@media(max-width:980px){.steps{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.steps{grid-template-columns:1fr}}
+.step{position:relative;padding:24px 20px;overflow:hidden}
+.step .n{position:absolute;top:14px;right:18px;font-family:var(--fdisp);font-weight:700;font-size:1.5rem;color:rgba(255,255,255,.1)}
+.step .si{font-size:1.7rem}
+.step h4{font-family:var(--fdisp);font-size:1.02rem;margin:12px 0 5px}
+.step p{color:var(--muted);font-size:.85rem}
+.step .pic{margin-top:14px;border:1px solid var(--line);border-radius:10px;background:#0a1322;padding:10px;font-size:.66rem}
+.minirow{display:flex;align-items:center;gap:6px;padding:3px 0}
+.minidot{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+.mtag{font-size:.56rem;font-weight:800;padding:2px 6px;border-radius:5px;text-transform:uppercase;letter-spacing:.04em}
 /* CTA band */
 .cta-band{text-align:center;border:1px solid var(--line2);border-radius:28px;padding:clamp(40px,7vw,72px) 24px;background:radial-gradient(120% 130% at 50% 0,rgba(46,230,214,.12),transparent 60%),linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01))}
 .cta-band h2{font-size:clamp(1.8rem,4.5vw,3rem);max-width:18ch;margin:10px auto 0}
@@ -161,7 +174,7 @@ footer{border-top:1px solid var(--line);padding:54px 0 40px;color:var(--muted);f
   <div class="nav-links">
     <a href="#ally">Ally</a><a href="#lines">Lines of care</a><a href="#ladder">How it works</a><a href="#why">Why AllyOS</a>
   </div>
-  <a class="btn primary" href="login.html">Enter AllyOS →</a>
+  <a class="btn ghost" href="login.html" style="padding:9px 16px">Sign in</a>
 </div></nav>
 
 <header class="hero" id="top"><div class="wrap">
@@ -169,8 +182,8 @@ footer{border-top:1px solid var(--line);padding:54px 0 40px;color:var(--muted);f
   <h1 class="reveal d1">The honest clinical AI<br><span class="grad">your clinic runs on.</span></h1>
   <p class="lead reveal d2">We don't sell products, recommend drugs, or take a cent from any pharmacy. We sell <b style="color:var(--ink)">structure and safety</b> — the workflow and guardrails that make a wellness center run <b style="color:var(--ink)">smoothly and safely</b>. Powered by <b style="color:var(--ink)">Ally</b>: a 100% independent, evidence-based clinical AI across <b style="color:var(--ink)">IV / IM, peptides, and BHRT</b> — that cites the evidence and never invents.</p>
   <div class="hero-cta reveal d3">
-    <a class="btn primary" href="login.html">Enter AllyOS</a>
-    <a class="btn ghost" href="#ally">Meet Ally ↓</a>
+    <a class="btn primary" href="chairside.html">▶ Try the live demo — no signup</a>
+    <a class="btn ghost" href="#how">See how it works ↓</a>
   </div>
   <div class="robot reveal d3"><img src="ally-avatar.png" alt="Ally — clinical AI assistant"></div>
   <div class="trust reveal">
@@ -211,6 +224,25 @@ footer{border-top:1px solid var(--line);padding:54px 0 40px;color:var(--muted);f
     <div class="brain md card reveal d2"><div class="ic">🩺</div><h3>Medical Director — the human brain</h3><p class="muted">A real physician of record who oversees, signs the standing orders, and carries the clinical responsibility. Ally never replaces the doctor.</p><span class="tagk">Human · responsible · oversees</span>
       <div style="margin-top:16px"><a class="btn ghost" href="https://myfloridamedicaldirector.com" target="_blank" rel="noopener">Need an MD? → myfloridamedicaldirector.com</a></div></div>
   </div>
+</div></section>
+
+<!-- HOW IT WORKS -->
+<section id="how"><div class="wrap">
+  <div class="sec-head center reveal"><span class="eyebrow">See it work</span><h2>The IV workflow, end to end.</h2><p>This is live and playable right now — demo patients loaded, zero PHI. Click through it, or open the sandbox and run a patient yourself.</p></div>
+  <div class="steps">
+    <div class="step card reveal"><span class="n">1</span><div class="si">👥</div><h4>Patient ready</h4><p>GFE + consent gates clear before anything starts. The card reads READY — no exam, no infusion.</p>
+      <div class="pic"><div class="minirow"><span class="minidot" style="background:var(--green)"></span> Emily R. <span class="mtag" style="margin-left:auto;background:#0e2a1f;color:var(--green)">Ready</span></div><div class="minirow"><span class="minidot" style="background:var(--red)"></span> Sarah M. <span class="mtag" style="margin-left:auto;background:#2a1512;color:#f0a59d">GFE needed</span></div></div></div>
+    <div class="step card reveal d1"><span class="n">2</span><div class="si">🧪</div><h4>Build the bag</h4><p>Pick a protocol or go à-la-carte. Ally screens every additive against the patient's conditions — live.</p>
+      <div class="pic"><div class="minirow">Vitamin C 7.5 g</div><div class="minirow" style="color:#f0a59d">🔴 G6PD × Vit C — block</div><div class="minirow" style="color:var(--gold)">🟡 Osmolarity raised</div></div></div>
+    <div class="step card reveal d2"><span class="n">3</span><div class="si">💧</div><h4>Infuse</h4><p>Pre-start vitals, live timer with drip &amp; pump rate, and 5-min / 2-min audible alarms.</p>
+      <div class="pic"><div class="minirow" style="font-family:var(--fdisp);font-size:1rem">38:04 <span class="mtag" style="margin-left:auto;background:#0e2436;color:var(--teal)">Infusing</span></div><div class="minirow muted">250 gtt/min · 500 mL / 45 min</div></div></div>
+    <div class="step card reveal d3"><span class="n">4</span><div class="si">🩺</div><h4>Monitor</h4><p>Tap symptoms &amp; interventions. A red-flag symptom jumps straight to the matching emergency card.</p>
+      <div class="pic"><div class="minirow"><span class="mtag" style="background:#0e2a1f;color:var(--green)">Feels OK</span> <span class="mtag" style="background:#2a1512;color:#f0a59d">⚠ Chest</span></div><div class="minirow muted">+18m · BP 120/78 · None</div></div></div>
+    <div class="step card reveal d3"><span class="n">5</span><div class="si">📄</div><h4>Document</h4><p>An auto-composed, provider-signed infusion note + a printable patient aftercare handout.</p>
+      <div class="pic"><div class="minirow" style="font-family:var(--fdisp)">IV Infusion Note</div><div class="minirow" style="color:var(--green)">✓ GFE ✓ Consent ✓ Screen</div><div class="minirow muted">signed · auto date-stamp</div></div></div>
+  </div>
+  <div style="text-align:center;margin-top:34px" class="reveal"><a class="btn primary" href="chairside.html" style="padding:14px 26px;font-size:1rem">▶ Open the live sandbox</a>
+    <p class="muted" style="font-size:.8rem;margin-top:12px">Real product · demo patients · zero PHI &nbsp;·&nbsp; Peptides → browse the evidence library &nbsp;·&nbsp; BHRT → coming soon</p></div>
 </div></section>
 
 <!-- LINES -->
