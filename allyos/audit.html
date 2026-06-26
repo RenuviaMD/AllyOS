@@ -334,10 +334,16 @@ function nextManualId(){var ses=(window.AllyOSAuth&&AllyOSAuth.session())||{};
   return code+'-'+y+'-'+('000'+n).slice(-4);}
 function mField(id,label,ph,w){return '<div style="flex:1;min-width:'+(w||120)+'px"><label style="display:block;font-size:.7rem;color:var(--muted);margin-bottom:3px">'+label+'</label><input id="'+id+'" placeholder="'+(ph||'')+'" style="width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink);font-family:inherit;font-size:.86rem"></div>';}
 function mYN(id,label){return '<label class="chk" style="flex:1;min-width:150px"><input type="checkbox" id="'+id+'"> '+label+'</label>';}
+var MFILE=null;
 function openManual(){
+  MFILE=null;
   var lbl=ym()?monthLabel(ym()):'current month';
   document.getElementById('md').innerHTML='<button class="x" onclick="closeM()">×</button><h3>Add encounter · <span style="color:var(--teal)">paper chart</span></h3>'+
-    '<div class="muted" style="font-size:.78rem;margin-bottom:8px">De-identified — read the chart, tick what is documented. <b>No patient name or DOB.</b> Recording into '+esc(lbl)+'.</div>'+
+    '<div class="muted" style="font-size:.78rem;margin-bottom:8px">Drop the chart to auto-fill (AI reads it &amp; returns <b>de-identified</b> fields only), or tick by hand. <b>No patient name/DOB is stored.</b> Recording into '+esc(lbl)+'.</div>'+
+    '<div id="mDrop" ondragover="event.preventDefault()" ondrop="mDropFile(event)" onclick="document.getElementById(\'mFile\').click()" style="border:1px dashed var(--line2);border-radius:10px;padding:15px;text-align:center;cursor:pointer;margin-bottom:8px;font-size:.84rem;color:var(--muted)">⬆ Drop chart packet (PDF / image) to auto-fill — or click to choose<br><span id="mFileName" style="font-size:.74rem;color:var(--teal)"></span></div>'+
+    '<input type="file" id="mFile" accept="application/pdf,image/*" style="display:none" onchange="mPickFile(event)">'+
+    '<button id="mRunBtn" class="btn-s" style="display:none;width:100%;margin-bottom:8px;border-color:var(--gold);color:var(--gold)" onclick="runInspect()">▶ Run Inspection (AI extract)</button>'+
+    '<div id="mInspStatus" style="font-size:.78rem;margin-bottom:6px"></div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">'+mField('mDate','Date of service','MM/DD/YYYY',120)+mField('mProto','Protocol','e.g. Myers / NAD+ / à-la-carte',180)+'</div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">'+mField('mProv','Provider (initials/credential)','Milagro NP',120)+mField('mVitC','Vitamin C grams (if used)','e.g. 12',90)+'</div>'+
     '<div class="muted" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;margin:8px 0 4px">Risk signals (tick if present)</div>'+
@@ -374,6 +380,24 @@ function saveManual(){
     riskFlags:flags,risk:flags.length,ing:[],provider:tv('mProv')||'',
     outcome:ck('mSusp')?'suspended':'stable',auditNote:note,manual:true};
   var a=load();a.push(rec);save(a);closeM();fill();}
+// ---- drop-chart → AI inspection (the chart goes to the AI; only de-identified fields return) ----
+function mDropFile(e){e.preventDefault();var f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f)readChartFile(f);}
+function mPickFile(e){var f=e.target.files&&e.target.files[0];if(f)readChartFile(f);}
+function readChartFile(f){var r=new FileReader();r.onload=function(){MFILE={data:(''+r.result).split(',')[1],mime:f.type||'application/pdf'};
+  document.getElementById('mFileName').textContent=f.name+' · '+((f.size/1024)|0)+' KB';document.getElementById('mRunBtn').style.display='block';};r.readAsDataURL(f);}
+function runInspect(){if(!MFILE)return;var st=document.getElementById('mInspStatus'),btn=document.getElementById('mRunBtn');
+  st.style.color='var(--muted)';st.textContent='🔍 Reading the chart…';btn.disabled=true;
+  fetch('/.netlify/functions/inspect',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(MFILE)})
+   .then(function(r){return r.json();}).then(function(d){btn.disabled=false;
+     if(!d.fields){st.style.color='var(--red)';st.textContent='Could not auto-read — '+(d.error==='not_configured'?'AI not configured on this deploy':'(fill by hand below)')+'.';return;}
+     prefillFromAI(d.fields);st.style.color='var(--green)';st.textContent='✓ AI-prefilled ('+(d.fields.confidence||'?')+' confidence) — verify every field before saving.';})
+   .catch(function(e){btn.disabled=false;st.style.color='var(--red)';st.textContent='Inspection failed — '+e.message;});}
+function prefillFromAI(f){function sV(id,v){var e=document.getElementById(id);if(e&&v!=null&&v!=='')e.value=v;}
+  function sC(id,v){var e=document.getElementById(id);if(e)e.checked=(v===true);}
+  sV('mDate',f.date);sV('mProto',f.protocol);sV('mProv',f.provider);sV('mVitC',f.vitC);
+  sC('mNad',f.nad);sC('mMgCa',f.mgCa);sC('mGluAsth',f.gluAsth);sC('mComorb',f.comorb);
+  sC('mGfe',f.gfe);sC('mConsent',f.consent);sC('mPre',f.pre);sC('mPost',f.post);sC('mMon',f.mon);sC('mAfter',f.after);
+  sC('mAe',f.ae);sC('mSusp',f.susp);sC('mOver',f.over);if(f.note)sV('mNote',f.note);}
 fill();
 </script>
 </body></html>
