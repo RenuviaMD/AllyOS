@@ -5,76 +5,130 @@
 <link rel="stylesheet" href="allyos-theme.css">
 <script src="allyos-auth.js"></script>
 <style>
-.wrap{max-width:1080px;margin:0 auto;padding:18px}
+.wrap{max-width:1120px;margin:0 auto;padding:18px}
 .top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px}
 .top h1{font-family:var(--fdisp);font-size:1.4rem}.top h1 b{color:var(--gold)}
 .top a{color:var(--teal);text-decoration:none;font-size:.85rem}
-.sub{color:var(--muted);font-size:.84rem;margin-bottom:16px}
+.sub{color:var(--muted);font-size:.84rem;margin-bottom:14px;max-width:80ch}
 .ctrls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
-.ctrls select,.ctrls input{background:#0e1f29;border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--ink);font-family:inherit;font-size:.86rem}
+.ctrls select{background:#0e1f29;border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--ink);font-family:inherit;font-size:.86rem}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{background:#0e1f29;border:none;color:var(--muted);padding:9px 14px;font-family:inherit;font-size:.82rem;cursor:pointer}
+.seg button.on{background:#0e2a2433;color:var(--teal)}
 .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
 @media(max-width:760px){.stats{grid-template-columns:1fr 1fr}}
 .stat{background:linear-gradient(180deg,#10202f,#0b1622);border:1px solid var(--line);border-radius:12px;padding:14px}
-.stat .lbl{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.stat .num{font-family:var(--fdisp);font-size:1.7rem;margin-top:3px}
-.stat.green .num{color:var(--green)}.stat.amber .num{color:var(--gold)}.stat.red .num{color:var(--red)}
+.stat .lbl{font-size:.64rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.stat .num{font-family:var(--fdisp);font-size:1.6rem;margin-top:3px}
+.stat.green .num{color:var(--green)}.stat.amber .num{color:var(--gold)}.stat.red .num{color:var(--red)}.stat.teal .num{color:var(--teal)}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
-th{text-align:left;color:var(--muted);font-weight:600;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;border-bottom:1px solid var(--line2)}
-td{padding:9px 10px;border-bottom:1px solid var(--line)}
-tr:hover td{background:rgba(255,255,255,.02)}
-.eid{font-family:var(--fdisp);color:var(--teal);font-weight:600}
-.tick{color:var(--green)}.cross{color:var(--red)}.ov{color:var(--gold)}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:.66rem;text-transform:uppercase;letter-spacing:.04em;padding:8px 9px;border-bottom:1px solid var(--line2)}
+td{padding:9px;border-bottom:1px solid var(--line);vertical-align:top}
+tr.hi td{background:rgba(231,184,78,.05)}
+tr:hover td{background:rgba(255,255,255,.025)}
+.eid{font-family:var(--fdisp);color:var(--teal);font-weight:600;white-space:nowrap}
+.rf{display:inline-block;font-size:.64rem;background:#2a2310;color:var(--gold);border:1px solid #5a4a22;border-radius:6px;padding:1px 6px;margin:1px 2px 1px 0}
+.rf.red{background:#2a1512;color:#f0a59d;border-color:#5a2a22}
+.tick{color:var(--green)}.cross{color:var(--red)}
+.rdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.aud-pass{color:var(--green);font-weight:600}.aud-corr{color:var(--gold);font-weight:600}.aud-no{color:var(--muted)}
+.btn-s{font-size:.72rem;padding:6px 11px;border-radius:8px;border:1px solid var(--line2);background:rgba(255,255,255,.04);color:var(--ink);cursor:pointer;font-family:inherit}
+.btn-s:hover{border-color:var(--teal)}
+.cplan{margin-top:22px;border:1px solid #5a4a22;background:rgba(231,184,78,.05);border-radius:12px;padding:16px}
+.cplan h3{font-family:var(--fdisp);font-size:1rem;color:var(--gold);margin-bottom:8px}
+.cplan .ci{font-size:.84rem;padding:7px 0;border-bottom:1px dashed var(--line)}
 .disc{font-size:.72rem;color:var(--muted);margin-top:18px;line-height:1.6}
-@media print{body{background:#fff!important;color:#111!important}.noprint{display:none!important}.stat,table,th,td{color:#111!important;border-color:#ccc!important;background:#fff!important}.eid{color:#06c!important}}
+/* modal */
+.overlay{position:fixed;inset:0;background:#04080fcc;display:none;align-items:flex-start;justify-content:center;padding:30px 14px;overflow:auto;z-index:60}
+.overlay.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--line2);border-radius:16px;max-width:520px;width:100%;padding:20px}
+.modal h3{font-family:var(--fdisp);margin-bottom:2px}.modal .x{float:right;background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer}
+.chk{display:flex;gap:9px;align-items:center;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#0e1c2e;margin:7px 0;font-size:.88rem;cursor:pointer}
+.chk input{width:auto}
+.dec{display:flex;gap:10px;margin:12px 0}
+.dec label{flex:1;border:1px solid var(--line);border-radius:10px;padding:11px;text-align:center;cursor:pointer;font-weight:600;font-size:.86rem}
+.dec input{display:none}
+.modal textarea{width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:9px;padding:10px;color:var(--ink);font-family:inherit;font-size:.86rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;width:100%;font-family:var(--fdisp);font-weight:600;border:none;border-radius:999px;padding:13px;margin-top:12px;cursor:pointer;background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a}
+@media print{body{background:#fff!important;color:#111!important}.noprint{display:none!important}.stat,table,th,td,.cplan{color:#111!important;border-color:#ccc!important;background:#fff!important}.eid{color:#06c!important}.rf{color:#7a560a!important;background:#fdf4e3!important}}
 </style></head>
 <body class="allyos"><div class="wrap">
   <div class="top">
     <h1>Practice Audit · <b>AllyOS</b></h1>
     <div class="noprint"><a href="chairside.html">← Chairside</a> &nbsp; <a href="#" onclick="exportCsv();return false">⬇ CSV</a> &nbsp; <a href="#" onclick="window.print();return false">🖨 Print</a></div>
   </div>
-  <div class="sub" id="sub">Medical-Director review of the practice — de-identified encounters. <b>PHI-free:</b> no patient names or DOB. Each encounter carries an ID; the clinic maps the ID to its own chart.</div>
+  <div class="sub">Medical-Director risk-based review. <b>PHI-free</b> — no names/DOB. The tool ranks encounters by clinical risk (per the screening reference: IV NAD+, high-dose Vit C, Mg+Ca together, glutathione+asthma, comorbidities, overrides, adverse events) so you pull the highest-risk charts. Each encounter carries an ID; the clinic maps the ID to its own chart to verify GFE / consent / monitoring.</div>
   <div class="ctrls noprint">
-    <label class="muted" style="font-size:.8rem">Month</label>
-    <select id="month" onchange="render()"></select>
+    <label class="muted" style="font-size:.8rem">Month</label><select id="month" onchange="render()"></select>
+    <span class="seg"><button id="vAll" class="on" onclick="setView('all')">All encounters</button><button id="vRisk" onclick="setView('risk')">🎯 Risk sample</button></span>
     <span class="muted" style="font-size:.78rem" id="who"></span>
   </div>
   <div class="stats" id="stats"></div>
   <div style="overflow:auto"><table id="tbl"></table></div>
-  <div class="disc">Audit purpose only. AllyOS records de-identified encounter metadata (date, protocol, compliance gates, overrides, adverse events, signing provider, outcome) to support Medical-Director oversight. It holds no PHI; patient identity stays in the clinic's own records, linked by Encounter ID. Advisory decision-support — the treating provider and the clinic's Medical Director own every clinical decision and signature. © <span id="yr"></span> RenuviaMD® PLLC.</div>
+  <div id="cplan"></div>
+  <div class="disc">Audit purpose only. AllyOS records de-identified encounter metadata (date, protocol, compliance gates, risk signals, overrides, adverse events, signing provider, outcome) to support Medical-Director oversight; it holds no PHI — patient identity stays in the clinic's own records, linked by Encounter ID. Advisory decision-support; the treating provider and Medical Director own every clinical decision and signature. © <span id="yr"></span> RenuviaMD® PLLC.</div>
 </div>
+<div class="overlay" id="ov"><div class="modal" id="md"></div></div>
 <script>
 document.getElementById('yr').textContent=new Date().getFullYear();
 if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin']);var s=AllyOSAuth.session();if(s)document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+(s.clinic||'');}
-function loadAudit(){try{return JSON.parse(localStorage.getItem('allyos_audit_v1')||'[]');}catch(e){return [];}}
+var VIEW='all';
+function load(){try{return JSON.parse(localStorage.getItem('allyos_audit_v1')||'[]');}catch(e){return [];}}
+function save(a){try{localStorage.setItem('allyos_audit_v1',JSON.stringify(a));}catch(e){}}
 function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function months(a){var m={};a.forEach(function(r){m[r.ym]=1;});var ks=Object.keys(m).sort().reverse();return ks;}
-function monthLabel(ym){var y=ym.slice(0,4),mo=+ym.slice(4);return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][mo-1]+' '+y;}
-function fill(){var a=loadAudit();var ks=months(a);var sel=document.getElementById('month');
-  if(!ks.length){sel.innerHTML='<option>No encounters yet</option>';return;}
+function months(a){var m={};a.forEach(function(r){m[r.ym]=1;});return Object.keys(m).sort().reverse();}
+function monthLabel(ym){return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][(+ym.slice(4))-1]+' '+ym.slice(0,4);}
+function fill(){var ks=months(load());var sel=document.getElementById('month');
+  if(!ks.length){sel.innerHTML='<option value="">No encounters yet</option>';render();return;}
   sel.innerHTML=ks.map(function(k){return '<option value="'+k+'">'+monthLabel(k)+'</option>';}).join('');render();}
-function rows(){var a=loadAudit();var ym=document.getElementById('month').value;return a.filter(function(r){return r.ym===ym;});}
-function render(){var r=rows();
-  var gfeOk=r.filter(function(x){return x.gfe==='current';}).length;
-  var ovs=r.filter(function(x){return x.override;}).length;
-  var aes=r.filter(function(x){return x.ae;}).length;
+function ym(){return document.getElementById('month').value;}
+function rows(){return load().filter(function(r){return r.ym===ym();}).sort(function(a,b){return (b.risk||0)-(a.risk||0);});}
+function setView(v){VIEW=v;document.getElementById('vAll').classList.toggle('on',v==='all');document.getElementById('vRisk').classList.toggle('on',v==='risk');render();}
+function riskColor(r){return r>=3?'var(--red)':r>=1?'var(--gold)':'var(--green)';}
+function render(){var all=rows();var view=VIEW==='risk'?all.filter(function(r){return (r.risk||0)>0;}).slice(0,5):all;
+  var audited=all.filter(function(r){return r.audited;}).length;
+  var corr=all.filter(function(r){return r.audited&&r.auditPass===false;});
   document.getElementById('stats').innerHTML=
-    stat('','Encounters',r.length)+
-    stat('green','GFE current',r.length?Math.round(gfeOk/r.length*100)+'%':'—')+
-    stat('green','Consented',r.length?Math.round(r.filter(function(x){return x.consent;}).length/r.length*100)+'%':'—')+
-    stat('amber','Overrides',ovs)+
-    stat(aes?'red':'green','Adverse events',aes);
-  var th='<tr><th>Encounter ID</th><th>Date</th><th>Protocol</th><th>Bag</th><th>GFE</th><th>Consent</th><th>Override</th><th>AE</th><th>Provider</th><th>Outcome</th></tr>';
-  var body=r.length?r.map(function(x){return '<tr><td class="eid">'+esc(x.id)+'</td><td>'+esc(x.date)+'</td><td>'+esc(x.protocol)+'</td><td class="muted">'+esc(x.base)+' '+x.vol+'mL/'+x.time+'m · '+x.items+'</td>'+
-    '<td>'+(x.gfe==='current'?'<span class="tick">✓</span>':'<span class="cross">'+esc(x.gfe)+'</span>')+'</td>'+
-    '<td>'+(x.consent?'<span class="tick">✓</span>':'<span class="cross">✗</span>')+'</td>'+
-    '<td>'+(x.override?'<span class="ov" title="'+esc(x.override)+'">⚠ yes</span>':'—')+'</td>'+
-    '<td>'+(x.ae?'<span class="cross">⚠ FORM-04</span>':'—')+'</td>'+
-    '<td>'+esc(x.provider)+'</td><td>'+esc(x.outcome)+'</td></tr>';}).join(''):'<tr><td colspan="10" class="muted" style="padding:20px;text-align:center">No encounters in this month.</td></tr>';
-  document.getElementById('tbl').innerHTML=th+body;}
+    stat('','Encounters (30d)',all.length)+
+    stat('amber','High-risk',all.filter(function(r){return (r.risk||0)>0;}).length)+
+    stat('teal','Audited',audited+' / '+Math.min(5,all.filter(function(r){return (r.risk||0)>0;}).length||all.length))+
+    stat(corr.length?'red':'green','Corrections open',corr.length)+
+    stat('green','Adverse events',all.filter(function(r){return r.ae;}).length);
+  var th='<tr><th>Risk</th><th>Encounter ID</th><th>Date</th><th>Protocol</th><th>Risk signals</th><th>GFE</th><th>Consent</th><th>Monitor</th><th>Audit</th></tr>';
+  var body=view.length?view.map(function(x){var rf=x.riskFlags||[];
+    return '<tr class="'+((x.risk||0)>0?'hi':'')+'"><td><span class="rdot" style="background:'+riskColor(x.risk||0)+'"></span>'+(x.risk||0)+'</td>'+
+      '<td class="eid">'+esc(x.id)+'</td><td>'+esc(x.date)+'</td><td>'+esc(x.protocol)+'</td>'+
+      '<td>'+(rf.length?rf.map(function(f){return '<span class="rf'+(/adverse|nad|mg \+ ca|asthma|high-dose/i.test(f)?' red':'')+'">'+esc(f)+'</span>';}).join(''):'<span class="muted">—</span>')+'</td>'+
+      '<td>'+(x.gfe==='current'?'<span class="tick">✓</span>':'<span class="cross">'+esc(x.gfe)+'</span>')+'</td>'+
+      '<td>'+(x.consent?'<span class="tick">✓</span>':'<span class="cross">✗</span>')+'</td>'+
+      '<td>'+((x.monCount||0)>0?'<span class="tick">✓ '+x.monCount+'</span>':'<span class="muted">0</span>')+'</td>'+
+      '<td>'+(x.audited?(x.auditPass?'<span class="aud-pass">✓ Pass</span>':'<span class="aud-corr">⚠ Correction</span>')+' <button class="btn-s noprint" onclick="openAudit(\''+x.id+'\')">edit</button>':'<button class="btn-s noprint" onclick="openAudit(\''+x.id+'\')">Audit →</button>')+'</td></tr>';}).join(''):'<tr><td colspan="9" class="muted" style="padding:20px;text-align:center">No encounters'+(VIEW==='risk'?' flagged as risk':'')+' this month.</td></tr>';
+  document.getElementById('tbl').innerHTML=th+body;
+  // correction plan
+  document.getElementById('cplan').innerHTML=corr.length?('<div class="cplan"><h3>⚠ Correction plan — '+monthLabel(ym())+'</h3>'+corr.map(function(x){return '<div class="ci"><b class="eid">'+esc(x.id)+'</b> — '+esc(x.auditNote||'correction needed')+' <span class="muted">(re-verify next month)</span></div>';}).join('')+'</div>'):'';}
 function stat(cls,lbl,n){return '<div class="stat '+cls+'"><div class="lbl">'+lbl+'</div><div class="num">'+n+'</div></div>';}
-function exportCsv(){var r=rows();var cols=['id','date','protocol','base','vol','time','items','gfe','consent','override','ae','provider','outcome'];
-  var csv=cols.join(',')+'\n'+r.map(function(x){return cols.map(function(c){return '"'+(''+(x[c]==null?'':x[c])).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
-  var b=new Blob([csv],{type:'text/csv'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='allyos-audit-'+document.getElementById('month').value+'.csv';a.click();URL.revokeObjectURL(u);}
+function openAudit(id){var a=load(),x=a.filter(function(r){return r.id===id;})[0];if(!x)return;
+  var gfe=x.auditGfe!=null?x.auditGfe:(x.gfe==='current'),con=x.auditConsent!=null?x.auditConsent:!!x.consent,mon=x.auditMon!=null?x.auditMon:((x.monCount||0)>0);
+  var pass=x.auditPass!==false;
+  var rf=x.riskFlags||[];
+  document.getElementById('md').innerHTML='<button class="x" onclick="closeM()">×</button><h3>Audit · <span style="color:var(--teal)">'+esc(x.id)+'</span></h3>'+
+    '<div class="muted" style="font-size:.8rem;margin-bottom:6px">'+esc(x.date)+' · '+esc(x.protocol)+'</div>'+
+    (rf.length?'<div style="margin-bottom:10px">'+rf.map(function(f){return '<span class="rf">'+esc(f)+'</span>';}).join('')+'</div>':'')+
+    '<div class="muted" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Verify in the clinic chart</div>'+
+    '<label class="chk"><input type="checkbox" id="aGfe" '+(gfe?'checked':'')+'> Valid GFE on file &amp; current</label>'+
+    '<label class="chk"><input type="checkbox" id="aCon" '+(con?'checked':'')+'> Signed consent on file</label>'+
+    '<label class="chk"><input type="checkbox" id="aMon" '+(mon?'checked':'')+'> Monitoring documented (FORM-05)</label>'+
+    '<div class="dec"><label style="border-color:'+(pass?'var(--green)':'var(--line)')+';color:'+(pass?'var(--green)':'var(--muted)')+'" id="lPass"><input type="radio" name="dec" value="pass" '+(pass?'checked':'')+' onchange="decTog(1)">✓ Pass</label>'+
+    '<label style="border-color:'+(!pass?'var(--gold)':'var(--line)')+';color:'+(!pass?'var(--gold)':'var(--muted)')+'" id="lCorr"><input type="radio" name="dec" value="corr" '+(!pass?'checked':'')+' onchange="decTog(0)">⚠ Correction needed</label></div>'+
+    '<textarea id="aNote" rows="3" placeholder="Correction plan / note (what to fix, by when)">'+esc(x.auditNote||'')+'</textarea>'+
+    '<button class="btn" onclick="saveAudit(\''+id+'\')">Record audit</button>';
+  document.getElementById('ov').classList.add('show');}
+function decTog(p){document.getElementById('lPass').style.borderColor=p?'var(--green)':'var(--line)';document.getElementById('lPass').style.color=p?'var(--green)':'var(--muted)';document.getElementById('lCorr').style.borderColor=!p?'var(--gold)':'var(--line)';document.getElementById('lCorr').style.color=!p?'var(--gold)':'var(--muted)';}
+function saveAudit(id){var a=load();a.forEach(function(r){if(r.id===id){r.audited=true;r.auditGfe=document.getElementById('aGfe').checked;r.auditConsent=document.getElementById('aCon').checked;r.auditMon=document.getElementById('aMon').checked;r.auditPass=document.querySelector('input[name=dec]:checked').value==='pass';r.auditNote=document.getElementById('aNote').value;r.auditedBy=((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||'MD');r.auditedDate=new Date().toISOString().slice(0,10);}});save(a);closeM();render();}
+function closeM(){document.getElementById('ov').classList.remove('show');}
+function exportCsv(){var r=rows();var cols=['id','date','protocol','risk','gfe','consent','monCount','override','ae','audited','auditPass','auditNote','provider','outcome'];
+  var csv=cols.join(',')+'\n'+r.map(function(x){return cols.map(function(c){var v=c==='riskFlags'?(x[c]||[]).join('; '):x[c];return '"'+(''+(v==null?'':v)).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var b=new Blob([csv],{type:'text/csv'}),u=URL.createObjectURL(b),el=document.createElement('a');el.href=u;el.download='allyos-audit-'+ym()+'.csv';el.click();URL.revokeObjectURL(u);}
 fill();
 </script>
 </body></html>

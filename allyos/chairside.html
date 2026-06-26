@@ -724,11 +724,26 @@ function nextEncounterId(){var ses=(window.AllyOSAuth&&AllyOSAuth.session())||{}
   var d=new Date(),ym=''+d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2);
   var n=loadAudit().filter(function(r){return r.ym===ym;}).length+1;
   return {id:code+'-'+ym+'-'+('000'+n).slice(-4),ym:ym};}
+// risk signals for MD risk-based audit sampling (per the screening reference)
+function encounterRisk(c){var p=c.patient,bag=c.bag||[],flags=[];
+  var names=bag.map(function(x){return (x.name||'').toLowerCase();});
+  if(names.some(function(n){return /nad/.test(n)&&!/niagen|nicotinamide/.test(n);}))flags.push('IV NAD+');
+  var vitc=bag.filter(function(x){return /vitamin c|vit c|ascorbic/i.test(x.name);})[0];var vcg=vitc?parseGrams(vitc.dose):null;
+  if(vcg!=null&&vcg>=7.5)flags.push('High-dose Vit C '+vcg+'g');
+  var hasMg=names.some(function(n){return /magnesium/.test(n);}),hasCa=names.some(function(n){return /calcium/.test(n);});
+  if(hasMg&&hasCa)flags.push('Mg + Ca together');
+  if(names.some(function(n){return /glutathione/.test(n);})&&(p.alerts||[]).indexOf('Asthma / COPD')>=0)flags.push('Glutathione + asthma');
+  if((p.alerts||[]).length)flags.push('Comorbidity: '+(p.alerts||[]).map(function(a){return a.split(' /')[0].split(' (')[0];}).join(', '));
+  if(c.override)flags.push('Override used');
+  if((c.monitoring||[]).some(function(m){return m.ae;}))flags.push('Adverse event');
+  return flags;}
 function logEncounter(i){var c=CHAIRS[i],p=c.patient,g=gfeState(p),s=stackByCode(p.proto),eid=nextEncounterId();c.encounterId=eid.id;
+  var rf=encounterRisk(c);
   var rec={id:eid.id,ym:eid.ym,date:fmtDob(todayISO()),ts:(c.noteSigned&&c.noteSigned.stamp)||nowStamp(),
     protocol:c.protoLabel+(s?' — '+s.title:''),base:c.base,vol:c.vol,time:c.time,items:(c.bag||[]).length,
     gfe:(g.k==='done'?'current':g.label),consent:!!p.consent,screen:true,scope:true,
-    override:c.override||'',ae:(c.monitoring||[]).some(function(m){return m.ae;}),
+    override:c.override||'',ae:(c.monitoring||[]).some(function(m){return m.ae;}),monCount:(c.monitoring||[]).length,
+    riskFlags:rf,risk:rf.length,
     provider:(c.noteSigned&&c.noteSigned.provider)||'',outcome:(c.dTol?'stable':'see note')};
   var a=loadAudit();a.push(rec);saveAudit(a);}
 // patient take-home aftercare handout (FORM-03) — printed before they leave
