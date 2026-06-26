@@ -632,10 +632,29 @@ var EM={
  EXTRAV:{t:'Infiltration / extravasation',steps:['STOP infusion; do not flush. Disconnect, aspirate residual if able.','Remove catheter; elevate limb; cold compress (warm for vesicant per agent).','Mark the area; photo-document. Assess for vesicant (e.g., Calcium Chloride).','Document FORM-05 (AE section if injury); notify MD.']}
 };
 function renderEmergency(){document.getElementById('embar').innerHTML=Object.keys(EM).map(function(k){return '<button class="embtn" onclick="emProtocol(\''+k+'\')">'+esc(EM[k].t.split(' · ')[0].split(' /')[0])+'</button>';}).join('');}
+// floor emergencies use the full laminated cards (CARD-A/CARD-V) where we have them
+var EM_CARD={ANAPHYLAXIS:'CARD_A',VASOVAGAL:'CARD_V'};
+function emCardSteps(card){var b='';
+  if(card.recognize)b+=refList('Recognize',card.recognize);
+  if(card.recognize_early)b+=refList('Early signs',card.recognize_early);
+  if(card.recognize_late)b+=refList('Late signs',card.recognize_late);
+  if(card.act_first)b+='<div class="flag crit" style="margin:8px 0"><b>ACT FIRST</b>'+esc(card.act_first)+'</div>';
+  if(card.act)b+=refList('Act',card.act);
+  if(card.concurrent)b+=refList('Concurrent actions',card.concurrent);
+  if(card.call_ems)b+='<div class="flag crit" style="margin:8px 0"><b>☎ EMS</b>'+esc(card.call_ems)+'</div>';
+  if(card.escalate_911)b+=refList('Escalate — call 911 if ANY',card.escalate_911);
+  if(card.secondary_meds)b+=refList('Secondary meds (after EPI + 911)',card.secondary_meds);
+  if(card.vs_anaphylaxis)b+='<div class="rsec">Vasovagal vs anaphylaxis</div><div class="rli">'+esc(card.vs_anaphylaxis)+'</div>';
+  if(card.prevent)b+=refList('Prevent',card.prevent);
+  if(card.post_event)b+=(typeof card.post_event==='string'?'<div class="rsec">Post-event</div><div class="rli">'+esc(card.post_event)+'</div>':refList('Post-event',card.post_event));
+  return b;}
 function emProtocol(k){var e=EM[k];emActive=k;document.getElementById('embar').classList.add('active');renderEmActive();
-  var h='<button class="x" onclick="closeModal()">×</button><h3 style="color:var(--red)">🚨 '+esc(e.t)+'</h3><div class="sub">Stays active on the floor until you mark it resolved or a false alarm — closing this window keeps it running.</div>'+
-    '<ol class="steps">'+e.steps.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')+'</ol>'+
-    '<div class="frow" style="margin-top:8px"><div><button class="btn neon-green" style="width:100%" onclick="closeEm()">✓ Resolved</button></div><div><button class="btn ghost" style="width:100%" onclick="closeModal()">Keep open · back to floor</button></div><div><button class="btn ghost" style="width:100%" onclick="closeEm()">False alarm</button></div></div>';
+  var card=(REF.emergency_cards||{})[EM_CARD[k]];
+  var title=card?(card.code+' — '+card.title):e.t;
+  var steps=card?emCardSteps(card):('<ol class="steps">'+e.steps.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')+'</ol>');
+  var h='<button class="x" onclick="closeModal()">×</button><h3 style="color:var(--red)">🚨 '+esc(title)+'</h3><div class="sub">Stays active on the floor until you mark it resolved or a false alarm — closing this window keeps it running.</div>'+
+    steps+
+    '<div class="frow" style="margin-top:10px"><div><button class="btn neon-green" style="width:100%" onclick="closeEm()">✓ Resolved</button></div><div><button class="btn ghost" style="width:100%" onclick="closeModal()">Keep open · back to floor</button></div><div><button class="btn ghost" style="width:100%" onclick="closeEm()">False alarm</button></div></div>';
   showModalEm(h);
 }
 // persistent banner on the floor while an emergency is active
