@@ -156,6 +156,15 @@
 .raskally{font-size:.7rem;color:var(--teal);cursor:pointer;margin-top:6px;display:inline-block}
 .alertbox{margin-top:8px}
 .empty{color:var(--muted);font-size:.82rem;padding:14px;text-align:center}
+/* monitor checkpoint chips (tap-first) */
+.mchips{display:flex;flex-wrap:wrap;gap:6px;margin:5px 0 12px}
+.mchip{font-size:.74rem;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:#0e1c2e;color:var(--ink);cursor:pointer;user-select:none}
+.mchip.on{border-color:var(--teal);background:#0e2a2433;color:var(--teal)}
+.mchip.ok.on{border-color:var(--green);background:#0e2a1f;color:var(--green)}
+.mchip.red{border-color:#5a2a22;color:#f0b3aa}
+.mchip.red.on{background:#2a1512;box-shadow:var(--glow-red)}
+.monlog{font-size:.76rem;padding:6px 9px;border-left:2px solid var(--line);margin:4px 0;color:var(--muted)}
+.monlog.ae{border-left-color:var(--red);color:#f0c4be}
 /* detail */
 .detail .demo{font-size:.84rem;margin-bottom:10px}
 .chips{display:flex;gap:8px;margin-bottom:12px}
@@ -617,24 +626,46 @@ function dischargeChair(i){var c=CHAIRS[i];if(!c)return;
 function freeChair(i){if(CHAIRS[i]&&CHAIRS[i].timer)clearInterval(CHAIRS[i].timer);CHAIRS[i]=null;closeModal();renderChairs();}
 
 // ---------- MONITORING (open/close; vitals / feels-ok / AE) ----------
-function openMonitor(i){var c=CHAIRS[i];if(!c)return;
-  var log=c.monitoring.map(function(m){return '<div class="ingrow"><span>'+esc(m.t)+' · '+esc(m.note)+'</span></div>';}).join('')||'<div class="muted" style="font-size:.74rem">No entries yet.</div>';
-  var h='<button class="x" onclick="closeModal()">×</button><h3>Monitor — Chair '+(i+1)+'</h3><div class="sub">'+esc(c.patient.name)+' · '+esc(c.protoLabel)+' · '+(c.state==='ended'?'ended':fmt(c.remain)+' left')+'</div>'+
-    '<div class="frow"><div><label>BP</label><input id="mBP"></div><div><label>HR</label><input id="mHR"></div><div><label>SpO2</label><input id="mO2"></div></div>'+
-    '<div class="frow"><div><button class="btn neon-green" style="width:100%" onclick="logMon('+i+',\'feels ok\')">✓ Feels OK</button></div>'+
-    '<div><button class="btn neon-red" style="width:100%" onclick="logMon('+i+',\'AE\')">⚠ Report AE</button></div></div>'+
-    '<textarea id="mNote" rows="2" placeholder="Note / AE detail"></textarea>'+
-    '<div style="margin-top:10px"><div class="col-h" style="font-size:.7rem">Log</div>'+log+'</div>';
+// FORM-05 §3 (during-infusion) only — pre/post already captured at Start/Discharge.
+var MON_SYM=[{k:'Feels OK',ok:1},{k:'Flushing/warmth'},{k:'Nausea'},{k:'Dizzy/lightheaded',em:'VASOVAGAL'},{k:'Headache'},{k:'Anxiety'},{k:'Rash/itch/hives',red:1,em:'ANAPHYLAXIS'},{k:'Chest tightness/pain',red:1,em:'ANAPHYLAXIS'},{k:'SOB/wheeze/throat',red:1,em:'ANAPHYLAXIS'},{k:'Facial/throat swelling',red:1,em:'ANAPHYLAXIS'},{k:'Fainting/LOC',red:1,em:'VASOVAGAL'},{k:'IV site pain/swelling',red:1,em:'EXTRAV'}];
+var MON_INT=['Slowed rate','Paused','Rechecked vitals','Notified provider','CARD-V','CARD-A','EMS 911','FORM-04 started'];
+function symByK(k){for(var j=0;j<MON_SYM.length;j++)if(MON_SYM[j].k===k)return MON_SYM[j];return null;}
+function saveMonVit(i){var c=CHAIRS[i];c._vit={bp:val('mBP'),hr:val('mHR'),rr:val('mRR'),o2:val('mO2'),note:val('mNote')};}
+function toggleMonSym(i,k){var c=CHAIRS[i];c._sym=c._sym||{};saveMonVit(i);if(k==='Feels OK'){var was=c._sym[k];c._sym={};c._sym[k]=!was;}else{c._sym[k]=!c._sym[k];c._sym['Feels OK']=false;}openMonitor(i);}
+function toggleMonInt(i,k){var c=CHAIRS[i];c._int=c._int||{};saveMonVit(i);c._int[k]=!c._int[k];openMonitor(i);}
+function openMonitor(i){var c=CHAIRS[i];if(!c)return;c._sym=c._sym||{};c._int=c._int||{};var v=c._vit||{};
+  var midDue=c.total>3600&&!(c.monitoring||[]).some(function(m){return m.mid;})&&(c.total-c.remain)>120;
+  var sym=MON_SYM.map(function(s){var on=c._sym[s.k];return '<span class="mchip'+(s.red?' red':(s.ok?' ok':''))+(on?' on':'')+'" onclick="toggleMonSym('+i+',\''+s.k+'\')">'+(s.red?'⚠ ':'')+esc(s.k)+'</span>';}).join('');
+  var intc=MON_INT.map(function(k){var on=c._int[k];return '<span class="mchip'+(on?' on':'')+'" onclick="toggleMonInt('+i+',\''+k+'\')">'+esc(k)+'</span>';}).join('');
+  var log=(c.monitoring||[]).length?c.monitoring.map(function(m){return '<div class="monlog'+(m.ae?' ae':'')+'">'+esc(m.t)+' · '+esc(m.note)+'</div>';}).join(''):'<div class="muted" style="font-size:.74rem">No checkpoints yet.</div>';
+  var h='<button class="x" onclick="closeModal()">×</button><h3>Monitor — Chair '+(i+1)+'</h3><div class="sub">'+esc(dispName(c.patient))+' · '+esc(c.protoLabel)+' · '+(c.state==='ended'?'ended':fmt(c.remain)+' left')+'</div>'+
+    (midDue?'<div class="flag warn" style="margin-bottom:8px"><b>Mid-infusion vitals due</b>Duration > 60 min — record a checkpoint.</div>':'')+
+    '<label style="font-size:.7rem;color:var(--muted)">Symptoms — tap any (or Feels OK)</label><div class="mchips">'+sym+'</div>'+
+    '<label style="font-size:.7rem;color:var(--muted)">Interventions (if any)</label><div class="mchips">'+intc+'</div>'+
+    '<label style="font-size:.7rem;color:var(--muted)">Vitals (optional)</label>'+
+    '<div class="frow"><div><label>BP</label><input id="mBP" value="'+esc(v.bp||'')+'"></div><div><label>HR</label><input id="mHR" value="'+esc(v.hr||'')+'"></div><div><label>RR</label><input id="mRR" value="'+esc(v.rr||'')+'"></div><div><label>SpO2</label><input id="mO2" value="'+esc(v.o2||'')+'"></div></div>'+
+    '<input id="mNote" placeholder="Note (optional)" value="'+esc(v.note||'')+'" style="width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink);font-size:.85rem;font-family:inherit">'+
+    '<button class="btn neon-green" style="width:100%;margin-top:10px" onclick="logCheckpoint('+i+')">✓ Log checkpoint</button>'+
+    '<div style="margin-top:10px"><div class="col-h" style="font-size:.7rem">Checkpoints</div>'+log+'</div>';
   showModal(h);
 }
-function logMon(i,kind){var c=CHAIRS[i];var v='BP '+(val('mBP')||'-')+' HR '+(val('mHR')||'-')+' SpO2 '+(val('mO2')||'-')+(val('mNote')?(' · '+val('mNote')):'');
-  c.monitoring.push({t:'+'+Math.round((c.total-c.remain)/60)+'m',note:(kind==='AE'?'⚠ AE: ':'')+v});
-  if(kind==='AE'){closeModal();aeEscalate(i);}else openMonitor(i);
+function logCheckpoint(i){var c=CHAIRS[i];saveMonVit(i);var v=c._vit||{};
+  var syms=Object.keys(c._sym||{}).filter(function(k){return c._sym[k];});
+  var ints=Object.keys(c._int||{}).filter(function(k){return c._int[k];});
+  var vit='BP '+(v.bp||'-')+' HR '+(v.hr||'-')+' RR '+(v.rr||'-')+' SpO2 '+(v.o2||'-');
+  var red=syms.some(function(k){var s=symByK(k);return s&&s.red;});
+  var note=(syms.length?('Sym: '+syms.join(', ')):'No new symptoms')+(ints.length?(' · Int: '+ints.join(', ')):'')+' · '+vit+(v.note?(' · '+v.note):'');
+  var mid=c.total>3600&&(c.total-c.remain)>=(c.total/2-300)&&(c.total-c.remain)<=(c.total/2+300);
+  c.monitoring.push({t:'+'+Math.round((c.total-c.remain)/60)+'m',note:note,ae:red,mid:mid});
+  var em=null;syms.forEach(function(k){var s=symByK(k);if(s&&s.em&&!em)em=s.em;});
+  c._sym={};c._int={};c._vit={};
+  if(red&&em){closeModal();monRedFlag(i,em);}else openMonitor(i);
 }
-function aeEscalate(i){var h='<button class="x" onclick="closeModal()">×</button><h3 style="color:var(--red)">⚠ Adverse event — Chair '+(i+1)+'</h3><div class="sub">Logged. Open the matching chairside protocol if clinically indicated:</div>'+
-  '<button class="btn neon-red" style="width:100%;margin-bottom:6px" onclick="closeModal();emProtocol(\'ANAPHYLAXIS\')">Anaphylaxis (CARD-A)</button>'+
-  '<button class="btn ghost" style="width:100%;margin-bottom:6px" onclick="closeModal();emProtocol(\'VASOVAGAL\')">Vasovagal (CARD-V)</button>'+
-  '<div class="muted" style="font-size:.72rem">Serious AE → complete FORM-04 within 24 h (ARNP + Medical Director co-sign).</div>';
+function monRedFlag(i,em){var label=em==='ANAPHYLAXIS'?'CARD-A · Anaphylaxis':em==='VASOVAGAL'?'CARD-V · Vasovagal':'Infiltration / extravasation';
+  var h='<button class="x" onclick="closeModal()">×</button><h3 style="color:var(--red)">⚠ Red-flag symptom — Chair '+(i+1)+'</h3><div class="sub">Logged. Stop or slow per your judgment, then open the protocol if indicated.</div>'+
+    '<button class="btn neon-red" style="width:100%;margin-bottom:8px" onclick="closeModal();emProtocol(\''+em+'\')">Open '+esc(label)+'</button>'+
+    '<button class="btn ghost" style="width:100%;margin-bottom:8px" onclick="openMonitor('+i+')">Back to monitoring</button>'+
+    '<div class="muted" style="font-size:.72rem">Serious AE → complete FORM-04 within 24 h (ARNP + Medical Director co-sign).</div>';
   showModal(h);
 }
 
