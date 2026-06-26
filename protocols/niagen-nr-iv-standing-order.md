@@ -1,6 +1,8 @@
 # Niagen® / Nicotinamide Riboside Chloride (NR) IV Standing Order — Evidence-Audited DRAFT v0.1
 
-> **STATUS — DRAFT, requires Medical Director sign-off before clinical use.**
+> **STATUS — PUBLISHED AllyOS reference TEMPLATE (curator editorial review, A. Falcon MD, 2026-06-26).**
+> **To USE it clinically, the clinic's OWN prescriber must review, customize, and sign this standing
+> order for their patients — AllyOS does not prescribe and does not sign another clinic's orders.**
 > Curated under the RenuviaMD® AllyOS Compliance Division. This is decision-support, not a
 > prescription or a medical-director relationship. **AllyOS is advisory — it informs how/what;
 > it does not stop a practice. It enforces only where RenuviaMD is the Medical Director of record.**

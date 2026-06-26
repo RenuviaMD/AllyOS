@@ -398,7 +398,7 @@ function renderDetail(){var el=document.getElementById('detail');var p=qById(sel
     h+='<label style="font-size:.7rem;color:var(--muted);display:block;margin-bottom:4px">Protocol menu — change anytime</label>'+
        '<select class="search" onchange="setProto(\''+p.id+'\',this.value)">'+allStacks().map(function(x){return '<option value="'+x.code+'"'+sel(code,x.code)+'>'+esc(x.code)+' — '+esc(x.title)+(x.status==='draft'?' (DRAFT)':'')+'</option>';}).join('')+'</select>'+
        '<div class="card" style="border-left:3px solid '+(s&&s.status==='draft'?'var(--gold)':'var(--teal)')+';padding:13px;margin-top:6px">'+
-       (s&&s.status==='draft'?'<div class="flag warn" style="margin-bottom:8px"><b>DRAFT protocol</b>'+esc(s.draft_note||'Requires Medical Director sign-off before clinical use.')+'</div>':'')+
+       (s&&s.status==='draft'?'<div class="flag warn" style="margin-bottom:8px"><b>DRAFT protocol</b>'+esc(s.draft_note||s.note||'Requires Medical Director sign-off before clinical use.')+'</div>':(s&&s.note?'<div class="flag info" style="margin-bottom:8px"><b>Standing order required</b>'+esc(s.note)+'</div>':''))+
        '<div class="eyebrow" style="color:var(--teal)">Protocol</div>'+
        '<div class="h-disp" style="font-size:1.05rem;margin:2px 0 2px">'+esc(code)+' — '+esc(s?s.title:'')+'</div>'+
        (s&&s.purpose?'<div class="muted" style="font-size:.76rem;margin-bottom:8px">'+esc(s.purpose)+'</div>':'')+
@@ -712,7 +712,7 @@ function refProtocols(q){var list=allStacks().filter(function(s){return refMatch
     var head='<div class="rh" onclick="refToggle(\''+s.code+'\')"><span><span class="rt">'+esc(s.code)+'</span> <span class="rs">'+esc(s.title)+'</span></span>'+(s.status==='draft'?'<span class="rtag draft">DRAFT</span>':'')+'</div>';
     if(!open)return '<div class="ritem">'+head+'</div>';
     var comp=(s.components||[]).map(function(c){return '<div class="row"><span class="k">'+esc(c.ingredient)+'</span><span>'+esc(c.dose||'')+'</span></div>';}).join('');
-    var body='<div class="rbody">'+(s.draft_note?'<div class="flag warn" style="margin:8px 0"><b>DRAFT</b>'+esc(s.draft_note)+'</div>':'')+
+    var body='<div class="rbody">'+(s.status==='draft'?'<div class="flag warn" style="margin:8px 0"><b>DRAFT</b>'+esc(s.draft_note||s.note||'')+'</div>':(s.note?'<div class="flag info" style="margin:8px 0"><b>Standing order required</b>'+esc(s.note)+'</div>':''))+
       '<div class="row"><span class="k">Base</span><span>'+esc(s.base||'')+'</span></div>'+
       '<div class="row"><span class="k">Time</span><span>'+esc(s.infusion_time||'')+'</span></div>'+
       (s.indication?'<div style="color:var(--muted);font-size:.74rem;margin:6px 0">'+esc(s.indication)+'</div>':'')+

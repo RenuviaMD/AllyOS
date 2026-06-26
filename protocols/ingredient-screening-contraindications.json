@@ -2,8 +2,8 @@
   "meta": {
     "id": "INGREDIENT-SCREEN-CONTRA-01",
     "title": "Ingredient-level screening contraindications (GFE intake)",
-    "version": "DRAFT v0.1",
-    "status": "draft_requires_md_signoff",
+    "version": "v1.0 (published)",
+    "status": "published",
     "owner": "RenuviaMD® PLLC · AllyOS Compliance Division",
     "curated_under": "Armando A. Falcon, MD (FL ME 84789)",
     "date_drafted": "2026-06-26",
@@ -15,180 +15,643 @@
       "screen": "Not a contraindication per se — requires a specific check (lab, medication reconciliation, allergy history) before giving."
     },
     "condition_keys": [
-      "diabetes", "htn", "cardiac", "renal", "hepatic", "respiratory",
-      "cancer", "pregnancy_lactation", "bleeding_anticoag", "g6pd",
-      "recent_procedure_30d", "allergy", "meds", "thyroid", "herpes_hx", "stones_hx"
+      "diabetes",
+      "htn",
+      "cardiac",
+      "renal",
+      "hepatic",
+      "respiratory",
+      "cancer",
+      "pregnancy_lactation",
+      "bleeding_anticoag",
+      "g6pd",
+      "recent_procedure_30d",
+      "allergy",
+      "meds",
+      "thyroid",
+      "herpes_hx",
+      "stones_hx"
     ],
     "honesty_notes": "Items marked VERIFY are mechanistically plausible but rest on limited or contested human data — the MD must confirm before they are treated as hard rules. Everything else is established pharmacology. No dose, citation, or interaction below is invented; where the locked iv-module.json already carries a guardrail it is referenced, not duplicated.",
-    "no_fabrication": true
+    "no_fabrication": true,
+    "published_by": "Armando A. Falcon, MD — AllyOS curator (editorial review; not a prescription)",
+    "published_date": "2026-06-26"
   },
-
   "ingredients": {
-    "ING_NS": { "name": "0.9% Normal Saline (base)", "screen": [
-      { "flag": "cardiac", "level": "caution", "note": "Sodium + volume load — slow rate / smaller bag in CHF or significant cardiac disease to avoid fluid overload." },
-      { "flag": "renal", "level": "caution", "note": "Volume + sodium caution in advanced renal failure / oliguria." },
-      { "flag": "htn", "level": "caution", "note": "Large sodium load can transiently raise BP in poorly controlled hypertension." }
-    ]},
-    "ING_LR": { "name": "Lactated Ringer's (base)", "screen": [
-      { "flag": "renal", "level": "caution", "note": "Contains potassium (~4 mEq/L) — avoid as a large-volume base in hyperkalemia or dialysis-dependent ESRD." },
-      { "flag": "hepatic", "level": "caution", "note": "Lactate is hepatically metabolized — caution in severe liver failure." },
-      { "flag": "cardiac", "level": "caution", "note": "Volume load in CHF." }
-    ]},
-    "ING_VITACOMPLEX": { "name": "Vita Complex (B-Complex)", "screen": [
-      { "flag": "allergy", "level": "screen", "note": "Contains thiamine — IV thiamine can rarely cause anaphylaxis; screen prior B-vitamin/infusion reactions." }
-    ]},
-    "ING_METHYLB12": { "name": "Methylcobalamin (B12)", "screen": [
-      { "flag": "allergy", "level": "screen", "note": "Cobalt/cobalamin hypersensitivity (rare)." },
-      { "flag": "cancer", "level": "caution", "note": "Polycythemia vera and some myeloproliferative states can be aggravated by B12 — screen if relevant hematologic history. VERIFY relevance per patient." }
-    ]},
-    "ING_VITC": { "name": "Ascorbic Acid (Vitamin C)", "screen": [
-      { "flag": "g6pd", "level": "avoid", "note": "High-dose IV Vitamin C can precipitate acute hemolysis in G6PD deficiency — screen BEFORE any dose >2 g (already wired in bench engine; CARD-VC tiering ≥6 g)." },
-      { "flag": "renal", "level": "avoid", "note": "Oxalate is a Vit C metabolite — high-dose IV risks oxalate nephropathy; avoid high dose in CKD/ESRD/dialysis." },
-      { "flag": "stones_hx", "level": "caution", "note": "History of calcium-oxalate kidney stones — limit dose / hydrate." },
-      { "flag": "meds", "level": "screen", "note": "Iron overload / hemochromatosis: Vit C increases iron absorption/mobilization — screen for iron-overload states." }
-    ]},
-    "ING_BIOTIN": { "name": "Biotin", "screen": [
-      { "flag": "screen", "level": "screen", "note": "High-dose biotin interferes with many streptavidin-biotin lab immunoassays (troponin, TSH/free-T4, hCG, others) — can cause falsely high or low results. Hold before labs / inform the lab. Not a true contraindication." }
-    ]},
-    "ING_MGCL": { "name": "Magnesium Chloride", "screen": [
-      { "flag": "renal", "level": "avoid", "note": "Magnesium is renally cleared — accumulation/toxicity in renal impairment or dialysis; avoid or markedly reduce + slow rate." },
-      { "flag": "cardiac", "level": "avoid", "note": "Heart block / significant bradycardia — IV Mg can worsen AV conduction; screen for conduction disease." },
-      { "flag": "meds", "level": "caution", "note": "Myasthenia gravis and neuromuscular blockers — Mg potentiates weakness. VERIFY MG history." }
-    ]},
-    "ING_CAGLUC": { "name": "Calcium Gluconate", "screen": [
-      { "flag": "meds", "level": "avoid", "note": "Digoxin / cardiac glycosides — IV calcium can precipitate fatal arrhythmia ('stone heart'); screen the med list." },
-      { "flag": "cancer", "level": "caution", "note": "Malignancy with hypercalcemia (bone mets, PTHrP) — avoid adding calcium." },
-      { "flag": "renal", "level": "caution", "note": "Stones / hypercalcemia risk; BMP above ceiling per module." }
-    ]},
-    "ING_ZINC": { "name": "Zinc Sulfate", "screen": [
-      { "flag": "renal", "level": "caution", "note": "Reduce in significant renal impairment (trace-element accumulation)." }
-    ]},
-    "ING_SELENIUM": { "name": "Selenium", "screen": [
-      { "flag": "renal", "level": "caution", "note": "Trace-element accumulation in renal failure — keep at/under ceiling." }
-    ]},
-    "ING_TRACE": { "name": "Trace Mineral Injection (Zn+Cu+Mn+Se)", "screen": [
-      { "flag": "hepatic", "level": "avoid", "note": "Manganese is biliary-excreted and accumulates in cholestasis / liver disease (neurotoxic, basal-ganglia deposition) — avoid the Mn-containing blend in cholestatic liver disease." },
-      { "flag": "renal", "level": "caution", "note": "Trace-element accumulation in renal failure." }
-    ]},
-    "ING_LYSINE": { "name": "L-Lysine", "screen": [
-      { "flag": "renal", "level": "caution", "note": "Amino-acid load — caution in significant renal impairment." }
-    ]},
-    "ING_TAURINE": { "name": "L-Taurine", "screen": [] },
-    "ING_CARNITINE": { "name": "L-Carnitine", "screen": [
-      { "flag": "thyroid", "level": "caution", "note": "L-Carnitine antagonizes thyroid hormone action peripherally — caution / avoid in hypothyroidism; can blunt thyroid replacement. VERIFY thyroid status." },
-      { "flag": "renal", "level": "caution", "note": "Accumulates in ESRD (though used therapeutically in dialysis) — provider judgment." },
-      { "flag": "meds", "level": "screen", "note": "May potentiate warfarin (INR rise) — screen anticoagulants. VERIFY." }
-    ]},
-    "ING_GLUTAMINE": { "name": "L-Glutamine", "screen": [
-      { "flag": "hepatic", "level": "avoid", "note": "Glutamine is metabolized to ammonia/glutamate — avoid in cirrhosis / hepatic encephalopathy or severe liver disease." },
-      { "flag": "renal", "level": "caution", "note": "Nitrogen load in advanced renal disease." }
-    ]},
-    "ING_AMINOBLEND": { "name": "Amino Blend (Proline+Arginine+Lysine+Citrulline)", "screen": [
-      { "flag": "renal", "level": "avoid", "note": "Contains ARGININE — the HCl salt shifts potassium extracellularly and has caused fatal hyperkalemia in renal impairment (see ING_ARGININE)." },
-      { "flag": "hepatic", "level": "caution", "note": "Amino-acid/nitrogen load in advanced liver disease." },
-      { "flag": "herpes_hx", "level": "caution", "note": "Arginine may favor HSV reactivation in patients with frequent oral/genital herpes — counsel/screen. VERIFY relevance per patient." }
-    ]},
-    "ING_GLUTATHIONE": { "name": "Glutathione (reduced)", "screen": [
-      { "flag": "respiratory", "level": "caution", "note": "Sulfur-containing — rare bronchospasm reports; caution in brittle asthma. IV PUSH ONLY / never in a Vit C bag (compatibility, per module)." },
-      { "flag": "allergy", "level": "screen", "note": "Sulfite/sulfur sensitivity." }
-    ]},
-    "ING_NAD": { "name": "NAD+ (IV)", "screen": [
-      { "flag": "cardiac", "level": "caution", "note": "Rapid infusion causes chest tightness, palpitations, flushing, nausea — strictly rate-limited (rate floors in module); extra caution with cardiac disease." }
-    ]},
-    "ING_LIPOTROPIC": { "name": "Lipotropic IM (MIC + methyl-B12)", "screen": [
-      { "flag": "pregnancy_lactation", "level": "avoid", "note": "Weight-loss/lipotropic agents — avoid in pregnancy/breastfeeding." },
-      { "flag": "hepatic", "level": "caution", "note": "Methionine/choline load — caution in significant liver disease." },
-      { "flag": "renal", "level": "caution", "note": "Caution in significant renal impairment." }
-    ]},
-    "ING_NAC": { "name": "N-Acetyl Cysteine (NAC)", "screen": [
-      { "flag": "respiratory", "level": "caution", "note": "Can provoke bronchospasm — caution in active asthma." },
-      { "flag": "allergy", "level": "screen", "note": "Prior NAC reaction (anaphylactoid)." }
-    ]},
-    "ING_COQ10": { "name": "Coenzyme Q10 IM", "screen": [
-      { "flag": "bleeding_anticoag", "level": "screen", "note": "CoQ10 can lower INR / antagonize warfarin — screen anticoagulant use and monitor." },
-      { "flag": "meds", "level": "screen", "note": "Same warfarin interaction noted in Section D reconciliation." }
-    ]},
-    "ING_B12_CYANO": { "name": "Cyanocobalamin (B12)", "screen": [
-      { "flag": "allergy", "level": "avoid", "note": "Leber's hereditary optic neuropathy and tobacco/nutritional amblyopia — cyanocobalamin is contraindicated (cyanide moiety); use methyl- or hydroxocobalamin. Also cobalt allergy." },
-      { "flag": "renal", "level": "caution", "note": "Cyanide moiety accumulates in severe renal failure — prefer hydroxo/methyl form." }
-    ]},
-    "ING_B12_HYDROXO": { "name": "Hydroxocobalamin (B12)", "screen": [
-      { "flag": "htn", "level": "caution", "note": "Can transiently raise blood pressure; expected reddish discoloration of urine/skin." },
-      { "flag": "allergy", "level": "screen", "note": "Cobalt/cobalamin hypersensitivity (rare)." }
-    ]},
-    "ING_B5": { "name": "Dexpanthenol (B5)", "screen": [
-      { "flag": "bleeding_anticoag", "level": "caution", "note": "Dexpanthenol may prolong bleeding time — caution in hemophilia / on anticoagulants. VERIFY." }
-    ]},
-    "ING_B6": { "name": "Pyridoxine (B6)", "screen": [
-      { "flag": "meds", "level": "screen", "note": "Levodopa WITHOUT carbidopa — B6 accelerates peripheral levodopa metabolism and reduces efficacy; screen Parkinson's meds." },
-      { "flag": "screen", "level": "screen", "note": "Chronic high-dose B6 causes sensory peripheral neuropathy — respect the 100 mg ceiling and avoid stacking other B6 sources." }
-    ]},
-    "ING_VITD3": { "name": "Vitamin D3 IM", "screen": [
-      { "flag": "cancer", "level": "caution", "note": "Granulomatous disease / sarcoidosis / some lymphomas convert vitamin D and cause hypercalcemia — screen." },
-      { "flag": "stones_hx", "level": "caution", "note": "Hypercalcemia/hypercalciuria risk — caution with calcium stones." }
-    ]},
-    "ING_ALA": { "name": "Alpha Lipoic Acid (ALA)", "screen": [
-      { "flag": "diabetes", "level": "avoid", "note": "Insulin Autoimmune Syndrome (Hirata) trigger AND additive hypoglycemia with insulin/sulfonylureas — screen diabetes meds and prior reaction (module carries the full Hirata guardrail). Give with thiamine repletion." },
-      { "flag": "thyroid", "level": "caution", "note": "May alter thyroid hormone levels — caution in thyroid disease. VERIFY." }
-    ]},
-    "ING_CACL": { "name": "Calcium Chloride", "screen": [
-      { "flag": "meds", "level": "avoid", "note": "Digoxin / cardiac glycosides — fatal-arrhythmia risk (as with Ca gluconate). Vesicant: high extravasation injury; gluconate preferred peripherally (module)." },
-      { "flag": "cancer", "level": "caution", "note": "Hypercalcemia of malignancy." }
-    ]},
-    "ING_ARGININE": { "name": "L-Arginine", "screen": [
-      { "flag": "renal", "level": "avoid", "note": "HCl salt shifts potassium extracellularly — has caused FATAL hyperkalemia in renal impairment; screen renal function (module guardrail)." },
-      { "flag": "cardiac", "level": "caution", "note": "Post-MI use was associated with harm (VINTAGE trial) — caution in recent MI; vasodilatory hypotension." },
-      { "flag": "herpes_hx", "level": "caution", "note": "May favor HSV reactivation — counsel patients with frequent herpes. VERIFY relevance." }
-    ]},
-    "ING_PROLINE": { "name": "L-Proline", "screen": [] },
-    "ING_GLYCINE": { "name": "Glycine", "screen": [
-      { "flag": "hepatic", "level": "caution", "note": "Amino-acid/nitrogen load — caution in hepatic encephalopathy." }
-    ]},
-    "ING_MINERALBLEND": { "name": "Mineral Blend (composite)", "screen": [
-      { "flag": "renal", "level": "caution", "note": "Trace-element accumulation in renal failure; do not double-dose with standalone minerals (module)." },
-      { "flag": "hepatic", "level": "caution", "note": "If Mn-containing — cholestasis accumulation (see Trace)." }
-    ]},
-    "ING_TRIIMMUNE": { "name": "Tri-Immune Boost (Zn + Vit C + Glutathione)", "screen": [
-      { "flag": "g6pd", "level": "avoid", "note": "Contains Vitamin C — inherits the G6PD hemolysis screen." },
-      { "flag": "renal", "level": "caution", "note": "Inherits Vit C oxalate/renal caution." },
-      { "flag": "respiratory", "level": "caution", "note": "Contains glutathione — inherits the asthma/bronchospasm caution." }
-    ]},
-    "ING_MICC": { "name": "MIC / MICC / Lipo-MIC IM", "screen": [
-      { "flag": "pregnancy_lactation", "level": "avoid", "note": "Lipotropic/weight-loss family — avoid in pregnancy/breastfeeding." },
-      { "flag": "hepatic", "level": "caution", "note": "Methionine/choline load." },
-      { "flag": "renal", "level": "caution", "note": "Caution in significant renal impairment." }
-    ]},
-    "ING_METHYLENE_BLUE": { "name": "Methylene Blue (HIGH-CAUTION)", "screen": [
-      { "flag": "meds", "level": "avoid", "note": "Potent MAO-A inhibitor — serotonin-syndrome risk with SSRIs/SNRIs/TCAs, tramadol/meperidine/fentanyl/methadone, dextromethorphan, bupropion; screen FULL med list incl. ~2-week washout (module guardrail)." },
-      { "flag": "g6pd", "level": "avoid", "note": "Hemolysis risk in G6PD deficiency." },
-      { "flag": "pregnancy_lactation", "level": "avoid", "note": "Avoid in pregnancy." },
-      { "flag": "renal", "level": "caution", "note": "Caution in renal impairment; falsely lowers SpO2 reading; blue-green urine expected." }
-    ]},
-    "ING_ONDANSETRON_MENU": { "name": "Ondansetron (anti-nausea)", "screen": [
-      { "flag": "cardiac", "level": "screen", "note": "Dose-dependent QT prolongation — screen congenital long-QT and other QT-prolonging meds; caution with significant cardiac disease / electrolyte derangement." },
-      { "flag": "meds", "level": "screen", "note": "Additive QT risk with other QT-prolonging drugs; serotonergic load (rare)." }
-    ]},
-    "ING_KETOROLAC": { "name": "Ketorolac (NSAID Rx)", "screen": [
-      { "flag": "bleeding_anticoag", "level": "avoid", "note": "NSAID — platelet inhibition + GI/bleeding risk; avoid with anticoagulants/bleeding disorder." },
-      { "flag": "renal", "level": "avoid", "note": "Nephrotoxic — avoid in renal impairment / volume depletion." },
-      { "flag": "recent_procedure_30d", "level": "caution", "note": "Bleeding risk around recent surgery/procedure." },
-      { "flag": "respiratory", "level": "caution", "note": "NSAID-exacerbated respiratory disease (aspirin-sensitive asthma/nasal polyps)." },
-      { "flag": "pregnancy_lactation", "level": "avoid", "note": "Avoid, especially 3rd trimester (ductal closure)." },
-      { "flag": "cardiac", "level": "caution", "note": "Fluid retention / BP elevation; caution in CHF/HTN." }
-    ]},
-    "ING_FAMOTIDINE": { "name": "Famotidine (H2 Rx)", "screen": [
-      { "flag": "renal", "level": "caution", "note": "Renally cleared — reduce dose (CrCl <50); CNS effects/confusion in elderly; give slow/diluted (rare QT in renal impairment) (module guardrail)." }
-    ]},
-
+    "ING_NS": {
+      "name": "0.9% Normal Saline (base)",
+      "screen": [
+        {
+          "flag": "cardiac",
+          "level": "caution",
+          "note": "Sodium + volume load — slow rate / smaller bag in CHF or significant cardiac disease to avoid fluid overload."
+        },
+        {
+          "flag": "renal",
+          "level": "caution",
+          "note": "Volume + sodium caution in advanced renal failure / oliguria."
+        },
+        {
+          "flag": "htn",
+          "level": "caution",
+          "note": "Large sodium load can transiently raise BP in poorly controlled hypertension."
+        }
+      ]
+    },
+    "ING_LR": {
+      "name": "Lactated Ringer's (base)",
+      "screen": [
+        {
+          "flag": "renal",
+          "level": "caution",
+          "note": "Contains potassium (~4 mEq/L) — avoid as a large-volume base in hyperkalemia or dialysis-dependent ESRD."
+        },
+        {
+          "flag": "hepatic",
+          "level": "caution",
+          "note": "Lactate is hepatically metabolized — caution in severe liver failure."
+        },
+        {
+          "flag": "cardiac",
+          "level": "caution",
+          "note": "Volume load in CHF."
+        }
+      ]
+    },
+    "ING_VITACOMPLEX": {
+      "name": "Vita Complex (B-Complex)",
+      "screen": [
+        {
+          "flag": "allergy",
+          "level": "screen",
+          "note": "Contains thiamine — IV thiamine can rarely cause anaphylaxis; screen prior B-vitamin/infusion reactions."
+        }
+      ]
+    },
+    "ING_METHYLB12": {
+      "name": "Methylcobalamin (B12)",
+      "screen": [
+        {
+          "flag": "allergy",
+          "level": "screen",
+          "note": "Cobalt/cobalamin hypersensitivity (rare)."
+        },
+        {
+          "flag": "cancer",
+          "level": "caution",
+          "note": "Polycythemia vera and some myeloproliferative states can be aggravated by B12 — screen if relevant hematologic history. VERIFY relevance per patient."
+        }
+      ]
+    },
+    "ING_VITC": {
+      "name": "Ascorbic Acid (Vitamin C)",
+      "screen": [
+        {
+          "flag": "g6pd",
+          "level": "avoid",
+          "note": "High-dose IV Vitamin C can precipitate acute hemolysis in G6PD deficiency — screen BEFORE any dose >2 g (already wired in bench engine; CARD-VC tiering ≥6 g)."
+        },
+        {
+          "flag": "renal",
+          "level": "avoid",
+          "note": "Oxalate is a Vit C metabolite — high-dose IV risks oxalate nephropathy; avoid high dose in CKD/ESRD/dialysis."
+        },
+        {
+          "flag": "stones_hx",
+          "level": "caution",
+          "note": "History of calcium-oxalate kidney stones — limit dose / hydrate."
+        },
+        {
+          "flag": "meds",
+          "level": "screen",
+          "note": "Iron overload / hemochromatosis: Vit C increases iron absorption/mobilization — screen for iron-overload states."
+        }
+      ]
+    },
+    "ING_BIOTIN": {
+      "name": "Biotin",
+      "screen": [
+        {
+          "flag": "screen",
+          "level": "screen",
+          "note": "High-dose biotin interferes with many streptavidin-biotin lab immunoassays (troponin, TSH/free-T4, hCG, others) — can cause falsely high or low results. Hold before labs / inform the lab. Not a true contraindication."
+        }
+      ]
+    },
+    "ING_MGCL": {
+      "name": "Magnesium Chloride",
+      "screen": [
+        {
+          "flag": "renal",
+          "level": "avoid",
+          "note": "Magnesium is renally cleared — accumulation/toxicity in renal impairment or dialysis; avoid or markedly reduce + slow rate."
+        },
+        {
+          "flag": "cardiac",
+          "level": "avoid",
+          "note": "Heart block / significant bradycardia — IV Mg can worsen AV conduction; screen for conduction disease."
+        },
+        {
+          "flag": "meds",
+          "level": "caution",
+          "note": "Myasthenia gravis and neuromuscular blockers — Mg potentiates weakness. VERIFY MG history."
+        }
+      ]
+    },
+    "ING_CAGLUC": {
+      "name": "Calcium Gluconate",
+      "screen": [
+        {
+          "flag": "meds",
+          "level": "avoid",
+          "note": "Digoxin / cardiac glycosides — IV calcium can precipitate fatal arrhythmia ('stone heart'); screen the med list."
+        },
+        {
+          "flag": "cancer",
+          "level": "caution",
+          "note": "Malignancy with hypercalcemia (bone mets, PTHrP) — avoid adding calcium."
+        },
+        {
+          "flag": "renal",
+          "level": "caution",
+          "note": "Stones / hypercalcemia risk; BMP above ceiling per module."
+        }
+      ]
+    },
+    "ING_ZINC": {
+      "name": "Zinc Sulfate",
+      "screen": [
+        {
+          "flag": "renal",
+          "level": "caution",
+          "note": "Reduce in significant renal impairment (trace-element accumulation)."
+        }
+      ]
+    },
+    "ING_SELENIUM": {
+      "name": "Selenium",
+      "screen": [
+        {
+          "flag": "renal",
+          "level": "caution",
+          "note": "Trace-element accumulation in renal failure — keep at/under ceiling."
+        }
+      ]
+    },
+    "ING_TRACE": {
+      "name": "Trace Mineral Injection (Zn+Cu+Mn+Se)",
+      "screen": [
+        {
+          "flag": "hepatic",
+          "level": "avoid",
+          "note": "Manganese is biliary-excreted and accumulates in cholestasis / liver disease (neurotoxic, basal-ganglia deposition) — avoid the Mn-containing blend in cholestatic liver disease."
+        },
+        {
+          "flag": "renal",
+          "level": "caution",
+          "note": "Trace-element accumulation in renal failure."
+        }
+      ]
+    },
+    "ING_LYSINE": {
+      "name": "L-Lysine",
+      "screen": [
+        {
+          "flag": "renal",
+          "level": "caution",
+          "note": "Amino-acid load — caution in significant renal impairment."
+        }
+      ]
+    },
+    "ING_TAURINE": {
+      "name": "L-Taurine",
+      "screen": []
+    },
+    "ING_CARNITINE": {
+      "name": "L-Carnitine",
+      "screen": [
+        {
+          "flag": "thyroid",
+          "level": "caution",
+          "note": "L-Carnitine antagonizes thyroid hormone action peripherally — caution / avoid in hypothyroidism; can blunt thyroid replacement. VERIFY thyroid status."
+        },
+        {
+          "flag": "renal",
+          "level": "caution",
+          "note": "Accumulates in ESRD (though used therapeutically in dialysis) — provider judgment."
+        },
+        {
+          "flag": "meds",
+          "level": "screen",
+          "note": "May potentiate warfarin (INR rise) — screen anticoagulants. VERIFY."
+        }
+      ]
+    },
+    "ING_GLUTAMINE": {
+      "name": "L-Glutamine",
+      "screen": [
+        {
+          "flag": "hepatic",
+          "level": "avoid",
+          "note": "Glutamine is metabolized to ammonia/glutamate — avoid in cirrhosis / hepatic encephalopathy or severe liver disease."
+        },
+        {
+          "flag": "renal",
+          "level": "caution",
+          "note": "Nitrogen load in advanced renal disease."
+        }
+      ]
+    },
+    "ING_AMINOBLEND": {
+      "name": "Amino Blend (Proline+Arginine+Lysine+Citrulline)",
+      "screen": [
+        {
+          "flag": "renal",
+          "level": "avoid",
+          "note": "Contains ARGININE — the HCl salt shifts potassium extracellularly and has caused fatal hyperkalemia in renal impairment (see ING_ARGININE)."
+        },
+        {
+          "flag": "hepatic",
+          "level": "caution",
+          "note": "Amino-acid/nitrogen load in advanced liver disease."
+        },
+        {
+          "flag": "herpes_hx",
+          "level": "caution",
+          "note": "Arginine may favor HSV reactivation in patients with frequent oral/genital herpes — counsel/screen. VERIFY relevance per patient."
+        }
+      ]
+    },
+    "ING_GLUTATHIONE": {
+      "name": "Glutathione (reduced)",
+      "screen": [
+        {
+          "flag": "respiratory",
+          "level": "caution",
+          "note": "Sulfur-containing — rare bronchospasm reports; caution in brittle asthma. IV PUSH ONLY / never in a Vit C bag (compatibility, per module)."
+        },
+        {
+          "flag": "allergy",
+          "level": "screen",
+          "note": "Sulfite/sulfur sensitivity."
+        }
+      ]
+    },
+    "ING_NAD": {
+      "name": "NAD+ (IV)",
+      "screen": [
+        {
+          "flag": "cardiac",
+          "level": "caution",
+          "note": "Rapid infusion causes chest tightness, palpitations, flushing, nausea — strictly rate-limited (rate floors in module); extra caution with cardiac disease."
+        }
+      ]
+    },
+    "ING_LIPOTROPIC": {
+      "name": "Lipotropic IM (MIC + methyl-B12)",
+      "screen": [
+        {
+          "flag": "pregnancy_lactation",
+          "level": "avoid",
+          "note": "Weight-loss/lipotropic agents — avoid in pregnancy/breastfeeding."
+        },
+        {
+          "flag": "hepatic",
+          "level": "caution",
+          "note": "Methionine/choline load — caution in significant liver disease."
+        },
+        {
+          "flag": "renal",
+          "level": "caution",
+          "note": "Caution in significant renal impairment."
+        }
+      ]
+    },
+    "ING_NAC": {
+      "name": "N-Acetyl Cysteine (NAC)",
+      "screen": [
+        {
+          "flag": "respiratory",
+          "level": "caution",
+          "note": "Can provoke bronchospasm — caution in active asthma."
+        },
+        {
+          "flag": "allergy",
+          "level": "screen",
+          "note": "Prior NAC reaction (anaphylactoid)."
+        }
+      ]
+    },
+    "ING_COQ10": {
+      "name": "Coenzyme Q10 IM",
+      "screen": [
+        {
+          "flag": "bleeding_anticoag",
+          "level": "screen",
+          "note": "CoQ10 can lower INR / antagonize warfarin — screen anticoagulant use and monitor."
+        },
+        {
+          "flag": "meds",
+          "level": "screen",
+          "note": "Same warfarin interaction noted in Section D reconciliation."
+        }
+      ]
+    },
+    "ING_B12_CYANO": {
+      "name": "Cyanocobalamin (B12)",
+      "screen": [
+        {
+          "flag": "allergy",
+          "level": "avoid",
+          "note": "Leber's hereditary optic neuropathy and tobacco/nutritional amblyopia — cyanocobalamin is contraindicated (cyanide moiety); use methyl- or hydroxocobalamin. Also cobalt allergy."
+        },
+        {
+          "flag": "renal",
+          "level": "caution",
+          "note": "Cyanide moiety accumulates in severe renal failure — prefer hydroxo/methyl form."
+        }
+      ]
+    },
+    "ING_B12_HYDROXO": {
+      "name": "Hydroxocobalamin (B12)",
+      "screen": [
+        {
+          "flag": "htn",
+          "level": "caution",
+          "note": "Can transiently raise blood pressure; expected reddish discoloration of urine/skin."
+        },
+        {
+          "flag": "allergy",
+          "level": "screen",
+          "note": "Cobalt/cobalamin hypersensitivity (rare)."
+        }
+      ]
+    },
+    "ING_B5": {
+      "name": "Dexpanthenol (B5)",
+      "screen": [
+        {
+          "flag": "bleeding_anticoag",
+          "level": "caution",
+          "note": "Dexpanthenol may prolong bleeding time — caution in hemophilia / on anticoagulants. VERIFY."
+        }
+      ]
+    },
+    "ING_B6": {
+      "name": "Pyridoxine (B6)",
+      "screen": [
+        {
+          "flag": "meds",
+          "level": "screen",
+          "note": "Levodopa WITHOUT carbidopa — B6 accelerates peripheral levodopa metabolism and reduces efficacy; screen Parkinson's meds."
+        },
+        {
+          "flag": "screen",
+          "level": "screen",
+          "note": "Chronic high-dose B6 causes sensory peripheral neuropathy — respect the 100 mg ceiling and avoid stacking other B6 sources."
+        }
+      ]
+    },
+    "ING_VITD3": {
+      "name": "Vitamin D3 IM",
+      "screen": [
+        {
+          "flag": "cancer",
+          "level": "caution",
+          "note": "Granulomatous disease / sarcoidosis / some lymphomas convert vitamin D and cause hypercalcemia — screen."
+        },
+        {
+          "flag": "stones_hx",
+          "level": "caution",
+          "note": "Hypercalcemia/hypercalciuria risk — caution with calcium stones."
+        }
+      ]
+    },
+    "ING_ALA": {
+      "name": "Alpha Lipoic Acid (ALA)",
+      "screen": [
+        {
+          "flag": "diabetes",
+          "level": "avoid",
+          "note": "Insulin Autoimmune Syndrome (Hirata) trigger AND additive hypoglycemia with insulin/sulfonylureas — screen diabetes meds and prior reaction (module carries the full Hirata guardrail). Give with thiamine repletion."
+        },
+        {
+          "flag": "thyroid",
+          "level": "caution",
+          "note": "May alter thyroid hormone levels — caution in thyroid disease. VERIFY."
+        }
+      ]
+    },
+    "ING_CACL": {
+      "name": "Calcium Chloride",
+      "screen": [
+        {
+          "flag": "meds",
+          "level": "avoid",
+          "note": "Digoxin / cardiac glycosides — fatal-arrhythmia risk (as with Ca gluconate). Vesicant: high extravasation injury; gluconate preferred peripherally (module)."
+        },
+        {
+          "flag": "cancer",
+          "level": "caution",
+          "note": "Hypercalcemia of malignancy."
+        }
+      ]
+    },
+    "ING_ARGININE": {
+      "name": "L-Arginine",
+      "screen": [
+        {
+          "flag": "renal",
+          "level": "avoid",
+          "note": "HCl salt shifts potassium extracellularly — has caused FATAL hyperkalemia in renal impairment; screen renal function (module guardrail)."
+        },
+        {
+          "flag": "cardiac",
+          "level": "caution",
+          "note": "Post-MI use was associated with harm (VINTAGE trial) — caution in recent MI; vasodilatory hypotension."
+        },
+        {
+          "flag": "herpes_hx",
+          "level": "caution",
+          "note": "May favor HSV reactivation — counsel patients with frequent herpes. VERIFY relevance."
+        }
+      ]
+    },
+    "ING_PROLINE": {
+      "name": "L-Proline",
+      "screen": []
+    },
+    "ING_GLYCINE": {
+      "name": "Glycine",
+      "screen": [
+        {
+          "flag": "hepatic",
+          "level": "caution",
+          "note": "Amino-acid/nitrogen load — caution in hepatic encephalopathy."
+        }
+      ]
+    },
+    "ING_MINERALBLEND": {
+      "name": "Mineral Blend (composite)",
+      "screen": [
+        {
+          "flag": "renal",
+          "level": "caution",
+          "note": "Trace-element accumulation in renal failure; do not double-dose with standalone minerals (module)."
+        },
+        {
+          "flag": "hepatic",
+          "level": "caution",
+          "note": "If Mn-containing — cholestasis accumulation (see Trace)."
+        }
+      ]
+    },
+    "ING_TRIIMMUNE": {
+      "name": "Tri-Immune Boost (Zn + Vit C + Glutathione)",
+      "screen": [
+        {
+          "flag": "g6pd",
+          "level": "avoid",
+          "note": "Contains Vitamin C — inherits the G6PD hemolysis screen."
+        },
+        {
+          "flag": "renal",
+          "level": "caution",
+          "note": "Inherits Vit C oxalate/renal caution."
+        },
+        {
+          "flag": "respiratory",
+          "level": "caution",
+          "note": "Contains glutathione — inherits the asthma/bronchospasm caution."
+        }
+      ]
+    },
+    "ING_MICC": {
+      "name": "MIC / MICC / Lipo-MIC IM",
+      "screen": [
+        {
+          "flag": "pregnancy_lactation",
+          "level": "avoid",
+          "note": "Lipotropic/weight-loss family — avoid in pregnancy/breastfeeding."
+        },
+        {
+          "flag": "hepatic",
+          "level": "caution",
+          "note": "Methionine/choline load."
+        },
+        {
+          "flag": "renal",
+          "level": "caution",
+          "note": "Caution in significant renal impairment."
+        }
+      ]
+    },
+    "ING_METHYLENE_BLUE": {
+      "name": "Methylene Blue (HIGH-CAUTION)",
+      "screen": [
+        {
+          "flag": "meds",
+          "level": "avoid",
+          "note": "Potent MAO-A inhibitor — serotonin-syndrome risk with SSRIs/SNRIs/TCAs, tramadol/meperidine/fentanyl/methadone, dextromethorphan, bupropion; screen FULL med list incl. ~2-week washout (module guardrail)."
+        },
+        {
+          "flag": "g6pd",
+          "level": "avoid",
+          "note": "Hemolysis risk in G6PD deficiency."
+        },
+        {
+          "flag": "pregnancy_lactation",
+          "level": "avoid",
+          "note": "Avoid in pregnancy."
+        },
+        {
+          "flag": "renal",
+          "level": "caution",
+          "note": "Caution in renal impairment; falsely lowers SpO2 reading; blue-green urine expected."
+        }
+      ]
+    },
+    "ING_ONDANSETRON_MENU": {
+      "name": "Ondansetron (anti-nausea)",
+      "screen": [
+        {
+          "flag": "cardiac",
+          "level": "screen",
+          "note": "Dose-dependent QT prolongation — screen congenital long-QT and other QT-prolonging meds; caution with significant cardiac disease / electrolyte derangement."
+        },
+        {
+          "flag": "meds",
+          "level": "screen",
+          "note": "Additive QT risk with other QT-prolonging drugs; serotonergic load (rare)."
+        }
+      ]
+    },
+    "ING_KETOROLAC": {
+      "name": "Ketorolac (NSAID Rx)",
+      "screen": [
+        {
+          "flag": "bleeding_anticoag",
+          "level": "avoid",
+          "note": "NSAID — platelet inhibition + GI/bleeding risk; avoid with anticoagulants/bleeding disorder."
+        },
+        {
+          "flag": "renal",
+          "level": "avoid",
+          "note": "Nephrotoxic — avoid in renal impairment / volume depletion."
+        },
+        {
+          "flag": "recent_procedure_30d",
+          "level": "caution",
+          "note": "Bleeding risk around recent surgery/procedure."
+        },
+        {
+          "flag": "respiratory",
+          "level": "caution",
+          "note": "NSAID-exacerbated respiratory disease (aspirin-sensitive asthma/nasal polyps)."
+        },
+        {
+          "flag": "pregnancy_lactation",
+          "level": "avoid",
+          "note": "Avoid, especially 3rd trimester (ductal closure)."
+        },
+        {
+          "flag": "cardiac",
+          "level": "caution",
+          "note": "Fluid retention / BP elevation; caution in CHF/HTN."
+        }
+      ]
+    },
+    "ING_FAMOTIDINE": {
+      "name": "Famotidine (H2 Rx)",
+      "screen": [
+        {
+          "flag": "renal",
+          "level": "caution",
+          "note": "Renally cleared — reduce dose (CrCl <50); CNS effects/confusion in elderly; give slow/diluted (rare QT in renal impairment) (module guardrail)."
+        }
+      ]
+    },
     "ING_NIAGEN_NR": {
       "name": "Niagen / Nicotinamide Riboside (NR) — NAD+ PRECURSOR (NOT in current inventory; NOT IV NAD+)",
       "added_by": "user request 2026-06-26",
       "distinct_from": "ING_NAD — NR is an oral/IV NAD+ precursor, a DIFFERENT molecule from infused NAD+; no proven peptide synergy (direct_combination_evidence:false in module market_additions).",
       "status": "draft_requires_md_signoff_and_standing_order",
       "screen": [
-        { "flag": "pregnancy_lactation", "level": "avoid", "note": "Insufficient human safety data in pregnancy/lactation — avoid." },
-        { "flag": "cancer", "level": "caution", "note": "NAD+ precursors raise cellular NAD+; theoretical concern about fueling some tumors — screen active malignancy and defer to oncology. VERIFY — limited/contested human data." },
-        { "flag": "meds", "level": "screen", "note": "Reconcile other NAD+ precursors / niacin-family supplements to avoid stacking; flushing uncommon with NR." }
+        {
+          "flag": "pregnancy_lactation",
+          "level": "avoid",
+          "note": "Insufficient human safety data in pregnancy/lactation — avoid."
+        },
+        {
+          "flag": "cancer",
+          "level": "caution",
+          "note": "NAD+ precursors raise cellular NAD+; theoretical concern about fueling some tumors — screen active malignancy and defer to oncology. VERIFY — limited/contested human data."
+        },
+        {
+          "flag": "meds",
+          "level": "screen",
+          "note": "Reconcile other NAD+ precursors / niacin-family supplements to avoid stacking; flushing uncommon with NR."
+        }
       ],
       "source_audit": "Standing-order draft (protocols/niagen-nr-iv-standing-order.md) carries the verified citations (Conze Sci Rep 2019; Hawkins medRxiv 2024; Reyna Front Aging 2026). Injectable NR sourcing is the clinic/provider's decision (pharmacy-agnostic, advisory) — AllyOS does not mandate a source. Requires a prescriber-signed standing order before clinical use."
     }

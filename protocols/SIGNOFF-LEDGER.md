@@ -70,7 +70,25 @@ reference; it does **not** order anything for a patient:
 
 ## Published entries
 
-_(none yet)_
+```
+- Item: ingredient-screening-contraindications.json v1.0
+  PUBLISHED to the AllyOS library as accurate decision-support reference (curator editorial review).
+  This is NOT a prescription or treatment authorization for any patient.
+  Curator: Armando A. Falcon, MD   (RenuviaMD® AllyOS Compliance Division)
+  Date: 2026-06-26
+  Edits required before publish: none (VERIFY-flagged items remain flagged as caution-to-confirm)
+
+- Item: draft-additions.json — Niagen/NR ingredient + NR-01 protocol
+  PUBLISHED to the AllyOS library as accurate decision-support reference (curator editorial review).
+  NR-01 is a TEMPLATE; the clinic's own prescriber signs the NR standing order for their patients.
+  Curator: Armando A. Falcon, MD   (RenuviaMD® AllyOS Compliance Division)
+  Date: 2026-06-26
+  Edits required before publish: none (evidence grade C–D noted; standing order required to use)
+
+- Item: niagen-nr-iv-standing-order.md — PUBLISHED as a reference TEMPLATE.
+  Curator: Armando A. Falcon, MD   Date: 2026-06-26
+  (The actual standing order is signed by each clinic's prescriber, in that clinic's records — not here.)
+```
 
 > The clinic-side GFE / standing-order signatures live in each clinic's own records — NOT here.
 > This ledger is only AllyOS's editorial publish record.
