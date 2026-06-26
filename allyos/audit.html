@@ -51,6 +51,25 @@ tr:hover td{background:rgba(255,255,255,.025)}
 .modal textarea{width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:9px;padding:10px;color:var(--ink);font-family:inherit;font-size:.86rem}
 .btn{display:inline-flex;align-items:center;justify-content:center;width:100%;font-family:var(--fdisp);font-weight:600;border:none;border-radius:999px;padding:13px;margin-top:12px;cursor:pointer;background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a}
 @media print{body{background:#fff!important;color:#111!important}.noprint{display:none!important}.stat,table,th,td,.cplan{color:#111!important;border-color:#ccc!important;background:#fff!important}.eid{color:#06c!important}.rf{color:#7a560a!important;background:#fdf4e3!important}}
+/* MD compliance report (light paper) */
+#report{display:none;padding:18px}
+body.reporting>.wrap{display:none}
+.rpt{background:#fff;color:#1a2733;border-radius:8px;padding:30px;max-width:850px;margin:0 auto;font-size:.82rem;line-height:1.5}
+.rpt h2{font-size:1.15rem;color:#0e3a40;text-align:center;letter-spacing:.02em}
+.rpt .rh{text-align:center;font-size:.74rem;color:#5b6b72;border-bottom:2px solid #0e8a8a;padding-bottom:10px;margin-bottom:12px}
+.rpt .meta{display:grid;grid-template-columns:1fr 1fr;gap:2px 18px;font-size:.78rem;margin:12px 0}
+.rpt .meta span{color:#5b6b72}.rpt .meta b{color:#1a2733}
+.rpt h3{font-size:.82rem;text-transform:uppercase;letter-spacing:.04em;color:#0e8a8a;border-bottom:1px solid #dce7e5;padding-bottom:4px;margin:18px 0 8px}
+.rpt table{width:100%;border-collapse:collapse;font-size:.76rem;margin:6px 0}
+.rpt th,.rpt td{border:1px solid #cfdbd9;padding:5px 7px;text-align:left;color:#1a2733}
+.rpt th{background:#eef6f5;font-size:.68rem;text-transform:uppercase}
+.rpt .ok{color:#0c7a4d;font-weight:700}.rpt .na{color:#94a3ab}.rpt .def{color:#b3261e;font-weight:700}
+.rpt .det{background:#e9f6f0;border-left:3px solid #1e9e6a;padding:9px 12px;border-radius:5px;margin:10px 0;font-size:.82rem}
+.rpt .aff label{display:flex;gap:8px;align-items:flex-start;margin:5px 0}
+.rpt .sig{margin-top:26px;border-top:1px solid #cfdbd9;padding-top:14px}
+.rpt .sigline{border-bottom:1px solid #1a2733;display:inline-block;min-width:260px;margin-right:8px}
+.rpt .foot{text-align:center;font-size:.68rem;color:#94a3ab;margin-top:22px;border-top:1px solid #dce7e5;padding-top:8px}
+@media print{body.reporting>.wrap,body.reporting>.overlay{display:none!important}body.reporting #report{display:block!important}.rpt{box-shadow:none;border-radius:0}}
 </style></head>
 <body class="allyos"><div class="wrap">
   <div class="top">
@@ -61,6 +80,7 @@ tr:hover td{background:rgba(255,255,255,.025)}
   <div class="ctrls noprint">
     <label class="muted" style="font-size:.8rem">Month</label><select id="month" onchange="render()"></select>
     <span class="seg"><button id="vAll" class="on" onclick="setView('all')">All encounters</button><button id="vRisk" onclick="setView('risk')">🎯 Risk sample</button></span>
+    <a href="#" onclick="showReport();return false" style="font-size:.85rem;color:var(--gold)">📄 MD Oversight Report</a>
     <span class="muted" style="font-size:.78rem" id="who"></span>
   </div>
   <div class="stats" id="stats"></div>
@@ -69,6 +89,7 @@ tr:hover td{background:rgba(255,255,255,.025)}
   <div class="disc">Audit purpose only. AllyOS records de-identified encounter metadata (date, protocol, compliance gates, risk signals, overrides, adverse events, signing provider, outcome) to support Medical-Director oversight; it holds no PHI — patient identity stays in the clinic's own records, linked by Encounter ID. Advisory decision-support; the treating provider and Medical Director own every clinical decision and signature. © <span id="yr"></span> RenuviaMD® PLLC.</div>
 </div>
 <div class="overlay" id="ov"><div class="modal" id="md"></div></div>
+<div id="report"></div>
 <script>
 document.getElementById('yr').textContent=new Date().getFullYear();
 if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin']);var s=AllyOSAuth.session();if(s)document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+(s.clinic||'');}
@@ -129,6 +150,133 @@ function closeM(){document.getElementById('ov').classList.remove('show');}
 function exportCsv(){var r=rows();var cols=['id','date','protocol','risk','gfe','consent','monCount','override','ae','audited','auditPass','auditNote','provider','outcome'];
   var csv=cols.join(',')+'\n'+r.map(function(x){return cols.map(function(c){var v=c==='riskFlags'?(x[c]||[]).join('; '):x[c];return '"'+(''+(v==null?'':v)).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
   var b=new Blob([csv],{type:'text/csv'}),u=URL.createObjectURL(b),el=document.createElement('a');el.href=u;el.download='allyos-audit-'+ym()+'.csv';el.click();URL.revokeObjectURL(u);}
+
+// ---------- SOFT MD OVERSIGHT REPORT (wellness IV/IM monthly inspection — PHI-free) ----------
+function addDays(iso,n){var p=iso.split('-');var d=new Date(+p[0],+p[1]-1,+p[2]);d.setDate(d.getDate()+n);return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
+function yn(v){return v?'<span class="ok">Y</span>':'<span class="def">N</span>';}
+function ynn(v){return v?'<span class="ok">Y</span>':'<span class="na">—</span>';}
+function composeReport(){
+  var ses=(window.AllyOSAuth&&AllyOSAuth.session())||{};
+  var all=rows();
+  var sample=all.filter(function(r){return (r.risk||0)>0;}).slice(0,5);
+  if(!sample.length)sample=all.slice(0,Math.min(5,all.length)); // low-risk month: still pull up to 5
+  var audited=all.filter(function(r){return r.audited;});
+  var corr=audited.filter(function(r){return r.auditPass===false;});
+  var aes=all.filter(function(r){return r.ae;});
+  var lbl=ym()?monthLabel(ym()):'—';
+  var today=new Date().toISOString().slice(0,10);
+  var del=addDays(today,30);
+  // service avenues derived from the encounters present (IV/IM is the only live module today)
+  var avenue='IV &amp; IM Infusion Therapy';
+  // operating model derived from signing providers
+  var creds=all.map(function(r){return (r.provider||'').toUpperCase();}).join(' ');
+  var hasAPP=/\b(NP|FNP|PA|MD|DO)\b/.test(creds);
+  var model=hasAPP?'APP / clinician-performed GFE, RN-administered infusion (per signing records)':'Per clinic standing orders';
+  var mdName=ses.name?(ses.name+(ses.credential?', '+ses.credential:'')):'________________________';
+  var mdRole=ses.md_of_record?'Medical Director of record — oversight &amp; standing-order authority':'Oversight review (advisory)';
+  // deficiency auto-scan across the sampled charts (soft — flags gaps in the de-identified record)
+  var defs=[];
+  sample.forEach(function(x){
+    var g=[];
+    if(x.gfe!=='current')g.push('GFE not documented as current');
+    if(!x.consent)g.push('consent not on file');
+    if(!x.preVit)g.push('pre-infusion vitals not recorded');
+    if((x.monCount||0)===0)g.push('no monitoring checkpoint');
+    if(!x.postVit)g.push('post-infusion vitals not recorded');
+    if(!x.aftercare)g.push('aftercare not documented');
+    if(x.audited&&x.auditPass===false)g.push('flagged on MD chart review'+(x.auditNote?': '+x.auditNote:''));
+    if(g.length)defs.push({id:x.id,items:g});
+  });
+  // clinic status
+  var status,scls;
+  if(aes.length){status='Needs follow-up — adverse event(s) this period';scls='def';}
+  else if(corr.length||defs.length){status='Compliant with corrections';scls='def';}
+  else if(!all.length){status='No encounters this period';scls='na';}
+  else{status='Compliant';scls='ok';}
+
+  var H='<div class="rpt" id="rptdoc">';
+  H+='<h2>Medical-Director Wellness IV/IM Oversight Report</h2>';
+  H+='<div class="rh">RenuviaMD® · AllyOS — soft clinical oversight review · '+esc(lbl)+'<br>De-identified · PHI-free · Encounter-ID linked · for the clinic compliance binder</div>';
+
+  // 1. Clinic scope
+  H+='<h3>1 · Clinic Scope</h3><div class="meta">'+
+    '<div><span>Clinic</span> <b>'+esc(ses.clinic||'________________________')+'</b></div>'+
+    '<div><span>Review period</span> <b>'+esc(lbl)+'</b></div>'+
+    '<div><span>Service avenue</span> <b>'+avenue+'</b></div>'+
+    '<div><span>Operating model</span> <b>'+model+'</b></div>'+
+    '<div><span>Record location</span> <b>Clinic chart / HIPAA binder (PHI not held by AllyOS)</b></div>'+
+    '<div><span>MD role</span> <b>'+mdRole+'</b></div></div>';
+
+  // 2. Monthly encounter review
+  H+='<h3>2 · Monthly Encounter Review</h3><div class="meta">'+
+    '<div><span>Total infusion visits (period)</span> <b>'+all.length+'</b></div>'+
+    '<div><span>Charts flagged high-risk</span> <b>'+all.filter(function(r){return (r.risk||0)>0;}).length+'</b></div>'+
+    '<div><span>Charts selected for review</span> <b>'+sample.length+'</b></div>'+
+    '<div><span>Charts reviewed by MD</span> <b>'+audited.length+'</b></div></div>'+
+    '<div style="font-size:.76rem;color:#5b6b72">Selection logic: highest clinical-risk charts first — IV NAD+, high-dose vitamin C (≥7.5 g), magnesium + calcium together, glutathione with asthma, comorbidity, protocol override, or any adverse event (per the published ingredient-screening reference).</div>';
+
+  // 3. Reviewed-chart matrix (clinical elements per encounter, Y/N/—)
+  H+='<h3>3 · Reviewed-Chart Compliance Matrix</h3>';
+  if(sample.length){
+    H+='<table><tr><th>Encounter</th><th>Protocol</th><th>GFE</th><th>Consent</th><th>Pre-vitals</th><th>Monitoring</th><th>Post-vitals</th><th>Aftercare</th><th>AE</th><th>MD verdict</th></tr>';
+    H+=sample.map(function(x){
+      return '<tr><td><b>'+esc(x.id)+'</b></td><td>'+esc(x.protocol)+'</td>'+
+        '<td>'+(x.gfe==='current'?'<span class="ok">Y</span>':'<span class="def">N</span>')+'</td>'+
+        '<td>'+yn(x.consent)+'</td><td>'+ynn(x.preVit)+'</td>'+
+        '<td>'+((x.monCount||0)>0?'<span class="ok">Y·'+x.monCount+'</span>':'<span class="def">N</span>')+'</td>'+
+        '<td>'+ynn(x.postVit)+'</td><td>'+ynn(x.aftercare)+'</td>'+
+        '<td>'+(x.ae?'<span class="def">Y</span>':'<span class="na">—</span>')+'</td>'+
+        '<td>'+(x.audited?(x.auditPass?'<span class="ok">Pass</span>':'<span class="def">Correction</span>'):'<span class="na">pending</span>')+'</td></tr>';
+    }).join('')+'</table>';
+    H+='<div style="font-size:.72rem;color:#94a3ab">Y = documented in the de-identified record · — = not captured in AllyOS (verify in the clinic chart) · N = required element not met.</div>';
+  }else{H+='<div class="na" style="font-size:.8rem">No encounters recorded for this period.</div>';}
+
+  // 4. Risk signals summary
+  var sig={};all.forEach(function(r){(r.riskFlags||[]).forEach(function(f){var k=f.replace(/[:].*$/,'').replace(/ [0-9.]+g$/,'');sig[k]=(sig[k]||0)+1;});});
+  var sigK=Object.keys(sig);
+  H+='<h3>4 · Risk-Signal Summary</h3>';
+  H+=sigK.length?('<table><tr><th>Signal</th><th>Encounters</th></tr>'+sigK.sort(function(a,b){return sig[b]-sig[a];}).map(function(k){return '<tr><td>'+esc(k)+'</td><td>'+sig[k]+'</td></tr>';}).join('')+'</table>'):'<div class="na" style="font-size:.8rem">No elevated-risk signals this period.</div>';
+
+  // 5. Incidents / adverse events
+  H+='<h3>5 · Incidents &amp; Adverse Events</h3>';
+  H+=aes.length?('<table><tr><th>Encounter</th><th>Protocol</th><th>Monitoring checkpoints</th><th>Override</th></tr>'+aes.map(function(x){return '<tr><td><b>'+esc(x.id)+'</b></td><td>'+esc(x.protocol)+'</td><td>'+(x.monCount||0)+'</td><td>'+(x.override?esc(x.override):'—')+'</td></tr>';}).join('')+'</table><div style="font-size:.74rem;color:#5b6b72">Confirm FORM-04 completion and MD notification in the clinic chart for each event above.</div>'):'<div class="ok" style="font-size:.82rem">No adverse events reported this period.</div>';
+
+  // 6. Deficiencies
+  H+='<h3>6 · Deficiencies Identified</h3>';
+  H+=defs.length?('<table><tr><th>Encounter</th><th>Deficiency</th></tr>'+defs.map(function(d){return '<tr><td><b>'+esc(d.id)+'</b></td><td>'+d.items.map(esc).join('; ')+'</td></tr>';}).join('')+'</table>'):'<div class="ok" style="font-size:.82rem">No deficiencies identified in the reviewed charts.</div>';
+
+  // 7. Corrective actions
+  H+='<h3>7 · Corrective Actions</h3>';
+  if(corr.length||defs.length){
+    H+='<table><tr><th>Encounter</th><th>Action required</th><th>Responsible</th><th>Due</th></tr>';
+    var seen={};
+    corr.forEach(function(x){seen[x.id]=1;H+='<tr><td><b>'+esc(x.id)+'</b></td><td>'+esc(x.auditNote||'Correct and re-file per MD review')+'</td><td>Treating provider</td><td>Next review</td></tr>';});
+    defs.forEach(function(d){if(seen[d.id])return;H+='<tr><td><b>'+esc(d.id)+'</b></td><td>Complete &amp; file missing element(s): '+d.items.map(esc).join('; ')+'</td><td>Treating provider</td><td>Next review</td></tr>';});
+    H+='</table>';
+  }else{H+='<div class="ok" style="font-size:.82rem">None required this period.</div>';}
+
+  // 8. MD conclusion
+  H+='<h3>8 · Monthly MD Conclusion</h3>';
+  H+='<div class="det">';
+  H+='<b>Charts reviewed:</b> '+audited.length+' of '+sample.length+' selected · <b>Compliant:</b> '+audited.filter(function(r){return r.auditPass!==false;}).length+' · <b>Needing correction:</b> '+corr.length+' · <b>Adverse events:</b> '+aes.length+'.<br>';
+  H+='<b>Clinic status this period:</b> <span class="'+scls+'">'+status+'</span>.';
+  if(sigK.length)H+='<br><b>Pattern note:</b> '+esc(sigK.slice(0,4).join(', '))+' appeared this period — confirm standing-order coverage and monitoring for these.';
+  H+='</div>';
+
+  // sign-off
+  H+='<div class="sig"><div class="aff">'+
+    '<label><span class="sigline">'+esc(mdName)+'</span> Medical Director</label>'+
+    '<label><span class="sigline">'+esc(today)+'</span> MD sign-off date</label>'+
+    '<label><span class="sigline">'+esc(del)+'</span> Temporary review-packet deletion date (≈30 days after closure; clinic retains the record)</label>'+
+    '</div></div>';
+
+  H+='<div class="foot">AllyOS holds no PHI. This oversight report is built from de-identified encounter metadata linked to clinic charts by Encounter ID. The clinic retains all patient records; AllyOS purges this review packet after closure. Advisory decision-support — the treating provider and Medical Director own every clinical decision and signature. © '+new Date().getFullYear()+' RenuviaMD® PLLC.</div>';
+  H+='<div class="noprint" style="text-align:center;margin-top:18px"><button class="btn-s" style="padding:9px 16px" onclick="window.print()">🖨 Print / Save PDF</button> &nbsp; <button class="btn-s" style="padding:9px 16px" onclick="hideReport()">← Back to audit</button></div>';
+  H+='</div>';
+  return H;
+}
+function showReport(){if(!ym()){alert('No encounters to report yet.');return;}document.getElementById('report').innerHTML=composeReport();document.getElementById('report').style.display='block';document.body.classList.add('reporting');window.scrollTo(0,0);}
+function hideReport(){document.getElementById('report').style.display='none';document.body.classList.remove('reporting');}
 fill();
 </script>
 </body></html>
