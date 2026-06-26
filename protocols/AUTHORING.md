@@ -22,8 +22,8 @@ card and its destination never drift from the schema.
 |---|---|---|
 | **Ingredient** (drug/nutrient reference) | No | repo JSON now → Supabase `ingredients` later |
 | **Protocol / stack** | No | repo JSON now → Supabase `protocols` later |
-| **Provider** (name, credential, NPI, license, email) | **No** — professional identifiers | Supabase `providers` |
-| **Clinic** (name, address, lines, MD arrangement) | No | Supabase `clinics` |
+| **Provider** (name, credential, NPI, license, email) | **No** — professional identifiers | Supabase `practitioners` (existing) |
+| **Clinic** (name, address, lines, MD arrangement) | No | Supabase `clinic_accounts` (existing) |
 | **De-identified audit encounter** (Encounter ID, gates, risk flags) | No | on-device now → Supabase `audit_encounters` later |
 | **Patient identity / chart / DOB / encounter-with-name** | **YES** | **on-device localStorage only — never Supabase, never a server** |
 
@@ -148,9 +148,13 @@ are **professional** identifiers, not patient PHI — safe for Supabase.
 
 ### 3c · Destination + governance
 - **Now (dev/login):** `allyos/allyos-auth.js → DEMO_USERS[]` (the local auth stand-in).
-- **Target:** Supabase `providers` row, linked to a `clinics` row by `clinic_id`.
-- **Governance:** a `can_sign` provider must have NPI + license on file. Real NPI/license values are
-  **not** committed to the public repo — they go straight into Supabase / the private onboarding record.
+- **Target:** the **existing** Supabase `practitioners` table (project `allyos`), linked to a
+  `clinic_accounts` row by `clinic_id`. Mapping: `credential → position` (NP/FNP→NP, PA→PA, RN/LPN→RN);
+  `state_license → license_number`. The **MD of record is not a `practitioners` row** — they are the
+  `clinic_accounts.md_*` fields. ⚠️ The live table has **no NPI/email column** and `position` is NP/PA/RN
+  only; storing provider NPI/email or MD/DO/FNP requires extending the table (open decision).
+- **Governance:** a signing provider must have a license on file. Real NPI/license values are
+  **not** committed to the public repo — they go to Supabase / the private onboarding record.
 
 ---
 
@@ -182,9 +186,12 @@ are **professional** identifiers, not patient PHI — safe for Supabase.
 
 ### 4c · Destination + governance
 - **Now:** the `onboard.html` Netlify form captures this into the private leads dashboard.
-- **Target:** Supabase `clinics` row; providers link to it via `clinic_id`.
-- **Governance:** `md_arrangement:"renuviamd"` requires a signed MD Services Agreement on file before
-  `status` flips to `active`.
+- **Target:** the **existing** Supabase `clinic_accounts` table (project `allyos`); `practitioners` link to
+  it via `clinic_id`. Mapping: `name → legal_name`, `city_state → city,state`, `lines[] → service_lines[]`
+  **plus** one `clinic_modules` row per line (iv→WELLNESS_IV, peptides→PEPTIDE, bhrt→BHRT); `own_md →`
+  the `md_*` columns when `md_arrangement="own"`.
+- **Governance:** `md_arrangement:"renuviamd"` requires a signed MD Services Agreement (`mdsa_signed`)
+  before `active` flips true.
 
 ---
 
@@ -194,8 +201,8 @@ are **professional** identifiers, not patient PHI — safe for Supabase.
 |---|---|---|---|---|
 | **Ingredient** | §1c | `draft-additions.json` + screening map | `ingredients` + `ingredient_screens` | No |
 | **Protocol** | PROTOCOL-AUTHORING §3 | `draft-additions.json → stacks[]` | `protocols` | No |
-| **Provider** | §3b | `allyos-auth.js DEMO_USERS` | `providers` | No |
-| **Clinic** | §4b | onboarding form → leads | `clinics` | No |
+| **Provider** | §3b | `allyos-auth.js DEMO_USERS` | `practitioners` (existing) | No |
+| **Clinic** | §4b | onboarding form → leads | `clinic_accounts` (existing) | No |
 | **Patient / encounter** | — | **on-device localStorage** | de-identified `audit_encounters` only | **YES** |
 
 Every non-PHI entry starts as a **draft**, is generated in canonical format from these prompts, gets
