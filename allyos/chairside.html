@@ -640,7 +640,8 @@ function dischargeChair(i){var c=CHAIRS[i];if(!c)return;
     '<div class="frow"><div><label>Post BP</label><input id="dBP" placeholder="118/76"></div><div><label>HR</label><input id="dHR" placeholder="70"></div><div><label>SpO2</label><input id="dO2" placeholder="99"></div></div>'+
     '<label class="muted" style="font-size:.74rem;display:flex;gap:6px;align-items:center;margin:4px 0"><input type="checkbox" id="dAmb" checked> Ambulates without orthostatic symptoms · aftercare handout given</label>'+
     '<label class="muted" style="font-size:.74rem;display:flex;gap:6px;align-items:center"><input type="checkbox" id="dTol" checked> Patient tolerated infusion well · discharged stable</label>'+
-    '<button class="btn neon" style="width:100%;margin-top:10px" onclick="toNote('+i+')">📄 Generate infusion note →</button>';
+    '<button class="btn ghost" style="width:100%;margin-top:8px" onclick="openAftercare('+i+')">🖨 Patient aftercare handout (take-home)</button>'+
+    '<button class="btn neon" style="width:100%;margin-top:8px" onclick="toNote('+i+')">📄 Generate infusion note →</button>';
   showModal(h);
 }
 function toNote(i){var c=CHAIRS[i];if(!c)return;c.postVitals={bp:val('dBP'),hr:val('dHR'),o2:val('dO2')};c.dAmb=!!(document.getElementById('dAmb')||{}).checked;c.dTol=!!(document.getElementById('dTol')||{}).checked;openInfusionNote(i);}
@@ -692,6 +693,25 @@ function composeNote(i){var c=CHAIRS[i],p=c.patient,df=15,g=gfeState(p);
 }
 function openInfusionNote(i){showModal(composeNote(i));}
 function signNote(i){var c=CHAIRS[i];var prov=val('noteProv').trim()||((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||'Provider');c.noteSigned={provider:prov,stamp:nowStamp()};openInfusionNote(i);}
+// patient take-home aftercare handout (FORM-03) — printed before they leave
+function composeAftercare(i){var c=CHAIRS[i],p=c.patient,a=REF.aftercare||{},s=stackByCode(p.proto);
+  function sec(title,arr,color){return '<div class="nsec"><h3'+(color?' style="color:'+color+'"':'')+'>'+esc(title)+'</h3>'+(arr||[]).map(function(x){return '<div style="padding:2px 0">• '+esc(x)+'</div>';}).join('')+'</div>';}
+  return '<div class="notepaper" id="noteDoc">'+
+    '<h2>'+esc(a.title||'After Your Wellness IV Infusion')+'</h2><div class="nmeta">RenuviaMD® · AllyOS · '+esc(a.code||'FORM-03')+' · Patient take-home · '+nowStamp()+'</div>'+
+    '<div class="ncomp" style="background:#fdecec;border-left-color:#b3261e;color:#7a2018;margin-top:8px">'+esc(a.banner||'For any life-threatening symptom, call 911 now.')+'</div>'+
+    sec('First 2 hours after your infusion',a.first_2h)+
+    sec('Common / expected — usually mild & temporary',a.expected)+
+    sec('Call the clinic SAME DAY if you notice',a.call_same_day,'#9a6300')+
+    sec('Call 911 / go to emergency NOW if you notice',a.call_911,'#b3261e')+
+    '<div class="nsec"><h3>Before your next wellness IV</h3><div>'+esc(a.before_next||'')+'</div></div>'+
+    '<div class="nsec"><div class="nrow"><span class="nk">Today’s protocol</span><span>'+esc(c.protoLabel)+(s?' — '+esc(s.title):'')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Next visit</span><span>______________________</span></div>'+
+      '<div class="nrow"><span class="nk">Clinic / phone</span><span>______________________</span></div></div>'+
+    '<div style="font-size:.7rem;color:#5b6b72;margin-top:8px">'+esc(a.footer||'')+'</div>'+
+    '<div class="noprint" style="display:flex;gap:8px;margin-top:12px"><button class="btn neon" style="flex:1" onclick="window.print()">🖨 Print handout</button><button class="btn ghost" style="flex:1" onclick="dischargeChair('+i+')">Back to discharge</button></div>'+
+    '</div>';
+}
+function openAftercare(i){if(CHAIRS[i])showModal(composeAftercare(i));}
 
 // ---------- MONITORING (open/close; vitals / feels-ok / AE) ----------
 // FORM-05 §3 (during-infusion) only — pre/post already captured at Start/Discharge.
