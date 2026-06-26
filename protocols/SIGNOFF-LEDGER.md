@@ -1,51 +1,76 @@
-# Medical Director sign-off ledger
+# AllyOS sign-off — two SEPARATE roles (do not confuse them)
 
-**Where DRAFT clinical content gets signed and promoted to enforced.** AllyOS keeps every
-new clinical layer as a `status:"draft"` until the Medical Director of record signs it here.
-The signature is an **attestation** (name · license · date · the exact item + version), and the
-**git commit that records it** — authored by Dr. Falcon's account — is the audit trail.
-
-> AllyOS is advisory and enforces only where RenuviaMD is the Medical Director of record.
-> Signing here is what flips an item from *advisory draft* to *enforced*.
+You raised the right question: *"why do I sign, if I'm not the treating physician?"*
+You don't — not as a treating physician. AllyOS is a decision-support **product**, and there
+are two different sign-offs that must stay separate:
 
 ---
 
-## What is currently awaiting sign-off
+## A · PUBLISH — RenuviaMD / Dr. Falcon, as the AllyOS content curator (editorial, NOT prescribing)
 
-| Item | File | Status |
+This is the only signature with your name **in the product**, and it is **not a prescription,
+not a treatment authorization, and not a medical-director relationship with any patient.** It is
+an **editorial attestation** — like an editor signing a monograph for publication, or an UpToDate
+author — that the DRAFT library content is accurate and fit to ship as reference. The library is
+published *"curated under Armando A. Falcon, MD,"* so this is you vouching for **content quality,
+nothing more**. No patient. No chart. No order.
+
+- **Effect of publishing:** the item moves from `draft` (experimental/hidden) to `published` in the AllyOS library. It remains **ADVISORY** for every clinic that brings its own Medical Director.
+
+## B · ADOPT & PRESCRIBE — each clinic's OWN treating physician / Medical Director
+
+The clinic's MD/NP/PA **reviews the AllyOS template, customizes it, and signs it as their own**
+GFE / standing order, for their own patients. **That signature is theirs, not yours.** AllyOS hands
+them the draft → they review → adopt → sign. AllyOS never prescribes and never signs for another
+clinic's patients. This is exactly the "we don't regulate the practice" line — we inform; their
+physician decides and signs.
+
+## C · ENFORCE — only in MD-of-Record mode
+
+The "avoid = hard stop" enforcement keys to **whoever IS the Medical Director of record** for that
+deployment. For a bring-your-own-MD clinic that is **their** doctor, and AllyOS stays advisory.
+**You sign as the treating / MD-of-record physician ONLY for clinics where RenuviaMD is contracted
+as the Medical Director** — never for the others.
+
+---
+
+## So, concretely
+
+| Action | Who | What it is |
 |---|---|---|
-| Ingredient-level GFE screening contraindications v0.1 | `protocols/ingredient-screening-contraindications.json` | ☐ DRAFT — unsigned |
-| Niagen / NR ingredient + NR-01 protocol | `protocols/draft-additions.json` | ☐ DRAFT — unsigned |
-| Niagen / NR IV standing order v0.1 | `protocols/niagen-nr-iv-standing-order.md` | ☐ DRAFT — unsigned |
+| **Publish** the draft library content | You (AllyOS curator) | Editorial QA — "this reference is accurate." No patient. |
+| **Adopt & sign** the GFE / standing order | The clinic's treating physician | Their clinical decision, their patients, their signature. |
+| **Enforce** as hard stops | The contracted MD-of-record | Only where RenuviaMD is the MD of record. |
 
-## How to sign (3 steps)
+## What's awaiting *your* (publish) decision
 
-1. **Review** the item (open it in the 📖 Reference drawer or the file). Confirm doses, gates, contraindications, and citations.
-2. **Attest** — add a signed row to the ledger below (copy the template). Use your real name + license + date.
-3. **Promote** — in that item's JSON, set `"status":"locked"`, `"requires_md_signoff":false`, fill `"signed_by"`/`"signed_date"`, and bump the version. (Tell me and I'll make the edit + commit it under your name, or you can edit + commit on the branch yourself — the commit is the legal trail.)
+These are DRAFT **library content** — publishing them just makes them standard (still advisory)
+reference; it does **not** order anything for a patient:
 
-For the **standing order** specifically (NR-01), a clinical standing order is a prescriptive
-document — in addition to this ledger, sign the actual order (wet or e-signature on the PDF/printout)
-the way you sign your other standing orders, since that is the artifact your board/audit expects.
+| Item | File | Publish status |
+|---|---|---|
+| Ingredient-level GFE screening contraindications v0.1 | `protocols/ingredient-screening-contraindications.json` | ☐ unpublished draft |
+| Niagen / NR monograph + NR-01 protocol | `protocols/draft-additions.json` | ☐ unpublished draft |
+| Niagen / NR IV standing-order **template** | `protocols/niagen-nr-iv-standing-order.md` | ☐ unpublished draft (a template for clinics — the clinic's prescriber signs the actual order) |
 
-## Attestation template (copy a block per item)
+### To publish (3 steps)
+1. **Review** the item (📖 Reference drawer or the file).
+2. **Attest** — add a row below (editorial, not prescriptive).
+3. Tell me **"publish X"** and I flip its `status` from `draft` → `published` and commit it under your name. The git commit is the record.
 
+### Publish attestation template
 ```
-- Item: <file + version, e.g. ingredient-screening-contraindications.json v0.1>
-  Reviewed and approved as Medical Director of record.
-  Name: Armando A. Falcon, MD     License: FL ME 84789
-  Date: 2026-__-__               Commit: <git sha after promotion>
-  Limitations / edits required before enforcement: <none | list>
-  Signature: ____________________________
+- Item: <file + version>
+  PUBLISHED to the AllyOS library as accurate decision-support reference (curator editorial review).
+  This is NOT a prescription or treatment authorization for any patient.
+  Curator: Armando A. Falcon, MD   (RenuviaMD® AllyOS Compliance Division)
+  Date: 2026-__-__                 Commit: <sha>
+  Edits required before publish: <none | list>
 ```
 
-## Signed entries
+## Published entries
 
-_(none yet — sign above to promote the first item)_
+_(none yet)_
 
----
-
-### Notes on what "signed" changes
-- A signed screening map becomes **enforced**: in MD-of-record mode its `avoid` rules are hard stops at the bench (today they are red advisories).
-- A signed NR-01 becomes a **live selectable protocol** (the DRAFT badge drops, it can be a default), and the Niagen ingredient leaves the draft lane into the locked inventory.
-- Anything you mark "edits required" stays draft until the edit + a fresh signature.
+> The clinic-side GFE / standing-order signatures live in each clinic's own records — NOT here.
+> This ledger is only AllyOS's editorial publish record.
