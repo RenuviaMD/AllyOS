@@ -165,6 +165,16 @@
 .mchip.red.on{background:#2a1512;box-shadow:var(--glow-red)}
 .monlog{font-size:.76rem;padding:6px 9px;border-left:2px solid var(--line);margin:4px 0;color:var(--muted)}
 .monlog.ae{border-left-color:var(--red);color:#f0c4be}
+/* demo coach guide */
+#demoGuide{position:fixed;left:18px;bottom:18px;z-index:55;width:310px;max-width:92vw;background:var(--bg2);border:1px solid var(--teal);border-radius:14px;box-shadow:var(--glow-teal);padding:14px 16px;font-size:.84rem}
+#demoGuide .gh{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+#demoGuide .gh b{font-family:var(--fdisp);color:var(--teal)}
+#demoGuide .gstep{font-size:.66rem;color:var(--muted)}
+#demoGuide p{color:var(--ink);line-height:1.5;margin:6px 0 12px}
+#demoGuide .gbtns{display:flex;gap:8px}
+#demoGuide .gbtns .btn{font-size:.76rem;padding:8px 12px}
+.tourhi{outline:2px solid var(--teal)!important;border-radius:12px;animation:pulseTeal 1.2s infinite alternate}
+@keyframes pulseTeal{from{box-shadow:0 0 0 4px rgba(46,230,214,.12),0 0 16px rgba(46,230,214,.3)}to{box-shadow:0 0 0 5px rgba(46,230,214,.28),0 0 32px rgba(46,230,214,.55)}}
 /* IV infusion note — clean light document (prints well) */
 .notepaper{background:#fff;color:#1c2b32;border-radius:8px;padding:20px;font-size:.8rem;line-height:1.5;max-height:72vh;overflow:auto}
 .notepaper h2{font-size:1.1rem;color:#0e3a40;margin:0}
@@ -249,6 +259,7 @@
 </div>
 <div class="disc" id="disc"></div>
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div id="demoGuide" style="display:none"></div>
 
 <!-- Reference drawer -->
 <div id="refDrawer">
@@ -284,7 +295,10 @@ Promise.all([
   MENU=(d.ingredients||[]).concat(DRAFTS.ingredients||[]);
   try{var iv=JSON.parse(localStorage.getItem('allyos_iv_inventory_v1')||'{}');INV=iv.inv||{};}catch(e){}
   if(window.AllyOSAuth){AllyOSAuth.guard(['nurse','provider','admin']);var s=AllyOSAuth.session();if(s){document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+((AllyOSAuth.ROLES[s.role]||{}).label||s.role);document.getElementById('mdMode').checked=!!s.mdOfRecord;
-    if(s.sandbox){var db=document.getElementById('demobar');if(db){db.style.display='flex';db.innerHTML='<span>🧪 <b>DEMO MODE</b> — sample patients · nothing is saved to a real chart · <b>not for real patient care</b></span><a href="login.html">Sign in / get your clinic set up →</a>';}}}}
+    if(s.sandbox){var db=document.getElementById('demobar');if(db){db.style.display='flex';db.innerHTML='<span>🧪 <b>DEMO MODE</b> — sample patients · nothing is saved to a real chart · <b>not for real patient care</b></span><span><a href="#" onclick="tourOpen();return false">▶ replay guide</a> &nbsp;·&nbsp; <a href="login.html">Sign in / set up your clinic →</a></span>';}
+      var dm=document.getElementById('demoMode');if(dm)dm.checked=true; // alarms playable in demo
+      try{if(!sessionStorage.getItem('allyos_demo_tour'))setTimeout(showTour,700);}catch(e){setTimeout(showTour,700);}
+    }}}
   document.getElementById('disc').innerHTML='AllyOS Chairside · advisory clinical decision-support · <b>PHI stays on this device only</b> (no server, no analytics) · no drug brokering · gates enforce in MD-of-record mode. © 2026 RenuviaMD® Compliance Division.';
   load(); fillProto(); renderEmergency(); renderQueue(); renderChairs(); renderPrep(); renderDetail();
 }).catch(function(e){document.getElementById('chairs').innerHTML='<div class="flag crit">Could not load IV module ('+e.message+')</div>';});
@@ -925,6 +939,24 @@ function allySend(){var inp=document.getElementById('allyInput');var q=(inp.valu
   fetch('/.netlify/functions/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:ALLY_HIST.slice(-8)})})
    .then(function(r){return r.json();}).then(function(d){var t=d.text||(d.error==='not_configured'?'Ally isn\'t configured on this deploy yet (no API key).':(d.error||'No response.'));bubble.textContent=t;if(d.text)ALLY_HIST.push({role:'assistant',content:d.text});var log=document.getElementById('allyLog');log.scrollTop=log.scrollHeight;})
    .catch(function(e){bubble.textContent='Ally unreachable — '+e.message;});}
+
+// ---------- DEMO COACH GUIDE (non-blocking, step-by-step, highlights the area) ----------
+var TOUR=[
+ {sel:'#queue',t:'👈 Start here. Click a waiting patient — try <b>Emily R.</b> (she reads <b style="color:var(--green)">READY</b>).'},
+ {sel:'#detail',t:'On the right, choose <b>🧪 Pre-made protocol</b> (or à-la-carte), then <b>Prepare on the bench →</b>.'},
+ {sel:'#prep',t:'This is the compounding bench. <b>Ally screens every additive live</b> — clear any flag, then <b>▶ Send to chair</b>.'},
+ {sel:'#chairs',t:'On the chair, hit <b>▶ Start</b> (pre-vitals). Then tap the <b>⏩</b> button to fast-forward and hear the <b>🟠 orange / 🔴 red alarms</b>.'},
+ {sel:'#chairs',t:'When it ends, <b>Discharge</b> → it auto-builds a <b>signed infusion note</b> + a <b>patient aftercare handout</b>. That\'s the whole loop! 🎉'}
+];
+var tStep=0,tEl=null;
+function clearHi(){if(tEl){tEl.classList.remove('tourhi');tEl=null;}}
+function showTour(){var g=document.getElementById('demoGuide');if(!g)return;tStep=Math.max(0,Math.min(tStep,TOUR.length-1));var s=TOUR[tStep];clearHi();tEl=document.querySelector(s.sel);if(tEl){tEl.classList.add('tourhi');tEl.scrollIntoView({behavior:'smooth',block:'center'});}
+  g.style.display='block';
+  g.innerHTML='<div class="gh"><b>📋 Demo guide</b><span class="gstep">'+(tStep+1)+' / '+TOUR.length+'</span></div><p>'+s.t+'</p>'+
+    '<div class="gbtns">'+(tStep<TOUR.length-1?'<button class="btn neon" style="flex:1" onclick="tourNext()">Next →</button>':'<button class="btn neon-green" style="flex:1" onclick="tourDone()">Got it ✓</button>')+'<button class="btn ghost" onclick="tourDone()">Skip</button></div>';}
+function tourNext(){tStep++;showTour();}
+function tourDone(){clearHi();var g=document.getElementById('demoGuide');if(g)g.style.display='none';try{sessionStorage.setItem('allyos_demo_tour','1');}catch(e){}}
+function tourOpen(){tStep=0;showTour();}
 
 // ---------- utils ----------
 function showModal(h){document.getElementById('modal').className='modal';document.getElementById('modal').innerHTML=h;document.getElementById('overlay').classList.add('show');}
