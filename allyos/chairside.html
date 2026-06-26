@@ -228,6 +228,10 @@
     <a href="#" onclick="refOpen();return false">📖 Reference</a><a href="iv-inventory.html">Inventory</a><a href="iv-calculator.html">Calc</a><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
 </div>
 
+<!-- lead capture (Netlify Forms — submissions appear in the Netlify dashboard, exportable) -->
+<form name="allyos-leads" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="email" name="email"><input name="clinic"><input name="role"><input name="context"><input name="bot-field">
+</form>
 <div id="demobar" style="display:none;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;background:linear-gradient(90deg,#2a2310,#1a1606);border-bottom:1px solid #5a4a22;color:var(--gold);font-size:.78rem;padding:8px 16px;text-align:center"></div>
 
 <div class="board">
@@ -281,6 +285,8 @@
 <script>
 var MOD=null, MENU=[], INV={}, QUEUE=[], CHAIRS=[null,null,null,null,null,null], PREP=null, selId=null, emActive=null, ALLY_HIST=[];
 var REF={}, DRAFTS={ingredients:[],stacks:[]}, SCREEN={ingredients:{}}, refTabName='protocols';
+var IS_DEMO=false, ALLY_USED=0, ALLY_CAP=5; // demo: the ONLY hard limit is Ally API calls
+function demoLeadOk(){try{return !!localStorage.getItem('allyos_lead');}catch(e){return false;}}
 var KEY='allyos_chairside_v1';
 
 function getJSON(u){return fetch(u).then(function(r){return r.json();}).catch(function(){return null;});}
@@ -296,7 +302,7 @@ Promise.all([
   try{var iv=JSON.parse(localStorage.getItem('allyos_iv_inventory_v1')||'{}');INV=iv.inv||{};}catch(e){}
   if(window.AllyOSAuth){AllyOSAuth.guard(['nurse','provider','admin']);var s=AllyOSAuth.session();if(s){document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+((AllyOSAuth.ROLES[s.role]||{}).label||s.role);document.getElementById('mdMode').checked=!!s.mdOfRecord;
     if(s.sandbox){var db=document.getElementById('demobar');if(db){db.style.display='flex';db.innerHTML='<span>🧪 <b>DEMO MODE</b> — sample patients · nothing is saved to a real chart · <b>not for real patient care</b></span><span><a href="#" onclick="tourOpen();return false">▶ replay guide</a> &nbsp;·&nbsp; <a href="login.html">Sign in / set up your clinic →</a></span>';}
-      var dm=document.getElementById('demoMode');if(dm)dm.checked=true; // alarms playable in demo
+      IS_DEMO=true;var dm=document.getElementById('demoMode');if(dm)dm.checked=true; // alarms playable in demo
       try{if(!sessionStorage.getItem('allyos_demo_tour'))setTimeout(showTour,700);}catch(e){setTimeout(showTour,700);}
     }}}
   document.getElementById('disc').innerHTML='AllyOS Chairside · advisory clinical decision-support · <b>PHI stays on this device only</b> (no server, no analytics) · no drug brokering · gates enforce in MD-of-record mode. © 2026 RenuviaMD® Compliance Division.';
@@ -930,12 +936,32 @@ function floorParts(){var parts=[];
   if(PREP){var an=analyzePrep();var al=an.flags.filter(function(f){return f.l==='crit'||f.l==='warn';}).map(function(f){return f.t;}).join('; ');parts.push('Prep bench: '+bagDesc(PREP)+(al?(' [active alerts: '+al+']'):''));}
   CHAIRS.forEach(function(c,i){if(c)parts.push('Chair '+(i+1)+' ('+c.protoLabel+', '+c.state+'): '+bagDesc({base:c.base,vol:c.vol,time:c.time,items:c.bag}));});
   return parts;}
-function allyUpdateCtx(){var el=document.getElementById('allyCtx');if(!el)return;var n=floorParts().length;el.textContent=n?('Ally can see '+n+' active build'+(n>1?'s':'')+' (bench + chairs by number) — bag contents only, never names or DOB.'):'Grounded in the locked IV/IM module. PHI-free — no patient identity is ever sent.';}
+function allyUpdateCtx(){var el=document.getElementById('allyCtx');if(!el)return;var n=floorParts().length;var base=n?('Ally can see '+n+' active build'+(n>1?'s':'')+' (bench + chairs by number) — bag contents only, never names or DOB.'):'Grounded in the locked IV/IM module. PHI-free — no patient identity is ever sent.';
+  if(IS_DEMO&&!demoLeadOk())base='🧪 Demo · '+Math.max(0,ALLY_CAP-ALLY_USED)+' free Ally questions left. '+base;
+  el.textContent=base;}
+// email capture — the demo's only gate (Ally API cap) doubles as the lead engine
+function captureEmail(context){var saved='';try{saved=localStorage.getItem('allyos_lead')||'';}catch(e){}
+  var h='<button class="x" onclick="closeModal()">×</button><h3>🔓 Keep going with Ally</h3>'+
+    '<div class="sub">You\'ve used your '+ALLY_CAP+' free demo questions. Drop your email to keep chatting with Ally — we\'ll send a quick setup walkthrough too. No spam, PHI-free.</div>'+
+    '<div class="frow"><div><label>Work email</label><input id="leadEmail" type="email" placeholder="you@clinic.com" value="'+esc(saved)+'"></div></div>'+
+    '<div class="frow"><div><label>Clinic (optional)</label><input id="leadClinic" placeholder="Clinic name"></div><div><label>Role (optional)</label><input id="leadRole" placeholder="MD / NP / RN / Owner"></div></div>'+
+    '<button class="btn neon" style="width:100%;margin-top:10px" onclick="submitLead(\''+esc(context)+'\')">Unlock more Ally →</button>'+
+    '<div class="muted" style="font-size:.7rem;text-align:center;margin-top:8px">We only use this to help set up your AllyOS.</div>';
+  showModal(h);}
+function submitLead(context){var e=(val('leadEmail')||'').trim();if(!/.+@.+\..+/.test(e)){alert('Please enter a valid work email.');return;}
+  var body='form-name=allyos-leads&email='+encodeURIComponent(e)+'&clinic='+encodeURIComponent(val('leadClinic')||'')+'&role='+encodeURIComponent(val('leadRole')||'')+'&context='+encodeURIComponent(context||'');
+  fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body}).catch(function(){});
+  try{localStorage.setItem('allyos_lead',e);}catch(_){}
+  ALLY_USED=0;allyUpdateCtx();
+  showModal('<button class="x" onclick="closeModal()">×</button><h3 style="color:var(--teal)">✓ You\'re in</h3><div class="sub">Thanks — keep exploring with Ally. We\'ll reach out about getting AllyOS set up for your clinic.</div><button class="btn neon" style="width:100%" onclick="closeModal();allyOpen()">Back to Ally</button>');}
 function allyCtx(){var parts=floorParts();if(!parts.length)return '';return 'PHI-FREE floor snapshot (clinical builds only — NO patient names, DOB, or identifiers): '+parts.join(' | ');}
 function allyAppend(cls,txt){var log=document.getElementById('allyLog');var d=document.createElement('div');d.className='amsg '+cls;d.textContent=txt;log.appendChild(d);log.scrollTop=log.scrollHeight;return d;}
-function allySend(){var inp=document.getElementById('allyInput');var q=(inp.value||'').trim();if(!q)return;inp.value='';
+function allySend(){var inp=document.getElementById('allyInput');var q=(inp.value||'').trim();if(!q)return;
+  // demo: the ONLY hard limit — cap Ally API calls, then capture email to continue
+  if(IS_DEMO && !demoLeadOk() && ALLY_USED>=ALLY_CAP){captureEmail('ally-cap');return;}
+  inp.value='';
   var ctx=allyCtx();ALLY_HIST.push({role:'user',content:ctx?(q+'\n\n['+ctx+']'):q});
-  allyAppend('u',q);var bubble=allyAppend('a','…');
+  allyAppend('u',q);var bubble=allyAppend('a','…');if(IS_DEMO)ALLY_USED++;allyUpdateCtx();
   fetch('/.netlify/functions/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:ALLY_HIST.slice(-8)})})
    .then(function(r){return r.json();}).then(function(d){var t=d.text||(d.error==='not_configured'?'Ally isn\'t configured on this deploy yet (no API key).':(d.error||'No response.'));bubble.textContent=t;if(d.text)ALLY_HIST.push({role:'assistant',content:d.text});var log=document.getElementById('allyLog');log.scrollTop=log.scrollHeight;})
    .catch(function(e){bubble.textContent='Ally unreachable — '+e.message;});}
