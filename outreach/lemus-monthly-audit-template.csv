@@ -1,0 +1,13 @@
+visit_id,date_of_service,patient_initials,provider,service_type,protocol,key_ingredients,vit_c_grams,nad_mg,mg_and_ca_same_bag,glutathione_route,intake_complete,consent_signed,gfe_valid,pre_infusion_checklist,vitals_pre_post,mid_vitals_if_over_60min,monitoring_documented,aftercare_given,adverse_event,ae_severity,md_notified_if_incident,notes
+EXAMPLE-001,2026-06-03,J.M.,Milagro NP,IV,Myers Cocktail,"B-complex, Methyl-B12, Vit C 5g, Mg 1g, Zinc",5,,N,NONE,Y,Y,Y,Y,Y,NA,Y,Y,N,NONE,NA,Example row — delete before sending
+EXAMPLE-002,2026-06-11,A.R.,Milagro NP,IV,NAD+ Energy,"NAD+ 250mg, B-complex",,250,N,NONE,Y,Y,Y,Y,Y,Y,Y,Y,N,NONE,NA,Example row — NAD+ is auto high-risk
+,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,
