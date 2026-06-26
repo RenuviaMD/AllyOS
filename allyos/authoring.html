@@ -94,7 +94,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
   <!-- PROVIDER -->
   <div class="card" id="c_prov">
     <h2>New provider</h2>
-    <div class="dest">→ Supabase <b>practitioners</b> (existing table; linked to <code>clinic_accounts</code> by <code>clinic_id</code>) &nbsp;·&nbsp; dev login: <code>allyos-auth.js DEMO_USERS</code> &nbsp;·&nbsp; <span class="phi">non-PHI</span><br><span style="color:var(--gold)">Note:</span> the live <code>practitioners</code> table has no NPI/email column and <code>position</code> is NP/PA/RN only — NPI/email/MD-DO need a table extension (pending decision).</div>
+    <div class="dest">→ Supabase <b>providers</b> (new AllyOS-wellness project; linked to a clinic by <code>clinic_id</code>) &nbsp;·&nbsp; dev login: <code>allyos-auth.js DEMO_USERS</code> &nbsp;·&nbsp; <span class="phi">non-PHI (professional identifiers)</span></div>
     <div class="row"><div><label class="req">name</label><input id="v_name" placeholder="Milagro"></div><div><label class="req">credential</label><select id="v_cred" onchange="provDefaults()"><option value="">—</option><option>MD</option><option>DO</option><option>NP</option><option>FNP</option><option>PA</option><option>RN</option><option>LPN</option></select></div></div>
     <div class="row"><div><label>NPI <span id="v_npireq"></span></label><input id="v_npi" inputmode="numeric" placeholder="10 digits"></div><div><label>state license #</label><input id="v_lic"></div><div><label>license state</label><input id="v_licst" placeholder="FL" value="FL"></div></div>
     <div class="row"><div><label>email</label><input id="v_email" type="email"></div><div><label>clinic</label><input id="v_clinic" placeholder="Lemus Natural Medicine"></div></div>
@@ -107,7 +107,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
   <!-- CLINIC -->
   <div class="card" id="c_clin">
     <h2>New clinic</h2>
-    <div class="dest">→ Supabase <b>clinic_accounts</b> (existing table) + one <code>clinic_modules</code> row per line &nbsp;·&nbsp; onboarding capture: <code>onboard.html</code> → leads &nbsp;·&nbsp; <span class="phi">non-PHI</span></div>
+    <div class="dest">→ Supabase <b>clinics</b> (new AllyOS-wellness project) &nbsp;·&nbsp; onboarding capture: <code>onboard.html</code> → leads &nbsp;·&nbsp; <span class="phi">non-PHI</span></div>
     <div class="row"><div><label class="req">clinic name</label><input id="k_name" placeholder="Lemus Natural Medicine of Coral Gables"></div><div><label class="req">city, state</label><input id="k_city" placeholder="Coral Gables, FL"></div></div>
     <div class="row"><div><label>phone</label><input id="k_phone"></div><div><label>lines</label><div style="display:flex;gap:14px;padding-top:8px"><label style="display:inline-flex;gap:5px;color:var(--ink);font-size:.82rem"><input type="checkbox" id="k_iv" checked style="width:auto"> IV</label><label style="display:inline-flex;gap:5px;color:var(--ink);font-size:.82rem"><input type="checkbox" id="k_pep" style="width:auto"> Peptides</label><label style="display:inline-flex;gap:5px;color:var(--ink);font-size:.82rem"><input type="checkbox" id="k_bhrt" style="width:auto"> BHRT</label></div></div></div>
     <div class="row"><div><label>MD arrangement</label><select id="k_md" onchange="clinDefaults()"><option value="renuviamd">RenuviaMD is MD of record</option><option value="own">Clinic's own MD</option></select></div></div>

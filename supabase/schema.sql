@@ -1,103 +1,167 @@
--- AllyOS / RenuviaMD — Supabase schema notes  (project: allyos · bjjfedjowjvfkvdpudqw)
+-- AllyOS WELLNESS — Supabase schema  (NEW, DEDICATED project)
 -- =============================================================================
--- DO NOT run this file as-is to "create" clinic/provider tables. The provider
--- and clinic model ALREADY EXISTS in this project as `practitioners` and
--- `clinic_accounts` (the AHCA AuditPro / MD-compliance backend). This file is
--- the reconciliation reference: how the AllyOS authoring console maps onto the
--- live tables, plus the only genuinely NEW tables we may add (the clinical
--- library), clearly marked.
+-- This schema is for a BRAND-NEW Supabase project created specifically for the
+-- AllyOS wellness platform. It is SELF-CONTAINED and standalone.
+--
+-- ⛔ DO NOT apply this to the existing `allyos` project (ref bjjfedjowjvfkvdpudqw)
+--    or any current project. That project is the separate AHCA AuditPro /
+--    compliance backend and must NOT be affected under any concept. We only
+--    read it once for reference; nothing here writes to it.
 --
 -- HARD RULE — no patient PHI in Supabase. Patient identity stays on-device in
--- the chairside app. The compliance backend stores at most de-identified visit
--- data (e.g. visits.patient_initials, Visit IDs) under the MD's own privileges,
--- NOT identified charts. See protocols/AUTHORING.md §0.
+-- the chairside app (localStorage). The only patient-derived data permitted here
+-- is the DE-IDENTIFIED audit encounter (Encounter ID + gates + risk flags), which
+-- carries no identifier that maps to a person without the clinic's own chart.
+-- See protocols/AUTHORING.md §0.
+--
+-- Apply with the Supabase MCP `apply_migration` (to the NEW project only), or
+-- `supabase db push`.
 -- =============================================================================
 
+create extension if not exists "pgcrypto";
 
--- ============================== EXISTING TABLES ==============================
--- (live in project allyos — listed here for reference; DO NOT recreate)
---
--- clinic_accounts   id, legal_name, dba_name, entity_type, ein, service_lines[],
---                   street_address, city, state, zip, county, phone, fax, email,
---                   emr_system, website, md_name, md_license, md_npi, md_email,
---                   md_entity, mdsa_*, provider_mode(APRN_LED|RN_ONLY|HYBRID),
---                   gfe_source(RENUVIA_DIRECT_CARE|IN_HOUSE|EXTERNAL|MIXED),
---                   representations(jsonb), billing_*, active
--- practitioners     id, clinic_id→clinic_accounts, name, position(NP|PA|RN),
---                   license_number, license_expiry, phone, verified_by_md, active
--- clinic_modules    id, clinic_id, module(WELLNESS_IV|MEDSPA|LASER|MOBILE_IV|
---                   GLP_WEIGHT_LOSS|PEPTIDE|BHRT), *_cents, activated_at
--- csv_uploads       id, clinic_id, period, filename, storage_path, status, ...
--- visits            id, clinic_id, csv_upload_id, visit_id, date_of_service,
---                   patient_initials, arnp_name, service_type, protocol_mode,
---                   audit_1..8 (Y/N/NA), custom_1..6 (Y/N/NA), adverse_event_*, ...
--- chart_reviews     id, clinic_id, period, reviewed_by_md, aggregate_*,
---                   status_level(PASS|MONITOR|CORRECTIVE|ESCALATION), status
--- chart_review_visits  id, chart_review_id, visit_id, tier(TIER_0..3),
---                   per_chart_*, findings(jsonb), *_storage_path, md_decision
+-- ---------------------------------------------------------------------------
+-- clinics  (AUTHORING.md §4)
+-- ---------------------------------------------------------------------------
+create table if not exists clinics (
+  id              uuid primary key default gen_random_uuid(),
+  name            text not null,
+  city_state      text,
+  phone           text,
+  lines           text[] not null default '{iv}',          -- iv | peptides | bhrt
+  md_arrangement  text not null default 'own'              -- renuviamd | own
+                    check (md_arrangement in ('renuviamd','own')),
+  md_of_record    boolean not null default false,          -- is RenuviaMD the MD here?
+  own_md          jsonb,                                    -- {name,credential,npi,license,email} when md_arrangement='own'
+  record_location text default 'Clinic chart / HIPAA binder (PHI not held by AllyOS)',
+  status          text not null default 'onboarding'        -- onboarding | active | paused
+                    check (status in ('onboarding','active','paused')),
+  created_at      timestamptz not null default now()
+);
 
+-- ---------------------------------------------------------------------------
+-- providers  (AUTHORING.md §3) — professional identifiers, NOT patient PHI
+-- ---------------------------------------------------------------------------
+create table if not exists providers (
+  id            uuid primary key default gen_random_uuid(),
+  clinic_id     uuid references clinics(id) on delete cascade,
+  name          text not null,
+  credential    text not null,                              -- MD | DO | NP | FNP | PA | RN | LPN
+  role          text not null default 'provider'            -- provider | nurse | admin
+                  check (role in ('provider','nurse','admin')),
+  npi           text,
+  state_license text,
+  license_state text,
+  email         text,
+  can_sign      boolean not null default false,             -- may sign GFE/orders/notes
+  md_of_record  boolean not null default false,
+  active        boolean not null default true,
+  created_at    timestamptz not null default now(),
+  constraint signing_needs_npi check (not can_sign or npi is not null)
+);
+create index if not exists providers_clinic_idx on providers(clinic_id);
 
--- ===================== AUTHORING CONSOLE → LIVE TABLE MAP =====================
--- allyos/authoring.html generates a canonical draft; here is where each lands.
---
--- CLINIC card     -> clinic_accounts
---   name          -> legal_name (+ dba_name)
---   city_state    -> city, state
---   phone         -> phone
---   lines[]       -> service_lines[]  AND one clinic_modules row per line
---                    (iv->WELLNESS_IV, peptides->PEPTIDE, bhrt->BHRT)
---   md_arrangement renuviamd -> md_* keep RenuviaMD defaults; gfe_source as set
---                  own       -> overwrite md_name/md_license/md_npi/md_email
---
--- PROVIDER card   -> practitioners   (the treating NP/PA/RN)
---   name          -> name
---   credential    -> position   (NP/FNP -> NP; PA -> PA; RN/LPN -> RN)
---   state_license -> license_number
---   (the MD of record is NOT a practitioners row — they are the clinic_accounts md_*)
---
---   GAPS to decide (authoring console collects these; live table lacks them):
---     * provider NPI       — practitioners has no npi column
---     * provider email     — practitioners has no email column
---     * MD/DO/FNP position — position enum is NP|PA|RN only
---   Options: (A) map/drop to fit the live table, or (B) ALTER practitioners to
---   add npi/email and widen the enum. Pending your call (see chat).
+-- ---------------------------------------------------------------------------
+-- ingredients  (AUTHORING.md §1a) — drug/nutrient reference, no PHI
+-- Mirror of the repo JSON library; repo stays the 3-auditor-locked source of
+-- truth, this table is the queryable copy.
+-- ---------------------------------------------------------------------------
+create table if not exists ingredients (
+  id                  text primary key,                     -- ING_<SHORTNAME>
+  name                text not null unique,
+  status              text not null default 'draft'         -- draft | published | locked
+                        check (status in ('draft','published','locked')),
+  requires_md_signoff boolean not null default true,
+  in_primary_library  boolean not null default false,
+  category            text[] default '{}',
+  class               text,
+  route               text,
+  standard            text,
+  ceiling             text,
+  rate                text,
+  absolute_ci         text,
+  relative_ci         text,
+  guardrail           text,
+  monograph           jsonb,
+  evidence_grade      text check (evidence_grade in ('A','B','C','D') or evidence_grade is null),
+  source              text,
+  citations           text[] default '{}',
+  created_at          timestamptz not null default now()
+);
 
+create table if not exists ingredient_screens (
+  id            bigint generated always as identity primary key,
+  ingredient_id text not null references ingredients(id) on delete cascade,
+  flag          text not null,                              -- renal|hepatic|cardiac|hypertension|diabetes|asthma|cancer|pregnancy|g6pd|bleeding|thyroid|allergy|recent_surgery
+  level         text not null check (level in ('avoid','caution')),
+  note          text
+);
+create index if not exists screens_ingredient_idx on ingredient_screens(ingredient_id);
 
--- ===================== PROPOSED NEW TABLES (optional) ========================
--- The clinical LIBRARY (ingredients/protocols) does NOT exist in Supabase today;
--- it lives in the repo JSON (protocols/iv-module.json + draft-additions.json),
--- which is version-controlled and 3-auditor-locked. Only create the tables below
--- if you want the library queryable from Supabase too. Until then the repo JSON
--- remains the single source of truth and these stay commented out.
+-- ---------------------------------------------------------------------------
+-- protocols / stacks  (AUTHORING.md §2, PROTOCOL-AUTHORING-FORMAT.md)
+-- ---------------------------------------------------------------------------
+create table if not exists protocols (
+  id                  bigint generated always as identity primary key,
+  code                text not null unique,
+  title               text not null,
+  version             text,
+  type                text default 'pre-built stack',
+  status              text not null default 'draft'
+                        check (status in ('draft','locked')),
+  requires_md_signoff boolean not null default true,
+  indication          text,
+  scope_limitation    text,
+  base                text,
+  components          jsonb not null default '[]',          -- [{ingredient,dose}] — each resolves to ingredients.name
+  optional_add_ons    jsonb default '[]',
+  infusion_time       text,
+  frequency           text,
+  key_gates           text[] default '{}',
+  evidence_grade      text check (evidence_grade in ('A','B','C','D') or evidence_grade is null),
+  citations           text[] default '{}',
+  in_primary_library  boolean not null default false,
+  created_at          timestamptz not null default now()
+);
 
--- create extension if not exists "pgcrypto";
---
--- create table if not exists ingredients (
---   id text primary key,                 -- ING_<SHORTNAME>
---   name text not null unique,
---   status text not null default 'draft' check (status in ('draft','published','locked')),
---   requires_md_signoff boolean not null default true,
---   in_primary_library boolean not null default false,
---   category text[] default '{}', class text, route text, standard text,
---   ceiling text, rate text, absolute_ci text, relative_ci text, guardrail text,
---   monograph jsonb, evidence_grade text, source text, citations text[] default '{}',
---   created_at timestamptz not null default now()
--- );
--- create table if not exists ingredient_screens (
---   id bigint generated always as identity primary key,
---   ingredient_id text not null references ingredients(id) on delete cascade,
---   flag text not null, level text not null check (level in ('avoid','caution')), note text
--- );
--- create table if not exists protocols (
---   id bigint generated always as identity primary key,
---   code text not null unique, title text not null, version text,
---   type text default 'pre-built stack',
---   status text not null default 'draft' check (status in ('draft','locked')),
---   requires_md_signoff boolean not null default true,
---   indication text, scope_limitation text, base text,
---   components jsonb not null default '[]', optional_add_ons jsonb default '[]',
---   infusion_time text, frequency text, key_gates text[] default '{}',
---   evidence_grade text, citations text[] default '{}',
---   in_primary_library boolean not null default false,
---   created_at timestamptz not null default now()
--- );
+-- ---------------------------------------------------------------------------
+-- audit_encounters  (DE-IDENTIFIED — mirrors localStorage allyos_audit_v1)
+-- No patient name/DOB. Encounter ID maps to the clinic's own chart, off-platform.
+-- ---------------------------------------------------------------------------
+create table if not exists audit_encounters (
+  id             text primary key,                          -- Encounter ID e.g. LEMUS-202606-0001
+  clinic_id      uuid references clinics(id) on delete set null,
+  ym             text,                                      -- YYYYMM bucket
+  enc_date       text,
+  protocol       text,
+  gfe            text,
+  consent        boolean,
+  mon_count      int,
+  pre_vit        boolean,
+  post_vit       boolean,
+  aftercare      boolean,
+  override       text,
+  ae             boolean,
+  suspended      boolean,
+  suspend_reason text,
+  risk_flags     text[] default '{}',
+  risk           int,
+  outcome        text,
+  provider       text,                                      -- signing provider label (not a patient)
+  audited        boolean default false,
+  audit_pass     boolean,
+  audit_note     text,
+  created_at     timestamptz not null default now()
+);
+create index if not exists audit_clinic_month_idx on audit_encounters(clinic_id, ym);
+
+-- ---------------------------------------------------------------------------
+-- Row-Level Security — enable before exposing the anon key client-side.
+-- (Add per-clinic policies keyed on the authenticated provider's clinic_id.)
+-- ---------------------------------------------------------------------------
+-- alter table clinics            enable row level security;
+-- alter table providers          enable row level security;
+-- alter table ingredients        enable row level security;
+-- alter table ingredient_screens enable row level security;
+-- alter table protocols          enable row level security;
+-- alter table audit_encounters   enable row level security;
