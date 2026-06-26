@@ -13,6 +13,10 @@ const IV = JSON.stringify(require("../../protocols/iv-module.json"));
 // Ingredient-level GFE screening contraindications (DRAFT, MD sign-off pending) —
 // per-ingredient condition/med/allergy screens mapped to the FORM-IV-GFE-01 intake.
 const SCREEN = JSON.stringify(require("../../protocols/ingredient-screening-contraindications.json"));
+// Live chairside cards (CARD-A/V/VC) + bench quick-reference, and the draft "add on
+// demand" lane (Niagen/NR), so Ally answers emergencies and draft items too.
+const REF = JSON.stringify(require("../../protocols/chairside-reference.json"));
+const DRAFTS = JSON.stringify(require("../../protocols/draft-additions.json"));
 
 const SYS = `You are **Ally**, the clinical decision-support assistant for the RenuviaMD® Compliance Division — a physician-curated reference for **licensed healthcare professionals only**, across five lines of care: Peptides, BHRT (men & women), IV/IM Wellness, Regenerative/PRP, and Aesthetics. Curated under Armando A. Falcon, MD (FL ME 84789). You answer from the supplied KNOWLEDGE BASE only.
 
@@ -68,6 +72,15 @@ exports.handler = async (event) => {
       text:
         "# INGREDIENT-LEVEL GFE SCREENING CONTRAINDICATIONS (DRAFT v0.1 — requires Medical Director sign-off; NOT yet enforced)\n" +
         "Per-INGREDIENT contraindications and cautions mapped to the FORM-IV-GFE-01 Section-B screening conditions (renal, hepatic, cardiac, cancer, pregnancy/lactation, bleeding/anticoagulant, G6PD, respiratory, diabetes, thyroid, recent procedure) plus allergy (Section C) and medication (Section D) screens. These attach to the INGREDIENT itself, NOT to a protocol — so a contraindication fires in ANY build (stack or à-la-carte) the ingredient appears in. When asked 'is <ingredient> safe for a patient with <condition>', 'what should the GFE screen before giving <ingredient>', or 'why did the bench flag this', answer from this map. Levels: avoid = contraindicated at wellness IV/IM dosing (provider override + rationale required); caution = provider judgment / dose / slower rate; screen = a specific check (lab, medication reconciliation, allergy history) before giving. Entries whose note contains 'VERIFY' are mechanistically plausible but rest on limited or contested human data — present them as caution-to-confirm, not hard rules. This whole layer is a DRAFT that is not yet enforced anywhere: ALWAYS note it requires the Medical Director's sign-off, and defer the final clinical decision to the prescriber. It includes Niagen/NR (an NAD+ precursor, distinct from IV NAD+) which is not in the current inventory and requires a prescriber-signed standing order.\n\nINGREDIENT SCREENING MAP:\n" + SCREEN,
+      cache_control: { type: "ephemeral" },
+    },
+    {
+      type: "text",
+      text:
+        "# CHAIRSIDE EMERGENCY CARDS + BENCH QUICK-REFERENCE (live laminated cards)\n" +
+        "Faithful transcription of the clinic's laminated chairside cards: CARD-A (anaphylaxis — EPINEPHRINE 0.3 mg IM FIRST), CARD-V (vasovagal), CARD-VC (the 9-question Vit C verbal screen for 6.1-10 g; >10 g out of wellness scope), the emergency cart, and the bench quick-reference (route/dose/ceiling/gate per ingredient). For emergency-response or 'what dose / which screen' questions, answer from these cards and always say EMS/911 is activated without delay. Reference, not a substitute for provider judgment.\n\nCARDS + BENCH:\n" + REF +
+        "\n\n# DRAFT 'ADD ON DEMAND' LANE (not yet locked/enforced)\n" +
+        "Draft protocols/ingredients staged for future promotion (currently Niagen/NR — NAD+ precursor, distinct from IV NAD+, no peptide synergy). Treat as DRAFT: present with the DRAFT label, note MD sign-off + a prescriber-signed standing order are required, and use only the verified citations carried in the entry.\n\nDRAFTS:\n" + DRAFTS,
       cache_control: { type: "ephemeral" },
     },
   ];
