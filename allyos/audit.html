@@ -79,6 +79,7 @@ body.reporting>.wrap{display:none}
   <div class="sub">Medical-Director risk-based review. <b>PHI-free</b> — no names/DOB. Each encounter gets a <b>1–5 risk score</b>: <b>5 = mandatory review</b> (adverse event, suspended infusion, override), 4 = high-risk ingredient or missing gate, 3 = comorbidity/doc gap. The monthly sample pulls <b>100% of score-5 charts + the highest-risk remaining to reach 5</b>. Each encounter carries an ID; the clinic maps the ID to its own chart to verify GFE / consent / monitoring.</div>
   <div class="ctrls noprint">
     <label class="muted" style="font-size:.8rem">Month</label><select id="month" onchange="render()"></select>
+    <label class="muted" style="font-size:.8rem">Total visits</label><input id="denom" type="number" min="0" placeholder="e.g. 18" onchange="setDenom()" style="width:80px;background:#0e1f29;border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--ink);font-family:inherit;font-size:.86rem">
     <span class="seg"><button id="vAll" class="on" onclick="setView('all')">All encounters</button><button id="vRisk" onclick="setView('risk')">🎯 Risk sample</button></span>
     <button class="btn-s" onclick="openManual()" style="border-color:var(--teal)">＋ Add encounter (paper chart)</button>
     <a href="#" onclick="showReport();return false" style="font-size:.85rem;color:var(--gold)">📄 MD Oversight Report</a>
@@ -97,6 +98,10 @@ if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin']);var s=AllyOSAuth.se
 var VIEW='all';
 function load(){try{return JSON.parse(localStorage.getItem('allyos_audit_v1')||'[]');}catch(e){return [];}}
 function save(a){try{localStorage.setItem('allyos_audit_v1',JSON.stringify(a));}catch(e){}}
+// per-month denominator (total visits that month) — for sampled paper-chart audits
+function loadDenom(){try{return JSON.parse(localStorage.getItem('allyos_audit_denom_v1')||'{}');}catch(e){return {};}}
+function denomFor(y){var d=loadDenom();return d[y]?+d[y]:0;}
+function setDenom(){var y=ym();if(!y)return;var d=loadDenom();var v=parseInt(document.getElementById('denom').value);if(v>0)d[y]=v;else delete d[y];try{localStorage.setItem('allyos_audit_denom_v1',JSON.stringify(d));}catch(e){}render();}
 function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function months(a){var m={};a.forEach(function(r){m[r.ym]=1;});return Object.keys(m).sort().reverse();}
 function monthLabel(ym){return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][(+ym.slice(4))-1]+' '+ym.slice(0,4);}
@@ -133,11 +138,12 @@ function defSeverity(item){
   return 'Minor';
 }
 function render(){var all=rows();var view=VIEW==='risk'?riskSample(all):all;
+  var dn=denomFor(ym());var di=document.getElementById('denom');if(di)di.value=dn||'';
   var audited=all.filter(function(r){return r.audited;}).length;
   var corr=all.filter(function(r){return r.audited&&r.auditPass===false;});
   var mand=all.filter(function(r){return riskScore(r)>=5;}).length;
   document.getElementById('stats').innerHTML=
-    stat('','Encounters (30d)',all.length)+
+    stat('','Visits this month',(dn||all.length)+(dn?' · '+all.length+' rev':''))+
     stat(mand?'red':'green','Mandatory review',mand)+
     stat('teal','Audited',audited+' / '+Math.max(5,mand))+
     stat(corr.length?'red':'green','Corrections open',corr.length)+
@@ -237,10 +243,11 @@ function composeReport(){
     '<div><span>MD role</span> <b>'+mdRole+'</b></div></div>';
 
   // 2. Monthly encounter review
+  var totalVisits=denomFor(ym())||all.length;
   H+='<h3>2 · Monthly Encounter Review</h3><div class="meta">'+
-    '<div><span>Total infusion visits (period)</span> <b>'+all.length+'</b></div>'+
+    '<div><span>Total infusion visits (period)</span> <b>'+totalVisits+'</b></div>'+
+    '<div><span>Charts pulled for review</span> <b>'+all.length+'</b></div>'+
     '<div><span>Mandatory-review charts (score 5)</span> <b>'+mand.length+'</b></div>'+
-    '<div><span>Charts selected for review</span> <b>'+sample.length+'</b></div>'+
     '<div><span>Charts reviewed by MD</span> <b>'+audited.length+'</b></div></div>'+
     '<div style="font-size:.76rem;color:#5b6b72">Selection logic (risk score 1–5): <b>100% of mandatory score-5 charts</b> — any adverse event, suspended infusion, or protocol override — plus the highest-risk remaining charts to reach a minimum sample of 5. Score 4 = high-risk ingredient (NAD+, Vit C ≥7.5 g, Mg + Ca, glutathione) or a missing GFE/consent gate; score 3 = comorbidity or documentation gap.</div>';
 
