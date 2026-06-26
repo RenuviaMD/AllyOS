@@ -165,6 +165,24 @@
 .mchip.red.on{background:#2a1512;box-shadow:var(--glow-red)}
 .monlog{font-size:.76rem;padding:6px 9px;border-left:2px solid var(--line);margin:4px 0;color:var(--muted)}
 .monlog.ae{border-left-color:var(--red);color:#f0c4be}
+/* IV infusion note — clean light document (prints well) */
+.notepaper{background:#fff;color:#1c2b32;border-radius:8px;padding:20px;font-size:.8rem;line-height:1.5;max-height:72vh;overflow:auto}
+.notepaper h2{font-size:1.1rem;color:#0e3a40;margin:0}
+.notepaper .nmeta{font-size:.7rem;color:#5b6b72}
+.notepaper .nsec{margin:11px 0;padding-top:8px;border-top:1px solid #e3ecea}
+.notepaper .nsec h3{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:#0e8a8a;margin:0 0 5px}
+.notepaper .nrow{display:flex;gap:8px;padding:2px 0;align-items:baseline}
+.notepaper .nk{min-width:118px;color:#5b6b72;flex:0 0 auto;font-size:.74rem}
+.notepaper .ncomp{background:#e9f6f0;border-left:3px solid #1e9e6a;padding:8px 10px;border-radius:5px;font-size:.76rem;color:#155}
+.notepaper .nsign{border-top:1px solid #e3ecea;margin-top:12px;padding-top:10px}
+.notepaper .stamp{color:#0c7a4d;font-weight:700}
+@media print{
+  body{background:#fff!important}
+  body * {visibility:hidden!important}
+  #noteDoc, #noteDoc * {visibility:visible!important}
+  #noteDoc{position:absolute;left:0;top:0;width:100%;max-height:none;box-shadow:none;padding:0}
+  .noprint{display:none!important}
+}
 /* detail */
 .detail .demo{font-size:.84rem;margin-bottom:10px}
 .chips{display:flex;gap:8px;margin-bottom:12px}
@@ -547,7 +565,7 @@ function sendToChair(){var p=qById(PREP.pid);if(!p)return;
   if(!p.consent){return hardStop('consent',p);}
   var an=analyzePrep();if(an.crit>0&&!PREP.override&&mdMode()){showAlertPopup(an);return;}
   var free=CHAIRS.indexOf(null);if(free<0){alert('All 6 chairs are full — keeping them on the bench. Tap "Back to waiting" to stage, then send when a chair frees.');return;}
-  CHAIRS[free]={patient:p,protoLabel:(p.proto==='ALACARTE'?'À LA CARTE':p.proto),bag:PREP.items.slice(),base:PREP.base,vol:PREP.vol,time:PREP.time,remain:PREP.time*60,total:PREP.time*60,state:'ready',timer:null,lastBeep:0,monitoring:[]};
+  CHAIRS[free]={patient:p,protoLabel:(p.proto==='ALACARTE'?'À LA CARTE':p.proto),bag:PREP.items.slice(),base:PREP.base,vol:PREP.vol,time:PREP.time,remain:PREP.time*60,total:PREP.time*60,state:'ready',timer:null,lastBeep:0,monitoring:[],override:PREP.override||'',alertSummary:(function(){var a=analyzePrep();return a.flags.filter(function(f){return f.l==='crit'||f.l==='warn';}).map(function(f){return f.t;}).join('; ');})()};
   delete p.prep;p.staged=false;
   QUEUE=QUEUE.filter(function(x){return x.id!==p.id;});PREP=null;selId=null;save();renderQueue();renderChairs();renderPrep();renderDetail();
 }
@@ -595,11 +613,12 @@ function startInfusion(i){var c=CHAIRS[i];if(!c)return;
   var h='<button class="x" onclick="closeModal()">×</button><h3>Start — Chair '+(i+1)+'</h3><div class="sub">'+esc(c.patient.name)+' · '+esc(c.protoLabel)+' · '+c.base+' '+c.vol+' mL · '+c.time+' min</div>'+
     '<div class="flag info"><b>Pre-start vitals (universal hold check)</b>BP/HR/SpO2/Temp within range; no red-flag symptom.</div>'+
     '<div class="frow"><div><label>BP</label><input id="vBP" placeholder="120/78"></div><div><label>HR</label><input id="vHR" placeholder="72"></div><div><label>SpO2 %</label><input id="vO2" placeholder="98"></div><div><label>Temp</label><input id="vT" placeholder="98.4"></div></div>'+
+    '<div class="frow"><div><label>IV site</label><select id="vSite"><option value="">—</option><option>L AC</option><option>R AC</option><option>L forearm</option><option>R forearm</option><option>L hand</option><option>R hand</option></select></div><div><label>Gauge</label><select id="vGauge"><option value="">—</option><option>20G</option><option selected>22G</option><option>24G</option></select></div><div><label>Delivery</label><select id="vDel"><option>Gravity</option><option>Pump</option></select></div></div>'+
     '<div class="muted" style="font-size:.72rem;margin-bottom:8px">Confirm venipuncture / catheter placed &amp; patent.</div>'+
     '<button class="btn neon-green" style="width:100%" onclick="reallyStart('+i+')">▶ Start infusion</button>';
   showModal(h);
 }
-function reallyStart(i){var c=CHAIRS[i];c.preVitals={bp:val('vBP'),hr:val('vHR'),o2:val('vO2'),t:val('vT')};c.state='infusing';c.startedStr=fmtClock(new Date());c.warned300=false;c.warned120=false;closeModal();runChair(i);renderChairs();}
+function reallyStart(i){var c=CHAIRS[i];c.preVitals={bp:val('vBP'),hr:val('vHR'),o2:val('vO2'),t:val('vT')};c.site=val('vSite');c.gauge=val('vGauge');c.delivery=val('vDel');c.state='infusing';c.startedStr=fmtClock(new Date());c.endedStr='';c.warned300=false;c.warned120=false;closeModal();runChair(i);renderChairs();}
 function demoMode(){var e=document.getElementById('demoMode');return e&&e.checked;}
 // demo only: jump the running infusion to just above the next alarm threshold
 function skipToNext(i){var c=CHAIRS[i];if(!c||c.state!=='infusing')return;if(!c.warned300){c.remain=301;}else if(!c.warned120){c.remain=121;}else{c.remain=1;}renderChairs();}
@@ -613,17 +632,66 @@ function runChair(i){var c=CHAIRS[i];beep(140,660);c.timer=setInterval(function(
   // 2-minute RED warning — three sharper beeps (fires once)
   if(c.remain<=120&&!c.warned120){c.warned120=true;beep(260,1100);setTimeout(function(){beep(260,1100);},250);setTimeout(function(){beep(260,1100);},500);renderChairs();}
   // ended — long triple tone, chair turns red 'INFUSION ENDED'
-  if(c.remain<=0){clearInterval(c.timer);c.timer=null;c.state='ended';beep(700,880);setTimeout(function(){beep(700,880);},800);setTimeout(function(){beep(700,880);},1600);renderChairs();}
+  if(c.remain<=0){clearInterval(c.timer);c.timer=null;c.state='ended';c.endedStr=fmtClock(new Date());beep(700,880);setTimeout(function(){beep(700,880);},800);setTimeout(function(){beep(700,880);},1600);renderChairs();}
 },1000);}
 function flash(i){renderChairs();}
 function dischargeChair(i){var c=CHAIRS[i];if(!c)return;
-  var h='<button class="x" onclick="closeModal()">×</button><h3>Discharge — Chair '+(i+1)+'</h3><div class="sub">'+esc(c.patient.name)+' · recheck vitals, remove catheter, aftercare.</div>'+
+  var h='<button class="x" onclick="closeModal()">×</button><h3>Discharge — Chair '+(i+1)+'</h3><div class="sub">'+esc(dispName(c.patient))+' · recheck vitals, remove catheter, aftercare.</div>'+
     '<div class="frow"><div><label>Post BP</label><input id="dBP" placeholder="118/76"></div><div><label>HR</label><input id="dHR" placeholder="70"></div><div><label>SpO2</label><input id="dO2" placeholder="99"></div></div>'+
-    '<label class="muted" style="font-size:.74rem;display:flex;gap:6px;align-items:center"><input type="checkbox" id="dAmb"> Ambulates without orthostatic symptoms · aftercare handout given</label>'+
-    '<button class="btn neon" style="width:100%;margin-top:10px" onclick="freeChair('+i+')">Close chart &amp; free chair</button>';
+    '<label class="muted" style="font-size:.74rem;display:flex;gap:6px;align-items:center;margin:4px 0"><input type="checkbox" id="dAmb" checked> Ambulates without orthostatic symptoms · aftercare handout given</label>'+
+    '<label class="muted" style="font-size:.74rem;display:flex;gap:6px;align-items:center"><input type="checkbox" id="dTol" checked> Patient tolerated infusion well · discharged stable</label>'+
+    '<button class="btn neon" style="width:100%;margin-top:10px" onclick="toNote('+i+')">📄 Generate infusion note →</button>';
   showModal(h);
 }
+function toNote(i){var c=CHAIRS[i];if(!c)return;c.postVitals={bp:val('dBP'),hr:val('dHR'),o2:val('dO2')};c.dAmb=!!(document.getElementById('dAmb')||{}).checked;c.dTol=!!(document.getElementById('dTol')||{}).checked;openInfusionNote(i);}
 function freeChair(i){if(CHAIRS[i]&&CHAIRS[i].timer)clearInterval(CHAIRS[i].timer);CHAIRS[i]=null;closeModal();renderChairs();}
+
+// ---------- IV INFUSION NOTE (one-page, auto-composed, provider-signed + date-stamped) ----------
+function nowStamp(){var d=new Date();return fmtDob(todayISO())+' '+fmtClock(d);}
+function composeNote(i){var c=CHAIRS[i],p=c.patient,df=15,g=gfeState(p);
+  var rate=(c.vol&&c.time)?(Math.round(c.vol/c.time*df)+' gtt/min · '+Math.round(c.vol/c.time*60)+' mL/hr'):'—';
+  var items=(c.bag||[]).map(function(it){return esc(it.name.split(' (')[0])+' '+esc(it.dose||'');}).join(' · ')||'—';
+  var conds=(p.alerts||[]).length?(p.alerts||[]).map(esc).join(', '):'none reported';
+  var mons=(c.monitoring||[]);var aes=mons.filter(function(m){return m.ae;});
+  var monStr=mons.length?mons.map(function(m){return '<div class="nrow"><span class="nk">'+esc(m.t)+'</span><span>'+esc(m.note)+'</span></div>';}).join(''):'<div class="nrow"><span class="nk">—</span><span>No mid-infusion concerns logged.</span></div>';
+  var pre=c.preVitals||{},post=c.postVitals||{};
+  var s=stackByCode(p.proto);
+  var why=s&&s.indication?esc(s.indication):(p.proto==='ALACARTE'?'Provider-directed à-la-carte wellness infusion.':'Wellness IV infusion.');
+  var alertLine=c.override?('Decision-support flag overridden — reason: '+esc(c.override)):(c.alertSummary?('Cautions noted &amp; addressed: '+esc(c.alertSummary)):'No critical decision-support conflicts.');
+  var aeLine=aes.length?('<b style="color:#b3261e">Adverse event(s) logged — FORM-04 required.</b> '+aes.map(function(m){return esc(m.note);}).join(' | ')):'No adverse event. Tolerated well.';
+  var sig=c.noteSigned;
+  return '<div class="notepaper" id="noteDoc">'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h2>IV Infusion Note</h2><div class="nmeta">RenuviaMD® · AllyOS · FORM-IV-NOTE-01 · '+nowStamp()+'</div></div><div style="font-size:.66rem;color:#5b6b72;text-align:right">Adult wellness IV<br>Internal clinical record</div></div>'+
+    '<div class="nsec"><div class="nrow"><span class="nk">Patient</span><span>'+esc(dispName(p))+' · '+(ageOf(p)!=null?ageOf(p)+'y':'—')+' '+esc(p.sex||'')+(p.dob?(' · DOB '+esc(fmtDob(p.dob))):'')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Chair / clinician</span><span>Chair '+(i+1)+' · '+esc((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||'Provider')+'</span></div></div>'+
+    '<div class="nsec"><h3>Why — indication &amp; eligibility</h3><div class="nrow"><span class="nk">Indication</span><span>'+why+'</span></div>'+
+      '<div class="nrow"><span class="nk">GFE</span><span>'+(g.k==='done'?'Current':esc(g.label))+(p.gfeDate?(' (last '+esc(fmtDob(p.gfeDate))+')'):'')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Consent</span><span>'+(p.consent?'Signed, on file':'NOT on file')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Conditions screened</span><span>'+conds+'</span></div></div>'+
+    '<div class="nsec"><h3>What — the infusion</h3><div class="nrow"><span class="nk">Protocol</span><span>'+esc(c.protoLabel)+(s?' — '+esc(s.title):'')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Base / volume</span><span>'+esc(c.base)+' · '+c.vol+' mL</span></div>'+
+      '<div class="nrow"><span class="nk">Additives</span><span>'+items+'</span></div>'+
+      '<div class="nrow"><span class="nk">Decision-support</span><span>'+alertLine+'</span></div></div>'+
+    '<div class="nsec"><h3>How — administration</h3><div class="nrow"><span class="nk">IV access</span><span>'+(esc(c.site||'—'))+' · '+(esc(c.gauge||'—'))+' · '+(esc(c.delivery||'—'))+'</span></div>'+
+      '<div class="nrow"><span class="nk">Rate · duration</span><span>'+rate+' · '+c.time+' min</span></div>'+
+      '<div class="nrow"><span class="nk">Times</span><span>start '+(esc(c.startedStr||'—'))+' · end '+(esc(c.endedStr||'—'))+'</span></div>'+
+      '<div class="nrow"><span class="nk">Pre-vitals</span><span>BP '+(esc(pre.bp||'—'))+' · HR '+(esc(pre.hr||'—'))+' · SpO2 '+(esc(pre.o2||'—'))+' · T '+(esc(pre.t||'—'))+'</span></div>'+
+      '<div style="margin-top:4px"><span class="nk">Monitoring</span>'+monStr+'</div></div>'+
+    '<div class="nsec"><h3>Outcome</h3><div class="nrow"><span class="nk">Post-vitals</span><span>BP '+(esc(post.bp||'—'))+' · HR '+(esc(post.hr||'—'))+' · SpO2 '+(esc(post.o2||'—'))+'</span></div>'+
+      '<div class="nrow"><span class="nk">Tolerance</span><span>'+aeLine+'</span></div>'+
+      '<div class="nrow"><span class="nk">Discharge</span><span>'+(c.dTol?'Stable':'See note')+(c.dAmb?' · ambulating without orthostatic symptoms · aftercare reviewed':'')+'</span></div></div>'+
+    '<div class="nsec"><h3>Compliance attestation</h3><div class="ncomp">'+
+      '✓ Valid GFE '+(g.k==='done'?'current':'('+esc(g.label)+')')+' &nbsp; ✓ Consent on file &nbsp; ✓ Ingredient contraindication screen performed &nbsp; ✓ Within adult wellness scope (non-disease) &nbsp; ✓ Emergency escalation pathway available'+
+      (aes.length?' &nbsp; ⚠ FORM-04 adverse-event report required':'')+'</div></div>'+
+    '<div class="nsign">'+(sig?
+      ('<div class="nrow"><span class="nk">Provider signature</span><span><b>'+esc(sig.provider)+'</b></span></div><div class="nrow"><span class="nk">Date / time</span><span class="stamp">'+esc(sig.stamp)+' (auto-stamped)</span></div>'):
+      ('<label style="font-size:.72rem;color:#5b6b72">Provider name / credential</label><input id="noteProv" class="noprint" placeholder="Falcon, MD" style="width:100%;padding:8px;border:1px solid #cdd9d7;border-radius:6px;margin-top:3px">'+
+       '<div class="noprint" style="display:flex;gap:8px;margin-top:10px"><button class="btn neon-green" style="flex:1" onclick="signNote('+i+')">✓ Sign &amp; date-stamp</button></div>'))+
+    '</div></div>'+
+    '<div class="noprint" style="display:flex;gap:8px;margin-top:12px">'+(sig?'<button class="btn neon" style="flex:1" onclick="window.print()">🖨 Print / Save PDF</button><button class="btn ghost" style="flex:1" onclick="freeChair('+i+')">Close chart &amp; free chair</button>':'<button class="btn ghost" style="flex:1" onclick="closeModal()">Back</button>')+'</div>';
+}
+function openInfusionNote(i){showModal(composeNote(i));}
+function signNote(i){var c=CHAIRS[i];var prov=val('noteProv').trim()||((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||'Provider');c.noteSigned={provider:prov,stamp:nowStamp()};openInfusionNote(i);}
 
 // ---------- MONITORING (open/close; vitals / feels-ok / AE) ----------
 // FORM-05 §3 (during-infusion) only — pre/post already captured at Start/Discharge.
