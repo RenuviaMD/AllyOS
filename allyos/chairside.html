@@ -233,7 +233,7 @@
   <div class="r"><span class="pill green" id="opstat">● OPERATIONAL</span><span id="who"></span>
     <label title="Where RenuviaMD is the Medical Director, gates enforce absolutely."><input type="checkbox" id="mdMode"> MD-of-record</label>
     <label title="Demo only: shows a ⏩ button to fast-forward an infusion to the 5-min / 2-min / end alarms so you can preview them."><input type="checkbox" id="demoMode"> Demo</label>
-    <a href="#" onclick="refOpen();return false">📖 Reference</a><a href="#" onclick="openFeedback();return false" style="color:var(--gold)">💬 Feedback</a><a href="audit.html">📋 Audit</a><a href="iv-inventory.html">Inventory</a><a href="iv-calculator.html">Calc</a><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
+    <a href="#" onclick="refOpen();return false">📖 Reference</a><a href="#" onclick="openFeedback();return false" style="color:var(--gold)">💬 Feedback</a><a href="gfe.html">🩺 GFE</a><a href="audit.html">📋 Audit</a><a href="iv-inventory.html">Inventory</a><a href="iv-calculator.html">Calc</a><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
 </div>
 
 <!-- lead capture (Netlify Forms — submissions appear in the Netlify dashboard, exportable) -->
@@ -336,6 +336,9 @@ function reviveChair(o){if(!o)return null;o.timer=null;
   return o;}
 // PHI stays on THIS device only — localStorage, never a server. Survives refresh / sleep / navigation.
 function save(){try{localStorage.setItem(KEY,JSON.stringify({q:QUEUE,chairs:CHAIRS.map(serializeChair),ally:ALLY_HIST.slice(-40)}));}catch(e){}}
+// pick up GFEs completed in the separate GFE Dashboard (another tab, same device) — refresh the
+// roster only; never clobber in-memory active chairs.
+window.addEventListener('storage',function(e){if(e.key!==KEY)return;try{var s=JSON.parse(e.newValue||'{}');if(s.q){QUEUE=s.q;if(typeof renderQueue==='function')renderQueue();if(typeof renderDetail==='function')renderDetail();}}catch(_){}});
 function seedQueue(){return [
   {id:pid(),first:'Sarah',last:'Martinez',name:'Sarah Martinez',dob:'1990-03-12',sex:'F',proto:'IV-05',alerts:[],gfe:false,gfeDate:'',consent:false},
   {id:pid(),first:'Michael',last:'Chen',name:'Michael Chen',dob:'1985-07-22',sex:'M',proto:'IV-08',alerts:['G6PD deficiency'],gfe:true,gfeDate:'2026-04-30',consent:false},
@@ -618,7 +621,9 @@ function sendToChair(){var p=qById(PREP.pid);if(!p)return;
 function hardStop(what,p){
   var msg=what==='GFE'?'No valid Good Faith Exam on file — no infusion.':'No signed consent — no IV.';
   var h='<button class="x" onclick="closeModal()">×</button><h3 style="color:var(--red)">⛔ Hard stop — '+what.toUpperCase()+' required</h3><div class="sub">'+msg+'</div>'+
-    '<button class="btn neon" style="width:100%;margin-bottom:8px" onclick="closeModal();'+(what==='GFE'?'openGFE':'openConsent')+'(\''+p.id+'\')">Complete '+what+' now</button>'+
+    (what==='GFE'
+      ? '<a class="btn neon" style="width:100%;margin-bottom:8px;text-decoration:none" href="gfe.html" target="_blank">Open GFE Dashboard (provider) ↗</a><div class="muted" style="font-size:.72rem;margin-bottom:6px">A provider (MD/DO/NP/PA) performs the GFE — not the nursing station.</div>'
+      : '<button class="btn neon" style="width:100%;margin-bottom:8px" onclick="closeModal();openConsent(\''+p.id+'\')">Complete consent now</button>')+
     (mdMode()?'<div class="muted" style="font-size:.72rem">MD-of-record mode — absolute stop.</div>':'<button class="btn ghost" style="width:100%" onclick="overrideGate(\''+p.id+'\',\''+what+'\')">Override with reason (advisory mode)</button>');
   showModal(h);
 }
@@ -908,45 +913,17 @@ function renderEmActive(){var el=document.getElementById('emBanner');if(!el)retu
 function closeEm(){emActive=null;document.getElementById('embar').classList.remove('active');renderEmActive();closeModal();}
 
 // ---------- GFE / CONSENT POPUPS ----------
+// Nursing station = READ-ONLY for GFE. The exam is performed by a provider (MD/DO/NP/PA)
+// in the separate GFE Dashboard module (gfe.html); the RN here only sees status + the report.
 function openGFE(id){var p=qById(id);if(!p)return;
-  if(p.gfeDoc){return openGFEDoc(id);}                 // full exam on file → show the signed document
-  if(p.gfe){return showModal('<button class="x" onclick="closeModal()">×</button><h3>GFE on file ✓</h3><div class="sub">'+esc(dispName(p))+' — recorded '+(p.gfeDate?esc(fmtDob(p.gfeDate)):'prior')+'. No full exam document on file yet.</div><button class="btn neon" style="width:100%;margin-top:8px" onclick="showModal(gfeForm(qById(\''+id+'\')))">Perform full GFE now</button>');}
-  showModal(gfeForm(p));
-}
-// the full Good Faith Exam form (FORM-INTAKE-GFE-01) — performed & signed by the provider
-function gfeForm(p){var age=ageOf(p),s=stackByCode(p.proto);
-  var conds=ALERT_CATALOG.map(function(c){var on=(p.alerts||[]).indexOf(c)>=0;
-    return '<label class="gchk"><input type="checkbox" class="gfecond" value="'+esc(c)+'" '+(on?'checked':'')+'> '+esc(c)+'</label>';}).join('');
-  return '<button class="x" onclick="closeModal()">×</button>'+
-    '<h3>Good Faith Exam</h3><div class="sub">'+esc(dispName(p))+' · '+(age!=null?age+'y ':'')+esc(p.sex||'')+' · plan: <b>'+esc(p.proto==='ALACARTE'?'À LA CARTE':p.proto)+(s?' — '+esc(s.title):'')+'</b></div>'+
-    '<div class="sub" style="margin-top:1px;font-size:.74rem">Provider (NP/PA/MD/DO) performs &amp; signs. Hard gate: no GFE → no infusion.</div>'+
-    '<label class="glab">Reason / wellness goal</label><input id="gfeGoal" placeholder="e.g. energy · hydration · recovery">'+
-    '<label class="glab">Section B — conditions screen (check all that apply)</label><div class="gconds">'+conds+'</div>'+
-    '<div class="frow"><div><label>Allergies</label><input id="gfeAllg" placeholder="NKDA or list"></div><div><label>Current meds</label><input id="gfeMeds" placeholder="incl. anticoagulants"></div></div>'+
-    '<label class="glab">Vitals</label><div class="frow"><div><label>BP</label><input id="gfeBP" inputmode="numeric" oninput="bpMask(this)" placeholder="118/76"></div><div><label>HR</label><input id="gfeHR" placeholder="70"></div><div><label>SpO2</label><input id="gfeO2" placeholder="98"></div><div><label>Temp</label><input id="gfeT" placeholder="98.4"></div><div><label>Wt lb</label><input id="gfeWt" placeholder="—"></div></div>'+
-    '<label class="gchk" style="margin-top:6px"><input type="checkbox" id="gfeExam" checked> Focused exam: well-appearing, no acute distress, no red-flag symptom; IV access adequate.</label>'+
-    '<label class="gchk"><input type="checkbox" id="gfeScreen" checked> Allergies/meds, pregnancy/G6PD/renal/cardiac reviewed against the selected protocol — no contraindication identified.</label>'+
-    '<label class="glab">Eligibility determination</label><div class="gelig">'+
-      '<label class="gradio"><input type="radio" name="gfeElig" value="eligible" checked> ✓ Eligible — cleared for today\'s wellness IV/IM</label>'+
-      '<label class="gradio"><input type="radio" name="gfeElig" value="defer"> ⏸ Defer — needs more info / modify plan</label>'+
-      '<label class="gradio"><input type="radio" name="gfeElig" value="no"> ⛔ Not eligible today</label></div>'+
-    '<textarea id="gfeNote" rows="2" placeholder="Clinical note / plan / reason if deferred (optional)" style="width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:9px;padding:10px;color:var(--ink);font-family:inherit;font-size:.86rem"></textarea>'+
-    '<div class="frow" style="margin-top:8px"><div><label>Performing provider</label><input id="gfeProv" placeholder="'+esc((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||'Provider')+'"></div></div>'+
-    '<button class="btn neon" style="width:100%;margin-top:8px" onclick="signGFE(\''+p.id+'\')">Sign GFE</button>';
-}
-function signGFE(id){var p=qById(id);if(!p)return;
-  var elig=(document.querySelector('input[name=gfeElig]:checked')||{}).value||'eligible';
-  var conds=[];Array.prototype.forEach.call(document.querySelectorAll('.gfecond:checked'),function(c){conds.push(c.value);});
-  p.alerts=conds;                                       // GFE is the source of truth for the conditions screen
-  var prov=val('gfeProv').trim()||((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||'Provider');
-  p.gfeDoc={goal:val('gfeGoal'),allergies:val('gfeAllg'),meds:val('gfeMeds'),
-    vitals:{bp:val('gfeBP'),hr:val('gfeHR'),o2:val('gfeO2'),t:val('gfeT'),wt:val('gfeWt')},
-    exam:document.getElementById('gfeExam').checked,screen:document.getElementById('gfeScreen').checked,
-    eligibility:elig,note:val('gfeNote'),provider:prov,stamp:nowStamp(),proto:p.proto};
-  if(elig==='eligible'){p.gfe=true;p.gfeDate=todayISO();}else{p.gfe=false;p.gfeDate='';}
-  save();renderDetail();renderQueue();
-  if(elig==='eligible')showModal(composeGFE(p));
-  else showModal('<button class="x" onclick="closeModal()">×</button><h3 style="color:var(--gold)">GFE recorded — '+(elig==='defer'?'deferred':'not eligible')+'</h3><div class="sub">'+esc(dispName(p))+' is <b>not cleared</b> for infusion today; the determination is saved on the chart.'+(val('gfeNote')?('<br><b>Note:</b> '+esc(val('gfeNote'))):'')+'</div><button class="btn ghost" style="width:100%;margin-top:8px" onclick="closeModal()">Close</button>');
+  if(p.gfeDoc){return openGFEDoc(id);}                 // signed exam on file → read-only report popup
+  var done=!!p.gfe;
+  showModal('<button class="x" onclick="closeModal()">×</button><h3>Good Faith Exam — '+(done?'on file ✓':'pending')+'</h3>'+
+    '<div class="sub">'+esc(dispName(p))+(done?(' — recorded '+(p.gfeDate?esc(fmtDob(p.gfeDate)):'prior')+'.'):'')+'</div>'+
+    (done?'<div class="flag ok" style="margin-top:8px"><b>GFE current</b>Cleared by a provider. No full exam document attached.</div>':
+      '<div class="flag crit" style="margin-top:8px"><b>GFE required — provider only</b>Must be performed &amp; signed by an MD/DO/NP/PA in the GFE Dashboard before infusion. An RN cannot perform it.</div>'+
+      '<a class="btn neon" style="width:100%;margin-top:8px;text-decoration:none" href="gfe.html" target="_blank">Open GFE Dashboard ↗</a>')+
+    '<div class="muted" style="font-size:.72rem;margin-top:8px">The nursing station shows GFE status only; the exam lives in the separate provider module.</div>');
 }
 function openGFEDoc(id){var p=qById(id);if(p&&p.gfeDoc)showModal(composeGFE(p));}
 // printable, signed GFE document (mirrors the infusion note / aftercare handout)

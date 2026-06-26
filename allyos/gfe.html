@@ -1,0 +1,224 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GFE Dashboard — AllyOS · RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
+<link rel="stylesheet" href="allyos-theme.css">
+<script src="allyos-auth.js"></script>
+<style>
+.wrap{max-width:1080px;margin:0 auto;padding:18px}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:4px}
+.top h1{font-family:var(--fdisp);font-size:1.4rem}.top h1 b{color:var(--gold)}
+.top a{color:var(--teal);text-decoration:none;font-size:.85rem}
+.sub{color:var(--muted);font-size:.84rem;margin-bottom:14px;max-width:86ch}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+@media(max-width:680px){.stats{grid-template-columns:1fr 1fr}}
+.stat{background:linear-gradient(180deg,#10202f,#0b1622);border:1px solid var(--line);border-radius:12px;padding:13px}
+.stat .lbl{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.stat .num{font-family:var(--fdisp);font-size:1.5rem;margin-top:2px}
+.stat.amber .num{color:var(--gold)}.stat.green .num{color:var(--green)}.stat.red .num{color:var(--red)}.stat.teal .num{color:var(--teal)}
+.ctrls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.ctrls input,.ctrls select{background:#0e1f29;border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--ink);font-family:inherit;font-size:.86rem}
+.ctrls input{min-width:200px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--fdisp);font-weight:600;border:none;border-radius:999px;padding:11px 18px;cursor:pointer;background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a;font-size:.9rem}
+.btn.ghost{background:transparent;border:1px solid var(--line2);color:var(--ink)}
+.btn-s{font-size:.74rem;padding:6px 12px;border-radius:8px;border:1px solid var(--line2);background:rgba(255,255,255,.04);color:var(--ink);cursor:pointer;font-family:inherit}
+.btn-s:hover{border-color:var(--teal)}
+.btn-s.go{border-color:var(--gold);color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:.66rem;text-transform:uppercase;letter-spacing:.04em;padding:8px 9px;border-bottom:1px solid var(--line2)}
+td{padding:10px 9px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.025)}
+.pchip{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.03em}
+.pchip.pend{background:#2a1512;color:#f0a59d;border:1px solid #5a2a22}
+.pchip.cur{background:#0e2a1d;color:var(--green);border:1px solid #1c5238}
+.pchip.exp{background:#2a230e;color:var(--gold);border:1px solid #4a3c18}
+.pchip.seat{background:#0e2436;color:#4ea8e0;border:1px solid #1c4763}
+.disc{font-size:.72rem;color:var(--muted);margin-top:18px;line-height:1.6}
+/* modal */
+.overlay{position:fixed;inset:0;background:#04080fcc;display:none;align-items:flex-start;justify-content:center;padding:26px 14px;overflow:auto;z-index:60}
+.overlay.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--line2);border-radius:16px;max-width:560px;width:100%;padding:20px}
+.modal h3{font-family:var(--fdisp);margin-bottom:2px}.modal .x{float:right;background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer}
+label{display:block;font-size:.74rem;color:var(--muted);margin:0 0 4px}
+input,select,textarea{width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--ink);font-size:.88rem;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
+.frow{display:flex;gap:10px;flex-wrap:wrap}.frow>div{flex:1;min-width:74px;margin-bottom:8px}
+.glab{display:block;font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:13px 0 5px}
+.gconds{display:grid;grid-template-columns:1fr 1fr;gap:3px 12px}
+@media(max-width:520px){.gconds{grid-template-columns:1fr}}
+.gchk{display:flex;gap:7px;align-items:flex-start;font-size:.8rem;color:var(--ink);padding:4px 0}
+.gchk input{margin-top:2px;width:auto}
+.gelig{display:flex;flex-direction:column;gap:6px}
+.gradio{display:flex;gap:8px;align-items:center;font-size:.84rem;padding:9px 11px;border:1px solid var(--line);border-radius:9px;cursor:pointer}
+.gradio input{width:auto}
+/* printable report */
+.notepaper{background:#fff;color:#1c2b32;border-radius:8px;padding:22px;font-size:.82rem;line-height:1.5}
+.notepaper h2{font-size:1.15rem;color:#0e3a40;margin:0}
+.notepaper .nmeta{font-size:.7rem;color:#5b6b72}
+.notepaper .nsec{margin:12px 0;padding-top:9px;border-top:1px solid #e3ecea}
+.notepaper .nsec h3{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:#0e8a8a;margin:0 0 5px}
+.notepaper .nrow{display:flex;gap:8px;padding:2px 0;align-items:baseline}
+.notepaper .nk{min-width:120px;color:#5b6b72;flex:0 0 auto;font-size:.74rem}
+.notepaper .ncomp{background:#e9f6f0;border-left:3px solid #1e9e6a;padding:9px 11px;border-radius:5px;font-size:.8rem;color:#155;margin-top:10px}
+.notepaper .nsign{border-top:1px solid #e3ecea;margin-top:12px;padding-top:10px}
+.notepaper .stamp{color:#0c7a4d;font-weight:700}
+@media print{body *{visibility:hidden!important}#repDoc,#repDoc *{visibility:visible!important}#repDoc{position:absolute;left:0;top:0;width:100%;padding:0}.noprint{display:none!important}}
+</style></head>
+<body class="allyos"><div class="wrap">
+  <div class="top">
+    <h1>GFE Dashboard · <b>AllyOS</b></h1>
+    <div class="noprint"><a href="chairside.html">← Nursing station</a> &nbsp; <a href="audit.html">Audit</a> &nbsp; <span class="muted" id="who" style="font-size:.78rem"></span></div>
+  </div>
+  <div class="sub">Provider worklist for the <b>Good Faith Exam</b> (FORM-INTAKE-GFE-01). Performed &amp; signed by <b>MD / DO / NP / PA</b> — independent of the nursing station. Clearing a GFE here feeds the patient's card and the read-only report popup at chairside. <b>Adults ≥ 18 · wellness scope only.</b></div>
+
+  <div class="stats" id="stats"></div>
+  <div class="ctrls noprint">
+    <input id="q" placeholder="Search patient / initials…" oninput="render()">
+    <select id="filter" onchange="render()">
+      <option value="all">All</option>
+      <option value="pending">Pending GFE</option>
+      <option value="current">Current</option>
+      <option value="expired">Expired</option>
+    </select>
+    <button class="btn" onclick="openAdd()">＋ Add patient</button>
+  </div>
+  <div style="overflow:auto"><table id="tbl"></table></div>
+  <div class="disc">GFE is a provider clinical-judgment act (MD/DO/NP/PA) — an RN cannot perform or sign it. This module is the provider's workspace; the nursing station shows status only and opens the finished report read-only. AllyOS is advisory decision-support; the provider owns every determination and signature. PHI stays on this device. © <span id="yr"></span> RenuviaMD® PLLC.</div>
+</div>
+<div class="overlay" id="ov"><div class="modal" id="md"></div></div>
+<script>
+document.getElementById('yr').textContent=new Date().getFullYear();
+if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin']);var ses=AllyOSAuth.session();if(ses)document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+(ses.clinic||'');}
+var KEY='allyos_chairside_v1', STACKS={};
+// shared roster (same store chairside uses) — preserves chairs/ally on write
+function loadState(){try{return JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){return {};}}
+function loadQueue(){var s=loadState();return s.q||[];}
+function saveQueue(q){var s=loadState();s.q=q;try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}}
+function seatedPatients(){var s=loadState();return (s.chairs||[]).filter(Boolean).map(function(c){return c.patient;}).filter(Boolean);}
+function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function val(id){var e=document.getElementById(id);return e?e.value:'';}
+function bpMask(el){var raw=el.value;if(raw.indexOf('/')>=0){var p=raw.split('/');el.value=p[0].replace(/\D/g,'').slice(0,3)+'/'+p.slice(1).join('').replace(/\D/g,'').slice(0,3);return;}var d=raw.replace(/\D/g,'').slice(0,6);el.value=d.length>3?(d.slice(0,3)+'/'+d.slice(3)):d;}
+function todayISO(){var n=new Date();return n.getFullYear()+'-'+('0'+(n.getMonth()+1)).slice(-2)+'-'+('0'+n.getDate()).slice(-2);}
+function fmtDob(d){if(!d)return'';var p=(''+d).split('-');return p.length===3?(p[1]+'/'+p[2]+'/'+p[0]):d;}
+function fmtClock(d){var h=d.getHours(),m=d.getMinutes(),ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+(m<10?'0':'')+m+' '+ap;}
+function nowStamp(){return fmtDob(todayISO())+' '+fmtClock(new Date());}
+function dispName(p){var f=p.first||((p.name||'').split(' ')[0]||'');var l=p.last||((p.name||'').split(' ').slice(1).join(' ')||'');return f+(l?(' '+l.charAt(0)+'.'):'');}
+function ageOf(p){if(!p.dob)return null;var d=new Date(p.dob+'T00:00:00'),n=new Date();var a=n.getFullYear()-d.getFullYear();if(n.getMonth()<d.getMonth()||(n.getMonth()===d.getMonth()&&n.getDate()<d.getDate()))a--;return a>=0&&a<130?a:null;}
+function gfeState(p){if(!p.gfe)return{k:'pending',label:'GFE NEEDED'};if(p.gfeDate){var d=new Date(p.gfeDate+'T00:00:00'),n=new Date(),mo=(n-d)/(1000*60*60*24*30.44);if(mo>12)return{k:'expired',label:'GFE EXPIRED'};}return{k:'current',label:'GFE current'};}
+function stackByCode(c){return STACKS[c]||null;}
+var ALERT_CATALOG=['Diabetes','High blood pressure','Heart disease / stroke','Kidney disease / dialysis','Liver disease','Asthma / COPD','Active cancer / treatment','Pregnancy / breastfeeding','Bleeding disorder / blood thinners','G6PD deficiency','Recent hospitalization / surgery <30d','Severe allergy / anaphylaxis hx'];
+var _pidSeq=0;function pid(){return 'g'+(++_pidSeq)+'x'+Math.floor(Math.random()*1e9);}
+
+// load protocol titles for context (optional — page still works if it fails)
+fetch('../protocols/iv-module.json').then(function(r){return r.json();}).then(function(d){
+  (d.stacks||[]).forEach(function(s){STACKS[s.code]={code:s.code,title:s.title,indication:s.indication};});
+}).catch(function(){}).then(function(){render();});
+
+function pchip(st){return st.k==='pending'?'<span class="pchip pend">Pending</span>':st.k==='expired'?'<span class="pchip exp">Expired</span>':'<span class="pchip cur">Current</span>';}
+function render(){
+  var q=(val('q')||'').toLowerCase(),f=val('filter');
+  var queue=loadQueue();
+  var list=queue.map(function(p,i){return {p:p,i:i,seated:false};});
+  var rows=list.filter(function(o){var st=gfeState(o.p);
+    if(f!=='all'&&st.k!==f)return false;
+    if(q&&(dispName(o.p)+' '+(o.p.name||'')).toLowerCase().indexOf(q)<0)return false;return true;});
+  // stats over the whole queue
+  var pend=0,cur=0,exp=0;queue.forEach(function(p){var k=gfeState(p).k;if(k==='pending')pend++;else if(k==='expired')exp++;else cur++;});
+  document.getElementById('stats').innerHTML=
+    stat('teal','In roster',queue.length)+stat('red','Pending GFE',pend)+stat('amber','Expired',exp)+stat('green','Current',cur);
+  var th='<tr><th>Patient</th><th>Age/Sex</th><th>Today\'s plan</th><th>GFE status</th><th>Last GFE</th><th></th></tr>';
+  var body=rows.length?rows.map(function(o){var p=o.p,st=gfeState(p),s=stackByCode(p.proto);
+    var act=st.k==='current'?'<button class="btn-s" onclick="viewReport('+o.i+')">View report</button> <button class="btn-s" onclick="openForm('+o.i+')">Re-do</button>':
+      '<button class="btn-s go" onclick="openForm('+o.i+')">Perform GFE →</button>'+(p.gfeDoc?' <button class="btn-s" onclick="viewReport('+o.i+')">View</button>':'');
+    return '<tr><td><b>'+esc(dispName(p))+'</b></td><td>'+(ageOf(p)!=null?ageOf(p)+'y ':'')+esc(p.sex||'')+'</td>'+
+      '<td>'+esc(p.proto==='ALACARTE'?'À LA CARTE':p.proto||'—')+(s?' · '+esc(s.title):'')+'</td>'+
+      '<td>'+pchip(st)+'</td><td>'+(p.gfeDate?esc(fmtDob(p.gfeDate)):'<span class="muted">—</span>')+'</td>'+
+      '<td style="text-align:right">'+act+'</td></tr>';}).join(''):'<tr><td colspan="6" class="muted" style="padding:22px;text-align:center">No patients'+(f!=='all'?' ('+f+')':'')+'. Add a patient or have the front desk register them at the station.</td></tr>';
+  document.getElementById('tbl').innerHTML=th+body;
+}
+function stat(cls,lbl,n){return '<div class="stat '+cls+'"><div class="lbl">'+lbl+'</div><div class="num">'+n+'</div></div>';}
+
+// ---- add a patient (work ahead of the visit) ----
+function openAdd(){
+  var opts='<option value="ALACARTE">À la carte</option>'+Object.keys(STACKS).map(function(c){return '<option value="'+c+'">'+esc(c)+' — '+esc(STACKS[c].title)+'</option>';}).join('');
+  document.getElementById('md').innerHTML='<button class="x" onclick="closeM()">×</button><h3>Add patient</h3>'+
+    '<div class="frow"><div><label>First name</label><input id="aFirst"></div><div><label>Last name</label><input id="aLast"></div></div>'+
+    '<div class="frow"><div><label>DOB</label><input id="aDob" type="date"></div><div><label>Sex</label><select id="aSex"><option value="">—</option><option>F</option><option>M</option><option>X</option></select></div></div>'+
+    '<div class="frow"><div><label>Today\'s plan</label><select id="aProto">'+opts+'</select></div></div>'+
+    '<button class="btn" style="width:100%;margin-top:8px" onclick="addPatient()">Add to roster</button>';
+  show();
+}
+function addPatient(){var f=val('aFirst').trim(),l=val('aLast').trim();if(!f){alert('First name required.');return;}
+  var q=loadQueue();q.push({id:pid(),first:f,last:l,name:(f+' '+l).trim(),dob:val('aDob'),sex:val('aSex'),proto:val('aProto'),alerts:[],gfe:false,gfeDate:'',consent:false});
+  saveQueue(q);closeM();render();}
+
+// ---- the GFE exam form ----
+function openForm(i){var q=loadQueue(),p=q[i];if(!p)return;var s=stackByCode(p.proto),age=ageOf(p),d=p.gfeDoc||{},v=d.vitals||{};
+  var conds=ALERT_CATALOG.map(function(c){var on=(p.alerts||[]).indexOf(c)>=0;return '<label class="gchk"><input type="checkbox" class="gfecond" value="'+esc(c)+'" '+(on?'checked':'')+'> '+esc(c)+'</label>';}).join('');
+  document.getElementById('md').innerHTML='<button class="x" onclick="closeM()">×</button>'+
+    '<h3>Good Faith Exam</h3><div class="sub" style="margin:2px 0">'+esc(dispName(p))+' · '+(age!=null?age+'y ':'')+esc(p.sex||'')+' · plan: <b>'+esc(p.proto==='ALACARTE'?'À LA CARTE':p.proto)+(s?' — '+esc(s.title):'')+'</b></div>'+
+    '<label class="glab">Reason / wellness goal</label><input id="gGoal" value="'+esc(d.goal||'')+'" placeholder="e.g. energy · hydration · recovery">'+
+    '<label class="glab">Section B — conditions screen (check all that apply)</label><div class="gconds">'+conds+'</div>'+
+    '<div class="frow" style="margin-top:8px"><div><label>Allergies</label><input id="gAllg" value="'+esc(d.allergies||'')+'" placeholder="NKDA or list"></div><div><label>Current meds</label><input id="gMeds" value="'+esc(d.meds||'')+'" placeholder="incl. anticoagulants"></div></div>'+
+    '<label class="glab">Vitals</label><div class="frow"><div><label>BP</label><input id="gBP" inputmode="numeric" oninput="bpMask(this)" value="'+esc(v.bp||'')+'" placeholder="118/76"></div><div><label>HR</label><input id="gHR" value="'+esc(v.hr||'')+'" placeholder="70"></div><div><label>SpO2</label><input id="gO2" value="'+esc(v.o2||'')+'" placeholder="98"></div><div><label>Temp</label><input id="gT" value="'+esc(v.t||'')+'" placeholder="98.4"></div><div><label>Wt lb</label><input id="gWt" value="'+esc(v.wt||'')+'"></div></div>'+
+    '<label class="gchk" style="margin-top:6px"><input type="checkbox" id="gExam" checked> Focused exam: well-appearing, no acute distress, no red-flag symptom; IV access adequate.</label>'+
+    '<label class="gchk"><input type="checkbox" id="gScreen" checked> Allergies/meds, pregnancy/G6PD/renal/cardiac reviewed against the selected protocol — no contraindication identified.</label>'+
+    '<label class="glab">Eligibility determination</label><div class="gelig">'+
+      '<label class="gradio"><input type="radio" name="gElig" value="eligible" checked> ✓ Eligible — cleared for wellness IV/IM</label>'+
+      '<label class="gradio"><input type="radio" name="gElig" value="defer"> ⏸ Defer — needs more info / modify plan</label>'+
+      '<label class="gradio"><input type="radio" name="gElig" value="no"> ⛔ Not eligible today</label></div>'+
+    '<label class="glab">Clinical note (optional)</label><textarea id="gNote" rows="2" placeholder="Plan / reason if deferred">'+esc(d.note||'')+'</textarea>'+
+    '<div class="frow" style="margin-top:8px"><div><label>Performing provider</label><input id="gProv" value="'+esc(d.provider||((ses&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||''))+'" placeholder="Provider name, credential"></div></div>'+
+    '<button class="btn" style="width:100%;margin-top:10px" onclick="signForm('+i+')">Sign GFE</button>';
+  show();
+}
+function signForm(i){var q=loadQueue(),p=q[i];if(!p)return;
+  var elig=(document.querySelector('input[name=gElig]:checked')||{}).value||'eligible';
+  var conds=[];Array.prototype.forEach.call(document.querySelectorAll('.gfecond:checked'),function(c){conds.push(c.value);});
+  p.alerts=conds;
+  var prov=val('gProv').trim()||((ses&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||'Provider');
+  p.gfeDoc={goal:val('gGoal'),allergies:val('gAllg'),meds:val('gMeds'),
+    vitals:{bp:val('gBP'),hr:val('gHR'),o2:val('gO2'),t:val('gT'),wt:val('gWt')},
+    exam:document.getElementById('gExam').checked,screen:document.getElementById('gScreen').checked,
+    eligibility:elig,note:val('gNote'),provider:prov,stamp:nowStamp(),proto:p.proto};
+  if(elig==='eligible'){p.gfe=true;p.gfeDate=todayISO();}else{p.gfe=false;p.gfeDate='';}
+  q[i]=p;saveQueue(q);
+  if(elig==='eligible')viewReport(i);
+  else{document.getElementById('md').innerHTML='<button class="x" onclick="closeM()">×</button><h3 style="color:var(--gold)">GFE recorded — '+(elig==='defer'?'deferred':'not eligible')+'</h3><div class="sub" style="margin-top:6px">'+esc(dispName(p))+' is <b>not cleared</b> for infusion; the determination is saved on the chart and the station will show it as pending.</div><button class="btn ghost" style="width:100%;margin-top:10px" onclick="closeM()">Close</button>';render();}
+}
+function viewReport(i){var q=loadQueue(),p=q[i];if(!p||!p.gfeDoc){alert('No GFE on file.');return;}
+  document.getElementById('md').innerHTML=composeGFE(p)+
+    '<div class="noprint" style="display:flex;gap:8px;margin-top:12px"><button class="btn" style="flex:1" onclick="window.print()">🖨 Print</button><button class="btn ghost" style="flex:1" onclick="downloadGFE('+i+')">⬇ Download</button><button class="btn ghost" style="flex:1" onclick="closeM()">Close</button></div>';
+  show();render();
+}
+function composeGFE(p){var d=p.gfeDoc||{},age=ageOf(p),s=stackByCode(p.proto),v=d.vitals||{};
+  var conds=(p.alerts||[]).length?(p.alerts||[]).map(esc).join(', '):'none reported';
+  var eligLabel=d.eligibility==='eligible'?'ELIGIBLE — cleared for wellness IV/IM':(d.eligibility==='defer'?'DEFERRED — not cleared today':'NOT ELIGIBLE today');
+  return '<div class="notepaper" id="repDoc">'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h2>Good Faith Exam</h2><div class="nmeta">RenuviaMD® · AllyOS · FORM-INTAKE-GFE-01 · '+esc(d.stamp||nowStamp())+'</div></div><div style="font-size:.66rem;color:#5b6b72;text-align:right">Adult wellness IV/IM<br>Internal clinical record</div></div>'+
+    '<div class="nsec"><div class="nrow"><span class="nk">Patient</span><span>'+esc(dispName(p))+' · '+(age!=null?age+'y':'—')+' '+esc(p.sex||'')+(p.dob?(' · DOB '+esc(fmtDob(p.dob))):'')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Visit goal</span><span>'+esc(d.goal||'Wellness optimization')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Today\'s plan</span><span>'+esc(p.proto==='ALACARTE'?'À LA CARTE':p.proto)+(s?' — '+esc(s.title):'')+'</span></div></div>'+
+    '<div class="nsec"><h3>History &amp; screen (Section B)</h3>'+
+      '<div class="nrow"><span class="nk">Conditions</span><span>'+conds+'</span></div>'+
+      '<div class="nrow"><span class="nk">Allergies</span><span>'+esc(d.allergies||'NKDA')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Current meds</span><span>'+esc(d.meds||'none reported')+'</span></div></div>'+
+    '<div class="nsec"><h3>Vitals &amp; exam</h3>'+
+      '<div class="nrow"><span class="nk">Vitals</span><span>BP '+esc(v.bp||'—')+' · HR '+esc(v.hr||'—')+' · SpO2 '+esc(v.o2||'—')+' · Temp '+esc(v.t||'—')+(v.wt?(' · Wt '+esc(v.wt)+' lb'):'')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Exam</span><span>'+(d.exam?'Well-appearing, no acute distress, no red-flag symptom; IV access adequate.':'See note.')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Screen</span><span>'+(d.screen?'Performed against the selected protocol — no contraindication identified.':'See note.')+'</span></div>'+
+      (d.note?'<div class="nrow"><span class="nk">Note</span><span>'+esc(d.note)+'</span></div>':'')+'</div>'+
+    '<div class="ncomp"'+(d.eligibility!=='eligible'?' style="background:#fdecec;border-left-color:#b3261e;color:#7a2018"':'')+'><b>Determination:</b> '+esc(eligLabel)+'</div>'+
+    '<div class="nsign"><div class="nrow"><span class="nk">Performed &amp; signed</span><span class="stamp">'+esc(d.provider||'Provider')+' · '+esc(d.stamp||nowStamp())+'</span></div>'+
+      '<div style="font-size:.68rem;color:#5b6b72;margin-top:4px">Provider attests this Good Faith Exam was personally performed and the patient meets eligibility for the wellness service indicated. Advisory decision-support; the provider owns this determination and signature.</div></div>'+
+    '</div>';
+}
+function downloadGFE(i){var q=loadQueue(),p=q[i];if(!p||!p.gfeDoc)return;
+  var html='<!doctype html><meta charset="utf-8"><title>GFE — '+esc(dispName(p))+'</title><style>body{font-family:-apple-system,Segoe UI,Arial,sans-serif;max-width:800px;margin:24px auto;padding:0 16px}'+
+    '.notepaper{color:#1c2b32;font-size:14px;line-height:1.5}h2{color:#0e3a40;margin:0}.nmeta{font-size:11px;color:#5b6b72}.nsec{margin:12px 0;padding-top:9px;border-top:1px solid #e3ecea}.nsec h3{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#0e8a8a;margin:0 0 5px}.nrow{display:flex;gap:8px;padding:2px 0}.nk{min-width:120px;color:#5b6b72;font-size:12px}.ncomp{background:#e9f6f0;border-left:3px solid #1e9e6a;padding:9px 11px;border-radius:5px;margin-top:10px}.nsign{border-top:1px solid #e3ecea;margin-top:12px;padding-top:10px}.stamp{color:#0c7a4d;font-weight:700}</style>'+composeGFE(p).replace('id="repDoc"','');
+  var b=new Blob([html],{type:'text/html'}),u=URL.createObjectURL(b),a=document.createElement('a');
+  a.href=u;a.download='GFE-'+dispName(p).replace(/[^A-Za-z]/g,'')+'-'+todayISO()+'.html';a.click();URL.revokeObjectURL(u);}
+function show(){document.getElementById('ov').classList.add('show');}
+function closeM(){document.getElementById('ov').classList.remove('show');}
+</script>
+</body></html>
