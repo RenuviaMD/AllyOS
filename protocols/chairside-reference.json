@@ -1,0 +1,143 @@
+{
+  "meta": {
+    "id": "CHAIRSIDE-REFERENCE-01",
+    "title": "Chairside reference — emergency cards + bench cheat-sheet",
+    "version": "v1.0 (from CARD-A v2.0, CARD-V v2.1, CARD-VC v2.0, QUICK-REFERENCE-SHEET-01 v1.3)",
+    "owner": "RenuviaMD® PLLC · AllyOS Compliance Division",
+    "effective_source": "2026-05-20",
+    "note": "Faithful transcription of the licensed laminated chairside cards for in-app read-only reference. The treating provider owns the clinical decision; this is decision-support, not a prescription. References MASTER-MENU-01 v3.3.",
+    "no_fabrication": true
+  },
+
+  "emergency_cards": {
+    "CARD_A": {
+      "code": "CARD-A", "version": "v2.0", "title": "Anaphylaxis — Chairside Emergency",
+      "recognize": [
+        "Sudden pruritus, urticaria, flushing",
+        "Throat tightness, hoarseness, stridor",
+        "Wheezing, shortness of breath, SpO2 < 92%",
+        "Hypotension, tachycardia, pre-syncope, syncope",
+        "GI: nausea, vomiting, abdominal cramping",
+        "Sense of impending doom, sudden anxiety"
+      ],
+      "act_first": "EPINEPHRINE 0.3 mg IM lateral thigh (1:1,000 · adult) IMMEDIATELY on recognition — before diphenhydramine, before steroids, before calling for help if alone. Repeat q5–15 min ×2 PRN if symptoms persist.",
+      "concurrent": [
+        "Stop infusion immediately. Keep IV catheter in place and patent (KVO with NS).",
+        "Position supine, legs elevated (sit upright if airway compromised).",
+        "O2 non-rebreather 10–15 L/min. Apply SpO2 + BP cuff; monitor continuously.",
+        "Note time of EPI dose and each subsequent action."
+      ],
+      "call_ems": "CALL 911 · ACTIVATE EMS · DO NOT DELAY",
+      "secondary_meds": [
+        "Diphenhydramine 25–50 mg IV slow push or IM (H1)",
+        "Methylprednisolone (Solu-Medrol) 40–125 mg IV slow push or IM — reduces biphasic-reaction risk",
+        "NS 250–500 mL bolus if hypotensive (BP < 90/60 or symptomatic)",
+        "Ondansetron 4 mg IV/IM if persistent nausea/vomiting (optional)"
+      ],
+      "post_event": [
+        "FORM-04 Adverse Event Incident Report within 24 h.",
+        "Notify Medical Director (call/text/email); document time.",
+        "Observe ≥ 4 h after resolution — biphasic risk peaks 4–12 h post-event.",
+        "Discharge only with EMS or ED transport; never self-drive after EPI."
+      ]
+    },
+
+    "CARD_V": {
+      "code": "CARD-V", "version": "v2.1", "title": "Vasovagal Response — Chairside",
+      "recognize_early": ["Pallor · diaphoresis · nausea · yawning", "Lightheadedness · pre-syncope · blurred vision", "Anxiety · feeling warm/flushed", "Patient says 'I feel funny / weird'"],
+      "recognize_late": ["Bradycardia (HR < 60) · hypotension (SBP < 90)", "Brief loss of consciousness", "Brief tonic-clonic-like movements possible", "Spontaneous recovery typically 1–5 min"],
+      "act": [
+        "STOP infusion by closing the roller clamp. Maintain IV access if safe/patent.",
+        "Position supine in brief / modified Trendelenburg as tolerated; legs elevated.",
+        "Do NOT use Trendelenburg if: vomiting · aspiration risk · respiratory distress · SpO2 < 94% · chest pain · suspected anaphylaxis · seizure · focal neuro · head/neck trauma · pregnancy concern — use supine flat, legs mildly elevated.",
+        "Recheck BP·HR·RR·SpO2·LOC. Cold compress forehead/neck. Reassure. Oral fluids only when fully alert.",
+        "Document on FORM-05 SOAP; FORM-04 for syncope/LOC/EMS/referral/deviation."
+      ],
+      "escalate_911": [
+        "LOC > 1 min, repeated LOC, or incomplete recovery",
+        "Persistent SBP < 90 or HR < 50 after 5 min supine + legs elevated",
+        "Chest pain · dyspnea · respiratory distress · cyanosis · SpO2 not correcting",
+        "Focal neuro — weakness · slurred speech · facial droop · seizure · prolonged confusion",
+        "Head/body trauma from fall · suspected fracture",
+        "Altered mental status · concern for non-vasovagal (cardiac/neuro/metabolic) cause"
+      ],
+      "vs_anaphylaxis": "Vasovagal: pale/cool/clammy, clear airway, bradycardia, improves with legs-up. Anaphylaxis: urticaria/flushing/angioedema, wheeze/stridor, usually tachycardia, does NOT improve — needs Epinephrine → CARD-A.",
+      "prevent": ["Pre-hydrate; light meal 1–2 h before (avoid fasting)", "Reclining chair — never standing", "Slow venipuncture; warn before insertion", "Monitor early signs q10–15 min", "Slow rate if lightheaded/warm", "High-risk: keep ARNP in room"],
+      "post_event": "Do not restart same session unless uncomplicated vasovagal, fully resolved, normal vitals ≥ 15 min. Remain in clinic until recovered; escort home; no driving until cleared; 24-h follow-up call; notify MD for QA within 24 h (same-day if serious)."
+    },
+
+    "CARD_VC": {
+      "code": "CARD-VC", "version": "v2.0", "title": "Vitamin C Verbal Screen (doses 6.1–10 g)",
+      "when": [
+        { "dose": "≤ 6 g / session", "action": "No formal verbal screen (standard intake applies)" },
+        { "dose": "6.1–10 g / session", "action": "Run the full 9-question screen + document each response in chart / FORM-05" },
+        { "dose": "> 10 g / session", "action": "Not within wellness scope — refer to standard medical evaluation" }
+      ],
+      "nine_questions": [
+        { "q": "Known G6PD deficiency?", "if_yes": "Cap Vit C at 2 g or decline" },
+        { "q": "Ever had a reaction to high-dose Vit C?", "if_yes": "Decline" },
+        { "q": "Active hemolytic anemia?", "if_yes": "Decline" },
+        { "q": "Mediterranean, Sephardic Jewish, African, or SE Asian ancestry AND family history of anemia?", "if_yes": "Cap at 7.5 g and document" },
+        { "q": "Currently receiving bortezomib (Velcade) or methotrexate?", "if_yes": "Decline (bortezomib absolute)" },
+        { "q": "End-stage renal disease or on dialysis?", "if_yes": "Decline" },
+        { "q": "Active hemochromatosis or iron overload?", "if_yes": "Decline" },
+        { "q": "Pregnant?", "if_yes": "Cap at 2 g" },
+        { "q": "Diabetic AND use a point-of-care finger-stick glucometer?", "if_yes": "Counsel re: false-high readings post-infusion" }
+      ],
+      "citations": "Padayatty SJ et al. (2010) PLoS ONE; AANP IV Nutrient Therapy Guidelines."
+    }
+  },
+
+  "emergency_cart": [
+    "Epinephrine 1:1,000 (1 mg/mL) ×2 · 1 mL syringes · 25G×1\" needles",
+    "Diphenhydramine 50 mg/mL ×2 · Methylprednisolone 125 mg ×2",
+    "Ondansetron 4 mg/2 mL ×2 · 0.9% NS 500 mL ×2 · IV tubing",
+    "O2 tank · regulator · non-rebreather mask · nasal cannula",
+    "Ambu bag (BVM) · oral airways · AED (charged, pads in date, daily self-test)",
+    "Pulse oximeter · BP cuff (manual+auto) · stethoscope · glucometer + strips · sharps",
+    "Cold compress/ice · sterile gauze · alcohol wipes · gloves · oral electrolyte solution",
+    "Incident report forms on cart · phone with 911 · emergency contact list posted"
+  ],
+
+  "quick_reference": {
+    "purpose": "Single-page bench reference for the supervised ARNP during compounding & order review — route, standard dose, wellness ceiling, key gate per ingredient.",
+    "defaults": "Catheter 22G · base 500 mL 0.9% NS (1 L only for HYDR-01) · Methylcobalamin only (no Cyano/Hydroxo) · ready-to-use only (no lyophilized) · preservative-free Vit C / Glutathione / Calcium Gluconate · no ALA in packet standard · no Sodium Bicarbonate in packet.",
+    "tiers": { "green": "Routine wellness, no extra gate beyond standard intake.", "yellow": "Additional gate required (verbal screen · IM-only · special handling · lab warning)." },
+    "base_fluids": [
+      { "name": "0.9% NS 250 mL", "note": "Short visit base" },
+      { "name": "0.9% NS 500 mL (default)", "note": "Standard wellness base" },
+      { "name": "0.9% NS 1 L", "note": "HYDR-01 hydration only" },
+      { "name": "Lactated Ringer's 1 L", "note": "HYDR-01 alternate; NOT with high-dose Vit C" }
+    ],
+    "ingredients": [
+      { "name": "Amino Blend (Pro+Arg+Lys+Cit)", "route": "IV in-bag", "dose": "5–10 mL", "ceiling": "10 mL", "gate": "WEL-15", "tier": "green" },
+      { "name": "Ascorbic Acid (Vit C) PF", "route": "IV in-bag", "dose": "1–10 g", "ceiling": "10 g/session", "gate": "6.1–10 g → CARD-VC", "tier": "yellow" },
+      { "name": "Biotin", "route": "IV in-bag", "dose": "5–10 mg", "ceiling": "10 mg/session", "gate": "Hold biotin 48–72 h before labs", "tier": "yellow" },
+      { "name": "Calcium Gluconate PF", "route": "IV in-bag (slow)", "dose": "100–500 mg", "ceiling": "1 g/session", "gate": "NOT with Vit C in same bag", "tier": "yellow" },
+      { "name": "Coenzyme Q10 (CoQ10)", "route": "IM only", "dose": "20–200 mg", "ceiling": "200 mg IM/session", "gate": "IM only · grapeseed oil base", "tier": "yellow" },
+      { "name": "Glutathione PF", "route": "IV push only · post-drip · 1–2 min", "dose": "600–1,200 mg", "ceiling": "1,200 mg/session", "gate": "No bag/piggyback · asthma exacerbation = decline", "tier": "yellow" },
+      { "name": "L-Carnitine", "route": "IV in-bag", "dose": "500 mg–1 g", "ceiling": "1 g/session", "gate": "IV-08", "tier": "green" },
+      { "name": "L-Glutamine (optional)", "route": "IV in-bag", "dose": "1–2 g", "ceiling": "2 g/session", "gate": "Optional add-on", "tier": "green" },
+      { "name": "L-Lysine", "route": "IV in-bag", "dose": "200–500 mg", "ceiling": "500 mg/session", "gate": "IV-05", "tier": "green" },
+      { "name": "L-Taurine", "route": "IV in-bag", "dose": "500 mg–1 g", "ceiling": "1 g/session", "gate": "IV-06, IV-07, IV-09", "tier": "green" },
+      { "name": "Lipotropic IM (MIC + Methyl B12)", "route": "IM only", "dose": "1 mL + Methyl B12", "ceiling": "1 mL/session", "gate": "IV-08 IM", "tier": "yellow" },
+      { "name": "Magnesium Chloride", "route": "IV in-bag (slow)", "dose": "500 mg–2 g", "ceiling": "2 g/session", "gate": "Slow infusion ≥ 15 min", "tier": "yellow" },
+      { "name": "Methylcobalamin (Methyl B12)", "route": "IV push / in-bag / IM", "dose": "1,000–5,000 mcg", "ceiling": "5,000 mcg/session", "gate": "Methyl form only", "tier": "green" },
+      { "name": "NAD+ (ready-to-use)", "route": "IV slow (dedicated bag)", "dose": "100–500 mg", "ceiling": "500 mg/session", "gate": "250 mg = 2 h first / 90–120 min subsequent · 500 mg = 3–4 h · not mixed", "tier": "yellow" },
+      { "name": "NAC (N-Acetyl Cysteine)", "route": "IM only at wellness dose", "dose": "200–600 mg", "ceiling": "600 mg/session IM", "gate": "Asthma exacerbation = decline", "tier": "yellow" },
+      { "name": "Pyridoxine (B6) standalone", "route": "IV in-bag / IM", "dose": "50–100 mg", "ceiling": "100 mg/session", "gate": "Optional", "tier": "green" },
+      { "name": "Selenium (Sodium Selenite)", "route": "IV in-bag", "dose": "100–200 mcg", "ceiling": "200 mcg/session", "gate": "Not stacked w/ Trace Mineral", "tier": "yellow" },
+      { "name": "Trace Mineral Injection (Zn+Cu+Mn+Se)", "route": "IV in-bag", "dose": "1 mL", "ceiling": "2 mL/session", "gate": "IV-11; not stacked w/ standalone Zn/Se", "tier": "yellow" },
+      { "name": "Vita Complex (B-Complex)", "route": "IV in-bag", "dose": "1–2 mL", "ceiling": "2 mL/session", "gate": "Most stacks", "tier": "green" },
+      { "name": "Vitamin D3 IM", "route": "IM only", "dose": "50,000–100,000 IU", "ceiling": "100,000 IU/session", "gate": "Optional", "tier": "yellow" },
+      { "name": "Zinc Sulfate", "route": "IV in-bag", "dose": "5–10 mg", "ceiling": "10 mg/session", "gate": "IV-01, IV-04, IV-05", "tier": "green" }
+    ],
+    "prn_meds": [
+      { "name": "Diphenhydramine (Benadryl)", "use": "Allergic reaction PRN", "route": "IV slow push or IM", "dose": "25–50 mg per algorithm", "warning": "Sedation · anticholinergic · not a wellness add-on" },
+      { "name": "Ondansetron (Zofran)", "use": "Infusion-related nausea PRN", "route": "IV push (slow 30 s) or IM", "dose": "4 mg per algorithm", "warning": "QT-prolongation risk · not a casual add-on" },
+      { "name": "Epinephrine 1:1,000", "use": "Anaphylaxis only", "route": "IM lateral thigh", "dose": "0.3 mg per CARD-A", "warning": "Activate EMS/911 · first-line in anaphylaxis · NOT a wellness ingredient" },
+      { "name": "Methylprednisolone (Solu-Medrol)", "use": "Anaphylaxis adjunct / severe allergic reaction", "route": "IV slow push or IM", "dose": "40–125 mg single", "warning": "After EPI only · onset delayed 4–6 h · prevents biphasic reaction" },
+      { "name": "Oxygen (O2)", "use": "Hypoxia · anaphylaxis · vasovagal · respiratory distress", "route": "Nasal cannula or non-rebreather", "dose": "Titrate SpO2 ≥ 94% (88–92% if COPD)", "warning": "Mandatory chairside equipment · verify tank daily" }
+    ]
+  }
+}

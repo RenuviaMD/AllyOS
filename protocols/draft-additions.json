@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "id": "DRAFT-ADDITIONS-01",
+    "title": "Draft protocol / ingredient additions (the 'add on demand' lane)",
+    "purpose": "New protocols and ingredients are staged here as DRAFTs and merged into the chairside menu with a DRAFT badge, so the 3-auditor-locked iv-module.json stays clean until the Medical Director signs and promotes them. This is the mechanism for adding protocols over time per PROTOCOL-AUTHORING-FORMAT.md.",
+    "status": "draft_requires_md_signoff",
+    "owner": "RenuviaMD® PLLC · AllyOS Compliance Division",
+    "no_fabrication": true
+  },
+
+  "ingredients": [
+    {
+      "id": "ING_NIAGEN_NR",
+      "name": "Niagen / Nicotinamide Riboside (NR)",
+      "status": "draft",
+      "requires_md_signoff": true,
+      "in_primary_library": false,
+      "category": ["NAD+ / longevity", "Non-peptide"],
+      "class": "NAD+ precursor (vitamin B3 family) — NOT a peptide, NOT IV NAD+",
+      "route": "IV in a dedicated bag",
+      "standard": "500 mg / 500 mL NS",
+      "ceiling": "500 mg/session (draft)",
+      "guardrail": "DRAFT — requires a prescriber-signed NR standing order + Medical Director sign-off before clinical use. NAD+ PRECURSOR — a DISTINCT molecule from infused NAD+ (ING_NAD); do NOT treat as interchangeable, and there is NO proven peptide synergy (direct_combination_evidence:false). Avoid in pregnancy/lactation; screen active cancer (theoretical, VERIFY). Sourcing/inventory is the clinic/provider's decision — AllyOS is pharmacy-agnostic and does not mandate a source.",
+      "monograph": {
+        "what": "Nicotinamide riboside (Niagen® is a branded NR) is an NAD+ precursor in the vitamin B3 family that raises intracellular NAD+. It is NOT the same molecule as infused NAD+, and it is NOT a peptide.",
+        "relevance_nad": "Cross-listed under NAD+: it elevates NAD+ through the precursor (salvage) pathway — an alternative/adjunct to direct IV NAD+, generally with a gentler infusion profile than NAD+ itself.",
+        "relevance_nonpeptide": "Cross-listed under non-peptide wellness: providers often weigh it alongside peptide longevity protocols, but it is a small-molecule vitamin derivative, not a peptide — and there is no proven NR + peptide synergy.",
+        "evidence_grade": "C–D",
+        "evidence_note": "Small retrospective (n=8 NR) + a non-peer-reviewed preprint for the IV route; oral NR is better studied. Moderate confidence for short-term tolerability, low for outcomes.",
+        "citations": [
+          "Conze et al. Scientific Reports 2019 — oral NR (background)",
+          "Hawkins et al. medRxiv 2024 — single 500 mg NR IV (preprint)",
+          "Reyna et al. Frontiers in Aging 2026 (DOI 10.3389/fragi.2026.1652582; PMC12907335) — n=14, 500 mg NAD+/NR IV ×4 days"
+        ],
+        "standing_order_ref": "protocols/niagen-nr-iv-standing-order.md (DRAFT v0.1, citations verified 2026-06-24)"
+      }
+    }
+  ],
+
+  "stacks": [
+    {
+      "code": "NR-01",
+      "title": "Niagen / NR (NAD+ precursor)",
+      "version": "v0.1-draft",
+      "type": "pre-built stack",
+      "status": "draft",
+      "requires_md_signoff": true,
+      "indication": "NAD+ precursor wellness support via nicotinamide riboside — an alternative/adjunct to IV NAD+ with a gentler infusion. Distinct from IV NAD+; not a peptide.",
+      "scope_limitation": "Adjunctive nutritional wellness support. Not intended to diagnose, treat, cure, prevent, reverse, or manage any disease. Adults >= 18. NOT IV NAD+; no proven peptide synergy.",
+      "base": "0.9% NS 500 mL (dedicated bag)",
+      "components": [
+        { "ingredient": "Niagen / Nicotinamide Riboside (NR)", "dose": "500 mg" }
+      ],
+      "optional_add_ons": [],
+      "infusion_time": "30–45 min",
+      "frequency": "per signed standing order",
+      "key_gates": [
+        "GFE Gate-0",
+        "Prescriber-signed NR standing order REQUIRED",
+        "MD sign-off REQUIRED (DRAFT)",
+        "Pregnancy / breastfeeding: avoid",
+        "Active cancer: screen / defer to oncology (VERIFY — limited data)"
+      ],
+      "evidence_grade": "C–D",
+      "citations": [
+        "Conze Sci Rep 2019 (oral NR, background)",
+        "Hawkins medRxiv 2024 (single 500 mg NR IV, preprint)",
+        "Reyna Front Aging 2026 (n=14, 500 mg NAD+/NR IV ×4 days)"
+      ],
+      "in_primary_library": false,
+      "draft_note": "DRAFT — requires Medical Director sign-off + a prescriber-signed NR standing order before clinical use. See protocols/niagen-nr-iv-standing-order.md."
+    }
+  ]
+}
