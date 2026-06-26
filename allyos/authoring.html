@@ -1,0 +1,217 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Authoring · New entries — AllyOS · RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
+<link rel="stylesheet" href="allyos-theme.css">
+<script src="allyos-auth.js"></script>
+<style>
+.wrap{max-width:1000px;margin:0 auto;padding:18px}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:4px}
+.top h1{font-family:var(--fdisp);font-size:1.4rem}.top h1 b{color:var(--gold)}
+.top a{color:var(--teal);text-decoration:none;font-size:.85rem}
+.sub{color:var(--muted);font-size:.84rem;margin-bottom:14px;max-width:84ch}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex-wrap:wrap;margin-bottom:16px}
+.seg button{background:#0e1f29;border:none;color:var(--muted);padding:10px 16px;font-family:inherit;font-size:.85rem;cursor:pointer;border-right:1px solid var(--line)}
+.seg button.on{background:#0e2a2433;color:var(--teal)}
+.card{background:linear-gradient(180deg,#10202f,#0b1622);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px;display:none}
+.card.on{display:block}
+.card h2{font-family:var(--fdisp);font-size:1.05rem;margin-bottom:2px}
+.dest{font-size:.74rem;color:var(--muted);margin-bottom:14px;line-height:1.6}
+.dest b{color:var(--teal)}.dest code{color:var(--ink);background:#06101a;border-radius:4px;padding:1px 5px}.dest .phi{color:var(--green)}
+label{display:block;font-size:.74rem;color:var(--muted);margin:0 0 4px}
+.req::after{content:" *";color:var(--gold)}
+input,select,textarea{width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--ink);font-size:.88rem;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:11px}.row>div{flex:1;min-width:150px}
+.sec{font-family:var(--fdisp);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);margin:16px 0 9px}
+.scr{display:grid;grid-template-columns:130px 120px 1fr;gap:8px;align-items:center;margin-bottom:6px}
+@media(max-width:640px){.scr{grid-template-columns:1fr}}
+.scr .k{font-size:.78rem;color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--fdisp);font-weight:600;border:none;border-radius:999px;padding:12px 20px;margin-top:12px;cursor:pointer;background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a}
+.btn.ghost{background:transparent;border:1px solid var(--line2);color:var(--ink)}
+.out{margin-top:14px;display:none}
+.out.show{display:block}
+.out pre{background:#06101a;border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto;font-size:.78rem;color:#cfe;white-space:pre-wrap;max-height:380px}
+.out .where{font-size:.76rem;color:var(--gold);margin:8px 0 6px;line-height:1.5}
+.prompt{margin-top:12px;border:1px dashed var(--line2);border-radius:10px}
+.prompt summary{cursor:pointer;padding:11px 14px;font-size:.82rem;color:var(--teal)}
+.prompt .pb{padding:0 14px 14px;font-size:.8rem;color:var(--muted);line-height:1.6;white-space:pre-wrap}
+.note{font-size:.74rem;color:var(--dim);margin-top:10px;line-height:1.6}
+.banner{background:rgba(231,184,78,.08);border:1px solid #5a4a22;border-radius:10px;padding:11px 14px;font-size:.8rem;color:var(--ink);margin-bottom:16px;line-height:1.5}
+.banner code{background:#06101a;border-radius:4px;padding:1px 5px}
+.copied{color:var(--green);font-size:.78rem;margin-left:8px}
+</style></head>
+<body class="allyos"><div class="wrap">
+  <div class="top">
+    <h1>Authoring · New entries <b>AllyOS</b></h1>
+    <div class="noprint"><a href="admin.html">← Admin</a> &nbsp; <a href="chairside.html">Chairside</a> &nbsp; <a href="../protocols/AUTHORING.md">Format spec ↗</a></div>
+  </div>
+  <div class="sub">Build a <b>new entry in the canonical format</b> (per <code>protocols/AUTHORING.md</code>) and see exactly <b>where it goes</b>. Each card generates a review-ready block you sign off, then drop into its destination. <b style="color:var(--green)">PHI-free</b> — none of these entries name a patient.</div>
+
+  <div class="banner">⚙️ <b>Draft-and-sign workflow.</b> This console <b>generates</b> the formatted entry; it does not yet auto-write to the repo or Supabase. After sign-off: ingredients/protocols go to their JSON files (then the 3-auditor lock); providers/clinics insert into Supabase <code>providers</code>/<code>clinics</code>. Real NPI/license values go to Supabase or the private record — <b>never the public repo</b>.</div>
+
+  <div class="seg" id="seg">
+    <button class="on" onclick="tab('ing')">🧪 Ingredient</button>
+    <button onclick="tab('proto')">💧 Protocol</button>
+    <button onclick="tab('prov')">🩺 Provider</button>
+    <button onclick="tab('clin')">🏥 Clinic</button>
+  </div>
+
+  <!-- INGREDIENT -->
+  <div class="card on" id="c_ing">
+    <h2>New ingredient</h2>
+    <div class="dest">→ <b>draft-additions.json</b> → <code>ingredients[]</code> &nbsp;+&nbsp; <b>ingredient-screening-contraindications.json</b> → <code>ingredients</code> &nbsp;·&nbsp; later: Supabase <code>ingredients</code> + <code>ingredient_screens</code> &nbsp;·&nbsp; <span class="phi">non-PHI</span></div>
+    <div class="row"><div><label class="req">id (ING_…)</label><input id="i_id" placeholder="ING_NIAGEN_NR"></div><div><label class="req">name (exact string protocols reference)</label><input id="i_name" placeholder="Niagen / Nicotinamide Riboside (NR)"></div></div>
+    <div class="row"><div><label>class</label><input id="i_class" placeholder="NAD+ precursor — NOT a peptide, NOT IV NAD+"></div><div><label>route</label><input id="i_route" placeholder="IV in a dedicated bag"></div></div>
+    <div class="row"><div><label>standard dose/volume</label><input id="i_std" placeholder="500 mg / 500 mL NS"></div><div><label class="req">ceiling (max/session)</label><input id="i_ceil" placeholder="500 mg/session"></div><div><label>rate floor (if rate-sensitive)</label><input id="i_rate" placeholder="e.g. ≥ 2 h for NAD+"></div></div>
+    <div class="row"><div><label>absolute contraindications</label><input id="i_aci" placeholder="· separated"></div><div><label>relative contraindications</label><input id="i_rci" placeholder="· separated"></div></div>
+    <div class="row"><div><label>evidence grade</label><select id="i_evi"><option value="">—</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div><div><label>source</label><input id="i_src" placeholder="MASTER-MENU §x or real ref"></div><div><label>in primary library?</label><select id="i_lib"><option value="false">No (market addition)</option><option value="true">Yes (packet origin)</option></select></div></div>
+    <div class="row"><div><label class="req">guardrail (honest paragraph)</label><textarea id="i_guard" rows="3" placeholder="What AllyOS does/doesn't claim · evidence grade · sourcing-agnostic · any VERIFY flags"></textarea></div></div>
+    <div class="row"><div><label>citations (one per line — REAL only, or blank)</label><textarea id="i_cit" rows="2" placeholder="PubMed / DOI / FDA"></textarea></div></div>
+    <div class="sec">Screening rules → bench guardrails</div>
+    <div id="i_screens"></div>
+    <button class="btn" onclick="genIng()">Generate entry →</button>
+    <div class="out" id="o_ing"></div>
+    <details class="prompt"><summary>📋 Structured build prompt (paste to Ally / Claude)</summary><div class="pb" id="p_ing"></div></details>
+  </div>
+
+  <!-- PROTOCOL -->
+  <div class="card" id="c_proto">
+    <h2>New protocol / stack</h2>
+    <div class="dest">→ <b>draft-additions.json</b> → <code>stacks[]</code> (DRAFT badge) → <code>iv-module.json</code> once locked &nbsp;·&nbsp; later: Supabase <code>protocols</code> &nbsp;·&nbsp; <span class="phi">non-PHI</span>. Full rules: <a href="../protocols/PROTOCOL-AUTHORING-FORMAT.md">PROTOCOL-AUTHORING-FORMAT.md ↗</a></div>
+    <div class="row"><div><label class="req">code</label><input id="s_code" placeholder="IV-13"></div><div><label class="req">title</label><input id="s_title" placeholder="Recovery Plus (Base Stack)"></div><div><label>version</label><input id="s_ver" placeholder="v0.1-draft" value="v0.1-draft"></div></div>
+    <div class="row"><div><label class="req">indication (wellness, non-disease)</label><input id="s_ind" placeholder="Post-exercise recovery support · hydration"></div></div>
+    <div class="row"><div><label class="req">base fluid + volume</label><input id="s_base" placeholder="0.9% NS 500 mL"></div><div><label>infusion time</label><input id="s_time" placeholder="45 min"></div><div><label>frequency</label><input id="s_freq" placeholder="as clinically indicated"></div></div>
+    <div class="row"><div><label class="req">components — one per line: <code>Ingredient | dose</code></label><textarea id="s_comp" rows="4" placeholder="Vitamin C | 5 g&#10;Magnesium Chloride | 1 g (slow ≥ 15 min)"></textarea></div></div>
+    <div class="row"><div><label>optional add-ons — <code>Ingredient | dose | note</code></label><textarea id="s_add" rows="2" placeholder="Calcium Gluconate | 100–500 mg | NOT in same bag as Vit C"></textarea></div></div>
+    <div class="row"><div><label>key gates (one per line)</label><textarea id="s_gates" rows="2" placeholder="GFE Gate-0&#10;CARD-VC if Vit C 6.1–10 g"></textarea></div><div><label>evidence grade</label><select id="s_evi"><option value="">—</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div></div>
+    <div class="row"><div><label>citations (one per line — REAL only)</label><textarea id="s_cit" rows="2"></textarea></div></div>
+    <button class="btn" onclick="genProto()">Generate entry →</button>
+    <div class="out" id="o_proto"></div>
+    <details class="prompt"><summary>📋 Structured build prompt</summary><div class="pb" id="p_proto"></div></details>
+  </div>
+
+  <!-- PROVIDER -->
+  <div class="card" id="c_prov">
+    <h2>New provider</h2>
+    <div class="dest">→ Supabase <b>providers</b> (linked to a clinic by <code>clinic_id</code>) &nbsp;·&nbsp; dev login: <code>allyos-auth.js DEMO_USERS</code> &nbsp;·&nbsp; <span class="phi">non-PHI (professional identifiers)</span></div>
+    <div class="row"><div><label class="req">name</label><input id="v_name" placeholder="Milagro"></div><div><label class="req">credential</label><select id="v_cred" onchange="provDefaults()"><option value="">—</option><option>MD</option><option>DO</option><option>NP</option><option>FNP</option><option>PA</option><option>RN</option><option>LPN</option></select></div></div>
+    <div class="row"><div><label>NPI <span id="v_npireq"></span></label><input id="v_npi" inputmode="numeric" placeholder="10 digits"></div><div><label>state license #</label><input id="v_lic"></div><div><label>license state</label><input id="v_licst" placeholder="FL" value="FL"></div></div>
+    <div class="row"><div><label>email</label><input id="v_email" type="email"></div><div><label>clinic</label><input id="v_clinic" placeholder="Lemus Natural Medicine"></div></div>
+    <div class="row"><div><label>can sign GFE / orders / notes?</label><select id="v_sign"><option value="true">Yes</option><option value="false">No</option></select></div><div><label>MD of record?</label><select id="v_mdor"><option value="false">No</option><option value="true">Yes</option></select></div></div>
+    <button class="btn" onclick="genProv()">Generate entry →</button>
+    <div class="out" id="o_prov"></div>
+    <details class="prompt"><summary>📋 Structured build prompt</summary><div class="pb" id="p_prov"></div></details>
+  </div>
+
+  <!-- CLINIC -->
+  <div class="card" id="c_clin">
+    <h2>New clinic</h2>
+    <div class="dest">→ Supabase <b>clinics</b> &nbsp;·&nbsp; onboarding capture: <code>onboard.html</code> → leads &nbsp;·&nbsp; <span class="phi">non-PHI</span></div>
+    <div class="row"><div><label class="req">clinic name</label><input id="k_name" placeholder="Lemus Natural Medicine of Coral Gables"></div><div><label class="req">city, state</label><input id="k_city" placeholder="Coral Gables, FL"></div></div>
+    <div class="row"><div><label>phone</label><input id="k_phone"></div><div><label>lines</label><div style="display:flex;gap:14px;padding-top:8px"><label style="display:inline-flex;gap:5px;color:var(--ink);font-size:.82rem"><input type="checkbox" id="k_iv" checked style="width:auto"> IV</label><label style="display:inline-flex;gap:5px;color:var(--ink);font-size:.82rem"><input type="checkbox" id="k_pep" style="width:auto"> Peptides</label><label style="display:inline-flex;gap:5px;color:var(--ink);font-size:.82rem"><input type="checkbox" id="k_bhrt" style="width:auto"> BHRT</label></div></div></div>
+    <div class="row"><div><label>MD arrangement</label><select id="k_md" onchange="clinDefaults()"><option value="renuviamd">RenuviaMD is MD of record</option><option value="own">Clinic's own MD</option></select></div></div>
+    <div id="k_ownmd" style="display:none">
+      <div class="sec">Clinic's own MD</div>
+      <div class="row"><div><label>MD name</label><input id="k_mdname"></div><div><label>credential</label><select id="k_mdcred"><option value="">—</option><option>MD</option><option>DO</option></select></div></div>
+      <div class="row"><div><label>NPI</label><input id="k_mdnpi"></div><div><label>license</label><input id="k_mdlic"></div><div><label>MD email</label><input id="k_mdemail" type="email"></div></div>
+    </div>
+    <button class="btn" onclick="genClin()">Generate entry →</button>
+    <div class="out" id="o_clin"></div>
+    <details class="prompt"><summary>📋 Structured build prompt</summary><div class="pb" id="p_clin"></div></details>
+  </div>
+
+  <div class="note">Every non-PHI entry starts as a <b>draft</b>, is generated here in canonical format, gets <b>MD sign-off</b> (recorded in <code>protocols/SIGNOFF-LEDGER.md</code> for ingredients/protocols), then is promoted. One schema, one source of truth — see <a href="../protocols/AUTHORING.md">AUTHORING.md</a> and <a href="../supabase/schema.sql">supabase/schema.sql</a>. © <span id="yr"></span> RenuviaMD® PLLC.</div>
+</div>
+<script>
+document.getElementById('yr').textContent=new Date().getFullYear();
+if(window.AllyOSAuth){AllyOSAuth.guard(['admin','provider']);}
+function tab(k){var ks=['ing','proto','prov','clin'];ks.forEach(function(x){document.getElementById('c_'+x).classList.toggle('on',x===k);});
+  var btns=document.querySelectorAll('#seg button');ks.forEach(function(x,i){btns[i].classList.toggle('on',x===k);});}
+function v(id){var e=document.getElementById(id);return e?(e.value||'').trim():'';}
+function chk(id){var e=document.getElementById(id);return!!(e&&e.checked);}
+function lines(t){return t.split('\n').map(function(x){return x.trim();}).filter(Boolean);}
+function esc(x){return(''+x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function show(outId,obj,where){var o=document.getElementById(outId);
+  var json=typeof obj==='string'?obj:JSON.stringify(obj,null,2);
+  o.innerHTML='<div class="where">'+where+'</div><pre id="pre_'+outId+'">'+esc(json)+'</pre>'+
+    '<button class="btn ghost" onclick="copyOut(\'pre_'+outId+'\',this)">⧉ Copy</button><span class="copied" id="cp_'+outId+'" style="display:none">copied ✓</span>';
+  o.classList.add('show');o.scrollIntoView({behavior:'smooth',block:'nearest'});}
+function copyOut(preId,btn){var t=document.getElementById(preId).textContent;
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){var c=btn.parentNode.querySelector('.copied');if(c)c.style.display='inline';}).catch(function(){
+    var r=document.createRange();r.selectNode(document.getElementById(preId));window.getSelection().removeAllRanges();window.getSelection().addRange(r);try{document.execCommand('copy');}catch(e){}});}
+
+// screening condition keys (must match GFE Section-B / patient-alert keys)
+var COND=['renal','hepatic','cardiac','hypertension','diabetes','asthma','cancer','pregnancy','g6pd','bleeding','thyroid','allergy','recent_surgery'];
+(function(){var h='';COND.forEach(function(k){h+='<div class="scr"><span class="k">'+k+'</span>'+
+  '<select id="sc_'+k+'"><option value="">— n/a —</option><option value="avoid">avoid</option><option value="caution">caution</option></select>'+
+  '<input id="scn_'+k+'" placeholder="one-line reason"></div>';});document.getElementById('i_screens').innerHTML=h;})();
+
+function genIng(){
+  if(!v('i_id')||!v('i_name')||!v('i_ceil')||!v('i_guard')){alert('id, name, ceiling and guardrail are required.');return;}
+  var ing={id:v('i_id'),name:v('i_name'),status:'draft',requires_md_signoff:true,in_primary_library:v('i_lib')==='true'};
+  if(v('i_class'))ing.class=v('i_class');
+  if(v('i_route'))ing.route=v('i_route');
+  if(v('i_std'))ing.standard=v('i_std');
+  ing.ceiling=v('i_ceil');
+  if(v('i_rate'))ing.rate=v('i_rate');
+  if(v('i_aci'))ing.absolute_ci=v('i_aci');
+  if(v('i_rci'))ing.relative_ci=v('i_rci');
+  ing.guardrail=v('i_guard');
+  if(v('i_evi'))ing.evidence_grade=v('i_evi');
+  if(v('i_src'))ing.source=v('i_src');
+  if(lines(v('i_cit')).length)ing.citations=lines(v('i_cit'));
+  var screen=[];COND.forEach(function(k){var lv=v('sc_'+k);if(lv)screen.push({flag:k,level:lv,note:v('scn_'+k)});});
+  var scrObj={};scrObj[v('i_id')]={name:v('i_name'),screen:screen};
+  var out='// → draft-additions.json  ·  ingredients[]  (append this object)\n'+JSON.stringify(ing,null,2)+
+    '\n\n// → ingredient-screening-contraindications.json  ·  ingredients  (add this key)\n'+JSON.stringify(scrObj,null,2);
+  show('o_ing',out,'Two blocks — ingredient record + screening rules. Append each to its file; keep status:"draft" until MD sign-off + 3-auditor lock.');
+}
+document.getElementById('p_ing').textContent='Draft a new AllyOS ingredient as two JSON blocks matching protocols/AUTHORING.md §1a and §1b. Ingredient: <name + what it is>. Give id (ING_…), class (and what it is NOT if confusable), route, standard dose/volume, per-session ceiling, rate floor if rate-sensitive, absolute and relative contraindications, an honest one-paragraph guardrail with an evidence grade (A–D) and a sourcing-agnostic note, a short monograph, and REAL citations or none. Then the screening block: for each relevant condition key (renal/hepatic/cardiac/hypertension/diabetes/asthma/cancer/pregnancy/g6pd/bleeding/thyroid/allergy/recent_surgery) an avoid or caution rule with a one-line reason. Set status:"draft", requires_md_signoff:true, in_primary_library:false. Do NOT invent doses, ceilings, or citations — if unsupported, say so and leave it out. Output the two JSON blocks, then a short rationale + evidence basis.';
+
+function parsePipe(t,keys){return lines(t).map(function(ln){var p=ln.split('|').map(function(x){return x.trim();});var o={};keys.forEach(function(k,i){if(p[i])o[k]=p[i];});return o;}).filter(function(o){return o[keys[0]];});}
+function genProto(){
+  if(!v('s_code')||!v('s_title')||!v('s_ind')||!v('s_base')||!v('s_comp')){alert('code, title, indication, base and components are required.');return;}
+  var p={code:v('s_code'),title:v('s_title'),version:v('s_ver')||'v0.1-draft',type:'pre-built stack',status:'draft',requires_md_signoff:true,
+    indication:v('s_ind'),scope_limitation:'Adjunctive nutritional wellness support. Not intended to diagnose, treat, cure, prevent, reverse, or manage any disease. Adults >= 18.',
+    base:v('s_base'),components:parsePipe(v('s_comp'),['ingredient','dose'])};
+  var add=parsePipe(v('s_add'),['ingredient','dose','note']);if(add.length)p.optional_add_ons=add;
+  if(v('s_time'))p.infusion_time=v('s_time');
+  if(v('s_freq'))p.frequency=v('s_freq');
+  var gates=lines(v('s_gates'));p.key_gates=gates.length?gates:['GFE Gate-0'];
+  if(v('s_evi'))p.evidence_grade=v('s_evi');
+  if(lines(v('s_cit')).length)p.citations=lines(v('s_cit'));
+  p.in_primary_library=false;
+  show('o_proto',p,'→ draft-additions.json · stacks[]. Each component’s ingredient MUST already exist in iv-module.json → ingredients[]. Keep status:"draft" until 3-auditor lock + MD sign-off.');
+}
+document.getElementById('p_proto').textContent='Draft a new AllyOS wellness IV/IM protocol as a JSON object matching protocols/PROTOCOL-AUTHORING-FORMAT.md. Protocol goal: <state the wellness goal>. Use ONLY ingredients already in iv-module.json → ingredients[]; keep every dose at/under that ingredient’s ceiling; respect compatibility_matrix and rate floors; wellness (non-disease) language only; honest evidence_grade (A–D) with REAL citations or none; set status:"draft", requires_md_signoff:true. List key_gates (GFE Gate-0 plus any triggered, e.g. CARD-VC for Vit C 6.1–10 g). Do NOT invent ingredients, doses, or citations. Output the JSON only, then a short rationale + evidence basis.';
+
+function provDefaults(){var c=v('v_cred');var sign=['MD','DO','NP','FNP','PA'].indexOf(c)>=0;
+  document.getElementById('v_sign').value=sign?'true':'false';
+  document.getElementById('v_npireq').innerHTML=sign?'<span style="color:var(--gold)">(required to sign)</span>':'';}
+function genProv(){
+  if(!v('v_name')||!v('v_cred')){alert('name and credential are required.');return;}
+  var cred=v('v_cred');var role=['RN','LPN'].indexOf(cred)>=0?'nurse':'provider';
+  var canSign=v('v_sign')==='true';
+  if(canSign&&!v('v_npi')){alert('A signing provider needs an NPI on file (or set “can sign” to No).');return;}
+  var rec={id:'<supabase uuid>',clinic_id:'<clinics.id>',name:v('v_name'),credential:cred,role:role,
+    npi:v('v_npi')||null,state_license:v('v_lic')||null,license_state:v('v_licst')||null,email:v('v_email')||null,
+    can_sign:canSign,md_of_record:v('v_mdor')==='true',active:true};
+  show('o_prov',rec,'→ Supabase providers (insert; id auto, clinic_id linked). Real NPI/license go here or to the private record — NOT the public repo.');
+}
+document.getElementById('p_prov').textContent='Create an AllyOS provider record matching protocols/AUTHORING.md §3a from: <name, credential, NPI, state license + state, email, which clinic>. Set role from credential (MD/DO/NP/FNP/PA → provider; RN/LPN → nurse; office manager → admin), can_sign true for MD/DO/NP/FNP/PA and false for RN/LPN, md_of_record only if explicitly the clinic’s MD of record, active:true. Leave id/clinic_id for Supabase. Do NOT guess an NPI or license — leave blank and flag if missing. Output JSON only.';
+
+function clinDefaults(){document.getElementById('k_ownmd').style.display=v('k_md')==='own'?'block':'none';}
+function genClin(){
+  if(!v('k_name')||!v('k_city')){alert('clinic name and city/state are required.');return;}
+  var ln=[];if(chk('k_iv'))ln.push('iv');if(chk('k_pep'))ln.push('peptides');if(chk('k_bhrt'))ln.push('bhrt');
+  var own=v('k_md')==='own';
+  var rec={id:'<supabase uuid>',name:v('k_name'),city_state:v('k_city'),phone:v('k_phone')||null,
+    lines:ln.length?ln:['iv'],md_arrangement:own?'own':'renuviamd',md_of_record:!own,
+    record_location:'Clinic chart / HIPAA binder (PHI not held by AllyOS)',status:'onboarding'};
+  if(own)rec.own_md={name:v('k_mdname'),credential:v('k_mdcred'),npi:v('k_mdnpi')||null,license:v('k_mdlic')||null,email:v('k_mdemail')||null};
+  show('o_clin',rec,'→ Supabase clinics (insert). The renuviamd arrangement requires a signed MD Services Agreement before status → active.');
+}
+document.getElementById('p_clin').textContent='Create an AllyOS clinic record matching protocols/AUTHORING.md §4a from: <clinic name, city/state, phone, which lines (IV/peptides/BHRT), MD arrangement>. If RenuviaMD is the MD of record set md_arrangement:"renuviamd", md_of_record:true, and omit own_md; if the clinic has its own MD set md_arrangement:"own", md_of_record:false, and fill own_md (leave NPI/license blank if unknown). status:"onboarding". Leave id for Supabase. Output JSON only.';
+</script>
+</body></html>
