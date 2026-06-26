@@ -63,16 +63,24 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal);bo
       </div>
 
       <div class="sec">Medical Director</div>
-      <label class="radio"><input type="radio" name="md_arrangement" value="renuviamd" checked onchange="document.getElementById('ownmd').style.display='none'"><span><span class="t">RenuviaMD is our Medical Director of record</span><div class="d">Falcon, MD oversees; gates enforce. (Requires a signed MD Services Agreement.)</div></span></label>
-      <label class="radio"><input type="radio" name="md_arrangement" value="own" onchange="document.getElementById('ownmd').style.display='block'"><span><span class="t">We have our own Medical Director</span><div class="d">AllyOS stays advisory; your MD owns and signs.</div></span></label>
-      <div id="ownmd"><div class="row"><div><label>Your MD's name</label><input name="own_md_name"></div><div><label>FL license #</label><input name="own_md_license"></div></div></div>
+      <p class="sub" style="margin-top:-4px;font-size:.84rem">Provides oversight and signs the standing orders. May be a different person from the treating clinician below.</p>
+      <label class="radio"><input type="radio" name="md_arrangement" value="renuviamd" checked onchange="toggleOwnMd(false)"><span><span class="t">RenuviaMD is our Medical Director of record</span><div class="d">Falcon, MD oversees; gates enforce. (Requires a signed MD Services Agreement.)</div></span></label>
+      <label class="radio"><input type="radio" name="md_arrangement" value="own" onchange="toggleOwnMd(true)"><span><span class="t">We have our own Medical Director</span><div class="d">AllyOS stays advisory; your MD owns and signs.</div></span></label>
+      <div id="ownmd">
+        <div class="row"><div><label>MD name</label><input name="own_md_name"></div><div><label>Credential</label><select name="own_md_credential"><option value="">—</option><option>MD</option><option>DO</option></select></div></div>
+        <div class="row"><div><label>NPI</label><input name="own_md_npi" inputmode="numeric"></div><div><label>State license #</label><input name="own_md_license"></div></div>
+        <div class="row"><div><label>MD email</label><input type="email" name="own_md_email"></div></div>
+      </div>
 
-      <div class="sec">Authorizing provider</div>
-      <p class="sub" style="margin-top:-4px;font-size:.84rem">The licensed clinician who performs the Good Faith Exam and signs orders / notes. (Add more later — nurses are free.)</p>
-      <div class="row"><div><label class="req">Name</label><input name="provider_name" required placeholder="Morejon"></div><div><label class="req">Credential</label><select name="provider_credential" required><option value="">—</option><option>MD</option><option>DO</option><option>NP</option><option>FNP</option><option>PA</option></select></div></div>
-      <div class="row"><div><label class="req">NPI</label><input name="provider_npi" required inputmode="numeric" placeholder="10 digits"></div><div><label class="req">State license #</label><input name="provider_license" required></div></div>
-      <div class="row"><div><label class="req">Provider email</label><input type="email" name="provider_email" required></div></div>
-      <label class="attest"><input type="checkbox" name="provider_attest" value="yes" required> This provider is authorized to perform Good Faith Exams and to sign orders / notes under the clinic's standing orders. <span class="req" style="color:var(--gold)"></span></label>
+      <div class="sec">Treating provider / APP</div>
+      <p class="sub" style="margin-top:-4px;font-size:.84rem">The licensed clinician who performs the Good Faith Exam, treats, and signs the chart — MD, DO, NP/FNP, or PA. (Add more later — nurses are free.)</p>
+      <label class="attest" style="background:transparent;border-color:var(--line);margin:0 0 12px"><input type="checkbox" name="provider_same_as_md" value="yes" onchange="toggleProv(this.checked)"> Same person as the Medical Director above.</label>
+      <div id="provfields">
+        <div class="row"><div><label class="req">Name</label><input name="provider_name" required placeholder="Morejon"></div><div><label class="req">Credential</label><select name="provider_credential" required><option value="">—</option><option>MD</option><option>DO</option><option>NP</option><option>FNP</option><option>PA</option></select></div></div>
+        <div class="row"><div><label class="req">NPI</label><input name="provider_npi" required inputmode="numeric" placeholder="10 digits"></div><div><label class="req">State license #</label><input name="provider_license" required></div></div>
+        <div class="row"><div><label class="req">Provider email</label><input type="email" name="provider_email" required></div></div>
+      </div>
+      <label class="attest"><input type="checkbox" name="provider_attest" value="yes" required> The treating provider is authorized to perform Good Faith Exams and to sign orders / notes under the clinic's standing orders.</label>
 
       <div class="sec">Anything else?</div>
       <textarea name="notes" rows="3" placeholder="Optional — questions, timeline, number of chairs, etc."></textarea>
@@ -90,6 +98,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal);bo
 
 <script>
 var f=document.getElementById('form');
+function toggleOwnMd(show){document.getElementById('ownmd').style.display=show?'block':'none';}
+function toggleProv(same){var d=document.getElementById('provfields');d.style.display=same?'none':'block';
+  ['provider_name','provider_credential','provider_npi','provider_license','provider_email'].forEach(function(n){var el=f.elements[n];if(el){if(same)el.removeAttribute('required');else el.setAttribute('required','');}});}
 f.addEventListener('submit',function(e){
   e.preventDefault();
   var data=new URLSearchParams(new FormData(f)).toString();
