@@ -270,7 +270,10 @@ function seedQueue(){return [
 ];}
 var _pidSeq=0;function pid(){return 'p'+(++_pidSeq)+'x'+Math.floor(Math.random()*1e9);}
 // ---- patient identity / status helpers ----
-var ALERT_CATALOG=['G6PD deficiency','Pregnancy / breastfeeding','Anticoagulant / bleeding risk','Renal impairment / dialysis','Cardiac / CHF','Severe allergy / anaphylaxis hx','Acute illness / infection'];
+// patient conditions mirror the GFE FORM-IV-GFE-01 Section-B checklist
+var ALERT_CATALOG=['Diabetes','High blood pressure','Heart disease / stroke','Kidney disease / dialysis','Liver disease','Asthma / COPD','Active cancer / treatment','Pregnancy / breastfeeding','Bleeding disorder / blood thinners','G6PD deficiency','Recent hospitalization / surgery <30d','Severe allergy / anaphylaxis hx'];
+// map each condition to the screening-map condition key
+var ALERT_TO_KEY={'Diabetes':'diabetes','High blood pressure':'htn','Heart disease / stroke':'cardiac','Kidney disease / dialysis':'renal','Liver disease':'hepatic','Asthma / COPD':'respiratory','Active cancer / treatment':'cancer','Pregnancy / breastfeeding':'pregnancy_lactation','Bleeding disorder / blood thinners':'bleeding_anticoag','G6PD deficiency':'g6pd','Recent hospitalization / surgery <30d':'recent_procedure_30d','Severe allergy / anaphylaxis hx':'allergy'};
 function dispName(p){var f=p.first||((p.name||'').split(' ')[0]||'');var l=p.last||((p.name||'').split(' ').slice(1).join(' ')||'');return f+(l?(' '+l.charAt(0)+'.'):'');}
 function ageOf(p){if(!p.dob)return null;var d=new Date(p.dob+'T00:00:00'),n=new Date();var a=n.getFullYear()-d.getFullYear();if(n.getMonth()<d.getMonth()||(n.getMonth()===d.getMonth()&&n.getDate()<d.getDate()))a--;return a>=0&&a<130?a:null;}
 function gfeState(p){if(!p.gfe)return{k:'missing',label:'GFE NEEDED'};if(p.gfeDate){var d=new Date(p.gfeDate+'T00:00:00'),n=new Date(),mo=(n-d)/(1000*60*60*24*30.44);if(mo>12)return{k:'expired',label:'GFE EXPIRED'};}return{k:'done',label:'GFE current'};}
@@ -497,13 +500,19 @@ function analyzePrep(){var bag=PREP.items,t=PREP.time,flags=[],crit=0,warn=0;
   // osmolarity
   var hyper=[],hi=false;bag.forEach(function(it){var n=(it.name||'').toLowerCase();if(/vitamin c|vit c|ascorbic/.test(n)){var g=parseGrams(it.dose);if(g!=null&&g>=7){hyper.push('Vit C '+g+'g');hi=true;}}if(/calcium chloride/.test(n))hyper.push('CaCl');if(/amino/.test(n))hyper.push('amino acids');if(/nad/.test(n))hyper.push('NAD+');});
   if(hyper.length){var conc=hi&&PREP.vol<=250;add(conc?'crit':'warn','Osmolarity '+(conc?'high':'raised'),'Hyperosmolar: '+hyper.join(', ')+'. Peripheral limit ~900 mOsm/L'+(conc?' — low volume + high Vit C: larger bag/central.':'.'));}
-  // ---- patient health flags × bag contents ----
-  var pat=qById(PREP.pid),pa=(pat&&pat.alerts)||[];
-  if(pa.indexOf('G6PD deficiency')>=0&&tags.vitc){var gg=parseGrams(tags.vitc.dose);add((gg!=null&&gg>2)?'crit':'warn','G6PD + Vitamin C','Patient flagged G6PD-deficient. High-dose IV Vit C risks acute hemolysis'+(gg!=null&&gg>2?' — hard stop at '+gg+' g.':' — keep dose low / reconsider.'));}
-  if(pa.indexOf('Pregnancy / breastfeeding')>=0)add('warn','Pregnancy / breastfeeding','Patient flagged pregnant/breastfeeding — confirm each additive is appropriate; many wellness IVs are avoided.');
-  if(pa.indexOf('Anticoagulant / bleeding risk')>=0)add('warn','Bleeding / anticoagulant','Patient on anticoagulant or bleeding risk — IM routes & ketorolac add risk; prefer IV, hold pressure.');
-  if(pa.indexOf('Renal impairment / dialysis')>=0&&(tags.mg||tags.calcium))add('warn','Renal + electrolytes','Renal impairment flagged with Mg/Ca in bag — risk of accumulation; provider should set dosing.');
-  if(pa.indexOf('Cardiac / CHF')>=0&&PREP.vol>=1000)add('warn','Cardiac + volume','CHF flagged with a 1 L bag — consider smaller volume / slower rate to avoid overload.');
+  // ---- patient GFE conditions × each ingredient's PUBLISHED screening map ----
+  // (drives every ingredient × condition contraindication automatically — base fluid + all additives)
+  var pat=qById(PREP.pid),pflags={};((pat&&pat.alerts)||[]).forEach(function(a){var k=ALERT_TO_KEY[a];if(k)pflags[k]=true;});
+  var screenIds=bag.map(function(it){return it.id;}).filter(Boolean);
+  var baseId=/lactated/i.test(PREP.base)?'ING_LR':(/dedicated|nad/i.test(PREP.base)?null:'ING_NS');
+  if(baseId)screenIds.push(baseId);
+  var seenSc={};
+  screenIds.forEach(function(id){var ent=SCREEN.ingredients&&SCREEN.ingredients[id];var sc=(ent&&ent.screen)||[];var nm=esc((ent&&ent.name?ent.name:id).split(' (')[0]);
+    sc.forEach(function(r){if(!pflags[r.flag])return;var dk=id+'|'+r.flag;if(seenSc[dk])return;seenSc[dk]=1;
+      if(r.level==='avoid')add('crit','Contraindicated — '+nm+' × '+esc(r.flag),esc(r.note));
+      else if(r.level==='caution')add('warn','Caution — '+nm+' × '+esc(r.flag),esc(r.note));
+      else add('warn','Screen — '+nm+' × '+esc(r.flag),esc(r.note));});
+  });
   var key=flags.filter(function(f){return f.l==='crit';}).map(function(f){return f.t;}).join('|');
   var newCrit=key!==''&&key!==lastCritKey;lastCritKey=key;
   return {flags:flags,crit:crit,warn:warn,newCrit:newCrit};
