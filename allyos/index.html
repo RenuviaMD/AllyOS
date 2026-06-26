@@ -1,74 +1,301 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AllyOS — Clinical Operating System · RenuviaMD®</title>
-<link rel="icon" type="image/png" href="ally-avatar-64.png"><link rel="apple-touch-icon" href="ally-avatar-180.png"><meta name="theme-color" content="#060a12">
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AllyOS — The honest clinical AI your wellness clinic runs on · RenuviaMD®</title>
+<meta name="description" content="AllyOS is the honest clinical-AI operating system for wellness clinics — IV/IM, peptides, and BHRT. Physician-curated, PHI-free, advisory decision-support powered by Ally.">
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
+<link rel="apple-touch-icon" href="ally-avatar-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#05080f">
+<meta property="og:title" content="AllyOS — the honest clinical AI for wellness clinics">
+<meta property="og:description" content="One AI brain across IV/IM, peptides & BHRT. Evidence-graded, PHI-free, never invents a dose.">
+<meta property="og:image" content="ally-avatar.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--navy:#102a30;--navy2:#0e3a40;--teal:#0e8a8a;--gold:#c9870a;--ink:#1c2b32;--muted:#5b6b72;--line:#e3ecea;--soft:#f3f8f7;--green:#1e9e6a}
-*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:#eef4f3;line-height:1.5}
-.wrap{max-width:1040px;margin:0 auto;padding:0 22px}
-header{background:linear-gradient(150deg,#0e3a40,#0e8a8a);color:#fff;padding:24px 0 30px}
-.topbar{display:flex;justify-content:space-between;align-items:center}
-.brand{font-weight:800;font-size:1.1rem}.brand span{color:#ffd98a}
-.nav a{color:#fff;text-decoration:none;font-size:.82rem;margin-left:16px;opacity:.9}
-.nav a.cta{background:#ffd98a;color:#3a2a00;padding:7px 14px;border-radius:8px;font-weight:800;opacity:1}
-h1{font-size:2.1rem;margin:16px 0 6px;font-family:Georgia,serif}header p{color:#d4ece9;max-width:680px}
-.lines{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
-.line{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:6px 14px;font-size:.85rem}
-section{padding:34px 0}h2{font-size:1.1rem;color:var(--navy);margin-bottom:6px}.sub{color:var(--muted);font-size:.92rem;margin-bottom:18px}
-.tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-.tool{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:0 2px 10px rgba(16,50,58,.05);text-decoration:none;color:inherit;display:block;transition:transform .14s,box-shadow .14s;position:relative}
-.tool:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(16,50,58,.12)}
-.tool .ic{font-size:1.7rem}.tool h3{font-size:1.1rem;margin:8px 0 4px;color:var(--navy)}.tool p{font-size:.88rem;color:var(--muted)}
-.tier{position:absolute;top:16px;right:16px;font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:6px}
-.free{background:#e8f7f0;color:#0c7a4d}.member{background:#e6f6f6;color:#0b6e6e}.top{background:#fff3df;color:#9a6300}
-.ladder{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:10px}
-.tg{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}.tg b{color:var(--navy)}.tg .pr{font-size:.78rem;color:var(--teal);font-weight:700;margin-top:2px}.tg ul{list-style:none;margin-top:8px;font-size:.84rem;color:var(--muted)}.tg li{padding:2px 0}
-.diffrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
-.diffrow .d{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:.8rem;color:var(--muted);flex:1;min-width:150px}.diffrow .d b{color:var(--navy)}
-footer{background:var(--navy);color:#9fb4b8;font-size:.78rem;padding:24px 0}footer b{color:#dfeae8}
-@media screen{
- :root{--navy:#dfeae8;--teal:#29b8a8;--gold:#d4a548;--ink:#e8eef0;--muted:#9aa9b0;--line:#222d32;--soft:#161e22;--green:#3fcf8e}
- body{background:#0b0f11}
- .tool,.tg,.diffrow .d{background:#11181b;box-shadow:none}
- .free{background:#0e2a1d;color:#7fe0b4}
- .member{background:#0e2436;color:#7fc6e0}
- .top{background:#241a06;color:#e0c48a}
- footer{background:#0d1417}
+:root{
+  --bg:#05080f; --bg2:#0a1220; --ink:#eaf1f6; --muted:#90a3b6; --dim:#5d7387;
+  --teal:#2ee6d6; --teal2:#19b9c9; --violet:#8b7bff; --gold:#e7b84e; --green:#46e08f; --red:#ff6b6b;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --glow-teal:0 0 40px rgba(46,230,214,.35); --fdisp:'Space Grotesk',system-ui,sans-serif; --fbody:'Inter',system-ui,sans-serif;
+  --r:18px;
 }
-</style></head><body>
-<header><div class="wrap">
-<div class="topbar"><div class="brand">Ally<span>OS</span> · by RenuviaMD®</div>
-<div class="nav"><a href="pricing.html">Pricing</a><a href="verify-npi.html">Verify NPI</a><a class="cta" href="login.html">Sign in</a></div></div>
-<h1>The honest clinical operating system</h1>
-<p>Physician-curated protocols, an honest AI, a full IV/IM chairside platform, and on-device documentation — for wellness practices and the licensed providers who run them. We inform how and what; we don't broker drugs, we hold no PHI, and we only enforce where we're your Medical Director.</p>
-<div class="lines"><span class="line">🧬 Advanced Peptides</span><span class="line">⚕️ BHRT</span><span class="line">💧 IV &amp; IM Wellness</span></div></div></header>
-<main class="wrap">
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fbody);background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+h1,h2,h3,.disp{font-family:var(--fdisp);letter-spacing:-.02em;line-height:1.05}
+.eyebrow{font-family:var(--fdisp);font-size:.72rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--teal)}
+.grad{background:linear-gradient(100deg,#fff 10%,var(--teal) 45%,var(--violet) 80%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.muted{color:var(--muted)}
+/* ---------- animated aurora background ---------- */
+.bg{position:fixed;inset:0;z-index:-2;overflow:hidden;background:radial-gradient(120% 80% at 50% -10%,#0c1830 0%,#05080f 55%)}
+.blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.55;mix-blend-mode:screen;animation:drift 22s ease-in-out infinite}
+.blob.a{width:46vw;height:46vw;left:-8vw;top:-6vw;background:radial-gradient(circle,#1b6f8c,transparent 65%)}
+.blob.b{width:42vw;height:42vw;right:-10vw;top:6vw;background:radial-gradient(circle,#5b46c9,transparent 65%);animation-delay:-7s}
+.blob.c{width:38vw;height:38vw;left:30vw;bottom:-14vw;background:radial-gradient(circle,#119c92,transparent 65%);animation-delay:-13s}
+@keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(4vw,3vh) scale(1.1)}66%{transform:translate(-3vw,2vh) scale(.95)}}
+.grid-tex{position:fixed;inset:0;z-index:-1;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:54px 54px;-webkit-mask:radial-gradient(120% 90% at 50% 0,#000 30%,transparent 80%);mask:radial-gradient(120% 90% at 50% 0,#000 30%,transparent 80%)}
+@media(prefers-reduced-motion:reduce){.blob{animation:none}}
+/* ---------- nav ---------- */
+nav{position:sticky;top:0;z-index:50;transition:background .3s,border-color .3s,backdrop-filter .3s;border-bottom:1px solid transparent}
+nav.scrolled{background:rgba(8,13,22,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:68px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--fdisp);font-weight:700;font-size:1.06rem}
+.brand img{width:32px;height:32px;border-radius:50%;background:#0b1626}
+.brand b{color:var(--gold)} .brand span{color:var(--teal)}
+.nav-links{display:flex;align-items:center;gap:28px;font-size:.9rem}
+.nav-links a{color:var(--muted);transition:color .2s}.nav-links a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--fdisp);font-weight:600;font-size:.9rem;border-radius:999px;padding:11px 20px;cursor:pointer;border:1px solid var(--line2);background:rgba(255,255,255,.04);color:var(--ink);transition:transform .15s,box-shadow .2s,background .2s,border-color .2s}
+.btn:hover{transform:translateY(-2px)}
+.btn.primary{background:linear-gradient(120deg,var(--teal),var(--teal2));color:#04121a;border:none;box-shadow:var(--glow-teal)}
+.btn.primary:hover{box-shadow:0 0 56px rgba(46,230,214,.55)}
+.btn.ghost:hover{border-color:var(--teal);box-shadow:var(--glow-teal)}
+@media(max-width:820px){.nav-links{display:none}}
+/* ---------- hero ---------- */
+.hero{padding:clamp(56px,11vw,128px) 0 64px;text-align:center;position:relative}
+.pill{display:inline-flex;align-items:center;gap:8px;font-size:.76rem;font-weight:600;color:var(--muted);border:1px solid var(--line);background:rgba(255,255,255,.03);border-radius:999px;padding:7px 15px}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+.hero h1{font-size:clamp(2.5rem,7vw,5rem);font-weight:700;margin:26px auto 0;max-width:15ch}
+.hero p.lead{font-size:clamp(1.02rem,2.1vw,1.3rem);color:var(--muted);max-width:60ch;margin:22px auto 0}
+.hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:34px}
+.hero-cta .btn{padding:14px 26px;font-size:1rem}
+.trust{display:flex;gap:10px 26px;justify-content:center;flex-wrap:wrap;margin-top:38px;font-size:.8rem;color:var(--dim)}
+.trust span{display:inline-flex;align-items:center;gap:7px}.trust span::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--teal)}
+/* floating robot */
+.robot{position:relative;width:clamp(180px,30vw,256px);margin:46px auto 0}
+.robot img{width:100%;display:block;border-radius:50%;animation:float 6s ease-in-out infinite;filter:drop-shadow(0 24px 60px rgba(46,230,214,.4))}
+.robot::after{content:"";position:absolute;inset:-14%;border-radius:50%;background:conic-gradient(from 0deg,transparent,rgba(46,230,214,.5),transparent 40%,rgba(139,123,255,.5),transparent 70%);animation:spin 9s linear infinite;z-index:-1;filter:blur(10px)}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ---------- sections ---------- */
+section{padding:clamp(56px,9vw,104px) 0;position:relative}
+.sec-head{max-width:62ch;margin-bottom:44px}
+.sec-head.center{margin-left:auto;margin-right:auto;text-align:center}
+.sec-head h2{font-size:clamp(1.8rem,4.5vw,3rem);font-weight:700;margin:14px 0 0}
+.sec-head p{color:var(--muted);font-size:1.05rem;margin-top:14px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:var(--r);padding:26px;transition:transform .25s,border-color .25s,box-shadow .25s}
+.card:hover{transform:translateY(-6px);border-color:var(--line2);box-shadow:0 24px 60px rgba(0,0,0,.45)}
+/* Ally feature split */
+.ally-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}
+@media(max-width:900px){.ally-grid{grid-template-columns:1fr;gap:30px}}
+.feat{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.feat:last-child{border:none}
+.feat .ic{flex:0 0 auto;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:1.1rem;background:rgba(46,230,214,.1);border:1px solid rgba(46,230,214,.25)}
+.feat h4{font-family:var(--fdisp);font-size:1rem;font-weight:600}
+.feat p{color:var(--muted);font-size:.9rem;margin-top:2px}
+/* chat demo */
+.chat{background:linear-gradient(180deg,#0b1422,#091020);border:1px solid var(--line2);border-radius:22px;padding:18px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.chat-top{display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.chat-top img{width:34px;height:34px;border-radius:50%}
+.chat-top b{font-family:var(--fdisp)}.chat-top .on{margin-left:auto;font-size:.7rem;color:var(--green);display:flex;align-items:center;gap:6px}
+.chat-top .on::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.msg{max-width:88%;padding:11px 14px;border-radius:14px;font-size:.9rem;margin:9px 0;line-height:1.5}
+.msg.u{margin-left:auto;background:#15302e;border:1px solid #1e5a52}
+.msg.a{background:#0f1d31;border:1px solid var(--line)}
+.msg.a .g{color:var(--red);font-weight:700}
+.msg .tag{display:inline-block;font-size:.64rem;font-weight:700;letter-spacing:.05em;color:var(--gold);border:1px solid rgba(231,184,78,.4);border-radius:6px;padding:1px 7px;margin-bottom:6px;text-transform:uppercase}
+/* two brains */
+.brains{display:grid;grid-template-columns:1fr auto 1fr;gap:24px;align-items:stretch}
+@media(max-width:760px){.brains{grid-template-columns:1fr}.brains .vs{display:none}}
+.brain{padding:30px}
+.brain .ic{font-size:2rem}
+.brain h3{font-size:1.4rem;margin:12px 0 6px}
+.brain .tagk{font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:999px;display:inline-block;margin-top:10px}
+.brain.ai{border-color:rgba(46,230,214,.3)}.brain.ai .tagk{color:var(--teal);background:rgba(46,230,214,.1)}
+.brain.md{border-color:rgba(231,184,78,.3)}.brain.md .tagk{color:var(--gold);background:rgba(231,184,78,.1)}
+.vs{display:grid;place-items:center;font-family:var(--fdisp);font-weight:700;color:var(--dim)}
+.vs span{width:46px;height:46px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center}
+/* lines */
+.lines{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+@media(max-width:900px){.lines{grid-template-columns:1fr}}
+.line{display:flex;flex-direction:column;position:relative;overflow:hidden}
+.line .lic{font-size:2.1rem}
+.line h3{font-size:1.35rem;margin:14px 0 6px}
+.line p{color:var(--muted);font-size:.92rem;flex:1}
+.line .meta{font-size:.78rem;color:var(--dim);margin:12px 0}
+.status{position:absolute;top:22px;right:22px;font-size:.64rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border-radius:999px}
+.status.live{color:#04140e;background:linear-gradient(120deg,var(--green),#2bbf76)}
+.status.ready{color:var(--gold);background:rgba(231,184,78,.12);border:1px solid rgba(231,184,78,.35)}
+.status.soon{color:var(--muted);background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.line .go{margin-top:16px;font-family:var(--fdisp);font-weight:600;font-size:.9rem;color:var(--teal);display:inline-flex;gap:7px;align-items:center;transition:gap .2s}
+.line:hover .go{gap:12px}
+.line.featured{border-color:rgba(46,230,214,.35);box-shadow:0 0 0 1px rgba(46,230,214,.12),0 30px 70px rgba(0,0,0,.45)}
+/* ladder */
+.ladder{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:760px){.ladder{grid-template-columns:1fr}}
+.tier{padding:28px}
+.tier .k{font-family:var(--fdisp);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.tier h3{font-size:1.5rem;margin:8px 0}
+.tier ul{list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:9px}
+.tier li{font-size:.92rem;color:var(--muted);display:flex;gap:10px}
+.tier li::before{content:"✓";color:var(--teal);font-weight:700}
+.tier.live{border-color:rgba(46,230,214,.3);background:linear-gradient(180deg,rgba(46,230,214,.06),rgba(255,255,255,.01))}
+.acrossbar{margin-top:22px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;padding:20px 26px;border:1px dashed var(--line2);border-radius:var(--r);background:rgba(231,184,78,.04)}
+.acrossbar b{font-family:var(--fdisp)}
+/* why strip */
+.why{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:820px){.why{grid-template-columns:1fr 1fr}}
+.why .w{padding:20px}.why .w .ic{font-size:1.4rem}.why .w h4{font-family:var(--fdisp);font-size:.98rem;margin:8px 0 4px}.why .w p{font-size:.82rem;color:var(--muted)}
+/* CTA band */
+.cta-band{text-align:center;border:1px solid var(--line2);border-radius:28px;padding:clamp(40px,7vw,72px) 24px;background:radial-gradient(120% 130% at 50% 0,rgba(46,230,214,.12),transparent 60%),linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01))}
+.cta-band h2{font-size:clamp(1.8rem,4.5vw,3rem);max-width:18ch;margin:10px auto 0}
+/* footer */
+footer{border-top:1px solid var(--line);padding:54px 0 40px;color:var(--muted);font-size:.86rem}
+.foot-grid{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap}
+.foot-grid a{color:var(--muted)}.foot-grid a:hover{color:var(--ink)}
+.foot-col h5{font-family:var(--fdisp);color:var(--ink);font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
+.foot-col a{display:block;padding:4px 0}
+.legal{margin-top:34px;padding-top:22px;border-top:1px solid var(--line);font-size:.76rem;color:var(--dim);line-height:1.7}
+/* reveal */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}
+</style></head>
+<body>
+<div class="bg"><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div></div>
+<div class="grid-tex"></div>
 
-<section><h2>The platform</h2><p class="sub">The IV/IM line is live now — the chairside operating system, not just a chatbot. (Sign in to use the gated tools; demo accounts on the login page.)</p>
-<div class="tools">
- <a class="tool" href="chairside.html"><span class="tier member">Platform</span><div class="ic">🪑</div><h3>Nurse Workstation</h3><p>Chairside command center — patient queue, 6-chair grid, live timers &amp; vitals alarms, the guardrail engine, and one-click GFE/consent + monitoring docs.</p></a>
- <a class="tool" href="chairside.html"><span class="tier member">Platform</span><div class="ic">🧪</div><h3>IV/IM Stack Builder</h3><p>Drag-and-drop a custom stack or load a template — live compatibility, ceilings, osmolarity, rate floors, drip calc, and an Ally review.</p></a>
- <a class="tool" href="iv-inventory.html"><span class="tier member">Platform</span><div class="ic">📦</div><h3>Inventory</h3><p>Your SKU · supplier · price · stock (generic clinical stays locked). CSV/JSON export to your practice-management software. No billing, ever.</p></a>
- <a class="tool" href="iv-calculator.html"><span class="tier free">Free</span><div class="ic">🧮</div><h3>IV Drip &amp; Dose Calculator</h3><p>Drip rate, time-from-rate, dose/concentration, osmolarity &amp; the rate-floor quick reference. Fast chairside utility.</p></a>
- <a class="tool" href="../ally/index.html"><span class="tier member">Platform</span><div class="ic">💬</div><h3>Ally — clinical AI</h3><p>The honest assistant across the wellness lines. States evidence grades, names the failed trials, never invents. No PHI.</p></a>
- <a class="tool" href="../protocols/library.html"><span class="tier member">Platform</span><div class="ic">📚</div><h3>Protocols</h3><p>Evidence-graded monographs with citations and the update radar — the locked clinical brain behind Ally and the builder.</p></a>
- <a class="tool" href="../protocols/regulatory-database.html"><span class="tier free">Free</span><div class="ic">⚖️</div><h3>Regulatory Database</h3><p>FDA classification + 503A/503B status for 30+ compounds, kept current. Your front door.</p></a>
- <a class="tool" href="verify-npi.html"><span class="tier free">Free</span><div class="ic">🆔</div><h3>Verify NPI</h3><p>Licensed-professional access checked against the live federal NPPES registry. Access only — never clinical scope.</p></a>
+<nav id="nav"><div class="wrap nav-in">
+  <a class="brand" href="#top"><img src="ally-avatar-64.png" alt="Ally"> Renuvia<b>MD</b>® <span>AllyOS</span></a>
+  <div class="nav-links">
+    <a href="#ally">Ally</a><a href="#lines">Lines of care</a><a href="#ladder">How it works</a><a href="#why">Why AllyOS</a>
+  </div>
+  <a class="btn primary" href="login.html">Enter AllyOS →</a>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+  <span class="pill reveal"><span class="dot"></span> Physician-curated · PHI-free · advisory clinical AI</span>
+  <h1 class="reveal d1">The honest clinical AI<br><span class="grad">your clinic runs on.</span></h1>
+  <p class="lead reveal d2">Meet <b style="color:var(--ink)">Ally</b> — the decision-support brain behind a full operating system for <b style="color:var(--ink)">IV / IM, peptides, and BHRT</b>. It states the evidence grade, names the failed trials, guards every build in real time, and <b style="color:var(--ink)">never invents a dose</b>.</p>
+  <div class="hero-cta reveal d3">
+    <a class="btn primary" href="login.html">Enter AllyOS</a>
+    <a class="btn ghost" href="#ally">Meet Ally ↓</a>
+  </div>
+  <div class="robot reveal d3"><img src="ally-avatar.png" alt="Ally — clinical AI assistant"></div>
+  <div class="trust reveal">
+    <span>Curated under Armando A. Falcon, MD</span><span>No PHI on our servers</span><span>No drug brokering</span><span>Advisory — your provider signs</span>
+  </div>
+</div></header>
+
+<!-- ALLY -->
+<section id="ally"><div class="wrap ally-grid">
+  <div class="reveal">
+    <span class="eyebrow">Meet Ally</span>
+    <h2 style="font-size:clamp(1.8rem,4.5vw,2.8rem);font-weight:700;margin-top:12px">The AI that won't bluff.</h2>
+    <p class="muted" style="margin:14px 0 22px;max-width:50ch">Most clinical chatbots sound confident and make things up. Ally is built on the opposite instinct — honesty as a feature. Same brain across every line of care.</p>
+    <div class="feat"><div class="ic">🎓</div><div><h4>States the grade, first</h4><p>Every answer leads with the evidence grade (A–D) and red / yellow / green status.</p></div></div>
+    <div class="feat"><div class="ic">🧪</div><div><h4>Names the failures</h4><p>When the trial was negative or the data is thin, it says so — out loud.</p></div></div>
+    <div class="feat"><div class="ic">🛡️</div><div><h4>Guards the build in real time</h4><p>Screens every IV bag against the patient's conditions — flags conflicts before they're hung.</p></div></div>
+    <div class="feat"><div class="ic">🚫</div><div><h4>Never invents</h4><p>No fabricated doses or citations, ever. If it isn't in the curated library, it says "VERIFY".</p></div></div>
+    <div class="feat"><div class="ic">🔒</div><div><h4>PHI-free by design</h4><p>Ally sees the clinical build — never the patient's name or chart.</p></div></div>
+  </div>
+  <div class="reveal d2">
+    <div class="chat">
+      <div class="chat-top"><img src="ally-avatar-64.png" alt="Ally"><b>Ally</b><span class="muted" style="font-size:.74rem">· clinical assistant</span><span class="on">online</span></div>
+      <div class="msg u">Can I add Vitamin C to chair 1? The patient is G6PD-deficient.</div>
+      <div class="msg a"><span class="tag">Grade A · safety</span><br><span class="g">🔴 No — hard stop.</span> High-dose IV Vitamin C can trigger acute hemolysis in G6PD deficiency. Avoid &gt; 2 g; the bench will block it. If a low dose is clinically intended, that's the prescriber's call to document.</div>
+      <div class="msg u">Is Niagen the same as IV NAD+?</div>
+      <div class="msg a">No. Niagen / NR is an NAD+ <b>precursor</b> — a different molecule from infused NAD+, with no proven peptide synergy. Evidence grade C–D (small studies). Needs a prescriber-signed standing order. <b>VERIFY</b> before relying on it.</div>
+    </div>
+    <p class="muted" style="font-size:.78rem;text-align:center;margin-top:14px">Illustrative. Ally answers from the physician-curated library — PHI-free.</p>
+  </div>
 </div></section>
 
-<section><h2>Membership ladder</h2><p class="sub">Two products: the platform you run your bar on, and us as your Medical Director. <a href="pricing.html" style="color:var(--teal)">See full pricing →</a></p>
-<div class="ladder">
- <div class="tg"><b>Free</b><div class="pr">$0</div><ul><li>Browse the clinical module</li><li>IV drip &amp; dose calculator</li><li>NPI / licensed access</li></ul></div>
- <div class="tg"><b>Platform</b><div class="pr">per location · BYO Medical Director</div><ul><li>+ Nurse station + builder</li><li>+ Inventory + real-time docs</li><li>+ Ally + unlimited nurse seats</li></ul></div>
- <div class="tg"><b>MD-of-Record</b><div class="pr">the moat · we are your MD</div><ul><li>+ RenuviaMD as Medical Director</li><li>+ Signed standing orders + GFE oversight</li><li>+ Genuine documented oversight</li></ul></div>
-</div>
-<div class="diffrow">
- <div class="d"><b>🩺 Genuine MD oversight</b> — a real Medical Director, not a matchmaker.</div>
- <div class="d"><b>🔒 PHI-free</b> — no patient data stored.</div>
- <div class="d"><b>🚫 No drug brokering</b> — software + oversight only.</div>
- <div class="d"><b>✅ Honest CDS</b> — grades, named failures, no fabrication.</div>
+<!-- TWO BRAINS -->
+<section><div class="wrap">
+  <div class="sec-head center reveal"><span class="eyebrow">The honest pairing</span><h2>Two brains for your clinic.</h2><p>Software supports the team in the moment. A human carries the responsibility. AllyOS never blurs the line.</p></div>
+  <div class="brains">
+    <div class="brain ai card reveal"><div class="ic">🤖</div><h3>Ally — the AI brain</h3><p class="muted">Decision-support across IV, peptides &amp; BHRT. Surfaces evidence, contraindications, gates, and emergencies — in real time, at the chair.</p><span class="tagk">Software · advisory · no liability</span></div>
+    <div class="vs reveal d1"><span>+</span></div>
+    <div class="brain md card reveal d2"><div class="ic">🩺</div><h3>Medical Director — the human brain</h3><p class="muted">A real physician of record who oversees, signs the standing orders, and carries the clinical responsibility. Ally never replaces the doctor.</p><span class="tagk">Human · responsible · oversees</span>
+      <div style="margin-top:16px"><a class="btn ghost" href="https://myfloridamedicaldirector.com" target="_blank" rel="noopener">Need an MD? → myfloridamedicaldirector.com</a></div></div>
+  </div>
 </div></section>
 
-</main>
-<footer><div class="wrap"><b>AllyOS by RenuviaMD® Compliance Division.</b> Advisory clinical decision-support for licensed providers — not medical/legal advice, and not a medical-director relationship except where contracted. &nbsp;·&nbsp; <a href="pricing.html" style="color:#bfe0dc">Pricing</a> &nbsp;·&nbsp; <a href="login.html" style="color:#bfe0dc">Sign in</a> &nbsp;·&nbsp; <a href="../privacy.html" style="color:#bfe0dc">Privacy</a> &nbsp;·&nbsp; <a href="../terms.html" style="color:#bfe0dc">Terms</a></div></footer>
-<script src="../disclaimer.js"></script>
+<!-- LINES -->
+<section id="lines"><div class="wrap">
+  <div class="sec-head reveal"><span class="eyebrow">Three lines of care</span><h2>License only the lines you run.</h2><p>Start with one. Add the others whenever you're ready — each is its own module, powered by the same Ally brain.</p></div>
+  <div class="lines">
+    <a class="card line reveal" href="../protocols/index.html">
+      <span class="status ready">Reference ready</span>
+      <div class="lic">🧬</div><h3>Advanced Peptides</h3>
+      <p>503A Rx, direct-to-patient. 30+ evidence-graded monographs, stacks &amp; interaction checks — BPC-157, GLP-1s, sermorelin, and more.</p>
+      <div class="meta">Library live · operating workflow in progress</div>
+      <span class="go">Explore the library →</span>
+    </a>
+    <a class="card line featured reveal d1" href="chairside.html">
+      <span class="status live">● Live</span>
+      <div class="lic">💧</div><h3>IV &amp; IM Infusion</h3>
+      <p>The full chairside operating system: build the bag → infuse with live alarms → tap-monitor → signed infusion note &amp; patient aftercare.</p>
+      <div class="meta">GFE → seat → infuse → monitor → note → discharge</div>
+      <span class="go">Open the chairside →</span>
+    </a>
+    <a class="card line reveal d2" href="login.html">
+      <span class="status soon">Coming</span>
+      <div class="lic">⚕️</div><h3>BHRT</h3>
+      <p>Bioidentical hormones for men &amp; women — dosing and longitudinal monitoring with the same honest, evidence-graded guardrails.</p>
+      <div class="meta">In design · join the early list</div>
+      <span class="go">Get notified →</span>
+    </a>
+  </div>
+</div></section>
+
+<!-- LADDER -->
+<section id="ladder"><div class="wrap">
+  <div class="sec-head center reveal"><span class="eyebrow">How you buy it</span><h2>Two ways into every line.</h2><p>Buy the knowledge, or run the whole operation on it. Move up whenever you want — no re-platforming.</p></div>
+  <div class="ladder">
+    <div class="card tier reveal"><span class="k">Entry · one-time</span><h3>Protocol Pack</h3><p class="muted" style="font-size:.92rem">The curated reference for a line — for clinics that bring their own MD and tools.</p>
+      <ul><li>Evidence-graded monographs &amp; stacks</li><li>Dosing, contraindications, citations</li><li>Unsigned templates your MD adapts</li><li>Yours to keep</li></ul></div>
+    <div class="card tier live reveal d1"><span class="k">Core · subscription</span><h3>AllyOS Live Module ✦</h3><p class="muted" style="font-size:.92rem">The protocols <b>plus Ally plus the workflows</b> — the operating system your clinic runs on.</p>
+      <ul><li>Everything in the Pack</li><li><b>Ally</b> — real-time decision-support</li><li>Chairside / Rx workflows + signed docs</li><li>Per location · per provider seat</li></ul></div>
+  </div>
+  <div class="acrossbar reveal"><div><b>Across every line:</b> <span class="muted">add RenuviaMD as your Medical Director of record.</span></div><a class="btn ghost" href="https://myfloridamedicaldirector.com" target="_blank" rel="noopener">myfloridamedicaldirector.com →</a></div>
+</div></section>
+
+<!-- WHY -->
+<section id="why"><div class="wrap">
+  <div class="sec-head center reveal"><span class="eyebrow">Why AllyOS</span><h2>Built on trust, not hype.</h2></div>
+  <div class="why">
+    <div class="card w reveal"><div class="ic">✅</div><h4>Honest CDS</h4><p>Grades, named failures, zero fabrication. "VERIFY" when unsure.</p></div>
+    <div class="card w reveal d1"><div class="ic">🔒</div><h4>PHI-free</h4><p>Patient data stays on-device. Nothing patient-identifying touches our servers.</p></div>
+    <div class="card w reveal d2"><div class="ic">🚫</div><h4>No drug brokering</h4><p>Software + oversight only. Sourcing is the clinic's choice — pharmacy-agnostic.</p></div>
+    <div class="card w reveal d3"><div class="ic">🧩</div><h4>Modular</h4><p>One line or all three. Advisory by default; enforces only where we're your MD.</p></div>
+  </div>
+</div></section>
+
+<!-- CTA -->
+<section><div class="wrap">
+  <div class="cta-band reveal">
+    <span class="eyebrow">Ready when you are</span>
+    <h2 class="grad">Start with one line.<br>Add the rest when you're ready.</h2>
+    <div class="hero-cta" style="margin-top:28px">
+      <a class="btn primary" href="login.html">Enter AllyOS</a>
+      <a class="btn ghost" href="chairside.html">See the IV chairside live</a>
+    </div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-col" style="max-width:300px">
+      <a class="brand" href="#top" style="margin-bottom:12px"><img src="ally-avatar-64.png" alt="Ally"> Renuvia<b>MD</b>® <span>AllyOS</span></a>
+      <p class="muted" style="font-size:.84rem">The honest clinical-AI operating system for wellness clinics. By RenuviaMD® PLLC · AllyOS Compliance Division.</p>
+    </div>
+    <div class="foot-col"><h5>Product</h5><a href="#ally">Ally</a><a href="chairside.html">IV Chairside</a><a href="../protocols/index.html">Peptides library</a><a href="iv-calculator.html">Drip calculator</a><a href="verify-npi.html">Verify NPI</a></div>
+    <div class="foot-col"><h5>Company</h5><a href="#why">Why AllyOS</a><a href="pricing.html">Pricing</a><a href="https://myfloridamedicaldirector.com" target="_blank" rel="noopener">Medical Director service ↗</a><a href="login.html">Sign in</a></div>
+    <div class="foot-col"><h5>Legal</h5><a href="../privacy.html">Privacy</a><a href="../terms.html">Terms</a></div>
+  </div>
+  <div class="legal">
+    © <span id="yr"></span> RenuviaMD® PLLC. AllyOS is advisory clinical decision-support for licensed providers — not medical or legal advice, not a prescription, and not a medical-director relationship except where separately contracted. Ally supports the care team; the treating provider and the clinic's Medical Director own every clinical decision and signature. PHI is never stored on AllyOS servers.
+  </div>
+</div></footer>
+
+<script>
+document.getElementById('yr').textContent=new Date().getFullYear();
+var nav=document.getElementById('nav');
+addEventListener('scroll',function(){nav.classList.toggle('scrolled',scrollY>20);},{passive:true});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+</script>
 </body></html>
