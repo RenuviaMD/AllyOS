@@ -225,7 +225,7 @@
   <div class="r"><span class="pill green" id="opstat">● OPERATIONAL</span><span id="who"></span>
     <label title="Where RenuviaMD is the Medical Director, gates enforce absolutely."><input type="checkbox" id="mdMode"> MD-of-record</label>
     <label title="Demo only: shows a ⏩ button to fast-forward an infusion to the 5-min / 2-min / end alarms so you can preview them."><input type="checkbox" id="demoMode"> Demo</label>
-    <a href="#" onclick="refOpen();return false">📖 Reference</a><a href="#" onclick="openFeedback();return false" style="color:var(--gold)">💬 Feedback</a><a href="iv-inventory.html">Inventory</a><a href="iv-calculator.html">Calc</a><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
+    <a href="#" onclick="refOpen();return false">📖 Reference</a><a href="#" onclick="openFeedback();return false" style="color:var(--gold)">💬 Feedback</a><a href="audit.html">📋 Audit</a><a href="iv-inventory.html">Inventory</a><a href="iv-calculator.html">Calc</a><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
 </div>
 
 <!-- lead capture (Netlify Forms — submissions appear in the Netlify dashboard, exportable) -->
@@ -685,7 +685,7 @@ function composeNote(i){var c=CHAIRS[i],p=c.patient,df=15,g=gfeState(p);
   var aeLine=aes.length?('<b style="color:#b3261e">Adverse event(s) logged — FORM-04 required.</b> '+aes.map(function(m){return esc(m.note);}).join(' | ')):'No adverse event. Tolerated well.';
   var sig=c.noteSigned;
   return '<div class="notepaper" id="noteDoc">'+
-    '<div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h2>IV Infusion Note</h2><div class="nmeta">RenuviaMD® · AllyOS · FORM-IV-NOTE-01 · '+nowStamp()+'</div></div><div style="font-size:.66rem;color:#5b6b72;text-align:right">Adult wellness IV<br>Internal clinical record</div></div>'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h2>IV Infusion Note</h2><div class="nmeta">RenuviaMD® · AllyOS · FORM-IV-NOTE-01 · '+nowStamp()+(c.encounterId?' · <b>Encounter '+esc(c.encounterId)+'</b>':'')+'</div></div><div style="font-size:.66rem;color:#5b6b72;text-align:right">Adult wellness IV<br>Internal clinical record</div></div>'+
     '<div class="nsec"><div class="nrow"><span class="nk">Patient</span><span>'+esc(dispName(p))+' · '+(ageOf(p)!=null?ageOf(p)+'y':'—')+' '+esc(p.sex||'')+(p.dob?(' · DOB '+esc(fmtDob(p.dob))):'')+'</span></div>'+
       '<div class="nrow"><span class="nk">Chair / clinician</span><span>Chair '+(i+1)+' · '+esc((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||'Provider')+'</span></div></div>'+
     '<div class="nsec"><h3>Why — indication &amp; eligibility</h3><div class="nrow"><span class="nk">Indication</span><span>'+why+'</span></div>'+
@@ -715,7 +715,22 @@ function composeNote(i){var c=CHAIRS[i],p=c.patient,df=15,g=gfeState(p);
     '<div class="noprint" style="display:flex;gap:8px;margin-top:12px">'+(sig?'<button class="btn neon" style="flex:1" onclick="window.print()">🖨 Print / Save PDF</button><button class="btn ghost" style="flex:1" onclick="freeChair('+i+')">Close chart &amp; free chair</button>':'<button class="btn ghost" style="flex:1" onclick="closeModal()">Back</button>')+'</div>';
 }
 function openInfusionNote(i){showModal(composeNote(i));}
-function signNote(i){var c=CHAIRS[i];var prov=val('noteProv').trim()||((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||'Provider');c.noteSigned={provider:prov,stamp:nowStamp()};openInfusionNote(i);}
+function signNote(i){var c=CHAIRS[i];var prov=val('noteProv').trim()||((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||'Provider');c.noteSigned={provider:prov,stamp:nowStamp()};if(!c.encounterId)logEncounter(i);openInfusionNote(i);}
+// ---------- AUDIT LOG (de-identified encounter registry — for MD audit, PHI-free) ----------
+function loadAudit(){try{return JSON.parse(localStorage.getItem('allyos_audit_v1')||'[]');}catch(e){return [];}}
+function saveAudit(a){try{localStorage.setItem('allyos_audit_v1',JSON.stringify(a));}catch(e){}}
+function nextEncounterId(){var ses=(window.AllyOSAuth&&AllyOSAuth.session())||{};
+  var code=((ses.clinic||'CLINIC').replace(/[^A-Za-z]/g,'').slice(0,5)||'CLINIC').toUpperCase();
+  var d=new Date(),ym=''+d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2);
+  var n=loadAudit().filter(function(r){return r.ym===ym;}).length+1;
+  return {id:code+'-'+ym+'-'+('000'+n).slice(-4),ym:ym};}
+function logEncounter(i){var c=CHAIRS[i],p=c.patient,g=gfeState(p),s=stackByCode(p.proto),eid=nextEncounterId();c.encounterId=eid.id;
+  var rec={id:eid.id,ym:eid.ym,date:fmtDob(todayISO()),ts:(c.noteSigned&&c.noteSigned.stamp)||nowStamp(),
+    protocol:c.protoLabel+(s?' — '+s.title:''),base:c.base,vol:c.vol,time:c.time,items:(c.bag||[]).length,
+    gfe:(g.k==='done'?'current':g.label),consent:!!p.consent,screen:true,scope:true,
+    override:c.override||'',ae:(c.monitoring||[]).some(function(m){return m.ae;}),
+    provider:(c.noteSigned&&c.noteSigned.provider)||'',outcome:(c.dTol?'stable':'see note')};
+  var a=loadAudit();a.push(rec);saveAudit(a);}
 // patient take-home aftercare handout (FORM-03) — printed before they leave
 function composeAftercare(i){var c=CHAIRS[i],p=c.patient,a=REF.aftercare||{},s=stackByCode(p.proto);
   function sec(title,arr,color){return '<div class="nsec"><h3'+(color?' style="color:'+color+'"':'')+'>'+esc(title)+'</h3>'+(arr||[]).map(function(x){return '<div style="padding:2px 0">• '+esc(x)+'</div>';}).join('')+'</div>';}

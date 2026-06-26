@@ -1,0 +1,80 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Practice Audit — AllyOS · RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
+<link rel="stylesheet" href="allyos-theme.css">
+<script src="allyos-auth.js"></script>
+<style>
+.wrap{max-width:1080px;margin:0 auto;padding:18px}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px}
+.top h1{font-family:var(--fdisp);font-size:1.4rem}.top h1 b{color:var(--gold)}
+.top a{color:var(--teal);text-decoration:none;font-size:.85rem}
+.sub{color:var(--muted);font-size:.84rem;margin-bottom:16px}
+.ctrls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.ctrls select,.ctrls input{background:#0e1f29;border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--ink);font-family:inherit;font-size:.86rem}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+@media(max-width:760px){.stats{grid-template-columns:1fr 1fr}}
+.stat{background:linear-gradient(180deg,#10202f,#0b1622);border:1px solid var(--line);border-radius:12px;padding:14px}
+.stat .lbl{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.stat .num{font-family:var(--fdisp);font-size:1.7rem;margin-top:3px}
+.stat.green .num{color:var(--green)}.stat.amber .num{color:var(--gold)}.stat.red .num{color:var(--red)}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;border-bottom:1px solid var(--line2)}
+td{padding:9px 10px;border-bottom:1px solid var(--line)}
+tr:hover td{background:rgba(255,255,255,.02)}
+.eid{font-family:var(--fdisp);color:var(--teal);font-weight:600}
+.tick{color:var(--green)}.cross{color:var(--red)}.ov{color:var(--gold)}
+.disc{font-size:.72rem;color:var(--muted);margin-top:18px;line-height:1.6}
+@media print{body{background:#fff!important;color:#111!important}.noprint{display:none!important}.stat,table,th,td{color:#111!important;border-color:#ccc!important;background:#fff!important}.eid{color:#06c!important}}
+</style></head>
+<body class="allyos"><div class="wrap">
+  <div class="top">
+    <h1>Practice Audit · <b>AllyOS</b></h1>
+    <div class="noprint"><a href="chairside.html">← Chairside</a> &nbsp; <a href="#" onclick="exportCsv();return false">⬇ CSV</a> &nbsp; <a href="#" onclick="window.print();return false">🖨 Print</a></div>
+  </div>
+  <div class="sub" id="sub">Medical-Director review of the practice — de-identified encounters. <b>PHI-free:</b> no patient names or DOB. Each encounter carries an ID; the clinic maps the ID to its own chart.</div>
+  <div class="ctrls noprint">
+    <label class="muted" style="font-size:.8rem">Month</label>
+    <select id="month" onchange="render()"></select>
+    <span class="muted" style="font-size:.78rem" id="who"></span>
+  </div>
+  <div class="stats" id="stats"></div>
+  <div style="overflow:auto"><table id="tbl"></table></div>
+  <div class="disc">Audit purpose only. AllyOS records de-identified encounter metadata (date, protocol, compliance gates, overrides, adverse events, signing provider, outcome) to support Medical-Director oversight. It holds no PHI; patient identity stays in the clinic's own records, linked by Encounter ID. Advisory decision-support — the treating provider and the clinic's Medical Director own every clinical decision and signature. © <span id="yr"></span> RenuviaMD® PLLC.</div>
+</div>
+<script>
+document.getElementById('yr').textContent=new Date().getFullYear();
+if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin']);var s=AllyOSAuth.session();if(s)document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+(s.clinic||'');}
+function loadAudit(){try{return JSON.parse(localStorage.getItem('allyos_audit_v1')||'[]');}catch(e){return [];}}
+function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function months(a){var m={};a.forEach(function(r){m[r.ym]=1;});var ks=Object.keys(m).sort().reverse();return ks;}
+function monthLabel(ym){var y=ym.slice(0,4),mo=+ym.slice(4);return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][mo-1]+' '+y;}
+function fill(){var a=loadAudit();var ks=months(a);var sel=document.getElementById('month');
+  if(!ks.length){sel.innerHTML='<option>No encounters yet</option>';return;}
+  sel.innerHTML=ks.map(function(k){return '<option value="'+k+'">'+monthLabel(k)+'</option>';}).join('');render();}
+function rows(){var a=loadAudit();var ym=document.getElementById('month').value;return a.filter(function(r){return r.ym===ym;});}
+function render(){var r=rows();
+  var gfeOk=r.filter(function(x){return x.gfe==='current';}).length;
+  var ovs=r.filter(function(x){return x.override;}).length;
+  var aes=r.filter(function(x){return x.ae;}).length;
+  document.getElementById('stats').innerHTML=
+    stat('','Encounters',r.length)+
+    stat('green','GFE current',r.length?Math.round(gfeOk/r.length*100)+'%':'—')+
+    stat('green','Consented',r.length?Math.round(r.filter(function(x){return x.consent;}).length/r.length*100)+'%':'—')+
+    stat('amber','Overrides',ovs)+
+    stat(aes?'red':'green','Adverse events',aes);
+  var th='<tr><th>Encounter ID</th><th>Date</th><th>Protocol</th><th>Bag</th><th>GFE</th><th>Consent</th><th>Override</th><th>AE</th><th>Provider</th><th>Outcome</th></tr>';
+  var body=r.length?r.map(function(x){return '<tr><td class="eid">'+esc(x.id)+'</td><td>'+esc(x.date)+'</td><td>'+esc(x.protocol)+'</td><td class="muted">'+esc(x.base)+' '+x.vol+'mL/'+x.time+'m · '+x.items+'</td>'+
+    '<td>'+(x.gfe==='current'?'<span class="tick">✓</span>':'<span class="cross">'+esc(x.gfe)+'</span>')+'</td>'+
+    '<td>'+(x.consent?'<span class="tick">✓</span>':'<span class="cross">✗</span>')+'</td>'+
+    '<td>'+(x.override?'<span class="ov" title="'+esc(x.override)+'">⚠ yes</span>':'—')+'</td>'+
+    '<td>'+(x.ae?'<span class="cross">⚠ FORM-04</span>':'—')+'</td>'+
+    '<td>'+esc(x.provider)+'</td><td>'+esc(x.outcome)+'</td></tr>';}).join(''):'<tr><td colspan="10" class="muted" style="padding:20px;text-align:center">No encounters in this month.</td></tr>';
+  document.getElementById('tbl').innerHTML=th+body;}
+function stat(cls,lbl,n){return '<div class="stat '+cls+'"><div class="lbl">'+lbl+'</div><div class="num">'+n+'</div></div>';}
+function exportCsv(){var r=rows();var cols=['id','date','protocol','base','vol','time','items','gfe','consent','override','ae','provider','outcome'];
+  var csv=cols.join(',')+'\n'+r.map(function(x){return cols.map(function(c){return '"'+(''+(x[c]==null?'':x[c])).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var b=new Blob([csv],{type:'text/csv'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='allyos-audit-'+document.getElementById('month').value+'.csv';a.click();URL.revokeObjectURL(u);}
+fill();
+</script>
+</body></html>
