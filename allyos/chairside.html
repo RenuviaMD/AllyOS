@@ -301,7 +301,7 @@ Promise.all([
   MENU=(d.ingredients||[]).concat(DRAFTS.ingredients||[]);
   try{var iv=JSON.parse(localStorage.getItem('allyos_iv_inventory_v1')||'{}');INV=iv.inv||{};}catch(e){}
   if(window.AllyOSAuth){AllyOSAuth.guard(['nurse','provider','admin']);var s=AllyOSAuth.session();if(s){document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+((AllyOSAuth.ROLES[s.role]||{}).label||s.role);document.getElementById('mdMode').checked=!!s.mdOfRecord;
-    if(s.sandbox){var db=document.getElementById('demobar');if(db){db.style.display='flex';db.innerHTML='<span>🧪 <b>DEMO MODE</b> — sample patients · nothing is saved to a real chart · <b>not for real patient care</b></span><span><a href="#" onclick="tourOpen();return false">▶ replay guide</a> &nbsp;·&nbsp; <a href="login.html">Sign in / set up your clinic →</a></span>';}
+    if(s.sandbox){var db=document.getElementById('demobar');if(db){db.style.display='flex';db.innerHTML='<span>🧪 <b>DEMO MODE</b> — sample patients · nothing is saved to a real chart · <b>not for real patient care</b></span><span><a href="#" onclick="tourOpen();return false">▶ replay guide</a> &nbsp;·&nbsp; <a href="login.html">Sign in</a> &nbsp;·&nbsp; <a href="onboard.html" style="color:var(--gold)">Set up your clinic →</a></span>';}
       IS_DEMO=true;var dm=document.getElementById('demoMode');if(dm)dm.checked=true; // alarms playable in demo
       try{if(!sessionStorage.getItem('allyos_demo_tour'))setTimeout(showTour,700);}catch(e){setTimeout(showTour,700);}
     }}}
