@@ -51,6 +51,13 @@ window.AllyOSAuth = (function () {
     return { session: s };
   }
 
+  // ---- DEMO / sandbox session (no signup) — clearly fake, never a real chart ----
+  function startDemo() {
+    var s = { userId: 'demo', email: 'demo', name: 'Demo', credential: 'Provider', role: 'provider',
+      clinicId: 'demo-sandbox', clinic: 'Demo Sandbox', mdOfRecord: false, demo: true, sandbox: true };
+    setSession(s); return s;
+  }
+
   function can(perm) { var s = session(); if (!s) return false; var r = ROLES[s.role]; return !!(r && r.can.indexOf(perm) >= 0); }
   function hasRole(roles) { var s = session(); return !!(s && roles.indexOf(s.role) >= 0); }
 
@@ -60,6 +67,8 @@ window.AllyOSAuth = (function () {
   // guard a page: call at top of each protected page with the roles allowed.
   function guard(roles) {
     var s = session();
+    // no-signup demo: ?demo=1 on any guarded page starts a sandbox session
+    if (!s && /[?&]demo=1/i.test(location.search)) { s = startDemo(); }
     var page = location.pathname.split('/').pop() || '';
     if (!s) { location.href = 'login.html?next=' + encodeURIComponent(page); return false; }
     if (roles && roles.indexOf(s.role) < 0) {
@@ -76,7 +85,7 @@ window.AllyOSAuth = (function () {
 
   function esc(x) { return ('' + (x == null ? '' : x)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
-  return { ROLES: ROLES, session: session, signIn: signIn, signOut: signOut, can: can, hasRole: hasRole, guard: guard, greeting: greeting };
+  return { ROLES: ROLES, session: session, signIn: signIn, signOut: signOut, can: can, hasRole: hasRole, guard: guard, greeting: greeting, startDemo: startDemo };
 
   /* =====================================================================
    * SUPABASE swap (makes the role boundary REAL — server-enforced)

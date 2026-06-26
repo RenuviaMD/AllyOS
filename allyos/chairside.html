@@ -218,6 +218,8 @@
     <a href="#" onclick="refOpen();return false">📖 Reference</a><a href="iv-inventory.html">Inventory</a><a href="iv-calculator.html">Calc</a><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
 </div>
 
+<div id="demobar" style="display:none;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;background:linear-gradient(90deg,#2a2310,#1a1606);border-bottom:1px solid #5a4a22;color:var(--gold);font-size:.78rem;padding:8px 16px;text-align:center"></div>
+
 <div class="board">
   <!-- LEFT · PATIENT (only what the patient brings to the chair) -->
   <div>
@@ -281,7 +283,8 @@ Promise.all([
   MOD=d; REF=arr[1]||{}; DRAFTS=arr[2]||{ingredients:[],stacks:[]}; SCREEN=arr[3]||{ingredients:{}};
   MENU=(d.ingredients||[]).concat(DRAFTS.ingredients||[]);
   try{var iv=JSON.parse(localStorage.getItem('allyos_iv_inventory_v1')||'{}');INV=iv.inv||{};}catch(e){}
-  if(window.AllyOSAuth){AllyOSAuth.guard(['nurse','provider','admin']);var s=AllyOSAuth.session();if(s){document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+((AllyOSAuth.ROLES[s.role]||{}).label||s.role);document.getElementById('mdMode').checked=!!s.mdOfRecord;}}
+  if(window.AllyOSAuth){AllyOSAuth.guard(['nurse','provider','admin']);var s=AllyOSAuth.session();if(s){document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+((AllyOSAuth.ROLES[s.role]||{}).label||s.role);document.getElementById('mdMode').checked=!!s.mdOfRecord;
+    if(s.sandbox){var db=document.getElementById('demobar');if(db){db.style.display='flex';db.innerHTML='<span>🧪 <b>DEMO MODE</b> — sample patients · nothing is saved to a real chart · <b>not for real patient care</b></span><a href="login.html">Sign in / get your clinic set up →</a>';}}}}
   document.getElementById('disc').innerHTML='AllyOS Chairside · advisory clinical decision-support · <b>PHI stays on this device only</b> (no server, no analytics) · no drug brokering · gates enforce in MD-of-record mode. © 2026 RenuviaMD® Compliance Division.';
   load(); fillProto(); renderEmergency(); renderQueue(); renderChairs(); renderPrep(); renderDetail();
 }).catch(function(e){document.getElementById('chairs').innerHTML='<div class="flag crit">Could not load IV module ('+e.message+')</div>';});
