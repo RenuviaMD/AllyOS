@@ -1,0 +1,132 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Practice Dashboard — AllyOS · RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
+<link rel="stylesheet" href="allyos-theme.css">
+<script src="allyos-auth.js"></script>
+<style>
+.wrap{max-width:1080px;margin:0 auto;padding:22px}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px}
+.top h1{font-family:var(--fdisp);font-size:1.4rem}.top h1 b{color:var(--gold)}
+.top .r{display:flex;gap:14px;align-items:center;font-size:.82rem;color:var(--muted)}.top .r a{color:var(--teal);text-decoration:none}
+.sub{color:var(--muted);font-size:.84rem;margin-bottom:18px}
+.sec{font-family:var(--fdisp);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin:18px 0 10px}
+.lines{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:780px){.lines{grid-template-columns:1fr}}
+.line{position:relative;background:linear-gradient(180deg,#10202f,#0b1622);border:1px solid var(--line);border-radius:16px;padding:20px;cursor:pointer;transition:border-color .15s,transform .1s}
+.line.active:hover{border-color:var(--teal);transform:translateY(-2px)}
+.line .ic{font-size:1.8rem}
+.line h3{font-family:var(--fdisp);font-size:1.05rem;margin:8px 0 4px}
+.line p{font-size:.82rem;color:var(--muted);line-height:1.5}
+.line .chip{position:absolute;top:14px;right:14px;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:3px 9px;border-radius:20px}
+.chip.live{background:#0e2a1d;color:var(--green);border:1px solid #1c5238}
+.chip.draft{background:#2a230e;color:var(--gold);border:1px solid #4a3c18}
+.chip.locked{background:#1a2733;color:var(--dim);border:1px solid var(--line2)}
+.line.locked{opacity:.62;cursor:not-allowed;filter:grayscale(.4)}
+.line.locked:hover{border-color:var(--gold)}
+.line.locked .lockrow{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:.74rem;color:var(--gold)}
+.tools{display:flex;gap:10px;flex-wrap:wrap}
+.tool{display:flex;align-items:center;gap:9px;background:#10202f;border:1px solid var(--line);border-radius:11px;padding:11px 15px;color:var(--ink);text-decoration:none;font-size:.86rem}
+.tool:hover{border-color:var(--teal)}.tool .ti{font-size:1.1rem}
+.disc{font-size:.72rem;color:var(--muted);margin-top:22px;line-height:1.6}
+/* popup card */
+.ov{position:fixed;inset:0;background:#04080fcc;display:none;align-items:center;justify-content:center;padding:20px;z-index:60}
+.ov.show{display:flex}
+.card{background:var(--bg2);border:1px solid var(--line2);border-radius:16px;max-width:380px;width:100%;padding:22px;text-align:center}
+.card .ic{font-size:2.2rem}
+.card h3{font-family:var(--fdisp);font-size:1.15rem;margin:8px 0 4px}
+.card p{font-size:.84rem;color:var(--muted);line-height:1.55;margin-bottom:6px}
+.card .ev{font-size:.72rem;color:var(--dim);margin:8px 0 14px}
+.card .btn{display:block;width:100%;font-family:var(--fdisp);font-weight:600;border:none;border-radius:999px;padding:13px;margin-top:8px;cursor:pointer;text-decoration:none;font-size:.95rem}
+.card .btn.go{background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a}
+.card .btn.ghost{background:transparent;border:1px solid var(--line2);color:var(--ink)}
+.card .price{font-size:.78rem;color:var(--gold);margin-bottom:4px}
+</style></head>
+<body class="allyos"><div class="wrap">
+  <div class="top">
+    <h1>Practice Dashboard · <b>AllyOS</b></h1>
+    <div class="r"><span id="who"></span><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
+  </div>
+  <div class="sub" id="clinicLine">Your clinic's lines of care. Active lines open their station; locked lines can be added any time.</div>
+
+  <div class="sec">Lines of care</div>
+  <div class="lines" id="lines"></div>
+
+  <div class="sec">Tools</div>
+  <div class="tools" id="tools"></div>
+
+  <div class="disc">Each line is a module you turn on per practice — pay only for what you run. AllyOS is advisory decision-support; the provider owns every clinical decision and signature. <b>PHI stays on-device.</b> © <span id="yr"></span> RenuviaMD® PLLC.</div>
+</div>
+
+<div class="ov" id="ov"><div class="card" id="card"></div></div>
+
+<script>
+document.getElementById('yr').textContent=new Date().getFullYear();
+var ses=null;
+if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin','nurse']);ses=AllyOSAuth.session();
+  if(ses){document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+(ses.clinic||'');
+    document.getElementById('clinicLine').innerHTML='<b style="color:var(--ink)">'+esc(ses.clinic||'Your clinic')+'</b> — active lines open their station; locked lines can be added any time.';}}
+function role(){return ses?ses.role:'nurse';}
+
+// which lines this clinic has turned on (later: Supabase clinic_modules). Demo default: IV only.
+var LKEY='allyos_clinic_lines_v1';
+function lines(){try{return Object.assign({iv:true,peptides:false,bhrt:false},JSON.parse(localStorage.getItem(LKEY)||'{}'));}catch(e){return {iv:true,peptides:false,bhrt:false};}}
+function setLine(k,v){var l=lines();l[k]=v;try{localStorage.setItem(LKEY,JSON.stringify(l));}catch(e){}render();}
+
+var LINES=[
+ {k:'iv',ic:'💧',name:'IV & IM Infusion',tool:'nursing-station.html',status:'live',price:'$199/mo',
+  short:'Nurse-run infusion under standing orders.',
+  what:'Build the bag → pre-infusion gates → infuse with live alarms → tap-monitor → signed infusion note + patient aftercare. Live ingredient screening against the patient’s conditions.'},
+ {k:'peptides',ic:'🧬',name:'Advanced Peptides',tool:'workspace.html',status:'live',price:'$199/mo',
+  short:'Provider-prescribed, evidence-graded.',
+  what:'The evidence library + contraindication/interaction screening + the evidence-grade→consent-tier logic + documentation. We don’t sell or recommend peptides — we provide the structure and safety.'},
+ {k:'bhrt',ic:'⚕️',name:'BHRT · Women’s Hormone Wellness',tool:'#',status:'draft',price:'$199/mo',
+  short:'Provider CDS for menopause wellness.',
+  what:'Red-flag referral screen → candidacy → FDA-approved-before-compounded pathway → monitoring. Provider-facing decision support; the provider prescribes. (Module in final review.)'}
+];
+
+function render(){
+  var on=lines();
+  document.getElementById('lines').innerHTML=LINES.map(function(L){
+    var active=!!on[L.k] && L.status!=='draft' || (!!on[L.k]&&L.status==='live');
+    active=!!on[L.k];
+    var chip=active?(L.status==='draft'?'<span class="chip draft">Draft</span>':'<span class="chip live">Active</span>')
+                   :'<span class="chip locked">Locked</span>';
+    return '<div class="line '+(active?'active':'locked')+'" onclick="lineClick(\''+L.k+'\')">'+chip+
+      '<div class="ic">'+L.ic+'</div><h3>'+esc(L.name)+'</h3><p>'+esc(L.short)+'</p>'+
+      (active?'':'<div class="lockrow">🔒 Add this line</div>')+'</div>';
+  }).join('');
+  // tools by role
+  var T=[];
+  T.push({t:'GFE Dashboard',i:'🩺',href:'gfe.html',roles:['provider','admin']});
+  T.push({t:'Practice Audit',i:'📋',href:'audit.html',roles:['provider','admin']});
+  T.push({t:'Team Seats',i:'👥',href:'admin-seats.html',roles:['provider','admin']});
+  T.push({t:'Authoring',i:'✚',href:'authoring.html',roles:['provider','admin']});
+  T.push({t:'Inventory',i:'📦',href:'iv-inventory.html',roles:['provider','admin','nurse']});
+  T.push({t:'Calculator',i:'🧮',href:'iv-calculator.html',roles:['provider','admin','nurse']});
+  T.push({t:'Admin Console',i:'⚙️',href:'admin.html',roles:['admin']});
+  document.getElementById('tools').innerHTML=T.filter(function(x){return x.roles.indexOf(role())>=0;})
+    .map(function(x){return '<a class="tool" href="'+x.href+'"><span class="ti">'+x.i+'</span>'+esc(x.t)+'</a>';}).join('');
+}
+function lineClick(k){var on=lines();var L=byKey(k);
+  if(on[k]){ if(L.tool&&L.tool!=='#'){location.href=L.tool;} else {popup(k,true);} return; }
+  popup(k,false);
+}
+function byKey(k){for(var i=0;i<LINES.length;i++)if(LINES[i].k===k)return LINES[i];return null;}
+function popup(k,active){var L=byKey(k);
+  document.getElementById('card').innerHTML='<div class="ic">'+L.ic+'</div><h3>'+esc(L.name)+'</h3>'+
+    '<p>'+esc(L.what)+'</p><div class="ev">Evidence-graded · independent · PHI-free. The provider owns the decision.</div>'+
+    (active
+      ? '<a class="btn go" href="'+L.tool+'">Open '+esc(L.name)+'</a>'
+      : '<div class="price">Live Module · '+esc(L.price)+' per clinic'+(L.status==='draft'?' · in final review':'')+'</div>'+
+        '<a class="btn go" href="onboard.html">➕ Add this line</a>'+
+        '<button class="btn ghost" onclick="setLine(\''+k+'\',true);closeOv()">Activate in this demo</button>')+
+    '<button class="btn ghost" onclick="closeOv()">Close</button>';
+  document.getElementById('ov').classList.add('show');
+}
+function closeOv(){document.getElementById('ov').classList.remove('show');}
+document.getElementById('ov').addEventListener('click',function(e){if(e.target===this)closeOv();});
+function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+render();
+</script>
+</body></html>

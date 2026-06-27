@@ -61,7 +61,7 @@ button:hover{filter:brightness(1.06)}
 <script>
 function fill(email){ document.getElementById('email').value=email; document.getElementById('password').value='demo'; }
 function nextPage(){ var m=location.search.match(/[?&]next=([^&]+)/); return m?decodeURIComponent(m[1]):'nursing-station.html'; }
-function landing(role){ if(role==='admin')return 'admin.html'; if(role==='provider')return 'iv-builder.html'; return 'nursing-station.html'; }
+function landing(role){ return 'dashboard.html'; } // the practice hub routes onward by line + role
 function doLogin(e){
   e.preventDefault();
   var r=AllyOSAuth.signIn(document.getElementById('email').value, document.getElementById('password').value);
