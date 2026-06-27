@@ -61,6 +61,8 @@ exports.handler = async (event) => {
         "content-type": "application/json",
         "x-api-key": key,
         "anthropic-version": "2023-06-01",
+        // enable native PDF document input (scanned chart packets)
+        "anthropic-beta": "pdfs-2024-09-25",
       },
       body: JSON.stringify({
         model: "claude-opus-4-8",
