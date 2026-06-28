@@ -5,6 +5,10 @@ on:
   schedule:
     - cron: '0 4 * * *'      # 04:00 UTC daily
   workflow_dispatch: {}       # manual trigger from the Actions tab (the admin "Run now" button)
+  push:                       # CI gate — also run on every push that touches AllyOS
+    paths: ['allyos/**', 'protocols/**', 'netlify/**', 'scripts/**', '.github/workflows/daily-audit.yml']
+  pull_request:
+    paths: ['allyos/**', 'protocols/**', 'netlify/**', 'scripts/**']
 
 permissions:
   contents: read
@@ -15,7 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate data + reconstitution math
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Audit codebase (JSON · inline JS · functions · calc · links · refs)
         run: python3 scripts/health-check.py
       - name: Upload status (read by the Master Console)
         if: always()

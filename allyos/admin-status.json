@@ -1,15 +1,22 @@
 {
-  "date": "2026-06-23T20:00:39.180434Z",
+  "date": "2026-06-28T03:50:26.432893Z",
   "json_valid": true,
+  "js_ok": true,
   "calc_ok": true,
-  "files_checked": [
-    "pricing.json",
-    "protocols/protocols.json",
-    "protocols/peptide-packs.json",
-    "protocols/intake-schema.json",
-    "protocols/contraindications.json",
-    "protocols/protocols-detail.json"
-  ],
+  "files_checked": 41,
+  "checks": {
+    "json": 18,
+    "js": 23
+  },
   "errors": [],
+  "warnings": [
+    "UNRESOLVED INGREDIENT: Vitamin C in stack IV-01",
+    "UNRESOLVED INGREDIENT: Vitamin C in stack IV-04",
+    "UNRESOLVED INGREDIENT: Vitamin C in stack IV-05",
+    "UNRESOLVED INGREDIENT: Vitamin C in stack IV-06",
+    "UNRESOLVED INGREDIENT: Vitamin C in stack IV-07",
+    "UNRESOLVED INGREDIENT: Vitamin C in stack IV-08",
+    "UNRESOLVED INGREDIENT: Vitamin C in stack IV-09"
+  ],
   "agent": "health-check"
 }

@@ -80,7 +80,9 @@
       '#allyhelp-modal details{margin-top:10px;border:1px dashed #243446;border-radius:9px}' +
       '#allyhelp-modal summary{cursor:pointer;padding:9px 12px;font-size:.8rem;color:#2ee6d6}' +
       '#allyhelp-modal pre{margin:0;padding:0 12px 12px;font-size:.7rem;color:#9fc;white-space:pre-wrap;word-break:break-word;max-height:200px;overflow:auto}' +
-      '#allyhelp-modal .ok{color:#46e08f;font-size:.86rem;text-align:center;padding:8px 0}';
+      '#allyhelp-modal .ok{color:#46e08f;font-size:.86rem;text-align:center;padding:8px 0}' +
+      '#allyhelp-banner{position:fixed;left:0;right:0;top:0;z-index:9997;background:#2a1f08;color:#f0d08a;border-bottom:1px solid #5a4a22;padding:9px 16px;font:600 13px/-apple-system,Segoe UI,Arial,sans-serif;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap}' +
+      '#allyhelp-banner a{color:#2ee6d6}#allyhelp-banner button{background:none;border:none;color:#90a3b6;font-size:1.1rem;cursor:pointer}';
     document.head.appendChild(c);
   }
 
@@ -140,12 +142,34 @@
     var r = document.getElementById('allyhelp-result'); if (r) r.innerHTML = '<div class="ok">Diagnostic copied — paste it into your chat with the MD.</div>';
   }
 
+  // at-app-open health check (client-side, deterministic, runs every load)
+  function preflight() {
+    var issues = [];
+    if (!storageWritable()) issues.push("Private/incognito mode — your work won't be saved. Reopen AllyOS in a normal window.");
+    if (!navigator.onLine) issues.push("No internet — Ally/sync are off (the station still works offline).");
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i); if (k.indexOf('allyos') !== 0) continue;
+        try { JSON.parse(localStorage.getItem(k)); } catch (e) { issues.push("Saved data looks corrupt (" + k + ") — Restore from a backup on the Dashboard."); }
+      }
+    } catch (e) {}
+    if (issues.length) banner(issues);
+  }
+  function banner(issues) {
+    if (document.getElementById('allyhelp-banner')) return;
+    var b = document.createElement('div'); b.id = 'allyhelp-banner';
+    b.innerHTML = '<span>⚠ ' + esc(issues[0]) + (issues.length > 1 ? ' (+' + (issues.length - 1) + ' more)' : '') + '</span>' +
+      '<a href="#" onclick="AllyHelp.open();return false">Get help</a><button title="Dismiss" onclick="this.parentNode.remove()">×</button>';
+    document.body.insertBefore(b, document.body.firstChild);
+  }
+
   function init() {
     css();
     var btn = document.createElement('button'); btn.id = 'allyhelp-btn'; btn.textContent = '🆘 Get help'; btn.onclick = open;
     var ov = document.createElement('div'); ov.id = 'allyhelp-ov'; ov.innerHTML = '<div id="allyhelp-modal"></div>';
     ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
     document.body.appendChild(btn); document.body.appendChild(ov);
+    try { preflight(); } catch (e) {}
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 
