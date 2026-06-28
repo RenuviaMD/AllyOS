@@ -1,5 +1,5 @@
 {
-  "date": "2026-06-28T03:57:19.686425Z",
+  "date": "2026-06-28T04:01:10.928271Z",
   "json_valid": true,
   "js_ok": true,
   "calc_ok": true,
@@ -9,14 +9,6 @@
     "js": 23
   },
   "errors": [],
-  "warnings": [
-    "UNRESOLVED INGREDIENT: Vitamin C in stack IV-01",
-    "UNRESOLVED INGREDIENT: Vitamin C in stack IV-04",
-    "UNRESOLVED INGREDIENT: Vitamin C in stack IV-05",
-    "UNRESOLVED INGREDIENT: Vitamin C in stack IV-06",
-    "UNRESOLVED INGREDIENT: Vitamin C in stack IV-07",
-    "UNRESOLVED INGREDIENT: Vitamin C in stack IV-08",
-    "UNRESOLVED INGREDIENT: Vitamin C in stack IV-09"
-  ],
+  "warnings": [],
   "agent": "health-check"
 }

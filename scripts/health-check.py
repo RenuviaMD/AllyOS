@@ -90,7 +90,11 @@ for fp in walk("allyos", ext=".html"):
 
 # ---- 6 · protocol components resolve to a known ingredient (warning) ----
 def names_from(mod):
-    return set((i.get("name", "") or "").lower() for i in (mod.get("ingredients") or []))
+    s = set()
+    for i in (mod.get("ingredients") or []):
+        if i.get("name"): s.add(i["name"].lower())
+        for a in (i.get("aliases") or []): s.add(a.lower())
+    return s
 try:
     iv = json.load(open(os.path.join(ROOT, "protocols", "iv-module.json"), encoding="utf-8"))
     ing = names_from(iv)
