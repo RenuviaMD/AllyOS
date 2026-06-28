@@ -1,0 +1,85 @@
+{
+  "meta": {
+    "id": "audit-wellness-module",
+    "title": "AuditPro — Wellness inspection mode (drop-in config)",
+    "version": "1.0",
+    "purpose": "Defines the WELLNESS inspection mode for AuditPro, parallel to the existing BILLING mode (F.S. 400.9935). Same 4-stage wizard (Upload → Auto-select → Per-chart AI review → Report); this config swaps the statute/billing content for wellness-clinical content. Drop into AHCAAuditPro and toggle billing ↔ wellness.",
+    "source": "RenuviaMD AllyOS — iv-module.json (IV risk), BHRT v1.5 engine §14 (BHRT risk), peptide-packs.json (peptide grade/tier). PHI-free config; the audit handles charts under the MD's own authority."
+  },
+
+  "stage1_session": {
+    "fields": ["audit_date", "clinic_name", "ahca_or_license", "medical_director", "period", "lines_active"],
+    "input": "the de-identified encounter list — AUTO from AllyOS chairside (Export audit for MD), or manual CSV for paper clinics",
+    "csv_columns": ["visit_id", "date_of_service", "provider", "service_type", "line", "protocol", "key_ingredients", "vit_c_grams", "nad_mg", "mg_and_ca_same_bag", "glutathione_route", "intake_complete", "consent_signed", "gfe_valid", "pre_infusion_checklist", "vitals_pre_post", "mid_vitals_if_over_60min", "monitoring_documented", "aftercare_given", "adverse_event", "ae_severity", "md_notified_if_incident"],
+    "summary": ["total_encounters", "by_line", "by_protocol", "risk_distribution", "AE_count", "suspended_count"]
+  },
+
+  "md_compliance_checklist": [
+    "Valid GFE on file for each patient (within 12-month window), provider-signed",
+    "Signed standing orders / collaborative protocol current",
+    "Emergency cart stocked + response cards (CARD-A / CARD-V / CARD-VC) posted",
+    "During-infusion monitoring policy (FORM-05) in use",
+    "Informed consent process documented",
+    "Adverse-event / FORM-04 protocol established; MD-notification pathway",
+    "Aftercare instructions provided to patients (FORM-03)",
+    "Provider licenses active; scope-of-practice respected (RN executes under authorization)"
+  ],
+
+  "stage2_risk_stratification": {
+    "score_scale": "1–5  ·  5 = mandatory MD review · 4 = high · 3 = moderate · 2 = routine · 1 = low",
+    "sample_rule": "100% of score-5 (mandatory) charts + highest-risk remaining to the monthly sample size; a MIX across active lines (e.g. 3 IV / 3 Peptides / 3 BHRT).",
+    "lines": {
+      "iv": {
+        "status": "live — risk model complete (iv-module.json gates/ceilings/screen)",
+        "mandatory_5": ["adverse event", "infusion suspended/stopped early", "protocol override"],
+        "high_4": ["IV NAD+", "high-dose Vitamin C (>= 7.5 g)", "Magnesium + Calcium together", "Glutathione with asthma/COPD", "missing GFE or consent gate"],
+        "moderate_3": ["any comorbidity flag", "documentation gap (no monitoring / missing pre or post vitals)"],
+        "required_docs": ["Intake / Consent / GFE (FORM-INTAKE-GFE-01)", "Pre-Infusion Verify + IV Monitoring (FORM-05)"]
+      },
+      "bhrt": {
+        "status": "ready to port from bhrt-module.json (v1.5 §14)",
+        "mandatory_5": ["adverse event / EMS-ED referral", "postmenopausal or unexplained bleeding", "estrogen-sensitive cancer history not cleared", "thrombotic/neuro/CV event", "testosterone non-HSDD or supraphysiologic / hematocrit concern", "compounded product without documented rationale", "RN/staff listed as prescriber", "missing provider order"],
+        "high_4": ["new hormone or testosterone start", "compounded product", "dose change", "abnormal lab needing review", "missed follow-up"],
+        "moderate_3": ["stable active therapy with recent follow-up", "routine lab review", "documentation correction"],
+        "required_docs": ["Intake + red-flag screen + consent", "Provider CDS note / order + monitoring plan"]
+      },
+      "peptides": {
+        "status": "ready to port from peptide-packs.json (grade→tier) + peptide-interactions.json",
+        "mandatory_5": ["adverse event", "research-chemical / unverifiable source", "RN/staff as prescriber", "GLP-1 red flag (MTC/MEN2, pancreatitis) not screened", "missing provider order"],
+        "high_4": ["new start", "compounded / off-label peptide (consent tier 2–3)", "low-evidence / research-grade (tier 3–4)", "interaction flagged", "source/compounding concern"],
+        "moderate_3": ["stable continuation", "documentation correction"],
+        "required_docs": ["Evaluation + red-flag screen + consent (tier-appropriate)", "Prescription / order + source documentation + monitoring plan"]
+      }
+    }
+  },
+
+  "stage3_chart_review": {
+    "dual_documents": "per chart, the two documents above for that line (GFE/Intake + Monitoring for IV; intake+screen + order/monitoring for BHRT/Peptides)",
+    "ai_inspection": "AllyOS inspect.js — drop the chart, the AI returns ONLY de-identified compliance fields (GFE / consent / pre+post vitals / monitoring / aftercare / AE / suspended / override + risk signals); never patient identifiers",
+    "verdict_per_chart": ["pass", "deficiency", "correction"],
+    "elements_checked": ["GFE valid & on file", "consent signed", "pre-infusion vitals", "during-infusion monitoring", "post-infusion vitals", "aftercare given", "adverse-event handling / FORM-04 + MD notified", "protocol within ceilings / no unauthorized mixing", "scope of practice (RN executes under authorization)"]
+  },
+
+  "stage4_report": {
+    "type": "SOFT wellness MD Oversight Report (NOT the F.S. 400.9935 statutory package)",
+    "sections": [
+      "Clinic Scope (name / period / lines / operating model / record location / MD role)",
+      "Monthly Encounter Review (total visits · charts pulled · mandatory-review · charts reviewed · selection logic)",
+      "Reviewed-Chart Compliance Matrix (per chart: GFE/consent/pre-vitals/monitoring/post-vitals/aftercare/AE → Y/N/—)",
+      "Risk-Signal Summary",
+      "Incidents & Adverse Events",
+      "Suspended / Stopped-Early Infusions",
+      "Deficiencies (with severity: Critical / Major / Minor)",
+      "Corrective Actions (what / who / due)",
+      "Monthly MD Conclusion (status: Compliant / Compliant-with-corrections / Needs-follow-up / Hold · MD sign-off date · temporary packet-deletion date ~30 days)"
+    ],
+    "output": "preview → download PDF → sign in Adobe → send to clinic for the compliance binder"
+  },
+
+  "integration_notes": {
+    "input_auto": "AllyOS clinics: Export audit (for MD) = the Stage-1 list; Export charts for MD (by Encounter ID) = the Stage-3 documents.",
+    "input_manual": "Paper clinics: emailed CSV (Stage 1) + scanned chart packets (Stage 3) — same wizard.",
+    "where": "This is the WELLNESS mode for AHCAAuditPro. Reuse the existing network dashboard, the 4-stage wizard, Reports/Financial/Documents shell; switch content by mode (billing ↔ wellness).",
+    "phi": "AuditPro handles PHI under the Medical Director's own authority (oversight / healthcare operations) — no BAA required for the MD. AllyOS (the clinic product) stays PHI-free."
+  }
+}
