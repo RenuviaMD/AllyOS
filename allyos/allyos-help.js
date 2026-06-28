@@ -6,10 +6,10 @@
  * safe derived counts) — never localStorage values, which on the chairside hold
  * patient names. So the MD can see "is it just them?" without any PHI.
  *
- * Live video for the few PHI cases goes through doxy.me (HIPAA). Set the room via
- *   <meta name="allyos-doxy" content="https://doxy.me/your-room">
- * Support requests POST to the Netlify form "allyos-support" (registered by a
- * hidden static form on dashboard.html). No PHI leaves the device otherwise.
+ * Scope: app/technical support only (PHI-free). Clinical/patient contact is a
+ * separate channel (Ally + the emergency cards + your MD-of-record line) — not
+ * this button. Support requests POST to the Netlify form "allyos-support"
+ * (registered by a hidden static form on dashboard.html). No PHI leaves the device.
  */
 (function () {
   var ERRORS = [];
@@ -17,7 +17,6 @@
   window.addEventListener('unhandledrejection', function (e) { push('promise', (e.reason && e.reason.message) || e.reason); });
   function push(t, m) { ERRORS.push(t + ': ' + String(m || '').slice(0, 140)); if (ERRORS.length > 8) ERRORS.shift(); }
 
-  function doxyRoom() { var m = document.querySelector('meta[name="allyos-doxy"]'); return (m && m.content) || 'https://doxy.me'; }
   function ses() { return (window.AllyOSAuth && AllyOSAuth.session()) || {}; }
 
   function storageWritable() { try { localStorage.setItem('_allyos_t', '1'); localStorage.removeItem('_allyos_t'); return true; } catch (e) { return false; } }
@@ -77,7 +76,6 @@
       '#allyhelp-modal textarea{width:100%;background:#0e1f29;border:1px solid #243446;border-radius:9px;padding:10px;color:#eaf1f6;font-family:inherit;font-size:.9rem;min-height:80px}' +
       '#allyhelp-modal .btn{display:block;width:100%;border:none;border-radius:999px;padding:12px;margin-top:9px;cursor:pointer;font-weight:600;font-size:.92rem;text-decoration:none;text-align:center}' +
       '#allyhelp-modal .btn.go{background:linear-gradient(120deg,#2ee6d6,#19b9c9);color:#04121a}' +
-      '#allyhelp-modal .btn.doxy{background:#13243a;color:#7fd3ff;border:1px solid #2a4763}' +
       '#allyhelp-modal .btn.ghost{background:transparent;border:1px solid #243446;color:#eaf1f6}' +
       '#allyhelp-modal details{margin-top:10px;border:1px dashed #243446;border-radius:9px}' +
       '#allyhelp-modal summary{cursor:pointer;padding:9px 12px;font-size:.8rem;color:#2ee6d6}' +
@@ -97,7 +95,6 @@
       '<div class="sub">Tell your Medical Director what\'s happening. We attach a <b>PHI-free</b> device/app diagnostic — no patient names or data.</div>' +
       '<textarea id="allyhelp-msg" placeholder="e.g. Chair 2 timer froze and won\'t discharge"></textarea>' +
       '<button class="btn go" onclick="AllyHelp.send()">Send to your Medical Director</button>' +
-      '<a class="btn doxy" href="' + esc(doxyRoom()) + '" target="_blank" rel="noopener">📹 Start live video (doxy.me) — for patient-specific issues</a>' +
       '<button class="btn ghost" onclick="AllyHelp.copy()">⧉ Copy diagnostic</button>' +
       '<details><summary>What we send (PHI-free) — review</summary><pre id="allyhelp-snap">' + esc(snapStr) + '</pre></details>' +
       '<div id="allyhelp-result"></div>';
