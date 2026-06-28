@@ -1,7 +1,8 @@
 {
   "meta": {
     "id": "audit-wellness-module",
-    "title": "AuditPro — Wellness inspection mode (drop-in config)",
+    "title": "AllyAudit — wellness inspection (drop-in config for AuditPro's wellness mode)",
+    "product": "AllyAudit — the Medical Director's wellness IV/IM/peptide/BHRT oversight tool (sibling to AHCA AuditPro billing). Part of the Ally family: AllyOS (clinic, PHI-free) + AllyAudit (MD oversight).",
     "version": "1.0",
     "purpose": "Defines the WELLNESS inspection mode for AuditPro, parallel to the existing BILLING mode (F.S. 400.9935). Same 4-stage wizard (Upload → Auto-select → Per-chart AI review → Report); this config swaps the statute/billing content for wellness-clinical content. Drop into AHCAAuditPro and toggle billing ↔ wellness.",
     "source": "RenuviaMD AllyOS — iv-module.json (IV risk), BHRT v1.5 engine §14 (BHRT risk), peptide-packs.json (peptide grade/tier). PHI-free config; the audit handles charts under the MD's own authority."

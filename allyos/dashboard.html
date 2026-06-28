@@ -107,7 +107,7 @@ function render(){
   T.push({t:'Export charts for MD',i:'📑',roles:['provider','admin','nurse'],iv:true,fn:'openChartExport()'}); // signed GFE+note for the MD's selected Encounter IDs
   T.push({t:'Backup & Restore',i:'💾',roles:['provider','admin'],fn:'openBackup()'});
   T.push({t:'Admin Console',i:'⚙️',href:'admin.html',roles:['admin']});
-  T.push({t:'MD Audit Cockpit',i:'📋',href:'md-audit.html',roles:['provider','admin'],md:true}); // MD-of-record only — every clinic you govern
+  T.push({t:'AllyAudit Cockpit',i:'📋',href:'md-audit.html',roles:['provider','admin'],md:true}); // MD-of-record only — every clinic you govern
   document.getElementById('tools').innerHTML=T.filter(function(x){
     if(x.iv && !on.iv) return false;
     if(x.md && !(ses && ses.mdAudit)) return false;
