@@ -1,10 +1,10 @@
 {
   "meta": {
     "id": "audit-wellness-module",
-    "title": "AllyAuditPro — wellness inspection (drop-in config for AuditPro's wellness mode)",
-    "product": "AllyAuditPro — the Medical Director's wellness IV/IM/peptide/BHRT oversight tool (sibling to AHCA AuditPro billing). Part of the Ally family: AllyOS (clinic, PHI-free) + AllyAuditPro (MD oversight).",
+    "title": "AllyAuditPro — wellness inspection config (standalone MD audit tool)",
+    "product": "AllyAuditPro — a standalone Medical-Director tool for auditing non-ACHA cash-pay wellness clinics across IV/IM, peptide, and BHRT lines. Its own app. Reads de-identified encounter data exported from AllyOS clinics.",
     "version": "1.0",
-    "purpose": "Defines the WELLNESS inspection mode for AuditPro, parallel to the existing BILLING mode (F.S. 400.9935). Same 4-stage wizard (Upload → Auto-select → Per-chart AI review → Report); this config swaps the statute/billing content for wellness-clinical content. Drop into AHCAAuditPro and toggle billing ↔ wellness.",
+    "purpose": "Defines the wellness inspection for AllyAuditPro: a 4-stage MD audit (Upload → Auto-select by risk → Per-chart AI review → Soft oversight report). Standalone — not a mode of any other product.",
     "source": "RenuviaMD AllyOS — iv-module.json (IV risk), BHRT v1.5 engine §14 (BHRT risk), peptide-packs.json (peptide grade/tier). PHI-free config; the audit handles charts under the MD's own authority."
   },
 
@@ -80,7 +80,7 @@
   "integration_notes": {
     "input_auto": "AllyOS clinics: Export audit (for MD) = the Stage-1 list; Export charts for MD (by Encounter ID) = the Stage-3 documents.",
     "input_manual": "Paper clinics: emailed CSV (Stage 1) + scanned chart packets (Stage 3) — same wizard.",
-    "where": "This is the WELLNESS mode for AHCAAuditPro. Reuse the existing network dashboard, the 4-stage wizard, Reports/Financial/Documents shell; switch content by mode (billing ↔ wellness).",
-    "phi": "AuditPro handles PHI under the Medical Director's own authority (oversight / healthcare operations) — no BAA required for the MD. AllyOS (the clinic product) stays PHI-free."
+    "where": "AllyAuditPro is its own standalone app — its own clinic-network dashboard, 4-stage audit wizard, and report builder. It is not a mode of any other tool.",
+    "phi": "AllyAuditPro handles PHI under the Medical Director's own authority (oversight / healthcare operations) — no BAA required for the MD. AllyOS (the clinic product) stays PHI-free."
   }
 }
