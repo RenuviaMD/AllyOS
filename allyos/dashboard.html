@@ -45,7 +45,7 @@
 <body class="allyos"><div class="wrap">
   <div class="top">
     <h1>Practice Dashboard · <b>AllyOS</b></h1>
-    <div class="r"><span id="who"></span><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
+    <div class="r"><span id="cloud" style="font-size:.72rem;margin-right:10px"></span><span id="who"></span><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
   </div>
   <div class="sub" id="clinicLine">Your clinic's lines of care. Active lines open their station; locked lines can be added any time.</div>
 
@@ -80,9 +80,9 @@ var LINES=[
  {k:'peptides',ic:'🧬',name:'Advanced Peptides',tool:'workspace.html',status:'live',price:'$199/mo',
   short:'Provider-prescribed, evidence-graded.',
   what:'The evidence library + contraindication/interaction screening + the evidence-grade→consent-tier logic + documentation. We don’t sell or recommend peptides — we provide the structure and safety.'},
- {k:'bhrt',ic:'⚕️',name:'BHRT · Women’s Hormone Wellness',tool:'#',status:'draft',price:'$199/mo',
+ {k:'bhrt',ic:'⚕️',name:'BHRT · Women’s Hormone Wellness',tool:'bhrt.html',status:'live',price:'$199/mo',
   short:'Provider CDS for menopause wellness.',
-  what:'Red-flag referral screen → candidacy → FDA-approved-before-compounded pathway → monitoring. Provider-facing decision support; the provider prescribes. (Module in final review.)'}
+  what:'Red-flag referral screen → candidacy → FDA-approved-before-compounded pathway → monitoring. Provider-facing decision support; the provider prescribes.'}
 ];
 
 function render(){
@@ -223,5 +223,18 @@ render();
   <input name="clinic"><input name="role"><input name="name"><input name="page"><input name="browser">
   <textarea name="message"></textarea><textarea name="diagnostic"></textarea><textarea name="triage"></textarea>
 </form>
+<script src="supabase-client.js"></script>
+<script>
+// cloud status badge — additive, fail-soft
+(function(){ if(!window.AllyOSCloud)return;
+  var el=document.getElementById('cloud'); if(!el)return;
+  AllyOSCloud.ready.then(function(ok){ if(!ok)return;
+    AllyOSCloud.user().then(function(u){
+      if(u){ el.innerHTML='☁ <b style="color:var(--green,#2bd49a)">'+(u.email||'cloud')+'</b> <a href="#" onclick="AllyOSCloud.signOut().then(function(){location.reload();});return false" style="color:var(--muted)">(sign out cloud)</a>'; }
+      else { el.innerHTML='<a href="login.html" style="color:var(--teal,#28c2b8)">☁ Cloud sign-in</a>'; }
+    });
+  });
+})();
+</script>
 <script src="allyos-help.js"></script>
 </body></html>

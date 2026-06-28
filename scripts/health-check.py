@@ -49,7 +49,7 @@ def node_check(fp):
     except Exception as e:
         return False, str(e)
 
-js_targets = walk("allyos", ext=".html") + walk("netlify", ext=".js")
+js_targets = walk("allyos", ext=".html") + walk("allyos", ext=".js") + walk("netlify", ext=".js") + walk("scripts", ext=".js")
 js_ok = True
 for fp in js_targets:
     ok, out = node_check(fp)
