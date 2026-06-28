@@ -103,9 +103,10 @@ function render(){
   T.push({t:'Authoring',i:'✚',href:'authoring.html',roles:['provider','admin']});
   T.push({t:'Inventory',i:'📦',href:'iv-inventory.html',roles:['provider','admin','nurse'],iv:true});
   T.push({t:'Calculator',i:'🧮',href:'iv-calculator.html',roles:['provider','admin','nurse'],iv:true});
+  T.push({t:'Export audit (for MD)',i:'📤',roles:['provider','admin','nurse'],iv:true,fn:'exportAuditForMD()'}); // clinic sends its de-identified audit to its MD
   T.push({t:'Backup & Restore',i:'💾',roles:['provider','admin'],fn:'openBackup()'});
   T.push({t:'Admin Console',i:'⚙️',href:'admin.html',roles:['admin']});
-  T.push({t:'MD Oversight Audit',i:'📋',href:'audit.html',roles:['provider','admin'],md:true}); // MD-of-record only — not a clinic feature
+  T.push({t:'MD Audit Cockpit',i:'📋',href:'md-audit.html',roles:['provider','admin'],md:true}); // MD-of-record only — every clinic you govern
   document.getElementById('tools').innerHTML=T.filter(function(x){
     if(x.iv && !on.iv) return false;
     if(x.md && !(ses && ses.mdAudit)) return false;
@@ -148,6 +149,19 @@ function exportBackup(){
   var payload={app:'AllyOS',exported:new Date().toISOString(),clinic:(ses&&ses.clinic)||'',keys:Object.keys(data).length,data:data};
   var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='allyos-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href);
+}
+// clinic → MD: export this device's de-identified audit log for the Medical Director to import
+function exportAuditForMD(){
+  var data=[],denom={};
+  try{data=JSON.parse(localStorage.getItem('allyos_audit_v1')||'[]');}catch(e){}
+  try{denom=JSON.parse(localStorage.getItem('allyos_audit_denom_v1')||'{}');}catch(e){}
+  if(!data.length){alert('No audit encounters recorded on this device yet — sign infusion notes first.');return;}
+  var clinic=(ses&&ses.clinic)||'clinic';
+  var payload={app:'AllyOS',type:'audit-export',clinic:clinic,exported:new Date().toISOString(),encounters:data.length,denom:denom,data:data};
+  var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='allyos-audit-'+clinic.replace(/[^A-Za-z0-9]/g,'').toLowerCase()+'-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(a.href);
 }
 function importBackup(file){if(!file)return;var r=new FileReader();
   r.onload=function(){try{var j=JSON.parse(r.result);var d=j.data||j;

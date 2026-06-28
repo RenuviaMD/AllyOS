@@ -73,8 +73,8 @@ body.reporting>.wrap{display:none}
 </style></head>
 <body class="allyos"><div class="wrap">
   <div class="top">
-    <h1>Practice Audit · <b>AllyOS</b></h1>
-    <div class="noprint"><a href="chairside.html">← Chairside</a> &nbsp; <a href="#" onclick="exportCsv();return false">⬇ CSV</a> &nbsp; <a href="#" onclick="window.print();return false">🖨 Print</a></div>
+    <h1>Practice Audit · <b id="clinicTitle">AllyOS</b></h1>
+    <div class="noprint"><a href="md-audit.html">🏥 All clinics</a> &nbsp; <a href="#" onclick="exportCsv();return false">⬇ CSV</a> &nbsp; <a href="#" onclick="window.print();return false">🖨 Print</a></div>
   </div>
   <div class="sub">Medical-Director risk-based review. <b>PHI-free</b> — no names/DOB. Each encounter gets a <b>1–5 risk score</b>: <b>5 = mandatory review</b> (adverse event, suspended infusion, override), 4 = high-risk ingredient or missing gate, 3 = comorbidity/doc gap. The monthly sample pulls <b>100% of score-5 charts + the highest-risk remaining to reach 5</b>. Each encounter carries an ID; the clinic maps the ID to its own chart to verify GFE / consent / monitoring.</div>
   <div class="ctrls noprint">
@@ -97,14 +97,20 @@ document.getElementById('yr').textContent=new Date().getFullYear();
 if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin']);var s=AllyOSAuth.session();
   // MD-of-record's private oversight tool — not a clinic feature. Block clinic staff even by direct URL.
   if(s&&!s.mdAudit){document.documentElement.innerHTML='<body style="font-family:-apple-system,Segoe UI,Arial,sans-serif;background:#05080f;color:#eaf1f6;display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center;padding:24px"><div><h2>Medical-Director tool</h2><p style="color:#90a3b6;max-width:46ch">The oversight audit is the Medical Director\'s private workspace, not a clinic feature. Ask your Medical Director for your monthly oversight report.</p><p style="margin-top:14px"><a style="color:#2ee6d6" href="dashboard.html">← Dashboard</a></p></div></body>';}
-  else if(s)document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+(s.clinic||'');}
+  else if(s){document.getElementById('who').textContent=AllyOSAuth.greeting();var ct=document.getElementById('clinicTitle');if(ct)ct.textContent=clinicName()||'AllyOS';}}
 var VIEW='all';
-function load(){try{return JSON.parse(localStorage.getItem('allyos_audit_v1')||'[]');}catch(e){return [];}}
-function save(a){try{localStorage.setItem('allyos_audit_v1',JSON.stringify(a));}catch(e){}}
+// multi-clinic: the MD cockpit sets an "active clinic"; each clinic's de-identified
+// audit lives under its own key so one MD can audit many clinics from one device.
+function activeClinic(){try{return JSON.parse(localStorage.getItem('allyos_active_clinic')||'null');}catch(e){return null;}}
+function auditKey(){var ac=activeClinic();return ac&&ac.id?('allyos_audit::'+ac.id):'allyos_audit_v1';}
+function denomKey(){var ac=activeClinic();return ac&&ac.id?('allyos_audit_denom::'+ac.id):'allyos_audit_denom_v1';}
+function clinicName(){var ac=activeClinic();if(ac&&ac.name)return ac.name;var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};return s.clinic||'';}
+function load(){try{return JSON.parse(localStorage.getItem(auditKey())||'[]');}catch(e){return [];}}
+function save(a){try{localStorage.setItem(auditKey(),JSON.stringify(a));}catch(e){}}
 // per-month denominator (total visits that month) — for sampled paper-chart audits
-function loadDenom(){try{return JSON.parse(localStorage.getItem('allyos_audit_denom_v1')||'{}');}catch(e){return {};}}
+function loadDenom(){try{return JSON.parse(localStorage.getItem(denomKey())||'{}');}catch(e){return {};}}
 function denomFor(y){var d=loadDenom();return d[y]?+d[y]:0;}
-function setDenom(){var y=ym();if(!y)return;var d=loadDenom();var v=parseInt(document.getElementById('denom').value);if(v>0)d[y]=v;else delete d[y];try{localStorage.setItem('allyos_audit_denom_v1',JSON.stringify(d));}catch(e){}render();}
+function setDenom(){var y=ym();if(!y)return;var d=loadDenom();var v=parseInt(document.getElementById('denom').value);if(v>0)d[y]=v;else delete d[y];try{localStorage.setItem(denomKey(),JSON.stringify(d));}catch(e){}render();}
 function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function months(a){var m={};a.forEach(function(r){m[r.ym]=1;});return Object.keys(m).sort().reverse();}
 function monthLabel(ym){return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][(+ym.slice(4))-1]+' '+ym.slice(0,4);}
@@ -238,7 +244,7 @@ function composeReport(){
 
   // 1. Clinic scope
   H+='<h3>1 · Clinic Scope</h3><div class="meta">'+
-    '<div><span>Clinic</span> <b>'+esc(ses.clinic||'________________________')+'</b></div>'+
+    '<div><span>Clinic</span> <b>'+esc(clinicName()||'________________________')+'</b></div>'+
     '<div><span>Review period</span> <b>'+esc(lbl)+'</b></div>'+
     '<div><span>Service avenue</span> <b>'+avenue+'</b></div>'+
     '<div><span>Operating model</span> <b>'+model+'</b></div>'+
@@ -331,7 +337,7 @@ function hideReport(){document.getElementById('report').style.display='none';doc
 
 // ---------- MANUAL ENTRY (paper-chart clinics) — de-identified, no PHI ----------
 function nextManualId(){var ses=(window.AllyOSAuth&&AllyOSAuth.session())||{};
-  var code=((ses.clinic||'CLINIC').replace(/[^A-Za-z]/g,'').slice(0,5)||'CLINIC').toUpperCase();
+  var code=((clinicName()||'CLINIC').replace(/[^A-Za-z]/g,'').slice(0,5)||'CLINIC').toUpperCase();
   var y=ym()||(new Date()).toISOString().slice(0,7).replace('-','');
   var n=load().filter(function(r){return r.ym===y;}).length+1;
   return code+'-'+y+'-'+('000'+n).slice(-4);}
