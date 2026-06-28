@@ -62,6 +62,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal);bo
         <label class="chip"><input type="checkbox" name="line_peptides" value="yes"> 🧬 Advanced Peptides</label>
         <label class="chip"><input type="checkbox" name="line_bhrt" value="yes"> ⚕️ BHRT</label>
       </div>
+      <p class="sub" style="margin-top:8px;font-size:.78rem">Each line is <b style="color:var(--ink)">$199/mo</b> per clinic (bundle all three for less). Turn lines on or off any time — pay only for what you run.</p>
 
       <div class="sec">Medical Director</div>
       <p class="sub" style="margin-top:-4px;font-size:.84rem">Provides oversight and signs the standing orders. May be a different person from the treating clinician below.</p>
@@ -71,10 +72,11 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal);bo
         <div class="row"><div><label>MD name</label><input name="own_md_name"></div><div><label>Credential</label><select name="own_md_credential"><option value="">—</option><option>MD</option><option>DO</option></select></div></div>
         <div class="row"><div><label>NPI</label><input name="own_md_npi" inputmode="numeric"></div><div><label>State license #</label><input name="own_md_license"></div></div>
         <div class="row"><div><label>MD email</label><input type="email" name="own_md_email"></div></div>
+        <p class="fine" style="margin-top:2px"><a href="verify-npi.html" target="_blank">Verify an NPI ↗</a></p>
       </div>
 
       <div class="sec">Treating provider / APP</div>
-      <p class="sub" style="margin-top:-4px;font-size:.84rem">The licensed clinician who performs the Good Faith Exam, treats, and signs the chart — MD, DO, NP/FNP, or PA. (Add more later — nurses are free.)</p>
+      <p class="sub" style="margin-top:-4px;font-size:.84rem">The licensed clinician who performs the Good Faith Exam, treats, and signs the chart — MD, DO, NP/FNP, or PA. Add more later in Team Seats: each <b style="color:var(--ink)">authorizing provider is a billable seat</b> (their signature is tied to one license), and <b style="color:var(--ink)">RN/LPN executors are free</b>.</p>
       <label class="attest" style="background:transparent;border-color:var(--line);margin:0 0 12px"><input type="checkbox" name="provider_same_as_md" value="yes" onchange="toggleProv(this.checked)"> Same person as the Medical Director above.</label>
       <div id="provfields">
         <div class="row"><div><label class="req">Name</label><input name="provider_name" required placeholder="Morejon"></div><div><label class="req">Credential</label><select name="provider_credential" required><option value="">—</option><option>MD</option><option>DO</option><option>NP</option><option>FNP</option><option>PA</option></select></div></div>
