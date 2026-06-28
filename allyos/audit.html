@@ -123,9 +123,35 @@ function setView(v){VIEW=v;document.getElementById('vAll').classList.toggle('on'
 function riskColor(r){return r>=3?'var(--red)':r>=1?'var(--gold)':'var(--green)';}
 // ---- shared audit spine (v1.5 §14): 1–5 risk score + mandatory-review tiers ----
 // 5 = mandatory MD review · 4 = high · 3 = moderate · 2 = routine complete · 1 = low/admin
+// §14 risk score — line-aware (iv / bhrt / peptides). Defaults to iv for backward compatibility.
 function riskScore(r){
-  if(r.ae||r.suspended||r.override)return 5;                 // mandatory MD review (§14.6)
+  // line-agnostic mandatory (§14.6): AE, suspended/stopped, override, RN/staff as prescriber, missing provider order
+  if(r.ae||r.suspended||r.override)return 5;
   var rf=(r.riskFlags||[]);
+  var hay=rf.join(' ').toLowerCase();
+  if(/rn .*prescrib|staff .*prescrib|unlicensed prescrib|missing (provider )?order|no provider order/.test(hay))return 5;
+  var line=(r.line||'iv').toLowerCase();
+
+  if(line==='bhrt'){
+    // mandatory_5: bleeding, estrogen-sensitive cancer uncleared, thrombotic/neuro/CV, non-HSDD/supraphysiologic testosterone, compounded w/o rationale
+    if(/bleed|cancer|estrogen-sensitive|thrombot|vte|pe |stroke|mi |cardio|neuro|non-hsdd|supraphysiolog|hematocrit|compounded.*(no|without) rationale/.test(hay))return 5;
+    // high_4: new hormone/testosterone start, compounded, dose change, abnormal lab, missed follow-up
+    if(/new (hormone|testosterone|start)|compounded|dose change|abnormal lab|missed follow/.test(hay))return 4;
+    if(!r.consent)return 4;                                   // consent gate
+    if(rf.length)return 3;                                    // stable w/ flag / doc correction
+    return 2;
+  }
+  if(line==='peptide'||line==='peptides'){
+    // mandatory_5: research-chemical/unverifiable source, GLP-1 red flag not screened, two GLP-1 co-administered
+    if(/research[- ]chem|unverifiable source|unknown source|mtc|men ?2|pancreatitis not screen|two glp|second glp|co-?administer/.test(hay))return 5;
+    // high_4: new start, compounded/off-label (tier 2-3), low-evidence/research-grade (tier 3-4), interaction flagged, source concern
+    if(/new start|compounded|off-label|tier ?[34]|tier ?2|research-grade|interaction|source.*concern|investigational/.test(hay))return 4;
+    if(!r.consent)return 4;                                   // consent-tier gate
+    if(rf.length)return 3;
+    return 2;
+  }
+
+  // iv (default) — original logic preserved exactly
   if(rf.some(function(f){return /nad|high-dose|mg \+ ca|glutathione/i.test(f);}))return 4; // high-risk ingredient
   if(r.gfe!=='current'||!r.consent)return 4;                 // missing hard gate
   if(rf.length)return 3;                                     // comorbidity / other flag
@@ -133,7 +159,14 @@ function riskScore(r){
   return 2;                                                  // routine, complete
 }
 function scoreColor(s){return s>=4?'var(--red)':s>=3?'var(--gold)':'var(--green)';}
-function mandatoryReasons(r){var z=[];if(r.ae)z.push('adverse event');if(r.suspended)z.push('infusion suspended');if(r.override)z.push('override used');return z;}
+function mandatoryReasons(r){var z=[];if(r.ae)z.push('adverse event');if(r.suspended)z.push('suspended / stopped early');if(r.override)z.push('override used');
+  var hay=(r.riskFlags||[]).join(' ').toLowerCase();
+  if(/rn .*prescrib|staff .*prescrib|unlicensed prescrib/.test(hay))z.push('RN/staff as prescriber');
+  if(/missing (provider )?order|no provider order/.test(hay))z.push('missing provider order');
+  var line=(r.line||'iv').toLowerCase();
+  if(line==='bhrt'){if(/bleed/.test(hay))z.push('unexplained/postmenopausal bleeding');if(/cancer|estrogen-sensitive/.test(hay))z.push('estrogen-sensitive cancer uncleared');if(/thrombot|vte|stroke|mi |cardio|neuro/.test(hay))z.push('thrombotic/CV/neuro event');if(/non-hsdd|supraphysiolog/.test(hay))z.push('testosterone non-HSDD/supraphysiologic');}
+  if(line==='peptide'||line==='peptides'){if(/research[- ]chem|unverifiable source|unknown source/.test(hay))z.push('research-chemical / unverifiable source');if(/mtc|men ?2|pancreatitis not screen/.test(hay))z.push('GLP-1 red flag not screened');if(/two glp|second glp|co-?administer/.test(hay))z.push('two GLP-1 co-administered');}
+  return z;}
 // §14.2 sample: 100% of mandatory (score 5) charts + highest-risk remaining to reach ≥5
 function riskSample(all){
   var scored=all.map(function(r){return {r:r,s:riskScore(r)};}).sort(function(a,b){return b.s-a.s;});
@@ -157,15 +190,17 @@ function render(){var all=rows();var view=VIEW==='risk'?riskSample(all):all;
     stat('teal','Audited',audited+' / '+Math.max(5,mand))+
     stat(corr.length?'red':'green','Corrections open',corr.length)+
     stat('green','Adverse events',all.filter(function(r){return r.ae;}).length);
-  var th='<tr><th>Score</th><th>Encounter ID</th><th>Date</th><th>Protocol</th><th>Risk signals</th><th>GFE</th><th>Consent</th><th>Monitor</th><th>Audit</th></tr>';
+  var th='<tr><th>Score</th><th>Line</th><th>Encounter ID</th><th>Date</th><th>Protocol</th><th>Risk signals</th><th>GFE</th><th>Consent</th><th>Monitor</th><th>Audit</th></tr>';
+  function lineBadge(l){l=(l||'iv').toLowerCase();var c=l==='bhrt'?'#a78bfa':(l==='peptide'||l==='peptides'?'#2bd49a':'#3aa8e0');var t=l==='bhrt'?'BHRT':(l==='peptide'||l==='peptides'?'PEP':'IV');return '<span class="rf" style="color:'+c+';border-color:'+c+'44;background:'+c+'18">'+t+'</span>';}
   var body=view.length?view.map(function(x){var rf=x.riskFlags||[];var sc=riskScore(x);
     return '<tr class="'+(sc>=4?'hi':'')+'"><td><span class="rdot" style="background:'+scoreColor(sc)+'"></span>'+sc+(sc>=5?' <span class="rf red" title="'+esc(mandatoryReasons(x).join(', '))+'">MD</span>':'')+'</td>'+
+      '<td>'+lineBadge(x.line)+'</td>'+
       '<td class="eid">'+esc(x.id)+'</td><td>'+esc(x.date)+'</td><td>'+esc(x.protocol)+'</td>'+
       '<td>'+(rf.length?rf.map(function(f){return '<span class="rf'+(/adverse|nad|mg \+ ca|asthma|high-dose/i.test(f)?' red':'')+'">'+esc(f)+'</span>';}).join(''):'<span class="muted">—</span>')+'</td>'+
       '<td>'+(x.gfe==='current'?'<span class="tick">✓</span>':'<span class="cross">'+esc(x.gfe)+'</span>')+'</td>'+
       '<td>'+(x.consent?'<span class="tick">✓</span>':'<span class="cross">✗</span>')+'</td>'+
       '<td>'+((x.monCount||0)>0?'<span class="tick">✓ '+x.monCount+'</span>':'<span class="muted">0</span>')+'</td>'+
-      '<td>'+(x.audited?(x.auditPass?'<span class="aud-pass">✓ Pass</span>':'<span class="aud-corr">⚠ Correction</span>')+' <button class="btn-s noprint" onclick="openAudit(\''+x.id+'\')">edit</button>':'<button class="btn-s noprint" onclick="openAudit(\''+x.id+'\')">Audit →</button>')+'</td></tr>';}).join(''):'<tr><td colspan="9" class="muted" style="padding:20px;text-align:center">No encounters'+(VIEW==='risk'?' flagged as risk':'')+' this month.</td></tr>';
+      '<td>'+(x.audited?(x.auditPass?'<span class="aud-pass">✓ Pass</span>':'<span class="aud-corr">⚠ Correction</span>')+' <button class="btn-s noprint" onclick="openAudit(\''+x.id+'\')">edit</button>':'<button class="btn-s noprint" onclick="openAudit(\''+x.id+'\')">Audit →</button>')+'</td></tr>';}).join(''):'<tr><td colspan="10" class="muted" style="padding:20px;text-align:center">No encounters'+(VIEW==='risk'?' flagged as risk':'')+' this month.</td></tr>';
   document.getElementById('tbl').innerHTML=th+body;
   // correction plan
   document.getElementById('cplan').innerHTML=corr.length?('<div class="cplan"><h3>⚠ Correction plan — '+monthLabel(ym())+'</h3>'+corr.map(function(x){return '<div class="ci"><b class="eid">'+esc(x.id)+'</b> — '+esc(x.auditNote||'correction needed')+' <span class="muted">(re-verify next month)</span></div>';}).join('')+'</div>'):'';}
@@ -353,7 +388,8 @@ function openManual(){
     '<input type="file" id="mFile" accept="application/pdf,image/*" style="display:none" onchange="mPickFile(event)">'+
     '<button id="mRunBtn" class="btn-s" style="display:none;width:100%;margin-bottom:8px;border-color:var(--gold);color:var(--gold)" onclick="runInspect()">▶ Run Inspection (AI extract)</button>'+
     '<div id="mInspStatus" style="font-size:.78rem;margin-bottom:6px"></div>'+
-    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">'+mField('mDate','Date of service','MM/DD/YYYY',120)+mField('mProto','Protocol','e.g. Myers / NAD+ / à-la-carte',180)+'</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;align-items:flex-end"><div><label class="muted" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:3px">Line</label><select id="mLine" style="background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:9px;color:var(--ink);font-family:inherit;font-size:.86rem"><option value="iv">IV / IM</option><option value="bhrt">BHRT</option><option value="peptides">Peptides</option></select></div>'+mField('mDate','Date of service','MM/DD/YYYY',120)+mField('mProto','Protocol / agent','e.g. Myers / estradiol+P4 / semaglutide',200)+'</div>'+
+    '<div style="margin-bottom:6px">'+mField('mFlags','Risk flags (comma-separated — BHRT/peptide lines)','e.g. new start, compounded, interaction flagged, research source',420)+'</div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">'+mField('mProv','Provider (initials/credential)','Milagro NP',120)+mField('mVitC','Vitamin C grams (if used)','e.g. 12',90)+'</div>'+
     '<div class="muted" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;margin:8px 0 4px">Risk signals (tick if present)</div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap">'+mYN('mNad','IV NAD+')+mYN('mMgCa','Mg + Ca together')+'</div>'+
@@ -380,8 +416,10 @@ function saveManual(){
   if(ck('mOver'))flags.push('Override used');
   if(ck('mAe'))flags.push('Adverse event');
   if(ck('mSusp'))flags.push('Infusion suspended');
+  var line=tv('mLine')||'iv';
+  tv('mFlags').split(',').forEach(function(s){s=s.trim();if(s)flags.push(s);}); // free-text line-specific flags
   var y=ym()||(new Date()).toISOString().slice(0,7).replace('-','');
-  var rec={id:nextManualId(),ym:y,date:tv('mDate')||'—',protocol:tv('mProto')||'—',
+  var rec={id:nextManualId(),ym:y,line:line,date:tv('mDate')||'—',protocol:tv('mProto')||'—',
     gfe:ck('mGfe')?'current':'GFE NEEDED',consent:ck('mConsent'),screen:true,scope:true,
     preVit:ck('mPre'),postVit:ck('mPost'),monCount:ck('mMon')?1:0,aftercare:ck('mAfter'),
     override:ck('mOver')?(note||'override'):'',ae:ck('mAe'),suspended:ck('mSusp'),
