@@ -95,7 +95,7 @@
     m.innerHTML =
       '<button class="x" onclick="AllyHelp.close()">×</button><h3>🆘 Get help</h3>' +
       '<div class="sub">Tell your Medical Director what\'s happening. We attach a <b>PHI-free</b> device/app diagnostic — no patient names or data.</div>' +
-      '<textarea id="allyhelp-msg" placeholder="e.g. Chair 2 timer froze and won\'t discharge"></textarea>' +
+      '<textarea id="allyhelp-msg" placeholder="e.g. Chair 2 timer froze and won\'t discharge — describe by chair/protocol, no patient names"></textarea>' +
       '<button class="btn go" onclick="AllyHelp.send()">Send to your Medical Director</button>' +
       '<button class="btn ghost" onclick="AllyHelp.copy()">⧉ Copy diagnostic</button>' +
       '<details><summary>What we send (PHI-free) — review</summary><pre id="allyhelp-snap">' + esc(snapStr) + '</pre></details>' +
