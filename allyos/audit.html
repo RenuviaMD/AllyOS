@@ -4,6 +4,7 @@
 <link rel="icon" type="image/png" href="ally-avatar-64.png">
 <link rel="stylesheet" href="allyos-theme.css">
 <script src="allyos-auth.js"></script>
+<script src="supabase-client.js"></script>
 <style>
 .wrap{max-width:1120px;margin:0 auto;padding:18px}
 .top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px}
@@ -82,6 +83,8 @@ body.reporting>.wrap{display:none}
     <label class="muted" style="font-size:.8rem">Total visits</label><input id="denom" type="number" min="0" placeholder="e.g. 18" onchange="setDenom()" style="width:80px;background:#0e1f29;border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--ink);font-family:inherit;font-size:.86rem">
     <span class="seg"><button id="vAll" class="on" onclick="setView('all')">All encounters</button><button id="vRisk" onclick="setView('risk')">🎯 Risk sample</button></span>
     <button class="btn-s" onclick="openManual()" style="border-color:var(--teal)">＋ Add encounter (paper chart)</button>
+    <button class="btn-s" id="syncBtn" onclick="cloudSync()" style="display:none;border-color:var(--green);color:var(--green)">☁ Sync to cloud (de-identified)</button>
+    <span id="syncMsg" style="font-size:.74rem;color:var(--muted)"></span>
     <a href="#" onclick="showReport();return false" style="font-size:.85rem;color:var(--gold)">📄 MD Oversight Report</a>
     <span class="muted" style="font-size:.78rem" id="who"></span>
   </div>
@@ -446,5 +449,32 @@ function prefillFromAI(f){function sV(id,v){var e=document.getElementById(id);if
   sC('mGfe',f.gfe);sC('mConsent',f.consent);sC('mPre',f.pre);sC('mPost',f.post);sC('mMon',f.mon);sC('mAfter',f.after);
   sC('mAe',f.ae);sC('mSusp',f.susp);sC('mOver',f.over);if(f.note)sV('mNote',f.note);}
 fill();
+
+// ---- cloud sync (PHI-free): clinic pushes its de-identified audit rows to the AllyOS hub ----
+function isCloudClinic(){var ac=activeClinic();return !!(ac&&ac.cloud&&/^[0-9a-f-]{36}$/i.test(ac.id));}
+function cloudSync(){
+  var ac=activeClinic(); if(!isCloudClinic())return;
+  var msg=document.getElementById('syncMsg'); msg.textContent='Syncing…';
+  AllyOSCloud.pushAudit(ac.id, load()).then(function(r){
+    if(r.error){msg.textContent='Sync failed — '+(r.error.message||r.error);msg.style.color='#f0b3aa';}
+    else{msg.textContent='✓ Synced '+r.pushed+' de-identified encounter(s) to the hub.';msg.style.color='var(--green)';}
+  });
+}
+(function initCloud(){
+  if(!window.AllyOSCloud||!isCloudClinic())return;
+  AllyOSCloud.ready.then(function(ok){ if(!ok)return;
+    AllyOSCloud.user().then(function(u){ if(!u)return;
+      document.getElementById('syncBtn').style.display='inline-block';
+      // pull whatever the hub already has for this clinic so the MD sees synced rows
+      var ac=activeClinic();
+      AllyOSCloud.pullAudit(ac.id).then(function(cloudRows){
+        if(!cloudRows||!cloudRows.length)return;
+        var local=load(), byId={}; local.forEach(function(r){byId[r.id]=r;});
+        cloudRows.forEach(function(r){ if(!byId[r.id]) local.push(r); }); // merge cloud-only rows
+        save(local); fill();
+      });
+    });
+  });
+})();
 </script>
 </body></html>

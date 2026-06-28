@@ -55,9 +55,18 @@ button:hover{filter:brightness(1.06)}
     </div>
   </div>
 
-  <div class="note">Demo sign-in is a role-routing scaffold, not a security boundary. Real enforcement (server-side roles) activates when the Supabase backend is connected. No PHI is stored.</div>
+  <div class="roles" id="cloudBox" style="display:none">
+    <h3>☁ AllyOS Cloud sign-in</h3>
+    <div class="role" style="margin-bottom:8px">Real server-enforced access (clinics, de-identified audit sync, MD cockpit). A one-time magic link is emailed — no password.</div>
+    <input id="cloudEmail" type="email" autocomplete="email" placeholder="you@clinic.com">
+    <button type="button" onclick="cloudLink()" style="margin-top:10px">Email me a magic link</button>
+    <div class="err" id="cloudMsg"></div>
+  </div>
+
+  <div class="note">Demo sign-in is a role-routing scaffold (no security boundary). <b>AllyOS Cloud</b> sign-in above is the real, server-enforced path (Row-Level-Security on every table). No PHI is stored either way.</div>
 </div>
 <script src="allyos-auth.js"></script>
+<script src="supabase-client.js"></script>
 <script>
 function fill(email){ document.getElementById('email').value=email; document.getElementById('password').value='demo'; }
 function nextPage(){ var m=location.search.match(/[?&]next=([^&]+)/); return m?decodeURIComponent(m[1]):'nursing-station.html'; }
@@ -74,5 +83,19 @@ function doLogin(e){
 }
 // already signed in? bounce to role landing
 (function(){ var s=AllyOSAuth.session(); if(s){ location.href = (location.search.indexOf('next=')>=0)?nextPage():landing(s.role); } })();
+// reveal cloud sign-in when the hub is reachable; if already cloud-authed, go to dashboard
+(function(){ if(!window.AllyOSCloud)return; AllyOSCloud.ready.then(function(ok){ if(!ok)return;
+  document.getElementById('cloudBox').style.display='block';
+  AllyOSCloud.user().then(function(u){ if(u) location.href='dashboard.html'; });
+}); })();
+function cloudLink(){
+  var email=document.getElementById('cloudEmail').value.trim(), m=document.getElementById('cloudMsg');
+  if(!email){ m.textContent='Enter your email.'; m.className='err show'; return; }
+  m.textContent='Sending…'; m.className='err show'; m.style.color='var(--muted)';
+  AllyOSCloud.signInWithOtp(email).then(function(r){
+    if(r&&r.error){ m.textContent=(r.error.message||r.error); m.style.color='#f0b3aa'; }
+    else { m.textContent='✓ Magic link sent — check '+email+' and click it to sign in.'; m.style.color='var(--teal)'; }
+  });
+}
 </script>
 </body></html>

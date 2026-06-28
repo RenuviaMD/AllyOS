@@ -4,6 +4,7 @@
 <link rel="icon" type="image/png" href="ally-avatar-64.png">
 <link rel="stylesheet" href="allyos-theme.css">
 <script src="allyos-auth.js"></script>
+<script src="supabase-client.js"></script>
 <style>
 .wrap{max-width:1080px;margin:0 auto;padding:18px}
 .top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:4px}
@@ -138,6 +139,38 @@ document.getElementById('impFile').addEventListener('change',function(e){var f=e
   }catch(err){alert('That is not a valid AllyOS audit export.');}
   e.target.value='';importTarget=null;};r.readAsText(f);});
 function importFor(id){importTarget=id;document.getElementById('impFile').click();}
-render();
+
+// ---- live cloud overlay (PHI-free): when signed into the AllyOS hub, pull clinics + de-identified summaries ----
+function ymNow(){var d=new Date();return ''+d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2);}
+function renderCloud(){
+  if(!window.AllyOSCloud)return;
+  var banner=document.querySelector('.banner');
+  AllyOSCloud.ready.then(function(ok){ if(!ok)return;
+    AllyOSCloud.user().then(function(u){
+      if(!u){ if(banner)banner.innerHTML='🔌 <b>Cloud sync available.</b> <a href="login.html" style="color:var(--teal)">Sign in</a> to see your clinics\' de-identified audits here automatically — no import. <span class="cc">Until then this cockpit shows locally imported data.</span>'; return; }
+      AllyOSCloud.clinicSummaries(ymNow()).then(function(list){
+        if(banner)banner.innerHTML='☁ <b style="color:var(--green)">Live cloud sync active</b> — clinics &amp; de-identified audits below are pulled from the AllyOS hub in real time (signed in as '+esc(u.email)+'). <span class="cc">PHI never leaves the clinic.</span>';
+        if(!list||!list.length){return;}
+        var pend=0,corrTot=0;
+        var rows=list.map(function(s){var c=s.clinic;var rev=s.audited,need=Math.min(5,s.encounters||0);
+          var state=rev===0&&s.encounters? 'pend':(rev<need||s.corrections?'prog':(s.encounters?'done':'none'));
+          if(state==='pend'||state==='prog')pend++;corrTot+=s.corrections;
+          var lbl=state==='pend'?'Pending review':state==='prog'?'In progress':state==='done'?'Reviewed':'No data yet';
+          var pc=state==='pend'?'pend':state==='prog'?'prog':state==='done'?'done':'none';
+          return '<tr><td><div class="cn">'+esc(c.name)+' <span class="cc">☁</span></div><div class="cc">'+esc(c.city_state||'')+'</div></td>'+
+            '<td>'+monthLabel(ymNow())+'</td><td>'+s.encounters+'</td>'+
+            '<td>'+(s.mandatory?'<b style="color:var(--red)">'+s.mandatory+'</b>':'0')+'</td>'+
+            '<td>'+rev+' / '+need+'</td>'+
+            '<td><span class="pill '+pc+'">'+lbl+'</span>'+(s.corrections?' <span class="cc">'+s.corrections+' corr</span>':'')+'</td>'+
+            '<td style="text-align:right;white-space:nowrap"><a class="btn-s go" href="#" onclick="openCloudAudit(\''+c.id+'\',\''+esc(c.name).replace(/\x27/g,"")+'\');return false">Audit →</a></td></tr>';
+        }).join('');
+        document.getElementById('tbl').innerHTML='<tr><th>Clinic</th><th>Month</th><th>Encounters</th><th>Mandatory</th><th>Reviewed</th><th>Status</th><th></th></tr>'+rows;
+        document.getElementById('stats').innerHTML=stat('teal','Clinics',list.length)+stat(pend?'amber':'green','Need review',pend)+stat(corrTot?'red':'green','Corrections open',corrTot)+stat('','Sync','☁ live');
+      });
+    });
+  });
+}
+function openCloudAudit(id,name){try{localStorage.setItem('allyos_active_clinic',JSON.stringify({id:id,name:name,cloud:true}));}catch(e){}location.href='audit.html';}
+render();renderCloud();
 </script>
 </body></html>
