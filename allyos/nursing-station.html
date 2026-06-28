@@ -357,4 +357,5 @@ function parseGrams(s){if(!s)return null;s=(''+s).toLowerCase();var m=s.match(/(
 function parseTimeMin(s){if(!s)return null;s=(''+s).toLowerCase();var h=s.match(/([\d.]+)\s*(?:–|-|to)?\s*([\d.]+)?\s*hr/);if(h)return Math.round((parseFloat(h[1])||0)*60);var m=s.match(/([\d.]+)\s*(?:–|-|to)?\s*([\d.]+)?\s*min/);if(m)return Math.round(parseFloat(m[1])||0);return null;}
 function esc(s){return(''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>
+<script src="allyos-help.js"></script>
 </body></html>

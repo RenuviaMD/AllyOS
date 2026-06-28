@@ -132,4 +132,11 @@ document.getElementById('ov').addEventListener('click',function(e){if(e.target==
 function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 render();
 </script>
+<!-- Netlify Forms registration for the Get Help widget (de-identified support requests) -->
+<form name="allyos-support" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input name="form-name" value="allyos-support"><input name="bot-field">
+  <input name="clinic"><input name="role"><input name="name"><input name="page"><input name="browser">
+  <textarea name="message"></textarea><textarea name="diagnostic"></textarea>
+</form>
+<script src="allyos-help.js"></script>
 </body></html>
