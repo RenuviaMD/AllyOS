@@ -2,10 +2,11 @@
   "meta": {
     "id": "bhrt-module",
     "title": "AllyOS BHRT / Women's Hormone Wellness — Provider CDS Module",
-    "version": "1.5-draft",
-    "status": "draft",
+    "version": "1.5",
+    "status": "locked",
     "requires_md_signoff": true,
-    "effective": null,
+    "md_signoff": { "by": "Armando A. Falcon, MD", "license": "FL ME 84789", "role": "Medical Director — governance / framework approval (not per-patient treating provider)", "date": "2026-06-28" },
+    "effective": "2026-06-28",
     "source": "Ally BHRT / Women's Wellness Provider Decision Support Engine v1.5 (MD Governance + APP Audit). Transcribed to the AllyOS locked-module format; pending citation lock + Medical Director sign-off.",
     "curated_by": "Armando A. Falcon, MD (FL ME 84789) — RenuviaMD® PLLC, AllyOS Compliance Division",
     "scope": "Stable menopause-transition wellness (perimenopause/menopause) BHRT/MHT candidacy review, symptom-guided protocol selection, safety gating, and referral triage. Adults, women's wellness. NOT an OB/GYN specialty platform, NOT an autonomous prescriber, NOT men's TRT.",
@@ -180,7 +181,7 @@
   "final_rule": "Ally supports the provider. Only the authorized APP/physician provider of record makes BHRT medication decisions. RN/staff support intake and routing only. Wellness is the scope. Pathology is referred or co-managed. Every clinical statement must be verifiable. No source = no recommendation.",
 
   "signoff_ledger": {
-    "status": "DRAFT — citations verified; pending 3-auditor lock + MD sign-off",
+    "status": "LOCKED — citations verified, 3-auditor lock complete, MD governance sign-off recorded (2026-06-28)",
     "citation_lock": "18 of 18 sources verified. PubMed-verified with PMID + DOI (9): S1, S2, S3 (NASEM companion), S4, S5, S6, S7, S9, S15. Web-verified against official government/guideline sources (9): S8 NICE NG23, S10 FDA fezolinetant Boxed Warning, S11 HHS/FDA 2025 MHT labeling, S12 FDA CDS guidance, S13 FDA general-wellness guidance, S14 HHS/ODPHP Physical Activity Guidelines 2nd ed, S16 NIH ODS Calcium/Vitamin D, S17 FL §464.012, S18 FL §458.347.",
     "citation_lock_date": "2026-06-28",
     "resolved": "S3 relabeled from the unverifiable 'Endocrine Society' title to the NASEM 2020 consensus report (PubMed companion PMID 33739316). S11 corrected from 'FDA 2026' to the HHS/FDA 10-Nov-2025 MHT labeling action.",
@@ -189,7 +190,8 @@
       "citation_regulatory": "PASS-WITH-NOTES (2026-06-28) — sources complete + honestly labeled; S6 title/PMID/DOI confirmed consistent (ISSWSH guideline, Climacteric 2021); claim->source binding ADDED via source_map. Regulatory/scope + compounded framing + honesty discipline confirmed correct.",
       "schema": "PASS-WITH-NOTES (2026-06-28) — strict valid JSON, S1-S18 unique no gaps, all consumer/required fields present; notes APPLIED: marker_status_convention added, CO-MANAGE delimiter normalized."
     },
-    "lock_status": "3-auditor lock COMPLETE — all PASS-WITH-NOTES, notes applied. Module is verification-complete and audit-clean; the ONLY remaining step is the Medical Director's governance sign-off.",
-    "pending": ["Medical Director governance sign-off (Falcon, MD) — approve the framework/evidence rules as MD, then set meta.effective + flip status to locked"]
+    "lock_status": "LOCKED 2026-06-28 — 18/18 citations verified, 3-auditor lock complete (all PASS-WITH-NOTES, notes applied), and Medical Director governance sign-off recorded (Falcon, MD, FL ME 84789). Effective 2026-06-28.",
+    "md_signoff_note": "Governance/framework approval as Medical Director — authorizes this CDS as the BHRT decision-support standard for clinics governed; does NOT make the MD the treating provider of record or prescriber for any patient.",
+    "pending": []
   }
 }

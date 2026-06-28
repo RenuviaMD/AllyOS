@@ -59,7 +59,7 @@
 <div class="top">
   <span class="brand"><b>Ally</b>OS</span>
   <span class="tag">BHRT · Provider CDS</span>
-  <span class="pill gold" style="font-size:9px">DRAFT — not locked</span>
+  <span class="pill gold" id="lockPill" style="font-size:9px">DRAFT — not locked</span>
   <span class="right"><a class="back" href="dashboard.html">← Dashboard</a></span>
 </div>
 
@@ -67,9 +67,9 @@
   <h1>BHRT / Women's Hormone Wellness</h1>
   <p class="sub" id="scopeSub">Provider decision-support — menopause-transition wellness. Loading module…</p>
 
-  <div class="draftbar">
+  <div class="draftbar" id="draftbar">
     <span class="ic">⚠️</span>
-    <div><b>This module is a DRAFT.</b> <span id="lockNote">It is not locked, not enforced, and not for clinical reliance.</span> It requires citation verification and <b>Medical Director sign-off (Falcon, MD)</b> before use. Nothing here is a prescription or a substitute for the provider's own judgment.</div>
+    <div id="draftbarText"><b>This module is a DRAFT.</b> <span id="lockNote">It is not locked, not enforced, and not for clinical reliance.</span> It requires citation verification and <b>Medical Director sign-off (Falcon, MD)</b> before use. Nothing here is a prescription or a substitute for the provider's own judgment.</div>
   </div>
 
   <div class="pol">
@@ -245,6 +245,16 @@ function renderModule(){
   var m=MOD.meta||{};
   document.getElementById('scopeSub').textContent=m.scope||'Provider decision-support — menopause-transition wellness.';
   if(MOD.signoff_ledger) document.getElementById('lockNote').textContent='Status: '+MOD.signoff_ledger.status+'. '+MOD.signoff_ledger.citation_lock;
+  // flip the banner to LOCKED when the module has been signed off
+  if(m.status==='locked'){
+    var sg=m.md_signoff||{};
+    var pill=document.getElementById('lockPill');
+    pill.className='pill green';pill.textContent='LOCKED v'+(m.version||'')+' · effective '+(m.effective||'');
+    var db=document.getElementById('draftbar');
+    db.style.background='linear-gradient(180deg,#0e2a1f,#08160f)';db.style.borderColor='#1c5238';
+    db.querySelector('.ic').textContent='✓';
+    document.getElementById('draftbarText').innerHTML='<b style="color:var(--green)">Locked &amp; signed.</b> Medical-Director governance sign-off recorded — '+(sg.by||'Falcon, MD')+' ('+(sg.license||'')+'), '+(sg.date||'')+'. 18/18 citations verified; 3-auditor lock complete. This is provider decision-support, not a prescription or a substitute for the provider\'s own judgment; the treating provider performs and signs each consult.';
+  }
 
   // medication registry
   var reg=(MOD.medication_registry&&MOD.medication_registry.fda_approved_default)||[];
