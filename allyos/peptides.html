@@ -212,7 +212,7 @@ function renderModule(){
     var sg=m.md_signoff||{};var pill=document.getElementById('lockPill');
     pill.className='badge b-fda';pill.textContent='LOCKED v'+(m.version||'');
     var db=document.getElementById('draftbar');db.style.background='linear-gradient(180deg,#0e2a1f,#08160f)';db.style.borderColor='#1c5238';db.querySelector('.ic').textContent='✓';
-    document.getElementById('draftbarText').innerHTML='<b style="color:var(--green)">Locked &amp; signed.</b> MD governance sign-off — '+esc(sg.by||'Falcon, MD')+' ('+esc(sg.license||'')+'), '+esc(sg.date||'')+'. No doses — decision-support only; the prescriber owns every decision.';
+    document.getElementById('draftbarText').innerHTML='<b style="color:var(--green)">Locked &amp; signed.</b> MD governance sign-off — '+esc(sg.by||'Falcon, MD')+' ('+esc(sg.license||'')+'), '+esc(sg.date||'')+'. Items marked <b class="vflag">(VERIFY)</b> are non-FDA-label, <b>MD-reviewed</b> conservative advisories. No doses — decision-support only; the prescriber owns every decision.';
   }
 }
 

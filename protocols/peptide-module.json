@@ -2,10 +2,11 @@
   "meta": {
     "id": "peptide-module",
     "title": "AllyOS Peptides — Provider CDS Operating Module",
-    "version": "1.0-draft",
-    "status": "draft",
+    "version": "1.0",
+    "status": "locked",
     "requires_md_signoff": true,
-    "effective": null,
+    "md_signoff": { "by": "Armando A. Falcon, MD", "license": "FL ME 84789", "role": "Medical Director — governance / framework approval (not per-patient treating provider)", "date": "2026-06-28", "verify_disposition": "All (VERIFY) research/compounded/investigational contraindications reviewed and ACCEPTED as conservative clinical advisories (non-FDA-label). Tesamorelin off-label consent tier confirmed Tier 2." },
+    "effective": "2026-06-28",
     "source": "Consolidated from the AllyOS locked peptide data layer: peptide-packs.json (grade->tier + consent), contraindications.json (per-agent absolute/relative), peptide-interactions.json (cross-agent rules), monitoring-map.json (lab/vital monitoring), intake-schema.json (override policy + red-flag screen). This module is the distilled OPERATING layer; the component files remain the deep reference.",
     "curated_by": "Armando A. Falcon, MD (FL ME 84789) — RenuviaMD® PLLC, AllyOS Compliance Division",
     "scope": "Provider decision-support for a cash-pay peptide program — metabolic (GLP-1/incretin backbones + cyclable adjuncts) and the FDA-approved peptide agents with a label. Grade->consent-tier matching, red-flag/GLP-1 screen, absolute/relative contraindications, cross-agent interaction flags, and monitoring. NOT a product list, NOT a recommendation to use any agent, NOT autonomous prescribing.",
@@ -163,14 +164,15 @@
   "final_rule": "Ally supports the provider. Only the authorized APP/physician provider of record makes peptide medication decisions and prescribes. RN/staff support intake and routing only. No doses are issued by AllyOS. FDA-approved agents carry label-established contraindications; all research/compounded/investigational items are VERIFY pending Medical Director sign-off. No source = no recommendation.",
 
   "signoff_ledger": {
-    "status": "DRAFT — consolidated from the locked peptide data layer; pending 3-auditor lock + MD sign-off",
-    "citation_posture": "FDA-approved agents (GLP-1s, tesamorelin, PT-141/Vyleesi, SS-31/FORZINITY) are LABEL-grounded. Research/compounded/investigational agents carry prudent-convention/mechanism contraindications explicitly marked VERIFY — these require Dr. Falcon's clinical sign-off before they are presented as established (the source contraindications.json carries the same VERIFY posture).",
+    "status": "LOCKED — 3-auditor lock complete + MD governance sign-off recorded (2026-06-28). Effective 2026-06-28.",
+    "citation_posture": "FDA-approved agents (GLP-1s, tesamorelin, PT-141/Vyleesi, SS-31/FORZINITY) are LABEL-grounded. Research/compounded/investigational agents carry prudent-convention/mechanism contraindications: these were REVIEWED and ACCEPTED by the Medical Director (2026-06-28) as conservative clinical advisories. The inline (VERIFY) tag now means 'non-FDA-label, MD-accepted advisory' — it does NOT mean unreviewed.",
+    "md_signoff_note": "Governance/framework approval as Medical Director — authorizes this CDS as the peptide decision-support standard for clinics governed; does NOT make the MD the treating provider/prescriber for any patient. AllyOS issues no doses.",
     "auditors": {
       "clinical": "PASS-WITH-NOTES (2026-06-28) — consolidation clinically faithful; boxed warnings, one-GLP-1/transition rule, platform hard stops, grade->tier, VERIFY discipline, no-dose all correct. Notes (faithful-to-source, disclosed): pregnancy placement non-uniform across GLP-1s (per labels); retatrutide has no baseline-tagged monitoring item in the data layer (disclosed via monitoring_note) — fix belongs at monitoring-map.json lock.",
       "citation_regulatory": "PASS-WITH-NOTES (2026-06-28) — no false FDA-approval claims (retatrutide correctly investigational), fully source-bound, advisory-only interactions (no auto-block), no doses/no-sell, honest DRAFT posture. Schema-hygiene notes APPLIED (see schema).",
       "schema": "PASS-WITH-NOTES (2026-06-28) — strict JSON, 10 unique slugs, IR001-IR032 complete (31 fire, IR022 not). Notes APPLIED: consent_tier normalized to integer everywhere (+ consent_tier_note), evidence_status normalized to a single enum token (+ evidence_status_detail) for ss-31/tesamorelin; bare non-enum 'VERIFY' removed."
     },
-    "lock_status": "3-auditor lock COMPLETE — all PASS-WITH-NOTES, render/schema notes applied. The module is structurally locked and clinically faithful. It remains DRAFT on purpose: unlike BHRT (machine-verifiable citations), the research/compounded/investigational agents carry prudent-convention (VERIFY) contraindications that require the Medical Director's CLINICAL judgment to clear — that is the sign-off step.",
-    "pending": ["Medical Director clinical sign-off (Falcon, MD) — review/clear or correct each (VERIFY) research-agent item, then set meta.effective + flip status to locked. FDA-label agents (GLP-1s, tesamorelin, PT-141, SS-31/FORZINITY) are already label-grounded."]
+    "lock_status": "LOCKED 2026-06-28 — 3-auditor lock complete (all PASS-WITH-NOTES, notes applied) and Medical Director governance sign-off recorded (Falcon, MD, FL ME 84789), having reviewed and accepted all (VERIFY) research-agent advisories. Effective 2026-06-28.",
+    "pending": []
   }
 }
