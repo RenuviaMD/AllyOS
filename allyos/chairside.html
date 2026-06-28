@@ -770,7 +770,7 @@ function composeNote(i){var c=CHAIRS[i],p=c.patient,df=15,g=gfeState(p);
     '<div class="noprint" style="display:flex;gap:8px;margin-top:12px">'+(sig?'<button class="btn neon" style="flex:1" onclick="window.print()">🖨 Print / Save PDF</button><button class="btn ghost" style="flex:1" onclick="freeChair('+i+')">Close chart &amp; free chair</button>':'<button class="btn ghost" style="flex:1" onclick="closeModal()">Back</button>')+'</div>';
 }
 function openInfusionNote(i){showModal(composeNote(i));}
-function signNote(i){var c=CHAIRS[i];var prov=val('noteProv').trim()||((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||'Provider');c.noteSigned={provider:prov,stamp:nowStamp()};if(!c.encounterId)logEncounter(i);save();openInfusionNote(i);}
+function signNote(i){var c=CHAIRS[i];var prov=val('noteProv').trim()||((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||'Provider');c.noteSigned={provider:prov,stamp:nowStamp()};if(!c.encounterId)logEncounter(i);saveChartPacket(i);save();openInfusionNote(i);}
 // ---------- AUDIT LOG (de-identified encounter registry — for MD audit, PHI-free) ----------
 function loadAudit(){try{return JSON.parse(localStorage.getItem('allyos_audit_v1')||'[]');}catch(e){return [];}}
 function saveAudit(a){try{localStorage.setItem('allyos_audit_v1',JSON.stringify(a));}catch(e){}}
@@ -793,6 +793,16 @@ function encounterRisk(c){var p=c.patient,bag=c.bag||[],flags=[];
   if((c.monitoring||[]).some(function(m){return m.ae;}))flags.push('Adverse event');
   if(c.suspended)flags.push('Infusion suspended');
   return flags;}
+// ---------- CHART PACKETS (PHI, on-device) — signed GFE + note kept by Encounter ID,
+// so the clinic can export just the charts the MD selects for the monthly audit. ----------
+function loadCharts(){try{return JSON.parse(localStorage.getItem('allyos_charts_v1')||'{}');}catch(e){return {};}}
+function saveCharts(o){try{localStorage.setItem('allyos_charts_v1',JSON.stringify(o));}catch(e){}}
+function stripDoc(html){return (html||'').replace(/<button[\s\S]*?<\/button>/g,'').replace(/<input[^>]*>/g,'').replace(/ id="noteDoc"/g,'');}
+function saveChartPacket(i){var c=CHAIRS[i];if(!c||!c.encounterId)return;var p=c.patient;
+  var charts=loadCharts();
+  charts[c.encounterId]={id:c.encounterId,date:fmtDob(todayISO()),protocol:c.protoLabel,patient:dispName(p),
+    gfe:(p&&p.gfeDoc)?stripDoc(composeGFE(p)):'',note:stripDoc(composeNote(i)),ts:nowStamp()};
+  saveCharts(charts);}
 function logEncounter(i){var c=CHAIRS[i],p=c.patient,g=gfeState(p),s=stackByCode(p.proto),eid=nextEncounterId();c.encounterId=eid.id;
   var rf=encounterRisk(c);
   var rec={id:eid.id,ym:eid.ym,date:fmtDob(todayISO()),ts:(c.noteSigned&&c.noteSigned.stamp)||nowStamp(),

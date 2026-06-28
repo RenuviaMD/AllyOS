@@ -104,6 +104,7 @@ function render(){
   T.push({t:'Inventory',i:'📦',href:'iv-inventory.html',roles:['provider','admin','nurse'],iv:true});
   T.push({t:'Calculator',i:'🧮',href:'iv-calculator.html',roles:['provider','admin','nurse'],iv:true});
   T.push({t:'Export audit (for MD)',i:'📤',roles:['provider','admin','nurse'],iv:true,fn:'exportAuditForMD()'}); // clinic sends its de-identified audit to its MD
+  T.push({t:'Export charts for MD',i:'📑',roles:['provider','admin','nurse'],iv:true,fn:'openChartExport()'}); // signed GFE+note for the MD's selected Encounter IDs
   T.push({t:'Backup & Restore',i:'💾',roles:['provider','admin'],fn:'openBackup()'});
   T.push({t:'Admin Console',i:'⚙️',href:'admin.html',roles:['admin']});
   T.push({t:'MD Audit Cockpit',i:'📋',href:'md-audit.html',roles:['provider','admin'],md:true}); // MD-of-record only — every clinic you govern
@@ -149,6 +150,48 @@ function exportBackup(){
   var payload={app:'AllyOS',exported:new Date().toISOString(),clinic:(ses&&ses.clinic)||'',keys:Object.keys(data).length,data:data};
   var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='allyos-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href);
+}
+// clinic → MD: export the signed GFE + note (PHI) for the Encounter IDs the MD selected
+function openChartExport(){
+  var audit=[],charts={};
+  try{audit=JSON.parse(localStorage.getItem('allyos_audit_v1')||'[]');}catch(e){}
+  try{charts=JSON.parse(localStorage.getItem('allyos_charts_v1')||'{}');}catch(e){}
+  audit.sort(function(a,b){return (''+(b.id||'')).localeCompare(''+(a.id||''));});
+  var rows=audit.map(function(r){var has=!!charts[r.id];
+    return '<label style="display:flex;gap:9px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:9px;margin-bottom:6px;font-size:.82rem;'+(has?'':'opacity:.45')+'">'+
+      '<input type="checkbox" class="cx" value="'+esc(r.id)+'" '+(has?'':'disabled')+' style="width:auto">'+
+      '<span style="font-family:var(--fdisp);color:var(--teal)">'+esc(r.id)+'</span>'+
+      '<span style="color:var(--muted);font-size:.76rem">'+esc(r.date||'')+' · '+esc(r.protocol||'')+'</span>'+
+      (has?'':'<span style="margin-left:auto;color:var(--muted);font-size:.7rem">no saved chart</span>')+'</label>';
+  }).join('');
+  document.getElementById('card').innerHTML='<div class="ic">📑</div><h3>Export charts for your MD</h3>'+
+    '<p>Check the Encounter IDs your Medical Director requested. We bundle the signed <b>GFE + infusion note</b> for each into one printable file to send to your MD.</p>'+
+    '<div class="ev" style="color:#e7b84e">⚠ Contains patient data — keep in secure / HIPAA storage.</div>'+
+    '<div style="max-height:280px;overflow:auto;text-align:left;margin:8px 0">'+(rows||'<p style="color:var(--muted)">No encounters recorded yet.</p>')+'</div>'+
+    '<button class="btn go" onclick="exportCharts()">⬇ Export selected charts</button>'+
+    '<button class="btn ghost" onclick="closeOv()">Close</button>';
+  document.getElementById('ov').classList.add('show');
+}
+function exportCharts(){
+  var ids=[];document.querySelectorAll('.cx:checked').forEach(function(c){ids.push(c.value);});
+  if(!ids.length){alert('Select at least one chart.');return;}
+  var charts={};try{charts=JSON.parse(localStorage.getItem('allyos_charts_v1')||'{}');}catch(e){}
+  var css='body{background:#f4f6f7;font-family:-apple-system,Segoe UI,Arial,sans-serif}'+
+    '.notepaper{background:#fff;color:#1c2b32;padding:22px;font-size:13px;line-height:1.5;border:1px solid #e3ecea;border-radius:8px;margin-bottom:14px}'+
+    '.notepaper h2{font-size:18px;color:#0e3a40;margin:0}.notepaper .nmeta{font-size:11px;color:#5b6b72}'+
+    '.notepaper .nsec{margin:11px 0;padding-top:8px;border-top:1px solid #e3ecea}.notepaper .nsec h3{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#0e8a8a;margin:0 0 5px}'+
+    '.notepaper .nrow{display:flex;gap:8px;padding:2px 0}.notepaper .nk{min-width:118px;color:#5b6b72;font-size:12px;flex:0 0 auto}'+
+    '.notepaper .ncomp{background:#e9f6f0;border-left:3px solid #1e9e6a;padding:8px 10px;border-radius:5px;font-size:12px;color:#155;margin-top:8px}'+
+    '.notepaper .nsign{border-top:1px solid #e3ecea;margin-top:12px;padding-top:10px}.notepaper .stamp{color:#0c7a4d;font-weight:700}'+
+    '.chartwrap{page-break-after:always;margin-bottom:24px}.cid{font:700 12px monospace;color:#0e8a8a;margin:18px 0 6px}';
+  var body=ids.map(function(id){var p=charts[id];if(!p)return '';
+    return '<div class="chartwrap"><div class="cid">ENCOUNTER '+esc(id)+'</div>'+(p.gfe||'')+(p.note||'')+'</div>';}).join('');
+  var clinic=(ses&&ses.clinic)||'clinic';
+  var html='<!doctype html><meta charset="utf-8"><title>AllyOS charts — '+ids.length+' for MD audit</title><style>'+css+'</style>'+
+    '<div style="max-width:850px;margin:18px auto;padding:0 12px"><div style="font-size:12px;color:#5b6b72;margin-bottom:10px">'+esc(clinic)+' · '+ids.length+' chart(s) for Medical-Director audit · '+new Date().toISOString().slice(0,10)+'</div>'+body+'</div>';
+  var blob=new Blob([html],{type:'text/html'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='allyos-charts-'+clinic.replace(/[^A-Za-z0-9]/g,'').toLowerCase()+'-'+new Date().toISOString().slice(0,10)+'.html';a.click();URL.revokeObjectURL(a.href);
+  closeOv();
 }
 // clinic → MD: export this device's de-identified audit log for the Medical Director to import
 function exportAuditForMD(){
