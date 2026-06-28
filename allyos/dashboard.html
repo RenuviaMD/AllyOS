@@ -103,13 +103,14 @@ function render(){
   T.push({t:'Authoring',i:'✚',href:'authoring.html',roles:['provider','admin']});
   T.push({t:'Inventory',i:'📦',href:'iv-inventory.html',roles:['provider','admin','nurse'],iv:true});
   T.push({t:'Calculator',i:'🧮',href:'iv-calculator.html',roles:['provider','admin','nurse'],iv:true});
+  T.push({t:'Backup & Restore',i:'💾',roles:['provider','admin'],fn:'openBackup()'});
   T.push({t:'Admin Console',i:'⚙️',href:'admin.html',roles:['admin']});
   T.push({t:'MD Oversight Audit',i:'📋',href:'audit.html',roles:['provider','admin'],md:true}); // MD-of-record only — not a clinic feature
   document.getElementById('tools').innerHTML=T.filter(function(x){
     if(x.iv && !on.iv) return false;
     if(x.md && !(ses && ses.mdAudit)) return false;
     return x.roles.indexOf(role())>=0;
-  }).map(function(x){return '<a class="tool" href="'+x.href+'"><span class="ti">'+x.i+'</span>'+esc(x.t)+'</a>';}).join('');
+  }).map(function(x){var a=x.fn?('href="#" onclick="'+x.fn+';return false"'):('href="'+x.href+'"');return '<a class="tool" '+a+'><span class="ti">'+x.i+'</span>'+esc(x.t)+'</a>';}).join('');
 }
 function lineClick(k){var on=lines();var L=byKey(k);
   if(on[k]){ if(L.tool&&L.tool!=='#'){location.href=L.tool;} else {popup(k,true);} return; }
@@ -130,6 +131,31 @@ function popup(k,active){var L=byKey(k);
 function closeOv(){document.getElementById('ov').classList.remove('show');}
 document.getElementById('ov').addEventListener('click',function(e){if(e.target===this)closeOv();});
 function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ---- Backup & Restore (clinic owns the file; it contains PHI, stays on their device) ----
+function isAllyKey(k){return k.indexOf('allyos')===0||k.indexOf('renuviamd')===0;}
+function openBackup(){
+  document.getElementById('card').innerHTML='<div class="ic">💾</div><h3>Backup &amp; Restore</h3>'+
+    '<p>Download a backup of this device\'s AllyOS data, or restore it onto a new device/browser so the clinic can keep operating.</p>'+
+    '<div class="ev" style="color:#e7b84e">⚠ This backup file <b>contains patient data</b> from in-progress visits. Keep it in your <b>secure / HIPAA storage</b> — it is not PHI-free.</div>'+
+    '<button class="btn go" onclick="exportBackup()">⬇ Download backup</button>'+
+    '<label class="btn ghost" style="cursor:pointer">⬆ Restore from backup<input type="file" accept="application/json" style="display:none" onchange="importBackup(this.files[0])"></label>'+
+    '<button class="btn ghost" onclick="closeOv()">Close</button>';
+  document.getElementById('ov').classList.add('show');
+}
+function exportBackup(){
+  var data={};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(isAllyKey(k))data[k]=localStorage.getItem(k);}
+  var payload={app:'AllyOS',exported:new Date().toISOString(),clinic:(ses&&ses.clinic)||'',keys:Object.keys(data).length,data:data};
+  var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='allyos-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href);
+}
+function importBackup(file){if(!file)return;var r=new FileReader();
+  r.onload=function(){try{var j=JSON.parse(r.result);var d=j.data||j;
+    if(!confirm('Restore this backup? It overwrites the current data on THIS device.'))return;
+    var n=0;Object.keys(d).forEach(function(k){if(isAllyKey(k)){localStorage.setItem(k,d[k]);n++;}});
+    alert('Restored '+n+' item(s). Reloading.');location.reload();
+  }catch(e){alert('That is not a valid AllyOS backup file.');}};
+  r.readAsText(file);}
 render();
 </script>
 <!-- Netlify Forms registration for the Get Help widget (de-identified support requests) -->
