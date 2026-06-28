@@ -103,18 +103,34 @@
   function close() { document.getElementById('allyhelp-ov').classList.remove('show'); }
 
   function send() {
-    var s = ses(), snap = snapshot();
+    var snap = snapshot();
     var msg = (document.getElementById('allyhelp-msg').value || '').trim();
     if (!msg) { document.getElementById('allyhelp-msg').focus(); return; }
+    var r = document.getElementById('allyhelp-result');
+    if (r) r.innerHTML = '<div class="ok" style="color:#90a3b6">🔍 Checking your device…</div>';
+    // run the debugger agent for an instant triage, then forward the diagnosed issue to the MD
+    fetch('/.netlify/functions/debug', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ diagnostic: snap, message: msg }) })
+      .then(function (x) { return x.json(); })
+      .then(function (d) { var t = d && d.triage; showTriage(t); post(snap, msg, t); })
+      .catch(function () { post(snap, msg, null); });
+  }
+  function showTriage(t) {
+    var r = document.getElementById('allyhelp-result'); if (!r) return;
+    if (!t) { r.innerHTML = '<div class="ok">✓ Sent to your Medical Director.</div>'; return; }
+    r.innerHTML = '<div style="background:#0e1f29;border:1px solid #243446;border-radius:9px;padding:10px;margin-top:8px;font-size:.84rem">' +
+      '<b>Quick check:</b> ' + esc(t.likely_cause || '—') + ' <span style="color:#90a3b6">(' + esc(t.scope || '') + (t.confidence ? ', ' + esc(t.confidence) : '') + ')</span>' +
+      (t.clinic_fix ? '<br><b>Try:</b> ' + esc(t.clinic_fix) : '') + '</div>' +
+      '<div class="ok">✓ Also sent to your Medical Director.</div>';
+  }
+  function post(snap, msg, t) {
+    var s = ses();
     var body = new URLSearchParams({
       'form-name': 'allyos-support',
       clinic: s.clinic || '', role: s.role || '', name: (window.AllyOSAuth && AllyOSAuth.greeting && AllyOSAuth.greeting()) || '',
-      page: snap.page, browser: snap.browser, message: msg, diagnostic: JSON.stringify(snap)
+      page: snap.page, browser: snap.browser, message: msg, diagnostic: JSON.stringify(snap), triage: t ? JSON.stringify(t) : ''
     }).toString();
-    fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body })
-      .then(done).catch(done);
+    fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body }).catch(function () {});
   }
-  function done() { var r = document.getElementById('allyhelp-result'); if (r) r.innerHTML = '<div class="ok">✓ Sent — your Medical Director got your request + the diagnostic.</div>'; }
 
   function copy() {
     var t = document.getElementById('allyhelp-snap').textContent;
