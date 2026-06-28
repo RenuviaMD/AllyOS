@@ -26,7 +26,7 @@ window.AllyOSAuth = (function () {
 
   // ---- DEMO backend (replace with Supabase for real enforcement) ----
   var DEMO_USERS = [
-    { email: 'md@clinic.test',    password: 'demo', name: 'Falcon', credential: 'MD', role: 'provider' },
+    { email: 'md@clinic.test',    password: 'demo', name: 'Falcon', credential: 'MD', role: 'provider', md_audit: true },
     { email: 'np@clinic.test',    password: 'demo', name: 'Rivera', credential: 'NP', role: 'provider' },
     { email: 'rn@clinic.test',    password: 'demo', name: 'Chen',   credential: 'RN', role: 'nurse' },
     { email: 'admin@clinic.test', password: 'demo', name: 'Office', credential: '',   role: 'admin' },
@@ -50,6 +50,7 @@ window.AllyOSAuth = (function () {
       userId: email, email: email, name: u.name, credential: u.credential, role: u.role,
       clinicId: u.clinicId || CLINIC.id, clinic: u.clinic || CLINIC.name,
       mdOfRecord: (u.md_of_record != null ? u.md_of_record : CLINIC.md_of_record),
+      mdAudit: !!u.md_audit, // the MD-of-record's private oversight tool (not a clinic feature)
       demo: true, pilot: !!u.pilot
     };
     setSession(s);

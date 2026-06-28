@@ -96,17 +96,20 @@ function render(){
       '<div class="ic">'+L.ic+'</div><h3>'+esc(L.name)+'</h3><p>'+esc(L.short)+'</p>'+
       (active?'':'<div class="lockrow">🔒 Add this line</div>')+'</div>';
   }).join('');
-  // tools by role
+  // tools — role-gated, plus: GFE/inventory/calc are IV-line only; Audit is the MD-of-record's private tool.
   var T=[];
-  T.push({t:'GFE Dashboard',i:'🩺',href:'gfe.html',roles:['provider','admin']});
-  T.push({t:'Practice Audit',i:'📋',href:'audit.html',roles:['provider','admin']});
+  T.push({t:'GFE Dashboard',i:'🩺',href:'gfe.html',roles:['provider','admin'],iv:true}); // GFE applies only to IV
   T.push({t:'Team Seats',i:'👥',href:'admin-seats.html',roles:['provider','admin']});
   T.push({t:'Authoring',i:'✚',href:'authoring.html',roles:['provider','admin']});
-  T.push({t:'Inventory',i:'📦',href:'iv-inventory.html',roles:['provider','admin','nurse']});
-  T.push({t:'Calculator',i:'🧮',href:'iv-calculator.html',roles:['provider','admin','nurse']});
+  T.push({t:'Inventory',i:'📦',href:'iv-inventory.html',roles:['provider','admin','nurse'],iv:true});
+  T.push({t:'Calculator',i:'🧮',href:'iv-calculator.html',roles:['provider','admin','nurse'],iv:true});
   T.push({t:'Admin Console',i:'⚙️',href:'admin.html',roles:['admin']});
-  document.getElementById('tools').innerHTML=T.filter(function(x){return x.roles.indexOf(role())>=0;})
-    .map(function(x){return '<a class="tool" href="'+x.href+'"><span class="ti">'+x.i+'</span>'+esc(x.t)+'</a>';}).join('');
+  T.push({t:'MD Oversight Audit',i:'📋',href:'audit.html',roles:['provider','admin'],md:true}); // MD-of-record only — not a clinic feature
+  document.getElementById('tools').innerHTML=T.filter(function(x){
+    if(x.iv && !on.iv) return false;
+    if(x.md && !(ses && ses.mdAudit)) return false;
+    return x.roles.indexOf(role())>=0;
+  }).map(function(x){return '<a class="tool" href="'+x.href+'"><span class="ti">'+x.i+'</span>'+esc(x.t)+'</a>';}).join('');
 }
 function lineClick(k){var on=lines();var L=byKey(k);
   if(on[k]){ if(L.tool&&L.tool!=='#'){location.href=L.tool;} else {popup(k,true);} return; }

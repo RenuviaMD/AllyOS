@@ -94,7 +94,10 @@ body.reporting>.wrap{display:none}
 <div id="report"></div>
 <script>
 document.getElementById('yr').textContent=new Date().getFullYear();
-if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin']);var s=AllyOSAuth.session();if(s)document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+(s.clinic||'');}
+if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin']);var s=AllyOSAuth.session();
+  // MD-of-record's private oversight tool — not a clinic feature. Block clinic staff even by direct URL.
+  if(s&&!s.mdAudit){document.documentElement.innerHTML='<body style="font-family:-apple-system,Segoe UI,Arial,sans-serif;background:#05080f;color:#eaf1f6;display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center;padding:24px"><div><h2>Medical-Director tool</h2><p style="color:#90a3b6;max-width:46ch">The oversight audit is the Medical Director\'s private workspace, not a clinic feature. Ask your Medical Director for your monthly oversight report.</p><p style="margin-top:14px"><a style="color:#2ee6d6" href="dashboard.html">← Dashboard</a></p></div></body>';}
+  else if(s)document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+(s.clinic||'');}
 var VIEW='all';
 function load(){try{return JSON.parse(localStorage.getItem('allyos_audit_v1')||'[]');}catch(e){return [];}}
 function save(a){try{localStorage.setItem('allyos_audit_v1',JSON.stringify(a));}catch(e){}}
