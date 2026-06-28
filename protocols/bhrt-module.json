@@ -141,13 +141,13 @@
     { "id": "S4", "title": "NAMS 2023 Nonhormone Therapy Position Statement", "pmid": "37252752", "doi": "10.1097/GME.0000000000002200", "verified": true },
     { "id": "S6", "title": "ISSWSH Clinical Practice Guideline — Systemic Testosterone for HSDD in Women", "pmid": "33792440", "doi": "10.1080/13697137.2021.1891773", "verified": true },
     { "id": "S15", "title": "PROT-AGE Study Group — protein recommendations in older people", "pmid": "23867520", "doi": "10.1016/j.jamda.2013.05.021", "verified": true },
-    { "id": "S2", "title": "ACOG Clinical Consensus 2023 — Compounded Bioidentical Menopausal Hormone Therapy", "url": "acog.org", "verified": false },
-    { "id": "S3", "title": "Endocrine Society Position Statement — Compounded Bioidentical Hormone Therapy", "url": "endocrine.org", "verified": false },
-    { "id": "S5", "title": "AUA/SUFU/AUGS 2025 Guideline — Genitourinary Syndrome of Menopause", "url": "auanet.org", "verified": false },
-    { "id": "S7", "title": "Global Consensus Position Statement on Testosterone Therapy for Women (2019)", "url": "pmc.ncbi.nlm.nih.gov/articles/PMC6821450", "verified": false },
-    { "id": "S8", "title": "NICE NG23 — Menopause: Identification and Management", "url": "nice.org.uk/guidance/ng23", "verified": false },
-    { "id": "S9", "title": "ACOG Committee Opinion No. 734 — Postmenopausal Bleeding Evaluation", "url": "acog.org", "verified": false },
-    { "id": "S10", "title": "FDA Drug Safety Communication — Fezolinetant (Veozah) liver injury warning", "url": "fda.gov", "verified": false },
+    { "id": "S2", "title": "Compounded Bioidentical Menopausal Hormone Therapy: ACOG Clinical Consensus No. 6 (Obstet Gynecol 2023;142:1266-1273)", "pmid": "37856860", "doi": "10.1097/AOG.0000000000005395", "verified": true, "verified_via": "PubMed" },
+    { "id": "S3", "title": "Endocrine Society Position Statement — Compounded Bioidentical Hormone Therapy", "url": "endocrine.org", "verified": false, "note": "NOT located in PubMed as labeled. The authoritative compounded-BHT evidence is the NASEM 2020 consensus report 'The Clinical Utility of Compounded Bioidentical Hormone Therapy' (National Academies — a book, not a PubMed article) and ACOG S2 (verified). RELABEL or REPLACE at lock." },
+    { "id": "S5", "title": "The AUA/SUFU/AUGS Guideline on Genitourinary Syndrome of Menopause (J Urol 2025;214:242-250)", "pmid": "40298120", "doi": "10.1097/JU.0000000000004589", "verified": true, "verified_via": "PubMed" },
+    { "id": "S7", "title": "Global Consensus Position Statement on the Use of Testosterone Therapy for Women (J Clin Endocrinol Metab 2019;104:4660-4666; PMC6821450)", "pmid": "31498871", "doi": "10.1210/jc.2019-01603", "verified": true, "verified_via": "PubMed" },
+    { "id": "S8", "title": "NICE NG23 — Menopause: Identification and Management (publ. 2015; updated 2024)", "url": "nice.org.uk/guidance/ng23", "verified": true, "verified_via": "web (NICE guideline confirmed live; Nov-2024 update on CBT, GSM, HRT outcomes)" },
+    { "id": "S9", "title": "ACOG Committee Opinion No. 734: Transvaginal Ultrasonography in Evaluating the Endometrium of Women With Postmenopausal Bleeding (Obstet Gynecol 2018;131:e124-e129)", "pmid": "29683909", "doi": "10.1097/AOG.0000000000002631", "verified": true, "verified_via": "PubMed" },
+    { "id": "S10", "title": "FDA Drug Safety Communication — Fezolinetant (Veozah) serious liver injury (DSC 12-Sep-2024; Boxed Warning added 16-Dec-2024; baseline + monthly×3 LFTs)", "url": "fda.gov", "verified": true, "verified_via": "web (FDA DSC + Boxed Warning confirmed)" },
     { "id": "S11", "title": "FDA 2026 Labeling Changes to Menopausal Hormone Therapy Products", "url": "fda.gov", "verified": false },
     { "id": "S12", "title": "FDA Clinical Decision Support Software Guidance", "url": "fda.gov/media/109618", "verified": false },
     { "id": "S13", "title": "FDA General Wellness: Policy for Low Risk Devices", "url": "fda.gov", "verified": false },
@@ -161,7 +161,8 @@
 
   "signoff_ledger": {
     "status": "DRAFT — not locked, not enforced",
-    "citation_lock": "4 of 18 sources verified against PubMed (S1, S4, S6, S15). The 14 guideline/FDA/statute sources (web URLs) are pending verification at the lock pass.",
-    "pending": ["verify remaining 14 web/FDA/statute sources", "3-auditor lock (clinical / citation+regulatory / schema)", "Medical Director sign-off (Falcon, MD)", "set effective date + flip status to locked"]
+    "citation_lock": "10 of 18 sources verified. PubMed-verified (8): S1, S2, S4, S5, S6, S7, S9, S15 — each with PMID + DOI. Web-verified guideline/FDA (2): S8 (NICE NG23), S10 (FDA fezolinetant DSC + Boxed Warning). The clinical recommendation backbone (NAMS HT + nonhormone, ISSWSH + Global testosterone consensus, GSM guideline, compounded-BHT ACOG, postmenopausal-bleeding ACOG, NICE, fezolinetant liver safety) is now verified.",
+    "flagged": "S3 (Endocrine Society — Compounded Bioidentical) NOT found in PubMed as labeled; relabel to the NASEM 2020 consensus report or fold into ACOG S2 at lock.",
+    "pending": ["S3 relabel/replace (see flag)", "confirm standing regulatory/lifestyle/statute refs S11–S14, S16–S18 (FDA labeling, FDA CDS/wellness guidance, CDC activity, NIH ODS, FL §464.012 / §458.347)", "3-auditor lock (clinical / citation+regulatory / schema)", "Medical Director sign-off (Falcon, MD)", "set effective date + flip status to locked"]
   }
 }
