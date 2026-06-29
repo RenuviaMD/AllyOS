@@ -1,0 +1,131 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Clinic Network — AllyOS · RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
+<link rel="stylesheet" href="allyos-theme.css">
+<script src="allyos-auth.js"></script>
+<style>
+.wrap{max-width:1120px;margin:0 auto;padding:18px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px}
+.kick{font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.top h1{font-family:var(--fdisp);font-size:1.7rem;margin-top:1px}
+.top .who{font-size:.8rem;color:var(--muted);margin-top:3px}
+.top a{color:var(--teal);text-decoration:none;font-size:.85rem}
+.pill-status{font-size:.66rem;font-weight:700;color:var(--green);letter-spacing:.06em}
+.sub{color:var(--muted);font-size:.84rem;margin:6px 0 16px;max-width:82ch}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.kpis{grid-template-columns:1fr 1fr}}
+.kpi{background:linear-gradient(180deg,#10202f,#0b1622);border:1px solid var(--line);border-radius:13px;padding:14px 15px}
+.kpi .l{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:6px}
+.kpi .v{font-family:var(--fdisp);font-size:1.55rem;margin-top:5px}
+.kpi.amber .v{color:var(--gold)}.kpi.green .v{color:var(--green)}.kpi.teal .v{color:var(--teal)}.kpi .sm{font-size:.62rem;color:var(--muted);margin-top:2px}
+.card{background:linear-gradient(180deg,#101f2c,#0b1521);border:1px solid var(--line2);border-radius:15px;padding:17px 19px;margin-bottom:13px}
+.chead{display:flex;align-items:flex-start;gap:13px}
+.cicon{width:40px;height:40px;border-radius:11px;background:rgba(40,194,184,.1);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex:0 0 auto}
+.cname{font-family:var(--fdisp);font-size:1.12rem}
+.cmeta{font-size:.74rem;color:var(--muted);margin-top:2px}
+.spill{font-size:.62rem;font-weight:700;padding:2px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em;background:#0e2a1d;color:var(--green);border:1px solid #1c5238}
+.cmodel{font-size:.66rem;font-weight:700;padding:2px 9px;border-radius:20px;letter-spacing:.03em}
+.cmodel.md{background:#2a230e;color:var(--gold);border:1px solid #4a3c18}
+.cmodel.clinic{background:#1a222b;color:var(--muted);border:1px solid var(--line2)}
+.cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+@media(max-width:680px){.cgrid{grid-template-columns:1fr 1fr}}
+.cbox{background:#0c1925;border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+.cbox .bl{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.cbox .bv{font-size:.92rem;margin-top:3px}
+.lchips{display:flex;gap:5px;flex-wrap:wrap;margin-top:3px}
+.lchip{font-size:.6rem;font-weight:700;padding:1px 7px;border-radius:6px;background:rgba(40,194,184,.12);color:var(--teal);border:1px solid var(--line2)}
+.crow2{display:flex;justify-content:space-between;align-items:center;margin-top:13px;gap:10px;flex-wrap:wrap}
+.open{color:var(--teal);text-decoration:none;font-size:.82rem;font-weight:600}
+.slot{border:1px dashed var(--line2);border-radius:14px;padding:15px 18px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.slot .st{font-size:.92rem;color:var(--ink)}.slot .sd{font-size:.72rem;color:var(--muted);margin-top:2px}
+.add{display:inline-flex;align-items:center;gap:7px;background:rgba(212,168,67,.12);border:1px solid #4a3c18;color:var(--gold);border-radius:10px;padding:8px 14px;font-size:.78rem;font-weight:700;text-decoration:none;cursor:pointer}
+.addic{width:28px;height:28px;border-radius:8px;border:1px dashed var(--line2);display:inline-flex;align-items:center;justify-content:center;color:var(--gold);font-size:1rem}
+.disc{font-size:.72rem;color:var(--muted);margin-top:18px;line-height:1.6}
+</style></head>
+<body class="allyos"><div class="wrap">
+  <div class="top">
+    <div>
+      <div class="kick">Medical Director Network · AllyOS</div>
+      <h1>Clinic Network</h1>
+      <div class="who" id="who">Armando Falcon MD · FL #ME 84789 · Medical Director</div>
+    </div>
+    <div style="text-align:right"><div class="pill-status">● OPERATIONAL</div><div style="margin-top:6px"><a href="dashboard.html">← Dashboard</a> &nbsp; <a href="md-audit.html">AllyAuditPro →</a></div></div>
+  </div>
+  <div class="sub">Every wellness clinic you run on AllyOS, in one place — care model, active lines, today's GFEs, and recurring revenue. <b>PHI-free</b>: counts and Encounter IDs only; patient identity stays on each clinic's device.</div>
+
+  <div class="kpis" id="kpis"></div>
+  <div id="clinics"></div>
+
+  <div class="disc">Recurring revenue = $199/mo per active line, per clinic. MD-of-record clinics count toward the FL §400.9935 cap of 5 per physician; clinics that use their own MD are not capped and are not your liability. Today's GFE counts come from a clinic's own device (this one shows the active clinic); remote clinics show — until the PHI-free hub is wired. © <span id="yr"></span> RenuviaMD® PLLC.</div>
+</div>
+<script>
+document.getElementById('yr').textContent=new Date().getFullYear();
+var ses=null;
+if(window.AllyOSAuth){AllyOSAuth.guard(['admin','provider']);ses=AllyOSAuth.session();
+  if(ses&&!ses.mdAudit){document.documentElement.innerHTML='<body style="font-family:-apple-system,Segoe UI,Arial,sans-serif;background:#05080f;color:#eaf1f6;display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center;padding:24px"><div><h2>Medical-Director cockpit</h2><p style="color:#90a3b6;max-width:46ch">The Clinic Network is the Medical Director\'s multi-clinic view — not a single-clinic feature.</p><p style="margin-top:14px"><a style="color:#2ee6d6" href="dashboard.html">← Dashboard</a></p></div></body>';}
+  if(ses)document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+((ses.credential==='MD'||ses.credential==='DO')?'FL #ME 84789 · ':'')+'Medical Director';
+}
+var PRICE=199, CAP=5, CKEY='allyos_owner_clinics_v1';
+function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function loadClinics(){try{var c=JSON.parse(localStorage.getItem(CKEY)||'null');if(c&&c.length)return c;}catch(e){}
+  // seed: the device clinic from the Clinic Card if present, else Lemus demo
+  var cfg={};try{cfg=JSON.parse(localStorage.getItem('allyos_clinic_config_v1')||'{}');}catch(e){}
+  var lines={};try{lines=JSON.parse(localStorage.getItem('allyos_clinic_lines_v1')||'{}');}catch(e){}
+  return [{id:'lemus',name:cfg.name||'Lemus Natural Medicine of Coral Gables',city:cfg.city||'Coral Gables, FL',
+    lines:Object.assign({iv:true,peptides:false,bhrt:false},lines),
+    falconIsMd:cfg.falconIsMd!==false,rnIvModel:!!cfg.rnIvModel,status:'active',device:true}];
+}
+function saveClinics(c){try{localStorage.setItem(CKEY,JSON.stringify(c));}catch(e){}}
+function lineKeys(l){return ['iv','peptides','bhrt'].filter(function(k){return l&&l[k];});}
+function lineLabel(k){return k==='iv'?'IV':k==='peptides'?'PEP':k==='bhrt'?'BHRT':k;}
+function mrrOf(c){return lineKeys(c.lines).length*PRICE;}
+// today's GFE counts for the device clinic, from the shared chairside queue (PHI-free counts)
+function gfeCounts(){try{var s=JSON.parse(localStorage.getItem('allyos_chairside_v1')||'{}');var q=s.q||[];
+  var done=0,pend=0;q.forEach(function(p){if(p.gfe)done++;else pend++;});return {total:q.length,done:done,pend:pend};
+}catch(e){return null;}}
+
+function render(){
+  var cl=loadClinics();
+  var mdCount=cl.filter(function(c){return c.falconIsMd;}).length;
+  var mrr=cl.reduce(function(a,c){return a+mrrOf(c);},0);
+  var linesActive=cl.reduce(function(a,c){return a+lineKeys(c.lines).length;},0);
+  var g=gfeCounts();
+  document.getElementById('kpis').innerHTML=
+    kpi('teal','🏥 Active clinics',cl.length,'')+
+    kpi('amber','⚖ MD-of-record',mdCount+' / '+CAP,'FL §400.9935 cap')+
+    kpi('green','$ MRR','$'+mrr.toLocaleString(),'recurring monthly')+
+    kpi('teal','💧 Lines active',linesActive,'across the network')+
+    kpi('amber','🩺 Pending GFE',g?g.pend:'—','active clinic today');
+
+  document.getElementById('clinics').innerHTML=cl.map(cardHTML).join('')+slotHTML(cl.length);
+}
+function kpi(cls,l,v,sm){return '<div class="kpi '+cls+'"><div class="l">'+l+'</div><div class="v">'+v+'</div>'+(sm?'<div class="sm">'+sm+'</div>':'')+'</div>';}
+function cardHTML(c){
+  var keys=lineKeys(c.lines), g=c.device?gfeCounts():null;
+  var gfeMode=(c.falconIsMd&&c.rnIvModel)?'GFE by you (RN-run)':'GFE by clinic provider';
+  return '<div class="card"><div class="chead"><div class="cicon">🏥</div>'+
+    '<div style="flex:1"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="cname">'+esc(c.name)+'</span><span class="spill">'+esc((c.status||'active').toUpperCase())+'</span>'+
+      '<span class="cmodel '+(c.falconIsMd?'md':'clinic')+'">'+(c.falconIsMd?'You · MD-of-record':'Clinic’s own MD')+'</span></div>'+
+      '<div class="cmeta">'+esc(c.city||'')+(c.device?' · this device':'')+'</div></div></div>'+
+    '<div class="cgrid">'+
+      '<div class="cbox"><div class="bl">Active lines</div><div class="lchips">'+(keys.length?keys.map(function(k){return '<span class="lchip">'+lineLabel(k)+'</span>';}).join(''):'<span class="bv" style="color:var(--muted)">none</span>')+'</div></div>'+
+      '<div class="cbox"><div class="bl">GFE today</div><div class="bv">'+(g?('<b style="color:var(--green)">'+g.done+'</b> done · <b style="color:var(--gold)">'+g.pend+'</b> pending'):'<span style="color:var(--muted)">—</span>')+'</div></div>'+
+      '<div class="cbox"><div class="bl">GFE model</div><div class="bv" style="font-size:.78rem">'+gfeMode+'</div></div>'+
+      '<div class="cbox"><div class="bl">Recurring</div><div class="bv" style="color:var(--gold)">$'+mrrOf(c).toLocaleString()+'/mo</div></div>'+
+    '</div>'+
+    '<div class="crow2"><span style="font-size:.72rem;color:var(--muted)">'+keys.length+' line'+(keys.length===1?'':'s')+' · '+(c.falconIsMd?'you carry the GFE + oversight':'clinic owns the GFE')+'</span>'+
+      '<a class="open" href="'+(c.device?'dashboard.html':'clinic-card.html')+'">Open →</a></div></div>';
+}
+function slotHTML(n){
+  var html='';
+  for(var i=n;i<CAP;i++){
+    html+='<div class="slot"><div><div class="st">Slot '+(i+1)+' — onboard a clinic</div><div class="sd">Set care model, lines &amp; roster · MD-of-record cap '+CAP+' per physician (§400.9935)</div></div>'+
+      '<a class="add" href="clinic-card.html"><span class="addic">+</span> Add clinic</a></div>';
+  }
+  return html;
+}
+render();
+</script>
+</body></html>
