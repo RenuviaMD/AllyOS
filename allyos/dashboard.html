@@ -72,6 +72,9 @@ function role(){return ses?ses.role:'nurse';}
 var LKEY='allyos_clinic_lines_v1';
 function lines(){try{return Object.assign({iv:true,peptides:false,bhrt:false},JSON.parse(localStorage.getItem(LKEY)||'{}'));}catch(e){return {iv:true,peptides:false,bhrt:false};}}
 function setLine(k,v){var l=lines();l[k]=v;try{localStorage.setItem(LKEY,JSON.stringify(l));}catch(e){}render();}
+// clinic care-model config (Clinic Card). GFE tab hides ONLY when BOTH: Falcon is the MD AND RN-run IV model.
+function clinicCfg(){try{return Object.assign({falconIsMd:true,rnIvModel:true},JSON.parse(localStorage.getItem('allyos_clinic_config_v1')||'{}'));}catch(e){return {falconIsMd:true,rnIvModel:true};}}
+function gfeBlocked(){var c=clinicCfg();return !!(c.falconIsMd&&c.rnIvModel);}
 
 var LINES=[
  {k:'iv',ic:'💧',name:'IV & IM Infusion',tool:'nursing-station.html',status:'live',price:'$199/mo',
@@ -98,7 +101,8 @@ function render(){
   }).join('');
   // tools — role-gated, plus: GFE/inventory/calc are IV-line only; Audit is the MD-of-record's private tool.
   var T=[];
-  T.push({t:'GFE Dashboard',i:'🩺',href:'gfe.html',roles:['provider','admin'],iv:true}); // GFE applies only to IV
+  if(!gfeBlocked()) T.push({t:'GFE Dashboard',i:'🩺',href:'gfe.html',roles:['provider','admin'],iv:true}); // GFE applies only to IV; hidden when the MD does it for an RN-run clinic
+  T.push({t:'Clinic Card',i:'🏥',href:'clinic-card.html',roles:['provider','admin']}); // care model · lines · roster
   T.push({t:'BHRT Provider CDS',i:'⚕️',href:'bhrt.html',roles:['provider','admin']}); // BHRT is provider-led; the page gates the role itself
   T.push({t:'Peptides Provider CDS',i:'🧬',href:'peptides.html',roles:['provider','admin']}); // grade→tier, red-flag screen, contraindications, interactions, monitoring
   T.push({t:'Team Seats',i:'👥',href:'admin-seats.html',roles:['provider','admin']});

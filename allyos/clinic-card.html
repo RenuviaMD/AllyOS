@@ -1,0 +1,169 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Clinic Card — AllyOS Admin · RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
+<link rel="stylesheet" href="allyos-theme.css">
+<script src="allyos-auth.js"></script>
+<script src="allyos-credentials.js"></script>
+<style>
+.wrap{max-width:920px;margin:0 auto;padding:18px}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.top h1{font-family:var(--fdisp);font-size:1.5rem}.top h1 b{color:var(--gold)}
+.top a{color:var(--teal);text-decoration:none;font-size:.85rem}
+.kick{font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:2px}
+.sub{color:var(--muted);font-size:.84rem;margin:6px 0 16px;max-width:80ch}
+.fsec{background:linear-gradient(180deg,#10202f,#0b1622);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:14px}
+.fsec-h{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:9px;font-weight:700}
+.fsec-h .n{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:6px;background:rgba(40,194,184,.12);border:1px solid var(--line2);color:var(--teal);font-size:.7rem;padding:0 5px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px 16px}
+.fgrid.v3{grid-template-columns:2fr 1fr 1fr}
+@media(max-width:640px){.fgrid,.fgrid.v3{grid-template-columns:1fr}}
+label{display:block;font-size:.7rem;color:var(--muted);margin:0 0 4px;text-transform:uppercase;letter-spacing:.03em}
+input,select{width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--ink);font-size:.88rem;font-family:inherit}
+input:focus,select:focus{outline:none;border-color:var(--teal)}
+.tog{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}
+.tog:last-child{border-bottom:none}
+.tog .tl{font-size:.92rem;color:var(--ink)}.tog .td{font-size:.74rem;color:var(--muted);margin-top:2px;max-width:60ch}
+.switch{position:relative;width:46px;height:26px;flex:0 0 auto;cursor:pointer}
+.switch input{opacity:0;width:0;height:0;position:absolute}
+.slider{position:absolute;inset:0;background:#243442;border:1px solid var(--line2);border-radius:30px;transition:.15s}
+.slider:before{content:"";position:absolute;height:18px;width:18px;left:3px;top:3px;background:#7d93a3;border-radius:50%;transition:.15s}
+.switch input:checked+.slider{background:rgba(40,194,184,.25);border-color:var(--teal)}
+.switch input:checked+.slider:before{transform:translateX(20px);background:var(--teal)}
+.lines{display:flex;gap:10px;flex-wrap:wrap}
+.lchip{display:flex;align-items:center;gap:8px;padding:9px 13px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:.86rem;color:var(--ink)}
+.lchip input{width:auto}
+.gfenote{margin-top:12px;font-size:.8rem;border-radius:10px;padding:11px 13px;line-height:1.5}
+.gfenote.block{background:#2a1512;border:1px solid #5a2a22;color:#f0a59d}
+.gfenote.open{background:#0e2a1d;border:1px solid #1c5238;color:var(--green)}
+table{width:100%;border-collapse:collapse;font-size:.84rem;margin-top:4px}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:.64rem;text-transform:uppercase;letter-spacing:.04em;padding:7px 8px;border-bottom:1px solid var(--line2)}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.badge{display:inline-block;font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.03em}
+.badge.md{background:#2a230e;color:var(--gold);border:1px solid #4a3c18}
+.badge.app{background:#0e2436;color:#4ea8e0;border:1px solid #1c4763}
+.badge.rn{background:#0e2a1d;color:var(--green);border:1px solid #1c5238}
+.badge.other{background:#1a222b;color:var(--muted);border:1px solid var(--line2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--fdisp);font-weight:600;border:none;border-radius:999px;padding:11px 20px;cursor:pointer;background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a;font-size:.9rem}
+.btn.ghost{background:transparent;border:1px solid var(--line2);color:var(--ink)}
+.btn-s{font-size:.74rem;padding:6px 12px;border-radius:8px;border:1px solid var(--line2);background:rgba(255,255,255,.04);color:var(--ink);cursor:pointer;font-family:inherit}
+.btn-s:hover{border-color:var(--red);color:var(--red)}
+.saved{color:var(--green);font-size:.8rem;margin-left:10px}
+.disc{font-size:.72rem;color:var(--muted);margin-top:16px;line-height:1.6}
+</style></head>
+<body class="allyos"><div class="wrap">
+  <div class="top">
+    <div><div class="kick">AllyOS — Admin · Clinic Configuration</div><h1>Clinic <b>Card</b></h1></div>
+    <div><a href="dashboard.html">← Dashboard</a> &nbsp; <span class="muted" id="who" style="font-size:.78rem"></span></div>
+  </div>
+  <div class="sub">One card per clinic — set the care model, active lines, and staff roster you collected at onboarding. The roster drives every signature box (standing order · GFE · infusion note) by title. <b>PHI-free</b>: no patient data here.</div>
+
+  <div class="fsec">
+    <div class="fsec-h"><span class="n">1</span> Clinic information</div>
+    <div class="fgrid">
+      <div><label>Legal name</label><input id="cName" placeholder="Lemus Natural Medicine of Coral Gables"></div>
+      <div><label>DBA (optional)</label><input id="cDba" placeholder="Trading-as name"></div>
+      <div><label>City / state</label><input id="cCity" placeholder="Coral Gables, FL"></div>
+      <div><label>Contact email</label><input id="cEmail" placeholder="admin@clinic.com"></div>
+    </div>
+  </div>
+
+  <div class="fsec">
+    <div class="fsec-h"><span class="n">2</span> Medical director &amp; care model</div>
+    <div class="tog">
+      <div><div class="tl">Dr. Falcon is the Medical Director</div><div class="td">RenuviaMD serves as MD-of-record for this clinic (you carry supervising authority + the GFE). Off = the clinic uses its own MD; AllyOS does not credential or regulate it.</div></div>
+      <label class="switch"><input type="checkbox" id="tFalcon" onchange="syncNote()"><span class="slider"></span></label>
+    </div>
+    <div class="tog">
+      <div><div class="tl">RN-run IV model (GFE done by the MD)</div><div class="td">The floor is RN-run with no on-site GFE provider. Combined with the toggle above, the GFE tab is hidden for this clinic and the GFE is yours. If the clinic has an APP/MD who does the GFE, leave this off.</div></div>
+      <label class="switch"><input type="checkbox" id="tRn" onchange="syncNote()"><span class="slider"></span></label>
+    </div>
+    <div id="gfeNote" class="gfenote"></div>
+  </div>
+
+  <div class="fsec">
+    <div class="fsec-h"><span class="n">3</span> Active lines</div>
+    <div class="lines">
+      <label class="lchip"><input type="checkbox" id="lIv"> 💧 IV &amp; IM Infusion</label>
+      <label class="lchip"><input type="checkbox" id="lPep"> 🧬 Advanced Peptides</label>
+      <label class="lchip"><input type="checkbox" id="lBhrt"> ⚕️ BHRT</label>
+    </div>
+  </div>
+
+  <div class="fsec">
+    <div class="fsec-h"><span class="n">4</span> Staff roster <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— name · title · function (drives the signature boxes)</span></div>
+    <div class="fgrid v3" style="align-items:end">
+      <div><label>Name</label><input id="rName" placeholder="Milagros"></div>
+      <div><label>Title</label><select id="rCred"><option value="">—</option><option>MD</option><option>DO</option><option>NP</option><option>PA</option><option>APRN</option><option>RN</option><option>LPN</option><option>MA</option></select></div>
+      <div><label>Function</label><input id="rFunc" placeholder="e.g. GFE provider"></div>
+    </div>
+    <div style="margin-top:10px"><button class="btn ghost" onclick="addSeat()">＋ Add to roster</button></div>
+    <div style="overflow:auto"><table id="roster"></table></div>
+    <div style="font-size:.72rem;color:var(--muted);margin-top:8px">Signature authority by title — <b>Standing order</b>: MD/DO · <b>GFE</b>: MD/DO/APP · <b>Infusion note</b>: MD/DO/APP/RN. AllyOS shows the eligible names; the clinic credentials its own staff and owns who signs.</div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:4px"><button class="btn" onclick="saveAll()">Save clinic card</button><span class="saved" id="saved"></span></div>
+  <div class="disc">Stored on this device (PHI-free). The roster writes the shared seats store used by every signature box. When the Supabase backend is wired, this card becomes the owner-writable clinic config (the RN cannot change it). © <span id="yr"></span> RenuviaMD® PLLC.</div>
+</div>
+<script>
+document.getElementById('yr').textContent=new Date().getFullYear();
+if(window.AllyOSAuth){AllyOSAuth.guard(['admin','provider']);var ses=AllyOSAuth.session();if(ses)document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+(ses.clinic||'');}
+var CFG='allyos_clinic_config_v1', LKEY='allyos_clinic_lines_v1', SKEY='allyos_seats_v1';
+function getCfg(){try{return Object.assign({falconIsMd:true,rnIvModel:true},JSON.parse(localStorage.getItem(CFG)||'{}'));}catch(e){return {falconIsMd:true,rnIvModel:true};}}
+function getLines(){try{return Object.assign({iv:true,peptides:false,bhrt:false},JSON.parse(localStorage.getItem(LKEY)||'{}'));}catch(e){return {iv:true,peptides:false,bhrt:false};}}
+function getSeats(){try{return JSON.parse(localStorage.getItem(SKEY)||'[]');}catch(e){return [];}}
+function setSeats(s){try{localStorage.setItem(SKEY,JSON.stringify(s));}catch(e){}}
+var SEATS=getSeats();
+
+function credClass(c){c=(c||'').toUpperCase().replace(/[^A-Z]/g,'');if(/^(MD|DO)$/.test(c))return 'md';if(/^(NP|APRN|ARNP|PA|PAC|APP)$/.test(c))return 'app';if(/^(RN|LPN)$/.test(c))return 'rn';return 'other';}
+function roleFor(c){var k=credClass(c);return k==='rn'?'nurse':(k==='other'?'admin':'provider');}
+function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function sid(){return 's'+Date.now().toString(36)+Math.floor(Math.random()*1e4);}
+
+function load(){
+  var c=getCfg(),l=getLines();
+  document.getElementById('cName').value=c.name||(ses&&ses.clinic)||'';
+  document.getElementById('cDba').value=c.dba||'';
+  document.getElementById('cCity').value=c.city||'';
+  document.getElementById('cEmail').value=c.email||'';
+  document.getElementById('tFalcon').checked=c.falconIsMd!==false;
+  document.getElementById('tRn').checked=c.rnIvModel!==false;
+  document.getElementById('lIv').checked=!!l.iv;
+  document.getElementById('lPep').checked=!!l.peptides;
+  document.getElementById('lBhrt').checked=!!l.bhrt;
+  syncNote();renderRoster();
+}
+function syncNote(){
+  var md=document.getElementById('tFalcon').checked, rn=document.getElementById('tRn').checked;
+  var el=document.getElementById('gfeNote');
+  if(md&&rn){el.className='gfenote block';el.innerHTML='⛔ <b>GFE tab hidden for this clinic.</b> You (the MD) perform the GFE; the RN floor cannot create one. An RN never appears in the GFE signer list regardless.';}
+  else{el.className='gfenote open';el.innerHTML='✓ <b>GFE tab open.</b> The clinic\'s credentialed APP/MD signs it (from the roster). '+(md?'You remain MD-of-record for oversight.':'The clinic\'s own MD owns the GFE — AllyOS does not regulate it.');}
+}
+function addSeat(){
+  var n=document.getElementById('rName').value.trim();if(!n){alert('Name required.');return;}
+  var cred=document.getElementById('rCred').value.trim();
+  SEATS.push({id:sid(),name:n,cred:cred,func:document.getElementById('rFunc').value.trim(),role:roleFor(cred),status:'active'});
+  document.getElementById('rName').value='';document.getElementById('rCred').value='';document.getElementById('rFunc').value='';
+  setSeats(SEATS);renderRoster();
+}
+function rmSeat(id){SEATS=SEATS.filter(function(s){return s.id!==id;});setSeats(SEATS);renderRoster();}
+function renderRoster(){
+  var rows=SEATS.filter(function(s){return s.status!=='removed';}).map(function(s){var k=credClass(s.cred);
+    var signs=[]; if(k==='md')signs=['Standing order','GFE','Infusion note']; else if(k==='app')signs=['GFE','Infusion note']; else if(k==='rn')signs=['Infusion note'];
+    return '<tr><td><b>'+esc(s.name)+'</b></td><td><span class="badge '+(k)+'">'+esc(s.cred||'—')+'</span></td><td>'+esc(s.func||'')+'</td><td style="font-size:.74rem;color:var(--muted)">'+(signs.join(' · ')||'—')+'</td><td style="text-align:right"><button class="btn-s" onclick="rmSeat(\''+s.id+'\')">remove</button></td></tr>';
+  }).join('');
+  document.getElementById('roster').innerHTML='<tr><th>Name</th><th>Title</th><th>Function</th><th>Can sign</th><th></th></tr>'+(rows||'<tr><td colspan="5" class="muted" style="padding:14px;color:var(--muted)">No staff yet — add the roster from onboarding.</td></tr>');
+}
+function saveAll(){
+  var cfg={name:document.getElementById('cName').value.trim(),dba:document.getElementById('cDba').value.trim(),
+    city:document.getElementById('cCity').value.trim(),email:document.getElementById('cEmail').value.trim(),
+    falconIsMd:document.getElementById('tFalcon').checked,rnIvModel:document.getElementById('tRn').checked};
+  try{localStorage.setItem(CFG,JSON.stringify(cfg));}catch(e){}
+  var lines={iv:document.getElementById('lIv').checked,peptides:document.getElementById('lPep').checked,bhrt:document.getElementById('lBhrt').checked};
+  try{localStorage.setItem(LKEY,JSON.stringify(lines));}catch(e){}
+  setSeats(SEATS);
+  var s=document.getElementById('saved');s.textContent='✓ Saved';setTimeout(function(){s.textContent='';},2200);
+}
+load();
+</script>
+</body></html>
