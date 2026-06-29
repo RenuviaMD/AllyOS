@@ -38,3 +38,11 @@ Supabase magic-link emails send via Supabase's default SMTP (rate-limited, fine 
 
 ## SQL of record
 `supabase/allyos-wellness-auth-rls.sql` — the full auth/tenant model + RLS, version-controlled.
+
+## Security posture (advisor review 2026-06-29)
+Verified live: all 8 tables have RLS enabled; `clinics` + `app_admin_emails` seeded (Lemus, `armandofalcon66@gmail.com`); RLS evaluates correctly as the `authenticated` role.
+
+**`EXECUTE` on the helper functions was tightened** — Postgres grants function `EXECUTE` to `PUBLIC` by default; that inherited grant was revoked, leaving `is_app_admin()`, `is_clinic_md(uuid)`, `is_clinic_member(uuid)` executable only by `anon, authenticated, postgres, service_role`. (Verified: revoking from `authenticated` entirely **breaks RLS** — policy evaluation *does* require the querying role to hold `EXECUTE` on policy-referenced functions, so `authenticated`/`anon` must keep it.)
+
+**Accepted low-risk advisory (lints 0028/0029):** these three SECURITY DEFINER helpers remain callable via REST RPC by signed-in users. This is **accepted** because each is a self-referential predicate that returns only the **caller's own** access status (am *I* an admin / a member / the MD of this clinic) — it exposes no other tenant's data and nothing the caller couldn't already determine. The DB is PHI-free regardless.
+- **Proper future hardening** (clears the lint): move the three helpers into a non-API-exposed `private` schema (PostgREST only exposes `public`), which requires recreating the 19 RLS policies that reference them. Deferred as a discrete, staged change (do it on a Supabase branch + verify tenant isolation before merge) — not worth risking the live tenant boundary for a self-referential predicate.
