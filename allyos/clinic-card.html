@@ -99,17 +99,17 @@ td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
     <div class="fgrid" style="grid-template-columns:1.3fr .7fr 1fr;align-items:end">
       <div><label>Name</label><input id="rName" placeholder="Milagro Morejon Valero"></div>
       <div><label>Title</label><select id="rCred"><option value="">—</option><option>MD</option><option>DO</option><option>NP</option><option>PA</option><option>APRN</option><option>RN</option><option>LPN</option><option>MA</option></select></div>
-      <div><label>Access level</label><select id="rRole"><option value="provider">Provider</option><option value="nurse">Nurse</option><option value="admin">Admin</option><option value="md">Medical Director</option></select></div>
+      <div><label>Access level</label><select id="rRole" onchange="syncAttest()"><option value="provider">Provider (licensed)</option><option value="nurse">Nurse (licensed)</option><option value="frontdesk">Front desk (scheduling)</option></select></div>
     </div>
     <div class="fgrid" style="grid-template-columns:1.3fr 1fr .8fr;align-items:end;margin-top:8px">
       <div><label>Email <span style="color:#5b6b72;text-transform:none;letter-spacing:0">(their login)</span></label><input id="rEmail" type="email" placeholder="name@clinic.com"></div>
       <div><label>State license <span style="color:#5b6b72;text-transform:none;letter-spacing:0">(of record)</span></label><input id="rLic" placeholder="FL APRN 11043901"></div>
       <div><label>NPI <span style="color:#5b6b72;text-transform:none;letter-spacing:0">(optional)</span></label><input id="rNpi" inputmode="numeric" maxlength="10" placeholder="10 digits"></div>
     </div>
-    <label style="display:flex;gap:8px;align-items:flex-start;margin-top:11px;font-size:.78rem;color:var(--ink);cursor:pointer"><input type="checkbox" id="rAttest" style="width:auto;margin-top:2px"> <span>I attest this person is a <b>licensed professional</b> and is <b>authorized by this clinic</b> to perform the acts indicated. (This — not the NPI — is the access gate; the clinic owns it.)</span></label>
+    <label style="display:flex;gap:8px;align-items:flex-start;margin-top:11px;font-size:.78rem;color:var(--ink);cursor:pointer"><input type="checkbox" id="rAttest" style="width:auto;margin-top:2px"> <span id="rAttestText">I attest this person is a <b>licensed professional</b> and is <b>authorized by this clinic</b> to perform the acts indicated. (This — not the NPI — is the access gate; the clinic owns it.)</span></label>
     <div style="margin-top:10px;display:flex;gap:8px;align-items:center"><button class="btn ghost" id="addBtn" onclick="addSeat()">＋ Add user</button><span id="npiResult" style="font-size:.78rem"></span></div>
     <div style="overflow:auto"><table id="roster"></table></div>
-    <div style="font-size:.72rem;color:var(--muted);margin-top:8px"><b>Access levels:</b> Provider — GFE, build &amp; sign, full station · Nurse — chairside execution · Admin — clinic operations + cockpit · Medical Director — MD-of-record + cockpit. The <b>title</b> sets signature authority (Standing order: MD/DO · GFE: MD/DO/APP · Note: MD/DO/APP/RN); the <b>access level</b> sets what they see. Provisioning the actual login is done by the owner.</div>
+    <div style="font-size:.72rem;color:var(--muted);margin-top:8px"><b>Access levels:</b> <b>Provider</b> (licensed) — GFE, build &amp; sign, full station · <b>Nurse</b> (licensed) — chairside execution · <b>Front desk</b> — scheduling &amp; appointments, intake (no clinical acts). Every clinical act is a licensed Provider/Nurse; front desk only handles the calendar. Title sets signature authority (Standing order: MD/DO · GFE: MD/DO/APP · Note: MD/DO/APP/RN).</div>
   </div>
 
   <div style="display:flex;align-items:center;gap:4px"><button class="btn" onclick="saveAll()">Save clinic card</button><span class="saved" id="saved"></span></div>
@@ -180,8 +180,13 @@ function addSeat(){
   }).catch(function(){ btn.disabled=false;res.style.color='var(--gold)';res.textContent='Registry unreachable — added on state license (verify NPI later).';pushSeat(n,cred,role,email,lic,npi,null); });
 }
 function rmSeat(id){SEATS=SEATS.filter(function(s){return s.id!==id;});setSeats(SEATS);renderRoster();}
-function accLabel(r){return r==='nurse'?'Nurse':r==='admin'?'Admin':r==='md'?'Medical Director':'Provider';}
-function accClass(r){return r==='md'?'md':r==='admin'?'other':r==='nurse'?'rn':'app';}
+function syncAttest(){
+  var role=document.getElementById('rRole').value, t=document.getElementById('rAttestText');
+  if(role==='frontdesk'){ t.innerHTML='I authorize this person as <b>front-desk / scheduling staff</b> for this clinic — <b>no clinical acts</b>. (Non-licensed role.)'; }
+  else { t.innerHTML='I attest this person is a <b>licensed professional</b> and is <b>authorized by this clinic</b> to perform the acts indicated. (This — not the NPI — is the access gate; the clinic owns it.)'; }
+}
+function accLabel(r){return r==='nurse'?'Nurse':r==='frontdesk'?'Front desk':r==='md'?'Medical Director':'Provider';}
+function accClass(r){return r==='md'?'md':r==='frontdesk'?'other':r==='nurse'?'rn':'app';}
 function renderRoster(){
   var rows=SEATS.filter(function(s){return s.status!=='removed';}).map(function(s){var k=credClass(s.cred);
     var signs=[]; if(k==='md')signs=['Standing order','GFE','Infusion note']; else if(k==='app')signs=['GFE','Infusion note']; else if(k==='rn')signs=['Infusion note'];
