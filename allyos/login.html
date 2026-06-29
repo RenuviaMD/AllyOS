@@ -38,34 +38,26 @@ button:hover{filter:brightness(1.06)}
     <div class="err" id="err"></div>
   </form>
 
-  <div class="roles">
-    <h3>Seats — each clinic assigns these by its own design</h3>
-    <div class="role"><b>Provider (MD/DO/NP/PA)</b> — clinical surface: Good Faith Exam, build &amp; authorize protocols, sign, full station.</div>
-    <div class="role"><b>Nurse (RN/LPN)</b> — chairside station: assign chairs, run infusions, document under the standing order.</div>
-    <div class="role"><b>Admin</b> — clinic operations: inventory, pricing, team seats.</div>
-    <div class="role" style="border-left:2px solid var(--gold,#c9a24b);padding-left:8px"><b>Medical Director — you, above the clinics</b>: Clinic Network cockpit + AllyAuditPro. Not a clinic seat.</div>
-    <div style="font-size:.72rem;color:var(--muted,#8aa3ad);margin-top:8px">The clinic credentials and assigns its own seats; AllyOS routes and the provider owns every decision. Only the Medical Director of record has the network + audit view. Enforcement applies only where RenuviaMD is the MD of record.</div>
-  </div>
-
-  <div class="demo">
-    <b>Demo accounts</b> (password <b>demo</b>) — tap to fill:
-    <div>
-      <span class="chip" onclick="fill('md@clinic.test')">md@ (provider)</span>
-      <span class="chip" onclick="fill('np@clinic.test')">np@ (provider)</span>
-      <span class="chip" onclick="fill('rn@clinic.test')">rn@ (nurse)</span>
-      <span class="chip" onclick="fill('admin@clinic.test')">admin@ (admin)</span>
-    </div>
-  </div>
-
-  <div class="roles" id="cloudBox" style="display:none">
-    <h3>☁ AllyOS Cloud sign-in</h3>
-    <div class="role" style="margin-bottom:8px">Real server-enforced access (clinics, de-identified audit sync, MD cockpit). A one-time magic link is emailed — no password.</div>
+  <div id="cloudBox" style="display:none;margin-top:18px;border-top:1px solid var(--line);padding-top:16px">
+    <label>Or sign in with a magic link <span style="color:var(--muted);font-weight:400">— no password</span></label>
     <input id="cloudEmail" type="email" autocomplete="email" placeholder="you@clinic.com">
     <button type="button" onclick="cloudLink()" style="margin-top:10px">Email me a magic link</button>
     <div class="err" id="cloudMsg"></div>
   </div>
 
-  <div class="note">Demo sign-in is a role-routing scaffold (no security boundary). <b>AllyOS Cloud</b> sign-in above is the real, server-enforced path (Row-Level-Security on every table). No PHI is stored either way.</div>
+  <details class="demo" style="margin-top:18px">
+    <summary style="cursor:pointer">Demo accounts</summary>
+    <div style="margin-top:8px">password <b>demo</b> — tap to fill:
+      <div style="margin-top:5px">
+        <span class="chip" onclick="fill('md@clinic.test')">md@ · MD</span>
+        <span class="chip" onclick="fill('np@clinic.test')">np@ · provider</span>
+        <span class="chip" onclick="fill('rn@clinic.test')">rn@ · nurse</span>
+        <span class="chip" onclick="fill('admin@clinic.test')">admin@ · admin</span>
+      </div>
+    </div>
+  </details>
+
+  <div class="note">PHI-free. The magic-link path is server-enforced (Row-Level Security on every table); demo sign-in is a local scaffold for click-through.</div>
 </div>
 <script src="allyos-auth.js"></script>
 <script src="supabase-client.js"></script>
