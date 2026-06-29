@@ -102,6 +102,7 @@ function render(){
   }).join('');
   // tools — role-gated, plus: GFE/inventory/calc are IV-line only; Audit is the MD-of-record's private tool.
   var T=[];
+  T.push({t:'Schedule',i:'📅',href:'schedule.html',roles:['provider','admin','nurse']}); // appointments per line + live IV chair board
   if(!gfeBlocked()) T.push({t:'GFE Dashboard',i:'🩺',href:'gfe.html',roles:['provider','admin'],iv:true}); // GFE applies only to IV; hidden when the MD does it for an RN-run clinic
   T.push({t:'Clinic Card',i:'🏥',href:'clinic-card.html',roles:['provider','admin']}); // care model · lines · roster
   T.push({t:'BHRT Provider CDS',i:'⚕️',href:'bhrt.html',roles:['provider','admin']}); // BHRT is provider-led; the page gates the role itself
