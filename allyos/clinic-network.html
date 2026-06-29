@@ -160,7 +160,8 @@ function renderAudit(){
     var errs=(d.errors||[]).length, warns=(d.warnings||[]).length, ok=errs===0;
     var oS=o.status||'pending';
     var oColor=oS==='PASS'?'var(--green)':oS==='FAIL'?'#f0a59d':oS==='NOTES'?'var(--gold)':'var(--muted)';
-    var oLabel=(oS==='pending'||oS==='skipped')?'pending':(oS+(o.notes_total?' · '+o.notes_total+' notes':''));
+    var rv=o.review_total||0;
+    var oLabel=(oS==='pending'||oS==='skipped')?'pending':(oS+(rv?' · '+rv+' to review':''));
     el.innerHTML='<div class="cgrid">'+
       '<a class="cbox" style="text-decoration:none;display:block" target="_blank" href="https://github.com/RenuviaMD/AllyOS/actions/workflows/daily-audit.yml"><div class="bl">Health / structure</div><div class="bv">'+(ok?'<b style="color:var(--green)">PASS</b>':'<b style="color:#f0a59d">'+errs+' errors</b>')+'</div></a>'+
       '<div class="cbox"><div class="bl">Last run</div><div class="bv" style="font-size:.76rem">'+esc((d.date||'').replace('T',' ').slice(0,16))+' UTC</div></div>'+

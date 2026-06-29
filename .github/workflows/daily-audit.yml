@@ -54,7 +54,7 @@ jobs:
         run: |
           git config user.name "allyos-bot"
           git config user.email "bot@renuviamd.com"
-          git add allyos/ops-audit-status.json || true
+          git add allyos/ops-audit-status.json allyos/ops-audit-review-queue.csv || true
           git commit -m "ops-audit: clinical-content re-verification ($(date -u +%F))" || echo "no changes"
           git push || echo "push skipped"
       - name: Upload report
