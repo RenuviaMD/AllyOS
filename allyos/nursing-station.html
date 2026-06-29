@@ -1,0 +1,394 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nurse Workstation — AllyOS · RenuviaMD®</title>
+<script>if(location.search.indexOf('keep')<0)location.replace('chairside.html');</script>
+<style>
+:root{--bg:#0b1620;--bg2:#12222e;--panel:#16293626;--card:#13242f;--line:#223947;--teal:#28c2b8;--blue:#3aa8e0;--gold:#e0b24a;--green:#1fb87a;--amber:#e0922a;--red:#e0594a;--ink:#e9f3f2;--muted:#8aa3ad}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:linear-gradient(160deg,#0b1620,#0e2330);min-height:100vh}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;border-bottom:1px solid var(--line);flex-wrap:wrap;gap:10px}
+.logo{font-weight:800;font-size:1.1rem}.logo span{color:var(--gold)}
+.hd-right{display:flex;align-items:center;gap:14px;font-size:.78rem;color:var(--muted)}
+.hd-right label{display:flex;align-items:center;gap:6px;cursor:pointer}
+.wrap{display:grid;grid-template-columns:300px 1fr 280px;gap:16px;padding:16px;align-items:start}
+@media(max-width:1080px){.wrap{grid-template-columns:1fr}}
+.col{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--teal);margin-bottom:12px}
+.muted{color:var(--muted)}
+input,select{width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink);font-size:.85rem;font-family:inherit}
+label.fld{display:block;font-size:.68rem;color:var(--muted);margin:7px 0 2px}
+.btn{border:none;border-radius:9px;padding:9px 12px;font-weight:700;font-size:.82rem;cursor:pointer}
+.btn.p{background:var(--teal);color:#06231f}.btn.g{background:transparent;border:1px solid var(--line);color:var(--teal)}
+.btn.start{background:var(--green);color:#04231a}.btn.stop{background:var(--red);color:#fff}.btn.full{width:100%}
+.btn:disabled{opacity:.45;cursor:default}
+.qcard{background:#0f2230;border:1px solid var(--line);border-radius:10px;padding:11px;margin:8px 0;cursor:pointer}
+.qcard:hover{border-color:var(--teal)}
+.qcard.sel{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal)}
+.qcard .nm{font-weight:700}
+.qcard .meta{font-size:.72rem;color:var(--muted);margin-top:2px}
+.pill{display:inline-block;font-size:.62rem;border-radius:7px;padding:2px 8px;margin-top:6px;font-weight:700}
+.pill.proto{background:#123a44;color:var(--teal)}
+.pill.cleared{background:#0f3a2a;color:var(--green)}
+.pill.pending{background:#3a2f12;color:var(--amber)}
+.chairs{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:620px){.chairs{grid-template-columns:repeat(2,1fr)}}
+.chair{border:2px solid var(--green);border-radius:14px;min-height:150px;padding:14px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:4px;cursor:pointer;background:#0f2230}
+.chair.occupied{border-color:var(--blue);cursor:pointer}
+.chair.done{border-color:var(--amber);animation:pulse 1s infinite alternate}
+@keyframes pulse{from{opacity:1}to{opacity:.6}}
+.chair .n{font-size:1.8rem;font-weight:800;color:var(--blue)}
+.chair .st{font-size:.7rem;color:var(--muted);letter-spacing:.06em}
+.chair .pt{font-weight:700;font-size:.92rem}
+.chair .pr{font-size:.66rem;color:var(--teal)}
+.chair .clk{font-size:1.5rem;font-weight:800;color:var(--green);font-variant-numeric:tabular-nums}
+.proto-item{background:#0f2230;border:1px solid var(--line);border-radius:9px;padding:9px 11px;margin:6px 0}
+.proto-item .t{font-weight:700;font-size:.82rem}
+.proto-item .d{font-size:.66rem;color:var(--muted)}
+.overlay{position:fixed;inset:0;background:rgba(4,12,18,.72);display:none;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto;z-index:50}
+.overlay.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--line);border-radius:16px;max-width:620px;width:100%;padding:22px}
+.modal h3{font-size:1.1rem;margin-bottom:2px}
+.modal .sub{font-size:.74rem;color:var(--muted);margin-bottom:14px}
+.modal .x{float:right;background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer}
+.box{background:#0f2230;border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0}
+.box .ttl{font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;color:var(--teal);margin-bottom:6px}
+.ingline{display:flex;justify-content:space-between;font-size:.82rem;padding:3px 0;border-bottom:1px solid #16313c}
+.ingline:last-child{border:none}
+.drip{display:flex;gap:16px;flex-wrap:wrap}.drip div span{display:block;font-size:.62rem;color:var(--muted)}.drip div b{font-size:1.1rem}
+.flag{border-radius:8px;padding:8px 10px;margin:5px 0;font-size:.8rem;line-height:1.4;border-left:3px solid}
+.flag.crit{background:#2a1512;border-color:var(--red);color:#f0b3aa}
+.flag.warn{background:#2a2212;border-color:var(--amber);color:#f0d3a0}
+.flag.info{background:#11262b;border-color:var(--teal);color:#a8e6e0}
+.flag.ok{background:#0f2a1f;border-color:var(--green);color:#a0e6c8}
+.flag b{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:110px}
+.docbtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.docbtns .btn{flex:1;min-width:110px}
+.monclock{text-align:center;font-size:2.2rem;font-weight:800;color:var(--green);font-variant-numeric:tabular-nums}
+.monmsg{text-align:center;font-size:.78rem;color:var(--amber);min-height:18px;margin:4px 0}
+.disc{font-size:.66rem;color:var(--muted);padding:6px 22px 24px;line-height:1.45}
+a{color:var(--teal)}
+#who{color:var(--gold)}
+</style>
+<script src="allyos-auth.js"></script></head>
+<body>
+<header>
+  <div class="logo">Renuvia<span>MD</span>® · AllyOS Nurse Workstation</div>
+  <div class="hd-right">
+    <span id="who"></span>
+    <label title="When RenuviaMD is the Medical Director of record, gates enforce. Off = advisory only."><input type="checkbox" id="mdMode"> MD-of-record (enforce gates)</label>
+    <a href="iv-builder.html">Builder</a> · <a href="iv-inventory.html">Inventory</a> · <a href="iv-calculator.html">Calc</a> · <a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- QUEUE -->
+  <div class="col">
+    <h2>📋 Patient Queue</h2>
+    <label class="fld">Add patient (from the provider's GFE order)</label>
+    <input id="qName" placeholder="Patient name">
+    <label class="fld">Authorized protocol</label>
+    <select id="qProto"></select>
+    <div class="row" style="margin-top:6px">
+      <div><input id="qTime" placeholder="10:00 AM"></div>
+      <div><label style="font-size:.72rem;color:var(--muted);display:flex;gap:6px;align-items:center;padding-top:8px"><input type="checkbox" id="qCleared" style="width:auto"> GFE cleared</label></div>
+    </div>
+    <button class="btn g full" style="margin-top:8px" onclick="addPatient()">+ Add to queue</button>
+    <div id="queue" style="margin-top:10px"></div>
+  </div>
+
+  <!-- CHAIRS -->
+  <div class="col">
+    <h2>🪑 Treatment Chairs</h2>
+    <div class="muted" style="font-size:.74rem;margin-bottom:10px" id="chairHint">Select a queued patient, then tap an available chair to set up the infusion.</div>
+    <div class="chairs" id="chairs"></div>
+  </div>
+
+  <!-- PROTOCOL REFERENCE -->
+  <div class="col">
+    <h2>🧪 Protocol Reference</h2>
+    <div class="muted" style="font-size:.72rem;margin-bottom:8px">Reference only — the protocol comes from the provider's GFE order, not picked here.</div>
+    <div id="protoRef"></div>
+    <div id="pepIvSupport" style="display:none;margin-top:16px"></div>
+  </div>
+</div>
+
+<div class="disc" id="disc"></div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+
+<script>
+var MOD=null, MENU=[], INV={}, QUEUE=[], CHAIRS=[null,null,null,null,null,null], selQ=null, modalChair=null;
+
+if(window.AllyOSAuth){ AllyOSAuth.guard(['nurse','provider','admin']); }
+
+// ---- Peptide-IV support (cross-line: shows ONLY for clinics running BOTH IV and peptides) ----
+function clinicLines(){try{return Object.assign({iv:true,peptides:false,bhrt:false},JSON.parse(localStorage.getItem('allyos_clinic_lines_v1')||'{}'));}catch(e){return {iv:true,peptides:false,bhrt:false};}}
+var PEP_FAM_NAME={FAM01:'Metabolic / GLP / Body-Composition',FAM02:'GH / Lean Mass / Recovery',FAM03:'Mitochondrial / Energy / Longevity',FAM04:'Repair / Injury / Connective Tissue',FAM05:'Skin / Hair / Glow / Aesthetic',FAM06:'Sexual Vitality / HPG Axis',FAM07:'Neuro / Focus / Calm / Sleep',FAM08:'Immune / Inflammatory Wellness',FAM09:'Non-GLP Fat-Loss / Metabolic Wellness'};
+function renderPepIvSupport(){
+  var el=document.getElementById('pepIvSupport'); if(!el)return;
+  var L=clinicLines();
+  if(!(L.iv && L.peptides)){ el.style.display='none'; el.innerHTML=''; return; } // not a peptide clinic → hidden
+  // Load the locked support-matching axes AND the locked 9-family hard-stop gate-map.
+  Promise.all([
+    fetch('../protocols/peptide-iv-support.json').then(function(r){return r.json()}).catch(function(){return {};}),
+    fetch('../protocols/peptide-stack-family-safety-gate-map.json').then(function(r){return r.json()}).catch(function(){return {};})
+  ]).then(function(res){
+    var sup=res[0]||{}, gm=res[1]||{};
+    // map each elaborated support axis to its family so support options surface under the right family
+    var AXIS_FAM={AXIS_METABOLIC_INCRETIN_GLUCAGON:'FAM01',AXIS_GH_IGF1_RECOVERY:'FAM02',AXIS_MITOCHONDRIAL_AMPK_NAD:'FAM03'};
+    var supByFam={};(sup.axes||[]).forEach(function(a){var f=AXIS_FAM[a.axis_id];if(f)supByFam[f]=(a.support_options||[]).map(esc).join(' · ');});
+    var fams=(gm.families||[]);
+    var rows=fams.map(function(f){
+      var id=(f.family_id||'').slice(0,5); var nm=PEP_FAM_NAME[id]||(f.family_id||'');
+      var flags=(f.primary_red_flags||[]); var opts=supByFam[id]||'';
+      return '<div class="proto-item"><div class="t">'+esc(id)+' · '+esc(nm)+'</div>'+
+        (opts?'<div class="d">Support (if goal/trigger): '+opts+'</div>':'<div class="d muted">Support matched per goal — routes to the locked standing order.</div>')+
+        (flags.length?'<div class="d" style="color:var(--gold)">⚠ Hard-stop / eval: '+flags.slice(0,3).map(function(x){return esc((''+x).split(' (')[0]);}).join(', ')+(flags.length>3?'…':'')+'</div>':'')+'</div>';
+    }).join('');
+    el.style.display='block';
+    el.innerHTML='<h2 style="margin-top:0">🧬💧 Peptide-IV Support <span style="font-size:.58rem;color:var(--gold);border:1px solid var(--gold);border-radius:5px;padding:1px 6px;vertical-align:middle;letter-spacing:.06em">SELECTIVE · 9 FAMILIES</span></h2>'+
+      '<div class="muted" style="font-size:.7rem;margin-bottom:8px">Optional support for peptide patients, organized by the 9 locked stack families. A client goal (or symptom) can match — <b>deficiency not required</b>. The shared hard-stop gate clears first; <b>no synergy / efficacy claims</b>. Doses come from the locked standing order.</div>'+
+      (rows||'<div class="muted" style="font-size:.7rem">Family gate-map unavailable.</div>')+
+      '<div class="muted" style="font-size:.64rem;margin-top:6px">Advisory — the provider selects and signs. Hard-stops delegate to the locked <b>wellness-iv-hard-stop</b> gate package; every contraindication/ceiling comes from the locked IV module. Not a treatment claim.</div>';
+  }).catch(function(){ el.style.display='none'; });
+}
+
+fetch('../protocols/iv-module.json').then(function(r){return r.json()}).then(function(d){
+  MOD=d; MENU=d.ingredients||[];
+  try{var s=JSON.parse(localStorage.getItem('allyos_iv_inventory_v1')||'{}');INV=s.inv||{};}catch(e){INV={};}
+  var sess=window.AllyOSAuth&&AllyOSAuth.session();
+  if(sess){var w=document.getElementById('who');if(w)w.textContent=AllyOSAuth.greeting()+' · '+((AllyOSAuth.ROLES[sess.role]||{}).label||sess.role);var mm=document.getElementById('mdMode');if(mm)mm.checked=!!sess.mdOfRecord;}
+  document.getElementById('disc').innerHTML='AllyOS is advisory decision-support for licensed providers — it informs how/what to run an IV/IM bar but does not stop the practice; the provider reviews and signs. Gates enforce only in MD-of-record mode. No PHI is stored (browser-local). © 2026 RenuviaMD® Compliance Division.';
+  fillProtoSelect(); renderProtoRef(); renderQueue(); renderChairs(); renderPepIvSupport();
+}).catch(function(e){ document.getElementById('chairs').innerHTML='<div class="flag crit">Could not load the IV module ('+e.message+').</div>'; });
+
+function mdMode(){return document.getElementById('mdMode').checked;}
+function stackByCode(c){var s=null;(MOD.stacks||[]).forEach(function(x){if(x.code===c)s=x;});return s;}
+function findIng(id){for(var i=0;i<MENU.length;i++)if(MENU[i].id===id)return MENU[i];return null;}
+function matchByName(name){var n=(name||'').toLowerCase();for(var i=0;i<MENU.length;i++){var mn=(MENU[i].name||'').toLowerCase();if(n.indexOf(mn.split(' ')[0])>=0||mn.indexOf(n.split(' ')[0])>=0)return MENU[i];}return null;}
+
+function fillProtoSelect(){
+  var el=document.getElementById('qProto'),html='';
+  (MOD.stacks||[]).forEach(function(s){html+='<option value="'+s.code+'">'+esc(s.code)+' — '+esc(s.title)+'</option>';});
+  el.innerHTML=html;
+}
+function renderProtoRef(){
+  var el=document.getElementById('protoRef'),html='';
+  (MOD.stacks||[]).forEach(function(s){html+='<div class="proto-item"><div class="t">'+esc(s.code)+' · '+esc(s.title)+'</div><div class="d">'+esc(s.infusion_time||'')+'</div></div>';});
+  el.innerHTML=html;
+}
+
+// ---- queue ----
+function addPatient(){
+  var name=document.getElementById('qName').value.trim();if(!name)return;
+  QUEUE.push({id:'q'+QUEUE.length+'_'+name.replace(/\W/g,''),name:name,proto:document.getElementById('qProto').value,time:document.getElementById('qTime').value||'',cleared:document.getElementById('qCleared').checked});
+  document.getElementById('qName').value='';document.getElementById('qTime').value='';document.getElementById('qCleared').checked=false;
+  renderQueue();
+}
+function renderQueue(){
+  var el=document.getElementById('queue');
+  if(!QUEUE.length){el.innerHTML='<div class="muted" style="font-size:.78rem;padding:10px">Queue is empty.</div>';return;}
+  var html='';
+  QUEUE.forEach(function(p){var s=stackByCode(p.proto);
+    html+='<div class="qcard'+(selQ===p.id?' sel':'')+'" onclick="selectQ(\''+p.id+'\')"><div class="nm">'+esc(p.name)+'</div>'+
+      '<div class="meta">'+esc(p.time||'')+'</div>'+
+      '<span class="pill proto">'+esc(p.proto)+'</span> '+
+      '<span class="pill '+(p.cleared?'cleared">GFE cleared':'pending">GFE pending')+'</span></div>';
+  });
+  el.innerHTML=html;
+}
+function selectQ(id){selQ=(selQ===id?null:id);renderQueue();}
+function queuedById(id){for(var i=0;i<QUEUE.length;i++)if(QUEUE[i].id===id)return QUEUE[i];return null;}
+
+// ---- chairs ----
+function renderChairs(){
+  var el=document.getElementById('chairs'),html='';
+  for(var i=0;i<6;i++){var c=CHAIRS[i];
+    if(!c){html+='<div class="chair" onclick="chairClick('+i+')"><div class="n">'+(i+1)+'</div><div class="st">AVAILABLE</div></div>';}
+    else{var cls=c.done?'done':'occupied';html+='<div class="chair '+cls+'" onclick="openMonitor('+i+')"><div class="n" style="font-size:1rem">Chair '+(i+1)+'</div><div class="pt">'+esc(c.patient.name)+'</div><div class="pr">'+esc(c.patient.proto)+'</div><div class="clk" id="clk'+i+'">'+(c.done?'COMPLETE':fmt(c.remain))+'</div><div class="st">'+(c.done?'recheck vitals · discharge':'infusing')+'</div></div>';}
+  }
+  el.innerHTML=html;
+}
+function chairClick(i){
+  if(!selQ){document.getElementById('chairHint').textContent='Select a queued patient first, then tap a chair.';return;}
+  openStart(i, queuedById(selQ));
+}
+
+// ---- build bag from stack ----
+function bagFromStack(s){
+  var comps=(s.components||[]).concat(s.post_drip||[]).concat(s.optional_add_ons||[]).concat(s.same_visit_add_ons||[]);
+  return comps.map(function(c){var ing=matchByName(c.ingredient);return {id:ing?ing.id:'',name:c.ingredient,dose:c.dose||'',ref:ing};});
+}
+function baseFromStack(s){
+  var b=s.base||'0.9% NS 500 mL', vol=500, type='0.9% Normal Saline';
+  if(/250/.test(b))vol=250; else if(/1 L|1000/.test(b))vol=1000; else if(/100 mL|access/i.test(b))vol=100;
+  if(/LR|lactated/i.test(b))type="Lactated Ringer's"; else if(/dedicated/i.test(b))type='Dedicated NAD+ bag (NS)'; else if(/access/i.test(b))type='IV access / push only (no bag)';
+  return {vol:vol,type:type};
+}
+
+// ---- START modal ----
+function openStart(chairIdx, patient){
+  var s=stackByCode(patient.proto); if(!s)return;
+  var bag=bagFromStack(s), base=baseFromStack(s), t=parseTimeMin(s.infusion_time)||45;
+  var ctx={chairIdx:chairIdx,patient:patient,stack:s,bag:bag,baseType:base.type,baseVol:base.vol,infMin:t};
+  modalChair=ctx;
+  var an=analyzeStack(ctx), drip=dripCalc(base.vol,t), stock=stockCheck(bag);
+  var ing=bag.map(function(b){return '<div class="ingline"><span>'+esc(b.name)+'</span><b>'+esc(b.dose||'')+'</b></div>';}).join('');
+  var flags=renderFlags(an);
+  var stockHtml=stock.length?('<div class="box"><div class="ttl">Inventory check (advisory)</div>'+stock.map(function(x){return '<div class="flag '+(x.lvl)+'">'+esc(x.msg)+'</div>';}).join('')+'</div>'):'';
+  var html='<button class="x" onclick="closeModal()">×</button>'+
+    '<h3>Set up — Chair '+(chairIdx+1)+'</h3><div class="sub">'+esc(patient.name)+' · '+esc(s.code)+' '+esc(s.title)+' · GFE '+(patient.cleared?'cleared':'<b style="color:var(--amber)">pending</b>')+'</div>'+
+    '<div class="box"><div class="ttl">Stack (generic) · '+esc(base.type)+' '+base.vol+' mL</div>'+ing+'</div>'+
+    '<div class="box"><div class="ttl">Time &amp; drip</div><div class="row"><div><label class="fld">Infusion time (min)</label><input id="mInf" type="number" value="'+t+'" oninput="reanalyze()"></div></div>'+
+      '<div class="drip" id="mDrip">'+drip+'</div></div>'+
+    stockHtml+
+    '<div class="box"><div class="ttl">AllyOS analysis</div><div id="mFlags">'+flags+'</div></div>'+
+    '<div class="docbtns"><button class="btn g" onclick="genDoc(\'GFE\')">GFE + Consent</button><button class="btn g" onclick="genDoc(\'FORM-02\')">FORM-02</button><button class="btn g" onclick="reviewAlly()">Ask Ally</button></div>'+
+    '<div id="allyAns"></div>'+
+    '<button class="btn start full" id="startTx" style="margin-top:12px" onclick="startTreatment()">▶ Start treatment</button>';
+  showModal(html); updateStartBtn(an);
+}
+function reanalyze(){
+  if(!modalChair)return;
+  modalChair.infMin=parseFloat(document.getElementById('mInf').value)||0;
+  var an=analyzeStack(modalChair);
+  document.getElementById('mFlags').innerHTML=renderFlags(an);
+  document.getElementById('mDrip').innerHTML=dripCalc(modalChair.baseVol,modalChair.infMin);
+  updateStartBtn(an);
+}
+function updateStartBtn(an){
+  var btn=document.getElementById('startTx');if(!btn)return;
+  // advisory by default — enabled; MD-mode enforces
+  if(mdMode()){ btn.disabled = !(modalChair.patient.cleared && an.crit===0); }
+  else btn.disabled=false;
+}
+function startTreatment(){
+  var ctx=modalChair; if(!ctx)return;
+  if(!mdMode()){
+    var an=analyzeStack(ctx),issues=[];
+    if(!ctx.patient.cleared)issues.push('GFE / consent not confirmed');
+    if(an.crit>0)issues.push(an.crit+' critical advisory(ies) unresolved');
+    if(issues.length && !confirm('Before starting:\n• '+issues.join('\n• ')+'\n\nAllyOS is advisory — it does not stop you. The provider owns this decision and signature. Start anyway?'))return;
+  }
+  var i=ctx.chairIdx, total=(ctx.infMin||0)*60;
+  CHAIRS[i]={patient:ctx.patient,stack:ctx.stack,bag:ctx.bag,baseType:ctx.baseType,baseVol:ctx.baseVol,infMin:ctx.infMin,remain:total,total:total,done:false,lastMon:0,timer:null};
+  QUEUE=QUEUE.filter(function(p){return p.id!==ctx.patient.id;}); selQ=null;
+  runChair(i); closeModal(); renderQueue(); renderChairs();
+}
+function runChair(i){
+  var c=CHAIRS[i]; beep(150,660);
+  c.timer=setInterval(function(){
+    c.remain--; var el=document.getElementById('clk'+i); if(el)el.textContent=fmt(Math.max(0,c.remain));
+    var em=Math.floor((c.total-c.remain)/60);
+    if(em>c.lastMon && ((em<=15&&em%5===0)||(em>15&&em%15===0))){c.lastMon=em;beep(200,990);}
+    if(c.remain<=0){clearInterval(c.timer);c.timer=null;c.done=true;beep(800,880);setTimeout(function(){beep(800,880);},900);renderChairs();if(modalChair&&modalChair.monitor===i)openMonitor(i);}
+  },1000);
+}
+
+// ---- MONITOR modal ----
+function openMonitor(i){
+  var c=CHAIRS[i];if(!c)return; modalChair={monitor:i,stack:c.stack,bag:c.bag,baseType:c.baseType,baseVol:c.baseVol,infMin:c.infMin,patient:c.patient};
+  var ing=c.bag.map(function(b){return '<div class="ingline"><span>'+esc(b.name)+'</span><b>'+esc(b.dose||'')+'</b></div>';}).join('');
+  var html='<button class="x" onclick="closeModal()">×</button>'+
+    '<h3>Chair '+(i+1)+' — '+esc(c.patient.name)+'</h3><div class="sub">'+esc(c.stack.code)+' '+esc(c.stack.title)+'</div>'+
+    '<div class="monclock" id="mClk">'+(c.done?'COMPLETE':fmt(c.remain))+'</div><div class="monmsg" id="mMon">'+(c.done?'Infusion complete — recheck vitals &amp; discharge':'infusing · vitals checks at 5/10/15 then q15 min')+'</div>'+
+    '<div class="box"><div class="ttl">Bag</div>'+ing+'</div>'+
+    '<div class="docbtns"><button class="btn g" onclick="genDoc(\'FORM-05\')">FORM-05 Monitoring</button><button class="btn g" onclick="genDoc(\'FORM-03\')">FORM-03 Handout</button></div>'+
+    '<div class="row" style="margin-top:12px"><div><button class="btn stop full" onclick="stopChair('+i+')">'+(c.done?'Discharge &amp; free chair':'■ Stop / free chair')+'</button></div></div>';
+  showModal(html);
+  // live-update the monitor clock
+  if(window._monI)clearInterval(window._monI);
+  window._monI=setInterval(function(){var cc=CHAIRS[i];if(!cc){clearInterval(window._monI);return;}var e=document.getElementById('mClk');if(e)e.textContent=cc.done?'COMPLETE':fmt(Math.max(0,cc.remain));},1000);
+}
+function stopChair(i){var c=CHAIRS[i];if(c&&c.timer)clearInterval(c.timer);CHAIRS[i]=null;if(window._monI)clearInterval(window._monI);closeModal();renderChairs();}
+
+// ---- analysis engine (data-driven from the locked module) ----
+function bagTags(bag,baseType){var t={};bag.forEach(function(it){var n=(it.name||'').toLowerCase();
+  if(/vitamin c|vit c|ascorbic/.test(n))t.vitc=it; if(/calcium/.test(n))t.calcium=it; if(/glutathione/.test(n))t.glutathione=it;
+  if(/magnesium|(^|\b)mg\b/.test(n))t.mg=it; if(/nad/.test(n))t.nad=it; if(/trace mineral/.test(n))t.trace=it;
+  if(/zinc|(^|\b)zn\b/.test(n))t.zinc=it; if(/selenium/.test(n))t.selenium=it; if(/b-complex|vita complex/.test(n))t.bcomplex=it;});
+  if(/lactated/i.test(baseType))t.lr=true; return t;}
+function analyzeStack(ctx){
+  var bag=ctx.bag,t=ctx.infMin||0,flags=[],crit=0,warn=0;
+  function add(l,ti,b){flags.push({l:l,t:ti,b:b});if(l==='crit')crit++;if(l==='warn')warn++;}
+  if(ctx.patient&&ctx.patient.cleared)add('ok','GFE Gate-0 confirmed','Provider GFE clearance on file for this patient.');
+  else add('crit','GFE Gate-0 not confirmed','No provider GFE clearance recorded for this patient. Confirm the GFE/consent before infusing (advisory unless MD-of-record mode).');
+  var tags=bagTags(bag,ctx.baseType);
+  var keymap={'vit c':'vitc','vitamin c':'vitc','ascorbic':'vitc','calcium':'calcium','glutathione':'glutathione','mg':'mg','magnesium':'mg','ca':'calcium','nad':'nad','trace':'trace','zn':'zinc','zinc':'zinc','se':'selenium','selenium':'selenium','b-complex':'bcomplex','lr':'lr','ceftriaxone':'ceftriaxone'};
+  (MOD.compatibility_matrix&&MOD.compatibility_matrix.rules||[]).forEach(function(rule){
+    var combo=(rule.combination||'').toLowerCase(),need=[];
+    Object.keys(keymap).forEach(function(k){if(combo.indexOf(k)>=0&&need.indexOf(keymap[k])<0)need.push(keymap[k]);});
+    if(need.length<2)return;if(!need.every(function(tg){return !!tags[tg];}))return;
+    var st=(rule.status||'').toUpperCase(),lvl=st.indexOf('INCOMPAT')>=0?'crit':(st==='COMPATIBLE'?'ok':'warn');
+    add(lvl,'Compatibility — '+rule.status,esc(rule.combination)+'. '+esc(rule.rationale||'')+(rule.action?(' → '+esc(rule.action)):''));});
+  if(tags.glutathione)add('warn','Glutathione handling','IV PUSH only (post-drip) — never in the bag, never with Vit C.');
+  if(tags.nad&&bag.length>1)add('warn','NAD+ dedicated bag','NAD+ must run in a dedicated bag — never co-mixed.');
+  if(tags.nad&&t){var ng=parseGrams(tags.nad.dose),mg=ng!=null?ng*1000:null;
+    if(mg!=null&&mg>=500&&t<180)add('crit','NAD+ rate too fast','NAD+ '+mg+' mg requires ≥ 180 min. Time '+t+' min is too fast.');
+    else if(mg!=null&&mg>=250&&t<120)add('crit','NAD+ rate too fast','NAD+ '+mg+' mg requires ≥ 120 min first session.');}
+  if(tags.mg&&t&&t<15)add('warn','Magnesium rate','Mg must infuse ≥ 15 min. Time '+t+' min is below the minimum.');
+  if(tags.vitc){var g=parseGrams(tags.vitc.dose);if(g!=null&&g>6)add('warn','CARD-VC screen','Vitamin C '+g+' g > 6 g — CARD-VC verbal screen (incl. G6PD) required.');}
+  bag.forEach(function(it){if(it.ref&&it.ref.ceiling){var dv=parseGrams(it.dose),cv=parseGrams(it.ref.ceiling);if(dv!=null&&cv!=null&&dv>cv)add('crit','Ceiling exceeded — '+esc(it.name),'Dose '+it.dose+' above ceiling ('+it.ref.ceiling+').');}});
+  bag.forEach(function(it){if(it.ref&&it.ref.guardrail){var lvl=/serotonin|insulin autoimmune|vesicant|hyperkalemia|safety-critical/i.test(it.ref.guardrail)?'crit':'warn';add(lvl,'Caution — '+esc(it.name),esc(it.ref.guardrail));}});
+  // osmolarity
+  var og=MOD.osmolarity_guidance||{},baseOsm=(og.base_osmolarity_mOsm_L||{})[ctx.baseType]||308,hyper=[],hiVitC=false;
+  bag.forEach(function(it){var n=(it.name||'').toLowerCase();if(/vitamin c|vit c|ascorbic/.test(n)){var g=parseGrams(it.dose);if(g!=null&&g>=7){hyper.push('high-dose Vit C ('+g+' g)');hiVitC=true;}}if(/calcium chloride/.test(n))hyper.push('Calcium Chloride');if(/amino blend|amino acid/.test(n))hyper.push('amino acids');if(/nad/.test(n))hyper.push('NAD+');});
+  if(hyper.length){var conc=hiVitC&&ctx.baseVol<=250,lvl=conc?'crit':'warn',lim=og.peripheral_limit_mOsm_L||900;add(lvl,'Osmolarity — '+(conc?'high (concentrated)':'raised (estimate)'),'Base ~'+baseOsm+' mOsm/L. Hyperosmolar: '+hyper.join(', ')+'. ESTIMATE — verify. Peripheral limit ~'+lim+' mOsm/L; if exceeded use a larger bag or central access.'+(conc?' Low-volume + high-dose Vit C — strongly consider a larger bag/central access.':''));}
+  return {flags:flags,crit:crit,warn:warn};
+}
+function renderFlags(an){var v=an.crit>0?('hold|REVIEW — '+an.crit+' critical advisory(ies)'):(an.warn>0?('review|'+an.warn+' advisory(ies)'):'go|No conflicts flagged — provider reviews & signs');var parts=v.split('|');
+  var html='<div class="flag '+(parts[0]==='hold'?'crit':parts[0]==='review'?'warn':'ok')+'"><b>Verdict</b>'+parts[1]+'</div>';
+  an.flags.forEach(function(f){html+='<div class="flag '+f.l+'"><b>'+f.t+'</b>'+f.b+'</div>';});return html;}
+
+function stockCheck(bag){
+  var out=[];bag.forEach(function(it){var ing=it.ref||matchByName(it.name);if(!ing)return;var r=INV[ing.id];if(!r)return;var s=+r.stock||0,par=+r.par||0;if(s<=0)out.push({lvl:'crit',msg:'OUT of stock: '+it.name+(r.sku?(' ('+r.sku+')'):'')});else if(s<=par)out.push({lvl:'warn',msg:'Low stock: '+it.name+' ('+s+' left)'});});
+  return out;
+}
+function dripCalc(vol,t){var df=15;if(!vol||!t)return'<div><span>set time</span></div>';var og=(MOD&&MOD.osmolarity_guidance&&MOD.osmolarity_guidance.base_osmolarity_mOsm_L)||{};return '<div><span>Drip</span><b>'+Math.round(vol/t*df)+' gtt/min</b></div><div><span>Pump</span><b>'+Math.round(vol/t*60)+' mL/hr</b></div><div><span>Vol/time</span><b>'+vol+' mL / '+t+' min</b></div>';}
+
+// ---- docs (reused) ----
+function stackSummary(){var ctx=modalChair||{};var s=ctx.stack||{};return {name:(s.title||'')+' ('+(s.code||'')+')',base:(ctx.baseType||'')+' '+(ctx.baseVol||'')+' mL',time:ctx.infMin||'',items:(ctx.bag||[]).map(function(b){return b.name+(b.dose?(' — '+b.dose):'');}),patient:(ctx.patient&&ctx.patient.name)||'',provider:''};}
+function genDoc(type){
+  var s=stackSummary(),today=new Date().toLocaleDateString();
+  var title={'GFE':'FORM-INTAKE-GFE-01 — Patient Intake, Consent & Wellness IV GFE','FORM-02':'FORM-02 — Pre-Infusion Verify Checklist','FORM-05':'FORM-05 — Wellness IV Infusion Monitoring Sheet','FORM-03':'FORM-03 — Post-IV Aftercare Handout'}[type];
+  var ing='<ul>'+s.items.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>',body='';
+  if(type==='GFE'){
+    body='<h3>A. Patient Information</h3><p>Name '+(esc(s.patient)||'____________')+'  DOB __________  Date '+today+'<br>Phone __________  Email __________  MRN __________</p>'+
+    '<h3>B. Health History (check all)</h3><ul class="ck">'+['Diabetes','High BP','Heart disease/stroke','Kidney disease/dialysis','Liver disease','Asthma/COPD','Active cancer/treatment','Pregnancy/breastfeeding','Bleeding disorder/blood thinners','G6PD deficiency','Surgery &lt; 30 days','None'].map(function(x){return '<li>☐ '+x+'</li>';}).join('')+'</ul>'+
+    '<h3>C. Allergies</h3><p>☐ NKDA ☐ Yes: __________</p><h3>D. Medications / Supplements</h3><p>__________________________</p>'+
+    '<h3>E. Acknowledgment &amp; Consent</h3><ul class="ck">'+['IV/IM nutrient therapy is supportive wellness only — not to diagnose, treat, cure, reverse, prevent, or manage disease.','I authorize a Good Faith Exam / wellness eligibility evaluation before therapy.','The provider may hold treatment and refer me (PCP, urgent care, ED, EMS/911) if indicated.','Risks include vein irritation, bruising, infiltration, flushing, dizziness, nausea, allergic/vasovagal reaction, rare serious reaction.','I consent to IV/IM therapy under the clinic’s active wellness protocols.','I consent to emergency measures and EMS/911 if a serious adverse event occurs.'].map(function(x){return '<li>☐ '+x+'</li>';}).join('')+'</ul>'+
+    '<p>Patient signature ____________________ Date/Time ______ Witness __________</p>'+
+    '<h3 style="border-top:2px solid #0e3a40;padding-top:8px">Provider — GFE / Eligibility</h3><p>Vitals BP __/__ HR __ RR __ Temp __ SpO2 __%</p><p>Requested protocol: <b>'+esc(s.name)+'</b></p><p>Decision: ☐ Eligible ☐ Eligible w/ limitation ☐ Held · Referred: ☐ PCP ☐ Specialist ☐ Urgent ☐ ED ☐ EMS</p><p>Provider signature ____________ Credential ____ Lic# ______ Date ______</p>';
+  } else if(type==='FORM-02'){
+    body='<p><b>Stack:</b> '+esc(s.name)+' · <b>Base:</b> '+esc(s.base)+' · '+esc(s.time)+' min</p><p><b>Components:</b></p>'+ing+'<h3>Pre-infusion checklist</h3><ul class="ck">'+['GFE on file &lt;12-mo / patient cleared','Identity verified · age ≥ 18','Allergies reviewed','Meds/supplements reviewed','Baseline vitals recorded','No hold/referral criteria','Ingredient screens cleared (G6PD/CARD-VC, asthma, renal/Mg, digoxin/Ca)','Consent confirmed'].map(function(x){return '<li>☐ '+x+'</li>';}).join('')+'</ul><p>Vitals BP __/__ HR __ RR __ Temp __ SpO2 __% · RN ____________ Date ______</p>';
+  } else if(type==='FORM-05'){
+    body='<p><b>Stack:</b> '+esc(s.name)+' · '+esc(s.base)+' · '+esc(s.time)+' min</p>'+ing+'<table border="1" cellpadding="6" style="width:100%;border-collapse:collapse;margin-top:8px"><tr><th>Time</th><th>BP</th><th>HR</th><th>SpO2</th><th>Site</th><th>Symptoms/intervention</th></tr>'+['Pre','5','10','15','30','End'].map(function(r){return '<tr><td>'+r+'</td><td></td><td></td><td></td><td></td><td></td></tr>';}).join('')+'</table><p>AE (FORM-04 if serious): __________ · Stable for discharge ☐ · RN ____________</p>';
+  } else {
+    body='<p>You received <b>'+esc(s.name)+'</b>.</p><h3>Aftercare</h3><ul><li>Keep bandage ~1 hr; hydrate over 24 hr.</li><li>Mild fatigue / urine color change can be normal.</li><li>Drive only if fully recovered.</li></ul><h3>Call 911 for:</h3><ul><li>Hives, wheezing, facial/throat swelling, trouble breathing</li><li>Chest pain, severe dizziness, fainting</li></ul><p>Non-emergency: contact the clinic within 24 hr.</p>';
+  }
+  var w=window.open('','_blank');
+  w.document.write('<html><head><title>'+title+'</title><style>body{font-family:-apple-system,Segoe UI,Arial,sans-serif;color:#1c2b32;max-width:760px;margin:30px auto;padding:0 20px;line-height:1.5}h1{color:#0e3a40;font-size:1.2rem;border-bottom:3px solid #0e8a8a;padding-bottom:8px}h3{color:#0e3a40;margin-top:16px}ul.ck{list-style:none;padding-left:0}ul.ck li{margin:4px 0}small{color:#5b6b72}@media print{button{display:none}}</style></head><body><h1>RenuviaMD® · AllyOS — '+title+'</h1><p><small>'+esc(s.patient?('Patient: '+s.patient+' · '):'')+'Date: '+today+'</small></p>'+body+'<p><small>Wellness IV/IM decision-support — not medical/legal advice. Adults ≥ 18. No PHI stored. © RenuviaMD® Compliance Division.</small></p><button onclick="window.print()" style="margin-top:14px;padding:10px 18px;background:#0e8a8a;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">🖨 Print</button></body></html>');
+  w.document.close();
+}
+
+// ---- Ask Ally ----
+function reviewAlly(){
+  var s=stackSummary();
+  var q='Review this wellness IV/IM stack from the AllyOS nursing station against the locked IV module — flag compatibility, ceiling, rate, osmolarity, contraindication, GFE, or scope issues; honest advisory verdict; do not invent doses.\n\nStack: '+s.name+'\nBase: '+s.base+'\nTime: '+s.time+' min\nIngredients:\n'+s.items.map(function(x){return '- '+x;}).join('\n');
+  var el=document.getElementById('allyAns');if(!el)return;el.innerHTML='<div class="flag info">…</div>';
+  fetch('/.netlify/functions/ask',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:q}]})})
+  .then(function(r){return r.json()}).then(function(j){var t=j.text||(j.error==='not_configured'?'Ally not connected (set ANTHROPIC_API_KEY, redeploy).':'Ally couldn’t reach the model.');el.innerHTML='<div class="flag info"><b>Ally</b>'+esc(t).replace(/\n/g,'<br>')+'</div>';})
+  .catch(function(e){el.innerHTML='<div class="flag crit">Network error ('+e.message+').</div>';});
+}
+
+// ---- utils / modal ----
+function showModal(html){document.getElementById('modal').innerHTML=html;document.getElementById('overlay').classList.add('show');}
+function closeModal(){document.getElementById('overlay').classList.remove('show');modalChair=null;if(window._monI)clearInterval(window._monI);}
+function beep(ms,f){try{var ac=new(window.AudioContext||window.webkitAudioContext)(),o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.frequency.value=f||880;o.start();g.gain.setValueAtTime(.22,ac.currentTime);g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+ms/1000);o.stop(ac.currentTime+ms/1000);}catch(e){}}
+function fmt(s){s=Math.max(0,s|0);var m=Math.floor(s/60),x=s%60;return (m<10?'0':'')+m+':'+(x<10?'0':'')+x;}
+function parseGrams(s){if(!s)return null;s=(''+s).toLowerCase();var m=s.match(/([\d.]+)\s*(g|mg|mcg)/);if(!m)return null;var v=parseFloat(m[1]);if(m[2]==='mg')v/=1000;if(m[2]==='mcg')v/=1000000;return v;}
+function parseTimeMin(s){if(!s)return null;s=(''+s).toLowerCase();var h=s.match(/([\d.]+)\s*(?:–|-|to)?\s*([\d.]+)?\s*hr/);if(h)return Math.round((parseFloat(h[1])||0)*60);var m=s.match(/([\d.]+)\s*(?:–|-|to)?\s*([\d.]+)?\s*min/);if(m)return Math.round(parseFloat(m[1])||0);return null;}
+function esc(s){return(''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+<script src="allyos-help.js"></script>
+</body></html>

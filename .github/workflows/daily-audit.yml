@@ -5,6 +5,10 @@ on:
   schedule:
     - cron: '0 4 * * *'      # 04:00 UTC daily
   workflow_dispatch: {}       # manual trigger from the Actions tab (the admin "Run now" button)
+  push:                       # CI gate — also run on every push that touches AllyOS
+    paths: ['allyos/**', 'protocols/**', 'netlify/**', 'scripts/**', '.github/workflows/daily-audit.yml']
+  pull_request:
+    paths: ['allyos/**', 'protocols/**', 'netlify/**', 'scripts/**']
 
 permissions:
   contents: read
@@ -15,7 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate data + reconstitution math
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Audit codebase (JSON · inline JS · functions · calc · links · refs)
         run: python3 scripts/health-check.py
       - name: Upload status (read by the Master Console)
         if: always()
@@ -25,16 +31,35 @@ jobs:
           path: allyos/admin-status.json
 
   # Operations Auditor — re-verifies clinical content (citations resolve, label
-  # doses/contraindications current, no drift) via the Claude API on the highest
-  # model. Requires the ANTHROPIC_API_KEY repo secret; wired from the cockpit.
-  #
-  # ops-audit:
-  #   name: Operations Auditor (Opus)
-  #   runs-on: ubuntu-latest
-  #   needs: health
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Re-audit clinical content
-  #       env:
-  #         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-  #       run: python3 scripts/ops-audit.py    # multi-Opus-auditor pass; emits a needs-fix report
+  # doses/contraindications current, no efficacy overclaim, advisory posture) via the
+  # Claude API on Opus. Schedule + on-demand only (NOT every push — it costs API calls).
+  # Requires the ANTHROPIC_API_KEY GitHub Actions secret (separate from Netlify's env).
+  ops-audit:
+    name: Operations Auditor (Opus) — clinical-content re-verification
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    needs: health
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - name: Re-verify clinical content (Opus)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 scripts/ops-audit.py
+      - name: Commit the audit report (so the cockpit shows it)
+        if: always()
+        run: |
+          git config user.name "allyos-bot"
+          git config user.email "bot@renuviamd.com"
+          git add allyos/ops-audit-status.json allyos/ops-audit-review-queue.csv || true
+          git commit -m "ops-audit: clinical-content re-verification ($(date -u +%F))" || echo "no changes"
+          git push || echo "push skipped"
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ops-audit-report
+          path: allyos/ops-audit-status.json

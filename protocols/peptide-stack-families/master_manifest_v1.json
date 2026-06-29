@@ -1,0 +1,73 @@
+{
+  "package_name": "peptide_stack_family_master_v1",
+  "date_updated": "2026-06-29",
+  "architecture": "client goal -> stack family -> 2/3/4 peptide build -> safety gate -> IV/IM support match -> standing order",
+  "family_count": 9,
+  "wellness_goal_trigger_allowed": true,
+  "deficiency_required": false,
+  "safety_gate_required_first": true,
+  "no_regulatory_logic": true,
+  "no_dosing_or_rate_logic": true,
+  "counts": {
+    "families": 9,
+    "iv_im_match_records": 9,
+    "selector_logic_records": 2,
+    "safety_gate_map_records": 9,
+    "validation_cases": 10,
+    "source_audit_records": 22
+  },
+  "jsonl_parse_counts": {
+    "peptide_stack_family_master_v1.jsonl": 9,
+    "peptide_stack_family_iv_im_match_v1.jsonl": 9,
+    "peptide_stack_selector_logic_v1.jsonl": 2,
+    "peptide_stack_family_safety_gate_map_v1.jsonl": 9
+  },
+  "unresolved_source_ids": [],
+  "files": [
+    {
+      "filename": "peptide_stack_family_master_v1.jsonl",
+      "bytes": 10099,
+      "sha256": "40b395586bc70e76790b77180f4b76f074335666c35e9120fed9d87a9bc70f0b"
+    },
+    {
+      "filename": "peptide_stack_family_master_v1.csv",
+      "bytes": 8536,
+      "sha256": "96911a735a3e4e94a838db2e383e80d60b197e1c4821298b735c4b899a12752d"
+    },
+    {
+      "filename": "peptide_stack_family_iv_im_match_v1.jsonl",
+      "bytes": 7433,
+      "sha256": "21f7bb20dcb0b6c0b322a8fc4bd5ae4420567893b3be04c6828d97c2d48cec5b"
+    },
+    {
+      "filename": "peptide_stack_family_iv_im_match_v1.csv",
+      "bytes": 5730,
+      "sha256": "c959f7c10f1e49023cbe2a23a58ed43b10d10ea73e5ff1edfa000d99005d098d"
+    },
+    {
+      "filename": "peptide_stack_selector_logic_v1.jsonl",
+      "bytes": 1473,
+      "sha256": "ed79c9d094fafb11c078cf2f1f024abb3193eb6ca688d5f23ece4af849eb88fe"
+    },
+    {
+      "filename": "peptide_stack_family_safety_gate_map_v1.jsonl",
+      "bytes": 2230,
+      "sha256": "b8df24e83f38dc5528daaffca117282c68ecb26cf55bdc681b58a39ceac20e18"
+    },
+    {
+      "filename": "peptide_stack_family_source_audit_v1.csv",
+      "bytes": 7460,
+      "sha256": "d89cf81273b64f7f1b688be3b00672bb4b91f3691dfd762e0fdd44eb7152aafa"
+    },
+    {
+      "filename": "peptide_stack_family_validation_cases_v1.csv",
+      "bytes": 1650,
+      "sha256": "f9ae4c4285809dac08833af10497affc68e4971cb5d11c8239487323560ebf32"
+    },
+    {
+      "filename": "peptide_stack_family_master_report_v1.md",
+      "bytes": 2397,
+      "sha256": "6b5c7223e2519d23462facf32333b62558a670f5dddb252b6aa84e84cab0fdc7"
+    }
+  ]
+}

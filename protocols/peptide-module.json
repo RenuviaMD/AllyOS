@@ -1,0 +1,178 @@
+{
+  "meta": {
+    "id": "peptide-module",
+    "title": "AllyOS Peptides — Provider CDS Operating Module",
+    "version": "1.0",
+    "status": "locked",
+    "requires_md_signoff": true,
+    "md_signoff": { "by": "Armando A. Falcon, MD", "license": "FL ME 84789", "role": "Medical Director — governance / framework approval (not per-patient treating provider)", "date": "2026-06-28", "verify_disposition": "All (VERIFY) research/compounded/investigational contraindications reviewed and ACCEPTED as conservative clinical advisories (non-FDA-label). Tesamorelin off-label consent tier confirmed Tier 2." },
+    "effective": "2026-06-28",
+    "source": "Consolidated from the AllyOS locked peptide data layer: peptide-packs.json (grade->tier + consent), contraindications.json (per-agent absolute/relative), peptide-interactions.json (cross-agent rules), monitoring-map.json (lab/vital monitoring), intake-schema.json (override policy + red-flag screen). This module is the distilled OPERATING layer; the component files remain the deep reference.",
+    "curated_by": "Armando A. Falcon, MD (FL ME 84789) — RenuviaMD® PLLC, AllyOS Compliance Division",
+    "scope": "Provider decision-support for a cash-pay peptide program — metabolic (GLP-1/incretin backbones + cyclable adjuncts) and the FDA-approved peptide agents with a label. Grade->consent-tier matching, red-flag/GLP-1 screen, absolute/relative contraindications, cross-agent interaction flags, and monitoring. NOT a product list, NOT a recommendation to use any agent, NOT autonomous prescribing.",
+    "honesty_discipline": "Provider-facing only; never patient-facing output. No doses (decision-support, not a prescription). FDA-approved agents (GLP-1s, tesamorelin, PT-141/Vyleesi, SS-31/FORZINITY) carry LABEL-established contraindications. ALL OTHER agents (research/compounded/investigational) have NO formal label list — their absolutes are prudent-convention and relatives are mechanism-based, each marked VERIFY pending Medical Director sign-off. No empiric/anti-aging/longevity efficacy claims. The provider confirms and prescribes every decision.",
+    "phi_posture": "PHI stays local (clinic/provider). AllyOS holds no PHI; only the de-identified decision marker flows to MD oversight. Consent/intake are generated on-device via the Visit Packet under the clinic's own HIPAA responsibility."
+  },
+
+  "output_rules": {
+    "provider_only": "Outputs only provider-facing clinical decision-support. No patient education, marketing claims, or 'dear patient' language. No doses.",
+    "evidence_status_classes": ["FDA_LABEL", "GUIDELINE", "MECHANISM_VERIFY", "PRUDENT_CONVENTION_VERIFY", "INVESTIGATIONAL"],
+    "no_source_response": "NO VERIFIED LABEL/SOURCE for this agent/claim — present as VERIFY, provider review required; do not state as established.",
+    "no_empiric_pathway": ["anti-aging", "longevity optimization", "compounded is safer/purer", "GH peptides build muscle as claimed", "research peptide equals approved drug", "stack synergy proven"],
+    "prescriber_authority": {
+      "authorized_roles": ["physician", "DO", "APRN", "ARNP", "PA"],
+      "rn_staff": "RN/MA/coordinator may assist with intake, vitals, med reconciliation, lab collection/upload, scheduling, routing, and provider-approved education. They may NOT diagnose, determine candidacy, select an agent, prescribe, authorize refills, change doses, interpret labs for medication decisions, clear contraindications, or clear red flags.",
+      "block_message": "BLOCKED — peptide medication decision requires an authorized APP/physician provider of record. RN/staff support intake and routing only.",
+      "source_class": "LOCAL_POLICY + FL §464.012 APRN / §458.347 PA"
+    }
+  },
+
+  "consent_tiers": {
+    "1": "Standard — FDA-approved, on-label (1–2 pg consent)",
+    "2": "Enhanced — FDA-approved off-label / Grade B (2–3 pg, off-label disclosure)",
+    "3": "Comprehensive experimental — Grade C / investigational / not-FDA-approved (4–6 pg, experimental attestation)",
+    "4": "Maximal — Grade D, generally not recommended (6–10 pg, maximum disclosure)"
+  },
+  "grade_to_tier": {
+    "A_on_label": 1, "A_off_label": 2, "B": 2, "C": 3, "D": 4, "investigational_not_approved": 3,
+    "rule": "Consent tier = the agent's matched tier. A stack's tier = the HIGHEST component tier. Investigational/not-approved forces Tier 3 even if trial-grade is B (e.g. retatrutide)."
+  },
+
+  "metabolic_red_flag_screen": {
+    "note": "One shared metabolic/GLP-1 red-flag screen covers every metabolic-line agent (authored once, reused).",
+    "hard_screen": ["Personal/family history of MTC (medullary thyroid carcinoma) — boxed warning", "MEN 2 (multiple endocrine neoplasia 2) — boxed warning", "Pregnancy / positive pregnancy test", "Active malignancy"],
+    "screen": ["Pancreatitis history", "Gallbladder disease / cholelithiasis", "Severe gastroparesis / severe GI motility disease", "Type 1 diabetes / DKA history (GLP-1 is not insulin and not for T1DM)", "Significant kidney disease (e.g. GFR<30) / volume depletion", "Diabetic retinopathy", "Insulin or sulfonylurea use (hypoglycemia risk)", "Eating disorder / restrictive dieting", "Serious prior hypersensitivity"],
+    "female_reproductive_required": ["Pregnancy status + test", "LMP", "Contraception / planning pregnancy", "Breastfeeding"],
+    "glp1_indication_threshold": "BMI >=30, or 27–29.9 + a weight-related comorbidity (Grade A, FDA Wegovy/Zepbound labels)."
+  },
+
+  "glp1_rules": {
+    "one_backbone_only": "Exactly ONE GLP-1/incretin backbone at a time. Never run two GLP-1/incretins concurrently — they overlap mechanistically and are continuous, not cycled. To change agent, use the TRANSITION / switch protocol, do not co-administer.",
+    "continuous_not_cycled": "GLP-1/incretin backbones are continuous (chronic, titrated), not cycled.",
+    "stack_rule": "Weight-loss stack = 1 GLP-1 backbone + 1–2 of {sermorelin, AOD-9604}. Metabolic stack = <=1 GLP-1 backbone + 1–3 cyclable adjuncts {sermorelin, AOD-9604, MOTS-c, SS-31}, total <=3 agents. Selecting a second GLP-1 routes to the Transition Protocol.",
+    "pregnancy": "GLP-1/incretins contraindicated in pregnancy; discontinue ~5 half-lives before planned conception (Grade A)."
+  },
+
+  "formulary": {
+    "note": "Stocked/operational agents. evidence_status: FDA_LABEL = label-established; VERIFY = prudent-convention/mechanism-based pending MD sign-off. No doses.",
+    "glp1_backbones": [
+      { "slug": "semaglutide", "name": "Semaglutide", "grade": "A", "consent_tier": 1, "fda_status": "FDA-approved", "evidence_status": "FDA_LABEL", "cadence": "continuous (chronic, titrated)", "stackable_with_other_glp1": false,
+        "absolute": ["Personal/family hx MTC (boxed warning)", "MEN 2 (boxed warning)", "Prior serious hypersensitivity (anaphylaxis/angioedema)", "Pregnancy — discontinue when recognized"],
+        "relative": ["Pancreatitis hx (d/c if suspected; do not restart if confirmed)", "Severe gastroparesis / severe GI motility disease", "Diabetic retinopathy (SUSTAIN-6 signal)", "Cholelithiasis / gallbladder disease", "Volume depletion / CKD (AKI from GI losses)", "Insulin or sulfonylureas (hypoglycemia)", "Lactation; severe hepatic impairment", "Peri-procedure aspiration risk"],
+        "monitoring_baseline": ["A1c", "Fasting glucose", "Renal function/eGFR", "BP/HR"], "monitoring_followup": ["BP/HR (~4 wk & each up-titration)", "Fasting glucose (3 mo)"] },
+      { "slug": "tirzepatide", "name": "Tirzepatide", "grade": "A", "consent_tier": 1, "fda_status": "FDA-approved", "evidence_status": "FDA_LABEL", "cadence": "continuous (chronic, titrated)", "stackable_with_other_glp1": false,
+        "absolute": ["Personal/family hx MTC (boxed warning)", "MEN 2 (boxed warning)", "Serious hypersensitivity to tirzepatide or excipients"],
+        "relative": ["Acute/recent pancreatitis (d/c if suspected; do not restart if confirmed)", "Severe gastroparesis / severe GI disease", "Pregnancy/planning (fetal harm; reduced oral-contraceptive efficacy — barrier/non-oral 4 wk after start & each dose increase)", "Cholelithiasis / gallbladder disease", "Diabetic retinopathy (monitor with rapid glycemic improvement)", "Insulin/sulfonylureas (hypoglycemia)", "Volume depletion / CKD (AKI)", "Lactation; age <18; peri-procedure aspiration"],
+        "monitoring_baseline": ["A1c", "Fasting glucose", "Renal function/eGFR", "BP/HR"], "monitoring_followup": ["BP/HR (~4 wk & each up-titration)", "A1c, Fasting glucose, Renal function/eGFR (3 mo, 6 mo + every 3–6 mo)"] },
+      { "slug": "liraglutide", "name": "Liraglutide", "grade": "A", "consent_tier": 1, "fda_status": "FDA-approved", "evidence_status": "FDA_LABEL", "cadence": "continuous (chronic, daily)", "stackable_with_other_glp1": false,
+        "absolute": ["Personal/family hx MTC (boxed warning)", "MEN 2 (boxed warning)", "Serious hypersensitivity to liraglutide or excipients", "Pregnancy (Saxenda) — discontinue when recognized"],
+        "relative": ["Pancreatitis hx (d/c if suspected; do not restart if confirmed)", "Severe gastroparesis / severe GI disease", "Cholelithiasis / gallbladder disease", "Insulin/sulfonylureas (hypoglycemia)", "Renal impairment / volume depletion (AKI)", "Lactation; severe hepatic impairment", "Peri-procedure aspiration"],
+        "monitoring_baseline": ["A1c", "Fasting glucose", "Renal function/eGFR", "BP/HR"], "monitoring_followup": ["A1c, Fasting glucose, Renal function/eGFR (6 mo + every 3–6 mo)"] },
+      { "slug": "retatrutide", "name": "Retatrutide", "grade": "B", "consent_tier": 3, "fda_status": "investigational — NOT FDA-approved (Phase 3)", "evidence_status": "INVESTIGATIONAL", "cadence": "continuous (investigational)", "stackable_with_other_glp1": false,
+        "absolute": ["(VERIFY) Personal/family MTC or MEN 2 — class signal, not label-established", "(VERIFY) Hypersensitivity to peptide/diluent", "(VERIFY) Pregnancy/planning; lactation"],
+        "relative": ["(VERIFY) Acute/recent pancreatitis", "(VERIFY) Severe gastroparesis / severe GI disease", "(VERIFY) Tachyarrhythmia / uncontrolled arrhythmia / decompensated HF / ischemic heart disease — dose-dependent HR rise; baseline HR/ECG if cardiac risk", "(VERIFY) Cholelithiasis / gallbladder disease", "(VERIFY) Insulin/sulfonylureas (hypoglycemia)", "(VERIFY) Volume depletion / CKD", "(VERIFY) Glucagon agonism may raise glucose/hepatic output (caution brittle diabetes)", "(VERIFY) Age <18"],
+        "monitoring_baseline": [], "monitoring_followup": ["Fasting glucose", "Renal function/eGFR", "BP/HR (standard GLP-1 continuous cadence: baseline, ~4 wk, 3 mo, 6 mo, ongoing)"], "monitoring_note": "Source keys all items 'followup'; no discrete baseline-tagged item despite the cadence text — provider draws baseline per the cadence." }
+    ],
+    "cyclable_adjuncts": [
+      { "slug": "sermorelin", "name": "Sermorelin", "grade": "B (peds/dx) → D (adult wellness)", "consent_tier": 3, "fda_status": "off-label (Geref was FDA-approved for pediatric dx; adult wellness use is off-label)", "evidence_status": "PRUDENT_CONVENTION_VERIFY", "cadence": "cycled (~12 wk)", "stackable": true, "axis": "GH/GHRH",
+        "absolute": ["(VERIFY) Active malignancy", "(VERIFY) Pregnancy/lactation; age <18", "(VERIFY) Hypersensitivity to sermorelin or diluent", "(VERIFY) Non-functional pituitary / disrupted HP axis (won't respond)"],
+        "relative": ["(VERIFY) Untreated/severe hypothyroidism (treat first)", "(VERIFY) Diabetes/insulin resistance (monitor glucose/A1c)", "(VERIFY) Fluid retention/edema/arthralgia/carpal tunnel", "(VERIFY) OSA", "(VERIFY) Active proliferative/severe non-proliferative diabetic retinopathy", "(VERIFY) Acute critical illness (consider hold)", "(VERIFY) Concurrent glucocorticoids may blunt GH response"],
+        "monitoring_baseline": ["IGF-1", "A1c", "Fasting glucose", "Lipid panel", "CMP/electrolytes", "TSH/thyroid"], "monitoring_followup": ["Fasting glucose (Mo 1)", "IGF-1 (Mo 3, titrate to upper-normal IGF-1)"] },
+      { "slug": "aod-9604", "name": "AOD-9604", "grade": "D", "consent_tier": 4, "fda_status": "investigational", "evidence_status": "INVESTIGATIONAL", "cadence": "cycled (8–12 wk)", "stackable": true, "axis": "GH-fragment lipolysis",
+        "absolute": ["(VERIFY) Hypersensitivity to peptide/diluent", "(VERIFY) Pregnancy/lactation (no human data)", "(VERIFY) Age <18"],
+        "relative": ["(VERIFY) Active malignancy — precautionary, weak GH-axis rationale", "(VERIFY) Compounded/unregulated sourcing", "(VERIFY) No established DDI profile"],
+        "monitoring_baseline": ["Fasting glucose", "Lipid panel", "CMP/electrolytes"], "monitoring_followup": ["Lipid panel (Mo 3, composition/lipids)"] },
+      { "slug": "mots-c", "name": "MOTS-c", "grade": "D→C", "consent_tier": 3, "fda_status": "investigational", "evidence_status": "INVESTIGATIONAL", "cadence": "cycled", "stackable": true, "axis": "mitochondrial-derived metabolic",
+        "absolute": ["(VERIFY) Hypersensitivity to peptide/diluent", "(VERIFY) Pregnancy/lactation (no human data)", "(VERIFY) Age <18"],
+        "relative": ["(VERIFY) Active malignancy — precautionary, mixed preclinical signals", "(VERIFY) Diabetes/glucose-lowering agents (AMPK/insulin sensitization; theoretical additive hypoglycemia; monitor glucose)", "(VERIFY) Compounded/unregulated sourcing", "(VERIFY) No established DDI profile"],
+        "monitoring_baseline": ["A1c", "Fasting glucose", "HOMA-IR", "Lipid panel", "CMP/electrolytes"], "monitoring_followup": ["A1c", "Fasting glucose", "HOMA-IR (reassess 1–6 mo)"], "note": "PCAC review July 2026." },
+      { "slug": "ss-31", "name": "SS-31 (Elamipretide)", "grade": "B−", "consent_tier": 3, "fda_status": "Elamipretide FDA-approved (FORZINITY, Barth syndrome 2025); compounded metabolic use is off-label/investigational", "evidence_status": "FDA_LABEL", "evidence_status_detail": "on-label elamipretide/FORZINITY = FDA_LABEL; compounded metabolic/wellness use = INVESTIGATIONAL", "cadence": "cycled", "stackable": true, "axis": "mitochondrial-targeting",
+        "absolute": ["Serious hypersensitivity to elamipretide or any excipient (FORZINITY label)"],
+        "relative": ["Hypersensitivity incl. serious allergic reactions (d/c and seek care)", "SC only — not approved for IV", "Benzyl-alcohol excipient NOT for neonates (fatal gasping syndrome; avoid in pregnancy/neonates absent clear need)", "Injection-site reactions (most common AE)", "(VERIFY) Pregnancy — limited human data (off-label use)", "(VERIFY) Lactation — no human data", "(VERIFY) Active malignancy — precautionary in compounded longevity use, not a label CI", "(VERIFY) Compounded SS-31 vs FORZINITY — purity/benzyl-alcohol/dosing unverified"],
+        "monitoring_baseline": [], "monitoring_followup": [], "monitoring_note": "No lab monitoring by design — functional/symptom/screen-based (in agents_without_lab_monitoring)." }
+    ],
+    "fda_approved_other": [
+      { "slug": "tesamorelin", "name": "Tesamorelin", "grade": "A (on-label, HIV lipodystrophy)", "consent_tier": 2, "consent_tier_note": "off-label anti-aging use; VERIFY at lock", "fda_status": "FDA-approved (EGRIFTA) for HIV lipodystrophy; off-label anti-aging not label-covered", "evidence_status": "FDA_LABEL", "evidence_status_detail": "on-label (EGRIFTA, HIV lipodystrophy) = FDA_LABEL; off-label anti-aging use = PRUDENT_CONVENTION_VERIFY", "cadence": "continuous (per label)", "axis": "GH/GHRH",
+        "absolute": ["Disruption of HP axis (hypophysectomy, hypopituitarism, pituitary tumor/surgery, head irradiation/trauma)", "Active malignancy (must be inactive & treatment complete before start)", "Pregnancy", "Known hypersensitivity to tesamorelin or excipients (e.g. mannitol)"],
+        "relative": ["IGF-1 elevation (monitor; consider d/c with persistent elevation)", "Fluid retention (edema, arthralgia, carpal tunnel)", "Glucose intolerance / new or worsening diabetes (monitor)", "Acute critical illness (consider d/c — GH-class mortality signal)", "Recurrent malignancy (d/c if any recurrence)", "Lactation; age <18", "Untreated hypothyroidism; OSA; diabetic retinopathy"],
+        "monitoring_baseline": ["IGF-1", "A1c", "Fasting glucose"], "monitoring_followup": ["IGF-1 (consider d/c with persistent elevation)", "A1c", "Fasting glucose"], "note": "Not in the metabolic_line of peptide-packs; tier shown is the off-label convention — VERIFY at lock." },
+      { "slug": "pt-141", "name": "Bremelanotide (PT-141 / Vyleesi)", "grade": "A (on-label, HSDD premenopausal women)", "consent_tier": 1, "consent_tier_note": "Tier 1 on-label (HSDD); Tier 2 if used off-label — VERIFY", "fda_status": "FDA-approved (Vyleesi) for HSDD in premenopausal women", "evidence_status": "FDA_LABEL", "cadence": "PRN (per label, dose limits)", "axis": "melanocortin",
+        "absolute": ["Uncontrolled hypertension", "Known cardiovascular disease", "Hypersensitivity to bremelanotide or any component"],
+        "relative": ["High CV risk — not recommended (assess CV risk, control BP)", "Dose limits <=1/24 h, <=8/month (bound BP effect)", "(VERIFY) Oral naltrexone-containing products — may significantly decrease naltrexone levels, not recommended", "Nausea (most common AE)", "Focal hyperpigmentation (face/gingiva/breasts; more with daily dosing/darker skin; may not resolve)", "(VERIFY) Severe hepatic or renal impairment", "Pregnancy — discontinue if suspected"],
+        "monitoring_baseline": ["BP/HR (BP + CV-risk gating; oral-naltrexone review; pregnancy)"], "monitoring_followup": ["BP/HR (benefit reassessment ~8 wk; hyperpigmentation watch)"] }
+    ]
+  },
+
+  "interaction_rules": {
+    "note": "Cross-agent (peptide-peptide) flags. 31 of 32 source rules fire (involve >=1 stocked agent); only IR022 (oxytocin+vasopressin, both non-stocked) does not. Actions: FLAG_FOR_PROVIDER_REVIEW (surface for review, never auto-block), INFORM (context), LANGUAGE_GUARDRAIL (force precise wording). 'direct' = direct_combination_evidence. Decision-support only — no doses, never a hard block.",
+    "key": [
+      { "id": "IR002", "rule": "GLP-1 receptor-agonist redundancy {semaglutide, liraglutide, tirzepatide, retatrutide}", "action": "FLAG_FOR_PROVIDER_REVIEW", "direct": false, "why": "Core 'never two GLP-1' enforcement; high mechanistic, low direct clinical for stacking." },
+      { "id": "IR003", "rule": "Tirzepatide + retatrutide overlap", "action": "FLAG_FOR_PROVIDER_REVIEW", "direct": false, "why": "Incretin overlap + added glucagon-axis uncertainty." },
+      { "id": "IR004", "rule": "Retatrutide + any GLP-1/amylin", "action": "FLAG_FOR_PROVIDER_REVIEW", "direct": false, "why": "GI / heart-rate overlap; no direct evidence." },
+      { "id": "IR029", "rule": "Insulin/secretagogue + GLP glycemic load", "action": "FLAG_FOR_PROVIDER_REVIEW", "direct": false, "why": "Hypoglycemia with insulin/sulfonylureas." },
+      { "id": "IR028", "rule": "GLP/amylin GI slowing + absorption-sensitive oral agents", "action": "FLAG_FOR_PROVIDER_REVIEW", "direct": false, "why": "Oral-drug absorption timing (incl. oral contraceptives)." },
+      { "id": "IR006", "rule": "GHRH analog + GHSR agonist GH synergy {sermorelin, tesamorelin, CJC-1295, ipamorelin, GHRP}", "action": "FLAG_FOR_PROVIDER_REVIEW", "direct": false, "why": "Additive GH/IGF-1 drive." },
+      { "id": "IR009", "rule": "GH/IGF axis vs insulin sensitivity {GH-axis + MOTS-c, GLP-1s}", "action": "INFORM", "direct": false, "why": "Mixed; not auto-synergistic." },
+      { "id": "IR005", "rule": "AOD-9604 vs GH-secretagogue distinction", "action": "INFORM", "direct": false, "why": "Do not call AOD a GH secretagogue." },
+      { "id": "IR011", "rule": "MOTS-c + GLP/amylin metabolic convergence", "action": "INFORM", "direct": false, "why": "Convergent metabolic nodes, not one booster." },
+      { "id": "IR012", "rule": "SS-31 + MOTS-c mitochondrial convergence", "action": "INFORM", "direct": false, "why": "Distinct nodes, not a single 'mito booster'." },
+      { "id": "IR019", "rule": "PT-141 + Melanotan II melanocortin redundancy", "action": "FLAG_FOR_PROVIDER_REVIEW", "direct": false, "why": "Melanocortin overlap." },
+      { "id": "IR014", "rule": "BPC-157 + TB-500 + GHK-Cu tissue-repair stack", "action": "FLAG_FOR_PROVIDER_REVIEW", "direct": false, "why": "Angiogenesis overlap; synergy unproven." },
+      { "id": "IR032", "rule": "Route/formulation identity warning {repair peptides, AOD-9604}", "action": "LANGUAGE_GUARDRAIL", "direct": false, "why": "Force exact molecule/formulation match." }
+    ],
+    "also_firing": ["IR001 (true)", "IR007", "IR008", "IR010", "IR013", "IR015", "IR016", "IR017", "IR018", "IR020", "IR021", "IR023", "IR024", "IR025", "IR026", "IR027", "IR030", "IR031"],
+    "not_firing": ["IR022 (oxytocin+vasopressin — both non-stocked)"],
+    "coverage_gaps": ["mk-677", "cjc-ipamorelin-blend (present in other files; no stocked interaction node)"]
+  },
+
+  "override_policy": {
+    "principle": "The provider can override ANY recommendation. AllyOS is decision-support, never a gatekeeper. Every override is a documented clinical decision by the licensed provider — which is what keeps the platform a tool and transfers responsibility to the provider.",
+    "soft_advisory": "inline note + optional one-tap acknowledge",
+    "hard_stop": "blocking modal requiring a TYPED override rationale; recorded in the note + consent. Highest friction, still overridable — not an absolute lock.",
+    "platform_hard_stops": ["Pregnancy / positive pregnancy test", "Active malignancy"]
+  },
+
+  "governance": {
+    "provider_of_record": "Every active peptide patient must have an authorized APP/physician provider of record before any prescription/refill/dose-change is finalized. Block if missing or if the named prescriber is RN/LPN/MA/coordinator/unlicensed.",
+    "medical_director": "Clinic governance/QA oversight unless separately contracted as treating provider. Approves the framework, evidence rules, audit criteria; reviews high-risk/AE/compounded/investigational charts; performs/supervises the monthly QA audit. Does NOT automatically include routine prescribing/direct-care.",
+    "required_fields": ["provider_of_record_present", "authorized_prescriber_role", "agent(s)_selected", "grade", "consent_tier_matched", "red_flag_screen_complete", "absolute_contra_cleared", "interaction_flags_reviewed", "monitoring_plan", "compounded_or_investigational_disclosed", "audit_risk_score(1-5)", "chart_status"]
+  },
+
+  "audit": {
+    "risk_score": {
+      "5": "Mandatory MD review — adverse event, research-chemical/unverifiable source, RN/staff as prescriber, GLP-1 red flag (MTC/MEN2, pancreatitis) not screened, missing provider order, two GLP-1 co-administered",
+      "4": "High — new start, compounded/off-label or investigational agent (Tier 3–4), interaction flagged, source/compounding concern, abnormal lab needing review",
+      "3": "Moderate — stable continuation, routine lab review, documentation correction",
+      "2": "Routine — stable maintenance, complete documentation, no change/concern",
+      "1": "Low — administrative update or discontinued agent"
+    },
+    "shared_spine": "Identical §14 risk spine as the IV and BHRT modules; the de-identified marker flows to MD oversight."
+  },
+
+  "source_map": {
+    "purpose": "Binds each operating element to its source layer. FDA_LABEL = label-established; VERIFY = prudent-convention/mechanism pending MD sign-off.",
+    "consent_tier_grade_logic": "peptide-packs.json",
+    "glp1_label_contraindications": "contraindications.json (FDA labels: Wegovy/Ozempic, Zepbound/Mounjaro, Saxenda/Victoza)",
+    "fda_other_label_contraindications": "contraindications.json (EGRIFTA tesamorelin; Vyleesi bremelanotide; FORZINITY elamipretide)",
+    "research_agent_contraindications": "contraindications.json — prudent-convention/mechanism, marked VERIFY pending Falcon sign-off",
+    "interaction_flags": "peptide-interactions.json",
+    "monitoring": "monitoring-map.json (provenance-locked to each agent's own monitoring text)",
+    "red_flag_screen_and_override": "intake-schema.json",
+    "prescriber_authority": "FL §464.012 APRN / §458.347 PA"
+  },
+
+  "final_rule": "Ally supports the provider. Only the authorized APP/physician provider of record makes peptide medication decisions and prescribes. RN/staff support intake and routing only. No doses are issued by AllyOS. FDA-approved agents carry label-established contraindications; all research/compounded/investigational items are VERIFY pending Medical Director sign-off. No source = no recommendation.",
+
+  "signoff_ledger": {
+    "status": "LOCKED — 3-auditor lock complete + MD governance sign-off recorded (2026-06-28). Effective 2026-06-28.",
+    "citation_posture": "FDA-approved agents (GLP-1s, tesamorelin, PT-141/Vyleesi, SS-31/FORZINITY) are LABEL-grounded. Research/compounded/investigational agents carry prudent-convention/mechanism contraindications: these were REVIEWED and ACCEPTED by the Medical Director (2026-06-28) as conservative clinical advisories. The inline (VERIFY) tag now means 'non-FDA-label, MD-accepted advisory' — it does NOT mean unreviewed.",
+    "md_signoff_note": "Governance/framework approval as Medical Director — authorizes this CDS as the peptide decision-support standard for clinics governed; does NOT make the MD the treating provider/prescriber for any patient. AllyOS issues no doses.",
+    "auditors": {
+      "clinical": "PASS-WITH-NOTES (2026-06-28) — consolidation clinically faithful; boxed warnings, one-GLP-1/transition rule, platform hard stops, grade->tier, VERIFY discipline, no-dose all correct. Notes (faithful-to-source, disclosed): pregnancy placement non-uniform across GLP-1s (per labels); retatrutide has no baseline-tagged monitoring item in the data layer (disclosed via monitoring_note) — fix belongs at monitoring-map.json lock.",
+      "citation_regulatory": "PASS-WITH-NOTES (2026-06-28) — no false FDA-approval claims (retatrutide correctly investigational), fully source-bound, advisory-only interactions (no auto-block), no doses/no-sell, honest DRAFT posture. Schema-hygiene notes APPLIED (see schema).",
+      "schema": "PASS-WITH-NOTES (2026-06-28) — strict JSON, 10 unique slugs, IR001-IR032 complete (31 fire, IR022 not). Notes APPLIED: consent_tier normalized to integer everywhere (+ consent_tier_note), evidence_status normalized to a single enum token (+ evidence_status_detail) for ss-31/tesamorelin; bare non-enum 'VERIFY' removed."
+    },
+    "lock_status": "LOCKED 2026-06-28 — 3-auditor lock complete (all PASS-WITH-NOTES, notes applied) and Medical Director governance sign-off recorded (Falcon, MD, FL ME 84789), having reviewed and accepted all (VERIFY) research-agent advisories. Effective 2026-06-28.",
+    "pending": []
+  }
+}

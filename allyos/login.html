@@ -1,0 +1,98 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sign in — AllyOS · RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png"><link rel="apple-touch-icon" href="ally-avatar-180.png"><meta name="theme-color" content="#060a12">
+<style>
+:root{--bg:#0b1620;--bg2:#12222e;--card:#13242f;--line:#223947;--teal:#28c2b8;--gold:#e0b24a;--ink:#e9f3f2;--muted:#8aa3ad;--red:#e0594a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:radial-gradient(1200px 600px at 50% -10%,#143041,#0b1620);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:30px;max-width:400px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.logo{font-weight:800;font-size:1.25rem;margin-bottom:2px}.logo span{color:var(--gold)}
+.tag{font-size:.78rem;color:var(--muted);margin-bottom:20px}
+label{display:block;font-size:.72rem;color:var(--muted);margin:12px 0 4px}
+input{width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:10px;padding:11px 13px;color:var(--ink);font-size:.92rem;font-family:inherit}
+input:focus{outline:none;border-color:var(--teal)}
+button{width:100%;background:var(--teal);color:#06231f;border:none;border-radius:10px;padding:12px;font-weight:800;font-size:.92rem;cursor:pointer;margin-top:18px}
+button:hover{filter:brightness(1.06)}
+.err{background:#2a1512;border:1px solid #5a2a22;color:#f0b3aa;border-radius:9px;padding:9px 11px;font-size:.8rem;margin-top:14px;display:none}
+.err.show{display:block}
+.roles{margin-top:20px;border-top:1px solid var(--line);padding-top:14px}
+.roles h3{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--teal);margin-bottom:8px}
+.role{font-size:.74rem;color:var(--muted);margin:5px 0;line-height:1.4}
+.role b{color:var(--ink)}
+.demo{margin-top:14px;background:#0f2230;border:1px solid var(--line);border-radius:9px;padding:10px;font-size:.72rem;color:var(--muted)}
+.demo b{color:var(--ink)}
+.demo .chip{display:inline-block;background:#11313a;color:var(--teal);border-radius:7px;padding:2px 8px;margin:3px 4px 0 0;cursor:pointer}
+.note{font-size:.66rem;color:var(--muted);margin-top:16px;line-height:1.45}
+</style></head>
+<body>
+<div class="card">
+  <div class="logo">Renuvia<span>MD</span>® · AllyOS</div>
+  <div class="tag">Clinical decision-support for licensed providers — sign in</div>
+
+  <form onsubmit="return doLogin(event)">
+    <label>Email</label>
+    <input id="email" type="email" autocomplete="username" placeholder="you@clinic.com" required>
+    <label>Password</label>
+    <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+    <button type="submit">Sign in</button>
+    <div class="err" id="err"></div>
+  </form>
+
+  <div id="cloudBox" style="display:none;margin-top:18px;border-top:1px solid var(--line);padding-top:16px">
+    <label>Or sign in with a magic link <span style="color:var(--muted);font-weight:400">— no password</span></label>
+    <input id="cloudEmail" type="email" autocomplete="email" placeholder="you@clinic.com">
+    <button type="button" onclick="cloudLink()" style="margin-top:10px">Email me a magic link</button>
+    <div class="err" id="cloudMsg"></div>
+  </div>
+
+  <div class="note">PHI-free · server-enforced (Row-Level Security on every table). Access is for the clinic's credentialed staff; the clinic assigns each seat. Forgot your password? Contact your clinic's Medical Director.</div>
+</div>
+<script src="allyos-auth.js"></script>
+<script src="supabase-client.js"></script>
+<script>
+function nextPage(){ var m=location.search.match(/[?&]next=([^&]+)/); return m?decodeURIComponent(m[1]):'nursing-station.html'; }
+// the Medical Director lands on the Clinic Network (multi-clinic home); clinic staff land on their practice hub.
+function landing(s){ if(!s) return 'dashboard.html'; if(s.mdAudit) return 'clinic-network.html'; if(s.role==='frontdesk') return 'schedule.html'; return 'dashboard.html'; }
+function go(s){ location.href=(location.search.indexOf('next=')>=0)?nextPage():landing(s); }
+function fail(msg){ var err=document.getElementById('err'); err.textContent=msg; err.className='err show'; err.style.color='#f0b3aa'; }
+
+// REAL login: authenticate against Supabase, build the profile, adopt the session (guards then pass).
+function doLogin(e){
+  e.preventDefault();
+  var email=document.getElementById('email').value.trim(), pw=document.getElementById('password').value;
+  var err=document.getElementById('err');
+  if(!window.AllyOSCloud){ fail('Cloud unavailable — check your connection.'); return false; }
+  err.textContent='Signing in…'; err.className='err show'; err.style.color='var(--muted)';
+  AllyOSCloud.ready.then(function(ok){
+    if(!ok){ fail('Cloud unavailable — check your connection.'); return; }
+    AllyOSCloud.signInWithPassword(email, pw).then(function(r){
+      if(r&&r.error){ fail(r.error.message||'Invalid email or password.'); return; }
+      AllyOSCloud.profile().then(function(p){
+        if(!p||!p.email){ fail('Signed in, but no profile is set up for this account. Contact your administrator.'); return; }
+        go(AllyOSAuth.adopt(p));
+      });
+    });
+  });
+  return false;
+}
+// already signed in? (local session, or a live Supabase session to rebuild)
+(function(){ var s=AllyOSAuth.session(); if(s){ go(s); return; }
+  if(window.AllyOSCloud){ AllyOSCloud.ready.then(function(ok){ if(!ok)return;
+    AllyOSCloud.user().then(function(u){ if(!u)return;
+      AllyOSCloud.profile().then(function(p){ if(p&&p.email){ go(AllyOSAuth.adopt(p)); } });
+    });
+  }); }
+})();
+// reveal the magic-link option when the cloud hub is reachable
+(function(){ if(!window.AllyOSCloud)return; AllyOSCloud.ready.then(function(ok){ if(ok) document.getElementById('cloudBox').style.display='block'; }); })();
+function cloudLink(){
+  var email=document.getElementById('cloudEmail').value.trim(), m=document.getElementById('cloudMsg');
+  if(!email){ m.textContent='Enter your email.'; m.className='err show'; return; }
+  m.textContent='Sending…'; m.className='err show'; m.style.color='var(--muted)';
+  AllyOSCloud.signInWithOtp(email).then(function(r){
+    if(r&&r.error){ m.textContent=(r.error.message||r.error); m.style.color='#f0b3aa'; }
+    else { m.textContent='✓ Magic link sent — check '+email+' and click it to sign in.'; m.style.color='var(--teal)'; }
+  });
+}
+</script>
+</body></html>

@@ -1,0 +1,96 @@
+/* ============================================================
+   AllyOS Design System — premium dark "neon-glow" theme
+   One source of truth for every AllyOS surface.
+   Inspired by the INFUSE IV BAR palette; clinical, not consumer.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  /* space-dark backgrounds */
+  --bg:#060a12; --bg2:#0a1120; --panel:#0d1726; --panel2:#11203353; --raise:#13243a;
+  --line:#1d3147; --line2:#274460;
+  /* neon accents */
+  --teal:#2ee6d6; --blue:#3aa8e0; --violet:#a78bfa; --pink:#f06aa0; --gold:#e7b84e; --green:#2bd49a; --amber:#e0a23a; --red:#f0635a;
+  --ink:#eaf3f5; --muted:#7f96ab; --dim:#5b7287;
+  /* glows */
+  --glow-teal:0 0 0 1px rgba(46,230,214,.45), 0 0 24px rgba(46,230,214,.22);
+  --glow-blue:0 0 0 1px rgba(58,168,224,.45), 0 0 24px rgba(58,168,224,.20);
+  --glow-violet:0 0 0 1px rgba(167,139,250,.45), 0 0 24px rgba(167,139,250,.20);
+  --glow-green:0 0 0 1px rgba(43,212,154,.45), 0 0 24px rgba(43,212,154,.20);
+  --glow-gold:0 0 0 1px rgba(231,184,78,.45), 0 0 22px rgba(231,184,78,.18);
+  --glow-red:0 0 0 1px rgba(240,99,90,.45), 0 0 24px rgba(240,99,90,.22);
+  --fdisp:'Space Grotesk', -apple-system, Segoe UI, sans-serif;
+  --fbody:'Inter', -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --r:16px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body.allyos{font-family:var(--fbody);color:var(--ink);min-height:100vh;
+  background:
+    radial-gradient(1100px 640px at 82% -8%, #16395a55, transparent 60%),
+    radial-gradient(900px 560px at 8% 8%, #4b2c7a33, transparent 55%),
+    linear-gradient(180deg,#070d18,#060a12) fixed;
+}
+/* faint tech grid */
+body.allyos::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(46,230,214,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(46,230,214,.035) 1px,transparent 1px);
+  background-size:44px 44px;mask-image:radial-gradient(ellipse at 50% 0%, #000 30%, transparent 75%);}
+.allyos > *{position:relative;z-index:1}
+
+/* typography */
+.h-disp{font-family:var(--fdisp);font-weight:900;letter-spacing:1.5px;line-height:1.05}
+.h-disp.up{text-transform:uppercase}
+.eyebrow{font-family:var(--fdisp);font-weight:700;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--teal)}
+.muted{color:var(--muted)} .dim{color:var(--dim)}
+
+/* surfaces */
+.glass{background:linear-gradient(180deg, #ffffff08, #ffffff02);border:1px solid var(--line);border-radius:var(--r)}
+.card{background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:var(--r);padding:18px;transition:transform .15s, box-shadow .15s, border-color .15s}
+.card.hov:hover{transform:translateY(-3px);box-shadow:var(--glow-teal);border-color:var(--teal)}
+
+/* neon accent edge (left bar) */
+.edge{position:relative;overflow:hidden}
+.edge:before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--teal);box-shadow:0 0 14px var(--teal)}
+.edge.blue:before{background:var(--blue);box-shadow:0 0 14px var(--blue)}
+.edge.violet:before{background:var(--violet);box-shadow:0 0 14px var(--violet)}
+.edge.gold:before{background:var(--gold);box-shadow:0 0 14px var(--gold)}
+.edge.red:before{background:var(--red);box-shadow:0 0 14px var(--red)}
+
+/* buttons */
+.btn{font-family:var(--fbody);font-weight:700;font-size:.85rem;border:none;border-radius:11px;padding:11px 16px;cursor:pointer;transition:filter .15s, box-shadow .15s;display:inline-flex;align-items:center;gap:7px;text-decoration:none;justify-content:center}
+.btn:hover{filter:brightness(1.08)}
+.btn.neon{background:linear-gradient(120deg,var(--teal),var(--blue));color:#05221f;box-shadow:var(--glow-teal)}
+.btn.neon-green{background:linear-gradient(120deg,var(--green),var(--teal));color:#04231a;box-shadow:var(--glow-green)}
+.btn.neon-red{background:linear-gradient(120deg,var(--red),#c0392b);color:#fff;box-shadow:var(--glow-red)}
+.btn.ghost{background:#0e1c2e;border:1px solid var(--line2);color:var(--teal)}
+.btn.ghost:hover{border-color:var(--teal);box-shadow:var(--glow-teal)}
+
+/* stat cards (Scheduled / Waiting / In-Chair / ...) */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat{background:linear-gradient(180deg,#0f1c2e,#0b1422);border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:13px;padding:14px 16px}
+.stat .lbl{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.stat .num{font-family:var(--fdisp);font-weight:900;font-size:2rem;margin-top:2px;text-shadow:0 0 18px rgba(46,230,214,.35)}
+.stat.blue{border-left-color:var(--blue)}.stat.blue .num{text-shadow:0 0 18px rgba(58,168,224,.35)}
+.stat.amber{border-left-color:var(--amber)}.stat.amber .num{color:var(--amber);text-shadow:0 0 18px rgba(224,162,58,.3)}
+.stat.green{border-left-color:var(--green)}.stat.green .num{color:var(--green);text-shadow:0 0 18px rgba(43,212,154,.3)}
+.stat.violet{border-left-color:var(--violet)}.stat.violet .num{color:var(--violet);text-shadow:0 0 18px rgba(167,139,250,.3)}
+
+/* chair grid */
+.chairgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.chair{border-radius:16px;min-height:150px;padding:16px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:5px;cursor:pointer;
+  background:linear-gradient(180deg,#0f1f33,#0b1626);border:1.5px solid var(--green);box-shadow:0 0 18px rgba(43,212,154,.12)}
+.chair .num{font-family:var(--fdisp);font-weight:900;font-size:1.9rem;color:var(--green)}
+.chair .st{font-size:.64rem;letter-spacing:.14em;color:var(--muted)}
+.chair.occupied{border-color:var(--blue);box-shadow:0 0 22px rgba(58,168,224,.22)}
+.chair.occupied .num,.chair.occupied .clk{color:var(--blue)}
+.chair .pt{font-weight:700}.chair .pr{font-size:.64rem;color:var(--teal);letter-spacing:.08em}
+.chair .clk{font-family:var(--fdisp);font-weight:700;font-size:1.4rem;font-variant-numeric:tabular-nums}
+.chair.done{border-color:var(--gold);box-shadow:0 0 26px rgba(231,184,78,.35);animation:pulseGold 1.1s infinite alternate}
+.chair.done .clk,.chair.done .num{color:var(--gold)}
+@keyframes pulseGold{from{box-shadow:0 0 18px rgba(231,184,78,.2)}to{box-shadow:0 0 34px rgba(231,184,78,.5)}}
+
+/* pills / flags */
+.pill{font-size:.6rem;font-weight:800;letter-spacing:.05em;border-radius:7px;padding:3px 9px;text-transform:uppercase}
+.pill.teal{background:#0e2e2b;color:var(--teal)} .pill.blue{background:#0e2436;color:var(--blue)}
+.pill.gold{background:#2a2210;color:var(--gold)} .pill.green{background:#0e2a1f;color:var(--green)}
+.pill.violet{background:#1c1633;color:var(--violet)} .pill.red{background:#2a1512;color:#f0b3aa}

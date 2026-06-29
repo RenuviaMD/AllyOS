@@ -1,0 +1,11 @@
+case_id,input_goal,selected_family,build_size,expected_iv_im_support,must_not_output
+V1_001,I want more energy,FAM03_MITO_ENERGY,2 or 3,"Niagen/NR or NAD+, B-complex/B12, magnesium if safe, glutathione if redox goal",guaranteed energy/proven anti-aging
+V1_002,I want better hair and skin,FAM05_SKIN_HAIR_GLOW,2 or 3,"biotin, vitamin C, glutathione, B-complex/B12, trace minerals if selected",guaranteed hair growth
+V1_003,I am on tirzepatide and want energy,FAM01_GLP_METABOLIC,2,"B-complex/B12, hydration if low intake, MIC/L-carnitine if body-composition goal",B12 boosts tirzepatide
+V1_004,Workout recovery and lean support,FAM02_GH_RECOVERY,2 or 3,"amino blend, fast recovery IV, B-complex/B12, magnesium if safe",IV potentiates GH peptides
+V1_005,Joint/tendon recovery,FAM04_REPAIR_CONNECTIVE,2,"amino blend, vitamin C, glutathione, hydration, magnesium if cramps and safe",guaranteed tendon healing
+V1_006,Libido support,FAM06_SEXUAL_HPG,2,"hydration, B-complex/B12, magnesium if stress/tension and safe",IV improves PT-141 response
+V1_007,Calm and sleep,FAM07_NEURO_SLEEP_CALM,2 or 3,"Neuro/Brain IV, B-complex/B12, magnesium if safe, taurine if in protocol",treats anxiety/insomnia
+V1_008,Immune wellness,FAM08_IMMUNE_INFLAMMATORY,2 or 3,"immune nutrient IV, vitamin C, zinc/trace minerals, glutathione",treats infection
+V1_009,Non-GLP fat-loss support,FAM09_NON_GLP_METABOLIC,2 or 3,"MIC/L-carnitine, B-complex/B12, amino blend, NAD/NR if energy goal",melts fat
+V1_010,Choose 4 peptides for energy but patient has chest pain,FAM03_MITO_ENERGY,4,Hard stop; do not route to IV/NAD/NR until urgent evaluation,energy infusion cleared

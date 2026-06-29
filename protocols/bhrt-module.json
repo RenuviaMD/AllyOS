@@ -1,0 +1,197 @@
+{
+  "meta": {
+    "id": "bhrt-module",
+    "title": "AllyOS BHRT / Women's Hormone Wellness — Provider CDS Module",
+    "version": "1.5",
+    "status": "locked",
+    "requires_md_signoff": true,
+    "md_signoff": { "by": "Armando A. Falcon, MD", "license": "FL ME 84789", "role": "Medical Director — governance / framework approval (not per-patient treating provider)", "date": "2026-06-28" },
+    "effective": "2026-06-28",
+    "source": "Ally BHRT / Women's Wellness Provider Decision Support Engine v1.5 (MD Governance + APP Audit). Transcribed to the AllyOS locked-module format; pending citation lock + Medical Director sign-off.",
+    "curated_by": "Armando A. Falcon, MD (FL ME 84789) — RenuviaMD® PLLC, AllyOS Compliance Division",
+    "scope": "Stable menopause-transition wellness (perimenopause/menopause) BHRT/MHT candidacy review, symptom-guided protocol selection, safety gating, and referral triage. Adults, women's wellness. NOT an OB/GYN specialty platform, NOT an autonomous prescriber, NOT men's TRT.",
+    "operating_principle": "Wellness optimization is the center of the workflow. Hormone therapy is one tool within a structured wellness plan — NOT framed as anti-aging, chronic-disease prevention, dementia prevention, cardiovascular prevention, or treatment of complex gynecologic pathology.",
+    "honesty_discipline": "Provider-facing only; never patient-facing output. Every material recommendation carries an evidence source class; no source = recommendation suppressed. FDA-approved options shown before compounded. Testosterone is HSDD-only. Pellets and oral testosterone are suppressed. No empiric/anti-aging/longevity claims. The provider confirms every decision.",
+    "phi_posture": "PHI stays local (clinic/provider). AllyOS holds no PHI; only the de-identified decision marker flows to MD oversight. The patient-facing intake (RenuviaMD BHRT intake) is the clinic's own front-door under the clinic's HIPAA responsibility."
+  },
+
+  "output_rules": {
+    "provider_only": "Outputs only provider-facing clinical content. No patient education, consent text, marketing claims, reassurance language, or 'dear patient' explanations.",
+    "evidence_source_classes": ["GUIDELINE", "FDA_LABEL", "PEER_REVIEWED", "INTERNAL_FORMULARY", "LOCAL_POLICY", "INSUFFICIENT"],
+    "no_source_response": "NO VERIFIED SOURCE ATTACHED — recommendation suppressed. Provider review required.",
+    "no_empiric_pathway": ["clinic experience", "patients like it", "anti-aging", "longevity hormone optimization", "compounded is safer", "custom dose equals exact dose needed", "SHBG-only escalation", "BMI-only aromatase inhibitor logic", "broad CVD/dementia/aging prevention claims"],
+    "prescriber_authority": {
+      "authorized_roles": ["physician", "DO", "APRN", "ARNP", "PA"],
+      "rn_staff": "RN/MA/coordinator may assist with intake, vitals, med reconciliation, lab collection/upload, scheduling, routing, and provider-approved education. They may NOT diagnose, determine candidacy, select therapy, prescribe, authorize refills, change doses, interpret labs for medication decisions, clear contraindications, or clear red flags.",
+      "block_message": "BLOCKED — BHRT medication decision requires authorized APP/physician provider of record. RN/staff may support intake and routing only.",
+      "source_class": "LOCAL_POLICY + applicable state scope-of-practice law (FL §464.012 APRN, FL §458.347 PA)"
+    }
+  },
+
+  "decision_marker": {
+    "GREEN_WELLNESS_CANDIDATE": { "meaning": "Stable, no red flags, required safety data present", "draft_allowed": "yes, draft only" },
+    "AMBER_MISSING_DATA": { "meaning": "Stable but missing key safety detail or labs/screening", "draft_allowed": "limited draft or hold" },
+    "AMBER_CO_MANAGE": { "meaning": "Stable but controlled comorbidity needing PCP/specialist coordination", "draft_allowed": "provider discretion, rationale required" },
+    "RED_REFERRAL": { "meaning": "Red flag or pathology concern", "draft_allowed": "no hormone medication draft" },
+    "GRAY_INSUFFICIENT_EVIDENCE": { "meaning": "Requested intervention lacks adequate evidence", "draft_allowed": "suppress recommendation" },
+    "PURPLE_COMPOUNDED_EXCEPTION": { "meaning": "Compounded product selected despite FDA-approved availability", "draft_allowed": "requires documented rationale" }
+  },
+
+  "scope_boundary": {
+    "in_scope": ["vasomotor symptoms (hot flashes, night sweats)", "menopause-transition sleep disruption", "GSM without alarming pelvic/vulvar/urinary features", "low libido evaluated as possible HSDD after biopsychosocial assessment", "bone/muscle/metabolic/skin-hair/energy/lifestyle optimization within evidence limits"],
+    "referral_first": [
+      { "category": "Abnormal bleeding", "examples": "postmenopausal bleeding, unexplained vaginal bleeding, new heavy bleeding, bleeding after sex", "status": "RED_REFERRAL_GYN" },
+      { "category": "Cancer-related", "examples": "known/suspected breast or endometrial cancer, estrogen-sensitive malignancy, active cancer treatment, unexplained breast mass", "status": "RED_REFERRAL_ONC_GYN" },
+      { "category": "Thromboembolic/vascular", "examples": "active/recent VTE/PE, stroke/TIA, MI, unstable CAD, active chest pain, acute neuro symptoms", "status": "RED_REFERRAL_PCP_CARDIO_ED" },
+      { "category": "Hepatic", "examples": "active liver disease or unexplained significant LFT abnormality", "status": "RED_REFERRAL_PCP_HEPATOLOGY" },
+      { "category": "Reproductive", "examples": "pregnancy, breastfeeding, suspected pregnancy, POI <40y, early menopause <45y without prior evaluation", "status": "RED_OR_AMBER_REFERRAL" },
+      { "category": "Pelvic/vulvar/urinary red flags", "examples": "pelvic mass, severe pelvic pain, vulvar lesion, recurrent gross hematuria, recurrent complicated UTI, suspected STI", "status": "RED_REFERRAL_GYN_UROLOGY" },
+      { "category": "Metabolic instability", "examples": "uncontrolled HTN, uncontrolled diabetes, unstable thyroid, severe renal disease", "status": "AMBER_OR_RED_PCP" },
+      { "category": "Bone pathology", "examples": "fragility fracture, osteoporosis-range DXA requiring disease management", "status": "AMBER_REFERRAL_OR_CO_MANAGE" },
+      { "category": "Psychiatric safety", "examples": "suicidal ideation, severe untreated mood disorder, psychosis, mania", "status": "RED_BEHAVIORAL_HEALTH_ED" }
+    ],
+    "rule": "May still generate a wellness note summary + referral rationale, but must suppress hormone-medication recommendations until the referral issue is cleared or co-managed."
+  },
+
+  "intake_required": {
+    "identity_context": ["age", "date_of_service", "chief_wellness_goal", "last_menstrual_period", "cycle_pattern", "pregnancy_potential"],
+    "safety": ["uterus_status", "history_hysterectomy_oophorectomy", "unexplained_bleeding", "breast_endometrial_estrogen_sensitive_cancer_history", "vte_pe_stroke_mi_cad_history", "active_liver_disease", "pregnancy_or_breastfeeding", "current_hormone_use", "tamoxifen_ai_serms_anticoagulants", "medications_supplements_allergies"],
+    "clinical_baseline": ["bp", "hr", "weight_bmi_or_body_composition", "smoking_status", "alcohol_use", "mammogram_status_per_age_risk", "pap_status_per_age_risk", "dxa_frax_if_indicated"],
+    "symptom_scoring": ["vms_frequency_severity", "sleep_severity", "gsm_symptoms", "sexual_desire_distress", "mood_screen_PHQ9_GAD7_if_symptomatic", "global_score_MRS_or_MENQOL"],
+    "note": "These fields map 1:1 to the RenuviaMD patient-facing BHRT intake form (abs_*, rel_*, sx_*, goal_* and the MRS subscales). Labs are important context but do NOT define treatment (clinical diagnosis ≥45 per NICE NG23)."
+  },
+
+  "menopause_stage_logic": {
+    "age_ge_45_typical": "May stage clinically from LMP/cycle + symptom pattern. Do NOT require FSH/E2 to diagnose menopause or start the wellness pathway.",
+    "age_40_45": "If symptomatic with menstrual change, FSH may be supportive context for provider review; early menopause warrants more caution / possible GYN-endo eval.",
+    "age_lt_40": "Suspected POI is outside routine wellness scope — referral/co-management; suppress routine BHRT draft until diagnostic evaluation is documented."
+  },
+
+  "pathways": {
+    "VMS_dominant": "If VMS bothersome AND no systemic-MHT contraindication AND age <60 or within 10y of menopause -> systemic MHT candidate; prefer FDA-approved transdermal 17b-estradiol; if uterus intact require an adequate evidence-based progestogen (see safety_gates.uterus_gate for the protective dose). If contraindicated/declined -> nonhormonal VMS. Else individualized provider review.",
+    "GSM_dominant": "GSM without red flags -> vaginal moisturizers/lubricants + low-dose vaginal estrogen OR vaginal DHEA OR ospemifene; recurrent-UTI pattern -> prefer local low-dose vaginal estrogen unless contraindicated. Red flags -> refer GYN/urology/urogynecology.",
+    "HSDD": "Low desire + personal distress + biopsychosocial assessment done -> evaluate HSDD; correct GSM/pain/medication/relationship/mood/sleep first; postmenopausal HSDD candidate -> testosterone is a provider-only off-label discussion. Otherwise suppress testosterone recommendation.",
+    "blocked_testosterone_uses": ["fatigue", "mood", "cognition", "weight loss", "muscle maintenance", "energy", "anti-aging", "GLP-1 body composition", "nonspecific wellness"],
+    "bone_muscle": "Assess age + menopause status + fracture/DXA history + FRAX. Fragility fracture/osteoporosis -> refer/co-manage. Else resistance training + adequate protein + calcium/vitamin D adequacy + fall-risk reduction.",
+    "metabolic": "Assess BP, BMI/waist/body comp, A1c/glucose, lipids, sleep, alcohol, activity. Unstable/uncontrolled -> refer/co-manage PCP. Else lifestyle optimization with evidence limits. MHT not a primary metabolic treatment."
+  },
+
+  "medication_registry": {
+    "fda_approved_default": [
+      { "class": "Systemic estrogen", "option": "FDA-approved 17b-estradiol transdermal patch/gel/spray", "role": "VMS; bone-loss prevention in appropriate candidates", "status": "PREFERRED_DEFAULT" },
+      { "class": "Systemic estrogen", "option": "FDA-approved oral estradiol", "role": "alternative when route acceptable and risk profile permits", "status": "ALTERNATIVE" },
+      { "class": "Progestogen", "option": "Oral micronized progesterone", "role": "endometrial protection when uterus intact + systemic estrogen", "status": "REQUIRED_IF_UTERUS_INTACT" },
+      { "class": "Local GSM", "option": "Low-dose vaginal estrogen cream/tablet/ring", "role": "GSM; recurrent-UTI risk reduction in GSM", "status": "GSM_DEFAULT" },
+      { "class": "Local GSM", "option": "Vaginal DHEA/prasterone 6.5 mg", "role": "dyspareunia/vaginal dryness", "status": "GSM_OPTION" },
+      { "class": "Local GSM", "option": "Ospemifene 60 mg PO daily with food", "role": "GSM/dyspareunia when vaginal route not preferred", "status": "GSM_OPTION" },
+      { "class": "Nonhormonal VMS", "option": "Fezolinetant 45 mg PO daily", "role": "moderate-severe VMS when MHT not used", "status": "VMS_OPTION_WITH_LFT_MODULE" },
+      { "class": "Nonhormonal VMS", "option": "Paroxetine mesylate 7.5 mg", "role": "FDA-approved SSRI for VMS", "status": "VMS_OPTION" },
+      { "class": "Nonhormonal VMS", "option": "SSRI/SNRI (venlafaxine/desvenlafaxine/escitalopram/paroxetine per source)", "role": "VMS; consider interactions", "status": "VMS_OPTION" },
+      { "class": "Nonhormonal VMS", "option": "Gabapentin", "role": "VMS esp. nocturnal; monitor sedation/falls/renal", "status": "VMS_OPTION" },
+      { "class": "Nonhormonal VMS", "option": "Oxybutynin", "role": "VMS; anticholinergic risk review", "status": "VMS_OPTION" },
+      { "class": "Behavioral", "option": "CBT / clinical hypnosis", "role": "VMS bother/sleep/mood support", "status": "WELLNESS_OPTION" }
+    ],
+    "compounded_exception": "Internal compounded formulary (estradiol RDT, Biest creams, compounded progesterone IR/E4M/cream, compounded testosterone 0.1% cream [HSDD-only provider override], vaginal DHEA) is INTERNAL_FORMULARY + PURPLE_COMPOUNDED_EXCEPTION — NOT first-line when FDA-approved options exist; requires documented rationale, no superiority/safety claim.",
+    "quarantine_suppressed": [
+      "Progesterone cream as routine endometrial protection (variable absorption — provider override only)",
+      "Progesterone 50 mg as endometrial protection with systemic estrogen (titration dose — hold/override-only)",
+      "Testosterone for energy/mood/muscle/cognition/weight loss (HSDD only)",
+      "Testosterone pellets (supraphysiologic exposure — suppress)",
+      "Oral testosterone (not recommended in consensus guidance)",
+      "SHBG-driven estrogen escalation (no guideline-supported rule)",
+      "BMI-driven anastrozole (not a wellness BHRT pathway)",
+      "Clonidine as routine VMS (NAMS 2023 does not recommend)",
+      "Supplements/herbals as VMS treatment equivalent"
+    ]
+  },
+
+  "safety_gates": {
+    "hard_stops": ["unexplained vaginal bleeding -> RED_REFERRAL_GYN", "postmenopausal bleeding -> RED_REFERRAL_GYN", "active/history estrogen-sensitive cancer without specialist clearance -> RED_REFERRAL_ONC_GYN", "active VTE/PE/stroke/MI or unstable CVD -> RED_REFERRAL_PCP_CARDIO_ED", "active liver disease -> RED_REFERRAL_PCP_HEPATOLOGY", "pregnant/breastfeeding -> RED_HOLD", "uterus status unknown + systemic estrogen considered -> AMBER_HOLD"],
+    "uterus_gate": "Systemic estrogen + uterus intact -> require an ADEQUATE progestogen regimen for endometrial protection: oral micronized progesterone 100 mg daily (continuous-combined) OR 200 mg for >=12 days/cycle (sequential), or an equivalent guideline-supported progestogen (S1). Under-dosed/variable-absorption regimens (e.g. progesterone cream, 50 mg titration) do NOT satisfy this gate (see quarantine_suppressed). Systemic estrogen + uterus unknown -> suppress final systemic-estrogen plan. TOTAL hysterectomy confirmed -> progestogen not required. CAVEAT: supracervical/subtotal hysterectomy, prior endometrial ablation, or endometriosis history -> residual endometrium possible -> provider review before omitting progestogen. (VERIFY exact progestogen dose text against S1 at lock.)",
+    "fezolinetant_liver_module": "Require baseline hepatic labs (ALT/AST/ALP/bilirubin) BEFORE start; per FDA Boxed Warning (S10) monitor monthly for the first 3 months, then at months 6 and 9; contraindicated in cirrhosis OR severe renal impairment OR strong/moderate CYP1A2 inhibitor; counsel the patient to STOP and seek care for signs/symptoms of liver injury (fatigue, nausea, pruritus, jaundice, dark urine, light stools, RUQ pain); suppress if monitoring cannot be performed.",
+    "testosterone_hsdd_module": "If not HSDD after biopsychosocial assessment -> suppress. A testosterone LEVEL does NOT establish the HSDD diagnosis (S6/S7) — baseline total testosterone (+ SHBG/free-testosterone context) is drawn for SAFETY/ceiling, to exclude already-high levels, not for candidacy. Goal: maintain physiologic premenopausal female range; recheck level ~3-6 weeks after start and periodically to exclude supraphysiologic exposure; assess for androgenic effects; DISCONTINUE at ~6 months if no meaningful benefit. Avoid pellets and oral testosterone (supraphysiologic / not recommended)."
+  },
+
+  "governance": {
+    "provider_of_record": "Every active BHRT patient must have an authorized APP/physician provider of record before any medication draft/refill/continuation/hold/dose-change is finalized. Block if missing or if the named prescriber is RN/LPN/MA/coordinator/unlicensed.",
+    "medical_director": "Treated as clinic governance/QA oversight unless separately documented as treating provider of record. Approves the framework, evidence rules, audit criteria; defines which charts need MD review; reviews high-risk/AE/compounded charts; performs/supervises the monthly QA audit; requires corrective action; may recommend service-line hold; approves protocol revisions. Does NOT automatically include routine prescribing/direct-care unless separately contracted.",
+    "required_fields": ["provider_of_record_present", "authorized_prescriber_role", "authorized_prescriber_verified", "rn_or_staff_used_as_prescriber", "medical_director_review_required", "audit_risk_score(1-5)", "chart_status", "missing_required_elements", "corrective_action_required"]
+  },
+
+  "audit": {
+    "sample": "≥5 active BHRT charts/clinic (or higher per policy); 100% of adverse-event, EMS/ED/urgent-referral, protocol-deviation, medication-source-concern, missing-provider-order, and suspected RN/staff prescribing-violation charts; highest-risk remaining first. If panel <5, audit all active BHRT charts.",
+    "risk_score": {
+      "5": "Mandatory MD review — AE, EMS/ED referral, thrombotic/CV/neuro symptom, abnormal bleeding, suspected cancer, serious psychiatric safety, unknown source/recall, missing provider order, RN/staff prescribing violation, patient complaint, serious protocol deviation",
+      "4": "High — new hormone/testosterone start, compounded product, pellet, dose change, abnormal lab needing review, missed follow-up, route/source change, specialist-clearance issue",
+      "3": "Moderate — stable active therapy w/ recent follow-up, routine lab review, minor resolved side effect, documentation correction",
+      "2": "Routine — stable maintenance, complete documentation, no change/symptom/source concern",
+      "1": "Low — administrative update or discontinued/closed medication"
+    },
+    "required_elements": ["patient identity (clinic chart)", "authorized provider of record", "authorized prescriber role (not RN/staff)", "APP/PA authority documentation", "wellness-scope fit", "dominant symptom domains", "red-flag screen", "uterus status before systemic estrogen", "contraindication review", "med/allergy/supplement review", "vitals/risk baseline", "screening status (breast/cervical/bone)", "treatment rationale", "evidence/source class", "medication order (full)", "medication source (FDA vs compounded)", "compounded exception rationale", "progesterone protection if uterus intact + systemic estrogen", "testosterone guardrail (HSDD only)", "follow-up plan", "abnormal-symptom workflow", "RN/staff role boundary", "official record storage"],
+    "defect_severity": {
+      "Critical": "immediate safety/prescribing/source/contraindication/red-flag/provider-order defect — hold start/refill/dose change until corrected; MD review within 1 business day",
+      "Major": "required documentation/monitoring defect affecting safe continuity — treating-provider correction within 5 business days",
+      "Minor": "administrative/clarity defect — correct by next QA cycle",
+      "Observation": "improvement opportunity, no active defect"
+    },
+    "phi_note": "The Ally audit output is keyed on chart_id (de-identified). Patient identity (name/DOB/MRN) is verified in the clinic's own chart, never stored by AllyOS. Shared §14 spine — identical to the IV/peptide audit."
+  },
+
+  "evidence_sources": [
+    { "id": "S1", "title": "NAMS 2022 Hormone Therapy Position Statement", "pmid": "35797481", "doi": "10.1097/GME.0000000000002028", "verified": true },
+    { "id": "S4", "title": "NAMS 2023 Nonhormone Therapy Position Statement", "pmid": "37252752", "doi": "10.1097/GME.0000000000002200", "verified": true },
+    { "id": "S6", "title": "ISSWSH Clinical Practice Guideline — Systemic Testosterone for HSDD in Women", "pmid": "33792440", "doi": "10.1080/13697137.2021.1891773", "verified": true },
+    { "id": "S15", "title": "PROT-AGE Study Group — protein recommendations in older people", "pmid": "23867520", "doi": "10.1016/j.jamda.2013.05.021", "verified": true },
+    { "id": "S2", "title": "Compounded Bioidentical Menopausal Hormone Therapy: ACOG Clinical Consensus No. 6 (Obstet Gynecol 2023;142:1266-1273)", "pmid": "37856860", "doi": "10.1097/AOG.0000000000005395", "verified": true, "verified_via": "PubMed" },
+    { "id": "S3", "title": "NASEM 2020 — The Clinical Utility of Compounded Bioidentical Hormone Therapy (National Academies Press, 1-Jul-2020); summarized in Stuenkel CA, Menopause 2021;28:576-578", "pmid": "33739316", "doi": "10.1097/GME.0000000000001735", "verified": true, "verified_via": "PubMed (companion) + National Academies", "note": "RELABELED from the unverifiable 'Endocrine Society' title to the authoritative NASEM 2020 consensus report; the PubMed-indexed companion (Stuenkel) carries the PMID/DOI." },
+    { "id": "S5", "title": "The AUA/SUFU/AUGS Guideline on Genitourinary Syndrome of Menopause (J Urol 2025;214:242-250)", "pmid": "40298120", "doi": "10.1097/JU.0000000000004589", "verified": true, "verified_via": "PubMed" },
+    { "id": "S7", "title": "Global Consensus Position Statement on the Use of Testosterone Therapy for Women (J Clin Endocrinol Metab 2019;104:4660-4666; PMC6821450)", "pmid": "31498871", "doi": "10.1210/jc.2019-01603", "verified": true, "verified_via": "PubMed" },
+    { "id": "S8", "title": "NICE NG23 — Menopause: Identification and Management (publ. 2015; updated 2024)", "url": "nice.org.uk/guidance/ng23", "verified": true, "verified_via": "web (NICE guideline confirmed live; Nov-2024 update on CBT, GSM, HRT outcomes)" },
+    { "id": "S9", "title": "ACOG Committee Opinion No. 734: Transvaginal Ultrasonography in Evaluating the Endometrium of Women With Postmenopausal Bleeding (Obstet Gynecol 2018;131:e124-e129)", "pmid": "29683909", "doi": "10.1097/AOG.0000000000002631", "verified": true, "verified_via": "PubMed" },
+    { "id": "S10", "title": "FDA Drug Safety Communication — Fezolinetant (Veozah) serious liver injury (DSC 12-Sep-2024; Boxed Warning added 16-Dec-2024; baseline + monthly×3 LFTs)", "url": "fda.gov", "verified": true, "verified_via": "web (FDA DSC + Boxed Warning confirmed)" },
+    { "id": "S11", "title": "HHS/FDA labeling changes to menopausal hormone therapy products — boxed warnings removed on first 6 products (announced 10-Nov-2025; approvals continuing 2026)", "url": "fda.gov/news-events/press-announcements/fda-approves-labeling-changes-menopausal-hormone-therapy-products", "verified": true, "verified_via": "web (FDA press announcement)" },
+    { "id": "S12", "title": "FDA Clinical Decision Support Software — Final Guidance (28-Sep-2022; Docket FDA-2017-D-6569)", "url": "fda.gov/media/109618", "verified": true, "verified_via": "web (FDA + Federal Register)" },
+    { "id": "S13", "title": "FDA General Wellness: Policy for Low Risk Devices — Guidance (27-Sep-2019)", "url": "fda.gov/regulatory-information/search-fda-guidance-documents/general-wellness-policy-low-risk-devices", "verified": true, "verified_via": "web (FDA)" },
+    { "id": "S14", "title": "Physical Activity Guidelines for Americans, 2nd ed. (HHS/ODPHP, 2018; ≥150–300 min/wk moderate aerobic + muscle-strengthening ≥2 days). PubMed companion PMID 30418471", "url": "health.gov/our-work/nutrition-physical-activity/physical-activity-guidelines", "verified": true, "verified_via": "web (HHS/ODPHP) + PubMed companion" },
+    { "id": "S16", "title": "NIH Office of Dietary Supplements — Calcium & Vitamin D, Health Professional Fact Sheets", "url": "ods.od.nih.gov/factsheets/Calcium-HealthProfessional/ , ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/", "verified": true, "verified_via": "web (NIH ODS)" },
+    { "id": "S17", "title": "Florida Statutes §464.012 — Advanced Practice Registered Nurse (autonomous practice qualifies separately under §464.0123)", "url": "leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=0400-0499/0464/Sections/0464.012.html", "verified": true, "verified_via": "web (FL Legislature)" },
+    { "id": "S18", "title": "Florida Statutes §458.347 — Physician Assistants", "url": "flsenate.gov/statutes/458.347", "verified": true, "verified_via": "web (FL Legislature)" }
+  ],
+
+  "marker_status_convention": "Base decision markers (GREEN_WELLNESS_CANDIDATE, AMBER_MISSING_DATA, AMBER_CO_MANAGE, RED_REFERRAL, GRAY_INSUFFICIENT_EVIDENCE, PURPLE_COMPOUNDED_EXCEPTION) are the de-identified flags that flow to MD oversight. Routing-suffixed strings used in scope_boundary (e.g. RED_REFERRAL_GYN, RED_REFERRAL_PCP_CARDIO_ED, AMBER_OR_RED_PCP) and the hold sub-statuses in safety_gates (RED_HOLD, AMBER_HOLD) are expansions of those base markers carrying the referral destination; they are NOT separate markers.",
+
+  "source_map": {
+    "purpose": "Binds each material recommendation to its verified source class so the 'no source = suppress' rule is auditable. S# refer to evidence_sources.",
+    "VMS_systemic_MHT": ["S1", "S8"],
+    "VMS_transdermal_estradiol_preferred": ["S1"],
+    "VMS_nonhormonal_fezolinetant": ["S10"],
+    "VMS_nonhormonal_SSRI_SNRI_gabapentin_oxybutynin": ["S4"],
+    "clonidine_not_recommended": ["S4"],
+    "GSM_vaginal_estrogen_DHEA_ospemifene": ["S5", "S1", "S8"],
+    "endometrial_protection_progestogen": ["S1"],
+    "postmenopausal_bleeding_referral": ["S9"],
+    "compounded_before_FDA_suppression": ["S2", "S3"],
+    "HSDD_testosterone_HSDD_only": ["S6", "S7"],
+    "bone_muscle_metabolic_lifestyle": ["S14", "S15", "S16"],
+    "menopause_clinical_diagnosis_ge45_no_FSH": ["S8"],
+    "prescriber_authority_scope": ["S17", "S18"],
+    "regulatory_CDS_wellness_framing": ["S11", "S12", "S13"]
+  },
+
+  "final_rule": "Ally supports the provider. Only the authorized APP/physician provider of record makes BHRT medication decisions. RN/staff support intake and routing only. Wellness is the scope. Pathology is referred or co-managed. Every clinical statement must be verifiable. No source = no recommendation.",
+
+  "signoff_ledger": {
+    "status": "LOCKED — citations verified, 3-auditor lock complete, MD governance sign-off recorded (2026-06-28)",
+    "citation_lock": "18 of 18 sources verified. PubMed-verified with PMID + DOI (9): S1, S2, S3 (NASEM companion), S4, S5, S6, S7, S9, S15. Web-verified against official government/guideline sources (9): S8 NICE NG23, S10 FDA fezolinetant Boxed Warning, S11 HHS/FDA 2025 MHT labeling, S12 FDA CDS guidance, S13 FDA general-wellness guidance, S14 HHS/ODPHP Physical Activity Guidelines 2nd ed, S16 NIH ODS Calcium/Vitamin D, S17 FL §464.012, S18 FL §458.347.",
+    "citation_lock_date": "2026-06-28",
+    "resolved": "S3 relabeled from the unverifiable 'Endocrine Society' title to the NASEM 2020 consensus report (PubMed companion PMID 33739316). S11 corrected from 'FDA 2026' to the HHS/FDA 10-Nov-2025 MHT labeling action.",
+    "auditors": {
+      "clinical": "PASS-WITH-NOTES (2026-06-28) — zero unsafe omissions; notes APPLIED: total-hysterectomy caveat + endometrial-protection dose (uterus_gate), testosterone level-is-not-diagnosis + recheck/6-month-stop (testosterone_hsdd_module), explicit fezolinetant LFT schedule + stop rule (fezolinetant_liver_module).",
+      "citation_regulatory": "PASS-WITH-NOTES (2026-06-28) — sources complete + honestly labeled; S6 title/PMID/DOI confirmed consistent (ISSWSH guideline, Climacteric 2021); claim->source binding ADDED via source_map. Regulatory/scope + compounded framing + honesty discipline confirmed correct.",
+      "schema": "PASS-WITH-NOTES (2026-06-28) — strict valid JSON, S1-S18 unique no gaps, all consumer/required fields present; notes APPLIED: marker_status_convention added, CO-MANAGE delimiter normalized."
+    },
+    "lock_status": "LOCKED 2026-06-28 — 18/18 citations verified, 3-auditor lock complete (all PASS-WITH-NOTES, notes applied), and Medical Director governance sign-off recorded (Falcon, MD, FL ME 84789). Effective 2026-06-28.",
+    "md_signoff_note": "Governance/framework approval as Medical Director — authorizes this CDS as the BHRT decision-support standard for clinics governed; does NOT make the MD the treating provider of record or prescriber for any patient.",
+    "pending": []
+  }
+}

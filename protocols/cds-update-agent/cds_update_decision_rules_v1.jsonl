@@ -1,0 +1,8 @@
+{"rule_id": "UPD_RULE_001", "if": "proposed_patch_changes_clinical_logic", "then": "ADD_TO_REVIEW_QUEUE", "never": "auto_publish"}
+{"rule_id": "UPD_RULE_002", "if": "source_type == safety_signal", "then": "label_signal_only_and_require_review", "never": "causal_claim_or_incidence_claim"}
+{"rule_id": "UPD_RULE_003", "if": "source_type == commercial_market_or_product_identity", "then": "allow_market_availability_or_product_identity_only", "never": "efficacy_or_safety_proof"}
+{"rule_id": "UPD_RULE_004", "if": "source_type == trial_registry and no_results_posted", "then": "trial_activity_only", "never": "efficacy_claim"}
+{"rule_id": "UPD_RULE_005", "if": "citation_does_not_support_exact_claim", "then": "BLOCKED_FOR_AUDIT_or_EVIDENCE_DOWNGRADE", "never": "keep_stronger_claim"}
+{"rule_id": "UPD_RULE_006", "if": "new_warning_or_red_flag_detected", "then": "PROPOSE_SAFETY_ESCALATION_and_clinician_review", "never": "silent_update"}
+{"rule_id": "UPD_RULE_007", "if": "source_mentions_approval_or_market_status", "then": "do_not_add_regulatory_decision_logic", "never": "approve_or_block_protocol_based_on_status"}
+{"rule_id": "UPD_RULE_008", "if": "dose_or_infusion_rate_claim_has_no_direct_source", "then": "BLOCKED_FOR_AUDIT", "never": "add_to_standing_order"}

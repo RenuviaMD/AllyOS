@@ -1,0 +1,221 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Peptides Provider CDS · AllyOS · RenuviaMD®</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="allyos-theme.css">
+<style>
+  body.allyos{font-family:var(--fbody)}
+  .top{display:flex;align-items:center;gap:14px;padding:0 20px;height:54px;background:#0a1120cc;backdrop-filter:blur(8px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+  .brand{font-family:var(--fdisp);font-weight:900;letter-spacing:.5px}.brand b{color:var(--teal)}
+  .tag{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);border:1px solid var(--line2);border-radius:5px;padding:3px 8px}
+  .top .right{margin-left:auto;display:flex;gap:12px;align-items:center}
+  .wrap{max-width:1000px;margin:0 auto;padding:22px 20px 80px}
+  h1{font-family:var(--fdisp);font-weight:900;font-size:1.5rem;letter-spacing:.4px}
+  .sub{color:var(--muted);font-size:.92rem;margin:3px 0 0}
+  .draftbar{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(180deg,#2a2210,#1a1608);border:1px solid #4a3c18;border-radius:13px;padding:13px 16px;margin:16px 0 8px;font-size:.86rem;line-height:1.5}
+  .draftbar .ic{font-size:1.2rem;line-height:1}.draftbar b{color:var(--gold)}
+  .pol{font-size:11.5px;color:var(--dim);border:1px solid var(--line);border-radius:9px;padding:10px 14px;margin:10px 0 18px;line-height:1.55}.pol b{color:var(--green)}
+  .grp{font-family:var(--fdisp);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin:26px 0 12px;display:flex;align-items:center;gap:10px}
+  .grp:after{content:'';flex:1;height:1px;background:var(--line)}
+  .panel{background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:16px}
+  .panel h3{font-family:var(--fdisp);font-size:1rem;margin-bottom:3px}
+  .panel .d{font-size:12.5px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+  label.q{display:block;font-size:13px;font-weight:600;margin:14px 0 6px}
+  select{width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:9px 11px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .chip{font-size:12px;border:1px solid var(--line2);border-radius:9px;padding:7px 11px;cursor:pointer;color:var(--muted);user-select:none;transition:.12s}
+  .chip:hover{border-color:var(--teal)}.chip.on{background:#0e2e2b;border-color:var(--teal);color:var(--teal)}
+  .chip.red.on{background:#2a1512;border-color:var(--red);color:#f0b3aa}
+  .block{background:#2a1512;border:1px solid #8a322c;border-radius:11px;padding:13px 15px;font-size:13px;color:#f0b3aa;margin-top:10px;display:none}
+  .block.show{display:block}.block b{color:#ff8a7e}
+  .badge{font-size:9px;font-weight:800;letter-spacing:.04em;padding:2px 8px;border-radius:5px;text-transform:uppercase}
+  .b-fda{background:#0e2a1f;color:var(--green)}.b-inv{background:#2a1512;color:#f0b3aa}.b-verify{background:#2a2210;color:var(--amber)}
+  .tier{font-family:var(--fdisp);font-weight:900}
+  .agentcard h2{font-family:var(--fdisp);font-size:1.2rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .meta-row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px;font-size:11.5px;color:var(--muted)}
+  .meta-row span{background:#0a1422;border:1px solid var(--line);border-radius:7px;padding:4px 9px}
+  .cisec{margin-top:14px}.cisec h4{font-family:var(--fdisp);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:7px}
+  ul.ci{list-style:none;margin:0}ul.ci li{font-size:12.5px;line-height:1.5;padding:5px 0 5px 16px;position:relative;color:var(--muted)}
+  ul.ci li:before{content:'▪';position:absolute;left:0;color:var(--dim)}
+  ul.ci.abs li{color:#f0b3aa}ul.ci.abs li:before{color:var(--red)}
+  .vflag{color:var(--amber);font-weight:700}
+  .mon{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:680px){.mon{grid-template-columns:1fr}}
+  .ix li{font-size:12px;color:var(--muted);line-height:1.5;margin:6px 0}
+  .ix .act{font-size:9px;font-weight:800;padding:1px 6px;border-radius:4px;background:#2a2210;color:var(--amber)}
+  .ix .act.inform{background:#0e2436;color:var(--blue)}.ix .act.lang{background:#1c1633;color:var(--violet)}
+  .rule{font-size:12.5px;color:var(--muted);line-height:1.6;padding:7px 0;border-bottom:1px solid var(--line)}.rule:last-child{border:none}.rule b{color:var(--ink)}
+  .foot{font-size:11.5px;color:var(--dim);line-height:1.7;border-top:1px solid var(--line);margin-top:30px;padding-top:16px}.foot b{color:var(--muted)}
+  a.back{color:var(--teal);font-size:12.5px;text-decoration:none}
+</style></head>
+<body class="allyos">
+<div class="top">
+  <span class="brand"><b>Ally</b>OS</span>
+  <span class="tag">Peptides · Provider CDS</span>
+  <span class="badge b-verify" id="lockPill">DRAFT — not locked</span>
+  <span class="right"><a class="back" href="dashboard.html">← Dashboard</a></span>
+</div>
+
+<div class="wrap">
+  <h1>Peptides — Provider CDS</h1>
+  <p class="sub" id="scopeSub">Loading module…</p>
+
+  <div class="draftbar" id="draftbar">
+    <span class="ic">⚠️</span>
+    <div id="draftbarText"><b>This module is a DRAFT.</b> <span id="lockNote">FDA-approved agents are label-grounded; research/compounded/investigational agents carry prudent-convention contraindications marked <b class="vflag">(VERIFY)</b> pending <b>Medical Director sign-off</b>.</span> <b>No doses</b> — decision-support only; the prescriber owns every decision.</div>
+  </div>
+
+  <div class="pol">
+    <b>Provider-facing only · no doses · PHI-free.</b> An authorized APP / physician provider of record selects the agent, clears contraindications, and prescribes. RN / staff support intake &amp; routing only. AllyOS holds no PHI; only a de-identified marker flows to MD oversight.
+  </div>
+
+  <!-- 1. PRESCRIBER GATE -->
+  <div class="grp">1 · Prescriber authority</div>
+  <div class="panel">
+    <label class="q" for="role">Role finalizing this peptide decision</label>
+    <select id="role" onchange="gate()">
+      <option value="">— select —</option>
+      <option value="physician">Physician (MD / DO)</option>
+      <option value="aprn">APRN / ARNP</option>
+      <option value="pa">Physician Assistant (PA)</option>
+      <option value="rn">RN</option>
+      <option value="ma">MA / coordinator / unlicensed</option>
+    </select>
+    <div class="block" id="roleBlock"><b>BLOCKED —</b> a peptide medication decision requires an authorized APP / physician provider of record. RN / staff support intake and routing only.</div>
+  </div>
+
+  <!-- 2. RED-FLAG SCREEN -->
+  <div class="grp">2 · Metabolic / GLP-1 red-flag screen</div>
+  <div class="panel">
+    <p class="d">Hard-screen items (boxed warnings + platform hard stops) and screen items. Any hard-screen hit blocks the metabolic line until cleared/overridden with documented rationale.</p>
+    <div style="font-size:11px;color:var(--dim);margin-bottom:6px">HARD SCREEN</div>
+    <div class="chips" id="hardScreen"></div>
+    <div style="font-size:11px;color:var(--dim);margin:14px 0 6px">SCREEN</div>
+    <div class="chips" id="screen"></div>
+    <div class="block" id="screenBlock"></div>
+  </div>
+
+  <!-- 3. AGENT -->
+  <div class="grp">3 · Agent · grade → consent tier · contraindications · monitoring</div>
+  <div class="panel">
+    <label class="q" for="agent">Select a peptide agent</label>
+    <select id="agent" onchange="renderAgent()"><option value="">— select —</option></select>
+  </div>
+  <div id="agentOut"></div>
+
+  <!-- GLP-1 RULES -->
+  <div class="grp">GLP-1 / incretin rules</div>
+  <div class="panel" id="glp1Rules"></div>
+
+  <!-- OVERRIDE -->
+  <div class="grp">Override policy</div>
+  <div class="panel" id="override"></div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+var MOD=null, AGENTS={};
+function getJSON(u){return fetch(u).then(function(r){return r.json();}).catch(function(){return null;});}
+function esc(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function vfmt(s){return esc(s).replace(/\(VERIFY\)/g,'<span class="vflag">(VERIFY)</span>');}
+
+function gate(){
+  var r=document.getElementById('role').value;
+  document.getElementById('roleBlock').classList.toggle('show', r==='rn'||r==='ma');
+}
+
+var sel={};
+function tog(id,k,grp){sel[k]=!sel[k];renderScreen();}
+function renderScreen(){
+  var any=Object.keys(sel).some(function(k){return sel[k]&&k.indexOf('H::')===0;});
+  var hb=document.getElementById('screenBlock');
+  hb.classList.toggle('show',any);
+  if(any) hb.innerHTML='<b>HARD SCREEN hit —</b> metabolic-line agents are blocked until this is cleared or overridden by the provider with a typed rationale (recorded in the note + consent). Pregnancy / active malignancy are platform hard stops.';
+}
+
+function tierLabel(t){var ct=(MOD&&MOD.consent_tiers)||{};return 'Tier '+t+(ct[String(t)]?' — '+ct[String(t)]:'');}
+function evBadge(ev){
+  if(ev==='FDA_LABEL')return '<span class="badge b-fda">FDA label</span>';
+  if(ev==='INVESTIGATIONAL')return '<span class="badge b-inv">Investigational</span>';
+  return '<span class="badge b-verify">Verify · prudent-convention</span>';
+}
+
+function ixFor(slug,name){
+  var rules=(MOD&&MOD.interaction_rules&&MOD.interaction_rules.key)||[];
+  var nm=(name||'').toLowerCase(), sl=(slug||'').toLowerCase().replace('-',' ');
+  return rules.filter(function(r){var t=(r.rule||'').toLowerCase();return t.indexOf(sl)>=0||(nm&&t.indexOf(nm.split(' ')[0])>=0);});
+}
+
+function renderAgent(){
+  var slug=document.getElementById('agent').value, out=document.getElementById('agentOut');
+  if(!slug){out.innerHTML='';return;}
+  var a=AGENTS[slug];if(!a){out.innerHTML='';return;}
+  var abs=(a.absolute||[]).map(function(x){return '<li>'+vfmt(x)+'</li>';}).join('')||'<li class="vflag">none listed</li>';
+  var rel=(a.relative||[]).map(function(x){return '<li>'+vfmt(x)+'</li>';}).join('')||'<li>none listed</li>';
+  var mb=(a.monitoring_baseline||[]);var mf=(a.monitoring_followup||[]);
+  var monB=mb.length?mb.map(function(x){return '<li>'+esc(x)+'</li>';}).join(''):'<li class="dim">'+(a.monitoring_note?esc(a.monitoring_note):'none')+'</li>';
+  var monF=mf.length?mf.map(function(x){return '<li>'+esc(x)+'</li>';}).join(''):'<li class="dim">none</li>';
+  var ix=ixFor(slug,a.name);
+  var ixHtml=ix.length?('<div class="cisec"><h4>Interaction flags</h4><ul class="ix" style="list-style:none">'+ix.map(function(r){
+      var cls=r.action==='INFORM'?'inform':(r.action==='LANGUAGE_GUARDRAIL'?'lang':'');
+      return '<li><span class="act '+cls+'">'+esc(r.action.replace(/_/g,' '))+'</span> '+esc(r.rule)+' — '+esc(r.why)+'</li>';}).join('')+'</ul></div>'):'';
+  var ctNote=a.consent_tier_note?' <span style="color:var(--dim)">('+esc(a.consent_tier_note)+')</span>':'';
+  out.innerHTML='<div class="panel agentcard">'+
+    '<h2>'+esc(a.name)+' '+evBadge(a.evidence_status)+'</h2>'+
+    '<div class="meta-row"><span>Grade: <b>'+esc(a.grade)+'</b></span><span>Consent <b class="tier">Tier '+esc(a.consent_tier)+'</b>'+ctNote+'</span><span>'+esc(a.cadence||'')+'</span>'+
+      (a.stackable_with_other_glp1===false?'<span style="color:#f0b3aa">single GLP-1 backbone — never co-administer</span>':'')+'</div>'+
+    '<div style="font-size:12px;color:var(--dim);margin:4px 0 2px">'+esc(a.fda_status||'')+'</div>'+
+    (a.evidence_status_detail?'<div style="font-size:11.5px;color:var(--muted)">'+esc(a.evidence_status_detail)+'</div>':'')+
+    '<div style="font-size:11px;color:var(--dim);margin-top:8px">Consent: '+esc(tierLabel(a.consent_tier))+'</div>'+
+    '<div class="cisec"><h4>Absolute contraindications</h4><ul class="ci abs">'+abs+'</ul></div>'+
+    '<div class="cisec"><h4>Relative contraindications / cautions</h4><ul class="ci">'+rel+'</ul></div>'+
+    '<div class="cisec"><h4>Monitoring</h4><div class="mon"><div><div style="font-size:11px;color:var(--dim);margin-bottom:5px">Baseline</div><ul class="ci">'+monB+'</ul></div>'+
+      '<div><div style="font-size:11px;color:var(--dim);margin-bottom:5px">Follow-up</div><ul class="ci">'+monF+'</ul></div></div></div>'+
+    ixHtml+
+    '</div>';
+}
+
+function renderModule(){
+  if(!MOD)return;var m=MOD.meta||{};
+  document.getElementById('scopeSub').textContent=m.scope||'Provider decision-support — peptides.';
+  if(MOD.signoff_ledger) document.getElementById('lockNote').innerHTML='Status: '+esc(MOD.signoff_ledger.status)+'.';
+
+  // red-flag screen
+  var rf=MOD.metabolic_red_flag_screen||{};
+  document.getElementById('hardScreen').innerHTML=(rf.hard_screen||[]).map(function(s,i){return '<span class="chip red" onclick="tog(this,\'H::'+i+'\')" id="c_H'+i+'">'+esc(s)+'</span>';}).join('');
+  document.getElementById('screen').innerHTML=(rf.screen||[]).map(function(s,i){return '<span class="chip" onclick="tog(this,\'S::'+i+'\')">'+esc(s)+'</span>';}).join('');
+  // chip toggle visual
+  document.querySelectorAll('.chips .chip').forEach(function(el){el.addEventListener('click',function(){el.classList.toggle('on');});});
+
+  // agents
+  var f=MOD.formulary||{};
+  var groups=[['GLP-1 / incretin backbones',f.glp1_backbones],['Cyclable adjuncts',f.cyclable_adjuncts],['FDA-approved (other)',f.fda_approved_other]];
+  var opts='<option value="">— select —</option>';
+  groups.forEach(function(g){if(!g[1]||!g[1].length)return;opts+='<optgroup label="'+esc(g[0])+'">';g[1].forEach(function(a){AGENTS[a.slug]=a;opts+='<option value="'+esc(a.slug)+'">'+esc(a.name)+' · grade '+esc(a.grade)+' · Tier '+esc(a.consent_tier)+'</option>';});opts+='</optgroup>';});
+  document.getElementById('agent').innerHTML=opts;
+
+  // glp1 rules
+  var g1=MOD.glp1_rules||{};
+  document.getElementById('glp1Rules').innerHTML=Object.keys(g1).map(function(k){return '<div class="rule"><b>'+esc(k.replace(/_/g,' '))+'</b> — '+esc(g1[k])+'</div>';}).join('');
+
+  // override
+  var ov=MOD.override_policy||{};
+  document.getElementById('override').innerHTML='<div class="rule"><b>Principle</b> — '+esc(ov.principle||'')+'</div>'+
+    '<div class="rule"><b>Soft advisory</b> — '+esc(ov.soft_advisory||'')+'</div>'+
+    '<div class="rule"><b>Hard stop</b> — '+esc(ov.hard_stop||'')+'</div>'+
+    '<div class="rule"><b>Platform hard stops</b> — '+(ov.platform_hard_stops||[]).map(esc).join(' · ')+'</div>';
+
+  document.getElementById('foot').innerHTML='<b>Final rule.</b> '+esc(MOD.final_rule||'')+'<br><br><b>Source.</b> '+esc(m.source||'')+' · Curated by '+esc(m.curated_by||'')+'.';
+
+  // locked state (when signed)
+  if(m.status==='locked'){
+    var sg=m.md_signoff||{};var pill=document.getElementById('lockPill');
+    pill.className='badge b-fda';pill.textContent='LOCKED v'+(m.version||'');
+    var db=document.getElementById('draftbar');db.style.background='linear-gradient(180deg,#0e2a1f,#08160f)';db.style.borderColor='#1c5238';db.querySelector('.ic').textContent='✓';
+    document.getElementById('draftbarText').innerHTML='<b style="color:var(--green)">Locked &amp; signed.</b> MD governance sign-off — '+esc(sg.by||'Falcon, MD')+' ('+esc(sg.license||'')+'), '+esc(sg.date||'')+'. Items marked <b class="vflag">(VERIFY)</b> are non-FDA-label, <b>MD-reviewed</b> conservative advisories. No doses — decision-support only; the prescriber owns every decision.';
+  }
+}
+
+getJSON('../protocols/peptide-module.json').then(function(j){MOD=j;renderModule();});
+</script>
+</body></html>

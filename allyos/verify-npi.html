@@ -1,0 +1,62 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verify NPI — AllyOS · RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png"><link rel="apple-touch-icon" href="ally-avatar-180.png"><meta name="theme-color" content="#060a12">
+<style>
+:root{--bg:#0b1620;--card:#13242f;--line:#223947;--teal:#28c2b8;--gold:#e0b24a;--ink:#e9f3f2;--muted:#8aa3ad;--green:#1fb87a;--red:#e0594a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:radial-gradient(1100px 600px at 50% -10%,#143041,#0b1620);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:30px;max-width:460px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.brand{font-weight:800;font-size:1.1rem}.brand span{color:var(--gold)}
+.tag{font-size:.8rem;color:var(--muted);margin:6px 0 18px;line-height:1.5}
+label{display:block;font-size:.72rem;color:var(--muted);margin:10px 0 4px}
+.row{display:flex;gap:8px}
+input{flex:1;background:#0e1f29;border:1px solid var(--line);border-radius:10px;padding:11px 13px;color:var(--ink);font-size:1rem;font-family:inherit;letter-spacing:1px}
+input:focus{outline:none;border-color:var(--teal)}
+button{background:var(--teal);color:#06231f;border:none;border-radius:10px;padding:0 18px;font-weight:800;cursor:pointer}
+button:disabled{opacity:.5;cursor:default}
+.res{margin-top:18px;border-radius:12px;padding:14px;display:none}
+.res.show{display:block}
+.res.ok{background:#0f2a1f;border:1px solid #1e4a36}
+.res.bad{background:#2a1512;border:1px solid #5a2a22}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:.86rem;padding:4px 0;border-bottom:1px solid #16313c}
+.kv:last-child{border:none}.kv span{color:var(--muted)}.kv b{text-align:right}
+.role{margin-top:10px;background:#11313a;color:var(--teal);border-radius:8px;padding:8px 10px;font-size:.82rem}
+.err{color:#f0b3aa;font-size:.86rem}
+.note{font-size:.68rem;color:var(--muted);margin-top:16px;line-height:1.5}
+a{color:var(--teal)}
+</style></head>
+<body>
+<div class="card">
+  <div class="brand">Renuvia<span>MD</span>® · AllyOS</div>
+  <div class="tag">Verify your NPI to unlock licensed-professional access. This confirms you're a real, enumerated provider — it does <b>not</b> decide your clinical scope (your Medical Director and state board do that).</div>
+  <label>National Provider Identifier (NPI)</label>
+  <div class="row">
+    <input id="npi" inputmode="numeric" maxlength="10" placeholder="10-digit NPI" oninput="this.value=this.value.replace(/\D/g,'')">
+    <button id="go" onclick="verify()">Verify</button>
+  </div>
+  <div class="res" id="res"></div>
+  <div class="note">Checked against the federal <a href="https://npiregistry.cms.hhs.gov/" target="_blank">NPPES NPI Registry</a>. AllyOS verifies access &amp; identity only — never clinical scope, and it sells/brokers no drugs. No PHI stored.</div>
+</div>
+<script>
+function verify(){
+  var npi=document.getElementById('npi').value.trim(), res=document.getElementById('res'), go=document.getElementById('go');
+  if(!/^\d{10}$/.test(npi)){ show('bad','<div class="err">Enter a 10-digit NPI.</div>'); return; }
+  go.disabled=true; show('ok','Checking NPPES…');
+  fetch('/.netlify/functions/npi?npi='+npi).then(function(r){return r.json()}).then(function(j){
+    go.disabled=false;
+    if(j.valid===false){ show('bad','<div class="err">'+esc(j.error||'Invalid NPI.')+'</div>'); return; }
+    if(!j.found){ show('bad','<div class="err">'+esc(j.note||j.error||'No active NPPES record found.')+'</div>'); return; }
+    var html='<div class="kv"><span>Name</span><b>'+esc(j.name||'—')+'</b></div>'+
+      '<div class="kv"><span>Credential</span><b>'+esc(j.credential||'—')+'</b></div>'+
+      '<div class="kv"><span>Type</span><b>'+esc(j.enumeration||'—')+'</b></div>'+
+      '<div class="kv"><span>Specialty</span><b>'+esc(j.taxonomy||'—')+'</b></div>'+
+      '<div class="kv"><span>Status</span><b>'+esc(j.status||'—')+'</b></div>'+
+      '<div class="role">Suggested seat: '+esc(j.roleSuggestion||'—')+'</div>';
+    show('ok',html);
+  }).catch(function(e){ go.disabled=false; show('bad','<div class="err">Network error reaching verifier ('+esc(e.message)+'). The NPPES lookup runs server-side — this works once deployed.</div>'); });
+}
+function show(cls,html){ var r=document.getElementById('res'); r.className='res show '+cls; r.innerHTML=html; }
+function esc(s){return(''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+document.getElementById('npi').addEventListener('keydown',function(e){if(e.key==='Enter')verify();});
+</script>
+</body></html>

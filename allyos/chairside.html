@@ -1,0 +1,1178 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AllyOS Chairside — Nurse Workstation · RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
+<link rel="apple-touch-icon" href="ally-avatar-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#060a12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AllyOS">
+<link rel="stylesheet" href="allyos-theme.css">
+<style>
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#070d18ee;backdrop-filter:blur(8px);z-index:20}
+.topbar .brand{font-family:var(--fdisp);font-weight:700;font-size:1.05rem}.brand b{color:var(--gold)}
+.topbar .r{display:flex;align-items:center;gap:14px;font-size:.78rem;color:var(--muted)}
+.topbar .r a{color:var(--teal);text-decoration:none}
+#who{color:var(--gold)}
+.board{display:grid;grid-template-columns:330px 1fr 360px;gap:14px;padding:14px;align-items:start}
+@media(max-width:1200px){.board{grid-template-columns:290px 1fr 320px}}
+.col-h{font-family:var(--fdisp);font-weight:600;font-size:.82rem;color:var(--teal);letter-spacing:.04em;margin-bottom:10px;text-transform:uppercase}
+/* search */
+.search{width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--ink);font-size:.84rem;font-family:inherit;margin-bottom:8px}
+.search:focus{outline:none;border-color:var(--teal);box-shadow:var(--glow-teal)}
+/* patient ID card (left) */
+.pcard{background:linear-gradient(180deg,#0f1f33,#0b1626);border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:12px;padding:11px 12px;margin-bottom:9px;cursor:pointer;transition:border-color .12s}
+.pcard:hover{border-color:var(--teal)}.pcard.sel{box-shadow:var(--glow-teal);border-color:var(--teal)}
+.pcard.s-ready{border-left-color:var(--green)}.pcard.s-caution{border-left-color:var(--amber)}.pcard.s-hold{border-left-color:var(--red)}.pcard.s-missing{border-left-color:var(--red)}
+.pcard.staged{border-left-color:var(--teal)}
+.qgroup{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin:4px 0 7px}
+.stagedbadge{font-size:.66rem;color:var(--teal);background:#0e2a2433;border:1px solid #1e5a52;border-radius:7px;padding:4px 8px;margin-top:7px;display:inline-block}
+.pcard .ptop{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pcard .chev{color:var(--teal);font-size:.7rem;flex:0 0 auto;width:22px;height:22px;line-height:20px;text-align:center;border:1px solid var(--line);border-radius:50%;background:#0e1c2e}
+.pcard:hover .chev{border-color:var(--teal);box-shadow:var(--glow-teal)}
+.pcard.open{box-shadow:var(--glow-teal)}
+.pcard .nm{font-weight:700;font-size:.95rem}
+.pcard .pmeta{font-size:.7rem;color:var(--muted);margin-top:2px}
+.pcard .pr{font-size:.66rem;color:var(--teal);letter-spacing:.05em;text-transform:uppercase}
+.pcard .alacarte{color:var(--gold)}
+.spill{font-size:.6rem;font-weight:800;letter-spacing:.06em;padding:3px 8px;border-radius:999px;text-transform:uppercase;white-space:nowrap}
+.spill.s-ready{background:#0e2a1f;color:var(--green);border:1px solid #1e5a40}
+.spill.s-caution{background:#2a2310;color:var(--amber);border:1px solid #5a4a22}
+.spill.s-hold{background:#2a1512;color:#f0b3aa;border:1px solid #5a2a22}
+.spill.s-missing{background:#2a1512;color:#f0a59d;border:1px solid #5a2a22}
+.pflags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.fchip{font-size:.6rem;padding:2px 7px;border-radius:6px;border:1px solid var(--line);color:var(--muted);display:inline-flex;align-items:center;gap:3px}
+.fchip.ok{color:var(--green);border-color:#1e5a40}
+.fchip.bad{color:#f0b3aa;border-color:#5a2a22}
+.fchip.alert{color:var(--amber);border-color:#5a4a22}
+.fchip.note{color:var(--muted);border-color:var(--line);background:#0e1c2e}
+.pexpand{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.gaterow{display:flex;gap:7px;margin-bottom:8px}
+.gatebtn{flex:1;border-radius:9px;padding:8px;text-align:center;cursor:pointer;font-size:.72rem;font-weight:700;border:1px solid}
+.gatebtn.done{background:#0e2a1f;border-color:#1e5a40;color:var(--green)}
+.gatebtn.pending{background:#2a1512;border-color:#5a2a22;color:#f0b3aa}
+.gatebtn.expired{background:#2a2310;border-color:#5a4a22;color:var(--amber)}
+.noteline{font-size:.74rem;color:var(--muted);margin:2px 0}
+/* emergency bar */
+.embar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.embtn{flex:1;min-width:130px;background:#1e0f0f;border:1px solid #5a2a22;color:#f0b3aa;border-radius:10px;padding:9px;font-weight:700;font-size:.74rem;cursor:pointer;text-transform:uppercase;letter-spacing:.04em}
+.embtn:hover{box-shadow:var(--glow-red);border-color:var(--red)}
+.embar.active .embtn{opacity:.5}
+/* chairs */
+.chairgrid{grid-template-columns:repeat(3,1fr)}
+@media(max-width:1000px){.chairgrid{grid-template-columns:repeat(2,1fr)}}
+.chair.warn{border-color:var(--amber);box-shadow:0 0 26px rgba(224,162,58,.4);animation:pulseAmber 1s infinite alternate}
+.chair.warn .clk{color:var(--amber)}
+.chair.ended{border-color:var(--red);box-shadow:0 0 28px rgba(240,99,90,.5);animation:pulseRed .8s infinite alternate}
+.chair.ended .clk,.chair.ended .num{color:var(--red)}
+@keyframes pulseAmber{from{box-shadow:0 0 16px rgba(224,162,58,.25)}to{box-shadow:0 0 32px rgba(224,162,58,.6)}}
+@keyframes pulseRed{from{box-shadow:0 0 16px rgba(240,99,90,.3)}to{box-shadow:0 0 36px rgba(240,99,90,.7)}}
+.chairbtns{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;align-items:center}
+.chairbtns .btn{flex:1;font-size:.66rem;padding:6px;min-width:0}
+.chairbtns .allychairbtn{flex:0 0 auto;padding:4px 7px;display:inline-flex;align-items:center;justify-content:center}
+.chair.paused{border-color:var(--blue);box-shadow:0 0 18px rgba(90,150,230,.32)}
+.chair.paused .clk,.chair.paused .num{color:var(--blue)}
+/* chair detail + infusion progress */
+.cmeta{font-size:.58rem;color:var(--muted);margin:2px 0;line-height:1.3}
+.cprog{height:5px;background:#0c1a28;border-radius:99px;overflow:hidden;margin:6px 0 2px}
+.cbar{height:100%;width:0;background:var(--teal);transition:width 1s linear;border-radius:99px}
+.chair.warn .cbar{background:var(--amber)}
+.chair.ended .cbar{background:var(--red)}
+/* persistent active-emergency banner — stays until resolved / false alarm */
+#emBanner:empty{display:none}
+.embanner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#2a1210;border:1px solid var(--red);border-radius:10px;padding:9px 13px;margin-bottom:10px;color:#f0b3aa;font-weight:700;box-shadow:var(--glow-red);animation:pulseRed 1.1s infinite alternate}
+.embanner .lbl{font-family:var(--fdisp);letter-spacing:.03em}
+.embanner .btn{font-size:.72rem;padding:6px 11px}
+.embanner .sp{margin-left:auto;display:flex;gap:6px}
+/* auto-surface: a chair just freed and someone is staged */
+#seatPrompt:empty{display:none}
+.seatbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#0e2a2433;border:1px solid #1e5a52;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:.82rem;color:var(--teal);animation:seatGlow 1.2s ease-out}
+.seatbar b{color:var(--ink)}
+.seatbar .btn{margin-left:auto;font-size:.74rem;padding:7px 13px;white-space:nowrap}
+@keyframes seatGlow{from{box-shadow:0 0 0 rgba(46,230,214,0)}40%{box-shadow:0 0 22px rgba(46,230,214,.45)}to{box-shadow:0 0 0 rgba(46,230,214,0)}}
+/* prep table */
+.prep{margin-top:16px;background:linear-gradient(180deg,#10202f,#0b1622);border:1px dashed var(--line2);border-radius:16px;padding:16px}
+.prep.active{border-style:solid;box-shadow:var(--glow-teal)}
+.prep .ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.prep .ph b{font-family:var(--fdisp);font-weight:600}
+.prep .bag{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.prep select,.prep input{background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:7px 9px;color:var(--ink);font-size:.82rem;font-family:inherit}
+.ingrow{display:flex;justify-content:space-between;align-items:center;background:#0e1c2e;border:1px solid var(--line);border-radius:8px;padding:6px 9px;margin:4px 0;font-size:.82rem}
+.ingrow .rm{background:#3a1a16;border:none;color:#f0b3aa;border-radius:6px;width:22px;height:22px;cursor:pointer;font-weight:800}
+.drip{display:flex;gap:9px;flex-wrap:wrap;margin-top:8px}
+.dz{flex:1;min-width:115px;padding:8px 11px;border-radius:9px;border:1px solid;background:#0c1a28}
+.dz span{display:block;font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.dz b{font-family:var(--fdisp);font-size:1.1rem;display:block;margin-top:2px}
+.dz.vol{border-color:#1e4a52}.dz.vol b{color:var(--teal)}
+.dz.drop{border-color:#5a4a22}.dz.drop b{color:var(--gold)}
+.dz.pump{border-color:#243a6a}.dz.pump b{color:var(--blue)}
+/* alert flags — title on its own line, coloured by severity */
+.flag{border-radius:9px;padding:9px 11px;margin:6px 0;font-size:.82rem;line-height:1.45;border:1px solid;border-left-width:3px}
+.flag b{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.flag.crit{background:#2a1512;border-color:#5a2a22;border-left-color:var(--red);color:#e6c2bd}
+.flag.crit b{color:var(--red)}
+.flag.warn{background:#2a2212;border-color:#5a4a22;border-left-color:var(--amber);color:#e6d4a6}
+.flag.warn b{color:var(--amber)}
+.flag.info{background:#11262b;border-color:#1e4a52;border-left-color:var(--teal);color:#bfe6e1}
+.flag.info b{color:var(--teal)}
+.flag.ok{background:#0f2a1f;border-color:#1e5a40;border-left-color:var(--green);color:#bfe6cf}
+.flag.ok b{color:var(--green)}
+/* Ask Ally floating button + drawer */
+#allyBtn{position:fixed;right:18px;bottom:18px;z-index:50;background:linear-gradient(135deg,var(--teal),#1aa89b);color:#04121a;border:none;border-radius:999px;padding:10px 18px 10px 11px;font-weight:700;font-family:var(--fdisp);font-size:.85rem;cursor:pointer;box-shadow:var(--glow-teal);display:inline-flex;align-items:center;gap:8px}
+#allyBtn:hover{filter:brightness(1.08)}
+.allyface{width:24px;height:24px;border-radius:50%;object-fit:cover;flex:0 0 auto;background:#0b1626;vertical-align:middle}
+#allyDrawer{position:fixed;right:0;top:0;bottom:0;width:380px;max-width:92vw;background:var(--bg2);border-left:1px solid var(--line2);box-shadow:-12px 0 40px #04080fcc;z-index:70;display:none;flex-direction:column}
+#allyDrawer.show{display:flex}
+.allyhead{display:flex;justify-content:space-between;align-items:center;padding:13px 15px;border-bottom:1px solid var(--line)}
+.allyhead b{font-family:var(--fdisp)}.allyhead .x{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer}
+#allyLog{flex:1;overflow:auto;padding:13px 15px;display:flex;flex-direction:column;gap:9px}
+.amsg{font-size:.84rem;line-height:1.5;padding:9px 11px;border-radius:10px;max-width:92%;white-space:pre-wrap}
+.amsg.u{align-self:flex-end;background:#0e2e2b;border:1px solid #1e5a52;color:var(--ink)}
+.amsg.a{align-self:flex-start;background:#0f1c2e;border:1px solid var(--line);color:var(--ink)}
+.amsg.sys{align-self:center;font-size:.7rem;color:var(--muted);text-align:center}
+.allyin{display:flex;gap:7px;padding:11px;border-top:1px solid var(--line)}
+.allyin input{flex:1;background:#0e1f29;border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--ink);font-size:.84rem;font-family:inherit}
+.allyctx{font-size:.66rem;color:var(--muted);padding:0 15px 8px}
+/* Reference drawer */
+#refDrawer{position:fixed;right:0;top:0;bottom:0;width:440px;max-width:96vw;background:var(--bg2);border-left:1px solid var(--line2);box-shadow:-12px 0 40px #04080fcc;z-index:70;display:none;flex-direction:column}
+#refDrawer.show{display:flex}
+.refhead{display:flex;justify-content:space-between;align-items:center;padding:13px 15px 6px}
+.refhead b{font-family:var(--fdisp);font-size:1.05rem}.refhead .x{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer}
+.reftabs{display:flex;gap:4px;padding:0 13px 8px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.reftab{flex:1;min-width:78px;background:#0e1c2e;border:1px solid var(--line);border-radius:8px;padding:7px;font-size:.72rem;color:var(--muted);cursor:pointer;text-align:center;font-weight:600}
+.reftab.on{background:#0e2a2433;border-color:var(--teal);color:var(--teal)}
+#refBody{flex:1;overflow:auto;padding:12px 14px}
+.ritem{background:#0f1c2e;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;overflow:hidden}
+.ritem>.rh{padding:10px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ritem .rt{font-weight:700;font-size:.86rem}.ritem .rs{font-size:.66rem;color:var(--muted)}
+.ritem .rbody{padding:0 12px 11px;font-size:.8rem;line-height:1.5;border-top:1px solid var(--line)}
+.ritem .rbody .row{display:flex;gap:8px;padding:3px 0;border-bottom:1px dashed var(--line)}
+.ritem .rbody .row:last-child{border:none}.ritem .rbody .k{color:var(--muted);min-width:90px}
+.rtag{font-size:.58rem;font-weight:800;letter-spacing:.05em;padding:2px 7px;border-radius:999px;text-transform:uppercase}
+.rtag.draft{background:#2a2310;color:var(--gold);border:1px solid #5a4a22}
+.rtag.green{background:#0e2a1f;color:var(--green)}.rtag.yellow{background:#2a2310;color:var(--gold)}
+.rtag.avoid{background:#2a1512;color:#f0a59d}.rtag.caution{background:#2a2310;color:var(--gold)}.rtag.screen{background:#11262b;color:var(--teal)}
+.rsec{font-family:var(--fdisp);font-size:.72rem;color:var(--teal);text-transform:uppercase;letter-spacing:.05em;margin:12px 0 6px}
+.rli{font-size:.8rem;line-height:1.5;margin:3px 0 3px 4px}
+.raskally{font-size:.7rem;color:var(--teal);cursor:pointer;margin-top:6px;display:inline-block}
+.alertbox{margin-top:8px}
+.empty{color:var(--muted);font-size:.82rem;padding:14px;text-align:center}
+/* monitor checkpoint chips (tap-first) */
+.mchips{display:flex;flex-wrap:wrap;gap:6px;margin:5px 0 12px}
+.mchip{font-size:.74rem;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:#0e1c2e;color:var(--ink);cursor:pointer;user-select:none}
+.mchip.on{border-color:var(--teal);background:#0e2a2433;color:var(--teal)}
+.mchip.ok.on{border-color:var(--green);background:#0e2a1f;color:var(--green)}
+.mchip.red{border-color:#5a2a22;color:#f0b3aa}
+.mchip.red.on{background:#2a1512;box-shadow:var(--glow-red)}
+.monlog{font-size:.76rem;padding:6px 9px;border-left:2px solid var(--line);margin:4px 0;color:var(--muted)}
+.monlog.ae{border-left-color:var(--red);color:#f0c4be}
+/* demo coach guide */
+#demoGuide{position:fixed;left:18px;bottom:18px;z-index:55;width:310px;max-width:92vw;background:var(--bg2);border:1px solid var(--teal);border-radius:14px;box-shadow:var(--glow-teal);padding:14px 16px;font-size:.84rem}
+#demoGuide .gh{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+#demoGuide .gh b{font-family:var(--fdisp);color:var(--teal)}
+#demoGuide .gstep{font-size:.66rem;color:var(--muted)}
+#demoGuide p{color:var(--ink);line-height:1.5;margin:6px 0 12px}
+#demoGuide .gbtns{display:flex;gap:8px}
+#demoGuide .gbtns .btn{font-size:.76rem;padding:8px 12px}
+.tourhi{outline:2px solid var(--teal)!important;border-radius:12px;animation:pulseTeal 1.2s infinite alternate}
+@keyframes pulseTeal{from{box-shadow:0 0 0 4px rgba(46,230,214,.12),0 0 16px rgba(46,230,214,.3)}to{box-shadow:0 0 0 5px rgba(46,230,214,.28),0 0 32px rgba(46,230,214,.55)}}
+/* IV infusion note — clean light document (prints well) */
+.notepaper{background:#fff;color:#1c2b32;border-radius:8px;padding:20px;font-size:.8rem;line-height:1.5;max-height:72vh;overflow:auto}
+.notepaper h2{font-size:1.1rem;color:#0e3a40;margin:0}
+.notepaper .nmeta{font-size:.7rem;color:#5b6b72}
+.notepaper .nsec{margin:11px 0;padding-top:8px;border-top:1px solid #e3ecea}
+.notepaper .nsec h3{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:#0e8a8a;margin:0 0 5px}
+.notepaper .nrow{display:flex;gap:8px;padding:2px 0;align-items:baseline}
+.notepaper .nk{min-width:118px;color:#5b6b72;flex:0 0 auto;font-size:.74rem}
+.notepaper .ncomp{background:#e9f6f0;border-left:3px solid #1e9e6a;padding:8px 10px;border-radius:5px;font-size:.76rem;color:#155}
+.notepaper .nsign{border-top:1px solid #e3ecea;margin-top:12px;padding-top:10px}
+.notepaper .stamp{color:#0c7a4d;font-weight:700}
+.glab{display:block;font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:13px 0 5px}
+.gconds{display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;margin-bottom:2px}
+@media(max-width:520px){.gconds{grid-template-columns:1fr}}
+.gchk{display:flex;gap:7px;align-items:flex-start;font-size:.8rem;color:var(--ink);padding:4px 0}
+.gchk input{margin-top:2px;width:auto}
+.gelig{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
+.gradio{display:flex;gap:8px;align-items:center;font-size:.84rem;padding:9px 11px;border:1px solid var(--line);border-radius:9px;cursor:pointer}
+.gradio input{width:auto}
+@media print{
+  body{background:#fff!important}
+  body * {visibility:hidden!important}
+  #noteDoc, #noteDoc * {visibility:visible!important}
+  #noteDoc{position:absolute;left:0;top:0;width:100%;max-height:none;box-shadow:none;padding:0}
+  .noprint{display:none!important}
+}
+/* detail */
+.detail .demo{font-size:.84rem;margin-bottom:10px}
+.chips{display:flex;gap:8px;margin-bottom:12px}
+.chip{flex:1;border-radius:10px;padding:9px;text-align:center;cursor:pointer;font-size:.74rem;font-weight:700;border:1px solid}
+.chip.done{background:#0e2a1f;border-color:#1e5a40;color:var(--green)}
+.chip.pending{background:#2a1512;border-color:#5a2a22;color:#f0b3aa;animation:pulseRed 1.4s infinite alternate}
+.cat h4{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:10px 0 5px}
+.palette{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pi{background:#0e1c2e;border:1px solid var(--line);border-radius:8px;padding:7px;font-size:.74rem;cursor:pointer}
+.pi:hover{border-color:var(--teal)}.pi.caut{border-left:2px solid var(--amber)}
+.pi.sel{border-color:var(--teal);background:#0e2a2433;box-shadow:inset 0 0 0 1px var(--teal);color:var(--teal)}.pi.sel .d{color:var(--teal)}
+.pi .d{font-size:.6rem;color:var(--muted)}
+/* overlay/modal */
+.overlay{position:fixed;inset:0;background:#04080fcc;display:none;align-items:flex-start;justify-content:center;padding:28px 14px;overflow:auto;z-index:60}
+.overlay.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--line2);border-radius:16px;max-width:560px;width:100%;padding:20px}
+.modal.em{border-color:var(--red);box-shadow:var(--glow-red)}
+.modal h3{font-family:var(--fdisp);font-weight:600;margin-bottom:2px}.modal .x{float:right;background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer}
+.modal .sub{font-size:.74rem;color:var(--muted);margin-bottom:12px}
+.steps li{font-size:.85rem;margin:6px 0 6px 18px;line-height:1.4}
+.frow{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0}.frow > div{flex:1;min-width:120px}
+.frow label{display:block;font-size:.66rem;color:var(--muted);margin-bottom:3px}
+.frow input,.frow select,.modal textarea{width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink);font-size:.85rem;font-family:inherit}
+.disc{font-size:.66rem;color:var(--muted);text-align:center;padding:8px 16px 24px;line-height:1.5}
+</style>
+<script src="allyos-auth.js"></script><script src="allyos-credentials.js"></script><script src="supabase-client.js"></script></head>
+<body class="allyos">
+<div class="topbar">
+  <div class="brand">Renuvia<b>MD</b>® · AllyOS <span style="color:var(--teal)">Chairside</span></div>
+  <div class="r"><span class="pill green" id="opstat">● OPERATIONAL</span><span id="who"></span>
+    <label title="Where RenuviaMD is the Medical Director, gates enforce absolutely."><input type="checkbox" id="mdMode"> MD-of-record</label>
+    <label title="Demo only: shows a ⏩ button to fast-forward an infusion to the 5-min / 2-min / end alarms so you can preview them."><input type="checkbox" id="demoMode"> Demo</label>
+    <a href="#" onclick="refOpen();return false">📖 Reference</a><a href="#" onclick="openFeedback();return false" style="color:var(--gold)">💬 Feedback</a><a href="gfe.html">🩺 GFE</a><a href="audit.html">📋 Audit</a><a href="iv-inventory.html">Inventory</a><a href="iv-calculator.html">Calc</a><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
+</div>
+
+<!-- lead capture (Netlify Forms — submissions appear in the Netlify dashboard, exportable) -->
+<form name="allyos-leads" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="email" name="email"><input name="clinic"><input name="role"><input name="context"><input name="message"><input name="bot-field">
+</form>
+<div id="demobar" style="display:none;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;background:linear-gradient(90deg,#2a2310,#1a1606);border-bottom:1px solid #5a4a22;color:var(--gold);font-size:.78rem;padding:8px 16px;text-align:center"></div>
+
+<div class="board">
+  <!-- LEFT · PATIENT (only what the patient brings to the chair) -->
+  <div>
+    <div class="col-h">👥 Waiting patients</div>
+    <input id="search" class="search" placeholder="🔍 Search patients…" oninput="renderQueue()">
+    <button class="btn ghost" onclick="openIntake()" style="width:100%;font-size:.78rem;padding:9px;margin-bottom:12px">+ New patient</button>
+    <div id="queue"></div>
+  </div>
+
+  <!-- CENTER · THE FLOOR + PREP BENCH -->
+  <div>
+    <div class="col-h">🚨 Emergency protocols</div>
+    <div id="emBanner"></div>
+    <div class="embar" id="embar"></div>
+    <div class="col-h" style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">🪑 Treatment chairs <span id="chairStat" class="muted" style="font-weight:400;font-size:.72rem"></span></div>
+    <div id="seatPrompt"></div>
+    <div class="chairgrid" id="chairs"></div>
+    <!-- PREP BENCH — cook the soup, fix alerts, send to chair -->
+    <div class="prep" id="prep"></div>
+  </div>
+
+  <!-- RIGHT · WHAT I GIVE (the menu) -->
+  <div class="detail">
+    <div class="col-h">🧴 What I give</div>
+    <div id="detail"><div class="empty">Select a patient on the left, then choose a pre-made protocol or build à la carte — it drops onto the prep bench to cook.</div></div>
+  </div>
+</div>
+<div class="disc" id="disc"></div>
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div id="demoGuide" style="display:none"></div>
+
+<!-- Reference drawer -->
+<div id="refDrawer">
+  <div class="refhead"><b>📖 Reference</b><button class="x" onclick="refClose()">×</button></div>
+  <input id="refSearch" class="search" placeholder="🔍 Filter…" oninput="renderRef()" style="margin:0 13px 8px">
+  <div class="reftabs" id="reftabs"></div>
+  <div id="refBody"></div>
+</div>
+
+<!-- Ask Ally -->
+<button id="allyBtn" onclick="allyOpen()"><img src="ally-avatar-64.png" alt="" class="allyface" onerror="this.replaceWith(document.createTextNode('💬'))"> Ask Ally</button>
+<div id="allyDrawer">
+  <div class="allyhead"><b><img src="ally-avatar-64.png" alt="" class="allyface" style="width:28px;height:28px" onerror="this.replaceWith(document.createTextNode('💬'))"> Ally <span style="color:var(--teal)">· clinical assistant</span></b><button class="x" onclick="allyClose()">×</button></div>
+  <div class="allyctx" id="allyCtx">Grounded in the locked IV/IM module. PHI-free — sees only the bench build, never the patient.</div>
+  <div id="allyLog"></div>
+  <div class="allyin"><input id="allyInput" placeholder="Ask about a stack, dose, compatibility… (no patient names)" onkeydown="if(event.key==='Enter')allySend()"><button class="btn neon" onclick="allySend()" style="padding:9px 13px">Send</button></div>
+</div>
+
+<script>
+var MOD=null, MENU=[], INV={}, QUEUE=[], CHAIRS=[null,null,null,null,null,null], PREP=null, selId=null, emActive=null, ALLY_HIST=[];
+var REF={}, DRAFTS={ingredients:[],stacks:[]}, SCREEN={ingredients:{}}, refTabName='protocols';
+var IS_DEMO=false, ALLY_USED=0, ALLY_CAP=5; // demo: the ONLY hard limit is Ally API calls
+function demoLeadOk(){try{return !!localStorage.getItem('allyos_lead');}catch(e){return false;}}
+var KEY='allyos_chairside_v1';
+
+function getJSON(u){return fetch(u).then(function(r){return r.json();}).catch(function(){return null;});}
+Promise.all([
+  getJSON('../protocols/iv-module.json'),
+  getJSON('../protocols/chairside-reference.json'),
+  getJSON('../protocols/draft-additions.json'),
+  getJSON('../protocols/ingredient-screening-contraindications.json')
+]).then(function(arr){
+  var d=arr[0]; if(!d) throw new Error('IV module failed to load');
+  MOD=d; REF=arr[1]||{}; DRAFTS=arr[2]||{ingredients:[],stacks:[]}; SCREEN=arr[3]||{ingredients:{}};
+  MENU=(d.ingredients||[]).concat(DRAFTS.ingredients||[]);
+  try{var iv=JSON.parse(localStorage.getItem('allyos_iv_inventory_v1')||'{}');INV=iv.inv||{};}catch(e){}
+  if(window.AllyOSAuth){AllyOSAuth.guard(['nurse','provider','admin']);var s=AllyOSAuth.session();if(s){document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+((AllyOSAuth.ROLES[s.role]||{}).label||s.role);document.getElementById('mdMode').checked=!!s.mdOfRecord;
+    if(s.sandbox){var db=document.getElementById('demobar');if(db){db.style.display='flex';db.innerHTML='<span>🧪 <b>DEMO MODE</b> — sample patients · nothing is saved to a real chart · <b>not for real patient care</b></span><span><a href="#" onclick="tourOpen();return false">▶ replay guide</a> &nbsp;·&nbsp; <a href="login.html">Sign in</a> &nbsp;·&nbsp; <a href="onboard.html" style="color:var(--gold)">Set up your clinic →</a></span>';}
+      IS_DEMO=true;var dm=document.getElementById('demoMode');if(dm)dm.checked=true; // alarms playable in demo
+      try{if(!sessionStorage.getItem('allyos_demo_tour'))setTimeout(showTour,700);}catch(e){setTimeout(showTour,700);}
+    }}}
+  document.getElementById('disc').innerHTML='AllyOS Chairside · advisory clinical decision-support · <b>PHI stays on this device only</b> (no server, no analytics) · no drug brokering · gates enforce in MD-of-record mode. © 2026 RenuviaMD® Compliance Division.';
+  load(); fillProto(); renderEmergency(); renderQueue(); renderChairs(); renderPrep(); renderDetail();
+}).catch(function(e){document.getElementById('chairs').innerHTML='<div class="flag crit">Could not load IV module ('+e.message+')</div>';});
+
+function load(){try{var s=JSON.parse(localStorage.getItem(KEY)||'{}');QUEUE=s.q||seedQueue();
+    if(s.chairs&&s.chairs.length===6){CHAIRS=s.chairs.map(reviveChair);}
+    if(s.ally&&s.ally.length){ALLY_HIST=s.ally;}
+  }catch(e){QUEUE=seedQueue();}
+  // heal duplicate / missing ids saved by older builds (performance.now() could collide)
+  var seen={},fixed=false;QUEUE.forEach(function(p){if(!p.id||seen[p.id]){p.id=pid();fixed=true;}seen[p.id]=1;});
+  // backfill the shared de-identified Encounter ID (same value the GFE page shows)
+  QUEUE.forEach(function(p){if(!p.encId){encId(p);fixed=true;}});if(fixed)save();
+  // resume live countdowns for chairs that were mid-infusion when the page was unloaded (refresh / tablet sleep / nav)
+  CHAIRS.forEach(function(c,i){if(c&&c.state==='infusing'&&c.remain>0)runChair(i,true);});}
+// serialize a chair for on-device persistence — strips the live timer handle; stores an
+// absolute deadline so a reload/sleep doesn't "freeze" or lose elapsed infusion time.
+function serializeChair(c){if(!c)return null;var o={};for(var k in c){if(k==='timer')continue;o[k]=c[k];}
+  if(c.state==='infusing')o.endAt=Date.now()+Math.max(0,c.remain)*1000;
+  return o;}
+function reviveChair(o){if(!o)return null;o.timer=null;
+  if(o.state==='infusing'){if(o.endAt)o.remain=Math.round((o.endAt-Date.now())/1000);
+    if(o.remain<=0){o.remain=0;o.state='ended';if(!o.endedStr)o.endedStr=fmtClock(new Date());}}
+  return o;}
+// PHI stays on THIS device only — localStorage, never a server. Survives refresh / sleep / navigation.
+function save(){try{localStorage.setItem(KEY,JSON.stringify({q:QUEUE,chairs:CHAIRS.map(serializeChair),ally:ALLY_HIST.slice(-40)}));}catch(e){}}
+// pick up GFEs completed in the separate GFE Dashboard (another tab, same device) — refresh the
+// roster only; never clobber in-memory active chairs.
+window.addEventListener('storage',function(e){if(e.key!==KEY)return;try{var s=JSON.parse(e.newValue||'{}');if(s.q){QUEUE=s.q;if(typeof renderQueue==='function')renderQueue();if(typeof renderDetail==='function')renderDetail();}}catch(_){}});
+function seedQueue(){return [
+  {id:pid(),first:'Sarah',last:'Martinez',name:'Sarah Martinez',dob:'1990-03-12',sex:'F',proto:'IV-05',alerts:[],gfe:false,gfeDate:'',consent:false},
+  {id:pid(),first:'Michael',last:'Chen',name:'Michael Chen',dob:'1985-07-22',sex:'M',proto:'IV-08',alerts:['G6PD deficiency'],gfe:true,gfeDate:'2026-04-30',consent:false},
+  {id:pid(),first:'Emily',last:'Rodriguez',name:'Emily Rodriguez',dob:'1995-11-02',sex:'F',proto:'ALACARTE',alerts:[],gfe:true,gfeDate:'2026-06-10',consent:true}
+];}
+var _pidSeq=0;function pid(){return 'p'+(++_pidSeq)+'x'+Math.floor(Math.random()*1e9);}
+// ---- patient identity / status helpers ----
+// patient conditions mirror the GFE FORM-IV-GFE-01 Section-B checklist
+var ALERT_CATALOG=['Diabetes','High blood pressure','Heart disease / stroke','Kidney disease / dialysis','Liver disease','Asthma / COPD','Active cancer / treatment','Pregnancy / breastfeeding','Bleeding disorder / blood thinners','G6PD deficiency','Recent hospitalization / surgery <30d','Severe allergy / anaphylaxis hx'];
+// map each condition to the screening-map condition key
+var ALERT_TO_KEY={'Diabetes':'diabetes','High blood pressure':'htn','Heart disease / stroke':'cardiac','Kidney disease / dialysis':'renal','Liver disease':'hepatic','Asthma / COPD':'respiratory','Active cancer / treatment':'cancer','Pregnancy / breastfeeding':'pregnancy_lactation','Bleeding disorder / blood thinners':'bleeding_anticoag','G6PD deficiency':'g6pd','Recent hospitalization / surgery <30d':'recent_procedure_30d','Severe allergy / anaphylaxis hx':'allergy'};
+function dispName(p){var f=p.first||((p.name||'').split(' ')[0]||'');var l=p.last||((p.name||'').split(' ').slice(1).join(' ')||'');return f+(l?(' '+l.charAt(0)+'.'):'');}
+function initialsOf(p){var f=(p.first||((p.name||'').split(' ')[0]||''));var l=(p.last||((p.name||'').split(' ').slice(1).join(' ')||''));var s=((f.charAt(0)||'')+(l.charAt(0)||'')).toUpperCase();return s||'XX';}
+// De-identified Encounter ID = initials + 4 digits (e.g. JX-4821). SHARED with the GFE page via
+// the same patient object in allyos_chairside_v1 — assigned once, identical everywhere. PHI-free.
+function encId(p){if(p&&!p.encId){p.encId=initialsOf(p)+'-'+(''+Math.floor(1000+Math.random()*9000));}return p?p.encId:'';}
+function ageOf(p){if(!p.dob)return null;var d=new Date(p.dob+'T00:00:00'),n=new Date();var a=n.getFullYear()-d.getFullYear();if(n.getMonth()<d.getMonth()||(n.getMonth()===d.getMonth()&&n.getDate()<d.getDate()))a--;return a>=0&&a<130?a:null;}
+function gfeState(p){if(!p.gfe)return{k:'missing',label:'GFE NEEDED'};if(p.gfeDate){var d=new Date(p.gfeDate+'T00:00:00'),n=new Date(),mo=(n-d)/(1000*60*60*24*30.44);if(mo>12)return{k:'expired',label:'GFE EXPIRED'};}return{k:'done',label:'GFE current'};}
+// Status reflects the GATES only (GFE + consent). A noted health condition is
+// NOT an alert by itself — it only becomes one at the bench, if the build
+// actually conflicts with it.
+function patientStatus(p){var g=gfeState(p);
+  if(g.k==='missing')return{k:'missing',label:'GFE NEEDED'};
+  if(g.k==='expired')return{k:'caution',label:'GFE EXPIRED'};
+  if(!p.consent)return{k:'caution',label:'CONSENT'};
+  return{k:'ready',label:'READY'};}
+function mdMode(){return document.getElementById('mdMode').checked;}
+function allStacks(){return (MOD.stacks||[]).concat((DRAFTS&&DRAFTS.stacks)||[]);}
+function stackByCode(c){var s=null;allStacks().forEach(function(x){if(x.code===c)s=x;});return s;}
+function findIng(id){for(var i=0;i<MENU.length;i++)if(MENU[i].id===id)return MENU[i];return null;}
+function matchByName(n){n=(n||'').toLowerCase();for(var i=0;i<MENU.length;i++){var m=(MENU[i].name||'').toLowerCase();if(n.indexOf(m.split(' ')[0])>=0||m.indexOf(n.split(' ')[0])>=0)return MENU[i];}return null;}
+function qById(id){for(var i=0;i<QUEUE.length;i++)if(QUEUE[i].id===id)return QUEUE[i];return null;}
+
+function fillProto(){var el=document.getElementById('qProto');if(!el)return;var h='<option value="ALACARTE">Micronutrient Infusion (custom build)</option>';(MOD.stacks||[]).forEach(function(s){h+='<option value="'+s.code+'">'+esc(s.code)+' — '+esc(s.title)+'</option>';});el.innerHTML=h;}
+function todayISO(){var n=new Date();return n.getFullYear()+'-'+('0'+(n.getMonth()+1)).slice(-2)+'-'+('0'+n.getDate()).slice(-2);}
+function renderStats(){var el=document.getElementById('stats');if(!el)return;var occ=CHAIRS.filter(Boolean).length,avail=6-occ,wait=QUEUE.length,ending=CHAIRS.filter(function(c){return c&&c.state==='ended';}).length,inf=CHAIRS.filter(function(c){return c&&c.state==='infusing';}).length;
+  el.innerHTML=stat('blue','Scheduled',wait+occ)+stat('amber','Waiting',wait)+stat('','In chair',inf)+stat('green','Available',avail)+stat('violet','Ending / done',ending);}
+function stat(cls,lbl,n){return '<div class="stat '+cls+'"><div class="lbl">'+lbl+'</div><div class="num">'+n+'</div></div>';}
+
+// ---------- QUEUE (Patient ID cards) ----------
+function openIntake(){
+  var alerts=ALERT_CATALOG.map(function(a){return '<label class="muted" style="font-size:.76rem;display:flex;gap:6px;align-items:center;width:48%"><input type="checkbox" class="ialert" value="'+esc(a)+'"> '+esc(a)+'</label>';}).join('');
+  var protoOpts='<option value="ALACARTE">Micronutrient Infusion (choose later)</option>'+allStacks().map(function(s){return '<option value="'+s.code+'">'+esc(s.code)+' — '+esc(s.title)+(s.status==='draft'?' (DRAFT)':'')+'</option>';}).join('');
+  var h='<button class="x" onclick="closeModal()">×</button><h3>New patient</h3><div class="sub">PHI stays on this device only — nothing is sent to a server.</div>'+
+    '<div class="frow"><div><label>First name</label><input id="iFirst" placeholder="Sarah"></div><div><label>Last name</label><input id="iLast" placeholder="Martinez"></div></div>'+
+    '<div class="frow"><div><label>Date of birth</label><input id="iDob" type="date" oninput="document.getElementById(\'iAge\').textContent=intakeAge()"></div><div><label>Age</label><input value="" id="iAgeBox" placeholder="auto" readonly style="opacity:.7"><span id="iAge" style="display:none"></span></div><div><label>Sex</label><select id="iSex"><option>F</option><option>M</option><option>Other</option></select></div></div>'+
+    '<label style="font-size:.7rem;color:var(--muted);display:block;margin:8px 0 4px">Health flags (feed the prep guardrails)</label>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:4px 0">'+alerts+'</div>'+
+    '<div class="frow" style="margin-top:8px"><div><label>Last GFE date (if any)</label><input id="iGfeDate" type="date"></div><div><label>Today\'s treatment</label><select id="iProto">'+protoOpts+'</select></div></div>'+
+    '<button class="btn neon" style="width:100%;margin-top:10px" onclick="saveIntake()">Add to waiting room</button>';
+  showModal(h);
+}
+function intakeAge(){var v=val('iDob');if(!v)return'';var p={dob:v};var a=ageOf(p);document.getElementById('iAgeBox').value=(a==null?'':a);return a==null?'':a;}
+function saveIntake(){var f=val('iFirst').trim(),l=val('iLast').trim();if(!f){alert('First name required.');return;}
+  var alerts=[];Array.prototype.forEach.call(document.querySelectorAll('.ialert:checked'),function(c){alerts.push(c.value);});
+  var gd=val('iGfeDate');
+  var np={id:pid(),first:f,last:l,name:(f+' '+l).trim(),dob:val('iDob'),sex:val('iSex'),proto:val('iProto'),alerts:alerts,gfe:!!gd,gfeDate:gd,consent:false};
+  encId(np);QUEUE.push(np);
+  save();closeModal();renderQueue();}
+function matchSearch(p,q){if(!q)return true;q=q.toLowerCase();return (p.name||'').toLowerCase().indexOf(q)>=0||(p.proto||'').toLowerCase().indexOf(q)>=0;}
+function renderQueue(){var el=document.getElementById('queue');var q=(document.getElementById('search')||{}).value||'';
+  var list=QUEUE.filter(function(p){return matchSearch(p,q);});
+  if(!list.length){el.innerHTML='<div class="empty">'+(QUEUE.length?'No match.':'Waiting room empty.')+'</div>';renderChairs();return;}
+  var staged=list.filter(function(p){return p.staged;}),waiting=list.filter(function(p){return !p.staged;});
+  var html='';
+  if(staged.length)html+='<div class="qgroup" style="color:var(--teal)">⏸ Prepared · waiting for a chair</div>'+staged.map(pcardHTML).join('');
+  if(waiting.length)html+=(staged.length?'<div class="qgroup">🪑 Waiting</div>':'')+waiting.map(pcardHTML).join('');
+  el.innerHTML=html;
+  renderChairs();
+}
+function fmtDob(d){if(!d)return'';var p=d.split('-');return p.length===3?(p[1]+'/'+p[2]+'/'+p[0]):d;}
+function pcardHTML(p){
+  var st=patientStatus(p),sel=selId===p.id;
+  var age=ageOf(p),g=gfeState(p);
+  // COLLAPSED = compact (name + status + age/sex). Details show only when open.
+  var h='<div class="pcard s-'+st.k+(p.staged?' staged':'')+(sel?' sel open':'')+'" onclick="selectPatient(\''+p.id+'\')">'+
+    '<div class="ptop"><span class="nm">'+esc(dispName(p))+'</span><span class="spill s-'+st.k+'">'+st.label+'</span><span class="chev">'+(sel?'▲':'▼')+'</span></div>'+
+    '<div class="pmeta"><span style="font-family:ui-monospace,Menlo,monospace;color:var(--teal)">'+esc(encId(p))+'</span> · '+(age!=null?age+'y':'—')+' · '+(p.sex||'—')+(sel&&p.dob?(' · DOB '+fmtDob(p.dob)):'')+'</div>'+
+    (p.staged&&p.prep?'<div class="stagedbadge">⏸ Prepared · '+esc(txLabel(p))+' · '+(p.prep.items.length)+' items — needs a chair</div>':'');
+  if(sel){
+    h+='<div class="pexpand" onclick="event.stopPropagation()">'+
+      '<div class="gaterow">'+
+      '<div class="gatebtn '+(g.k==='done'?'done':(g.k==='expired'?'expired':'pending'))+'" onclick="openGFE(\''+p.id+'\')">'+g.label+'</div>'+
+      '<div class="gatebtn '+(p.consent?'done':'pending')+'" onclick="openConsent(\''+p.id+'\')">'+(p.consent?'Consent ✓':'Consent ✗')+'</div>'+
+      '</div>'+
+      ((p.alerts||[]).length?('<div style="margin-bottom:6px"><div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Noted conditions (what the patient brings)</div>'+(p.alerts||[]).map(function(a){return '<div class="noteline">• '+esc(a)+'</div>';}).join('')+'</div>'):'')+
+      '<div style="display:flex;gap:6px"><button class="btn ghost" style="flex:1;font-size:.72rem;padding:6px" onclick="editAlerts(\''+p.id+'\')">Edit conditions</button>'+
+      '<button class="btn ghost" style="flex:1;font-size:.72rem;padding:6px" onclick="selectPatient(\''+p.id+'\')">▲ Close card</button></div>'+
+      '</div>';
+  }
+  return h+'</div>';
+}
+function editAlerts(id){var p=qById(id);if(!p)return;
+  var alerts=ALERT_CATALOG.map(function(a){var on=(p.alerts||[]).indexOf(a)>=0;return '<label class="muted" style="font-size:.78rem;display:flex;gap:6px;align-items:center;width:48%"><input type="checkbox" class="ealert" value="'+esc(a)+'"'+(on?' checked':'')+'> '+esc(a)+'</label>';}).join('');
+  var h='<button class="x" onclick="closeModal()">×</button><h3>Health flags — '+esc(dispName(p))+'</h3><div class="sub">These feed the prep-table guardrails (e.g. G6PD + Vitamin C).</div>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:4px 0">'+alerts+'</div>'+
+    '<button class="btn neon" style="width:100%;margin-top:10px" onclick="saveAlerts(\''+id+'\')">Save flags</button>';
+  showModal(h);}
+function saveAlerts(id){var p=qById(id);if(!p)return;var a=[];Array.prototype.forEach.call(document.querySelectorAll('.ealert:checked'),function(c){a.push(c.value);});p.alerts=a;save();closeModal();renderQueue();renderDetail();}
+function selectPatient(id){selId=(selId===id?null:id);renderQueue();renderDetail();}
+
+// ---------- NURSE STATION (right · build) ----------
+function renderDetail(){var el=document.getElementById('detail');var p=qById(selId);
+  if(!p){el.innerHTML='<div class="empty">Select a patient on the left. When the card reads <b style="color:var(--green)">READY</b>, choose a pre-made stack or build à la carte here.</div>';return;}
+  var st=patientStatus(p),s=stackByCode(p.proto);
+  // context header
+  var h='<div class="pcard s-'+st.k+(p.staged?' staged':'')+'" style="cursor:default"><div class="ptop"><span class="nm">'+esc(dispName(p))+'</span><span class="spill s-'+st.k+'">'+st.label+'</span></div><div class="pmeta">Review the card on the left · on-device record only</div></div>';
+  // STAGED patient — already prepared, parked in the queue, waiting for a chair
+  if(p.staged&&p.prep){
+    var freeN=CHAIRS.filter(function(c){return !c;}).length;
+    h+='<div class="card" style="border-left:3px solid var(--teal);padding:13px;margin-top:10px">'+
+       '<div class="eyebrow" style="color:var(--teal)">⏸ Prepared — order staged</div>'+
+       '<div class="h-disp" style="font-size:1.02rem;margin:2px 0">'+esc(txLabel(p))+'</div>'+
+       '<div class="muted" style="font-size:.72rem;margin-bottom:6px">'+esc(p.prep.base)+' · '+p.prep.vol+' mL · '+p.prep.time+' min · '+p.prep.items.length+' items</div>'+
+       p.prep.items.map(function(it){return '<div class="ingrow"><span>'+esc(it.name)+' <span class="muted">'+esc(it.dose||'')+'</span></span></div>';}).join('')+
+       '<div class="muted" style="font-size:.66rem;margin:8px 0">Mix the bag when seating — staged = approved order, not a pre-mixed bag.</div>'+
+       '<button class="btn neon-green" style="width:100%" onclick="sendStaged(\''+p.id+'\')">▶ Send to chair'+(freeN?' ('+freeN+' free)':' — all full')+'</button>'+
+       '<div style="display:flex;gap:8px;margin-top:8px"><button class="btn ghost" style="flex:1;font-size:.74rem" onclick="resumeBench(\''+p.id+'\')">✎ Edit on bench</button>'+
+       '<button class="btn ghost" style="flex:1;font-size:.74rem" onclick="clearGive(\''+p.id+'\')">✕ Discard</button></div>'+
+       '</div>';
+    el.innerHTML=h;return;
+  }
+  // readiness gate banner
+  if(st.k==='missing'||st.k==='hold'||(st.k==='caution'&&!p.consent)||(st.k==='caution'&&gfeState(p).k==='expired')){
+    var why=gfeState(p).k!=='done'?'A current Good Faith Exam is required':(!p.consent?'Signed consent is required':'Resolve the hold');
+    h+='<div class="flag warn" style="margin:10px 0"><b>Not cleared yet</b>'+why+' before sending to a chair. You can still build the bag — the gate is checked at "send to chair."</div>';
+  }
+  // bench-busy notice — flag when the bench is open for a different patient
+  if(PREP&&PREP.pid!==p.id){var ob=qById(PREP.pid);h+='<div class="flag info" style="margin:10px 0"><b>Bench in use</b>The prep bench is open for '+esc(ob?dispName(ob):'another patient')+'. <a href="#" onclick="stageBack();return false" style="color:var(--teal)">Stage it (back to waiting)</a> to free the bench, or <a href="#" onclick="clearBench();return false" style="color:var(--muted)">discard it</a>.</div>';}
+  // choose what I give — nothing is assigned until the nurse picks
+  var chosen=(p.buildMode==='stack'||p.buildMode==='ala');
+  h+='<div class="chips" style="margin:12px 0 10px">'+
+     '<div class="chip '+(p.buildMode==='stack'?'done':'')+'" style="cursor:pointer'+(p.buildMode==='stack'?'':';background:#0e1c2e;border-color:var(--line);color:var(--muted)')+'" onclick="setMode(\''+p.id+'\',\'stack\')">🧪 Pre-made protocol</div>'+
+     '<div class="chip '+(p.buildMode==='ala'?'done':'')+'" style="cursor:pointer'+(p.buildMode==='ala'?'':';background:#0e1c2e;border-color:var(--line);color:var(--muted)')+'" onclick="setMode(\''+p.id+'\',\'ala\')">🎛 À la carte</div></div>';
+  if(!chosen){
+    h+='<div class="empty">Choose what to give <b>'+esc(dispName(p))+'</b> — a <b style="color:var(--teal)">pre-made protocol</b> or build <b style="color:var(--gold)">à la carte</b>. Nothing is assigned until you pick.</div>';
+  } else if(p.buildMode==='stack'){
+    // PROTOCOL — change with the menu, clear with the button
+    var code=(p.proto&&p.proto!=='ALACARTE')?p.proto:((MOD.stacks&&MOD.stacks[0]||{}).code||'');
+    s=stackByCode(code);
+    h+='<label style="font-size:.7rem;color:var(--muted);display:block;margin-bottom:4px">Protocol menu — change anytime</label>'+
+       '<select class="search" onchange="setProto(\''+p.id+'\',this.value)">'+allStacks().map(function(x){return '<option value="'+x.code+'"'+sel(code,x.code)+'>'+esc(x.code)+' — '+esc(x.title)+(x.status==='draft'?' (DRAFT)':'')+'</option>';}).join('')+'</select>'+
+       '<div class="card" style="border-left:3px solid '+(s&&s.status==='draft'?'var(--gold)':'var(--teal)')+';padding:13px;margin-top:6px">'+
+       (s&&s.status==='draft'?'<div class="flag warn" style="margin-bottom:8px"><b>DRAFT protocol</b>'+esc(s.draft_note||s.note||'Requires Medical Director sign-off before clinical use.')+'</div>':(s&&s.note?'<div class="flag info" style="margin-bottom:8px"><b>Standing order required</b>'+esc(s.note)+'</div>':''))+
+       '<div class="eyebrow" style="color:var(--teal)">Protocol</div>'+
+       '<div class="h-disp" style="font-size:1.05rem;margin:2px 0 2px">'+esc(code)+' — '+esc(s?s.title:'')+'</div>'+
+       (s&&s.purpose?'<div class="muted" style="font-size:.76rem;margin-bottom:8px">'+esc(s.purpose)+'</div>':'')+
+       '<div class="muted" style="font-size:.7rem;margin-bottom:4px">'+esc(s?(s.base||'0.9% NS'):'')+' · '+esc(s?s.infusion_time:'')+'</div>'+
+       (s?('<div style="margin:6px 0">'+(s.components||[]).map(function(c){return '<div class="ingrow"><span>'+esc(c.ingredient)+' <span class="muted">'+esc(c.dose||'')+'</span></span></div>';}).join('')+'</div>'):'')+
+       '<button class="btn neon" style="width:100%;margin-top:6px" onclick="startPrep(\''+p.id+'\',\''+code+'\')">Prepare on the bench →</button>'+
+       '<div class="muted" style="font-size:.7rem;margin-top:8px;text-align:center">or <a href="#" onclick="setMode(\''+p.id+'\',\'ala\');return false" style="color:var(--gold)">customize à la carte</a></div>'+
+       '</div>'+
+       '<button class="btn ghost" style="width:100%;margin-top:8px;font-size:.74rem;padding:7px" onclick="clearGive(\''+p.id+'\')">✕ Clear — give nothing yet</button>';
+  } else {
+    h+='<div style="font-size:.78rem;color:var(--gold);margin-bottom:8px">À la carte — add the broth + ingredients to the prep bench (Mode B, under standing orders):</div>';
+    h+='<button class="btn neon" style="width:100%;margin-bottom:10px" onclick="startPrep(\''+p.id+'\',null)">Open prep bench</button>';
+    h+='<div id="palette">'+paletteHTML()+'</div>';
+    h+='<button class="btn ghost" style="width:100%;margin-top:10px;font-size:.74rem;padding:7px" onclick="clearGive(\''+p.id+'\')">✕ Clear — give nothing yet</button>';
+  }
+  el.innerHTML=h;
+}
+function setMode(id,m,silent){var p=qById(id);if(!p)return;p.buildMode=m;if(!silent)renderDetail();}
+function setProto(id,code){var p=qById(id);if(!p)return;p.proto=code;p.buildMode='stack';save();renderDetail();}
+function clearGive(id){var p=qById(id);if(!p)return;p.buildMode=null;p.staged=false;delete p.prep;if(PREP&&PREP.pid===id)PREP=null;save();renderQueue();renderPrep();renderDetail();}
+function clearBench(){if(PREP){var p=qById(PREP.pid);if(p){delete p.prep;p.staged=false;}}PREP=null;save();renderQueue();renderPrep();renderDetail();}
+function txLabel(p){return p.proto==='ALACARTE'?'Micronutrient Infusion':(p.proto?(p.proto+(stackByCode(p.proto)?' — '+stackByCode(p.proto).title:'')):'Custom build');}
+function paletteHTML(){
+  var byCat={};MENU.forEach(function(i){if(i.in_primary_library===false&&/KETOROLAC|FAMOTIDINE|METHYLENE/.test(i.id))return;var c=catOf(i);(byCat[c]=byCat[c]||[]).push(i);});
+  var order=['Base fluids','Vitamins','Minerals & electrolytes','Amino acids','Antioxidants & specialty','Lipotropic / metabolic','Rx & administration adjuncts','Other'];
+  var h='';order.forEach(function(c){if(!byCat[c]||c==='Base fluids')return;h+='<div class="cat"><h4>'+c+'</h4><div class="palette">'+byCat[c].map(function(i){var inc=PREP&&PREP.items.some(function(it){return it.id===i.id;});return '<div class="pi'+(i.guardrail?' caut':'')+(inc?' sel':'')+'" onclick="toggleIng(\''+i.id+'\')">'+(inc?'✓ ':'')+esc(i.name.split(' (')[0])+'<div class="d">'+esc(i.standard||'')+'</div></div>';}).join('')+'</div></div>';});
+  return h;
+}
+function catOf(i){var id=i.id||'';if(id==='ING_NS'||id==='ING_LR')return'Base fluids';if(/B12|VITACOMPLEX|VITC|BIOTIN|ING_B5|ING_B6|VITD3/i.test(id))return'Vitamins';if(/MGCL|CAGLUC|CACL|ZINC|SELENIUM|TRACE|MINERALBLEND/i.test(id))return'Minerals & electrolytes';if(/LYSINE|TAURINE|CARNITINE|GLUTAMINE|AMINOBLEND|ARGININE|PROLINE|GLYCINE/i.test(id))return'Amino acids';if(/GLUTATHIONE|NAD|NIAGEN|ING_ALA|NAC|TRIIMMUNE|COQ10|METHYLENE/i.test(id))return'Antioxidants & specialty';if(/LIPOTROPIC|MICC/i.test(id))return'Lipotropic / metabolic';if(/ONDANSETRON|KETOROLAC|FAMOTIDINE/i.test(id))return'Rx & administration adjuncts';return'Other';}
+
+// ---------- PREP BENCH (per-patient — each patient carries their own build) ----------
+function newBag(pid){return {pid:pid,base:'0.9% NS',vol:500,time:45,items:[],nadFloor:null,override:''};}
+function startPrep(pid,code){var p=qById(pid);if(!p)return;
+  if(code){p.prep=newBag(pid);var s=stackByCode(code);if(s){(s.components||[]).concat(s.post_drip||[]).concat(s.optional_add_ons||[]).concat(s.same_visit_add_ons||[]).forEach(function(c){var ing=matchByName(c.ingredient);p.prep.items.push({id:ing?ing.id:'',name:c.ingredient,dose:c.dose||'',ref:ing});});
+      if(/250/.test(s.base||''))p.prep.vol=250;else if(/1 L|1000/.test(s.base||''))p.prep.vol=1000;if(/LR|lactated/i.test(s.base||''))p.prep.base="Lactated Ringer's";if(/dedicated/i.test(s.base||''))p.prep.base='Dedicated NAD+ bag';
+      var tm=parseTimeMin(s.infusion_time);if(tm)p.prep.time=tm;}}
+  else if(!p.prep){p.prep=newBag(pid);}
+  p.prep.pid=pid;PREP=p.prep;p.staged=false;autoTime();save();renderPrep();renderDetail();
+}
+function addToPrep(ingId){if(!PREP){if(selId)startPrep(selId,null);else return;}var ing=findIng(ingId);if(!ing)return;PREP.items.push({id:ingId,name:ing.name,dose:ing.standard||'',ref:ing});autoTime();save();renderPrep();renderDetail();}
+// cart toggle — click a menu item to add it, click again to take it back out (incl. items that came from a protocol)
+function toggleIng(ingId){if(!PREP){if(selId)startPrep(selId,null);else return;}
+  var idx=-1;for(var k=0;k<PREP.items.length;k++){if(PREP.items[k].id===ingId){idx=k;break;}}
+  if(idx>=0){PREP.items.splice(idx,1);}else{var ing=findIng(ingId);if(!ing)return;PREP.items.push({id:ingId,name:ing.name,dose:ing.standard||'',ref:ing});}
+  autoTime();save();renderPrep();renderDetail();}
+function rmPrep(i){PREP.items.splice(i,1);autoTime();save();renderPrep();renderDetail();}
+function setPrep(f,v){PREP[f]=v;if(f!=='time')autoTime();save();renderPrep();}
+// the two exits from the bench
+function stageBack(){if(!PREP)return;var p=qById(PREP.pid);if(p)p.staged=true;PREP=null;save();renderQueue();renderPrep();renderDetail();}
+function resumeBench(id){var p=qById(id);if(!p||!p.prep)return;p.staged=false;p.prep.pid=id;PREP=p.prep;save();renderQueue();renderPrep();renderDetail();}
+function sendStaged(id){resumeBench(id);sendToChair();}
+// NAD overrides the default 45-min drip with its rate-sensitive duration
+function autoTime(){if(!PREP)return;var nad=PREP.items.filter(function(it){return /nad/i.test(it.name);})[0];if(nad){var g=parseGrams(nad.dose),mg=g!=null?g*1000:250;PREP.time=mg>=500?210:120;PREP.nadFloor=PREP.time;}else{PREP.nadFloor=null;if(PREP.time===120||PREP.time===210)PREP.time=45;}}
+function renderPrep(){var el=document.getElementById('prep');if(!PREP){el.style.display='block';el.className='prep';el.innerHTML='<div class="empty">🧪 Preparation bench — pick a pre-made protocol or an à-la-carte item on the right; it lands here to cook. Fix any Ally alert, then send to a chair.</div>';return;}
+  var p=qById(PREP.pid);el.style.display='block';el.className='prep active';
+  var an=analyzePrep();var drip=dripCalc();
+  var items=PREP.items.length?PREP.items.map(function(it,i){return '<div class="ingrow"><span>'+esc(it.name)+' <span class="muted">'+esc(it.dose)+'</span></span><button class="rm" onclick="rmPrep('+i+')">×</button></div>';}).join(''):'<div class="empty">Add the broth (base) and ingredients.</div>';
+  var bases=['0.9% NS',"Lactated Ringer's",'Dedicated NAD+ bag'];
+  var baseSel='<select onchange="setPrep(\'base\',this.value)">'+bases.map(function(b){return '<option'+sel(PREP.base,b)+'>'+esc(b)+'</option>';}).join('')+'</select>';
+  var volSel='<select onchange="setPrep(\'vol\',+this.value)">'+[250,500,1000].map(function(v){return '<option value="'+v+'"'+sel(PREP.vol,v)+'>'+v+' mL</option>';}).join('')+'</select>';
+  el.innerHTML='<div class="ph"><b>🧪 Preparation bench — '+esc(p?dispName(p):'')+'</b></div>'+
+    '<div class="bag">'+baseSel+volSel+'<input type="number" value="'+PREP.time+'" style="width:110px" oninput="setPrep(\'time\',+this.value)" title="minutes"> min'+(PREP.nadFloor?' <span class="pill gold">NAD floor '+PREP.nadFloor+'m</span>':'')+'</div>'+
+    items+
+    '<div class="drip">'+drip+'</div>'+
+    '<div class="alertbox" id="alertbox">'+renderAlertSummary(an)+'</div>'+
+    '<div style="display:flex;gap:8px;margin-top:10px">'+
+      '<button class="btn neon-green" style="flex:1" onclick="sendToChair()">▶ Send to chair</button>'+
+      '<button class="btn ghost" style="flex:1" onclick="stageBack()">⏸ Back to waiting</button>'+
+    '</div>'+
+    '<div class="muted" style="font-size:.66rem;text-align:center;margin-top:6px">Staging parks the approved order — mix the bag when a chair opens (beyond-use dating).</div>';
+  // popup only on a NEW critical
+  if(an.crit>0 && an.newCrit) showAlertPopup(an);
+}
+function dripCalc(){var df=15,v=PREP.vol,t=PREP.time;if(!v||!t)return '<div class="dz"><span>set time</span></div>';
+  return '<div class="dz vol"><span>Volume · bag / time</span><b>'+v+' mL / '+t+' min</b></div>'+
+         '<div class="dz drop"><span>Drip rate</span><b>'+Math.round(v/t*df)+' gtt/min</b></div>'+
+         '<div class="dz pump"><span>Pump rate</span><b>'+Math.round(v/t*60)+' mL/hr</b></div>';}
+function renderAlertSummary(an){if(an.crit===0&&an.warn===0)return '<div class="flag ok"><b>Ally</b>No conflicts — nurse confirms &amp; signs.</div>';
+  var h='';an.flags.filter(function(f){return f.l!=='ok'&&f.l!=='info';}).slice(0,4).forEach(function(f){h+='<div class="flag '+f.l+'"><b>'+f.t+'</b>'+f.b+'</div>';});return h;}
+
+// ---------- GUARDRAIL ENGINE (alert-only) ----------
+var lastCritKey='';
+function analyzePrep(){var bag=PREP.items,t=PREP.time,flags=[],crit=0,warn=0;
+  function add(l,ti,b){flags.push({l:l,t:ti,b:b});if(l==='crit')crit++;if(l==='warn')warn++;}
+  var tags={};bag.forEach(function(it){var n=(it.name||'').toLowerCase();if(/vitamin c|vit c|ascorbic/.test(n))tags.vitc=it;if(/calcium/.test(n))tags.calcium=it;if(/glutathione/.test(n))tags.glut=it;if(/magnesium/.test(n))tags.mg=it;if(/nad/.test(n))tags.nad=it;if(/zinc/.test(n))tags.zinc=it;});
+  if(/lactated/i.test(PREP.base))tags.lr=true;
+  var km={'vit c':'vitc','vitamin c':'vitc','ascorbic':'vitc','calcium':'calcium','glutathione':'glut','mg':'mg','magnesium':'mg','ca':'calcium','nad':'nad','zinc':'zinc','lr':'lr','ceftriaxone':'cef'};
+  (MOD.compatibility_matrix&&MOD.compatibility_matrix.rules||[]).forEach(function(r){var c=(r.combination||'').toLowerCase(),need=[];Object.keys(km).forEach(function(k){if(c.indexOf(k)>=0&&need.indexOf(km[k])<0)need.push(km[k]);});if(need.length<2)return;if(!need.every(function(x){return !!tags[x];}))return;var st=(r.status||'').toUpperCase(),l=st.indexOf('INCOMPAT')>=0?'crit':(st==='COMPATIBLE'?'ok':'warn');add(l,'Compatibility — '+r.status,esc(r.combination)+'. '+esc(r.rationale||''));});
+  if(tags.glut)add('warn','Glutathione','IV push only — never in the bag/with Vit C.');
+  if(tags.nad&&bag.length>1)add('warn','NAD+ dedicated bag','NAD+ runs alone in a dedicated bag.');
+  if(tags.nad&&t){var g=parseGrams(tags.nad.dose),mg=g!=null?g*1000:null;if(mg!=null&&mg>=500&&t<180)add('crit','NAD+ rate too fast','500 mg needs ≥ 180 min (not 45). Time set to floor.');else if(mg!=null&&mg>=250&&t<120)add('crit','NAD+ rate too fast','250 mg needs ≥ 120 min (not the 45-min default).');}
+  if(tags.mg&&t&&t<15)add('warn','Magnesium','Mg over ≥ 15 min.');
+  if(tags.vitc){var gv=parseGrams(tags.vitc.dose);if(gv!=null&&gv>6)add('warn','CARD-VC screen','Vit C '+gv+' g > 6 g — verbal screen incl. G6PD required.');}
+  bag.forEach(function(it){if(it.ref&&it.ref.ceiling){var d=parseGrams(it.dose),c=parseGrams(it.ref.ceiling);if(d!=null&&c!=null&&d>c)add('crit','Ceiling exceeded — '+esc(it.name),'Above wellness ceiling ('+it.ref.ceiling+') → needs provider.');}});
+  bag.forEach(function(it){if(it.ref&&it.ref.guardrail){var l=/serotonin|insulin autoimmune|vesicant|hyperkalemia|safety-critical/i.test(it.ref.guardrail)?'crit':'warn';add(l,'Caution — '+esc(it.name),esc(it.ref.guardrail));}});
+  // osmolarity
+  var hyper=[],hi=false;bag.forEach(function(it){var n=(it.name||'').toLowerCase();if(/vitamin c|vit c|ascorbic/.test(n)){var g=parseGrams(it.dose);if(g!=null&&g>=7){hyper.push('Vit C '+g+'g');hi=true;}}if(/calcium chloride/.test(n))hyper.push('CaCl');if(/amino/.test(n))hyper.push('amino acids');if(/nad/.test(n))hyper.push('NAD+');});
+  if(hyper.length){var conc=hi&&PREP.vol<=250;add(conc?'crit':'warn','Osmolarity '+(conc?'high':'raised'),'Hyperosmolar: '+hyper.join(', ')+'. Peripheral limit ~900 mOsm/L'+(conc?' — low volume + high Vit C: larger bag/central.':'.'));}
+  // ---- patient GFE conditions × each ingredient's PUBLISHED screening map ----
+  // (drives every ingredient × condition contraindication automatically — base fluid + all additives)
+  var pat=qById(PREP.pid),pflags={};((pat&&pat.alerts)||[]).forEach(function(a){var k=ALERT_TO_KEY[a];if(k)pflags[k]=true;});
+  var screenIds=bag.map(function(it){return it.id;}).filter(Boolean);
+  var baseId=/lactated/i.test(PREP.base)?'ING_LR':(/dedicated|nad/i.test(PREP.base)?null:'ING_NS');
+  if(baseId)screenIds.push(baseId);
+  var seenSc={};
+  screenIds.forEach(function(id){var ent=SCREEN.ingredients&&SCREEN.ingredients[id];var sc=(ent&&ent.screen)||[];var nm=esc((ent&&ent.name?ent.name:id).split(' (')[0]);
+    sc.forEach(function(r){if(!pflags[r.flag])return;var dk=id+'|'+r.flag;if(seenSc[dk])return;seenSc[dk]=1;
+      if(r.level==='avoid')add('crit','Contraindicated — '+nm+' × '+esc(r.flag),esc(r.note));
+      else if(r.level==='caution')add('warn','Caution — '+nm+' × '+esc(r.flag),esc(r.note));
+      else add('warn','Screen — '+nm+' × '+esc(r.flag),esc(r.note));});
+  });
+  var key=flags.filter(function(f){return f.l==='crit';}).map(function(f){return f.t;}).join('|');
+  var newCrit=key!==''&&key!==lastCritKey;lastCritKey=key;
+  return {flags:flags,crit:crit,warn:warn,newCrit:newCrit};
+}
+
+// ---------- ALERT POPUP (red-flag → override / consult) ----------
+function showAlertPopup(an){var crits=an.flags.filter(function(f){return f.l==='crit';});
+  var h='<button class="x" onclick="closeModal()">×</button><h3 style="color:var(--red)">⚠ Red-flag alert</h3><div class="sub">Ally flagged the build. Resolve, override with a reason, or consult the attending provider.</div>'+
+    crits.map(function(f){return '<div class="flag crit"><b>'+f.t+'</b>'+f.b+'</div>';}).join('')+
+    '<textarea id="ovReason" placeholder="Override reason (required to proceed)" rows="2" style="margin-top:8px"></textarea>'+
+    '<div class="frow" style="margin-top:8px"><div><button class="btn ghost" style="width:100%" onclick="closeModal()">Fix the build</button></div>'+
+    '<div><button class="btn ghost" style="width:100%" onclick="consultProvider()">Consult attending</button></div>'+
+    (mdMode()?'':'<div><button class="btn neon-red" style="width:100%" onclick="overrideAlert()">Override</button></div>')+'</div>'+
+    (mdMode()?'<div class="muted" style="font-size:.72rem;margin-top:6px">MD-of-record mode — criticals must be resolved; no override.</div>':'');
+  showModal(h);
+}
+function overrideAlert(){var r=(document.getElementById('ovReason')||{}).value;if(!r||!r.trim()){alert('Override needs a reason.');return;}PREP.override=r;closeModal();}
+function consultProvider(){closeModal();alert('Flagged for attending provider review (logged to the chart).');}
+
+// ---------- SEND TO CHAIR / START / TIMER ----------
+function sendToChair(){var p=qById(PREP.pid);if(!p)return;
+  if(!p.gfe){return hardStop('GFE',p);}
+  if(!p.consent){return hardStop('consent',p);}
+  var an=analyzePrep();if(an.crit>0&&!PREP.override&&mdMode()){showAlertPopup(an);return;}
+  var free=CHAIRS.indexOf(null);if(free<0){alert('All 6 chairs are full — keeping them on the bench. Tap "Back to waiting" to stage, then send when a chair frees.');return;}
+  CHAIRS[free]={patient:p,protoLabel:(p.proto==='ALACARTE'?'Micronutrient Infusion':p.proto),bag:PREP.items.slice(),base:PREP.base,vol:PREP.vol,time:PREP.time,remain:PREP.time*60,total:PREP.time*60,state:'ready',timer:null,lastBeep:0,monitoring:[],override:PREP.override||'',alertSummary:(function(){var a=analyzePrep();return a.flags.filter(function(f){return f.l==='crit'||f.l==='warn';}).map(function(f){return f.t;}).join('; ');})()};
+  delete p.prep;p.staged=false;
+  QUEUE=QUEUE.filter(function(x){return x.id!==p.id;});PREP=null;selId=null;save();renderQueue();renderChairs();renderPrep();renderDetail();
+}
+function hardStop(what,p){
+  var msg=what==='GFE'?'No valid Good Faith Exam on file — no infusion.':'No signed consent — no IV.';
+  var h='<button class="x" onclick="closeModal()">×</button><h3 style="color:var(--red)">⛔ Hard stop — '+what.toUpperCase()+' required</h3><div class="sub">'+msg+'</div>'+
+    (what==='GFE'
+      ? '<a class="btn neon" style="width:100%;margin-bottom:8px;text-decoration:none" href="gfe.html" target="_blank">Open GFE Dashboard (provider) ↗</a><div class="muted" style="font-size:.72rem;margin-bottom:6px">A provider (MD/DO/NP/PA) performs the GFE — not the nursing station.</div>'
+      : '<button class="btn neon" style="width:100%;margin-bottom:8px" onclick="closeModal();openConsent(\''+p.id+'\')">Complete consent now</button>')+
+    (mdMode()?'<div class="muted" style="font-size:.72rem">MD-of-record mode — absolute stop.</div>':'<button class="btn ghost" style="width:100%" onclick="overrideGate(\''+p.id+'\',\''+what+'\')">Override with reason (advisory mode)</button>');
+  showModal(h);
+}
+function overrideGate(id,what){var r=prompt('Override '+what+' hard-stop — reason (logged):');if(!r)return;var p=qById(id);if(p){p[what==='GFE'?'gfe':'consent']=true;p['ov_'+what]=r;}closeModal();renderDetail();}
+function renderChairs(){var el=document.getElementById('chairs');var h='';
+  for(var i=0;i<6;i++){var c=CHAIRS[i];
+    if(!c){h+='<div class="chair"><div class="num">'+(i+1)+'</div><div class="st">AVAILABLE</div></div>';continue;}
+    var cls=c.suspended?'warn':(c.state==='ended'?'ended':(c.state==='paused'?'paused':(c.state==='infusing'&&c.remain<=300?'warn':'occupied')));
+    var clk=c.suspended?'⏹ SUSPENDED':(c.state==='ended'?'INFUSION ENDED':(c.state==='paused'?fmt(c.remain)+' ⏸':fmt(c.remain)));
+    var pct=c.total?Math.min(100,Math.round((c.total-c.remain)/c.total*100)):0;
+    h+='<div class="chair '+cls+'"><div class="num" style="font-size:.95rem">Chair '+(i+1)+'</div><div class="pt">'+esc(dispName(c.patient))+'</div><div class="pr">'+esc(c.protoLabel)+'</div>'+
+      '<div class="cmeta">'+esc(c.base)+' · '+c.vol+' mL · '+c.time+' min'+(c.startedStr?' · ⏱ '+esc(c.startedStr):'')+'</div>'+
+      '<div class="clk" id="clk'+i+'">'+clk+'</div>'+
+      ((c.state==='infusing'||c.state==='paused'||c.state==='ended')?'<div class="cprog"><div class="cbar" id="bar'+i+'" style="width:'+pct+'%"></div></div>':'')+
+      '<div class="chairbtns">'+
+      (c.state==='ready'?'<button class="btn neon-green" onclick="startInfusion('+i+')">▶ Start</button>':'')+
+      (c.state==='infusing'?'<button class="btn ghost" onclick="pauseChair('+i+')">⏸ Pause</button><button class="btn ghost" onclick="openMonitor('+i+')">Monitor</button><button class="btn ghost" onclick="endChair('+i+')">⏹ End</button>':'')+
+      (c.state==='paused'?'<button class="btn neon-green" onclick="resumeChair('+i+')">▶ Resume</button><button class="btn ghost" onclick="openMonitor('+i+')">Monitor</button><button class="btn ghost" onclick="endChair('+i+')">⏹ End</button>':'')+
+      (c.state==='ended'?'<button class="btn ghost" onclick="dischargeChair('+i+')">Discharge</button>':'')+
+      ((c.state==='infusing'||c.state==='paused'||c.state==='ended')?'<button class="btn ghost allychairbtn" onclick="allyAskChair('+i+')" title="Ask Ally about this build"><img src="ally-avatar-64.png" alt="Ally" class="allyface" style="width:18px;height:18px" onerror="this.replaceWith(document.createTextNode(\'💬\'))"></button>':'')+
+      ((c.state==='infusing'&&demoMode())?'<button class="btn ghost allychairbtn" onclick="skipToNext('+i+')" title="Demo: jump to the next alarm">⏩</button>':'')+
+      '</div></div>';
+  }
+  el.innerHTML=h;
+  renderStats();var cs=document.getElementById('chairStat');if(cs)cs.textContent=CHAIRS.filter(Boolean).length+' / 6 occupied';
+  renderSeatPrompt();
+}
+// when a chair is free and a patient is staged, auto-surface a one-click seat
+function renderSeatPrompt(){var el=document.getElementById('seatPrompt');if(!el)return;
+  var freeIdx=CHAIRS.indexOf(null);
+  var staged=QUEUE.filter(function(p){return p.staged&&p.prep;});
+  if(freeIdx<0||!staged.length){el.innerHTML='';return;}
+  var p=staged[0],more=staged.length-1;
+  el.innerHTML='<div class="seatbar">🪑 <b>Chair '+(freeIdx+1)+' open</b> · ⏸ '+esc(dispName(p))+' is prepared ('+esc(txLabel(p))+')'+(more>0?' · +'+more+' more staged':'')+
+    '<button class="btn neon-green" onclick="sendStaged(\''+p.id+'\')">▶ Seat '+esc(dispName(p).split(' ')[0])+'</button></div>';
+}
+function startInfusion(i){var c=CHAIRS[i];if(!c)return;
+  var h='<button class="x" onclick="closeModal()">×</button><h3>Start — Chair '+(i+1)+'</h3><div class="sub">'+esc(c.patient.name)+' · '+esc(c.protoLabel)+' · '+c.base+' '+c.vol+' mL · '+c.time+' min</div>'+
+    '<div class="flag info"><b>Pre-start vitals (universal hold check)</b>BP/HR/SpO2/Temp within range; no red-flag symptom.</div>'+
+    '<div class="frow"><div><label>BP</label><input id="vBP" inputmode="numeric" oninput="bpMask(this)" placeholder="120/78"></div><div><label>HR</label><input id="vHR" placeholder="72"></div><div><label>SpO2 %</label><input id="vO2" placeholder="98"></div><div><label>Temp</label><input id="vT" placeholder="98.4"></div></div>'+
+    '<div class="frow"><div><label>IV site</label><select id="vSite"><option value="">—</option><option>L AC</option><option>R AC</option><option>L forearm</option><option>R forearm</option><option>L hand</option><option>R hand</option></select></div><div><label>Gauge</label><select id="vGauge"><option value="">—</option><option>20G</option><option selected>22G</option><option>24G</option></select></div><div><label>Delivery</label><select id="vDel"><option>Gravity</option><option>Pump</option></select></div></div>'+
+    '<div class="muted" style="font-size:.72rem;margin-bottom:8px">Confirm venipuncture / catheter placed &amp; patent.</div>'+
+    '<button class="btn neon-green" style="width:100%" onclick="reallyStart('+i+')">▶ Start infusion</button>';
+  showModal(h);
+}
+function reallyStart(i){var c=CHAIRS[i];c.preVitals={bp:val('vBP'),hr:val('vHR'),o2:val('vO2'),t:val('vT')};c.site=val('vSite');c.gauge=val('vGauge');c.delivery=val('vDel');c.state='infusing';c.startedStr=fmtClock(new Date());c.endedStr='';c.warned300=false;c.warned120=false;closeModal();runChair(i);save();renderChairs();}
+function demoMode(){var e=document.getElementById('demoMode');return e&&e.checked;}
+// demo only: jump the running infusion to just above the next alarm threshold
+function skipToNext(i){var c=CHAIRS[i];if(!c||c.state!=='infusing')return;if(!c.warned300){c.remain=301;}else if(!c.warned120){c.remain=121;}else{c.remain=1;}renderChairs();}
+// pause / resume — hold the drip without ending it (line check, bathroom, mild reaction)
+function pauseChair(i){var c=CHAIRS[i];if(!c||c.state!=='infusing')return;if(c.timer){clearInterval(c.timer);c.timer=null;}c.state='paused';c.pausedStr=fmtClock(new Date());save();renderChairs();}
+function resumeChair(i){var c=CHAIRS[i];if(!c||c.state!=='paused')return;c.state='infusing';runChair(i);save();renderChairs();}
+function runChair(i,silent){var c=CHAIRS[i];if(!silent)beep(140,660);c.timer=setInterval(function(){c.remain--;var e=document.getElementById('clk'+i);if(e&&c.state==='infusing')e.textContent=fmt(Math.max(0,c.remain));
+  var b=document.getElementById('bar'+i);if(b)b.style.width=(c.total?Math.min(100,Math.round((c.total-c.remain)/c.total*100)):0)+'%';
+  // 5-minute ORANGE warning — two mid beeps, chair goes amber (fires once)
+  if(c.remain<=300&&!c.warned300){c.warned300=true;beep(220,990);setTimeout(function(){beep(220,990);},300);renderChairs();}
+  // 2-minute RED warning — three sharper beeps (fires once)
+  if(c.remain<=120&&!c.warned120){c.warned120=true;beep(260,1100);setTimeout(function(){beep(260,1100);},250);setTimeout(function(){beep(260,1100);},500);renderChairs();}
+  // ended — long triple tone, chair turns red 'INFUSION ENDED'
+  if(c.remain<=0){clearInterval(c.timer);c.timer=null;c.state='ended';c.endedStr=fmtClock(new Date());beep(700,880);setTimeout(function(){beep(700,880);},800);setTimeout(function(){beep(700,880);},1600);save();renderChairs();}
+},1000);}
+function flash(i){renderChairs();}
+// ---------- END / SUSPEND (a stopped infusion MUST stay on the record) ----------
+var SUSPEND_REASONS=['Adverse reaction','Patient request / declined to continue','IV access issue (infiltration / extravasation / lost line)','Clinical decision — provider','Vasovagal / felt unwell','Equipment / supply issue','Other'];
+function endChair(i){var c=CHAIRS[i];if(!c)return;
+  var done=Math.max(0,c.total-c.remain);var pct=c.total?Math.round(done/c.total*100):100;var ml=c.vol?Math.round(c.vol*done/c.total):'';
+  var h='<button class="x" onclick="closeModal()">×</button><h3>⏹ End infusion — Chair '+(i+1)+'</h3>'+
+    '<div class="sub">'+esc(dispName(c.patient))+' · '+esc(c.protoLabel)+' · ~'+pct+'% delivered ('+ml+' of '+c.vol+' mL).</div>'+
+    '<label class="chk" style="margin:8px 0 4px"><input type="radio" name="endmode" value="complete" checked onchange="document.getElementById(\'suspBox\').style.display=\'none\'"> ✓ Infusion completed — discharge normally</label>'+
+    '<label class="chk" style="margin:0 0 4px"><input type="radio" name="endmode" value="suspend" onchange="document.getElementById(\'suspBox\').style.display=\'block\'"> ⏹ Stopped / suspended early — keep on record</label>'+
+    '<div id="suspBox" style="display:none;margin-top:6px">'+
+      '<label class="muted" style="font-size:.74rem">Reason (required)</label>'+
+      '<select id="suspReason" style="width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:9px;color:var(--ink);font-family:inherit;margin-bottom:6px"><option value="">— select —</option>'+SUSPEND_REASONS.map(function(r){return '<option>'+esc(r)+'</option>';}).join('')+'</select>'+
+      '<textarea id="suspNote" rows="2" placeholder="What happened / action taken (e.g. line removed, provider notified, CARD-V used)" style="width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:9px;color:var(--ink);font-family:inherit;font-size:.86rem"></textarea>'+
+      '<div class="muted" style="font-size:.7rem;margin-top:4px">If this was an adverse event, also complete <b>FORM-04</b> and notify the provider — it carries into the infusion note &amp; the MD audit.</div>'+
+    '</div>'+
+    '<button class="btn neon" style="width:100%;margin-top:10px" onclick="finalizeEnd('+i+')">Continue to discharge →</button>';
+  showModal(h);
+}
+function finalizeEnd(i){var c=CHAIRS[i];if(!c)return;
+  var mode=(document.querySelector('input[name=endmode]:checked')||{}).value||'complete';
+  if(mode==='suspend'){var r=val('suspReason');if(!r){alert('Select a reason for stopping the infusion.');return;}
+    var n=(val('suspNote')||'').trim();c.suspended=true;c.suspendReason=r+(n?(' — '+n):'');c.suspendAt=fmtClock(new Date());}
+  if(c.timer){clearInterval(c.timer);c.timer=null;}
+  c.mlGiven=c.vol?Math.round(c.vol*Math.max(0,c.total-c.remain)/c.total):null;
+  c.endedStr=c.endedStr||fmtClock(new Date());c.state='ended';
+  save();renderChairs();dischargeChair(i);
+}
+function dischargeChair(i){var c=CHAIRS[i];if(!c)return;
+  var h='<button class="x" onclick="closeModal()">×</button><h3>Discharge — Chair '+(i+1)+'</h3><div class="sub">'+esc(dispName(c.patient))+' · recheck vitals, remove catheter, aftercare.</div>'+
+    (c.suspended?'<div class="flag warn" style="margin-bottom:8px"><b>⏹ Infusion suspended</b>'+esc(c.suspendReason)+' · ~'+(c.mlGiven!=null?c.mlGiven:'?')+' of '+c.vol+' mL infused. This is recorded on the note &amp; in the MD audit.</div>':'')+
+    '<div class="frow"><div><label>Post BP</label><input id="dBP" inputmode="numeric" oninput="bpMask(this)" placeholder="118/76"></div><div><label>HR</label><input id="dHR" placeholder="70"></div><div><label>SpO2</label><input id="dO2" placeholder="99"></div></div>'+
+    '<label class="muted" style="font-size:.74rem;display:flex;gap:6px;align-items:center;margin:4px 0"><input type="checkbox" id="dAmb" checked> Ambulates without orthostatic symptoms · aftercare handout given</label>'+
+    '<label class="muted" style="font-size:.74rem;display:flex;gap:6px;align-items:center"><input type="checkbox" id="dTol" '+(c.suspended?'':'checked')+'> Patient tolerated infusion well · discharged stable</label>'+
+    '<button class="btn ghost" style="width:100%;margin-top:8px" onclick="openAftercare('+i+')">🖨 Patient aftercare handout (take-home)</button>'+
+    '<button class="btn neon" style="width:100%;margin-top:8px" onclick="toNote('+i+')">📄 Generate infusion note →</button>';
+  showModal(h);
+}
+function toNote(i){var c=CHAIRS[i];if(!c)return;c.postVitals={bp:val('dBP'),hr:val('dHR'),o2:val('dO2')};c.dAmb=!!(document.getElementById('dAmb')||{}).checked;c.dTol=!!(document.getElementById('dTol')||{}).checked;openInfusionNote(i);}
+function freeChair(i){if(CHAIRS[i]&&CHAIRS[i].timer)clearInterval(CHAIRS[i].timer);CHAIRS[i]=null;save();closeModal();renderChairs();}
+
+// ---------- IV INFUSION NOTE (one-page, auto-composed, provider-signed + date-stamped) ----------
+function nowStamp(){var d=new Date();return fmtDob(todayISO())+' '+fmtClock(d);}
+function composeNote(i){var c=CHAIRS[i],p=c.patient,df=15,g=gfeState(p);
+  var rate=(c.vol&&c.time)?(Math.round(c.vol/c.time*df)+' gtt/min · '+Math.round(c.vol/c.time*60)+' mL/hr'):'—';
+  var items=(c.bag||[]).map(function(it){return esc(it.name.split(' (')[0])+' '+esc(it.dose||'');}).join(' · ')||'—';
+  var conds=(p.alerts||[]).length?(p.alerts||[]).map(esc).join(', '):'none reported';
+  var mons=(c.monitoring||[]);var aes=mons.filter(function(m){return m.ae;});
+  var monStr=mons.length?mons.map(function(m){return '<div class="nrow"><span class="nk">'+esc(m.t)+'</span><span>'+esc(m.note)+'</span></div>';}).join(''):'<div class="nrow"><span class="nk">—</span><span>No mid-infusion concerns logged.</span></div>';
+  var pre=c.preVitals||{},post=c.postVitals||{};
+  var s=stackByCode(p.proto);
+  var why=s&&s.indication?esc(s.indication):(p.proto==='ALACARTE'?'Provider-directed micronutrient wellness infusion.':'Wellness IV infusion.');
+  var alertLine=c.override?('Decision-support flag overridden — reason: '+esc(c.override)):(c.alertSummary?('Cautions noted &amp; addressed: '+esc(c.alertSummary)):'No critical decision-support conflicts.');
+  var aeLine=aes.length?('<b style="color:#b3261e">Adverse event(s) logged — FORM-04 required.</b> '+aes.map(function(m){return esc(m.note);}).join(' | ')):'No adverse event. Tolerated well.';
+  var sig=c.noteSigned;
+  return '<div class="notepaper" id="noteDoc">'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h2>IV Infusion Note</h2><div class="nmeta">RenuviaMD® · AllyOS · FORM-IV-NOTE-01 · '+nowStamp()+(c.encounterId?' · <b>Encounter '+esc(c.encounterId)+'</b>':'')+'</div></div><div style="font-size:.66rem;color:#5b6b72;text-align:right">Adult wellness IV<br>Internal clinical record</div></div>'+
+    '<div class="nsec"><div class="nrow"><span class="nk">Patient</span><span>'+esc(dispName(p))+' · '+(ageOf(p)!=null?ageOf(p)+'y':'—')+' '+esc(p.sex||'')+(p.dob?(' · DOB '+esc(fmtDob(p.dob))):'')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Chair / clinician</span><span>Chair '+(i+1)+' · '+esc((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||'Provider')+'</span></div></div>'+
+    '<div class="nsec"><h3>Why — indication &amp; eligibility</h3><div class="nrow"><span class="nk">Indication</span><span>'+why+'</span></div>'+
+      '<div class="nrow"><span class="nk">GFE</span><span>'+(g.k==='done'?'Current':esc(g.label))+(p.gfeDate?(' (last '+esc(fmtDob(p.gfeDate))+')'):'')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Consent</span><span>'+(p.consent?'Signed, on file':'NOT on file')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Conditions screened</span><span>'+conds+'</span></div></div>'+
+    '<div class="nsec"><h3>What — the infusion</h3><div class="nrow"><span class="nk">Protocol</span><span>'+esc(c.protoLabel)+(s?' — '+esc(s.title):'')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Base / volume</span><span>'+esc(c.base)+' · '+c.vol+' mL</span></div>'+
+      '<div class="nrow"><span class="nk">Additives</span><span>'+items+'</span></div>'+
+      '<div class="nrow"><span class="nk">Decision-support</span><span>'+alertLine+'</span></div></div>'+
+    '<div class="nsec"><h3>How — administration</h3><div class="nrow"><span class="nk">IV access</span><span>'+(esc(c.site||'—'))+' · '+(esc(c.gauge||'—'))+' · '+(esc(c.delivery||'—'))+'</span></div>'+
+      '<div class="nrow"><span class="nk">Rate · duration</span><span>'+rate+' · '+c.time+' min</span></div>'+
+      '<div class="nrow"><span class="nk">Times</span><span>start '+(esc(c.startedStr||'—'))+' · end '+(esc(c.endedStr||'—'))+'</span></div>'+
+      '<div class="nrow"><span class="nk">Pre-vitals</span><span>BP '+(esc(pre.bp||'—'))+' · HR '+(esc(pre.hr||'—'))+' · SpO2 '+(esc(pre.o2||'—'))+' · T '+(esc(pre.t||'—'))+'</span></div>'+
+      '<div style="margin-top:4px"><span class="nk">Monitoring</span>'+monStr+'</div></div>'+
+    '<div class="nsec"><h3>Outcome</h3><div class="nrow"><span class="nk">Post-vitals</span><span>BP '+(esc(post.bp||'—'))+' · HR '+(esc(post.hr||'—'))+' · SpO2 '+(esc(post.o2||'—'))+'</span></div>'+
+      '<div class="nrow"><span class="nk">Tolerance</span><span>'+aeLine+'</span></div>'+
+      '<div class="nrow"><span class="nk">Discharge</span><span>'+(c.suspended?('<b style="color:#b3261e">Infusion SUSPENDED</b> — '+esc(c.suspendReason)+' · ~'+(c.mlGiven!=null?c.mlGiven:'?')+' of '+c.vol+' mL infused'):(c.dTol?'Stable':'See note'))+(c.dAmb?' · ambulating without orthostatic symptoms · aftercare reviewed':'')+'</span></div></div>'+
+    '<div class="nsec"><h3>Compliance attestation</h3><div class="ncomp">'+
+      '✓ Standing order on file'+(MOD&&MOD.meta?' (IV protocol v'+esc(MOD.meta.version||'')+' · locked &amp; MD-signed · eff '+esc(MOD.meta.effective||'')+')':'')+' &nbsp; ✓ Valid GFE '+(g.k==='done'?'current':'('+esc(g.label)+')')+' &nbsp; ✓ Consent on file &nbsp; ✓ Ingredient contraindication screen performed &nbsp; ✓ Within adult wellness scope (non-disease) &nbsp; ✓ Emergency escalation pathway available'+
+      (aes.length?' &nbsp; ⚠ FORM-04 adverse-event report required':'')+'</div></div>'+
+    '<div class="nsign">'+(sig?
+      ('<div class="nrow"><span class="nk">Provider signature</span><span><b>'+esc(sig.provider)+'</b></span></div><div class="nrow"><span class="nk">Date / time</span><span class="stamp">'+esc(sig.stamp)+' (auto-stamped)</span></div>'):
+      ('<label style="font-size:.72rem;color:#5b6b72">Signing provider <span style="color:#9aa9b0">(infusion note — MD/DO, APP, or RN)</span></label><select id="noteProv" class="noprint" style="width:100%;padding:8px;border:1px solid #cdd9d7;border-radius:6px;margin-top:3px;background:#fff">'+(window.AllyOSCred?AllyOSCred.options(AllyOSCred.DOC.INFUSION_NOTE,""):"<option value=\"\">— select —</option>")+'</select>'+
+       '<div class="noprint" style="display:flex;gap:8px;margin-top:10px"><button class="btn neon-green" style="flex:1" onclick="signNote('+i+')">✓ Sign &amp; date-stamp</button></div>'))+
+    '</div></div>'+
+    '<div class="noprint" style="display:flex;gap:8px;margin-top:12px">'+(sig?'<button class="btn neon" style="flex:1" onclick="window.print()">🖨 Print / Save PDF</button><button class="btn ghost" style="flex:1" onclick="freeChair('+i+')">Close chart &amp; free chair</button>':'<button class="btn ghost" style="flex:1" onclick="closeModal()">Back</button>')+'</div>';
+}
+function openInfusionNote(i){showModal(composeNote(i));}
+function signNote(i){var c=CHAIRS[i];var prov=val('noteProv').trim()||((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||'Provider');c.noteSigned={provider:prov,stamp:nowStamp()};if(!c.encounterId)logEncounter(i);saveChartPacket(i);save();openInfusionNote(i);}
+// ---------- AUDIT LOG (de-identified encounter registry — for MD audit, PHI-free) ----------
+function loadAudit(){try{return JSON.parse(localStorage.getItem('allyos_audit_v1')||'[]');}catch(e){return [];}}
+function saveAudit(a){try{localStorage.setItem('allyos_audit_v1',JSON.stringify(a));}catch(e){}}
+function nextEncounterId(){var ses=(window.AllyOSAuth&&AllyOSAuth.session())||{};
+  var code=((ses.clinic||'CLINIC').replace(/[^A-Za-z]/g,'').slice(0,5)||'CLINIC').toUpperCase();
+  var d=new Date(),ym=''+d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2);
+  var n=loadAudit().filter(function(r){return r.ym===ym;}).length+1;
+  return {id:code+'-'+ym+'-'+('000'+n).slice(-4),ym:ym};}
+// risk signals for MD risk-based audit sampling (per the screening reference)
+function encounterRisk(c){var p=c.patient,bag=c.bag||[],flags=[];
+  var names=bag.map(function(x){return (x.name||'').toLowerCase();});
+  if(names.some(function(n){return /nad/.test(n)&&!/niagen|nicotinamide/.test(n);}))flags.push('IV NAD+');
+  var vitc=bag.filter(function(x){return /vitamin c|vit c|ascorbic/i.test(x.name);})[0];var vcg=vitc?parseGrams(vitc.dose):null;
+  if(vcg!=null&&vcg>=7.5)flags.push('High-dose Vit C '+vcg+'g');
+  var hasMg=names.some(function(n){return /magnesium/.test(n);}),hasCa=names.some(function(n){return /calcium/.test(n);});
+  if(hasMg&&hasCa)flags.push('Mg + Ca together');
+  if(names.some(function(n){return /glutathione/.test(n);})&&(p.alerts||[]).indexOf('Asthma / COPD')>=0)flags.push('Glutathione + asthma');
+  if((p.alerts||[]).length)flags.push('Comorbidity: '+(p.alerts||[]).map(function(a){return a.split(' /')[0].split(' (')[0];}).join(', '));
+  if(c.override)flags.push('Override used');
+  if((c.monitoring||[]).some(function(m){return m.ae;}))flags.push('Adverse event');
+  if(c.suspended)flags.push('Infusion suspended');
+  return flags;}
+// ---------- CHART PACKETS (PHI, on-device) — signed GFE + note kept by Encounter ID,
+// so the clinic can export just the charts the MD selects for the monthly audit. ----------
+function loadCharts(){try{return JSON.parse(localStorage.getItem('allyos_charts_v1')||'{}');}catch(e){return {};}}
+function saveCharts(o){try{localStorage.setItem('allyos_charts_v1',JSON.stringify(o));}catch(e){}}
+function stripDoc(html){return (html||'').replace(/<button[\s\S]*?<\/button>/g,'').replace(/<input[^>]*>/g,'').replace(/ id="noteDoc"/g,'');}
+function saveChartPacket(i){var c=CHAIRS[i];if(!c||!c.encounterId)return;var p=c.patient;
+  var charts=loadCharts();
+  charts[c.encounterId]={id:c.encounterId,date:fmtDob(todayISO()),protocol:c.protoLabel,patient:dispName(p),
+    gfe:(p&&p.gfeDoc)?stripDoc(composeGFE(p)):'',note:stripDoc(composeNote(i)),ts:nowStamp()};
+  saveCharts(charts);}
+function logEncounter(i){var c=CHAIRS[i],p=c.patient,g=gfeState(p),s=stackByCode(p.proto),eid=nextEncounterId();c.encounterId=eid.id;
+  var rf=encounterRisk(c);
+  var rec={id:eid.id,ym:eid.ym,date:fmtDob(todayISO()),ts:(c.noteSigned&&c.noteSigned.stamp)||nowStamp(),
+    protocol:c.protoLabel+(s?' — '+s.title:''),base:c.base,vol:c.vol,time:c.time,items:(c.bag||[]).length,
+    gfe:(g.k==='done'?'current':g.label),consent:!!p.consent,screen:true,scope:true,
+    override:c.override||'',ae:(c.monitoring||[]).some(function(m){return m.ae;}),monCount:(c.monitoring||[]).length,
+    riskFlags:rf,risk:rf.length,ing:(c.bag||[]).map(function(it){return (it.name||'').split(' (')[0];}),
+    preVit:!!(c.preVitals&&(c.preVitals.bp||c.preVitals.hr)),postVit:!!(c.postVitals&&(c.postVitals.bp||c.postVitals.hr)),aftercare:!!c.dAmb,
+    suspended:!!c.suspended,suspendReason:c.suspendReason||'',mlGiven:(c.mlGiven!=null?c.mlGiven:''),
+    provider:(c.noteSigned&&c.noteSigned.provider)||'',outcome:(c.suspended?'suspended':(c.dTol?'stable':'see note'))};
+  var a=loadAudit();a.push(rec);saveAudit(a);}
+// patient take-home aftercare handout (FORM-03) — printed before they leave
+function composeAftercare(i){var c=CHAIRS[i],p=c.patient,a=REF.aftercare||{},s=stackByCode(p.proto);
+  function sec(title,arr,color){return '<div class="nsec"><h3'+(color?' style="color:'+color+'"':'')+'>'+esc(title)+'</h3>'+(arr||[]).map(function(x){return '<div style="padding:2px 0">• '+esc(x)+'</div>';}).join('')+'</div>';}
+  return '<div class="notepaper" id="noteDoc">'+
+    '<h2>'+esc(a.title||'After Your Wellness IV Infusion')+'</h2><div class="nmeta">RenuviaMD® · AllyOS · '+esc(a.code||'FORM-03')+' · Patient take-home · '+nowStamp()+'</div>'+
+    '<div class="ncomp" style="background:#fdecec;border-left-color:#b3261e;color:#7a2018;margin-top:8px">'+esc(a.banner||'For any life-threatening symptom, call 911 now.')+'</div>'+
+    sec('First 2 hours after your infusion',a.first_2h)+
+    sec('Common / expected — usually mild & temporary',a.expected)+
+    sec('Call the clinic SAME DAY if you notice',a.call_same_day,'#9a6300')+
+    sec('Call 911 / go to emergency NOW if you notice',a.call_911,'#b3261e')+
+    '<div class="nsec"><h3>Before your next wellness IV</h3><div>'+esc(a.before_next||'')+'</div></div>'+
+    '<div class="nsec"><div class="nrow"><span class="nk">Today’s protocol</span><span>'+esc(c.protoLabel)+(s?' — '+esc(s.title):'')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Next visit</span><span>______________________</span></div>'+
+      '<div class="nrow"><span class="nk">Clinic / phone</span><span>______________________</span></div></div>'+
+    '<div style="font-size:.7rem;color:#5b6b72;margin-top:8px">'+esc(a.footer||'')+'</div>'+
+    '<div class="noprint" style="display:flex;gap:8px;margin-top:12px"><button class="btn neon" style="flex:1" onclick="window.print()">🖨 Print handout</button><button class="btn ghost" style="flex:1" onclick="dischargeChair('+i+')">Back to discharge</button></div>'+
+    '</div>';
+}
+function openAftercare(i){if(CHAIRS[i])showModal(composeAftercare(i));}
+
+// ---------- MONITORING (open/close; vitals / feels-ok / AE) ----------
+// FORM-05 §3 (during-infusion) only — pre/post already captured at Start/Discharge.
+var MON_SYM=[{k:'Feels OK',ok:1},{k:'Flushing/warmth'},{k:'Nausea'},{k:'Dizzy/lightheaded',em:'VASOVAGAL'},{k:'Headache'},{k:'Anxiety'},{k:'Rash/itch/hives',red:1,em:'ANAPHYLAXIS'},{k:'Chest tightness/pain',red:1,em:'ANAPHYLAXIS'},{k:'SOB/wheeze/throat',red:1,em:'ANAPHYLAXIS'},{k:'Facial/throat swelling',red:1,em:'ANAPHYLAXIS'},{k:'Fainting/LOC',red:1,em:'VASOVAGAL'},{k:'IV site pain/swelling',red:1,em:'EXTRAV'}];
+var MON_INT=['Slowed rate','Paused','Rechecked vitals','Notified provider','CARD-V','CARD-A','EMS 911','FORM-04 started'];
+function symByK(k){for(var j=0;j<MON_SYM.length;j++)if(MON_SYM[j].k===k)return MON_SYM[j];return null;}
+function saveMonVit(i){var c=CHAIRS[i];c._vit={bp:val('mBP'),hr:val('mHR'),rr:val('mRR'),o2:val('mO2'),note:val('mNote')};}
+function toggleMonSym(i,k){var c=CHAIRS[i];c._sym=c._sym||{};saveMonVit(i);if(k==='Feels OK'){var was=c._sym[k];c._sym={};c._sym[k]=!was;}else{c._sym[k]=!c._sym[k];c._sym['Feels OK']=false;}openMonitor(i);}
+function toggleMonInt(i,k){var c=CHAIRS[i];c._int=c._int||{};saveMonVit(i);c._int[k]=!c._int[k];openMonitor(i);}
+function openMonitor(i){var c=CHAIRS[i];if(!c)return;c._sym=c._sym||{};c._int=c._int||{};var v=c._vit||{};
+  var midDue=c.total>3600&&!(c.monitoring||[]).some(function(m){return m.mid;})&&(c.total-c.remain)>120;
+  var sym=MON_SYM.map(function(s){var on=c._sym[s.k];return '<span class="mchip'+(s.red?' red':(s.ok?' ok':''))+(on?' on':'')+'" onclick="toggleMonSym('+i+',\''+s.k+'\')">'+(s.red?'⚠ ':'')+esc(s.k)+'</span>';}).join('');
+  var intc=MON_INT.map(function(k){var on=c._int[k];return '<span class="mchip'+(on?' on':'')+'" onclick="toggleMonInt('+i+',\''+k+'\')">'+esc(k)+'</span>';}).join('');
+  var log=(c.monitoring||[]).length?c.monitoring.map(function(m){return '<div class="monlog'+(m.ae?' ae':'')+'">'+esc(m.t)+' · '+esc(m.note)+'</div>';}).join(''):'<div class="muted" style="font-size:.74rem">No checkpoints yet.</div>';
+  var h='<button class="x" onclick="closeModal()">×</button><h3>Monitor — Chair '+(i+1)+'</h3><div class="sub">'+esc(dispName(c.patient))+' · '+esc(c.protoLabel)+' · '+(c.state==='ended'?'ended':fmt(c.remain)+' left')+'</div>'+
+    (midDue?'<div class="flag warn" style="margin-bottom:8px"><b>Mid-infusion vitals due</b>Duration > 60 min — record a checkpoint.</div>':'')+
+    '<label style="font-size:.7rem;color:var(--muted)">Symptoms — tap any (or Feels OK)</label><div class="mchips">'+sym+'</div>'+
+    '<label style="font-size:.7rem;color:var(--muted)">Interventions (if any)</label><div class="mchips">'+intc+'</div>'+
+    '<label style="font-size:.7rem;color:var(--muted)">Vitals (optional)</label>'+
+    '<div class="frow"><div><label>BP</label><input id="mBP" inputmode="numeric" oninput="bpMask(this)" value="'+esc(v.bp||'')+'"></div><div><label>HR</label><input id="mHR" value="'+esc(v.hr||'')+'"></div><div><label>RR</label><input id="mRR" value="'+esc(v.rr||'')+'"></div><div><label>SpO2</label><input id="mO2" value="'+esc(v.o2||'')+'"></div></div>'+
+    '<input id="mNote" placeholder="Note (optional)" value="'+esc(v.note||'')+'" style="width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink);font-size:.85rem;font-family:inherit">'+
+    '<button class="btn neon-green" style="width:100%;margin-top:10px" onclick="logCheckpoint('+i+')">✓ Log checkpoint</button>'+
+    '<div style="margin-top:10px"><div class="col-h" style="font-size:.7rem">Checkpoints</div>'+log+'</div>';
+  showModal(h);
+}
+function logCheckpoint(i){var c=CHAIRS[i];saveMonVit(i);var v=c._vit||{};
+  var syms=Object.keys(c._sym||{}).filter(function(k){return c._sym[k];});
+  var ints=Object.keys(c._int||{}).filter(function(k){return c._int[k];});
+  var vit='BP '+(v.bp||'-')+' HR '+(v.hr||'-')+' RR '+(v.rr||'-')+' SpO2 '+(v.o2||'-');
+  var red=syms.some(function(k){var s=symByK(k);return s&&s.red;});
+  var note=(syms.length?('Sym: '+syms.join(', ')):'No new symptoms')+(ints.length?(' · Int: '+ints.join(', ')):'')+' · '+vit+(v.note?(' · '+v.note):'');
+  var mid=c.total>3600&&(c.total-c.remain)>=(c.total/2-300)&&(c.total-c.remain)<=(c.total/2+300);
+  c.monitoring.push({t:'+'+Math.round((c.total-c.remain)/60)+'m',note:note,ae:red,mid:mid});
+  var em=null;syms.forEach(function(k){var s=symByK(k);if(s&&s.em&&!em)em=s.em;});
+  c._sym={};c._int={};c._vit={};save();
+  if(red&&em){closeModal();monRedFlag(i,em);}else openMonitor(i);
+}
+function monRedFlag(i,em){var label=em==='ANAPHYLAXIS'?'CARD-A · Anaphylaxis':em==='VASOVAGAL'?'CARD-V · Vasovagal':'Infiltration / extravasation';
+  var h='<button class="x" onclick="closeModal()">×</button><h3 style="color:var(--red)">⚠ Red-flag symptom — Chair '+(i+1)+'</h3><div class="sub">Logged. Stop or slow per your judgment, then open the protocol if indicated.</div>'+
+    '<button class="btn neon-red" style="width:100%;margin-bottom:8px" onclick="closeModal();emProtocol(\''+em+'\')">Open '+esc(label)+'</button>'+
+    '<button class="btn ghost" style="width:100%;margin-bottom:8px" onclick="openMonitor('+i+')">Back to monitoring</button>'+
+    '<div class="muted" style="font-size:.72rem">Serious AE → complete FORM-04 within 24 h (ARNP + Medical Director co-sign).</div>';
+  showModal(h);
+}
+
+// ---------- EMERGENCY PROTOCOL BAR ----------
+var EM={
+ ANAPHYLAXIS:{t:'Anaphylaxis · CARD-A',steps:['STOP infusion immediately; keep IV access.','Epinephrine 0.3 mg IM lateral thigh (1:1,000); repeat q5–15 min ×2 PRN.','Call 911 / activate EMS — do not delay for MD.','O2 via non-rebreather; position supine, legs up if hypotensive.','Adjuncts after Epi: diphenhydramine 25–50 mg, methylprednisolone 40–125 mg, albuterol neb for wheeze.','Monitor BP/HR/SpO2 continuously. Document FORM-04. Notify Medical Director.']},
+ VASOVAGAL:{t:'Vasovagal / pre-syncope · CARD-V',steps:['STOP infusion. Brief Trendelenburg / legs elevated UNLESS contraindicated (CHF, severe COPD, recent CVA, late pregnancy).','Cold compress; reassure. Recheck BP/HR q5 min.','NS bolus if hypotensive per orders.','If LOC > 1 min or not recovering → call 911.','Document in FORM-05; notify Medical Director for QA.']},
+ MGTOX:{t:'Suspected Mg toxicity',steps:['STOP infusion immediately. ABCs + vitals; place supine.','Activate EMS for hypotension/bradycardia/respiratory depression/AMS.','Calcium Gluconate 1 g IV slow is the antidote — ONLY if authorized, staff trained, product available, EMS activated.','Document FORM-04; notify MD.']},
+ EXTRAV:{t:'Infiltration / extravasation',steps:['STOP infusion; do not flush. Disconnect, aspirate residual if able.','Remove catheter; elevate limb; cold compress (warm for vesicant per agent).','Mark the area; photo-document. Assess for vesicant (e.g., Calcium Chloride).','Document FORM-05 (AE section if injury); notify MD.']}
+};
+function renderEmergency(){document.getElementById('embar').innerHTML=Object.keys(EM).map(function(k){return '<button class="embtn" onclick="emProtocol(\''+k+'\')">'+esc(EM[k].t.split(' · ')[0].split(' /')[0])+'</button>';}).join('');}
+// floor emergencies use the full laminated cards (CARD-A/CARD-V) where we have them
+var EM_CARD={ANAPHYLAXIS:'CARD_A',VASOVAGAL:'CARD_V'};
+function emCardSteps(card){var b='';
+  if(card.recognize)b+=refList('Recognize',card.recognize);
+  if(card.recognize_early)b+=refList('Early signs',card.recognize_early);
+  if(card.recognize_late)b+=refList('Late signs',card.recognize_late);
+  if(card.act_first)b+='<div class="flag crit" style="margin:8px 0"><b>ACT FIRST</b>'+esc(card.act_first)+'</div>';
+  if(card.act)b+=refList('Act',card.act);
+  if(card.concurrent)b+=refList('Concurrent actions',card.concurrent);
+  if(card.call_ems)b+='<div class="flag crit" style="margin:8px 0"><b>☎ EMS</b>'+esc(card.call_ems)+'</div>';
+  if(card.escalate_911)b+=refList('Escalate — call 911 if ANY',card.escalate_911);
+  if(card.secondary_meds)b+=refList('Secondary meds (after EPI + 911)',card.secondary_meds);
+  if(card.vs_anaphylaxis)b+='<div class="rsec">Vasovagal vs anaphylaxis</div><div class="rli">'+esc(card.vs_anaphylaxis)+'</div>';
+  if(card.prevent)b+=refList('Prevent',card.prevent);
+  if(card.post_event)b+=(typeof card.post_event==='string'?'<div class="rsec">Post-event</div><div class="rli">'+esc(card.post_event)+'</div>':refList('Post-event',card.post_event));
+  return b;}
+function emProtocol(k){var e=EM[k];emActive=k;document.getElementById('embar').classList.add('active');renderEmActive();
+  var card=(REF.emergency_cards||{})[EM_CARD[k]];
+  var title=card?(card.code+' — '+card.title):e.t;
+  var steps=card?emCardSteps(card):('<ol class="steps">'+e.steps.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')+'</ol>');
+  var h='<button class="x" onclick="closeModal()">×</button><h3 style="color:var(--red)">🚨 '+esc(title)+'</h3><div class="sub">Stays active on the floor until you mark it resolved or a false alarm — closing this window keeps it running.</div>'+
+    steps+
+    '<div class="frow" style="margin-top:10px"><div><button class="btn neon-green" style="width:100%" onclick="closeEm()">✓ Resolved</button></div><div><button class="btn ghost" style="width:100%" onclick="closeModal()">Keep open · back to floor</button></div><div><button class="btn ghost" style="width:100%" onclick="closeEm()">False alarm</button></div></div>';
+  showModalEm(h);
+}
+// persistent banner on the floor while an emergency is active
+function renderEmActive(){var el=document.getElementById('emBanner');if(!el)return;
+  if(!emActive){el.innerHTML='';return;}
+  var e=EM[emActive];
+  el.innerHTML='<div class="embanner"><span class="lbl">🚨 '+esc(e.t.split(' · ')[0])+' — ACTIVE</span>'+
+    '<span class="sp"><button class="btn ghost" onclick="emProtocol(\''+emActive+'\')">Reopen steps</button>'+
+    '<button class="btn neon-green" onclick="closeEm()">✓ Resolved</button>'+
+    '<button class="btn ghost" onclick="closeEm()">False alarm</button></span></div>';
+}
+function closeEm(){emActive=null;document.getElementById('embar').classList.remove('active');renderEmActive();closeModal();}
+
+// ---------- GFE / CONSENT POPUPS ----------
+// Nursing station = READ-ONLY for GFE. The exam is performed by a provider (MD/DO/NP/PA)
+// in the separate GFE Dashboard module (gfe.html); the RN here only sees status + the report.
+function openGFE(id){var p=qById(id);if(!p)return;
+  if(p.gfeDoc){return openGFEDoc(id);}                 // signed exam on file → read-only report popup
+  var done=!!p.gfe;
+  showModal('<button class="x" onclick="closeModal()">×</button><h3>Good Faith Exam — '+(done?'on file ✓':'pending')+'</h3>'+
+    '<div class="sub">'+esc(dispName(p))+(done?(' — recorded '+(p.gfeDate?esc(fmtDob(p.gfeDate)):'prior')+'.'):'')+'</div>'+
+    (done?'<div class="flag ok" style="margin-top:8px"><b>GFE current</b>Cleared by a provider. No full exam document attached.</div>':
+      '<div class="flag crit" style="margin-top:8px"><b>GFE required — provider only</b>Must be performed &amp; signed by an MD/DO/NP/PA before infusion. An RN cannot perform it.</div>'+
+      '<a class="btn neon" style="width:100%;margin-top:8px;text-decoration:none" href="gfe.html" target="_blank">Open GFE Dashboard ↗</a>'+
+      '<button class="btn ghost" style="width:100%;margin-top:6px" onclick="requestMdGfe(\''+id+'\')">📨 Request MD GFE (remote)</button>')+
+    '<div class="muted" style="font-size:.72rem;margin-top:8px">The nursing station shows GFE status only; the exam lives in the separate provider module.</div>');
+}
+function openGFEDoc(id){var p=qById(id);if(p&&p.gfeDoc)showModal(composeGFE(p));}
+// ---- de-identified remote-GFE sync (PHI-free: Encounter ID + plan/age/sex only) ----
+var CLOUD_CLINIC=null;
+function requestMdGfe(id){var p=qById(id);if(!p)return;
+  if(!window.AllyOSCloud||!CLOUD_CLINIC){alert('Sign in to AllyOS Cloud first (the MD receives the request in their cockpit).');return;}
+  encId(p);save();
+  AllyOSCloud.pushGfeRequest(CLOUD_CLINIC,{enc:p.encId,plan:(p.proto==='ALACARTE'?'Micronutrient Infusion':p.proto),age:ageOf(p),sex:p.sex||null,screen:{conditions:p.alerts||[]},status:'requested'})
+    .then(function(r){closeModal();showModal('<button class="x" onclick="closeModal()">×</button><h3>'+(r&&r.ok?'📨 Requested':'Could not send')+'</h3><div class="sub" style="margin-top:6px">'+(r&&r.ok?('GFE request <b>'+esc(p.encId)+'</b> sent to the Medical Director. It appears in their cockpit; when signed, this card flips to GFE on file.'):'Cloud unavailable — try again when online.')+'</div>');});
+}
+function syncRemoteGfe(){
+  if(!window.AllyOSCloud)return;
+  AllyOSCloud.ready.then(function(ok){if(!ok)return;AllyOSCloud.user().then(function(u){if(!u)return;
+    AllyOSCloud.myClinic().then(function(c){if(!c)return;CLOUD_CLINIC=c.id;
+      AllyOSCloud.pullGfeRequests(c.id).then(function(rs){var ch=false;
+        (rs||[]).forEach(function(r){if(r.status!=='signed')return;
+          QUEUE.forEach(function(p){if(p.encId===r.enc&&!p.gfe){p.gfe=true;p.gfeDate=(r.signed_at||'').slice(0,10)||todayISO();ch=true;}});});
+        if(ch){save();if(typeof renderQueue==='function')renderQueue();}
+      });
+    });
+  });});
+}
+syncRemoteGfe();
+// printable, signed GFE document (mirrors the infusion note / aftercare handout)
+function composeGFE(p){var d=p.gfeDoc||{},age=ageOf(p),s=stackByCode(p.proto),v=d.vitals||{};
+  var conds=(p.alerts||[]).length?(p.alerts||[]).map(esc).join(', '):'none reported';
+  var eligLabel=d.eligibility==='eligible'?'ELIGIBLE — cleared for wellness IV/IM':(d.eligibility==='defer'?'DEFERRED — not cleared today':'NOT ELIGIBLE today');
+  return '<div class="notepaper" id="noteDoc">'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h2>Good Faith Exam</h2><div class="nmeta">RenuviaMD® · AllyOS · FORM-INTAKE-GFE-01 · '+esc(d.stamp||nowStamp())+'</div></div><div style="font-size:.66rem;color:#5b6b72;text-align:right">Adult wellness IV/IM<br>Internal clinical record</div></div>'+
+    '<div class="nsec"><div class="nrow"><span class="nk">Patient</span><span>'+esc(dispName(p))+' · '+(age!=null?age+'y':'—')+' '+esc(p.sex||'')+(p.dob?(' · DOB '+esc(fmtDob(p.dob))):'')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Visit goal</span><span>'+esc(d.goal||'Wellness optimization')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Today\'s plan</span><span>'+esc(p.proto==='ALACARTE'?'Micronutrient Infusion':p.proto)+(s?' — '+esc(s.title):'')+'</span></div></div>'+
+    '<div class="nsec"><h3>History &amp; screen (Section B)</h3>'+
+      '<div class="nrow"><span class="nk">Conditions</span><span>'+conds+'</span></div>'+
+      '<div class="nrow"><span class="nk">Allergies</span><span>'+esc(d.allergies||'NKDA')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Current meds</span><span>'+esc(d.meds||'none reported')+'</span></div></div>'+
+    '<div class="nsec"><h3>Vitals &amp; exam</h3>'+
+      '<div class="nrow"><span class="nk">Vitals</span><span>BP '+esc(v.bp||'—')+' · HR '+esc(v.hr||'—')+' · SpO2 '+esc(v.o2||'—')+' · Temp '+esc(v.t||'—')+(v.wt?(' · Wt '+esc(v.wt)+' lb'):'')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Exam</span><span>'+(d.exam?'Well-appearing, no acute distress, no red-flag symptom; IV access adequate.':'See note.')+'</span></div>'+
+      '<div class="nrow"><span class="nk">Screen</span><span>'+(d.screen?'Performed against the selected protocol — no contraindication identified.':'See note.')+'</span></div>'+
+      (d.note?'<div class="nrow"><span class="nk">Note</span><span>'+esc(d.note)+'</span></div>':'')+'</div>'+
+    '<div class="ncomp"'+(d.eligibility!=='eligible'?' style="background:#fdecec;border-left-color:#b3261e;color:#7a2018"':'')+'><b>Determination:</b> '+esc(eligLabel)+'</div>'+
+    '<div class="nsign"><div class="nrow"><span class="nk">Performed &amp; signed</span><span class="stamp">'+esc(d.provider||'Provider')+' · '+esc(d.stamp||nowStamp())+'</span></div>'+
+      '<div style="font-size:.68rem;color:#5b6b72;margin-top:4px">Provider attests this Good Faith Exam was personally performed and the patient meets eligibility for the wellness service indicated. Advisory decision-support; the provider owns this determination and signature.</div></div>'+
+    '<div class="noprint" style="display:flex;gap:8px;margin-top:12px"><button class="btn neon" style="flex:1" onclick="window.print()">🖨 Print GFE</button><button class="btn ghost" style="flex:1" onclick="closeModal()">Close</button></div>'+
+    '</div>';
+}
+function openConsent(id){var p=qById(id);if(!p)return;
+  if(p.consent){return showModal('<button class="x" onclick="closeModal()">×</button><h3>Consent on file ✓</h3><div class="sub">'+esc(p.name)+' — wellness IV/IM consent signed.</div>');}
+  var h='<button class="x" onclick="closeModal()">×</button><h3>Consent — '+esc(p.name)+'</h3><div class="sub">Hard gate: no consent → no IV.</div>'+
+    '<ul class="steps"><li>Wellness only — not disease treatment.</li><li>Risks: vein irritation, bruising, flushing, dizziness, nausea, allergic/vasovagal, rare serious reaction.</li><li>Provider may hold/refer; emergency measures / EMS authorized.</li></ul>'+
+    '<button class="btn neon" style="width:100%;margin-top:8px" onclick="signConsent(\''+id+'\')">Patient consents — sign</button>';
+  showModal(h);
+}
+function signConsent(id){var p=qById(id);if(p)p.consent=true;save();closeModal();renderDetail();renderQueue();}
+
+// ---------- REFERENCE DRAWER (read-only · rendered from the locked JSON + cards) ----------
+var refSel=null;
+var REF_TABS=[{k:'protocols',t:'Protocols'},{k:'ingredients',t:'Ingredients'},{k:'emerg',t:'Emergencies'},{k:'bench',t:'Bench'}];
+function refOpen(){document.getElementById('refDrawer').classList.add('show');renderRefTabs();renderRef();}
+function refClose(){document.getElementById('refDrawer').classList.remove('show');}
+function refSetTab(k){refTabName=k;refSel=null;renderRefTabs();renderRef();}
+function renderRefTabs(){document.getElementById('reftabs').innerHTML=REF_TABS.map(function(t){return '<div class="reftab'+(refTabName===t.k?' on':'')+'" onclick="refSetTab(\''+t.k+'\')">'+t.t+'</div>';}).join('');}
+function refToggle(id){refSel=(refSel===id?null:id);renderRef();}
+function refMatch(s,q){return !q||(''+s).toLowerCase().indexOf(q.toLowerCase())>=0;}
+function allyAskRef(t){allyOpen();var inp=document.getElementById('allyInput');if(inp){inp.value='About '+t+': ';inp.focus();}refClose();}
+function renderRef(){var el=document.getElementById('refBody');if(!el)return;var q=(document.getElementById('refSearch')||{}).value||'';
+  el.innerHTML=refTabName==='protocols'?refProtocols(q):refTabName==='ingredients'?refIngredients(q):refTabName==='emerg'?refEmerg(q):refBench(q);}
+function refList(title,arr){if(!arr||!arr.length)return '';return '<div class="rsec">'+title+'</div>'+arr.map(function(x){return '<div class="rli">• '+esc(x)+'</div>';}).join('');}
+function refProtocols(q){var list=allStacks().filter(function(s){return refMatch(s.code+' '+s.title+' '+(s.indication||''),q);});
+  if(!list.length)return '<div class="empty">No match.</div>';
+  return list.map(function(s){var open=refSel===s.code;
+    var head='<div class="rh" onclick="refToggle(\''+s.code+'\')"><span><span class="rt">'+esc(s.code)+'</span> <span class="rs">'+esc(s.title)+'</span></span>'+(s.status==='draft'?'<span class="rtag draft">DRAFT</span>':'')+'</div>';
+    if(!open)return '<div class="ritem">'+head+'</div>';
+    var comp=(s.components||[]).map(function(c){return '<div class="row"><span class="k">'+esc(c.ingredient)+'</span><span>'+esc(c.dose||'')+'</span></div>';}).join('');
+    var body='<div class="rbody">'+(s.status==='draft'?'<div class="flag warn" style="margin:8px 0"><b>DRAFT</b>'+esc(s.draft_note||s.note||'')+'</div>':(s.note?'<div class="flag info" style="margin:8px 0"><b>Standing order required</b>'+esc(s.note)+'</div>':''))+
+      '<div class="row"><span class="k">Base</span><span>'+esc(s.base||'')+'</span></div>'+
+      '<div class="row"><span class="k">Time</span><span>'+esc(s.infusion_time||'')+'</span></div>'+
+      (s.indication?'<div style="color:var(--muted);font-size:.74rem;margin:6px 0">'+esc(s.indication)+'</div>':'')+
+      '<div class="rsec">Components</div>'+comp+
+      ((s.optional_add_ons||[]).length?refList('Optional add-ons',(s.optional_add_ons||[]).map(function(c){return c.ingredient+' '+(c.dose||'')+(c.note?(' — '+c.note):'');})):'')+
+      refList('Gates',s.key_gates)+
+      (s.evidence_grade||s.citations?('<div class="rsec">Evidence</div>'+(s.evidence_grade?'<div class="rli">Grade '+esc(s.evidence_grade)+'</div>':'')+(s.citations||[]).map(function(c){return '<div class="rli">• '+esc(c)+'</div>';}).join('')):'')+
+      '<span class="raskally" onclick="allyAskRef(\'protocol '+esc(s.code)+'\')">💬 Ask Ally about '+esc(s.code)+'</span></div>';
+    return '<div class="ritem">'+head+body+'</div>';}).join('');}
+function refIngredients(q){var list=MENU.filter(function(i){return i.id!=='ING_NS'&&i.id!=='ING_LR'&&refMatch(i.name,q);});
+  if(!list.length)return '<div class="empty">No match.</div>';
+  return list.map(function(i){var open=refSel===i.id;
+    var scr=(SCREEN.ingredients&&SCREEN.ingredients[i.id]&&SCREEN.ingredients[i.id].screen)||[];
+    var tag=i.status==='draft'?'<span class="rtag draft">DRAFT</span>':(i.guardrail?'<span class="rtag caution">caution</span>':'');
+    var head='<div class="rh" onclick="refToggle(\''+i.id+'\')"><span class="rt">'+esc(i.name.split(' (')[0])+'</span>'+tag+'</div>';
+    if(!open)return '<div class="ritem">'+head+'</div>';
+    var m=i.monograph||{};
+    var body='<div class="rbody">'+
+      (i.standard?'<div class="row"><span class="k">Standard</span><span>'+esc(i.standard)+'</span></div>':'')+
+      (i.route?'<div class="row"><span class="k">Route</span><span>'+esc(i.route)+'</span></div>':'')+
+      (i.ceiling?'<div class="row"><span class="k">Ceiling</span><span>'+esc(i.ceiling)+'</span></div>':'')+
+      (i["class"]?'<div class="row"><span class="k">Class</span><span>'+esc(i["class"])+'</span></div>':'')+
+      (m.what?'<div style="margin:6px 0;font-size:.78rem">'+esc(m.what)+'</div>':'')+
+      (m.relevance_nad?'<div class="rli"><b>NAD+:</b> '+esc(m.relevance_nad)+'</div>':'')+
+      (m.relevance_nonpeptide?'<div class="rli"><b>Non-peptide:</b> '+esc(m.relevance_nonpeptide)+'</div>':'')+
+      (i.guardrail?'<div class="flag warn" style="margin:8px 0"><b>Guardrail</b>'+esc(i.guardrail)+'</div>':'')+
+      (scr.length?('<div class="rsec">GFE screening contraindications</div>'+scr.map(function(r){return '<div class="rli"><span class="rtag '+r.level+'">'+r.level+'</span> '+esc(r.flag)+' — '+esc(r.note)+'</div>';}).join('')):'')+
+      ((m.citations||[]).length?('<div class="rsec">Evidence</div>'+(m.evidence_grade?'<div class="rli">Grade '+esc(m.evidence_grade)+(m.evidence_note?' — '+esc(m.evidence_note):'')+'</div>':'')+(m.citations||[]).map(function(c){return '<div class="rli">• '+esc(c)+'</div>';}).join('')):'')+
+      '<span class="raskally" onclick="allyAskRef(\'ingredient '+esc(i.name.split(' (')[0])+'\')">💬 Ask Ally</span></div>';
+    return '<div class="ritem">'+head+body+'</div>';}).join('');}
+function refEmerg(q){var c=REF.emergency_cards||{};var out='';
+  ['CARD_A','CARD_V','CARD_VC'].forEach(function(k){var card=c[k];if(!card||!refMatch((card.code||'')+' '+(card.title||''),q))return;
+    var open=refSel===k;
+    var head='<div class="rh" onclick="refToggle(\''+k+'\')"><span><span class="rt">'+esc(card.code)+'</span> <span class="rs">'+esc(card.title)+'</span></span><span class="rtag avoid">CARD</span></div>';
+    if(!open){out+='<div class="ritem" style="border-color:#5a2a22">'+head+'</div>';return;}
+    var b='<div class="rbody">';
+    if(card.recognize)b+=refList('Recognize',card.recognize);
+    if(card.recognize_early)b+=refList('Early signs',card.recognize_early);
+    if(card.recognize_late)b+=refList('Late signs',card.recognize_late);
+    if(card.act_first)b+='<div class="flag crit" style="margin:8px 0"><b>ACT FIRST</b>'+esc(card.act_first)+'</div>';
+    if(card.act)b+=refList('Act',card.act);
+    if(card.concurrent)b+=refList('Concurrent actions',card.concurrent);
+    if(card.call_ems)b+='<div class="flag crit" style="margin:8px 0"><b>EMS</b>'+esc(card.call_ems)+'</div>';
+    if(card.escalate_911)b+=refList('Escalate — call 911',card.escalate_911);
+    if(card.secondary_meds)b+=refList('Secondary meds (after EPI + 911)',card.secondary_meds);
+    if(card.vs_anaphylaxis)b+='<div class="rsec">Vasovagal vs anaphylaxis</div><div class="rli">'+esc(card.vs_anaphylaxis)+'</div>';
+    if(card.prevent)b+=refList('Prevent',card.prevent);
+    if(card.when)b+='<div class="rsec">When to run</div>'+card.when.map(function(w){return '<div class="rli">• '+esc(w.dose)+' → '+esc(w.action)+'</div>';}).join('');
+    if(card.nine_questions)b+='<div class="rsec">9-question verbal screen</div>'+card.nine_questions.map(function(qq,n){return '<div class="rli">'+(n+1)+'. '+esc(qq.q)+' <span style="color:var(--gold)">→ '+esc(qq.if_yes)+'</span></div>';}).join('');
+    if(card.post_event)b+=(typeof card.post_event==='string'?'<div class="rsec">Post-event</div><div class="rli">'+esc(card.post_event)+'</div>':refList('Post-event',card.post_event));
+    if(card.citations)b+='<div class="rli" style="color:var(--muted);margin-top:6px">'+esc(card.citations)+'</div>';
+    b+='</div>';
+    out+='<div class="ritem" style="border-color:#5a2a22">'+head+b+'</div>';});
+  if((REF.emergency_cart||[]).length&&refMatch('emergency cart',q))out+='<div class="rsec">Emergency cart (verify daily)</div>'+(REF.emergency_cart||[]).map(function(x){return '<div class="rli">☐ '+esc(x)+'</div>';}).join('');
+  return out||'<div class="empty">No match.</div>';}
+function refBench(q){var b=REF.quick_reference;if(!b)return '<div class="empty">No bench sheet loaded.</div>';
+  var out='<div style="font-size:.74rem;color:var(--muted);margin-bottom:8px">'+esc(b.purpose||'')+'</div>';
+  out+='<div class="rsec">Defaults</div><div class="rli">'+esc(b.defaults||'')+'</div>';
+  out+='<div class="rsec">Base fluids</div>'+(b.base_fluids||[]).filter(function(x){return refMatch(x.name+' '+x.note,q);}).map(function(x){return '<div class="rli">• <b>'+esc(x.name)+'</b> — '+esc(x.note)+'</div>';}).join('');
+  out+='<div class="rsec">Ingredients</div>'+(b.ingredients||[]).filter(function(x){return refMatch(x.name+' '+x.gate,q);}).map(function(x){return '<div class="ritem"><div class="rh" style="cursor:default"><span class="rt" style="font-size:.78rem">'+esc(x.name)+'</span><span class="rtag '+(x.tier||'green')+'">'+esc(x.tier||'')+'</span></div><div class="rbody" style="border-top:none;padding-top:2px"><div class="row"><span class="k">Route</span><span>'+esc(x.route)+'</span></div><div class="row"><span class="k">Dose</span><span>'+esc(x.dose)+'</span></div><div class="row"><span class="k">Ceiling</span><span>'+esc(x.ceiling)+'</span></div><div class="row"><span class="k">Gate</span><span>'+esc(x.gate)+'</span></div></div></div>';}).join('');
+  out+='<div class="rsec">Emergency / PRN meds (not wellness add-ons)</div>'+(b.prn_meds||[]).filter(function(x){return refMatch(x.name+' '+x.use,q);}).map(function(x){return '<div class="rli">• <b>'+esc(x.name)+'</b> ('+esc(x.use)+') — '+esc(x.route)+' · '+esc(x.dose)+' <span style="color:var(--gold)">⚠ '+esc(x.warning)+'</span></div>';}).join('');
+  return out;}
+
+// ---------- ASK ALLY (chat drawer · PHI-free, grounded in the locked module) ----------
+function allyOpen(){document.getElementById('allyDrawer').classList.add('show');
+  var log=document.getElementById('allyLog');
+  if(log&&!log.children.length){ // fresh open OR after a reload — rebuild from saved history
+    allyAppend('sys','Ally answers from the locked IV/IM library — evidence-graded, no invented doses or citations. It sees the bench + chair builds by number (bag contents only, never names). Defer the final call & signature to the provider.');
+    ALLY_HIST.forEach(function(m){allyAppend(m.role==='user'?'u':'a',m.role==='user'?m.content.replace(/\n\n\[[\s\S]*\]$/,''):m.content);});
+  }
+  allyUpdateCtx();document.getElementById('allyInput').focus();}
+function allyAskChair(i){var c=CHAIRS[i];allyOpen();var inp=document.getElementById('allyInput');if(inp&&c){inp.value='For Chair '+(i+1)+' ('+c.protoLabel+'): ';inp.focus();}}
+function allyClose(){document.getElementById('allyDrawer').classList.remove('show');}
+function bagDesc(b){var items=(b.items||[]).map(function(it){return it.name+(it.dose?(' '+it.dose):'');}).join('; ');return b.base+' '+b.vol+' mL / '+b.time+' min — '+(items||'no additives yet');}
+function floorParts(){var parts=[];
+  if(PREP){var an=analyzePrep();var al=an.flags.filter(function(f){return f.l==='crit'||f.l==='warn';}).map(function(f){return f.t;}).join('; ');parts.push('Prep bench: '+bagDesc(PREP)+(al?(' [active alerts: '+al+']'):''));}
+  CHAIRS.forEach(function(c,i){if(c)parts.push('Chair '+(i+1)+' ('+c.protoLabel+', '+c.state+'): '+bagDesc({base:c.base,vol:c.vol,time:c.time,items:c.bag}));});
+  return parts;}
+function allyUpdateCtx(){var el=document.getElementById('allyCtx');if(!el)return;var n=floorParts().length;var base=n?('Ally can see '+n+' active build'+(n>1?'s':'')+' (bench + chairs by number) — bag contents only, never names or DOB.'):'Grounded in the locked IV/IM module. PHI-free — no patient identity is ever sent.';
+  if(IS_DEMO&&!demoLeadOk())base='🧪 Demo · '+Math.max(0,ALLY_CAP-ALLY_USED)+' free Ally questions left. '+base;
+  el.textContent=base;}
+// email capture — the demo's only gate (Ally API cap) doubles as the lead engine
+function captureEmail(context){var saved='';try{saved=localStorage.getItem('allyos_lead')||'';}catch(e){}
+  var h='<button class="x" onclick="closeModal()">×</button><h3>🔓 Keep going with Ally</h3>'+
+    '<div class="sub">You\'ve used your '+ALLY_CAP+' free demo questions. Drop your email to keep chatting with Ally — we\'ll send a quick setup walkthrough too. No spam, PHI-free.</div>'+
+    '<div class="frow"><div><label>Work email</label><input id="leadEmail" type="email" placeholder="you@clinic.com" value="'+esc(saved)+'"></div></div>'+
+    '<div class="frow"><div><label>Clinic (optional)</label><input id="leadClinic" placeholder="Clinic name"></div><div><label>Role (optional)</label><input id="leadRole" placeholder="MD / NP / RN / Owner"></div></div>'+
+    '<button class="btn neon" style="width:100%;margin-top:10px" onclick="submitLead(\''+esc(context)+'\')">Unlock more Ally →</button>'+
+    '<div class="muted" style="font-size:.7rem;text-align:center;margin-top:8px">We only use this to help set up your AllyOS.</div>';
+  showModal(h);}
+// pilot feedback — straight to the AllyOS team (no PHI)
+function openFeedback(){var ses=(window.AllyOSAuth&&AllyOSAuth.session())||{};
+  var h='<button class="x" onclick="closeModal()">×</button><h3>💬 Send feedback</h3><div class="sub">Bug, rough edge, or an idea? It goes straight to the AllyOS team — exactly how we fine-tune. Please, no patient identifiers.</div>'+
+    '<textarea id="fbMsg" rows="4" placeholder="What happened / what would make this better?" style="width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:10px;color:var(--ink);font-family:inherit;font-size:.9rem"></textarea>'+
+    '<div class="frow" style="margin-top:8px"><div><label>Your email (optional)</label><input id="fbEmail" type="email" value="'+esc(ses.email||'')+'" placeholder="so we can follow up"></div></div>'+
+    '<button class="btn neon" style="width:100%;margin-top:10px" onclick="submitFeedback()">Send feedback →</button>';
+  showModal(h);}
+function submitFeedback(){var m=(val('fbMsg')||'').trim();if(!m){alert('Add a quick note first.');return;}
+  var ses=(window.AllyOSAuth&&AllyOSAuth.session())||{};
+  var body='form-name=allyos-leads&context=pilot-feedback&email='+encodeURIComponent(val('fbEmail')||ses.email||'')+'&clinic='+encodeURIComponent(ses.clinic||'')+'&role='+encodeURIComponent(ses.credential||ses.role||'')+'&message='+encodeURIComponent(m);
+  fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body}).catch(function(){});
+  showModal('<button class="x" onclick="closeModal()">×</button><h3 style="color:var(--teal)">✓ Sent — thank you</h3><div class="sub">Your feedback reached the AllyOS team. This is exactly how we make it better.</div><button class="btn neon" style="width:100%" onclick="closeModal()">Close</button>');}
+function submitLead(context){var e=(val('leadEmail')||'').trim();if(!/.+@.+\..+/.test(e)){alert('Please enter a valid work email.');return;}
+  var body='form-name=allyos-leads&email='+encodeURIComponent(e)+'&clinic='+encodeURIComponent(val('leadClinic')||'')+'&role='+encodeURIComponent(val('leadRole')||'')+'&context='+encodeURIComponent(context||'');
+  fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body}).catch(function(){});
+  try{localStorage.setItem('allyos_lead',e);}catch(_){}
+  ALLY_USED=0;allyUpdateCtx();
+  showModal('<button class="x" onclick="closeModal()">×</button><h3 style="color:var(--teal)">✓ You\'re in</h3><div class="sub">Thanks — keep exploring with Ally. We\'ll reach out about getting AllyOS set up for your clinic.</div><button class="btn neon" style="width:100%" onclick="closeModal();allyOpen()">Back to Ally</button>');}
+function allyCtx(){var parts=floorParts();if(!parts.length)return '';return 'PHI-FREE floor snapshot (clinical builds only — NO patient names, DOB, or identifiers): '+parts.join(' | ');}
+function allyAppend(cls,txt){var log=document.getElementById('allyLog');var d=document.createElement('div');d.className='amsg '+cls;d.textContent=txt;log.appendChild(d);log.scrollTop=log.scrollHeight;return d;}
+function allySend(){var inp=document.getElementById('allyInput');var q=(inp.value||'').trim();if(!q)return;
+  // demo: the ONLY hard limit — cap Ally API calls, then capture email to continue
+  if(IS_DEMO && !demoLeadOk() && ALLY_USED>=ALLY_CAP){captureEmail('ally-cap');return;}
+  inp.value='';
+  var ctx=allyCtx();ALLY_HIST.push({role:'user',content:ctx?(q+'\n\n['+ctx+']'):q});save();
+  allyAppend('u',q);var bubble=allyAppend('a','…');if(IS_DEMO)ALLY_USED++;allyUpdateCtx();
+  fetch('/.netlify/functions/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:ALLY_HIST.slice(-8)})})
+   .then(function(r){return r.json();}).then(function(d){var t=d.text||(d.error==='not_configured'?'Ally isn\'t configured on this deploy yet (no API key).':(d.error||'No response.'));bubble.textContent=t;if(d.text){ALLY_HIST.push({role:'assistant',content:d.text});save();}var log=document.getElementById('allyLog');log.scrollTop=log.scrollHeight;})
+   .catch(function(e){bubble.textContent='Ally unreachable — '+e.message;});}
+
+// ---------- DEMO COACH GUIDE (non-blocking, step-by-step, highlights the area) ----------
+var TOUR=[
+ {sel:'#queue',t:'👈 Start here. Click a waiting patient — try <b>Emily R.</b> (she reads <b style="color:var(--green)">READY</b>).'},
+ {sel:'#detail',t:'On the right, choose <b>🧪 Pre-made protocol</b> (or à-la-carte), then <b>Prepare on the bench →</b>.'},
+ {sel:'#prep',t:'This is the compounding bench. <b>Ally screens every additive live</b> — clear any flag, then <b>▶ Send to chair</b>.'},
+ {sel:'#chairs',t:'On the chair, hit <b>▶ Start</b> (pre-vitals). Then tap the <b>⏩</b> button to fast-forward and hear the <b>🟠 orange / 🔴 red alarms</b>.'},
+ {sel:'#chairs',t:'When it ends, <b>Discharge</b> → it auto-builds a <b>signed infusion note</b> + a <b>patient aftercare handout</b>. That\'s the whole loop! 🎉'}
+];
+var tStep=0,tEl=null;
+function clearHi(){if(tEl){tEl.classList.remove('tourhi');tEl=null;}}
+function showTour(){var g=document.getElementById('demoGuide');if(!g)return;tStep=Math.max(0,Math.min(tStep,TOUR.length-1));var s=TOUR[tStep];clearHi();tEl=document.querySelector(s.sel);if(tEl){tEl.classList.add('tourhi');tEl.scrollIntoView({behavior:'smooth',block:'center'});}
+  g.style.display='block';
+  g.innerHTML='<div class="gh"><b>📋 Demo guide</b><span class="gstep">'+(tStep+1)+' / '+TOUR.length+'</span></div><p>'+s.t+'</p>'+
+    '<div class="gbtns">'+(tStep<TOUR.length-1?'<button class="btn neon" style="flex:1" onclick="tourNext()">Next →</button>':'<button class="btn neon-green" style="flex:1" onclick="tourDone()">Got it ✓</button>')+'<button class="btn ghost" onclick="tourDone()">Skip</button></div>';}
+function tourNext(){tStep++;showTour();}
+function tourDone(){clearHi();var g=document.getElementById('demoGuide');if(g)g.style.display='none';try{sessionStorage.setItem('allyos_demo_tour','1');}catch(e){}}
+function tourOpen(){tStep=0;showTour();}
+
+// ---------- utils ----------
+function showModal(h){document.getElementById('modal').className='modal';document.getElementById('modal').innerHTML=h;document.getElementById('overlay').classList.add('show');}
+function showModalEm(h){document.getElementById('modal').className='modal em';document.getElementById('modal').innerHTML=h;document.getElementById('overlay').classList.add('show');}
+function closeModal(){document.getElementById('overlay').classList.remove('show');}
+function sel(a,b){return a==b?' selected':'';}
+function val(id){var e=document.getElementById(id);return e?e.value:'';}
+// blood-pressure input mask → forces the "xx/xx" shape (digits + a single slash)
+function bpMask(el){var raw=el.value;
+  if(raw.indexOf('/')>=0){var p=raw.split('/');el.value=p[0].replace(/\D/g,'').slice(0,3)+'/'+p.slice(1).join('').replace(/\D/g,'').slice(0,3);return;}
+  var d=raw.replace(/\D/g,'').slice(0,6);el.value=d.length>3?(d.slice(0,3)+'/'+d.slice(3)):d;}
+function initials(n){return (n||'').split(' ').map(function(x){return x[0];}).join('').toUpperCase()+' ('+(n||'').split(' ')[0]+')';}
+function beep(ms,f){try{var a=new(window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=f;o.start();g.gain.setValueAtTime(.22,a.currentTime);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+ms/1000);o.stop(a.currentTime+ms/1000);}catch(e){}}
+function fmt(s){s=Math.max(0,s|0);var m=Math.floor(s/60),x=s%60;return (m<10?'0':'')+m+':'+(x<10?'0':'')+x;}
+function fmtClock(d){var h=d.getHours(),m=d.getMinutes(),ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+(m<10?'0':'')+m+' '+ap;}
+function parseGrams(s){if(!s)return null;s=(''+s).toLowerCase();var m=s.match(/([\d.]+)\s*(g|mg|mcg)/);if(!m)return null;var v=parseFloat(m[1]);if(m[2]==='mg')v/=1000;if(m[2]==='mcg')v/=1000000;return v;}
+function parseTimeMin(s){if(!s)return null;s=(''+s).toLowerCase();var h=s.match(/([\d.]+)\s*(?:–|-|to)?\s*([\d.]+)?\s*hr/);if(h)return Math.round((parseFloat(h[1])||0)*60);var m=s.match(/([\d.]+)\s*(?:–|-|to)?\s*([\d.]+)?\s*min/);if(m)return Math.round(parseFloat(m[1])||0);return null;}
+function esc(s){return(''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+<script src="allyos-help.js"></script>
+</body></html>

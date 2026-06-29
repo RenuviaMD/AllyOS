@@ -1,0 +1,15 @@
+{
+  "name": "AllyOS Chairside — RenuviaMD®",
+  "short_name": "AllyOS",
+  "description": "AllyOS Chairside — the honest IV/IM clinical operating system. PHI-free, advisory clinical decision-support for licensed providers.",
+  "start_url": "chairside.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#060a12",
+  "theme_color": "#060a12",
+  "icons": [
+    { "src": "ally-avatar-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "ally-avatar.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

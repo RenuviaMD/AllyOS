@@ -1,0 +1,173 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IV/IM Inventory — AllyOS · RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png"><link rel="apple-touch-icon" href="ally-avatar-180.png"><meta name="theme-color" content="#060a12">
+<style>
+:root{--navy:#102a30;--teal:#0e8a8a;--gold:#c9870a;--ink:#1c2b32;--muted:#5b6b72;--line:#e3ecea;--soft:#f3f8f7;--amber:#b9770a;--red:#c0392b;--green:#1e7d57}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#eef4f3}
+header{background:linear-gradient(150deg,#0e3a40,#0e8a8a);color:#fff;padding:14px 20px}
+.brand{font-weight:800}.brand span{color:#ffd98a}
+header h1{font-size:1.1rem;font-family:Georgia,serif;margin-top:2px}
+header .sub{font-size:.74rem;color:#d4ece9;max-width:920px}
+header a{color:#fff;text-decoration:underline;font-size:.74rem}
+.wrap{max-width:1240px;margin:0 auto;padding:16px}
+.legend{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:.78rem;color:var(--muted);margin-bottom:14px;line-height:1.5}
+.legend b{color:var(--navy)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:11px;padding:14px;text-align:center}
+.stat b{display:block;font-size:1.6rem;color:var(--navy)}.stat span{font-size:.7rem;color:var(--muted)}
+.stat.low b{color:var(--amber)}.stat.out b{color:var(--red)}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.toolbar input.search{flex:1;min-width:200px;border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-size:.88rem}
+.btn{border:none;border-radius:9px;padding:9px 14px;font-weight:700;font-size:.82rem;cursor:pointer}
+.btn.p{background:var(--teal);color:#fff}.btn.g{background:#fff;border:1px solid var(--line);color:var(--teal)}
+.alert{background:#fdecec;border:1px solid #f3b6b0;color:#7a2018;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:.82rem;display:none}
+.alert.show{display:block}
+.cat h3{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:14px 0 6px}
+table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:11px;overflow:hidden}
+th{font-size:.64rem;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);text-align:left;padding:9px 8px;background:#f8fbfb;border-bottom:1px solid var(--line)}
+td{padding:7px 8px;font-size:.82rem;border-bottom:1px solid var(--soft);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr.low{background:#fdf4e3}tr.out{background:#fdecec}
+.agent{font-weight:600;color:var(--ink)}
+.agent .ci{font-size:.66rem;color:var(--muted);font-weight:400}
+.agent .info{cursor:help;color:var(--teal);font-size:.7rem;margin-left:4px}
+td input{width:100%;border:1px solid var(--line);border-radius:6px;padding:5px 6px;font-size:.8rem}
+td.num input{text-align:right}
+.stock{display:flex;align-items:center;gap:5px}
+.stock button{border:none;background:#e6eeed;color:var(--navy);border-radius:6px;width:24px;height:24px;font-weight:800;cursor:pointer}
+.stock .v{min-width:26px;text-align:center;font-weight:700}
+.badge{font-size:.64rem;border-radius:8px;padding:2px 7px;font-weight:700}
+.badge.ok{background:#e7f5ee;color:var(--green)}.badge.low{background:#fdf4e3;color:var(--amber)}.badge.out{background:#fdecec;color:var(--red)}
+.custom{font-size:.6rem;background:#eef6f5;color:var(--teal);border-radius:6px;padding:1px 5px;margin-left:4px}
+.rm{border:none;background:#f1dede;color:var(--red);border-radius:6px;width:24px;height:24px;font-weight:800;cursor:pointer}
+.disc{font-size:.68rem;color:var(--muted);margin-top:16px;line-height:1.45}
+.saved{font-size:.72rem;color:var(--green);margin-left:8px}
+</style></head>
+<body>
+<header><div class="brand">Renuvia<span>MD</span>® · AllyOS</div><h1>IV / IM Inventory</h1>
+<div class="sub">AllyOS keeps the <b>clinical</b> data generic and locked (agent · dose · route · safety). Your clinic owns the <b>commercial</b> data — add or edit SKU, supplier, vial size, cost, and stock here. Nothing on this page changes the locked clinical module or AllyOS's guardrails. &nbsp; <a href="iv-builder.html">→ Stack builder</a> &nbsp; <a href="iv-calculator.html">→ Calculator</a></div></header>
+<div class="wrap">
+
+  <div class="legend"><b>Generic ↔ your product:</b> each row is a generic AllyOS agent. The <b>Agent</b> column (and its clinical safety data) is read-only and shared across all clinics. The <b>SKU / Supplier / Size / Cost / Stock / Par</b> columns are yours to set — map each agent to whatever product and pharmacy you actually stock. AllyOS names no pharmacy; that choice is yours. Saved to this browser only (no PHI, no server).</div>
+
+  <div class="stats">
+    <div class="stat"><b id="sTotal">0</b><span>Items mapped</span></div>
+    <div class="stat"><b id="sIn">0</b><span>In stock</span></div>
+    <div class="stat low"><b id="sLow">0</b><span>At / below par</span></div>
+    <div class="stat out"><b id="sOut">0</b><span>Out of stock</span></div>
+  </div>
+
+  <div class="alert" id="alert"></div>
+
+  <div class="toolbar">
+    <input class="search" id="search" placeholder="Search agents…" oninput="render()">
+    <button class="btn g" onclick="addCustom()">+ Add custom item</button>
+    <button class="btn g" onclick="exportCSV()">⬇ Export CSV</button>
+    <button class="btn g" onclick="exportJSON()">⬇ Export JSON</button>
+    <label class="btn g" style="cursor:pointer">⬆ Import JSON<input type="file" accept=".json,application/json" style="display:none" onchange="importJSON(event)"></label>
+    <button class="btn p" onclick="save(true)">💾 Save</button>
+    <span class="saved" id="saved"></span>
+  </div>
+
+  <div id="rows"><div style="color:var(--muted);padding:20px">Loading master menu…</div></div>
+
+  <div class="disc">Inventory and sourcing are the clinic/provider's responsibility. AllyOS provides the generic clinical palette and safety logic only; it does not direct, endorse, or verify any pharmacy, outsourcing facility, SKU, or price. <b>Cost is a cost-of-goods reference for reorder and margin awareness only — AllyOS handles no billing, invoicing, or payments. Export (CSV/JSON) into your practice-management software for the financial side.</b> Verify all products against the actual label. © 2026 RenuviaMD® Compliance Division.</div>
+</div>
+<script src="allyos-auth.js"></script>
+<script>
+var MENU=[], INV={}, CUSTOM=[], KEY='allyos_iv_inventory_v1';
+if(window.AllyOSAuth){ AllyOSAuth.guard(['admin','provider']); }
+
+fetch('../protocols/iv-module.json').then(function(r){return r.json()}).then(function(d){
+  MENU=(d.ingredients||[]);
+  load(); render();
+}).catch(function(e){ document.getElementById('rows').innerHTML='<div style="color:var(--red);padding:20px">Could not load the IV module ('+e.message+').</div>'; });
+
+function load(){ try{var s=JSON.parse(localStorage.getItem(KEY)||'{}');INV=s.inv||{};CUSTOM=s.custom||[];}catch(e){INV={};CUSTOM=[];} }
+function save(flash){ localStorage.setItem(KEY,JSON.stringify({inv:INV,custom:CUSTOM})); if(flash){var el=document.getElementById('saved');el.textContent='✓ saved';setTimeout(function(){el.textContent='';},1500);} }
+
+function rec(id){ if(!INV[id])INV[id]={sku:'',supplier:'',size:'',cost:'',stock:0,par:2}; return INV[id]; }
+function catOf(ing){var id=ing.id||'';
+  if(id==='ING_NS'||id==='ING_LR')return'Base fluids';
+  if(/B12|VITACOMPLEX|VITC|BIOTIN|ING_B5|ING_B6|VITD3/i.test(id))return'Vitamins';
+  if(/MGCL|CAGLUC|CACL|ZINC|SELENIUM|TRACE|MINERALBLEND/i.test(id))return'Minerals & electrolytes';
+  if(/LYSINE|TAURINE|CARNITINE|GLUTAMINE|AMINOBLEND|ARGININE|PROLINE|GLYCINE/i.test(id))return'Amino acids';
+  if(/GLUTATHIONE|NAD|ING_ALA|NAC|TRIIMMUNE|METHYLENE|COQ10/i.test(id))return'Antioxidants & specialty';
+  if(/LIPOTROPIC|MICC/i.test(id))return'Lipotropic / metabolic';
+  if(/ONDANSETRON|KETOROLAC|FAMOTIDINE/i.test(id))return'Rx & administration adjuncts';
+  return'Other';}
+var CAT_ORDER=['Base fluids','Vitamins','Minerals & electrolytes','Amino acids','Antioxidants & specialty','Lipotropic / metabolic','Rx & administration adjuncts','Custom items','Other'];
+
+function allItems(){
+  var items=MENU.map(function(ing){return {id:ing.id,name:ing.name,clin:clinInfo(ing),cat:catOf(ing),custom:false};});
+  CUSTOM.forEach(function(c){items.push({id:c.id,name:c.name,clin:'',cat:'Custom items',custom:true});});
+  return items;
+}
+function clinInfo(ing){var p=[];if(ing.standard)p.push('dose '+ing.standard);if(ing.route)p.push(ing.route);if(ing.ceiling)p.push('ceiling '+ing.ceiling);var g=ing.guardrail?(' · ⚠ '+ing.guardrail):'';return p.join(' · ')+g;}
+
+function statusBadge(r){var s=+r.stock||0,par=+r.par||0;if(s<=0)return'<span class="badge out">OUT</span>';if(s<=par)return'<span class="badge low">LOW</span>';return'<span class="badge ok">OK</span>';}
+function rowClass(r){var s=+r.stock||0,par=+r.par||0;return s<=0?'out':(s<=par?'low':'');}
+
+function render(){
+  var q=(document.getElementById('search').value||'').toLowerCase();
+  var items=allItems().filter(function(it){return !q||it.name.toLowerCase().indexOf(q)>=0;});
+  var byCat={}; items.forEach(function(it){(byCat[it.cat]=byCat[it.cat]||[]).push(it);});
+  var html='';
+  CAT_ORDER.forEach(function(c){ if(!byCat[c])return;
+    html+='<div class="cat"><h3>'+c+'</h3><table><thead><tr><th style="width:24%">Agent</th><th style="width:13%">SKU</th><th style="width:14%">Supplier</th><th style="width:9%">Size</th><th style="width:9%">Cost $</th><th style="width:12%">Stock</th><th style="width:7%">Par</th><th style="width:7%">Status</th><th style="width:5%"></th></tr></thead><tbody>';
+    byCat[c].forEach(function(it){ var r=rec(it.id);
+      html+='<tr class="'+rowClass(r)+'"><td class="agent">'+esc(it.name)+(it.custom?'<span class="custom">custom</span>':'')+
+        (it.clin?('<span class="info" title="'+esc(it.clin)+'">ⓘ</span><div class="ci">'+esc(it.clin)+'</div>'):'')+'</td>'+
+        '<td><input value="'+esc(r.sku)+'" oninput="upd(\''+it.id+'\',\'sku\',this.value)" placeholder="your SKU"></td>'+
+        '<td><input value="'+esc(r.supplier)+'" oninput="upd(\''+it.id+'\',\'supplier\',this.value)" placeholder="supplier"></td>'+
+        '<td><input value="'+esc(r.size)+'" oninput="upd(\''+it.id+'\',\'size\',this.value)" placeholder="30mL"></td>'+
+        '<td class="num"><input type="number" step="0.01" value="'+esc(r.cost)+'" oninput="upd(\''+it.id+'\',\'cost\',this.value)" placeholder="0.00"></td>'+
+        '<td><div class="stock"><button onclick="adj(\''+it.id+'\',-1)">−</button><span class="v">'+(+r.stock||0)+'</span><button onclick="adj(\''+it.id+'\',1)">+</button></div></td>'+
+        '<td class="num"><input type="number" value="'+esc(r.par)+'" oninput="upd(\''+it.id+'\',\'par\',this.value)"></td>'+
+        '<td>'+statusBadge(r)+'</td>'+
+        '<td>'+(it.custom?'<button class="rm" onclick="rmCustom(\''+it.id+'\')">×</button>':'')+'</td></tr>';
+    });
+    html+='</tbody></table></div>';
+  });
+  document.getElementById('rows').innerHTML=html||'<div style="color:var(--muted);padding:20px">No match.</div>';
+  stats();
+}
+
+function upd(id,f,v){ rec(id)[f]=v; save(); if(f==='par')render(); else stats(); }
+function adj(id,d){ var r=rec(id); r.stock=Math.max(0,(+r.stock||0)+d); save(); render(); }
+function addCustom(){ var name=prompt('Custom item name (generic agent or product):'); if(!name)return; var id='CUSTOM_'+Date.now(); CUSTOM.push({id:id,name:name}); rec(id); save(); render(); }
+function rmCustom(id){ CUSTOM=CUSTOM.filter(function(c){return c.id!==id;}); delete INV[id]; save(); render(); }
+
+function stats(){
+  var items=allItems(),mapped=0,inS=0,low=0,out=0,lowNames=[];
+  items.forEach(function(it){var r=INV[it.id];if(!r)return; var s=+r.stock||0,par=+r.par||0;
+    if(r.sku||r.supplier||s>0)mapped++;
+    if(s<=0){out++;lowNames.push(it.name+' (out)');} else if(s<=par){low++;lowNames.push(it.name+' (low)');} else inS++;
+  });
+  document.getElementById('sTotal').textContent=mapped;
+  document.getElementById('sIn').textContent=inS;
+  document.getElementById('sLow').textContent=low;
+  document.getElementById('sOut').textContent=out;
+  var a=document.getElementById('alert');
+  if(low+out>0){a.className='alert show';a.textContent='⚠ '+(low+out)+' item(s) at/below par or out: '+lowNames.slice(0,6).join(', ')+(lowNames.length>6?'…':'');}
+  else a.className='alert';
+}
+// ---- import / export (bridge to practice-management software; AllyOS handles no billing/payments) ----
+function dl(name,content,type){var b=new Blob([content],{type:type}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
+function csvCell(v){v=''+(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function exportCSV(){
+  var rows=[['Agent','AgentID','Category','SKU','Supplier','Size','Cost','Stock','Par']];
+  allItems().forEach(function(it){var r=INV[it.id]||{};rows.push([it.name,it.id,it.cat,r.sku||'',r.supplier||'',r.size||'',r.cost||'',(+r.stock||0),(r.par==null?'':r.par)]);});
+  dl('allyos-iv-inventory.csv',rows.map(function(row){return row.map(csvCell).join(',');}).join('\n'),'text/csv');
+}
+function exportJSON(){ dl('allyos-iv-inventory.json',JSON.stringify({inv:INV,custom:CUSTOM},null,2),'application/json'); }
+function importJSON(ev){
+  var f=ev.target.files&&ev.target.files[0];if(!f)return;
+  var rd=new FileReader();
+  rd.onload=function(){try{var d=JSON.parse(rd.result);if(d.inv)INV=d.inv;if(d.custom)CUSTOM=d.custom;save();render();alert('Inventory imported.');}catch(e){alert('Could not parse file: '+e.message);}};
+  rd.readAsText(f);ev.target.value='';
+}
+function esc(s){return(''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+</script>
+</body></html>

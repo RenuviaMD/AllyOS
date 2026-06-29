@@ -1,0 +1,176 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AllyAuditPro — MD Cockpit · RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
+<link rel="stylesheet" href="allyos-theme.css">
+<script src="allyos-auth.js"></script>
+<script src="supabase-client.js"></script>
+<style>
+.wrap{max-width:1080px;margin:0 auto;padding:18px}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:4px}
+.top h1{font-family:var(--fdisp);font-size:1.4rem}.top h1 b{color:var(--gold)}
+.top .r{display:flex;gap:14px;align-items:center;font-size:.82rem;color:var(--muted)}.top .r a{color:var(--teal);text-decoration:none}
+.sub{color:var(--muted);font-size:.84rem;margin-bottom:16px;max-width:82ch}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+@media(max-width:760px){.stats{grid-template-columns:1fr 1fr}}
+.stat{background:linear-gradient(180deg,#10202f,#0b1622);border:1px solid var(--line);border-radius:12px;padding:14px}
+.stat .lbl{font-size:.64rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.stat .num{font-family:var(--fdisp);font-size:1.6rem;margin-top:3px}
+.stat.amber .num{color:var(--gold)}.stat.red .num{color:var(--red)}.stat.green .num{color:var(--green)}.stat.teal .num{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:.86rem}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:.66rem;text-transform:uppercase;letter-spacing:.04em;padding:9px 10px;border-bottom:1px solid var(--line2)}
+td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.025)}
+.cn{font-family:var(--fdisp);font-weight:600}.cc{color:var(--muted);font-size:.78rem}
+.pill{display:inline-block;font-size:.64rem;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.03em}
+.pill.pend{background:#2a1512;color:#f0a59d;border:1px solid #5a2a22}
+.pill.prog{background:#2a230e;color:var(--gold);border:1px solid #4a3c18}
+.pill.done{background:#0e2a1d;color:var(--green);border:1px solid #1c5238}
+.pill.none{background:#1a2733;color:var(--dim);border:1px solid var(--line2)}
+.btn-s{font-size:.74rem;padding:7px 12px;border-radius:8px;border:1px solid var(--line2);background:rgba(255,255,255,.04);color:var(--ink);cursor:pointer;font-family:inherit;text-decoration:none}
+.btn-s:hover{border-color:var(--teal)}.btn-s.go{border-color:var(--gold);color:var(--gold)}
+.add{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-top:18px;background:#0e1f29;border:1px solid var(--line);border-radius:12px;padding:14px}
+.add>div{flex:1;min-width:140px}
+.add label{display:block;font-size:.7rem;color:var(--muted);margin-bottom:3px}
+.add input{width:100%;background:#0b1622;border:1px solid var(--line);border-radius:8px;padding:9px 11px;color:var(--ink);font-family:inherit;font-size:.86rem}
+.btn{font-family:var(--fdisp);font-weight:600;border:none;border-radius:999px;padding:11px 18px;cursor:pointer;background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a}
+.disc{font-size:.72rem;color:var(--muted);margin-top:18px;line-height:1.6}
+.banner{background:rgba(231,184,78,.08);border:1px solid #5a4a22;border-radius:10px;padding:11px 14px;font-size:.8rem;color:var(--ink);margin-bottom:16px;line-height:1.5}
+.banner code{background:#06101a;border-radius:4px;padding:1px 5px}
+</style></head>
+<body class="allyos"><div class="wrap">
+  <div class="top">
+    <h1><b>Ally</b>AuditPro · <span style="color:var(--muted);font-weight:400">MD Cockpit</span></h1>
+    <div class="r"><span id="who"></span><a href="dashboard.html">Dashboard</a><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
+  </div>
+  <div class="sub">Every clinic you govern as Medical Director, in one place. Pick a clinic to run its monthly risk-based audit and sign the oversight report. <b>PHI-free</b> — de-identified encounters only.</div>
+
+  <div class="banner">🔌 <b>Manual sync (today):</b> each clinic exports its de-identified audit and you <b>Import</b> it here. When the PHI-free Supabase hub is wired, clinics' audits will appear here <b>automatically</b> — no import. <span class="cc">This cockpit is the front end for both.</span></div>
+
+  <div class="stats" id="stats"></div>
+  <div style="overflow:auto"><table id="tbl"></table></div>
+
+  <div class="add">
+    <div><label>Clinic name</label><input id="cName" placeholder="Lemus Natural Medicine"></div>
+    <div><label>City / state</label><input id="cCity" placeholder="Coral Gables, FL"></div>
+    <button class="btn" onclick="addClinic()">＋ Add clinic</button>
+  </div>
+
+  <div class="disc">Each clinic's de-identified audit lives under its own key on this device; selecting a clinic loads it into the audit tool. AllyOS holds no PHI — patient identity stays in each clinic's own records, linked by Encounter ID. © <span id="yr"></span> RenuviaMD® PLLC.</div>
+</div>
+<input type="file" id="impFile" accept="application/json" style="display:none">
+<script>
+document.getElementById('yr').textContent=new Date().getFullYear();
+var ses=null;
+if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin']);ses=AllyOSAuth.session();
+  if(ses&&!ses.mdAudit){document.documentElement.innerHTML='<body style="font-family:-apple-system,Segoe UI,Arial,sans-serif;background:#05080f;color:#eaf1f6;display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center;padding:24px"><div><h2>Medical-Director cockpit</h2><p style="color:#90a3b6;max-width:46ch">This is the Medical Director\'s multi-clinic oversight cockpit — not a clinic feature.</p><p style="margin-top:14px"><a style="color:#2ee6d6" href="dashboard.html">← Dashboard</a></p></div></body>';}
+  else if(ses)document.getElementById('who').textContent=AllyOSAuth.greeting();}
+
+var CKEY='allyos_md_clinics_v1';
+function slug(n){return (n||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,32)||('c'+Math.floor(Math.random()*1e6));}
+function loadClinics(){try{var c=JSON.parse(localStorage.getItem(CKEY)||'null');if(c&&c.length)return c;}catch(e){}
+  // seed from the active pilot if present, else Lemus
+  return [{id:'lemus-natural-medicine',name:'Lemus Natural Medicine',city:'Coral Gables, FL'}];}
+function saveClinics(c){try{localStorage.setItem(CKEY,JSON.stringify(c));}catch(e){}}
+function auditData(id){try{return JSON.parse(localStorage.getItem('allyos_audit::'+id)||'[]');}catch(e){return [];}}
+function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function monthLabel(ym){return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][(+ym.slice(4))-1]+' '+ym.slice(0,4);}
+
+function clinicStatus(id){
+  var a=auditData(id);
+  if(!a.length)return {ym:null,enc:0,mand:0,audited:0,corr:0,state:'none',label:'No data yet'};
+  var ym=a.map(function(r){return r.ym;}).sort().reverse()[0];           // latest month present
+  var m=a.filter(function(r){return r.ym===ym;});
+  var mand=m.filter(function(r){return r.ae||r.suspended||r.override;}).length;
+  var audited=m.filter(function(r){return r.audited;}).length;
+  var corr=m.filter(function(r){return r.audited&&r.auditPass===false;}).length;
+  var state= audited===0?'pend':(audited< Math.min(5,m.length)||corr? 'prog':'done');
+  var label= state==='pend'?'Pending review':state==='prog'?'In progress':'Reviewed';
+  return {ym:ym,enc:m.length,mand:mand,audited:audited,corr:corr,state:state,label:label};
+}
+
+function render(){
+  var cl=loadClinics();
+  var pend=0,corrTot=0;
+  var rows=cl.map(function(c){var s=clinicStatus(c.id);if(s.state==='pend'||s.state==='prog')pend++;corrTot+=s.corr;
+    var pillCls=s.state==='pend'?'pend':s.state==='prog'?'prog':s.state==='done'?'done':'none';
+    return '<tr>'+
+      '<td><div class="cn">'+esc(c.name)+'</div><div class="cc">'+esc(c.city||'')+'</div></td>'+
+      '<td>'+(s.ym?monthLabel(s.ym):'—')+'</td>'+
+      '<td>'+s.enc+'</td>'+
+      '<td>'+(s.mand?'<b style="color:var(--red)">'+s.mand+'</b>':'0')+'</td>'+
+      '<td>'+s.audited+' / '+Math.min(5,s.enc||0)+'</td>'+
+      '<td><span class="pill '+pillCls+'">'+esc(s.label)+'</span>'+(s.corr?' <span class="cc">'+s.corr+' corr</span>':'')+'</td>'+
+      '<td style="text-align:right;white-space:nowrap">'+
+        '<a class="btn-s go" href="#" onclick="openAudit(\''+c.id+'\',\''+esc(c.name).replace(/\x27/g,"")+'\');return false">Audit →</a> '+
+        '<button class="btn-s" onclick="importFor(\''+c.id+'\')">Import</button> '+
+        '<button class="btn-s" onclick="removeClinic(\''+c.id+'\')">×</button></td></tr>';
+  }).join('');
+  document.getElementById('tbl').innerHTML='<tr><th>Clinic</th><th>Month</th><th>Encounters</th><th>Mandatory</th><th>Reviewed</th><th>Status</th><th></th></tr>'+(rows||'<tr><td colspan="7" class="cc" style="padding:18px">No clinics yet — add one below.</td></tr>');
+  document.getElementById('stats').innerHTML=
+    stat('teal','Clinics',cl.length)+
+    stat(pend?'amber':'green','Need review',pend)+
+    stat(corrTot?'red':'green','Corrections open',corrTot)+
+    stat('','Period','monthly');
+}
+function stat(cls,lbl,n){return '<div class="stat '+cls+'"><div class="lbl">'+lbl+'</div><div class="num">'+n+'</div></div>';}
+
+function openAudit(id,name){
+  try{localStorage.setItem('allyos_active_clinic',JSON.stringify({id:id,name:name}));}catch(e){}
+  location.href='audit.html';
+}
+function addClinic(){var n=document.getElementById('cName').value.trim();if(!n)return;
+  var cl=loadClinics();var id=slug(n);if(cl.some(function(c){return c.id===id;}))id=id+'-'+Math.floor(Math.random()*900+100);
+  cl.push({id:id,name:n,city:document.getElementById('cCity').value.trim()});saveClinics(cl);
+  document.getElementById('cName').value='';document.getElementById('cCity').value='';render();}
+function removeClinic(id){if(!confirm('Remove this clinic from your cockpit? Its imported audit data on this device is also cleared.'))return;
+  var cl=loadClinics().filter(function(c){return c.id!==id;});saveClinics(cl);
+  try{localStorage.removeItem('allyos_audit::'+id);localStorage.removeItem('allyos_audit_denom::'+id);}catch(e){}render();}
+
+// import a clinic's de-identified audit export (JSON the clinic sends)
+var importTarget=null;
+document.getElementById('impFile').addEventListener('change',function(e){var f=e.target.files[0];if(!f||!importTarget)return;
+  var r=new FileReader();r.onload=function(){try{var j=JSON.parse(r.result);
+    var recs=Array.isArray(j)?j:(j.data||j.encounters||[]);
+    if(!Array.isArray(recs))throw 0;
+    localStorage.setItem('allyos_audit::'+importTarget,JSON.stringify(recs));
+    if(j.denom)localStorage.setItem('allyos_audit_denom::'+importTarget,JSON.stringify(j.denom));
+    alert('Imported '+recs.length+' encounter(s).');render();
+  }catch(err){alert('That is not a valid AllyOS audit export.');}
+  e.target.value='';importTarget=null;};r.readAsText(f);});
+function importFor(id){importTarget=id;document.getElementById('impFile').click();}
+
+// ---- live cloud overlay (PHI-free): when signed into the AllyOS hub, pull clinics + de-identified summaries ----
+function ymNow(){var d=new Date();return ''+d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2);}
+function renderCloud(){
+  if(!window.AllyOSCloud)return;
+  var banner=document.querySelector('.banner');
+  AllyOSCloud.ready.then(function(ok){ if(!ok)return;
+    AllyOSCloud.user().then(function(u){
+      if(!u){ if(banner)banner.innerHTML='🔌 <b>Cloud sync available.</b> <a href="login.html" style="color:var(--teal)">Sign in</a> to see your clinics\' de-identified audits here automatically — no import. <span class="cc">Until then this cockpit shows locally imported data.</span>'; return; }
+      AllyOSCloud.clinicSummaries(ymNow()).then(function(list){
+        if(banner)banner.innerHTML='☁ <b style="color:var(--green)">Live cloud sync active</b> — clinics &amp; de-identified audits below are pulled from the AllyOS hub in real time (signed in as '+esc(u.email)+'). <span class="cc">PHI never leaves the clinic.</span>';
+        if(!list||!list.length){return;}
+        var pend=0,corrTot=0;
+        var rows=list.map(function(s){var c=s.clinic;var rev=s.audited,need=Math.min(5,s.encounters||0);
+          var state=rev===0&&s.encounters? 'pend':(rev<need||s.corrections?'prog':(s.encounters?'done':'none'));
+          if(state==='pend'||state==='prog')pend++;corrTot+=s.corrections;
+          var lbl=state==='pend'?'Pending review':state==='prog'?'In progress':state==='done'?'Reviewed':'No data yet';
+          var pc=state==='pend'?'pend':state==='prog'?'prog':state==='done'?'done':'none';
+          return '<tr><td><div class="cn">'+esc(c.name)+' <span class="cc">☁</span></div><div class="cc">'+esc(c.city_state||'')+'</div></td>'+
+            '<td>'+monthLabel(ymNow())+'</td><td>'+s.encounters+'</td>'+
+            '<td>'+(s.mandatory?'<b style="color:var(--red)">'+s.mandatory+'</b>':'0')+'</td>'+
+            '<td>'+rev+' / '+need+'</td>'+
+            '<td><span class="pill '+pc+'">'+lbl+'</span>'+(s.corrections?' <span class="cc">'+s.corrections+' corr</span>':'')+'</td>'+
+            '<td style="text-align:right;white-space:nowrap"><a class="btn-s go" href="#" onclick="openCloudAudit(\''+c.id+'\',\''+esc(c.name).replace(/\x27/g,"")+'\');return false">Audit →</a></td></tr>';
+        }).join('');
+        document.getElementById('tbl').innerHTML='<tr><th>Clinic</th><th>Month</th><th>Encounters</th><th>Mandatory</th><th>Reviewed</th><th>Status</th><th></th></tr>'+rows;
+        document.getElementById('stats').innerHTML=stat('teal','Clinics',list.length)+stat(pend?'amber':'green','Need review',pend)+stat(corrTot?'red':'green','Corrections open',corrTot)+stat('','Sync','☁ live');
+      });
+    });
+  });
+}
+function openCloudAudit(id,name){try{localStorage.setItem('allyos_active_clinic',JSON.stringify({id:id,name:name,cloud:true}));}catch(e){}location.href='audit.html';}
+render();renderCloud();
+</script>
+</body></html>

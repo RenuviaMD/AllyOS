@@ -1,0 +1,7 @@
+{
+  "date": null,
+  "agent": "ops-audit",
+  "status": "pending",
+  "detail": "Wired: source sentinels (PubMed/ClinicalTrials) + content auditor. Awaiting first CI run — add ANTHROPIC_API_KEY (GitHub Actions secret), then Run now.",
+  "modules": []
+}

@@ -1,0 +1,284 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BHRT Provider CDS · AllyOS · RenuviaMD®</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="allyos-theme.css">
+<style>
+  body.allyos{font-family:var(--fbody)}
+  .top{display:flex;align-items:center;gap:14px;padding:0 20px;height:54px;background:#0a1120cc;backdrop-filter:blur(8px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+  .brand{font-family:var(--fdisp);font-weight:900;letter-spacing:.5px}.brand b{color:var(--teal)}
+  .tag{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);border:1px solid var(--line2);border-radius:5px;padding:3px 8px}
+  .top .right{margin-left:auto;display:flex;gap:12px;align-items:center}
+  .wrap{max-width:1000px;margin:0 auto;padding:22px 20px 80px}
+  h1{font-family:var(--fdisp);font-weight:900;font-size:1.5rem;letter-spacing:.4px}
+  .sub{color:var(--muted);font-size:.92rem;margin:3px 0 0}
+  .draftbar{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(180deg,#2a2210,#1a1608);border:1px solid #4a3c18;border-radius:13px;padding:13px 16px;margin:16px 0 8px;font-size:.86rem;line-height:1.5}
+  .draftbar .ic{font-size:1.2rem;line-height:1}
+  .draftbar b{color:var(--gold)}
+  .pol{font-size:11.5px;color:var(--dim);border:1px solid var(--line);border-radius:9px;padding:10px 14px;margin:10px 0 18px;line-height:1.55}.pol b{color:var(--green)}
+  .grp{font-family:var(--fdisp);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin:26px 0 12px;display:flex;align-items:center;gap:10px}
+  .grp:after{content:'';flex:1;height:1px;background:var(--line)}
+  .panel{background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:16px}
+  .panel h3{font-family:var(--fdisp);font-size:1rem;margin-bottom:3px}
+  .panel .d{font-size:12.5px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+  label.q{display:block;font-size:13px;font-weight:600;margin:14px 0 6px}
+  select,input[type=text]{width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:9px 11px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .chip{font-size:12px;border:1px solid var(--line2);border-radius:9px;padding:7px 11px;cursor:pointer;color:var(--muted);user-select:none;transition:.12s}
+  .chip:hover{border-color:var(--teal)}
+  .chip.on{background:#0e2e2b;border-color:var(--teal);color:var(--teal)}
+  .chip.red.on{background:#2a1512;border-color:var(--red);color:#f0b3aa}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:680px){.grid2{grid-template-columns:1fr}}
+  .marker{border-radius:13px;padding:16px 18px;margin-top:8px;border:1px solid var(--line);background:#0a1422}
+  .marker .mk{font-family:var(--fdisp);font-weight:900;font-size:1.15rem;letter-spacing:.5px;display:flex;align-items:center;gap:9px}
+  .marker .mw{font-size:12.5px;color:var(--muted);margin-top:7px;line-height:1.55}
+  .marker ul{margin:9px 0 0 18px;font-size:12.5px;color:var(--muted);line-height:1.6}
+  .marker.green{border-color:#1c6e4f;box-shadow:var(--glow-green)}.marker.green .mk{color:var(--green)}
+  .marker.amber{border-color:#7a5e1c}.marker.amber .mk{color:var(--amber)}
+  .marker.red{border-color:#8a322c;box-shadow:var(--glow-red)}.marker.red .mk{color:#f0635a}
+  .marker.gray{border-color:var(--line2)}.marker.gray .mk{color:var(--muted)}
+  .block{background:#2a1512;border:1px solid #8a322c;border-radius:11px;padding:13px 15px;font-size:13px;color:#f0b3aa;margin-top:10px;display:none}
+  .block.show{display:block}.block b{color:#ff8a7e}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--fdisp);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+  td .st{font-size:9px;font-weight:800;letter-spacing:.04em;padding:2px 7px;border-radius:5px;white-space:nowrap}
+  .st.def{background:#0e2a1f;color:var(--green)} .st.alt{background:#0e2436;color:var(--blue)}
+  .st.req{background:#2a2210;color:var(--gold)} .st.opt{background:#1c1633;color:var(--violet)}
+  .sup li{font-size:12.5px;color:#f0b3aa;line-height:1.6;margin-left:18px}
+  .src{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px}
+  .src .v{font-size:9px;font-weight:800;letter-spacing:.04em;padding:2px 7px;border-radius:5px}
+  .v.ok{background:#0e2a1f;color:var(--green)} .v.pend{background:#2a2210;color:var(--amber)}
+  .src .id{font-family:var(--fdisp);color:var(--dim);min-width:30px}
+  .foot{font-size:11.5px;color:var(--dim);line-height:1.7;border-top:1px solid var(--line);margin-top:30px;padding-top:16px}
+  .foot b{color:var(--muted)}
+  a.back{color:var(--teal);font-size:12.5px;text-decoration:none}
+</style></head>
+<body class="allyos">
+<div class="top">
+  <span class="brand"><b>Ally</b>OS</span>
+  <span class="tag">BHRT · Provider CDS</span>
+  <span class="pill gold" id="lockPill" style="font-size:9px">DRAFT — not locked</span>
+  <span class="right"><a class="back" href="dashboard.html">← Dashboard</a></span>
+</div>
+
+<div class="wrap">
+  <h1>BHRT / Women's Hormone Wellness</h1>
+  <p class="sub" id="scopeSub">Provider decision-support — menopause-transition wellness. Loading module…</p>
+
+  <div class="draftbar" id="draftbar">
+    <span class="ic">⚠️</span>
+    <div id="draftbarText"><b>This module is a DRAFT.</b> <span id="lockNote">It is not locked, not enforced, and not for clinical reliance.</span> It requires citation verification and <b>Medical Director sign-off (Falcon, MD)</b> before use. Nothing here is a prescription or a substitute for the provider's own judgment.</div>
+  </div>
+
+  <div class="pol">
+    <b>Provider-facing only.</b> Never patient-facing output. <b>PHI stays local</b> — AllyOS holds no patient identifiers; only a de-identified decision marker flows to MD oversight. BHRT is a real medical consultation: <b>the authorized provider performs it and signs</b>. RN / staff support intake and routing only.
+  </div>
+
+  <!-- 1. PRESCRIBER GATE -->
+  <div class="grp">1 · Prescriber authority</div>
+  <div class="panel">
+    <h3>Who is making the medication decision?</h3>
+    <p class="d">Only an authorized APP / physician provider of record may determine candidacy, select therapy, prescribe, change doses, or clear red flags (FL §464.012 APRN · §458.347 PA).</p>
+    <label class="q" for="role">Role of the person finalizing this BHRT decision</label>
+    <select id="role" onchange="recompute()">
+      <option value="">— select —</option>
+      <option value="physician">Physician (MD / DO)</option>
+      <option value="aprn">APRN / ARNP</option>
+      <option value="pa">Physician Assistant (PA)</option>
+      <option value="rn">RN</option>
+      <option value="ma">MA / coordinator / unlicensed</option>
+    </select>
+    <div class="block" id="roleBlock"><b>BLOCKED —</b> a BHRT medication decision requires an authorized APP / physician provider of record. RN / staff may support intake and routing only.</div>
+  </div>
+
+  <!-- 2. RED-FLAG SCREEN -->
+  <div class="grp">2 · Red-flag / referral screen</div>
+  <div class="panel">
+    <h3>Any of these present?</h3>
+    <p class="d">Any checked item is a hard stop — generate a wellness summary + referral rationale, but <b>suppress all hormone-medication recommendations</b> until cleared or co-managed.</p>
+    <div class="chips" id="flags"></div>
+  </div>
+
+  <!-- 3. CONTEXT -->
+  <div class="grp">3 · Candidacy context</div>
+  <div class="panel">
+    <div class="grid2">
+      <div>
+        <label class="q" for="uterus">Uterus status</label>
+        <select id="uterus" onchange="recompute()">
+          <option value="">— select —</option>
+          <option value="intact">Intact</option>
+          <option value="removed">Hysterectomy (removed)</option>
+          <option value="unknown">Unknown</option>
+        </select>
+      </div>
+      <div>
+        <label class="q" for="age">Age band</label>
+        <select id="age" onchange="recompute()">
+          <option value="">— select —</option>
+          <option value="ge45">≥ 45</option>
+          <option value="40_45">40–45</option>
+          <option value="lt40">&lt; 40</option>
+        </select>
+      </div>
+    </div>
+    <label class="q">Dominant symptom domain</label>
+    <div class="chips" id="domains"></div>
+    <label class="q" style="margin-top:16px"><input type="checkbox" id="safetyData" onchange="recompute()" style="width:auto;margin-right:7px">Required safety data &amp; screening present (contraindication review, vitals, breast/cervical/bone screening per age/risk)</label>
+  </div>
+
+  <!-- 4. DECISION MARKER -->
+  <div class="grp">4 · Decision marker</div>
+  <div id="markerOut"></div>
+
+  <!-- MEDICATION REGISTRY -->
+  <div class="grp">Medication registry · FDA-approved before compounded</div>
+  <div class="panel"><table><thead><tr><th>Class</th><th>Option</th><th>Role</th><th>Status</th></tr></thead><tbody id="medRows"></tbody></table></div>
+  <div class="panel" style="border-color:#7a5e1c">
+    <h3 style="color:var(--amber)">Compounded exception</h3>
+    <p class="d" id="compoundNote"></p>
+    <h3 style="color:#f0635a;margin-top:6px">Suppressed / quarantine</h3>
+    <ul class="sup" id="suppRows"></ul>
+  </div>
+
+  <!-- EVIDENCE -->
+  <div class="grp">Evidence sources</div>
+  <div class="panel">
+    <p class="d"><span id="srcCount">—</span> Every material recommendation carries a source class; no verified source = recommendation suppressed.</p>
+    <div id="srcRows"></div>
+  </div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+var MOD=null;
+function getJSON(u){return fetch(u).then(function(r){return r.json();}).catch(function(){return null;});}
+
+// red-flag screen items (from module referral_first + hard_stops)
+var FLAGS=[
+  {k:'bleed',t:'Postmenopausal / unexplained vaginal bleeding',route:'RED → GYN'},
+  {k:'cancer',t:'Breast / endometrial / estrogen-sensitive cancer (uncleared)',route:'RED → Onc/GYN'},
+  {k:'vte',t:'Active/recent VTE · PE · stroke/TIA · MI · unstable CAD · chest pain',route:'RED → PCP/Cardio/ED'},
+  {k:'liver',t:'Active liver disease / significant unexplained LFT abnormality',route:'RED → PCP/Hepatology'},
+  {k:'preg',t:'Pregnant / breastfeeding / suspected pregnancy',route:'RED → hold'},
+  {k:'pelvic',t:'Pelvic mass · severe pelvic pain · vulvar lesion · gross hematuria',route:'RED → GYN/Urology'},
+  {k:'psych',t:'Suicidal ideation · psychosis · mania · severe untreated mood disorder',route:'RED → Behavioral health/ED'},
+  {k:'metab',t:'Uncontrolled HTN / diabetes / thyroid / severe renal disease',route:'AMBER/RED → PCP'}
+];
+var DOMAINS=[
+  {k:'vms',t:'VMS (hot flashes / night sweats)'},
+  {k:'gsm',t:'GSM (vaginal/urinary)'},
+  {k:'hsdd',t:'Low desire + distress (?HSDD)'},
+  {k:'bone',t:'Bone / muscle / metabolic'},
+  {k:'sleep',t:'Sleep / mood (menopause-transition)'}
+];
+var fl={}, dm={};
+
+function renderChips(){
+  document.getElementById('flags').innerHTML=FLAGS.map(function(f){
+    return '<span class="chip red'+(fl[f.k]?' on':'')+'" onclick="tog(\'fl\',\''+f.k+'\')">'+f.t+'</span>';}).join('');
+  document.getElementById('domains').innerHTML=DOMAINS.map(function(d){
+    return '<span class="chip'+(dm[d.k]?' on':'')+'" onclick="tog(\'dm\',\''+d.k+'\')">'+d.t+'</span>';}).join('');
+}
+function tog(g,k){var o=(g==='fl'?fl:dm);o[k]=!o[k];renderChips();recompute();}
+
+function recompute(){
+  var role=document.getElementById('role').value;
+  var blocked=(role==='rn'||role==='ma');
+  document.getElementById('roleBlock').classList.toggle('show',blocked);
+
+  var anyFlag=Object.keys(fl).some(function(k){return fl[k];});
+  var uterus=document.getElementById('uterus').value;
+  var age=document.getElementById('age').value;
+  var safety=document.getElementById('safetyData').checked;
+  var doms=Object.keys(dm).filter(function(k){return dm[k];});
+
+  var out=document.getElementById('markerOut'), cls,mk,why,items=[];
+
+  if(blocked){
+    cls='red';mk='■ BLOCKED — authority';
+    why='RN / staff may not finalize a BHRT medication decision. Route to the authorized APP / physician provider of record.';
+  } else if(anyFlag){
+    cls='red';mk='■ RED — referral first';
+    var routes=FLAGS.filter(function(f){return fl[f.k];}).map(function(f){return f.t+'  ('+f.route+')';});
+    why='Red flag present. Suppress all hormone-medication recommendations until cleared or co-managed. A wellness summary + referral rationale may still be generated.';
+    items=routes;
+  } else if(age==='lt40'){
+    cls='amber';mk='● AMBER — out of routine scope';
+    why='Age < 40: suspected POI is outside routine wellness scope. Refer / co-manage; suppress routine BHRT draft until diagnostic evaluation is documented.';
+  } else if(!role||!uterus||!age||!doms.length){
+    cls='gray';mk='○ Incomplete';
+    why='Select prescriber role, uterus status, age band, and at least one symptom domain to evaluate candidacy.';
+  } else if(uterus==='unknown' && doms.indexOf('gsm')<0){
+    cls='amber';mk='● AMBER — missing data';
+    why='Uterus status unknown + systemic estrogen under consideration → suppress the final systemic-estrogen plan until uterus status is confirmed (endometrial-protection gate). Local GSM pathways are unaffected.';
+  } else if(!safety){
+    cls='amber';mk='● AMBER — missing safety data';
+    why='Stable but required safety data / screening not yet confirmed. Draft is limited or held until contraindication review, vitals, and age/risk-appropriate screening are documented.';
+  } else {
+    cls='green';mk='✓ GREEN — wellness candidate';
+    why='Stable, no red flags, required safety data present. Provider may draft a wellness plan for the selected domain(s). FDA-approved options before compounded; if uterus intact + systemic estrogen → progestogen required.';
+    items=pathways(doms,uterus);
+  }
+  out.innerHTML='<div class="marker '+cls+'"><div class="mk">'+mk+'</div><div class="mw">'+why+'</div>'+
+    (items.length?'<ul>'+items.map(function(i){return '<li>'+i+'</li>';}).join('')+'</ul>':'')+'</div>';
+}
+
+function pathways(doms,uterus){
+  var p=[];
+  if(doms.indexOf('vms')>=0||doms.indexOf('sleep')>=0)
+    p.push('<b>VMS</b>: if bothersome, no systemic-MHT contraindication, age &lt;60 or within 10y of menopause → prefer FDA-approved transdermal 17β-estradiol'+(uterus==='intact'?' <b>+ evidence-based progestogen (uterus intact)</b>':'')+'. If contraindicated/declined → nonhormonal VMS (fezolinetant w/ LFT module, SSRI/SNRI, gabapentin).');
+  if(doms.indexOf('gsm')>=0)
+    p.push('<b>GSM</b> (no red flags): moisturizers/lubricants + low-dose vaginal estrogen OR vaginal DHEA OR ospemifene. Recurrent-UTI pattern → prefer local low-dose vaginal estrogen unless contraindicated.');
+  if(doms.indexOf('hsdd')>=0)
+    p.push('<b>HSDD</b>: requires personal distress + biopsychosocial assessment; correct GSM/pain/meds/mood/sleep first. Postmenopausal HSDD → testosterone is a <b>provider-only, off-label</b> discussion (HSDD only; not for energy/mood/weight/anti-aging). Otherwise suppress testosterone.');
+  if(doms.indexOf('bone')>=0)
+    p.push('<b>Bone / metabolic</b>: assess FRAX/DXA/fracture history; fragility fracture or osteoporosis-range → refer/co-manage. Else resistance training + protein + calcium/vitamin D adequacy. MHT is not a primary metabolic treatment.');
+  return p;
+}
+
+function renderModule(){
+  if(!MOD)return;
+  var m=MOD.meta||{};
+  document.getElementById('scopeSub').textContent=m.scope||'Provider decision-support — menopause-transition wellness.';
+  if(MOD.signoff_ledger) document.getElementById('lockNote').textContent='Status: '+MOD.signoff_ledger.status+'. '+MOD.signoff_ledger.citation_lock;
+  // flip the banner to LOCKED when the module has been signed off
+  if(m.status==='locked'){
+    var sg=m.md_signoff||{};
+    var pill=document.getElementById('lockPill');
+    pill.className='pill green';pill.textContent='LOCKED v'+(m.version||'')+' · effective '+(m.effective||'');
+    var db=document.getElementById('draftbar');
+    db.style.background='linear-gradient(180deg,#0e2a1f,#08160f)';db.style.borderColor='#1c5238';
+    db.querySelector('.ic').textContent='✓';
+    document.getElementById('draftbarText').innerHTML='<b style="color:var(--green)">Locked &amp; signed.</b> Medical-Director governance sign-off recorded — '+(sg.by||'Falcon, MD')+' ('+(sg.license||'')+'), '+(sg.date||'')+'. 18/18 citations verified; 3-auditor lock complete. This is provider decision-support, not a prescription or a substitute for the provider\'s own judgment; the treating provider performs and signs each consult.';
+  }
+
+  // medication registry
+  var reg=(MOD.medication_registry&&MOD.medication_registry.fda_approved_default)||[];
+  var stMap={PREFERRED_DEFAULT:['def','Preferred'],ALTERNATIVE:['alt','Alternative'],REQUIRED_IF_UTERUS_INTACT:['req','Required if uterus intact'],
+    GSM_DEFAULT:['def','GSM default'],GSM_OPTION:['opt','GSM option'],VMS_OPTION:['opt','VMS option'],VMS_OPTION_WITH_LFT_MODULE:['opt','VMS · LFT module'],WELLNESS_OPTION:['opt','Wellness']};
+  document.getElementById('medRows').innerHTML=reg.map(function(r){
+    var s=stMap[r.status]||['opt',r.status];
+    return '<tr><td>'+r.class+'</td><td>'+r.option+'</td><td style="color:var(--muted)">'+r.role+'</td><td><span class="st '+s[0]+'">'+s[1]+'</span></td></tr>';}).join('');
+  if(MOD.medication_registry) document.getElementById('compoundNote').textContent=MOD.medication_registry.compounded_exception||'';
+  var supp=(MOD.medication_registry&&MOD.medication_registry.quarantine_suppressed)||[];
+  document.getElementById('suppRows').innerHTML=supp.map(function(s){return '<li>'+s+'</li>';}).join('');
+
+  // evidence
+  var src=MOD.evidence_sources||[];
+  var ok=src.filter(function(s){return s.verified;}).length;
+  document.getElementById('srcCount').textContent=ok+' of '+src.length+' sources PubMed-verified ·';
+  document.getElementById('srcRows').innerHTML=src.map(function(s){
+    return '<div class="src"><span class="id">'+s.id+'</span><span class="v '+(s.verified?'ok':'pend')+'">'+(s.verified?'VERIFIED':'PENDING')+'</span><span>'+s.title+(s.pmid?' · PMID '+s.pmid:'')+'</span></div>';}).join('');
+
+  document.getElementById('foot').innerHTML='<b>Final rule.</b> '+(MOD.final_rule||'')+
+    '<br><br><b>Provider of record.</b> '+((MOD.governance&&MOD.governance.provider_of_record)||'')+
+    '<br><br><b>Source.</b> '+(m.source||'')+' · Curated by '+(m.curated_by||'')+'.';
+}
+
+getJSON('../protocols/bhrt-module.json').then(function(j){MOD=j;renderChips();renderModule();recompute();});
+</script>
+</body></html>

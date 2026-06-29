@@ -1,0 +1,115 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Set up your clinic — AllyOS · RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
+<meta name="theme-color" content="#05080f">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#05080f;--ink:#eaf1f6;--muted:#90a3b6;--dim:#5d7387;--teal:#2ee6d6;--teal2:#19b9c9;--gold:#e7b84e;--green:#46e08f;--line:rgba(255,255,255,.1);--line2:rgba(255,255,255,.16);--fdisp:'Space Grotesk',system-ui,sans-serif;--fbody:'Inter',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fbody);background:var(--bg);color:var(--ink);line-height:1.55;min-height:100vh}
+.bg{position:fixed;inset:0;z-index:-1;background:radial-gradient(120% 80% at 50% -10%,#0c1830,#05080f 55%)}
+a{color:var(--teal);text-decoration:none}
+.wrap{max-width:680px;margin:0 auto;padding:30px 22px 70px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--fdisp);font-weight:700;font-size:1.05rem;margin-bottom:22px}
+.brand img{width:30px;height:30px;border-radius:50%}.brand b{color:var(--gold)}.brand span{color:var(--teal)}
+h1{font-family:var(--fdisp);font-size:clamp(1.7rem,5vw,2.4rem);letter-spacing:-.02em;line-height:1.1}
+.sub{color:var(--muted);margin:10px 0 4px;max-width:56ch}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:18px;padding:24px;margin-top:22px}
+.sec{font-family:var(--fdisp);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin:18px 0 12px}
+.sec:first-child{margin-top:0}
+label{display:block;font-size:.78rem;color:var(--muted);margin:0 0 5px}
+.req::after{content:" *";color:var(--gold)}
+input,select,textarea{width:100%;background:#0c1626;border:1px solid var(--line);border-radius:10px;padding:11px 13px;color:var(--ink);font-size:.92rem;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(46,230,214,.15)}
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:13px}.row>div{flex:1;min-width:160px}
+.chips{display:flex;gap:10px;flex-wrap:wrap}
+.chip{flex:1;min-width:140px;display:flex;gap:9px;align-items:center;border:1px solid var(--line);background:#0c1626;border-radius:11px;padding:11px 13px;cursor:pointer;font-size:.9rem}
+.chip input{width:auto}
+.radio{display:flex;gap:9px;align-items:flex-start;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#0c1626;cursor:pointer;margin-bottom:9px}
+.radio input{width:auto;margin-top:3px}
+.radio .t{font-size:.9rem}.radio .d{font-size:.76rem;color:var(--muted)}
+.attest{display:flex;gap:10px;align-items:flex-start;font-size:.84rem;color:var(--muted);background:rgba(46,230,214,.05);border:1px solid rgba(46,230,214,.25);border-radius:11px;padding:12px 14px;margin-top:6px}
+.attest input{width:auto;margin-top:3px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;font-family:var(--fdisp);font-weight:600;font-size:1rem;border:none;border-radius:999px;padding:15px;margin-top:20px;cursor:pointer;background:linear-gradient(120deg,var(--teal),var(--teal2));color:#04121a;box-shadow:0 0 40px rgba(46,230,214,.3)}
+.btn:hover{filter:brightness(1.06)}
+.fine{font-size:.74rem;color:var(--dim);margin-top:14px;line-height:1.6}
+#ownmd{display:none}
+#ok{display:none;text-align:center;padding:40px 0}
+#ok h2{font-family:var(--fdisp);color:var(--teal);font-size:1.6rem}
+</style></head>
+<body><div class="bg"></div>
+<div class="wrap">
+  <a class="brand" href="index.html"><img src="ally-avatar-64.png" alt="Ally"> Renuvia<b>MD</b>® <span>AllyOS</span></a>
+  <h1>Set up your clinic.</h1>
+  <p class="sub">A few details and we'll provision your AllyOS. Takes ~2 minutes. <b style="color:var(--ink)">No PHI here</b> — patient data always stays on-device.</p>
+  <div class="attest" style="margin-bottom:18px"><span>🔒</span><span><b style="color:var(--ink)">AllyOS is PHI-free.</b> Do not enter patient identifiers (name, DOB, MRN, contact) anywhere in the platform — patient data stays in your own records. AllyOS provides structure and decision support, not a chart.</span></div>
+
+  <form name="clinic-onboarding" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="form">
+    <input type="hidden" name="form-name" value="clinic-onboarding">
+    <p hidden><label>Skip: <input name="bot-field"></label></p>
+
+    <div class="card">
+      <div class="sec">Your clinic</div>
+      <div class="row"><div><label class="req">Clinic name</label><input name="clinic_name" required placeholder="Lemus Natural Medicine of Coral Gables"></div></div>
+      <div class="row"><div><label class="req">City &amp; state</label><input name="city_state" required placeholder="Coral Gables, FL"></div><div><label>Phone</label><input name="phone" placeholder="(305) ___-____"></div></div>
+      <div class="row"><div><label class="req">Your name (owner / admin)</label><input name="admin_name" required></div><div><label class="req">Email</label><input type="email" name="admin_email" required placeholder="you@clinic.com"></div></div>
+
+      <div class="sec">What you run</div>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" name="line_iv" value="yes" checked> 💧 IV &amp; IM Infusion</label>
+        <label class="chip"><input type="checkbox" name="line_peptides" value="yes"> 🧬 Advanced Peptides</label>
+        <label class="chip"><input type="checkbox" name="line_bhrt" value="yes"> ⚕️ BHRT</label>
+      </div>
+      <p class="sub" style="margin-top:8px;font-size:.78rem">Each line is <b style="color:var(--ink)">$199/mo</b> per clinic (bundle all three for less). Turn lines on or off any time — pay only for what you run.</p>
+
+      <div class="sec">Medical Director</div>
+      <p class="sub" style="margin-top:-4px;font-size:.84rem">Provides oversight and signs the standing orders. May be a different person from the treating clinician below.</p>
+      <label class="radio"><input type="radio" name="md_arrangement" value="renuviamd" checked onchange="toggleOwnMd(false)"><span><span class="t">RenuviaMD is our Medical Director of record</span><div class="d">Falcon, MD oversees; gates enforce. (Requires a signed MD Services Agreement.)</div></span></label>
+      <label class="radio"><input type="radio" name="md_arrangement" value="own" onchange="toggleOwnMd(true)"><span><span class="t">We have our own Medical Director</span><div class="d">AllyOS stays advisory; your MD owns and signs.</div></span></label>
+      <div id="ownmd">
+        <div class="row"><div><label>MD name</label><input name="own_md_name"></div><div><label>Credential</label><select name="own_md_credential"><option value="">—</option><option>MD</option><option>DO</option></select></div></div>
+        <div class="row"><div><label>NPI</label><input name="own_md_npi" inputmode="numeric"></div><div><label>State license #</label><input name="own_md_license"></div></div>
+        <div class="row"><div><label>MD email</label><input type="email" name="own_md_email"></div></div>
+        <p class="fine" style="margin-top:2px"><a href="verify-npi.html" target="_blank">Verify an NPI ↗</a></p>
+      </div>
+
+      <div class="sec">Treating provider / APP</div>
+      <p class="sub" style="margin-top:-4px;font-size:.84rem">The licensed clinician who performs the Good Faith Exam, treats, and signs the chart — MD, DO, NP/FNP, or PA. Add more later in Team Seats: each <b style="color:var(--ink)">authorizing provider is a billable seat</b> (their signature is tied to one license), and <b style="color:var(--ink)">RN/LPN executors are free</b>.</p>
+      <label class="attest" style="background:transparent;border-color:var(--line);margin:0 0 12px"><input type="checkbox" name="provider_same_as_md" value="yes" onchange="toggleProv(this.checked)"> Same person as the Medical Director above.</label>
+      <div id="provfields">
+        <div class="row"><div><label class="req">Name</label><input name="provider_name" required placeholder="Morejon"></div><div><label class="req">Credential</label><select name="provider_credential" required><option value="">—</option><option>MD</option><option>DO</option><option>NP</option><option>FNP</option><option>PA</option></select></div></div>
+        <div class="row"><div><label class="req">NPI</label><input name="provider_npi" required inputmode="numeric" placeholder="10 digits"></div><div><label class="req">State license #</label><input name="provider_license" required></div></div>
+        <div class="row"><div><label class="req">Provider email</label><input type="email" name="provider_email" required></div></div>
+      </div>
+      <label class="attest"><input type="checkbox" name="provider_attest" value="yes" required> The treating provider is authorized to perform Good Faith Exams and to sign orders / notes under the clinic's standing orders.</label>
+
+      <div class="sec">Anything else?</div>
+      <textarea name="notes" rows="3" placeholder="Optional — questions, timeline, number of chairs, etc."></textarea>
+
+      <button class="btn" type="submit">Request setup →</button>
+      <p class="fine">By submitting you agree AllyOS may contact you about setup. AllyOS is advisory decision-support — not a prescription or, except where separately contracted, a medical-director relationship. We hold no PHI; no financial ties to any pharmacy or supplier.</p>
+    </div>
+  </form>
+
+  <div id="ok">
+    <h2>✓ Got it — thank you.</h2>
+    <p class="sub" style="margin:10px auto 0">Your clinic setup request is in. We'll reach out shortly to finish provisioning. Meanwhile, <a href="chairside.html?demo=1">keep exploring the live demo →</a></p>
+  </div>
+</div>
+
+<script>
+var f=document.getElementById('form');
+function toggleOwnMd(show){document.getElementById('ownmd').style.display=show?'block':'none';}
+function toggleProv(same){var d=document.getElementById('provfields');d.style.display=same?'none':'block';
+  ['provider_name','provider_credential','provider_npi','provider_license','provider_email'].forEach(function(n){var el=f.elements[n];if(el){if(same)el.removeAttribute('required');else el.setAttribute('required','');}});}
+f.addEventListener('submit',function(e){
+  e.preventDefault();
+  var data=new URLSearchParams(new FormData(f)).toString();
+  fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:data})
+   .then(function(){done();}).catch(function(){done();}); // graceful even if Forms is off
+});
+function done(){f.style.display='none';document.getElementById('ok').style.display='block';window.scrollTo(0,0);}
+</script>
+</body></html>

@@ -1,0 +1,9 @@
+{
+  "package_name": "cds_update_agent_design_v1",
+  "date_updated": "2026-06-29",
+  "purpose": "run-on-demand CDS update/citation-audit/protocol-diff agent",
+  "no_regulatory_logic": true,
+  "no_auto_publish_clinical_logic": true,
+  "clinician_signoff_required_for_clinical_changes": true,
+  "counts": { "subagents": 11, "sources": 7, "decision_rules": 8, "validation_cases": 10 }
+}

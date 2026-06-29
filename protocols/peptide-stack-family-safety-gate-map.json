@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "id": "peptide-stack-family-safety-gate-map",
+    "title": "AllyOS Peptide Stack Family → Safety Gate Routing Map",
+    "version": "1.0",
+    "status": "reference",
+    "source": "Promoted from protocols/peptide-stack-families/safety_gate_map_v1.jsonl so cross-file references resolve. Each family routes to its gate package(s) and lists its primary red flags. The authoritative absolute contraindications live in peptide-stack-families.json key_gate and wellness-iv-hard-stop.json; this map is the routing index, not the gate text.",
+    "delegates_to": {
+      "shared_hard_stop": "wellness-iv-hard-stop.json (wellness_iv_hard_stop_gate_rules_v1)",
+      "ingredient_screens": "iv-module.json (LOCKED) gates.ingredient_specific_screens",
+      "glp_drug_context": "peptide-iv-support.json glp_support.glp_context_safety_gates"
+    }
+  },
+  "families": [
+    { "family_id": "FAM01_GLP_METABOLIC", "gate_package": "glp_support gates + wellness_iv_hard_stop", "primary_red_flags": ["persistent vomiting/diarrhea", "orthostasis/syncope", "AKI/CKD risk", "insulin/SU hypoglycemia risk", "oral-med absorption context", "pancreatitis / gallbladder red flags", "MTC/MEN2 (peptide-side stack gate)"] },
+    { "family_id": "FAM02_GH_RECOVERY", "gate_package": "patient_factor_modifier_rules + wellness_iv_hard_stop", "primary_red_flags": ["active malignancy (mitogenic GH/IGF-1 axis)", "diabetes/retinopathy", "edema/carpal tunnel", "glucose/IGF-1 context", "treat hypothyroidism first"] },
+    { "family_id": "FAM03_MITO_ENERGY", "gate_package": "wellness_iv_hard_stop + niagen_nr_standing_order", "primary_red_flags": ["active chest pain", "unstable CV symptoms", "active malignancy review", "advanced CKD/liver disease", "pregnancy/lactation"] },
+    { "family_id": "FAM04_REPAIR_CONNECTIVE", "gate_package": "wellness_iv_hard_stop", "primary_red_flags": ["active OR prior malignancy (BPC-157/TB-500/GHK-Cu pro-angiogenic)", "GHK-Cu Wilson disease / copper overload", "acute injury needing evaluation", "infection red flags", "renal/hepatic amino gate", "vitamin C/G6PD gate"] },
+    { "family_id": "FAM05_SKIN_HAIR_GLOW", "gate_package": "ingredient_axis_match + wellness_iv_hard_stop", "primary_red_flags": ["active OR prior malignancy (GHK-Cu/BPC-157/TB-500 pro-angiogenic)", "GHK-Cu Wilson disease / copper overload", "biotin lab interference", "vitamin C renal/G6PD", "glutathione reaction", "trace mineral double-dose"] },
+    { "family_id": "FAM06_SEXUAL_HPG", "gate_package": "wellness_iv_hard_stop", "primary_red_flags": ["uncontrolled HTN / known CVD (PT-141/bremelanotide label contraindication)", "hormone-sensitive malignancy (breast/prostate/endometrial/ovarian)", "known/suspected pituitary tumor or adenoma (kisspeptin-10/gonadorelin GnRH-axis)", "abnormal BP/HR", "chest pain", "syncope", "oral-naltrexone review"] },
+    { "family_id": "FAM07_NEURO_SLEEP_CALM", "gate_package": "wellness_iv_hard_stop", "primary_red_flags": ["acute neuro symptoms", "suicidality/mania/psychiatric instability", "sedative/alcohol context", "magnesium renal gate"] },
+    { "family_id": "FAM08_IMMUNE_INFLAMMATORY", "gate_package": "wellness_iv_hard_stop", "primary_red_flags": ["fever/hypoxia/confusion/sepsis symptoms", "active infection red flags", "active malignancy review (thymic/immunomodulatory)", "vitamin C/G6PD", "trace mineral double-dose"] },
+    { "family_id": "FAM09_NON_GLP_METABOLIC", "gate_package": "patient_factor_modifier_rules + wellness_iv_hard_stop", "primary_red_flags": ["AOD efficacy-limitation language (claim discipline)", "GH/IGF-1 glucose/edema/retinopathy", "active malignancy (GH/IGF-1 agents)", "NAD/NR high-risk gate", "MIC hepatic/gallbladder review"] }
+  ]
+}

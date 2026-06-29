@@ -1,0 +1,122 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AllyOS Design Language — Preview</title>
+<link rel="stylesheet" href="allyos-theme.css">
+<style>
+.wrap{max-width:1180px;margin:0 auto;padding:22px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:8px}
+h1{font-size:2.2rem}
+.sec{margin-top:30px}
+.sec > .eyebrow{margin-bottom:10px;display:block}
+.grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;align-items:start}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.tx{padding:9px 0;border-bottom:1px solid var(--line);font-size:.86rem;display:flex;justify-content:space-between;gap:10px}
+.tx:last-child{border:none}.tx span{color:var(--muted)}
+.swatch{display:flex;gap:10px;flex-wrap:wrap}
+.sw{width:84px;height:54px;border-radius:10px;display:flex;align-items:flex-end;padding:6px;font-size:.6rem;font-weight:700;color:#04121a}
+/* GFE on-screen styled form */
+.form-band{background:linear-gradient(120deg,#0e2e2b,#0e2436);border:1px solid var(--line2);border-radius:14px 14px 0 0;padding:16px 18px;box-shadow:var(--glow-teal)}
+.form-band .eyebrow{color:var(--teal)}
+.form-body{border:1px solid var(--line);border-top:none;border-radius:0 0 14px 14px;padding:18px;background:#0b1422}
+.fline{display:flex;gap:10px;font-size:.84rem;padding:7px 0;border-bottom:1px dashed var(--line);align-items:center}
+.fline:last-child{border:none}
+.fline .ln{flex:1;border-bottom:1px solid var(--line2);height:1px;margin:0 4px;align-self:flex-end}
+.chk{display:flex;gap:8px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+.chk span{border:1px solid var(--line2);border-radius:7px;padding:4px 9px}
+.actcard{background:linear-gradient(180deg,#0f1f33,#0b1626);border:1px solid var(--line);border-left:3px solid var(--red);border-radius:14px;padding:14px}
+.timer{font-family:var(--fdisp);font-weight:900;font-size:1.8rem;text-align:center;color:var(--red);background:#2a121233;border:1px solid #4a201c;border-radius:10px;padding:8px;margin:8px 0;text-shadow:0 0 18px rgba(240,99,90,.4)}
+.bar{display:flex;gap:8px;flex-wrap:wrap}.bar .btn{flex:1;min-width:90px;font-size:.74rem;padding:8px}
+.note{font-size:.74rem;color:var(--muted);line-height:1.5;margin-top:8px}
+</style></head>
+<body class="allyos"><div class="wrap">
+
+  <div class="top">
+    <div>
+      <span class="eyebrow">AllyOS Design Language · v1</span>
+      <h1 class="h-disp">Nurse Workstation</h1>
+      <div class="muted" style="margin-top:4px">The premium dark skin — react to it here, then I cascade it across every screen and fix the GFE form.</div>
+    </div>
+    <div class="bar" style="max-width:320px">
+      <button class="btn neon">▶ Assign to chair</button>
+      <button class="btn ghost">Open GFE</button>
+    </div>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="sec">
+    <span class="eyebrow">Today · live counts (PHI-free)</span>
+    <div class="stats">
+      <div class="stat blue"><div class="lbl">Scheduled</div><div class="num">8</div></div>
+      <div class="stat amber"><div class="lbl">In waiting</div><div class="num">2</div></div>
+      <div class="stat"><div class="lbl">In chair</div><div class="num">2</div></div>
+      <div class="stat violet"><div class="lbl">Called</div><div class="num">6</div></div>
+      <div class="stat green"><div class="lbl">Completed</div><div class="num">3</div></div>
+    </div>
+  </div>
+
+  <!-- CHAIRS + ACTIVE TREATMENT -->
+  <div class="sec grid2">
+    <div>
+      <span class="eyebrow">Treatment chairs</span>
+      <div class="chairgrid" style="margin-top:10px">
+        <div class="chair occupied"><div class="num" style="font-size:1rem">Chair 1</div><div class="pt">S. Johnson</div><div class="pr">RECOVERY</div><div class="clk">21:04</div><div class="st">INFUSING</div></div>
+        <div class="chair done"><div class="num" style="font-size:1rem">Chair 2</div><div class="pt">M. Chen</div><div class="pr">NAD+ LONGEVITY</div><div class="clk">DONE!</div><div class="st">RECHECK · DISCHARGE</div></div>
+        <div class="chair"><div class="num">3</div><div class="st">AVAILABLE</div></div>
+        <div class="chair"><div class="num">4</div><div class="st">AVAILABLE</div></div>
+        <div class="chair"><div class="num">5</div><div class="st">AVAILABLE</div></div>
+        <div class="chair"><div class="num">6</div><div class="st">AVAILABLE</div></div>
+      </div>
+    </div>
+    <div>
+      <span class="eyebrow">Active treatment card</span>
+      <div class="actcard" style="margin-top:10px">
+        <div style="display:flex;justify-content:space-between"><b>S. Johnson</b><span class="pill red">in chair</span></div>
+        <div class="muted" style="font-size:.74rem;margin:4px 0">Chair 1 · started 3:08 PM</div>
+        <div class="pill teal" style="display:inline-block;margin:4px 0">RECOVERY · 500 mL · 45 min</div>
+        <div class="timer">21:04</div>
+        <div class="bar"><button class="btn neon-green">✓ Complete</button><button class="btn ghost">Checklist</button><button class="btn ghost">Notes</button></div>
+        <div class="note">Name shown for the floor only — <b>no DOB/age/sex, nothing stored.</b> Display-only, browser-local.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GFE FORM (fixed) + palette -->
+  <div class="sec grid2">
+    <div>
+      <span class="eyebrow">The GFE — no longer a plain printout</span>
+      <div style="margin-top:10px">
+        <div class="form-band"><span class="eyebrow">RenuviaMD® · AllyOS</span><div class="h-disp" style="font-size:1.05rem;margin-top:3px">FORM-INTAKE-GFE-01 — Patient Intake, Consent &amp; Wellness IV GFE</div></div>
+        <div class="form-body">
+          <div class="fline">Provider (GFE) <span class="pill gold">MD</span> · Date 6/24/2026 · Patient <span class="ln"></span> DOB <span class="ln" style="max-width:90px"></span></div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--teal);margin:10px 0 6px">B · Brief health history</div>
+          <div class="chk"><span>☐ Diabetes</span><span>☐ High BP</span><span>☐ Heart/stroke</span><span>☐ Kidney/dialysis</span><span>☐ G6PD</span><span>☐ Pregnancy</span><span>☐ Bleeding/anticoag</span><span>☐ None</span></div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--teal);margin:12px 0 6px">E · Consent</div>
+          <div class="chk"><span>☐ Wellness only — not disease treatment</span><span>☐ Authorize GFE</span><span>☐ Risks reviewed</span><span>☐ Emergency / EMS</span></div>
+          <div class="fline" style="margin-top:10px">Patient signature <span class="ln"></span> Date <span class="ln" style="max-width:90px"></span></div>
+        </div>
+        <div class="note">On-screen it's branded &amp; on-theme; the <b>print version stays clean &amp; signable</b> (separate print stylesheet) so the signed copy reads well.</div>
+      </div>
+    </div>
+    <div>
+      <span class="eyebrow">Palette</span>
+      <div class="card" style="margin-top:10px">
+        <div class="swatch">
+          <div class="sw" style="background:var(--teal)">teal</div>
+          <div class="sw" style="background:var(--blue)">blue</div>
+          <div class="sw" style="background:var(--violet)">violet</div>
+          <div class="sw" style="background:var(--pink)">pink</div>
+          <div class="sw" style="background:var(--gold)">gold</div>
+          <div class="sw" style="background:var(--green)">green</div>
+          <div class="sw" style="background:var(--red);color:#fff">red</div>
+        </div>
+        <div class="tx" style="margin-top:14px"><span>Display font</span><b class="h-disp">Space Grotesk</b></div>
+        <div class="tx"><span>Body font</span><b>Inter</b></div>
+        <div class="tx"><span>Background</span><b>space-dark + glow + grid</b></div>
+        <div class="tx"><span>Accents</span><b>neon glow on edges &amp; states</b></div>
+        <button class="btn neon" style="width:100%;margin-top:12px">This is the look — cascade it</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:26px;text-align:center">AllyOS · advisory clinical decision-support · PHI-free · no drug brokering. This is a visual preview — say the word and I apply it to the station, builder, inventory, calculator, login, pricing, and the GFE/consent docs.</div>
+
+</div></body></html>

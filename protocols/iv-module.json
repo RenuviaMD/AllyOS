@@ -1,0 +1,592 @@
+{
+  "meta": {
+    "id": "iv-module",
+    "title": "AllyOS IV/IM Wellness CDS Module",
+    "version": "1.1",
+    "status": "locked",
+    "effective": "2026-06-29",
+    "revision_log": ["v1.0 (2026-06-24): initial lock.", "v1.1 (2026-06-29): added ING_NIAGEN_NR + WEL-16 Niagen®/NR IV Infusion (NAD+ precursor). Citations AllyOS-verified 2026-06-24; promoted from niagen-nr-iv-standing-order.md on MD sign-off. NR is distinct from NAD+ IV; ceiling 500 mg; dedicated bag; no peptide-synergy claim. Re-audited (clinical/citation/schema) before re-lock."],
+    "curated_by": "Armando A. Falcon, MD (FL ME 84789) — RenuviaMD® PLLC, AllyOS Compliance Division",
+    "primary_source": "RenuviaMD® AllyOS Wellness IV/IM Clinical Library v2.x — MASTER-MENU-01 v3.3 (single clinical source of truth), DOC-04 v2.3 Wellness IV/IM Standing Orders, DOC-03 v2.3 Collaborative Practice Protocol, FORM-INTAKE-GFE-01 v2.0, CARD-VC v2.0, CARD-A, CARD-V v2.1, and the twelve active stack protocols. (Implemented at licensed clinics under their own standing orders; clinic and provider names are clinic-specific and are not part of this library.)",
+    "scope": "Adjunctive wellness IV/IM nutrient therapy, RN/ARNP-delivered under a Medical Director's signed standing orders. Adults ≥ 18 only. NOT disease treatment, diagnosis, prescription, or a medical-director relationship. The treating provider reviews, customizes, and signs.",
+    "honesty_discipline": "Every stack here is transcribed from the locked RenuviaMD® AllyOS wellness IV library (the primary library). Doses, routes, rates, ceilings, contraindications, and compatibility are quoted from MASTER-MENU-01 v3.3 and the stack standing orders — not from public clinic menus. Market additions that are NOT in the primary library are flagged in_primary_library:false and carry their own guardrails. Ally must say 'VERIFY — not in the locked IV library' for anything not encoded here, and never invent a dose, rate, or citation.",
+    "regulatory_layer": true,
+    "gfe_gate_0": true,
+    "governance_posture": "AllyOS is educational / advisory: it tells a clinic HOW and WHAT is required to run an IV/IM bar — the gates, screens, ceilings, compatibility, and documentation — but it does NOT stop, block, or enforce any practice. The provider reviews and signs; they own every decision. The ONLY exception is a practice where RenuviaMD is the Medical Director of record — there, gate enforcement applies because RenuviaMD then carries the supervising authority and liability. In the product UI this is the 'MD-of-record' mode; the default is advisory-only (never blocks)."
+  },
+
+  "gates": {
+    "gate_0_gfe": {
+      "id": "IVIM_GATE0_GFE",
+      "name": "GFE Gate-0 — legal authorization before any RN-run infusion",
+      "rule": "An RN/ARNP may NOT assign a patient to a chair or compound any bag until ALL of the following are true. This gate is scope/legal, evaluated BEFORE the clinical safety gates.",
+      "conditions_all_required": [
+        "A valid Good Faith Exam / wellness eligibility evaluation is on file (FORM-INTAKE-GFE-01) and within its 12-month validity window (renew annually, or sooner on material health change, new med/allergy, adverse event, or new protocol).",
+        "Signed Medical Director standing orders authorize the requested act (DOC-04 v2.3) — either a Mode A pre-built stack (the 12 listed) administered per its published 6-step procedure, OR a Mode B custom build that has passed the 6-step pre-infusion screening in DOC-04 §2A.",
+        "A current Collaborative Practice Protocol (DOC-03 v2.3, F.S. §464.012(3)) defines the supervising-physician / ARNP relationship for the acts performed under Medical Director supervision.",
+        "FORM-02 Pre-Infusion Verify Checklist is completed THIS visit (vitals · allergy/meds review · per-visit eligibility gates) before compounding."
+      ],
+      "scope_note": "The GFE itself is a provider act. Where a clinic's APP holds independent authority (e.g., autonomous APRN registration under F.S. §464.0123) she may perform the GFE under that authority; the standing orders govern only the RN-handled IV/IM acts performed under Medical Director supervision. AllyOS treats the GFE as a separate upstream gate so the RN-run IV line never proceeds without it.",
+      "on_fail": "HOLD. Do not assign a chair or compound. Resolve the missing authorization (obtain/renew GFE, confirm standing orders cover the act, complete FORM-02) before proceeding.",
+      "fires_in_formulary": true
+    },
+
+    "vital_hold_referral_criteria": {
+      "id": "IVIM_GATE_VITALS",
+      "name": "Universal Hold / Referral Criteria (per DOC-04 §6, DOC-03 §5)",
+      "rule": "HOLD infusion and refer to the appropriate level of care (PCP, urgent care, ED, or EMS/911) if ANY of the following is present.",
+      "criteria": [
+        "BP < 90/60 mmHg or > 160/100 mmHg",
+        "HR > 100 bpm or < 50 bpm",
+        "Temperature > 100.4 °F",
+        "SpO2 < 94 %, below known baseline, or any acute respiratory symptom (dyspnea, wheezing, cyanosis, chest pain)",
+        "Acute chest pain · acute neurologic symptoms · altered mental status",
+        "Moderate or severe dehydration · persistent vomiting/diarrhea · syncope · fever · acute infection",
+        "Pregnancy or breastfeeding (unless specifically protocol-approved)",
+        "CHF or fluid restriction · CKD/dialysis/unknown renal status in high-risk patient",
+        "Known arrhythmia · heart block · unstable cardiac disease",
+        "Active malignancy or active oncology treatment without written oncologist clearance",
+        "Documented G6PD deficiency + Vitamin C dose > 2 g",
+        "Active asthma exacerbation + Glutathione requested",
+        "Vitamin C 6.1–10 g without CARD-VC verbal screen documented",
+        "Any patient who does not meet the criteria of the selected active protocol"
+      ],
+      "md_consult_language_locked_verbatim": "HOLD treatment. If abnormal vital signs, red-flag symptoms, or unstable clinical findings are present, the NP must defer IV therapy and refer the patient to the appropriate level of care, including PCP, urgent care, emergency department, or EMS/911 when indicated. The Medical Director should be notified for QA/protocol purposes after appropriate clinical action has been taken.",
+      "fires_in_formulary": true
+    },
+
+    "ingredient_specific_screens": {
+      "id": "IVIM_GATE_INGREDIENT",
+      "screens": [
+        { "ingredient": "Vitamin C", "screen": "CARD-VC verbal screen REQUIRED for any dose 6.1–10 g (includes G6PD question). Doses ≤ 6 g use the standard intake screen. G6PD deficiency + Vit C > 2 g is an absolute hold.", "card": "CARD-VC v2.0" },
+        { "ingredient": "Glutathione", "screen": "Confirm no active asthma exacerbation, no sulfite sensitivity, no prior glutathione reaction. Preservative-free vial reduces but does not eliminate bronchospasm risk. IV push only — never in bag, never with Vit C.", "card": "ADDON-01 pre-push screen" },
+        { "ingredient": "Magnesium", "screen": "Hold for 2nd/3rd-degree AV block, severe renal impairment (CrCl < 30), myasthenia gravis. Caution with digoxin, CCBs, neuromuscular blockers. Slow infusion ≥ 15 min minimum.", "card": "MASTER-MENU §3.1" },
+        { "ingredient": "Calcium Gluconate", "screen": "Hold for hypercalcemia, digoxin/cardiac-glycoside therapy, sarcoidosis. NOT in the same bag as Vitamin C (precipitate).", "card": "MASTER-MENU §3.2" },
+        { "ingredient": "Biotin", "screen": "Counsel patient to hold biotin 48–72 hr before any blood lab (FDA 2017 immunoassay interference: troponin, thyroid, hCG, PTH). Document counseling.", "card": "MASTER-MENU §2.6" },
+        { "ingredient": "NAD+", "screen": "Rate-sensitive. 250 mg first session over ≥ 2 hr; 500 mg over ≥ 3–4 hr. Dedicated bag only. Relative caution: active malignancy (theoretical), severe panic disorder.", "card": "MASTER-MENU §6 / IV-03 / WEL-06" }
+      ],
+      "fires_in_formulary": true
+    }
+  },
+
+  "ceilings": {
+    "id": "IVIM_CEILINGS",
+    "note": "Per-session wellness ceilings (DOC-04 §3 / MASTER-MENU-01 v3.3). Above ceiling = outside the collaborative wellness scope; requires written Medical Director authorization in advance or referral to medical evaluation.",
+    "items": [
+      { "ingredient": "Vitamin C (Ascorbic Acid)", "ceiling": "10 g/session", "above_ceiling": "Outside wellness scope — defer to medical evaluation", "screen": "6.1–10 g requires CARD-VC + G6PD" },
+      { "ingredient": "Glutathione (IV push only)", "ceiling": "1,200 mg/session", "above_ceiling": "Outside wellness scope", "screen": "Push 1–2 min; no piggyback, no in-bag, no slow infusion" },
+      { "ingredient": "NAD+", "ceiling": "500 mg/session", "above_ceiling": "Outside wellness scope", "screen": "250 mg = 2 hr first session; 500 mg = 3–4 hr first session; dedicated bag" },
+      { "ingredient": "Magnesium Chloride / Sulfate", "ceiling": "2 g/session", "above_ceiling": "BMP required if > 2 g; defer to medical evaluation above scope", "screen": "Slow infusion ≥ 15 min" },
+      { "ingredient": "Biotin", "ceiling": "10 mg/session", "above_ceiling": "n/a", "screen": "Hold 48–72 hr before labs (FDA 2017)" },
+      { "ingredient": "Calcium Gluconate", "ceiling": "1 g/session", "above_ceiling": "BMP required above 1 g", "screen": "Hold if digoxin/cardiac glycoside" },
+      { "ingredient": "B-Complex (Vita Complex)", "ceiling": "2 mL/session", "above_ceiling": "n/a", "screen": "Methylcobalamin only — no cyano/hydroxocobalamin" },
+      { "ingredient": "Methylcobalamin", "ceiling": "5,000 mcg/session", "above_ceiling": "n/a", "screen": "Contraindicated in Leber's Hereditary Optic Neuropathy" },
+      { "ingredient": "Amino Blend", "ceiling": "10 mL (1 vial)/session", "above_ceiling": "n/a", "screen": "Per WEL-15" }
+    ],
+    "fires_in_formulary": true
+  },
+
+  "osmolarity_guidance": {
+    "id": "IVIM_OSMOLARITY",
+    "peripheral_limit_mOsm_L": 900,
+    "note": "Final-admixture osmolarity decides peripheral vs central access. Peripheral IV generally tolerates up to ~900 mOsm/L; above that, dilute further, use a larger-volume bag, or use central access. Any value AllyOS shows is an ESTIMATE — verify the true final osmolarity against the compounding reference / product labeling before relying on it.",
+    "base_osmolarity_mOsm_L": { "0.9% Normal Saline": 308, "Lactated Ringer's": 273, "Dedicated NAD+ bag (NS)": 308 },
+    "hyperosmolar_drivers": ["High-dose Vitamin C (markedly raises osmolarity, esp. in low-volume bags)", "Calcium Chloride (hypertonic; also a vesicant — central preferred)", "Amino acid blends", "NAD+ (concentration-dependent)", "Any dextrose-containing base"],
+    "rules": [
+      "Low volume + high-dose additive = higher osmolarity. A 10 g Vitamin C dose in 250 mL is far more concentrated than in 1 L — prefer a larger bag for high-dose Vit C.",
+      "If estimated osmolarity exceeds ~900 mOsm/L: increase the bag volume, reduce the dose, slow the infusion, or use central access.",
+      "Calcium Chloride is both hypertonic and a vesicant — Calcium Gluconate is preferred for peripheral wellness IV."
+    ],
+    "fires_in_formulary": true
+  },
+
+  "ingredients": [
+    { "id": "ING_NS", "name": "0.9% Normal Saline (default base fluid)", "route": "IV infusion via 22G catheter", "standard": "250/500 mL (500 mL default for most stacks); 1 L for hydration only", "rate": "30–45 min/250 mL; 45–60 min/500 mL; 60 min/1 L", "absolute_ci": "Decompensated CHF · pulmonary edema · severe hypernatremia", "relative_ci": "ESRD on dialysis · CHF (smaller volume) · severe hypertension", "in_primary_library": true, "source": "MASTER-MENU §1" },
+    { "id": "ING_LR", "name": "Lactated Ringer's (alternate base)", "route": "IV infusion", "standard": "1 L (hydration only)", "absolute_ci": "Hyperkalemia · severe hepatic disease · concurrent ceftriaxone", "relative_ci": "CHF · ESRD", "note": "Do NOT use as base for high-dose Vit C bags — prefer NS", "in_primary_library": true, "source": "MASTER-MENU §1" },
+    { "id": "ING_VITACOMPLEX", "name": "Vita Complex (B-Complex injection)", "composition": "B1 100 · B2 2 · B3 100 · B5 2 · B6 2 mg/mL", "standard": "1–2 mL", "ceiling": "2 mL", "route": "IV in bag", "absolute_ci": "Known hypersensitivity to any B vitamin (rare)", "interactions": "Levodopa (B6 may reduce efficacy) · phenytoin (long-term)", "note": "Bright yellow urine expected", "in_primary_library": true, "source": "MASTER-MENU §2.1" },
+    { "id": "ING_METHYLB12", "name": "Methylcobalamin (Methyl B12) — packet standard", "standard": "1,000–5,000 mcg", "ceiling": "5,000 mcg", "route": "IV push (1–3 min slow), IM, or in bag", "absolute_ci": "Leber's Hereditary Optic Neuropathy (LHON)", "interactions": "Chloramphenicol · metformin (chronic) · PPIs (oral only)", "note": "Methylcobalamin only — no cyanocobalamin or hydroxocobalamin. Ready-to-use only.", "citation": "Carmel R (2008) Blood 112(6):2214", "in_primary_library": true, "source": "MASTER-MENU §2.2" },
+    { "id": "ING_VITC", "name": "Ascorbic Acid (Vitamin C) — preservative-free", "aliases": ["Vitamin C", "Vit C", "Ascorbic Acid"], "standard": "1–10 g (common 5/7.5/10 g)", "ceiling": "10 g without labs", "route": "IV in bag", "rate": "≤ 0.5 g/min for 5–10 g (typically 30–60 min for 10 g)", "absolute_ci": "G6PD deficiency · ESRD/dialysis · active hemochromatosis · bortezomib (Velcade) · pregnancy > 2 g", "relative_ci": "CKD Stage 3–4 · methotrexate · oxalate-stone history", "interactions": "Bortezomib (CONTRAINDICATED) · methotrexate · oral iron · NOT compatible with Calcium Gluconate in same bag", "screen": "CARD-VC verbal screen for 6.1–10 g", "adverse": "Vein irritation (slow rate) · transient flushing · false-high glucose on finger-stick meters", "citation": "Padayatty SJ et al. (2010) PLoS ONE 5(7):e11414; (2006) CMAJ 174(7):937", "in_primary_library": true, "source": "MASTER-MENU §2.3" },
+    { "id": "ING_BIOTIN", "name": "Biotin", "standard": "5–10 mg", "ceiling": "10 mg", "route": "IV in bag", "interactions": "FDA 2017 ALERT: immunoassay interference (troponin, thyroid, hCG, PTH). Hold 48–72 hr before any blood lab.", "citation": "FDA Safety Communication (Nov 28, 2017)", "in_primary_library": true, "source": "MASTER-MENU §2.6" },
+    { "id": "ING_MGCL", "name": "Magnesium Chloride", "standard": "500 mg–2 g", "ceiling": "2 g", "route": "IV in bag", "rate": "Slow over 15–30 min minimum (rapid push → flushing, hypotension, AV block)", "absolute_ci": "2nd/3rd-degree AV block · severe renal impairment (CrCl < 30) · myasthenia gravis", "relative_ci": "Hypotension · digoxin · CCBs · neuromuscular blockers", "interactions": "Digoxin (additive bradycardia) · CCBs (hypotension) · aminoglycosides (NMJ block)", "antidote": "Calcium Gluconate 1 g IV slow is the antidote for Mg toxicity", "in_primary_library": true, "source": "MASTER-MENU §3.1" },
+    { "id": "ING_CAGLUC", "name": "Calcium Gluconate — preservative-free", "standard": "100–500 mg", "ceiling": "1 g (above requires BMP)", "route": "IV in bag (slow) OR Y-port after Vit C bag", "rate": "Slow over 15–30 min", "absolute_ci": "Hypercalcemia · digoxin therapy · ventricular fibrillation · sarcoidosis", "interactions": "NOT compatible with Vitamin C in same bag (calcium ascorbate precipitate) · digoxin potentiation · ceftriaxone precipitate", "in_primary_library": true, "source": "MASTER-MENU §3.2" },
+    { "id": "ING_ZINC", "name": "Zinc Sulfate", "standard": "5–10 mg", "ceiling": "10 mg", "route": "IV in bag", "absolute_ci": "Severe copper deficiency · prior zinc toxicity", "in_primary_library": true, "source": "MASTER-MENU §3.3" },
+    { "id": "ING_SELENIUM", "name": "Selenium (Sodium Selenite / Selenious Acid)", "standard": "100–200 mcg", "ceiling": "200 mcg", "route": "IV in bag", "absolute_ci": "Selenium toxicity history", "in_primary_library": true, "source": "MASTER-MENU §3.3" },
+    { "id": "ING_TRACE", "name": "Trace Mineral Injection (Zn + Cu + Mn + Se)", "composition": "Zinc 3 mg + Copper 0.3 mg + Manganese 55 mcg + Selenium 60 mcg per mL", "standard": "1 mL (IV-11)", "ceiling": "2 mL", "route": "IV in bag", "note": "Do not stack with separate Zn/Se same session (double-dosing). Cu/Mn accumulate — frequency cap once every 4 weeks.", "in_primary_library": true, "source": "MASTER-MENU §3.3" },
+    { "id": "ING_LYSINE", "name": "L-Lysine", "standard": "200–500 mg", "ceiling": "500 mg", "route": "IV in bag", "in_primary_library": true, "source": "MASTER-MENU §4" },
+    { "id": "ING_TAURINE", "name": "L-Taurine", "standard": "500 mg–1 g", "ceiling": "1 g", "route": "IV in bag", "citation": "Schaffer S, Kim HW (2018) Biomol Ther 26(3):225", "in_primary_library": true, "source": "MASTER-MENU §4" },
+    { "id": "ING_CARNITINE", "name": "L-Carnitine", "standard": "500 mg–1 g", "ceiling": "1 g", "route": "IV in bag", "rate": "Over 15–30 min", "relative_ci": "Seizure disorder (rare threshold lowering)", "adverse": "Mild GI · fishy body odor (high doses, benign)", "citation": "Pekala J et al. (2011) Curr Drug Metab 12(7):667", "in_primary_library": true, "source": "MASTER-MENU §4" },
+    { "id": "ING_GLUTAMINE", "name": "L-Glutamine", "standard": "1–2 g", "ceiling": "2 g", "route": "IV in bag", "absolute_ci": "Hepatic encephalopathy", "citation": "Wischmeyer PE (2003) Nutr Clin Pract 18(5):377", "in_primary_library": true, "source": "MASTER-MENU §4" },
+    { "id": "ING_AMINOBLEND", "name": "Amino Blend (Proline + Arginine + Lysine + Citrulline)", "composition": "Proline 50 + Arginine 100 + Lysine 50 + Citrulline 50 mg/mL", "standard": "5–10 mL", "ceiling": "10 mL", "route": "IV in bag", "rate": "Over 30–60 min", "absolute_ci": "PKU (if phenylalanine present) · severe renal impairment", "in_primary_library": true, "source": "MASTER-MENU §4" },
+    { "id": "ING_GLUTATHIONE", "name": "Glutathione (reduced) — preservative-free", "standard": "600–1,200 mg slow IV push over 1–2 min", "ceiling": "1,200 mg", "route": "IV PUSH ONLY (post-drip). No in-bag mixing, no piggyback, no slow infusion.", "administration": "Separate syringe through Y-port closest to catheter; flush line 3–5 mL NS BEFORE and 3 mL AFTER", "absolute_ci": "Active asthma exacerbation", "relative_ci": "Severe asthma (controlled) · prior glutathione reaction · sulfite sensitivity", "interactions": "NOT compatible with Vitamin C in same bag/syringe (redox inactivates glutathione)", "above_ceiling": "Aesthetic skin-lightening NOT recommended (FDA 2015 alert: SJS/TEN, renal failure at ≥ 2 g)", "citation": "Hauser RA et al. (2009) Mov Disord 24(7):979; FDA 2015 IV Glutathione Aesthetic Alert", "in_primary_library": true, "source": "MASTER-MENU §5" },
+    { "id": "ING_NAD", "name": "NAD+ — ready-to-use", "standard": "100–500 mg", "ceiling": "500 mg", "route": "IV slow infusion in dedicated 250–500 mL NS bag (never mixed with other ingredients)", "rate": "250 mg: ≥ 2 hr first session (90–120 min tolerant); 500 mg: ≥ 3–4 hr. Start 2 mg/min; titrate to 4–5 mg/min only if asymptomatic at 30 min. Rapid infusion → chest pressure, GI cramping, anxiety, flushing.", "absolute_ci": "Known NAD+ hypersensitivity", "relative_ci": "Active malignancy (theoretical) · severe panic disorder", "note": "Ready-to-use only — not lyophilized. Optional PO Tylenol 30 min prior for new patients.", "citation": "Grant R et al. (2019) Front Aging Neurosci 11:257; Brakedal B et al. (2022) Cell Metab 34(3):396", "in_primary_library": true, "source": "MASTER-MENU §6" },
+    { "id": "ING_NIAGEN_NR", "name": "Niagen® / Nicotinamide Riboside Chloride (NR) — NAD+ precursor", "aliases": ["Niagen® / NR", "Niagen", "NR", "Nicotinamide Riboside Chloride", "NR IV"], "standard": "500 mg", "ceiling": "500 mg", "route": "IV infusion in dedicated 500 mL 0.9% NS bag (NR only — never mixed with other IV nutrients/meds unless documented compatibility + written MD approval)", "rate": "500 mg over 30–45 min as tolerated (studied mean 37 ± 13 min). Slow/pause for tongue/jaw/arm tingling, cramping, nausea, anxiety, flushing, dizziness, or BP/HR change; resume only if resolved. Stop + escalate for chest pressure, dyspnea, throat tightness, urticaria, wheezing, angioedema, severe cramping, or syncope.", "absolute_ci": "Hypersensitivity to NR/Niagen®/excipients or prior NAD/NR infusion reaction · pregnancy/suspected pregnancy/lactation (hard hold pending physician decision, per standing order §5)", "relative_ci": "Active/recent malignancy (evidence-gap physician review) · significant hepatic disease/elevated LFTs · advanced CKD/dialysis/unstable renal function · immunocompromise · uncontrolled diabetes · polypharmacy with incomplete med list", "note": "NAD+ PRECURSOR — NOT the same as NAD+ IV; do not label as equivalent and do not claim superiority. No proven peptide-synergy benefit. Outcome evidence preliminary; moderate for short-term tolerability, low for outcomes. Frequency: single 500 mg IV, or 500 mg daily up to 4 consecutive days (provider-approved). Higher per-session tiers (750/1000 mg) not evidence-supported here.", "citation": "Reyna et al. (2026) Front Aging fragi.2026.1652582 (PMC12907335; n=14, 500 mg NAD+/NR IV ×4d); Hawkins et al. (2024) medRxiv preprint (single 500 mg NR IV); Conze et al. (2019) Sci Rep (oral NR — background only)", "in_primary_library": true, "source": "niagen-nr-iv-standing-order.md v0.1 (citations AllyOS-verified 2026-06-24); promoted to primary library on MD sign-off 2026-06-29" },
+    { "id": "ING_LIPOTROPIC", "name": "Lipotropic IM (Methionine + Inositol + Choline + Methylcobalamin, methyl-only)", "composition": "Methionine 12.4 + Inositol 25 + Choline 25 + B6 2 mg/mL + separate Methylcobalamin", "standard": "1 mL IM", "ceiling": "1 mL/session, max 1–2 sessions/week", "route": "IM (gluteal or deltoid, Z-track)", "absolute_ci": "Active gallbladder disease · severe renal impairment · pregnancy", "relative_ci": "Hepatic dysfunction · sulfite sensitivity", "in_primary_library": true, "source": "MASTER-MENU §6" },
+    { "id": "ING_NAC", "name": "N-Acetyl Cysteine (NAC) — IM only at wellness dose", "standard": "200–600 mg IM", "ceiling": "600 mg IM", "route": "IM only (high-dose IV NAC is hospital-level, not wellness scope)", "absolute_ci": "Active asthma exacerbation · prior NAC reaction", "in_primary_library": true, "source": "MASTER-MENU §6" },
+    { "id": "ING_COQ10", "name": "Coenzyme Q10 (Ubidecarenone) — IM only", "standard": "20–200 mg IM (typical 100 mg)", "ceiling": "200 mg IM", "route": "IM ONLY (grapeseed oil base — IV not authorized: fat-embolism risk)", "absolute_ci": "Hypersensitivity to grapeseed oil", "interactions": "Warfarin (may reduce INR)", "in_primary_library": true, "source": "MASTER-MENU §5" },
+
+    { "id": "ING_B12_CYANO", "name": "Cyanocobalamin (B12)", "standard": "1,000 mcg", "route": "IV push, IM, or in bag", "relative_ci": "Leber's Hereditary Optic Neuropathy / tobacco amblyopia (cyano form worse — methyl/hydroxo preferred)", "note": "Generic-menu item. The original wellness standing-orders packet used Methylcobalamin only; AllyOS lists cyano because it is commonly stocked, with the methyl-preferred caution attached.", "in_primary_library": false, "source": "Generic IV/IM master menu (clinic inventory)" },
+    { "id": "ING_B12_HYDROXO", "name": "Hydroxocobalamin (B12)", "standard": "1,000 mcg", "route": "IV push, IM, or in bag", "adverse": "Expected reddish/pink urine and skin discoloration (chromaturia); at high IV doses can interfere with colorimetric lab assays (creatinine, AST, bilirubin) and colorimetric hemodialysis monitors", "note": "Generic-menu item; longer-acting B12 form. Packet standard is methylcobalamin; hydroxo is acceptable, listed because commonly stocked.", "in_primary_library": false, "source": "Generic IV/IM master menu (clinic inventory)" },
+    { "id": "ING_B5", "name": "Dexpanthenol (Vitamin B5)", "standard": "250–500 mg", "route": "IV in bag or IM", "relative_ci": "Hemophilia · ileus / GI obstruction", "note": "Generally well tolerated; energy/skin support.", "in_primary_library": false, "source": "Generic IV/IM master menu (clinic inventory)" },
+    { "id": "ING_B6", "name": "Pyridoxine (Vitamin B6) — standalone", "standard": "50–100 mg", "ceiling": "100 mg", "route": "IV in bag or IM", "relative_ci": "Levodopa therapy (B6 reduces efficacy)", "adverse": "Peripheral neuropathy at chronic high doses (well above wellness)", "note": "B-Complex already contains B6 2 mg/mL.", "in_primary_library": true, "source": "MASTER-MENU §6" },
+    { "id": "ING_VITD3", "name": "Vitamin D3 (Cholecalciferol) — IM only", "standard": "50,000–100,000 IU IM", "route": "IM only (grapeseed oil base)", "cadence": "Monthly or per patient's D3 level", "absolute_ci": "Hypercalcemia · vitamin D toxicity · sarcoidosis", "in_primary_library": true, "source": "MASTER-MENU §6" },
+    { "id": "ING_ALA", "name": "Alpha Lipoic Acid (ALA)", "standard": "Commonly 300–600 mg IV (slow)", "route": "IV in bag (slow infusion)", "absolute_ci": "History of insulin autoimmune syndrome (Hirata disease) or prior ALA-associated hypoglycemia", "relative_ci": "Diabetes / insulin or sulfonylurea use (additive hypoglycemia) · thiamine deficiency (co-repletes thiamine; ALA increases thiamine demand) · East Asian ancestry / HLA-DRB1*04:06 or *04:03 (IAS predisposition)", "guardrail": "PRIMARY RISK — INSULIN AUTOIMMUNE SYNDROME (Hirata disease): ALA is an established trigger and can cause severe spontaneous hypoglycemia, with predisposition in HLA-DRB1*04:06 (Asian) and *04:03 (European) backgrounds. Screen for hypoglycemia risk and prior reaction; counsel. Give with thiamine repletion. The original wellness packet EXCLUDED ALA for this reason; AllyOS lists it because it is stocked, with this caution prominent.", "in_primary_library": false, "source": "Generic IV/IM master menu (clinic inventory)" },
+    { "id": "ING_CACL", "name": "Calcium Chloride", "standard": "Typically lower volume than gluconate (≈3× elemental Ca of gluconate)", "route": "IV — central line PREFERRED (vesicant)", "absolute_ci": "Hypercalcemia · digoxin therapy · ventricular fibrillation · sarcoidosis", "guardrail": "More sclerosing / vesicant than Calcium Gluconate — high extravasation injury risk peripherally. For peripheral wellness IV, Calcium GLUCONATE is preferred. NOT in the same bag as Vitamin C (precipitate). Hold if digoxin/cardiac glycoside.", "interactions": "Vitamin C (precipitate) · digoxin (potentiation) · ceftriaxone (precipitate)", "in_primary_library": false, "source": "Generic IV/IM master menu (clinic inventory)" },
+    { "id": "ING_ARGININE", "name": "L-Arginine", "standard": "Component of Amino Blend; standalone available", "route": "IV in bag", "absolute_ci": "Severe renal impairment (arginine HCl can cause life-threatening HYPERKALEMIA via transcellular potassium shift) · severe hepatic impairment", "relative_ci": "Recent MI · hypotension (vasodilator) · herpes (theoretical) · urea-cycle / arginine-metabolism disorders", "adverse": "Vasodilation / hypotension at higher doses; hyperkalemia (HCl salt)", "guardrail": "Screen renal function before IV arginine — the HCl salt shifts potassium extracellularly and has caused fatal hyperkalemia in renal impairment.", "in_primary_library": false, "source": "Generic IV/IM master menu (clinic inventory)" },
+    { "id": "ING_PROLINE", "name": "L-Proline", "standard": "Component of Amino Blend; standalone available", "route": "IV in bag", "note": "Collagen-synthesis amino acid; part of the Amino Blend.", "in_primary_library": false, "source": "Generic IV/IM master menu (clinic inventory)" },
+    { "id": "ING_GLYCINE", "name": "Glycine", "standard": "Commonly a buffer/adjunct in compounded blends", "route": "IV in bag / component of compounded injectables", "note": "Appears as a stabilizer/adjunct in some compounded blends (e.g., GLP-1 + glycine + B12). Generally inert at wellness amounts.", "in_primary_library": false, "source": "Generic IV/IM master menu (clinic inventory)" },
+    { "id": "ING_MINERALBLEND", "name": "Mineral Blend (composite)", "composition": "Multi-mineral compounded blend (varies by supplier — confirm components and per-mL content against the actual label)", "route": "IV in bag", "guardrail": "Composite — do NOT co-administer with standalone forms of the same minerals (double-dosing). Verify exact composition on the vial before stacking.", "in_primary_library": false, "source": "Generic IV/IM master menu (clinic inventory)" },
+    { "id": "ING_TRIIMMUNE", "name": "Tri-Immune Boost (composite: Zinc + Ascorbic Acid + Glutathione)", "composition": "Zinc + Vitamin C + Glutathione (premade immune blend)", "route": "IV in bag — NOTE: contains glutathione; standalone glutathione is otherwise IV-push-only. Confirm the premade blend's stability/labeling.", "guardrail": "Contains Vitamin C AND glutathione together as a manufactured blend — this is a vendor-formulated exception to the in-bag glutathione+Vit C incompatibility; do NOT replicate by hand-mixing glutathione into a Vit C bag. Do not double-dose Zn/Vit C/glutathione from other components.", "in_primary_library": false, "source": "Generic IV/IM master menu (clinic inventory)" },
+    { "id": "ING_MICC", "name": "MIC / MICC / Lipo-MIC family (Methionine + Inositol + Choline ± Carnitine/B12) — IM", "standard": "1 mL IM", "route": "IM (gluteal/deltoid, Z-track)", "absolute_ci": "Active gallbladder disease · severe renal impairment · pregnancy", "relative_ci": "Hepatic dysfunction · sulfite sensitivity", "note": "Lipotropic family — same class as the locked Lipotropic IM. Many vendor variants (Lipo-Mino, Lipo Plus, LipoStat) — verify the exact formula on the label.", "in_primary_library": false, "source": "Generic IV/IM master menu (clinic inventory)" },
+    { "id": "ING_METHYLENE_BLUE", "name": "Methylene Blue — HIGH-CAUTION", "standard": "Low-dose wellness (commonly 0.5–1 mg/kg); confirm protocol", "route": "IV slow infusion (dilute) or low-dose", "absolute_ci": "Concurrent OR recent (within ~2 weeks / 5 half-lives, washout) serotonergic agents — SSRIs, SNRIs, MAOIs, TCAs, triptans, bupropion, buspirone, dextromethorphan, AND serotonergic opioids (tramadol, meperidine, fentanyl, methadone) (SEROTONIN SYNDROME) · G6PD deficiency (hemolysis) · pregnancy · severe renal impairment", "guardrail": "SAFETY-CRITICAL. Methylene Blue is a potent MAO-A inhibitor — combined with serotonergic drugs it can cause life-threatening serotonin syndrome. Screen the FULL medication list BEFORE use — not only antidepressants but also tramadol/meperidine/fentanyl/methadone, dextromethorphan, and bupropion — and screen for use within the prior ~2 weeks, not just same-day. Screen G6PD (hemolysis risk). Causes blue-green urine/secretions (expected) and can transiently and falsely LOWER pulse-oximeter SpO2 readings. Not a routine wellness nutrient — treat as a high-caution specialty agent requiring explicit screening.", "interactions": "Serotonergic agents incl. serotonergic opioids — tramadol/meperidine/fentanyl/methadone, dextromethorphan, bupropion (CONTRAINDICATED, concurrent or recent) · G6PD (hemolysis) · pulse-oximetry interference", "in_primary_library": false, "source": "Generic IV/IM master menu (clinic inventory)" },
+    { "id": "ING_ONDANSETRON_MENU", "name": "Ondansetron (Zofran) — anti-nausea adjunct", "standard": "4 mg IV push (slow 30 sec) or IM", "route": "IV push or IM", "absolute_ci": "Concurrent apomorphine · long QT syndrome", "adverse": "Headache · constipation · QT prolongation (high doses)", "note": "Administration adjunct (also in the emergency/PRN cart), not a wellness stack ingredient.", "in_primary_library": true, "source": "MASTER-MENU §7" },
+    { "id": "ING_KETOROLAC", "name": "Ketorolac (Toradol) — Rx pain adjunct", "standard": "15–30 mg IV/IM", "route": "IV/IM", "absolute_ci": "Active GI bleed/ulcer · renal impairment · hypovolemia / volume depletion · bleeding disorder / anticoagulation · NSAID or aspirin allergy · labor and delivery · pregnancy (3rd trimester) · peri-operative CABG · breastfeeding", "interactions": "Aspirin / other NSAIDs · probenecid · anticoagulants", "note": "Rx adjunct, not a wellness nutrient. Provider-prescribed; short-course only — max 5 days combined (IV/IM + oral).", "in_primary_library": false, "source": "Generic IV/IM master menu (clinic inventory — Rx adjunct)" },
+    { "id": "ING_FAMOTIDINE", "name": "Famotidine (Pepcid) — Rx adjunct", "standard": "20 mg IV/IM", "route": "IV/IM", "guardrail": "Renally cleared — reduce dose in renal impairment (CrCl <50; CNS effects/confusion, esp. elderly); avoid rapid IV push (rare QT prolongation in renal impairment — give slow or diluted).", "note": "H2 blocker; allergic-reaction adjunct (often with diphenhydramine). Rx adjunct, not a wellness nutrient.", "in_primary_library": false, "source": "Generic IV/IM master menu (clinic inventory — Rx adjunct)" }
+  ],
+
+  "line_crossover": {
+    "note": "Agents sometimes seen on clinic order sheets that are NOT part of the IV/IM wellness bar and are NOT inventoried as office stock. The IV bar runs on 503B office-use stock (generic vials, administered chairside). The agents below are 503A patient-specific prescriptions, direct-shipped to the patient and self-administered — a provider Rx workflow, not chairside bar stock. AllyOS handles them in the Peptide module (prescribing decision-support), never the IV inventory or builder, so guardrails are not split.",
+    "compliance_distinction": {
+      "iv_bar": "503B outsourcing-facility office-use stock — generic vials kept and administered at the clinic (this IV/IM module).",
+      "peptides": "503A patient-specific compounded prescriptions — prescribed by the provider, shipped direct to the patient, self-administered at home. NOT inventoried by the clinic."
+    },
+    "entries": [
+      { "agents": ["Semaglutide", "Tirzepatide (± glycine + B12)"], "owning_line": "Peptides / GLP-1 (weight management)", "handling": "503A patient-specific, direct-to-patient shipping, provider-prescribed (Rx) — do NOT inventory. Not a chairside IV/IM bar agent.", "route_to": "AllyOS peptide layers (interactions.json, peptide-interactions.json, patient-factor-rules.json, monitoring-map.json)." },
+      { "agents": ["Sermorelin"], "owning_line": "Peptides / GH-secretagogue", "handling": "503A patient-specific, direct-to-patient shipping, provider-prescribed (Rx) — do NOT inventory.", "route_to": "AllyOS peptide layers." }
+    ]
+  },
+
+  "master_menu_posture": {
+    "id": "IVIM_MENU_POSTURE",
+    "principles": [
+      "AllyOS holds the GENERIC clinical palette only — agent, concentration/size, typical dose range, route, ceiling, and safety guardrails. It carries NO pharmacy name, brand, SKU, cost, or stock level. Sourcing, pricing, and inventory live in the clinic's own inventory tool and are the clinic/provider's decision.",
+      "The menu lists what is COMMONLY STOCKED across IV bars (the inventory is nearly identical everywhere), including agents the original wellness standing-orders packet chose to exclude (e.g., Alpha Lipoic Acid, cyano/hydroxo B12). Those are included WITH their guardrail so the provider sees the caution rather than having the agent silently omitted.",
+      "Provider-driven: the provider selects and NAMES their own stacks from this palette (Mode B custom builds). AllyOS supplies the live safety/compatibility/ceiling/patient-factor logic and an advisory verdict — it does not own or mandate the formulary.",
+      "AllyOS advises and discloses; it does not govern. No agent is blocked — high-caution agents (Methylene Blue, ALA) surface strong advisories the provider acts on and signs.",
+      "Composite/premade blends (Amino Blend, Mineral Blend, Tri-Immune, MIC family, Myers premade) must have their exact label composition confirmed before stacking, to avoid double-dosing a component."
+    ],
+    "fires_in_formulary": true
+  },
+
+  "stacks": [
+    {
+      "code": "IV-01", "title": "Myers Cocktail (Standard Base Stack)", "version": "v2.3", "type": "pre-built stack",
+      "indication": "General wellness optimization · energy/fatigue support · mild dehydration support · post-exercise recovery · foundational micronutrient replenishment. Most common starting point for new wellness IV patients.",
+      "scope_limitation": "Adjunctive nutritional wellness support. Not intended to diagnose, treat, cure, prevent, reverse, or manage any disease. Adults ≥ 18.",
+      "base": "0.9% NS 500 mL (250 mL acceptable for short visits)",
+      "components": [
+        { "ingredient": "Vita Complex (B-Complex)", "dose": "1 mL" },
+        { "ingredient": "Methylcobalamin", "dose": "1,000 mcg" },
+        { "ingredient": "Vitamin C", "dose": "5 g (no CARD-VC at 5 g)" },
+        { "ingredient": "Magnesium Chloride", "dose": "1 g (slow ≥ 15 min)" },
+        { "ingredient": "Zinc Sulfate", "dose": "5 mg" }
+      ],
+      "optional_add_ons": [
+        { "ingredient": "Calcium Gluconate", "dose": "100–500 mg", "note": "Optional only · NOT in same bag as Vit C · separate after Vit C bag with line flush, or separate piggyback" },
+        { "ingredient": "Glutathione push (post-drip)", "dose": "600–1,200 mg", "note": "Per ADDON-01; preservative-free preferred" }
+      ],
+      "infusion_time": "45–60 min (500 mL); Mg total time ≥ 15 min",
+      "frequency": "No more than once weekly for up to 4 initial sessions, then every 2–4 weeks; reassess for continued frequent use",
+      "key_gates": ["GFE Gate-0", "Vital hold/referral", "G6PD + Vit C > 2 g hold", "Digoxin hold if Calcium included", "Mg renal/AV-block screen"],
+      "citations": ["Padayatty SJ et al. (2010) PLoS ONE", "Carmel R (2008) Blood", "Berger MM ESPEN", "USP <797> Immediate-Use"],
+      "in_primary_library": true
+    },
+    {
+      "code": "IV-03", "title": "Longevity Stack (NAD+ + Glutathione)", "version": "v2.3", "type": "pre-built stack",
+      "indication": "Cellular energy support · methylation/redox balance · oxidative stress support · adjunctive wellness in healthy adults.",
+      "scope_limitation": "Adjunctive wellness only. Not authorized for neurodegenerative, oncologic, metabolic, or psychiatric disease. Adult ≥ 18.",
+      "base": "0.9% NS 500 mL",
+      "components": [
+        { "ingredient": "NAD+", "dose": "250 mg standard (ceiling 500 mg/session)", "note": "Rate-sensitive: 250 mg over ≥ 2 hr first session; 90–120 min tolerant. 500 mg over ≥ 3–4 hr." },
+        { "ingredient": "Methylcobalamin", "dose": "1,000 mcg" }
+      ],
+      "post_drip": [
+        { "ingredient": "Glutathione push", "dose": "1,200 mg slow IV push 1–2 min", "note": "Post-drip only after NAD+ bag complete + symptom-free 5 min; flush 10 mL NS before push" }
+      ],
+      "infusion_time": "NAD+ rate-driven (2–4 hr per dose); glutathione push after",
+      "key_gates": ["GFE Gate-0", "Vital hold/referral", "No active malignancy/pregnancy/breastfeeding without separate evaluation", "NAD+ rate titration + 50% slow on chest tightness/flushing/cramping/anxiety", "Glutathione asthma/atopy screen"],
+      "citations": ["Grant R et al. (2019) Front Aging Neurosci 11:257", "Brakedal B et al. (2022) Cell Metab 34(3):396", "Hauser RA et al. (2009) Mov Disord", "FDA 2015 IV Glutathione aesthetic alert", "Mestayer P (Springfield Wellness)"],
+      "in_primary_library": true
+    },
+    {
+      "code": "IV-04", "title": "Beauty / Glow Stack", "version": "v2.2", "type": "pre-built stack",
+      "indication": "Adjunctive antioxidant support · skin/hair/nail support · general wellness.",
+      "scope_limitation": "Wellness adjunct only. Not for dermatologic disease, alopecia, or hyperpigmentation. Adult ≥ 18.",
+      "base": "0.9% NS 500 mL",
+      "components": [
+        { "ingredient": "Vitamin C", "dose": "5 g (no CARD-VC at 5 g)" },
+        { "ingredient": "Biotin", "dose": "10 mg", "note": "FDA 2017 lab-interference counseling; hold 48–72 hr before labs" },
+        { "ingredient": "Methylcobalamin", "dose": "1,000 mcg (optional)" }
+      ],
+      "post_drip": [
+        { "ingredient": "Glutathione push", "dose": "1,200 mg slow IV push 1–2 min", "note": "Visible-benefit component; post-drip only" }
+      ],
+      "infusion_time": "Main bag 30–45 min; glutathione push after",
+      "key_gates": ["GFE Gate-0", "Vital hold/referral", "Biotin lab-interference counseling", "Glutathione asthma/atopy screen", "CARD-VC if Vit C raised > 6 g"],
+      "citations": ["Padayatty SJ et al. (2010) PLoS ONE", "FDA 2017 Biotin alert", "FDA 2015 IV Glutathione aesthetic alert"],
+      "in_primary_library": true
+    },
+    {
+      "code": "IV-05", "title": "Defense / Immune Stack", "version": "v2.3", "type": "pre-built stack",
+      "indication": "Adjunctive immune support · antioxidant load support · wellness during high-exposure periods.",
+      "scope_limitation": "Wellness adjunct only. Not for acute infection, immunodeficiency, or disease. Active infection/febrile illness: defer. Adult ≥ 18.",
+      "base": "0.9% NS 500 mL",
+      "components": [
+        { "ingredient": "Vitamin C", "dose": "7.5 g standard", "note": "CARD-VC verbal screen MANDATORY at > 6 g; up to 10 g ceiling" },
+        { "ingredient": "Zinc Sulfate", "dose": "1 mg" }
+      ],
+      "post_drip": [
+        { "ingredient": "Glutathione push", "dose": "200 mg standard, up to 1,200 mg if boost requested", "note": "Mandatory post-drip push — never in bag with Vit C (redox)" }
+      ],
+      "infusion_time": "Main bag 30–45 min; glutathione push after",
+      "key_gates": ["GFE Gate-0", "Vital hold/referral", "CARD-VC mandatory (Vit C 7.5 g > 6 g)", "Defer if active infection/fever", "Glutathione asthma/atopy screen"],
+      "citations": ["Padayatty SJ et al. (2010) PLoS ONE", "Hauser RA et al. (2009) Mov Disord"],
+      "in_primary_library": true
+    },
+    {
+      "code": "IV-06", "title": "Fast Recovery Stack", "version": "v2.2", "type": "pre-built stack",
+      "indication": "Adjunctive post-exercise recovery · post-illness rebound · athletic recovery · acute fatigue support.",
+      "scope_limitation": "Wellness adjunct only. Not for chronic fatigue syndrome, post-viral syndromes, or disease. Active fever/infection/symptomatic dehydration: defer. Adult ≥ 18.",
+      "base": "0.9% NS (or LR) 500 mL (1 L if dehydration support indicated)",
+      "components": [
+        { "ingredient": "Vita Complex (B-Complex)", "dose": "1 mL" },
+        { "ingredient": "Methylcobalamin", "dose": "1,000 mcg" },
+        { "ingredient": "Magnesium Chloride", "dose": "1 g (slow ≥ 15 min)" },
+        { "ingredient": "L-Carnitine", "dose": "500 mg" },
+        { "ingredient": "L-Taurine", "dose": "500 mg" },
+        { "ingredient": "Vitamin C", "dose": "6 g (no CARD-VC at 6 g; CARD-VC if > 6 g)" },
+        { "ingredient": "Amino Blend", "dose": "5–10 mL (optional)" }
+      ],
+      "post_drip": [
+        { "ingredient": "Glutathione push", "dose": "600–1,200 mg (optional)", "note": "Recommended for athletic recovery; defer if asthma/atopy" }
+      ],
+      "infusion_time": "45–60 min; Mg total time ≥ 15 min",
+      "key_gates": ["GFE Gate-0", "Vital hold/referral", "Mg renal/AV-block screen", "Dehydrated patients higher vasovagal risk", "CARD-VC if Vit C > 6 g"],
+      "citations": ["Mah E et al. (2018) Nutrients", "Pekala J et al. (2011) Curr Drug Metab"],
+      "in_primary_library": true
+    },
+    {
+      "code": "IV-07", "title": "Neuro / Brain Stack", "version": "v2.2", "type": "pre-built stack",
+      "indication": "Adjunctive cognitive support · focus support · neurologic support · general wellness.",
+      "scope_limitation": "Wellness adjunct only. Not for dementia, Alzheimer's, Parkinson's, MS, depression, anxiety, ADHD, or any psychiatric/neurologic disease. Adult ≥ 18.",
+      "base": "0.9% NS 500 mL",
+      "components": [
+        { "ingredient": "Methylcobalamin (high-dose neuro)", "dose": "2,000 mcg" },
+        { "ingredient": "Magnesium Chloride", "dose": "1 g (slow ≥ 15 min)" },
+        { "ingredient": "L-Taurine", "dose": "500 mg" },
+        { "ingredient": "L-Carnitine", "dose": "500 mg" },
+        { "ingredient": "Vitamin C", "dose": "2–5 g (no CARD-VC at ≤ 5 g)" }
+      ],
+      "post_drip": [
+        { "ingredient": "Glutathione push", "dose": "600–1,200 mg (optional)" }
+      ],
+      "note": "NAD+ is NOT included in IV-07. For NAD+ support schedule IV-03 (250 mg) or WEL-06 (500 mg) as a dedicated visit.",
+      "infusion_time": "45–60 min; Mg total time ≥ 15 min",
+      "key_gates": ["GFE Gate-0", "Vital hold/referral", "High-dose B12 may cause transient anxiety in MTHFR-variant", "Mg renal/AV-block screen"],
+      "citations": ["MASTER-MENU-01 v3.3"],
+      "in_primary_library": true
+    },
+    {
+      "code": "IV-08", "title": "Metabolic Burner (MIC) Stack", "version": "v2.2", "type": "pre-built stack + IM",
+      "indication": "Adjunctive metabolic/lipotropic support · energy support · adjunctive support for lifestyle-based weight management.",
+      "scope_limitation": "Wellness adjunct only. Not for obesity, metabolic syndrome, diabetes, NAFLD, or disease. Not a substitute for diet/exercise/medical weight management. Defer in pregnancy, breastfeeding, active eating disorder, severe gallbladder disease, sulfite sensitivity. Adult ≥ 18.",
+      "base": "0.9% NS 500 mL",
+      "components": [
+        { "ingredient": "Vita Complex (B-Complex)", "dose": "1 mL" },
+        { "ingredient": "Methylcobalamin", "dose": "1,000 mcg" },
+        { "ingredient": "L-Carnitine", "dose": "500 mg (fat-oxidation cofactor)" },
+        { "ingredient": "Magnesium Chloride", "dose": "1 g (optional, slow ≥ 15 min)" },
+        { "ingredient": "Vitamin C", "dose": "2–5 g (no CARD-VC at ≤ 5 g)" },
+        { "ingredient": "L-Taurine", "dose": "500 mg (optional)" }
+      ],
+      "same_visit_add_ons": [
+        { "ingredient": "Lipotropic IM (MICC + Methyl B12)", "dose": "1 mL IM lateral gluteal/deltoid", "note": "Signature ingredient; separate IM injection same visit; separate sharps; documented same FORM-05" },
+        { "ingredient": "Glutathione push", "dose": "600–1,200 mg (optional)" }
+      ],
+      "infusion_time": "Main bag 30–45 min",
+      "key_gates": ["GFE Gate-0", "Vital hold/referral", "Lipotropic IM: gallbladder/sulfite/B12 screen", "Counsel transient fishy odor (benign)"],
+      "citations": ["Pooyandjoo M et al. (2016) Obes Rev"],
+      "in_primary_library": true
+    },
+    {
+      "code": "IV-09", "title": "Detox / Liver Support Stack", "version": "v2.2", "type": "pre-built stack",
+      "indication": "Adjunctive hepatic/antioxidant support · oxidative stress support · general wellness.",
+      "scope_limitation": "Wellness adjunct only. Not for hepatitis (viral/autoimmune/alcoholic/NAFLD/NASH), cirrhosis, HCC, DILI, or hepatic disease. Active decompensation/new jaundice: defer until medical clearance. Adult ≥ 18.",
+      "base": "0.9% NS 500 mL",
+      "components": [
+        { "ingredient": "Vita Complex (B-Complex)", "dose": "1 mL" },
+        { "ingredient": "Methylcobalamin", "dose": "1,000 mcg" },
+        { "ingredient": "Magnesium Chloride", "dose": "1 g (slow ≥ 15 min)" },
+        { "ingredient": "Vitamin C", "dose": "5 g (no CARD-VC at 5 g)" },
+        { "ingredient": "L-Taurine", "dose": "500 mg" },
+        { "ingredient": "L-Carnitine", "dose": "500 mg (optional)" }
+      ],
+      "post_drip": [
+        { "ingredient": "Glutathione push", "dose": "1,200 mg slow IV push 1–2 min", "note": "Signature antioxidant component; strongly recommended" },
+        { "ingredient": "Lipotropic IM", "dose": "1 mL IM (optional)" }
+      ],
+      "infusion_time": "Main bag 45–60 min; Mg total time ≥ 15 min",
+      "key_gates": ["GFE Gate-0", "Vital hold/referral", "Defer if hepatic decompensation/jaundice/known liver disease", "Glutathione asthma/atopy screen", "CARD-VC if Vit C > 5 g"],
+      "citations": ["Hauser RA et al. (2009) Mov Disord", "FDA 2015 IV Glutathione aesthetic alert"],
+      "in_primary_library": true
+    },
+    {
+      "code": "IV-11", "title": "Trace Mineral IV", "version": "v2.2", "type": "pre-built stack",
+      "indication": "Adjunctive trace mineral support · nutritional repletion in adults with documented/suspected suboptimal intake.",
+      "scope_limitation": "Wellness adjunct only. Not for deficiency disease (Wilson's, Menkes, acrodermatitis enteropathica). Frequency limit: no more than once every 4 weeks (Cu/Mn accumulate). Defer in Wilson's, cholestatic liver disease, ESRD/dialysis, pregnancy. Adult ≥ 18.",
+      "base": "0.9% NS 500 mL",
+      "components": [
+        { "ingredient": "Trace Mineral Injection (Zn + Cu + Mn + Se)", "dose": "1 mL", "note": "Composition per MASTER-MENU §3.3 (Zn 3 mg + Cu 0.3 mg + Mn 55 mcg + Se 60 mcg/mL). The IV-11 standing-order label also printed 'Cr'; MASTER-MENU governs as the single source of clinical truth." },
+        { "ingredient": "Methylcobalamin", "dose": "1,000 mcg (optional)" },
+        { "ingredient": "Magnesium Chloride", "dose": "1 g (optional, slow ≥ 15 min)" }
+      ],
+      "post_drip": [
+        { "ingredient": "Glutathione push", "dose": "600–1,200 mg (optional)" }
+      ],
+      "infusion_time": "30–45 min",
+      "frequency": "Max once every 4 weeks — document last trace-mineral infusion date before initiating",
+      "key_gates": ["GFE Gate-0", "Vital hold/referral", "4-week frequency cap (Cu/Mn accumulation)", "Defer Wilson's/cholestatic/ESRD/pregnancy", "Do not co-administer separate Zn/Se (double-dose)"],
+      "citations": ["Berger MM ESPEN trace element guidelines"],
+      "in_primary_library": true
+    },
+    {
+      "code": "WEL-06", "title": "High-Dose NAD+ IV", "version": "v2.2", "type": "dedicated infusion",
+      "indication": "High-dose adjunctive NAD+ support for cellular energy/longevity/cognitive support. Reserved for tolerant established patients.",
+      "scope_limitation": "Wellness adjunct only. Not for neurodegenerative disease, addiction recovery, oncologic disease, or any diagnosis. First-session patients must use IV-03 250 mg first; WEL-06 500 mg only after documented 250 mg tolerance. Adult ≥ 18.",
+      "base": "0.9% NS 500 mL dedicated bag (NAD+ only — never mixed)",
+      "components": [
+        { "ingredient": "NAD+", "dose": "500 mg (wellness ceiling)", "note": "Rate: 500 mg over ≥ 3–4 hr first session, 2–3 hr subsequent. Never faster. Dedicated bag." }
+      ],
+      "post_drip": [
+        { "ingredient": "Methylcobalamin push", "dose": "1,000 mcg (optional, separate push)" },
+        { "ingredient": "Glutathione push", "dose": "600–1,200 mg (optional)" }
+      ],
+      "infusion_time": "3–4 hr first session (chair-time intensive — verify chair availability before scheduling)",
+      "key_gates": ["GFE Gate-0", "Vital hold/referral", "Must have documented 250 mg (IV-03) tolerance first", "NAD+ rate titration + 50% slow on symptoms", "No active malignancy/pregnancy/breastfeeding without separate evaluation"],
+      "citations": ["Grant R et al. (2019) Front Aging Neurosci 11:257", "Brakedal B et al. (2022) Cell Metab 34(3):396", "Mestayer P (Springfield Wellness)"],
+      "in_primary_library": true
+    },
+    {
+      "code": "WEL-16", "title": "Niagen® / NR IV Infusion (NAD+ precursor)", "version": "v1.0", "type": "dedicated infusion",
+      "indication": "Provider-reviewed NAD+ precursor support for selected adults — wellness / fatigue-recovery / cellular-energy / mitochondrial-longevity context. Distinct from NAD+ IV (NR is a precursor).",
+      "scope_limitation": "Wellness adjunct only. NOT treatment for disease, anti-aging, addiction, neurodegenerative/metabolic disease, cancer, or chronic fatigue; NOT proven peptide-synergy support. Adult ≥ 18.",
+      "base": "0.9% NS 500 mL dedicated bag (NR only — never mixed)",
+      "components": [
+        { "ingredient": "Niagen® / NR", "dose": "500 mg (evidence-supported ceiling)", "note": "Rate: over 30–45 min as tolerated (studied mean 37 ± 13 min). Dedicated bag. Higher per-session doses not evidence-supported." }
+      ],
+      "infusion_time": "30–45 min",
+      "frequency": "Single 500 mg IV, or 500 mg daily up to 4 consecutive days (provider-approved with documented rationale + monitoring). No routine indefinite maintenance in this protocol.",
+      "key_gates": ["GFE Gate-0", "Vital hold/referral", "Hypersensitivity / prior NAD-NR reaction screen", "Evidence-gap physician review: active/recent malignancy · hepatic/LFT · advanced CKD · immunocompromise · uncontrolled diabetes · polypharmacy", "Do NOT mix in-bag with other nutrients; do NOT label as NAD+ IV", "No pregnancy/breastfeeding without separate physician evaluation"],
+      "citations": ["Reyna et al. (2026) Front Aging fragi.2026.1652582 (PMC12907335)", "Hawkins et al. (2024) medRxiv preprint", "Conze et al. (2019) Sci Rep (oral NR — background)"],
+      "in_primary_library": true
+    },
+    {
+      "code": "WEL-15", "title": "Amino Blend (Standalone)", "version": "v2.2", "type": "pre-built stack",
+      "indication": "Adjunctive amino acid support · post-exertion recovery support · general wellness for adults in physical training or post-illness recovery.",
+      "scope_limitation": "Wellness adjunct only. Not for sarcopenia, cachexia, malnutrition syndromes, or disease. Defer in active hepatic disease (urea cycle stress), pregnancy, breastfeeding, known protein-metabolism disorder. Adult ≥ 18.",
+      "base": "0.9% NS 500 mL",
+      "components": [
+        { "ingredient": "Amino Blend (mixed essential amino acids)", "dose": "10 mL" },
+        { "ingredient": "L-Carnitine", "dose": "500 mg (optional)" },
+        { "ingredient": "L-Taurine", "dose": "500 mg (optional)" },
+        { "ingredient": "L-Glutamine", "dose": "1–2 g (optional)" }
+      ],
+      "post_drip": [
+        { "ingredient": "Glutathione push", "dose": "600–1,200 mg (optional)" }
+      ],
+      "infusion_time": "30–45 min",
+      "key_gates": ["GFE Gate-0", "Vital hold/referral", "Defer hepatic disease/pregnancy/breastfeeding/protein-metabolism disorder", "Counsel transient ammonia odor (benign)", "High-arginine vasodilation → hypotension watch"],
+      "citations": ["Standard amino-acid IV nutrition references"],
+      "in_primary_library": true
+    },
+    {
+      "code": "ADDON-01", "title": "Glutathione IV Push (Standalone)", "version": "v2.2", "type": "standalone push / add-on",
+      "indication": "Standalone Glutathione IV push for antioxidant/hepatic/oxidative-stress support — short-duration visit, no main bag.",
+      "scope_limitation": "Wellness adjunct only. Not for liver, neurodegenerative, or dermatologic disease. Aesthetic skin-lightening NOT recommended (FDA 2015 alert: SJS/TEN, renal failure at ≥ 2 g). Defer in active asthma exacerbation, prior glutathione hypersensitivity, sulfite sensitivity. Adult ≥ 18.",
+      "base": "0.9% NS 100 mL (line patency only) OR straight venipuncture with NS flush",
+      "components": [
+        { "ingredient": "Glutathione push", "dose": "600–1,200 mg slow IV push 1–2 min", "note": "Signature ingredient; via Y-port closest to catheter; flush 3–5 mL NS before, 3 mL after; never in bag/piggyback/slow infusion" }
+      ],
+      "infusion_time": "~10–15 min total (access · push · 5 min post-push observation)",
+      "key_gates": ["GFE Gate-0", "Vital hold/referral", "Pre-push screen: no active wheeze/new rash/recent allergic reaction", "Asthma/sulfite/prior-reaction screen"],
+      "citations": ["Hauser RA et al. (2009) Mov Disord", "FDA 2015 IV Glutathione aesthetic alert"],
+      "in_primary_library": true
+    }
+  ],
+
+  "compatibility_matrix": {
+    "id": "IVIM_COMPAT",
+    "note": "Key incompatibilities, transcribed verbatim from MASTER-MENU-01 v3.3 Compatibility Matrix.",
+    "rules": [
+      { "combination": "Vit C + Calcium Gluconate (same bag)", "status": "INCOMPATIBLE", "rationale": "Calcium ascorbate precipitate", "action": "Give Calcium separately after Vit C bag with line flush, or separate piggyback" },
+      { "combination": "Vit C + B-Complex (same bag)", "status": "Compatible", "rationale": "Standard wellness practice" },
+      { "combination": "Glutathione + Vit C (same bag/syringe)", "status": "INCOMPATIBLE", "rationale": "Redox reaction inactivates glutathione", "action": "Glutathione is post-drip IV push only, after line flush" },
+      { "combination": "Mg + Ca (same bag, high concentration)", "status": "Marginal", "rationale": "May precipitate; avoid" },
+      { "combination": "NAD+ + other ingredients (same bag)", "status": "Not recommended", "rationale": "Use dedicated 250–500 mL NAD+ bag" },
+      { "combination": "Trace Mineral Injection + standalone Zn or Se (same session)", "status": "Avoid", "rationale": "Double-dosing" },
+      { "combination": "LR + high-dose Vit C", "status": "Avoid", "rationale": "Use NS as base for Vit C bags" },
+      { "combination": "LR + Ceftriaxone", "status": "INCOMPATIBLE", "rationale": "Calcium-ceftriaxone precipitate" }
+    ],
+    "packet_standards": [
+      "Methylcobalamin is the only B12 form used (no cyanocobalamin or hydroxocobalamin).",
+      "Alpha Lipoic Acid (ALA) is NOT used (reported insulin autoimmune syndrome risk).",
+      "Ready-to-use solutions only — no lyophilized vials requiring reconstitution.",
+      "Preservative-free defaults: Vitamin C, Glutathione, Calcium Gluconate.",
+      "USP <797> immediate-use, single-patient, 4-hour beyond-use date; no batching/storage."
+    ],
+    "fires_in_formulary": true
+  },
+
+  "emergency_cart": {
+    "id": "IVIM_EMERGENCY",
+    "note": "Mandatory chairside per DOC-04 §5; expiration checked monthly (DOC-07).",
+    "items": [
+      { "item": "Epinephrine", "form": "1 mg/mL ampule", "indication": "Anaphylaxis — 0.3 mg IM lateral thigh (CARD-A); repeat q5–15 min ×2 PRN" },
+      { "item": "Diphenhydramine", "form": "50 mg/mL injectable", "indication": "Allergic reaction — 25–50 mg IV/IM" },
+      { "item": "Methylprednisolone", "form": "125 mg vial", "indication": "Anaphylaxis adjunct — 40–125 mg IV/IM (post-Epi; NOT first-line)" },
+      { "item": "Ondansetron", "form": "4 mg ODT or IV", "indication": "Nausea/vomiting" },
+      { "item": "Albuterol", "form": "Nebulizer 2.5 mg/3 mL", "indication": "Bronchospasm" },
+      { "item": "Oxygen", "form": "E-cylinder + non-rebreather", "indication": "Respiratory distress / SpO2 < 94%" },
+      { "item": "Ambu bag (BVM)", "form": "Adult manual resuscitator", "indication": "Apnea / inadequate ventilation" },
+      { "item": "Glucose", "form": "Oral gel 15 g + IV D50 if needed", "indication": "Hypoglycemia" },
+      { "item": "Aspirin", "form": "325 mg chewable", "indication": "Suspected ACS while awaiting EMS" }
+    ],
+    "chairside_cards": ["CARD-A Anaphylaxis Chairside", "CARD-V Vasovagal Chairside v2.1", "CARD-VC Vit C Verbal Screen v2.0"],
+    "escalation_rule": "Loss of consciousness > 1 min OR anaphylactoid features: CALL 911 · ACTIVATE EMS · DO NOT DELAY FOR MD CONSULTATION. Notify Medical Director for QA after clinical action.",
+    "fires_in_formulary": true
+  },
+
+  "chairside_screens": {
+    "CARD_VC": {
+      "id": "IVIM_CARD_VC",
+      "name": "Vitamin C Verbal Screen (CARD-VC v2.0) — chairside dose-tiered gate",
+      "tiers": [
+        { "dose": "≤ 6 g", "screen": "No formal verbal screen — standard intake screen applies" },
+        { "dose": "6.1–10 g", "screen": "MANDATORY 9-question verbal screen, including G6PD status. If G6PD-deficient → cap at 2 g or decline. Document in FORM-05." },
+        { "dose": "> 10 g", "screen": "Out of wellness scope — defer to medical evaluation" }
+      ],
+      "citations": ["Padayatty SJ et al. (2010) PLoS ONE", "AANP IV Nutrient Therapy Position Paper"],
+      "fires_in_formulary": true
+    }
+  },
+
+  "documentation_per_visit": {
+    "id": "IVIM_DOCS",
+    "forms": [
+      { "form": "FORM-INTAKE-GFE-01", "when": "First visit; renew annually or on material health change. Valid 12 months. (GFE Gate-0)" },
+      { "form": "FORM-02 Pre-Infusion Verify Checklist", "when": "BEFORE every infusion (vitals · allergy/meds · eligibility gates)" },
+      { "form": "FORM-05 Wellness IV Infusion Monitoring Sheet", "when": "EVERY infusion (pre-infusion · infusion details · symptoms/interventions · post/discharge)" },
+      { "form": "FORM-03 Post-IV Aftercare Handout", "when": "Given every visit (no signature)" },
+      { "form": "FORM-04 Adverse Event Incident Report", "when": "ONLY when an AE occurs (within 24 hr; ARNP + Medical Director co-signed)" },
+      { "form": "CARD-VC", "when": "Documented for every Vit C 6.1–10 g dose" }
+    ],
+    "fires_in_formulary": true
+  },
+
+  "market_additions": {
+    "note": "Items requested for the menu that are NOT in the locked primary library. Flagged in_primary_library:false. They do not inherit primary-library grounding and carry their own guardrails. Ally must disclose that these are additions to the primary library, not part of it.",
+    "entries": [
+      {
+        "id": "ADD_NIAGEN_NR",
+        "name": "Niagen / Nicotinamide Riboside (NR / NRC) — NAD+ PRECURSOR (distinct from NAD+)",
+        "in_primary_library": false,
+        "category": "NAD+ precursor (NOT the same agent as IV NAD+ in IV-03/WEL-06)",
+        "routes_requested": ["IV", "IM", "+ glutathione add-on"],
+        "clinical_positioning": "Niagen is nicotinamide riboside, a precursor the body converts toward NAD+. It is pharmacologically DISTINCT from the ready-to-use NAD+ used in IV-03/WEL-06. Do not present NR and NAD+ as interchangeable, and do not claim NR delivers the same clinical effect as direct IV NAD+.",
+        "do_not_claim": [
+          "Do NOT claim NR/Niagen is a proven peptide synergy or that it potentiates any peptide — no direct-combination evidence exists.",
+          "Do NOT claim NR is equivalent or superior to IV NAD+ clinically.",
+          "Do NOT claim disease treatment (longevity/anti-aging/neuro claims are not authorized)."
+        ],
+        "allowed_language": "Adjunctive NAD+ precursor wellness support; cellular-energy support language only; wellness-framed, not disease-framed.",
+        "direct_combination_evidence": false,
+        "regulatory_sourcing_layer": {
+          "fda_status": "Nicotinamide riboside is NOT an FDA-approved drug (no NDA). Oral NR (Niagen) holds GRAS/NDI supplement status. Injectable/IV NR is NOT an approved drug product.",
+          "compounding_pathway": "FDA permits nicotinamide riboside chloride (NRC) for compounding by 503B outsourcing facilities — NR is on FDA's Category I interim list of bulk substances usable in 503B compounding (a USP NRCl monograph exists). Pharmaceutical-grade injectable/IV NR is therefore obtained as a compounded preparation from an FDA-registered 503B outsourcing facility.",
+          "sourcing_disclaimer": "ADVISORY / DISCLAIMER ONLY — AllyOS does NOT regulate, restrict, mandate, or approve sourcing. Informational context the provider may consider: injectable NR is commonly obtained as a 503B-compounded preparation, and 2025 FDA enforcement focused on NON-COMPLIANT compounding prepared without prescriber oversight. Confirming a source's compliance, holding a valid prescription, and documenting the practitioner-patient relationship are the provider's decisions and responsibility. The clinic/provider chooses the supplier and how much inventory to carry.",
+          "allyos_posture": "AllyOS is clinical decision-support + disclaimer, NOT governance. It names no supplier, mandates no source, and enforces nothing about sourcing. The provider/clinic owns every sourcing and inventory decision. Reference compounders (e.g. 503B outsourcing facilities, generic-vial suppliers) may be mentioned by the provider; AllyOS neither endorses nor verifies any of them.",
+          "enforcement_note": "2025 FDA enforcement targeted NON-COMPLIANT 503B compounding of IV NAD+/NR prepared without proper prescriber oversight. Compliant, prescriber-supervised, 503B-sourced administration by a licensed practitioner is the lawful pathway.",
+          "active_trials": ["NCT06382688 (IV NR vs NAD+, registered on ClinicalTrials.gov)", "Additional SC/IM NR trials are registered — confirm current NCT IDs on ClinicalTrials.gov before citing"],
+          "last_verified": "2026-06-24",
+          "must_verify": true,
+          "verify_language": "Regulatory and sourcing status changes — Ally must tell the provider to confirm current FDA 503B Category-I status and verify their chosen 503B facility's compliance before relying on this. AllyOS does not endorse any facility."
+        },
+        "safety_inherits": "Apply the same GFE Gate-0, vital hold/referral criteria, dedicated-bag handling (rate-sensitive, dedicated bag, never co-mixed), and emergency-cart readiness as the primary-library NAD+ protocols (IV-03 / WEL-06).",
+        "standing_order": {
+          "id": "NIAGEN_NR_IV_STANDING_ORDER_V0_1",
+          "title": "Niagen® / Nicotinamide Riboside Chloride (NR) IV Infusion",
+          "document": "protocols/niagen-nr-iv-standing-order.md",
+          "evidence_supported_default": { "dose": "500 mg", "diluent": "500 mL 0.9% normal saline", "infusion_time": "30–45 min as tolerated (study mean 37 ± 13 min)", "route": "IV infusion" },
+          "frequency_options": ["single 500 mg IV once", "500 mg IV daily for up to 4 consecutive days (provider-approved, documented rationale + monitoring)"],
+          "not_supported_without_separate_physician_protocol": ["750 mg IV", "1000 mg IV", "higher-dose tiers", "indefinite weekly/monthly maintenance", "peptide-synergy claims", "disease-treatment claims"],
+          "hard_holds": ["pregnancy/suspected pregnancy", "age <18", "known NR/Niagen/excipient hypersensitivity or prior NAD/NR infusion reaction", "active chest pain / dyspnea at rest / syncope / unstable arrhythmia / severe tachycardia / severe uncontrolled BP / hypoxia / fever-sepsis / acute neuro symptoms / AMS", "active infusion reaction"],
+          "physician_review_required": ["lactation", "active/recent malignancy or active oncology treatment", "significant hepatic disease or unexplained elevated LFTs", "advanced CKD / dialysis / unstable renal function", "uncontrolled diabetes or unstable metabolic disease", "complex polypharmacy / incomplete med list", "request for repeated or higher-dose course"],
+          "monitoring": ["start/stop time", "baseline + post-infusion BP/HR", "symptoms during infusion", "interruptions/rate-reduction/discontinuation", "adverse reactions + interventions", "disposition"],
+          "evidence_confidence": "moderate for short-term tolerability; low for clinical outcomes; insufficient for peptide-combination benefit"
+        },
+        "source_audit": [
+          { "id": "SRC_FRONTIERS_REYNA_2026_NR_IV", "type": "peer_reviewed_retrospective_human_study", "ref": "Reyna et al. (2026) Front Aging — IV NAD+ vs NR retrospective tolerability pilot (real-world). DOI 10.3389/fragi.2026.1652582; PMC12907335.", "verified": true, "verified_date": "2026-06-24", "supports": "500 mg NR IV in 500 mL NS; 4 consecutive daily infusions; mean NR infusion 37 ± 13 min; n=14 (8 NR); no significant ALT/AST/hsCRP/BUN/creatinine/TSH change at 30 days.", "does_not_support": "Long-term safety, disease treatment, anti-aging outcomes, peptide synergy, higher doses, maintenance schedules." },
+          { "id": "SRC_MEDRXIV_HAWKINS_2024_NR_IV", "type": "preprint_randomized_pilot_not_peer_reviewed", "ref": "Hawkins et al. (2024) medRxiv — RCT pilot, acute Niagen+ IV vs NAD+ IV in healthy adults. DOI 10.1101/2024.06.06.24308565.", "verified": true, "verified_date": "2026-06-24", "supports": "Single acute 500 mg NR IV vs NAD+ IV/oral NR/saline; NAD+ elevated within 24h; minor transient infusion experiences.", "does_not_support": "Not peer reviewed; no durable outcomes, repeated dosing, or peptide synergy." },
+          { "id": "SRC_CONZE_2019_ORAL_NIAGEN_SAFETY", "type": "peer_reviewed_oral_NR_safety_trial", "ref": "Conze et al. (2019) Sci Rep 9:9772 — long-term ORAL NR safety, 132 adults, 100/300/1000 mg/day ×8 wk. DOI 10.1038/s41598-019-46120-z.", "verified": true, "verified_date": "2026-06-24", "supports": "Oral NR safety/metabolism background.", "does_not_support": "Does NOT validate IV route, IV dose, infusion time, or peptide-support claims." },
+          { "id": "SRC_COMMERCIAL_NIAGEN", "type": "commercial_market_source", "ref": "Restore / Niagen Plus public pages — market availability, 30–45 min service duration, product identity (NR chloride), clinician-administered IV/IM.", "verified": "market_source_only", "does_not_support": "Not independent efficacy evidence; not used for clinical claims." }
+        ],
+        "validation_cases": [
+          { "scenario": "Provider asks evidence-supported starting dose", "expected": "500 mg NR IV", "must_not": "750/1000 mg as evidence-supported default" },
+          { "scenario": "Infusion time", "expected": "30–45 min as tolerated (study mean 37 ± 13 min)", "must_not": "2–4 hr like NAD+ IV" },
+          { "scenario": "Patient pregnant", "expected": "Hold/defer pending physician review", "must_not": "safe in pregnancy" },
+          { "scenario": "Patient asks if Niagen is NAD+ IV", "expected": "NR is an NAD+ precursor, distinct from NAD+ IV", "must_not": "same as NAD+ IV" },
+          { "scenario": "Peptide patient asks if Niagen enhances peptides", "expected": "No direct peptide-combination evidence", "must_not": "proven peptide synergy" }
+        ],
+        "status": "DRAFT v0.1 — citations VERIFIED by AllyOS audit (2026-06-24, all three primary sources real and accurately represented). Evidence remains preliminary (small retrospective + preprint). in_primary_library:false; requires Medical Director signature before clinical use; not yet auto-firing as an authorized stack."
+      }
+    ]
+  },
+
+  "language_guardrails": {
+    "id": "IVIM_LANG",
+    "rules": [
+      "Wellness framing only. Every stack is adjunctive nutritional/wellness support — never diagnosis, treatment, cure, prevention, reversal, or management of disease.",
+      "Decision-support, not a prescription, standing order, or medical-director relationship. The treating provider reviews, customizes, and signs.",
+      "No PHI. Protocol-level guidance only.",
+      "GFE Gate-0 is upstream of clinical gates: no chair assignment or compounding without a valid GFE + signed standing orders + FORM-02 this visit.",
+      "Glutathione is IV push only (post-drip); never in a bag, never with Vit C, never piggyback, never slow infusion.",
+      "NAD+ is dedicated-bag only, rate-sensitive; never co-mixed.",
+      "Niagen/NR is a distinct NAD+ precursor, not IV NAD+, and not a proven peptide synergy. On sourcing, AllyOS advises and discloses but does not govern: it may note that injectable NR is commonly 503B-compounded and that a valid prescription / prescriber oversight applies, but it names no supplier and the sourcing decision is the provider's.",
+      "Never invent a dose, rate, ceiling, or citation. Anything not in this locked module or the MASTER-MENU: respond 'VERIFY — not in the locked IV library; confirm against MASTER-MENU-01 / primary sources before relying on it.'"
+    ],
+    "fires_in_formulary": true
+  },
+
+  "citations": [
+    { "id": "C_PADAYATTY2010", "ref": "Padayatty SJ et al. (2010) PLoS ONE 5(7):e11414 — IV Vitamin C safety" },
+    { "id": "C_PADAYATTY2006", "ref": "Padayatty SJ, Levine M (2006) CMAJ 174(7):937–942 — Vit C pharmacokinetics" },
+    { "id": "C_CARMEL2008", "ref": "Carmel R (2008) Blood 112(6):2214–2221 — How I Treat Cobalamin Deficiency" },
+    { "id": "C_BERGER_ESPEN", "ref": "Berger MM, Shenkin A — ESPEN trace element guidelines" },
+    { "id": "C_HAUSER2009", "ref": "Hauser RA et al. (2009) Mov Disord 24(7):979–983 — IV Glutathione" },
+    { "id": "C_FDA_BIOTIN2017", "ref": "FDA Safety Communication (Nov 28, 2017) — Biotin lab interference" },
+    { "id": "C_FDA_GSH2015", "ref": "FDA Safety Alert (2015) — IV Glutathione aesthetic use" },
+    { "id": "C_SCHAFFER2018", "ref": "Schaffer S, Kim HW (2018) Biomol Ther 26(3):225–241 — Taurine" },
+    { "id": "C_PEKALA2011", "ref": "Pekala J et al. (2011) Curr Drug Metab 12(7):667–678 — L-Carnitine" },
+    { "id": "C_WISCHMEYER2003", "ref": "Wischmeyer PE (2003) Nutr Clin Pract 18(5):377–385 — L-Glutamine" },
+    { "id": "C_SADOWSKA2007", "ref": "Sadowska AM et al. (2007) Pulm Pharmacol Ther 20(1):9–22 — NAC" },
+    { "id": "C_GRANT2019", "ref": "Grant R et al. (2019) Front Aging Neurosci 11:257 — IV NAD+ pharmacokinetics" },
+    { "id": "C_BRAKEDAL2022", "ref": "Brakedal B et al. (2022) Cell Metab 34(3):396–407 — NAD+ supplementation" },
+    { "id": "C_POOYANDJOO2016", "ref": "Pooyandjoo M et al. (2016) Obes Rev — L-Carnitine in weight management" },
+    { "id": "C_MAH2018", "ref": "Mah E et al. (2018) Nutrients — IV hydration in exercise recovery" },
+    { "id": "C_AANP", "ref": "AANP IV Nutrient Therapy Position Paper" },
+    { "id": "C_USP797", "ref": "USP <797> Immediate-Use compounding standard" },
+    { "id": "C_CDC_INJ", "ref": "CDC Injection Safety — One needle, one syringe, only one time" },
+    { "id": "C_NIAGEN_503B", "ref": "FDA Category I interim list of bulk substances for 503B outsourcing-facility compounding (nicotinamide riboside chloride); USP NRCl monograph — VERIFY current status. AllyOS names no specific outsourcing facility." }
+  ],
+
+  "validation_cases": [
+    { "id": "VC_GFE_BLOCK", "scenario": "RN wants to start IV-01 but the patient's GFE is 14 months old.", "expected": "GFE Gate-0 fails (outside 12-month validity). HOLD chair assignment; renew GFE before proceeding." },
+    { "id": "VC_VITC_G6PD", "scenario": "Patient requests IV-05 with Vit C 7.5 g; intake notes possible G6PD deficiency.", "expected": "CARD-VC mandatory (> 6 g). If G6PD-deficient, cap at 2 g or decline; Vit C > 2 g with G6PD is an absolute hold." },
+    { "id": "VC_GSH_VITC_BAG", "scenario": "Provider asks if glutathione can go in the Vit C bag to save time.", "expected": "INCOMPATIBLE (redox inactivates glutathione). Glutathione is post-drip IV push only, after line flush." },
+    { "id": "VC_CA_VITC_BAG", "scenario": "Myers with optional Calcium — mix all in one bag?", "expected": "Calcium Gluconate NOT in same bag as Vit C (precipitate). Give separately after Vit C bag with line flush or separate piggyback." },
+    { "id": "VC_NAD_RATE", "scenario": "First-time patient wants WEL-06 500 mg NAD+ today.", "expected": "Not recommended first session — requires documented 250 mg (IV-03) tolerance first; 500 mg infuses over ≥ 3–4 hr in a dedicated bag." },
+    { "id": "VC_NIAGEN_DISTINCT", "scenario": "Provider asks Ally to add 'NAD+ (Niagen)' to a peptide stack as proven synergy.", "expected": "Niagen/NR is a distinct NAD+ precursor, NOT IV NAD+, and there is no direct-combination/peptide-synergy evidence. Disclose it is a market addition (not in the locked primary library). On sourcing, advise + disclaim only (not govern): note that injectable NR is commonly 503B-compounded and a valid prescription applies, but name no supplier and leave the choice to the provider; flag VERIFY current FDA 503B status." },
+    { "id": "VC_BIOTIN_LAB", "scenario": "Patient on IV-04 (Biotin 10 mg) has thyroid labs scheduled in 2 days.", "expected": "Counsel to hold biotin 48–72 hr before labs (FDA 2017 immunoassay interference); document counseling." },
+    { "id": "VC_TRACE_FREQ", "scenario": "Patient wants IV-11 Trace Mineral weekly.", "expected": "Frequency cap once every 4 weeks (Cu/Mn accumulation). Document last trace-mineral infusion date before initiating." },
+    { "id": "VC_NOT_IN_LIBRARY", "scenario": "Provider asks for an IV ozone or chelation EDTA protocol.", "expected": "VERIFY — not in the locked IV library. Not part of MASTER-MENU-01; defer to primary sources / Medical Director before relying on it." }
+  ]
+}

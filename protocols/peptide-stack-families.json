@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "id": "peptide-stack-families",
+    "title": "AllyOS Peptide Stack Family Master Selector — v1",
+    "version": "1.0",
+    "status": "locked",
+    "requires_md_signoff": true,
+    "effective": "2026-06-29",
+    "source": "peptide_stack_family_master_v1 (physician-authored). Canonical top-level selector for the peptides line. Full source in protocols/peptide-stack-families/. Supersedes the v0.4 stack recommender and the loose stacks.list in peptide-iv-support.json.",
+    "curated_by": "Armando A. Falcon, MD (FL ME 84789) — RenuviaMD® PLLC, AllyOS Compliance Division",
+    "architecture": "client goal → ONE stack family → 2/3/4-peptide build → safety gate → IV/IM support match → standing order.",
+    "posture": { "wellness_goal_trigger_allowed": true, "deficiency_required": false, "safety_gate_required_first": true, "no_doses": true, "no_regulatory_logic": true }
+  },
+
+  "selector_logic": {
+    "order": ["collect client wellness goal", "select ONE stack family", "choose 2/3/4-peptide build", "run safety gate module", "match IV/IM support group", "route to standing order only if cleared", "output evidence language + do-not-claim"],
+    "goal_to_family": {
+      "weight/appetite/metabolic": "FAM01_GLP_METABOLIC", "recovery/lean/sleep recovery": "FAM02_GH_RECOVERY",
+      "energy/fatigue/longevity": "FAM03_MITO_ENERGY", "joint/tendon/injury": "FAM04_REPAIR_CONNECTIVE",
+      "skin/hair/nails/glow": "FAM05_SKIN_HAIR_GLOW", "libido/sexual vitality": "FAM06_SEXUAL_HPG",
+      "focus/calm/sleep": "FAM07_NEURO_SLEEP_CALM", "immune/inflammatory wellness": "FAM08_IMMUNE_INFLAMMATORY",
+      "non-GLP fat-loss/body composition": "FAM09_NON_GLP_METABOLIC"
+    },
+    "build_size": { "2": "starter/simple", "3": "expanded axis support", "4": "advanced; stronger provider review + safety-gate pass" },
+    "hard_rules": [
+      "Select ONE primary family first. Do NOT assemble cross-family stacks unless the provider explicitly overrides and documents the rationale.",
+      "Builds are NOT automatic escalation — patient risk + provider judgment determine 2 vs 3 vs 4."
+    ]
+  },
+
+  "families": [
+    { "id": "FAM01_GLP_METABOLIC", "name": "Metabolic / GLP / Body-Composition", "goals": ["weight management", "appetite support", "body composition", "metabolic wellness", "energy during GLP program"],
+      "peptide_pool": { "anchor_choose_one": ["semaglutide", "tirzepatide", "retatrutide"], "add_on_pool": ["MOTS-c", "AOD-9604"] },
+      "builds": { "2": ["GLP/GIP anchor", "MOTS-c"], "3": ["GLP/GIP anchor", "MOTS-c", "AOD-9604"] }, "build_4_pending": "amylin (cagrilintide / pramlintide) needs a monograph — 4-build unavailable on the 30",
+      "iv_im_support": ["GLP hydration/electrolytes", "B-complex/B12", "MIC/lipotropic", "L-carnitine", "amino/recovery", "beauty support if aesthetic goal"],
+      "gate_package": "glp_support gates + wellness_iv_hard_stop", "evidence_language": "Highest evidence sits with the GLP/GIP anchor pharmacology/weight-management trials; IV/IM is wellness support only.",
+      "do_not_claim": ["IV improves weight loss", "B12/MIC boosts GLP effect", "routine IV for all GLP clients"],
+      "key_gate": "GLP/GIP anchor: MTC/MEN2 boxed-warning + pancreatitis / gallbladder / diabetic-retinopathy screen; retatrutide HR/arrhythmia/HF review; MOTS-c additive-hypoglycemia if on insulin/sulfonylurea." },
+    { "id": "FAM02_GH_RECOVERY", "name": "GH / Lean Mass / Recovery", "goals": ["recovery", "lean support", "sleep recovery", "training support", "body composition"],
+      "peptide_pool": { "anchor_or_base": ["sermorelin", "CJC-1295", "tesamorelin"], "pairing_pool": ["ipamorelin", "GHRP-2", "GHRP-6", "hexarelin"] },
+      "builds": { "2": ["sermorelin OR CJC-1295", "ipamorelin"], "3": ["CJC-1295", "ipamorelin", "tesamorelin OR sermorelin"], "4": ["CJC-1295", "ipamorelin", "tesamorelin", "GHRP option"] },
+      "iv_im_support": ["amino blend", "fast recovery IV", "B-complex/B12", "magnesium if safe", "hydration if training/low intake"],
+      "gate_package": "patient_factor_modifier_rules + wellness_iv_hard_stop", "evidence_language": "GH/IGF-1 axis support; IV ingredients support recovery/nutrient wellness, not GH peptide potentiation.",
+      "do_not_claim": ["guaranteed muscle gain", "IV potentiates GH peptides", "fat-loss guarantee"],
+      "key_gate": "Active malignancy = hard stop (GH/IGF-1 axis); IGF-1 / glucose / edema / carpal-tunnel / retinopathy review; treat hypothyroidism first." },
+    { "id": "FAM03_MITO_ENERGY", "name": "Mitochondrial / Energy / Longevity", "goals": ["energy", "fatigue recovery", "mitochondrial support", "longevity wellness", "exercise tolerance support"],
+      "peptide_pool": { "base": ["MOTS-c", "SS-31"], "add_on_pool": ["Epitalon"] },
+      "builds": { "2": ["MOTS-c", "SS-31"], "3": ["MOTS-c", "SS-31", "Epitalon"] }, "build_4_pending": "Humanin needs a monograph — 4-build unavailable on the 30",
+      "iv_im_support": ["Niagen/NR", "NAD+", "B-complex/B12", "glutathione", "magnesium if safe", "CoQ10 adjunct if IM library"],
+      "gate_package": "wellness_iv_hard_stop + niagen_nr_standing_order", "evidence_language": "Axis-aligned mitochondrial energy support; human outcome evidence limited/mixed; no anti-aging guarantee.",
+      "do_not_claim": ["proven anti-aging", "guaranteed energy", "NAD/NR makes MOTS-c work better"] },
+    { "id": "FAM04_REPAIR_CONNECTIVE", "name": "Repair / Injury / Connective Tissue", "goals": ["joint/tendon support", "training recovery", "connective tissue support", "post-exertion recovery"],
+      "peptide_pool": { "base": ["BPC-157", "TB-500"], "add_on_pool": ["KPV", "GHK-Cu"] },
+      "builds": { "2": ["BPC-157", "TB-500"], "3": ["BPC-157", "TB-500", "KPV"], "4": ["BPC-157", "TB-500", "KPV", "GHK-Cu"] },
+      "dedupe_note": "Dropped 'thymosin beta-4' (= TB-500, already the base). 4-build uses GHK-Cu (connective-tissue/repair overlap) from the 30.",
+      "iv_im_support": ["amino blend", "vitamin C", "glutathione", "trace minerals", "hydration", "magnesium if cramps/recovery and renal screen clear"],
+      "gate_package": "wellness_iv_hard_stop", "evidence_language": "Recovery/repair wellness support; most peptide evidence remains preclinical/mechanistic.",
+      "do_not_claim": ["accelerates healing", "repairs tendon guaranteed", "IV potentiates BPC/TB"],
+      "key_gate": "Active or prior malignancy = hard stop (BPC-157 / TB-500 / GHK-Cu are pro-angiogenic); GHK-Cu adds Wilson disease / copper-overload screen; rule out red-flag injury needing evaluation." },
+    { "id": "FAM05_SKIN_HAIR_GLOW", "name": "Skin / Hair / Glow / Aesthetic", "goals": ["skin glow", "hair support", "nail support", "collagen support", "post-weight-loss aesthetic support"],
+      "peptide_pool": { "base": ["GHK-Cu"], "injectable_pool": ["BPC-157", "KPV", "TB-500"] },
+      "builds": { "2": ["GHK-Cu", "BPC-157"], "3": ["GHK-Cu", "BPC-157", "KPV"], "4": ["GHK-Cu", "BPC-157", "KPV", "TB-500"] },
+      "modality_note": "REBUILT injectable-only. The original aesthetic pool (palmitoyl pentapeptide-4 / acetyl hexapeptide-8 / tripeptide-1) are TOPICAL cosmeceuticals — removed from the injectable peptide line; they belong to a separate topical/aesthetic offering. Injectable skin/glow = GHK-Cu anchor + repair peptides (all in the 30).",
+      "iv_im_support": ["biotin", "vitamin C", "glutathione", "B-complex/B12", "trace minerals"],
+      "gate_package": "ingredient_axis_match + wellness_iv_hard_stop", "evidence_language": "Aesthetic wellness support; biotin allowed by wellness goal but nondeficient hair outcome evidence limited.",
+      "do_not_claim": ["guaranteed hair growth", "reverses alopecia", "GHK-Cu + biotin proven synergy"],
+      "key_gate": "Active or prior malignancy = hard stop (GHK-Cu / BPC-157 / TB-500 pro-angiogenic); GHK-Cu adds Wilson disease / copper-overload screen." },
+    { "id": "FAM06_SEXUAL_HPG", "name": "Sexual Vitality / HPG Axis", "goals": ["libido support", "sexual vitality", "arousal wellness", "HPG-axis wellness"],
+      "peptide_pool": { "base": ["PT-141", "kisspeptin-10"], "add_on_pool": ["gonadorelin"] },
+      "builds": { "2": ["PT-141", "kisspeptin-10"], "3": ["PT-141", "kisspeptin-10", "gonadorelin"] }, "build_4_pending": "oxytocin needs a monograph — 4-build unavailable on the 30",
+      "iv_im_support": ["hydration", "B-complex/B12", "magnesium if stress/tension and renal screen clear", "trace/nutrient if wellness trigger"],
+      "gate_package": "wellness_iv_hard_stop", "evidence_language": "Sexual wellness / HPG-axis support; IV nutrients are readiness/support only, not libido outcome proof.",
+      "do_not_claim": ["IV improves libido response", "PT-141 + kisspeptin proven synergy", "guaranteed sexual performance"],
+      "key_gate": "BP/HR with the PT-141/bremelanotide axis (uncontrolled HTN / CVD are label contraindications); oral-naltrexone review; PLUS hormone-sensitive malignancy (breast / prostate / endometrial / ovarian) + pituitary tumor screen for the kisspeptin/gonadorelin HPG-stimulation axis; pregnancy review." },
+    { "id": "FAM07_NEURO_SLEEP_CALM", "name": "Neuro / Focus / Calm / Sleep", "goals": ["focus", "calm", "stress recovery", "sleep quality", "neuro-wellness"],
+      "peptide_pool": { "base": ["Semax", "Selank"], "add_on_pool": ["DSIP", "Cerebrolysin"] },
+      "builds": { "2": ["Semax", "Selank"], "3": ["Semax", "Selank", "DSIP"], "4": ["Semax", "Selank", "DSIP", "Cerebrolysin"] },
+      "iv_im_support": ["Neuro/Brain IV", "B-complex/B12", "magnesium if safe", "taurine if in locked protocol", "hydration", "optional glutathione"],
+      "gate_package": "wellness_iv_hard_stop", "evidence_language": "Neuro-wellness support; DSIP sleep evidence is weak/limited (human endpoints sparse).",
+      "do_not_claim": ["treats anxiety", "treats insomnia", "nootropic guaranteed", "IV potentiates Semax/Selank"],
+      "language_guardrail": "Do NOT claim treatment of anxiety, insomnia, ADHD, depression, or cognitive disease. Gate on acute neuro symptoms / psychiatric instability / suicidality. 4-build adds Cerebrolysin — screen seizure disorder / status epilepticus + severe renal impairment (porcine-derived: allergy review); review concurrent sedatives/alcohol (Selank/DSIP additive sedation)." },
+    { "id": "FAM08_IMMUNE_INFLAMMATORY", "name": "Immune / Inflammatory Wellness", "goals": ["immune wellness", "inflammatory balance", "post-viral wellness", "resilience"],
+      "peptide_pool": { "base": ["thymosin alpha-1", "KPV"], "add_on_pool": [] },
+      "builds": { "2": ["thymosin alpha-1", "KPV"] }, "build_3_4_pending": "LL-37, thymulin, tuftsin need monographs — only thymosin alpha-1 + KPV are in the 30, so this family caps at a 2-build for now",
+      "iv_im_support": ["immune nutrient IV", "vitamin C", "zinc/trace minerals", "glutathione", "B-complex/B12"],
+      "gate_package": "wellness_iv_hard_stop", "evidence_language": "Immune wellness support; not treatment of infection or immune disease.",
+      "do_not_claim": ["treats infection", "prevents infection", "boosts immune peptide response"],
+      "key_gate": "Active infection / fever / hypoxia / confusion / sepsis symptoms = DO NOT infuse; medical evaluation." },
+    { "id": "FAM09_NON_GLP_METABOLIC", "name": "Non-GLP Fat-Loss / Metabolic Wellness", "goals": ["fat-loss wellness", "metabolic support", "body composition", "energy", "training adherence"],
+      "peptide_pool": { "base": ["AOD-9604", "tesamorelin"], "add_on_pool": ["ipamorelin", "MOTS-c"] },
+      "builds": { "2": ["AOD-9604", "MOTS-c OR tesamorelin"], "3": ["AOD-9604", "tesamorelin", "ipamorelin"], "4": ["AOD-9604", "tesamorelin", "ipamorelin", "MOTS-c"] },
+      "iv_im_support": ["MIC/lipotropic", "L-carnitine", "B-complex/B12", "amino blend", "Niagen/NR or NAD+ if energy/mitochondrial goal", "hydration if training/low intake"],
+      "gate_package": "patient_factor_modifier_rules + wellness_iv_hard_stop", "evidence_language": "High-market, low-to-moderate evidence wellness support; AOD-9604 FAILED a 24-wk 536-subject weight-loss trial (efficacy-limited).",
+      "do_not_claim": ["fat melting", "guaranteed fat loss", "IV potentiates AOD or tesamorelin"],
+      "key_gate": "AOD efficacy-limitation language (failed a 24-wk 536-subject weight-loss trial); GH/IGF-1 glucose/edema/retinopathy review; MIC hepatic/gallbladder review." }
+  ],
+
+  "iv_im_safety_delegation": "Every iv_im_support group resolves to peptide-iv-support.json ingredient IDs, and every safety gate to the GLP gates / iv-module screens / wellness_iv_hard_stop rules — ONE safety source of truth. This selector adds the family/build/selector layer ON TOP; it does not restate doses or contraindications (no doses; routes to the locked standing order).",
+
+  "injectable_constraint_applied": {
+    "rule": "Every build uses ONLY the locked 30 injectable peptides. Topicals removed; non-library agents dropped from builds and parked behind 'needs monograph'. Thymosin beta-4 deduped to TB-500.",
+    "buildability_on_the_30": {
+      "full_2_3_4": ["FAM02_GH_RECOVERY", "FAM04_REPAIR_CONNECTIVE (4 = +GHK-Cu)", "FAM05_SKIN_HAIR_GLOW (rebuilt injectable)", "FAM07_NEURO_SLEEP_CALM", "FAM09_NON_GLP_METABOLIC"],
+      "builds_2_3_only": ["FAM01_GLP_METABOLIC (4 pending amylin)", "FAM03_MITO_ENERGY (4 pending Humanin)", "FAM06_SEXUAL_HPG (4 pending oxytocin)"],
+      "build_2_only": ["FAM08_IMMUNE_INFLAMMATORY (TA-1 + KPV; 3/4 pending LL-37/thymulin/tuftsin)"]
+    },
+    "removed_topical": ["palmitoyl pentapeptide-4 (Matrixyl)", "acetyl hexapeptide-8 (Argireline)", "tripeptide-1"],
+    "parked_needs_monograph_injectable": ["cagrilintide", "pramlintide", "Humanin", "oxytocin", "LL-37", "thymulin", "tuftsin"],
+    "deduped": "thymosin beta-4 → TB-500 (already in library)"
+  },
+
+  "supersedes": "peptide-stack-families.json (prior draft), the v0.4 stack_axis recommender, and stacks.list + stack_recommender_example in peptide-iv-support.json. Migrate workspace.html stack monographs to these 9 families.",
+
+  "validation_cases_ref": "protocols/peptide-stack-families/validation_cases_v1.csv (10 cases, incl. V1_010: 4-peptide energy build + chest pain → HARD STOP, do not route to IV/NAD until urgent eval).",
+  "sources_ref": "protocols/peptide-stack-families/source_audit_v1.csv (22 sources — DailyMed labels, NEJM retatrutide, PubMed mechanistic, NIH ODS, FDA biotin, MSD Myers — each with does_not_support).",
+
+  "signoff_ledger": {
+    "status": "LOCKED 2026-06-29 — canonical v1 selector, constrained to the 30 injectables; 3-auditor lock complete (all PASS / PASS-WITH-NOTES, notes applied); gate package + workspace migration done; MD sign-off recorded.",
+  "md_signoff": { "by": "Armando A. Falcon, MD (FL ME 84789)", "role": "Medical Director / curator — editorial governance sign-off (framework, once). NOT a per-patient clinical signature.", "date": "2026-06-29", "attests": "The 9-family taxonomy, anchor-one-family rule, claim discipline, and 30-injectable constraint are sound and fabrication-free; family key_gates carry the absolute contraindications; the shared wellness-iv-hard-stop gate package and the workspace 9-family migration are in place. Effective 2026-06-29." },
+    "auditors": {
+      "clinical": "PASS-WITH-NOTES (2026-06-29) — architecture/anchor-rule/claim-discipline/constraint-honesty sound, zero fabrication. Notes APPLIED: added family-level key_gates surfacing absolute contraindications — FAM01 (MTC/MEN2 + retatrutide CV + MOTS-c hypoglycemia), FAM02 (GH-axis malignancy + IGF-1/glucose), FAM04 & FAM05 (pro-angiogenic active/prior malignancy + GHK-Cu Wilson/copper), FAM06 (hormone-sensitive malignancy + pituitary, kisspeptin/gonadorelin), FAM07 (Cerebrolysin seizure/renal + sedation).",
+      "citation_regulatory": "PASS-WITH-NOTES (2026-06-29) — no efficacy overclaim, sources consistent with does_not_support, regulatory posture correct, constraint honestly documented. Notes APPLIED: FAM09 evidence_language now carries the AOD failed-trial efficacy-limitation; FAM07 now surfaces DSIP weak/limited sleep evidence.",
+      "schema": "PASS (2026-06-29) — strict-valid JSON, 9 unique families, every build peptide resolves to the locked 30, buildability buckets consistent (FAM04 corrected to full 2/3/4)."
+    },
+    "pending": [
+      "(OPTIONAL, to expand deeper builds) Author monographs for the parked injectable agents — cagrilintide, pramlintide, Humanin, oxytocin, LL-37, thymulin, tuftsin — to unlock the 4-builds (and FAM08's 3/4).",
+      "Confirm each family's IV/IM groups resolve to peptide-iv-support ingredient IDs + provide the wellness_iv_hard_stop gate package (referenced, not yet in-repo).",
+      "Migrate workspace.html stack monographs to the 9 families.",
+      "3-auditor lock + Medical Director sign-off → set effective + flip to locked."
+    ]
+  }
+}

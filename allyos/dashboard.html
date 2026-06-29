@@ -1,0 +1,245 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Practice Dashboard — AllyOS · RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
+<link rel="stylesheet" href="allyos-theme.css">
+<script src="allyos-auth.js"></script>
+<style>
+.wrap{max-width:1080px;margin:0 auto;padding:22px}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px}
+.top h1{font-family:var(--fdisp);font-size:1.4rem}.top h1 b{color:var(--gold)}
+.top .r{display:flex;gap:14px;align-items:center;font-size:.82rem;color:var(--muted)}.top .r a{color:var(--teal);text-decoration:none}
+.sub{color:var(--muted);font-size:.84rem;margin-bottom:18px}
+.sec{font-family:var(--fdisp);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin:18px 0 10px}
+.lines{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:780px){.lines{grid-template-columns:1fr}}
+.line{position:relative;background:linear-gradient(180deg,#10202f,#0b1622);border:1px solid var(--line);border-radius:16px;padding:20px;cursor:pointer;transition:border-color .15s,transform .1s}
+.line.active:hover{border-color:var(--teal);transform:translateY(-2px)}
+.line .ic{font-size:1.8rem}
+.line h3{font-family:var(--fdisp);font-size:1.05rem;margin:8px 0 4px}
+.line p{font-size:.82rem;color:var(--muted);line-height:1.5}
+.line .chip{position:absolute;top:14px;right:14px;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:3px 9px;border-radius:20px}
+.chip.live{background:#0e2a1d;color:var(--green);border:1px solid #1c5238}
+.chip.draft{background:#2a230e;color:var(--gold);border:1px solid #4a3c18}
+.chip.locked{background:#1a2733;color:var(--dim);border:1px solid var(--line2)}
+.line.locked{opacity:.62;cursor:not-allowed;filter:grayscale(.4)}
+.line.locked:hover{border-color:var(--gold)}
+.line.locked .lockrow{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:.74rem;color:var(--gold)}
+.tools{display:flex;gap:10px;flex-wrap:wrap}
+.tool{display:flex;align-items:center;gap:9px;background:#10202f;border:1px solid var(--line);border-radius:11px;padding:11px 15px;color:var(--ink);text-decoration:none;font-size:.86rem}
+.tool:hover{border-color:var(--teal)}.tool .ti{font-size:1.1rem}
+.disc{font-size:.72rem;color:var(--muted);margin-top:22px;line-height:1.6}
+/* popup card */
+.ov{position:fixed;inset:0;background:#04080fcc;display:none;align-items:center;justify-content:center;padding:20px;z-index:60}
+.ov.show{display:flex}
+.card{background:var(--bg2);border:1px solid var(--line2);border-radius:16px;max-width:380px;width:100%;padding:22px;text-align:center}
+.card .ic{font-size:2.2rem}
+.card h3{font-family:var(--fdisp);font-size:1.15rem;margin:8px 0 4px}
+.card p{font-size:.84rem;color:var(--muted);line-height:1.55;margin-bottom:6px}
+.card .ev{font-size:.72rem;color:var(--dim);margin:8px 0 14px}
+.card .btn{display:block;width:100%;font-family:var(--fdisp);font-weight:600;border:none;border-radius:999px;padding:13px;margin-top:8px;cursor:pointer;text-decoration:none;font-size:.95rem}
+.card .btn.go{background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a}
+.card .btn.ghost{background:transparent;border:1px solid var(--line2);color:var(--ink)}
+.card .price{font-size:.78rem;color:var(--gold);margin-bottom:4px}
+</style></head>
+<body class="allyos"><div class="wrap">
+  <div class="top">
+    <h1>Practice Dashboard · <b>AllyOS</b></h1>
+    <div class="r"><a id="netLink" href="clinic-network.html" style="display:none;margin-right:10px;color:var(--teal);text-decoration:none;font-size:.82rem">← Clinic Network</a><span id="cloud" style="font-size:.72rem;margin-right:10px"></span><span id="who"></span><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
+  </div>
+  <div class="sub" id="clinicLine">Your clinic's lines of care. Active lines open their station; locked lines can be added any time.</div>
+
+  <div class="sec">Lines of care</div>
+  <div class="lines" id="lines"></div>
+
+  <div class="sec">Tools</div>
+  <div class="tools" id="tools"></div>
+
+  <div class="disc">Each line is a module you turn on per practice — pay only for what you run. AllyOS is advisory decision-support; the provider owns every clinical decision and signature. <b>PHI stays on-device.</b> © <span id="yr"></span> RenuviaMD® PLLC.</div>
+</div>
+
+<div class="ov" id="ov"><div class="card" id="card"></div></div>
+
+<script>
+document.getElementById('yr').textContent=new Date().getFullYear();
+var ses=null;
+if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin','nurse']);ses=AllyOSAuth.session();
+  if(ses){document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+(ses.clinic||'');
+    document.getElementById('clinicLine').innerHTML='<b style="color:var(--ink)">'+esc(ses.clinic||'Your clinic')+'</b> — active lines open their station; locked lines can be added any time.';
+    if(ses.mdAudit){var nl=document.getElementById('netLink');if(nl)nl.style.display='';}}}
+function role(){return ses?ses.role:'nurse';}
+
+// which lines this clinic has turned on (later: Supabase clinic_modules). Demo default: IV only.
+var LKEY='allyos_clinic_lines_v1';
+function lines(){try{return Object.assign({iv:true,peptides:false,bhrt:false},JSON.parse(localStorage.getItem(LKEY)||'{}'));}catch(e){return {iv:true,peptides:false,bhrt:false};}}
+function setLine(k,v){var l=lines();l[k]=v;try{localStorage.setItem(LKEY,JSON.stringify(l));}catch(e){}render();}
+// clinic care-model config (Clinic Card). GFE tab hides ONLY when BOTH: Falcon is the MD AND RN-run IV model.
+function clinicCfg(){try{return Object.assign({falconIsMd:true,rnIvModel:true},JSON.parse(localStorage.getItem('allyos_clinic_config_v1')||'{}'));}catch(e){return {falconIsMd:true,rnIvModel:true};}}
+function gfeBlocked(){var c=clinicCfg();return !!(c.falconIsMd&&c.rnIvModel);}
+
+var LINES=[
+ {k:'iv',ic:'💧',name:'IV & IM Infusion',tool:'nursing-station.html',status:'live',price:'$199/mo',
+  short:'Nurse-run infusion under standing orders.',
+  what:'Build the bag → pre-infusion gates → infuse with live alarms → tap-monitor → signed infusion note + patient aftercare. Live ingredient screening against the patient’s conditions.'},
+ {k:'peptides',ic:'🧬',name:'Advanced Peptides',tool:'workspace.html',status:'live',price:'$199/mo',
+  short:'Provider-prescribed, evidence-graded.',
+  what:'The evidence library + contraindication/interaction screening + the evidence-grade→consent-tier logic + documentation. We don’t sell or recommend peptides — we provide the structure and safety.'},
+ {k:'bhrt',ic:'⚕️',name:'BHRT · Women’s Hormone Wellness',tool:'bhrt.html',status:'live',price:'$199/mo',
+  short:'Provider CDS for menopause wellness.',
+  what:'Red-flag referral screen → candidacy → FDA-approved-before-compounded pathway → monitoring. Provider-facing decision support; the provider prescribes.'}
+];
+
+function render(){
+  var on=lines();
+  document.getElementById('lines').innerHTML=LINES.map(function(L){
+    var active=!!on[L.k] && L.status!=='draft' || (!!on[L.k]&&L.status==='live');
+    active=!!on[L.k];
+    var chip=active?(L.status==='draft'?'<span class="chip draft">Draft</span>':'<span class="chip live">Active</span>')
+                   :'<span class="chip locked">Locked</span>';
+    return '<div class="line '+(active?'active':'locked')+'" onclick="lineClick(\''+L.k+'\')">'+chip+
+      '<div class="ic">'+L.ic+'</div><h3>'+esc(L.name)+'</h3><p>'+esc(L.short)+'</p>'+
+      (active?'':'<div class="lockrow">🔒 Add this line</div>')+'</div>';
+  }).join('');
+  // Lean clinic toolset. AllyOS = decision-support (+ real-time IV charting), NOT practice management.
+  // Drip is auto-calculated and inventory is a stock-confirm gate INSIDE the nursing station — no tiles.
+  // Owner tools (cockpit, audit, authoring) are NOT here — they live in the admin cockpit.
+  var T=[];
+  T.push({t:'Schedule',i:'📅',href:'schedule.html',roles:['provider','admin','nurse']}); // appointments per line + live IV chair board
+  if(!gfeBlocked()) T.push({t:'GFE Dashboard',i:'🩺',href:'gfe.html',roles:['provider','admin'],iv:true}); // the IV gate; hidden when the MD does the GFE for an RN-run clinic
+  T.push({t:'Clinic Card',i:'🏥',href:'clinic-card.html',roles:['provider','admin']}); // admin: clinic info · users & access
+  T.push({t:'Backup & Restore',i:'💾',roles:['provider','admin'],fn:'openBackup()'}); // device data safety (occasional)
+  document.getElementById('tools').innerHTML=T.filter(function(x){
+    if(x.iv && !on.iv) return false;
+    if(x.md && !(ses && ses.mdAudit)) return false;
+    return x.roles.indexOf(role())>=0;
+  }).map(function(x){var a=x.fn?('href="#" onclick="'+x.fn+';return false"'):('href="'+x.href+'"');return '<a class="tool" '+a+'><span class="ti">'+x.i+'</span>'+esc(x.t)+'</a>';}).join('');
+}
+function lineClick(k){var on=lines();var L=byKey(k);
+  if(on[k]){ if(L.tool&&L.tool!=='#'){location.href=L.tool;} else {popup(k,true);} return; }
+  popup(k,false);
+}
+function byKey(k){for(var i=0;i<LINES.length;i++)if(LINES[i].k===k)return LINES[i];return null;}
+function popup(k,active){var L=byKey(k);
+  document.getElementById('card').innerHTML='<div class="ic">'+L.ic+'</div><h3>'+esc(L.name)+'</h3>'+
+    '<p>'+esc(L.what)+'</p><div class="ev">Evidence-graded · independent · PHI-free. The provider owns the decision.</div>'+
+    (active
+      ? '<a class="btn go" href="'+L.tool+'">Open '+esc(L.name)+'</a>'
+      : '<div class="price">Live Module · '+esc(L.price)+' per clinic'+(L.status==='draft'?' · in final review':'')+'</div>'+
+        '<a class="btn go" href="onboard.html">➕ Add this line</a>'+
+        '<button class="btn ghost" onclick="setLine(\''+k+'\',true);closeOv()">Activate in this demo</button>')+
+    '<button class="btn ghost" onclick="closeOv()">Close</button>';
+  document.getElementById('ov').classList.add('show');
+}
+function closeOv(){document.getElementById('ov').classList.remove('show');}
+document.getElementById('ov').addEventListener('click',function(e){if(e.target===this)closeOv();});
+function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ---- Backup & Restore (clinic owns the file; it contains PHI, stays on their device) ----
+function isAllyKey(k){return k.indexOf('allyos')===0||k.indexOf('renuviamd')===0;}
+function openBackup(){
+  document.getElementById('card').innerHTML='<div class="ic">💾</div><h3>Backup &amp; Restore</h3>'+
+    '<p>Download a backup of this device\'s AllyOS data, or restore it onto a new device/browser so the clinic can keep operating.</p>'+
+    '<div class="ev" style="color:#e7b84e">⚠ This backup file <b>contains patient data</b> from in-progress visits. Keep it in your <b>secure / HIPAA storage</b> — it is not PHI-free.</div>'+
+    '<button class="btn go" onclick="exportBackup()">⬇ Download backup</button>'+
+    '<label class="btn ghost" style="cursor:pointer">⬆ Restore from backup<input type="file" accept="application/json" style="display:none" onchange="importBackup(this.files[0])"></label>'+
+    '<button class="btn ghost" onclick="closeOv()">Close</button>';
+  document.getElementById('ov').classList.add('show');
+}
+function exportBackup(){
+  var data={};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(isAllyKey(k))data[k]=localStorage.getItem(k);}
+  var payload={app:'AllyOS',exported:new Date().toISOString(),clinic:(ses&&ses.clinic)||'',keys:Object.keys(data).length,data:data};
+  var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='allyos-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href);
+}
+// clinic → MD: export the signed GFE + note (PHI) for the Encounter IDs the MD selected
+function openChartExport(){
+  var audit=[],charts={};
+  try{audit=JSON.parse(localStorage.getItem('allyos_audit_v1')||'[]');}catch(e){}
+  try{charts=JSON.parse(localStorage.getItem('allyos_charts_v1')||'{}');}catch(e){}
+  audit.sort(function(a,b){return (''+(b.id||'')).localeCompare(''+(a.id||''));});
+  var rows=audit.map(function(r){var has=!!charts[r.id];
+    return '<label style="display:flex;gap:9px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:9px;margin-bottom:6px;font-size:.82rem;'+(has?'':'opacity:.45')+'">'+
+      '<input type="checkbox" class="cx" value="'+esc(r.id)+'" '+(has?'':'disabled')+' style="width:auto">'+
+      '<span style="font-family:var(--fdisp);color:var(--teal)">'+esc(r.id)+'</span>'+
+      '<span style="color:var(--muted);font-size:.76rem">'+esc(r.date||'')+' · '+esc(r.protocol||'')+'</span>'+
+      (has?'':'<span style="margin-left:auto;color:var(--muted);font-size:.7rem">no saved chart</span>')+'</label>';
+  }).join('');
+  document.getElementById('card').innerHTML='<div class="ic">📑</div><h3>Export charts for your MD</h3>'+
+    '<p>Check the Encounter IDs your Medical Director requested. We bundle the signed <b>GFE + infusion note</b> for each into one printable file to send to your MD.</p>'+
+    '<div class="ev" style="color:#e7b84e">⚠ Contains patient data — keep in secure / HIPAA storage.</div>'+
+    '<div style="max-height:280px;overflow:auto;text-align:left;margin:8px 0">'+(rows||'<p style="color:var(--muted)">No encounters recorded yet.</p>')+'</div>'+
+    '<button class="btn go" onclick="exportCharts()">⬇ Export selected charts</button>'+
+    '<button class="btn ghost" onclick="closeOv()">Close</button>';
+  document.getElementById('ov').classList.add('show');
+}
+function exportCharts(){
+  var ids=[];document.querySelectorAll('.cx:checked').forEach(function(c){ids.push(c.value);});
+  if(!ids.length){alert('Select at least one chart.');return;}
+  var charts={};try{charts=JSON.parse(localStorage.getItem('allyos_charts_v1')||'{}');}catch(e){}
+  var css='body{background:#f4f6f7;font-family:-apple-system,Segoe UI,Arial,sans-serif}'+
+    '.notepaper{background:#fff;color:#1c2b32;padding:22px;font-size:13px;line-height:1.5;border:1px solid #e3ecea;border-radius:8px;margin-bottom:14px}'+
+    '.notepaper h2{font-size:18px;color:#0e3a40;margin:0}.notepaper .nmeta{font-size:11px;color:#5b6b72}'+
+    '.notepaper .nsec{margin:11px 0;padding-top:8px;border-top:1px solid #e3ecea}.notepaper .nsec h3{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#0e8a8a;margin:0 0 5px}'+
+    '.notepaper .nrow{display:flex;gap:8px;padding:2px 0}.notepaper .nk{min-width:118px;color:#5b6b72;font-size:12px;flex:0 0 auto}'+
+    '.notepaper .ncomp{background:#e9f6f0;border-left:3px solid #1e9e6a;padding:8px 10px;border-radius:5px;font-size:12px;color:#155;margin-top:8px}'+
+    '.notepaper .nsign{border-top:1px solid #e3ecea;margin-top:12px;padding-top:10px}.notepaper .stamp{color:#0c7a4d;font-weight:700}'+
+    '.chartwrap{page-break-after:always;margin-bottom:24px}.cid{font:700 12px monospace;color:#0e8a8a;margin:18px 0 6px}';
+  var body=ids.map(function(id){var p=charts[id];if(!p)return '';
+    return '<div class="chartwrap"><div class="cid">ENCOUNTER '+esc(id)+'</div>'+(p.gfe||'')+(p.note||'')+'</div>';}).join('');
+  var clinic=(ses&&ses.clinic)||'clinic';
+  var html='<!doctype html><meta charset="utf-8"><title>AllyOS charts — '+ids.length+' for MD audit</title><style>'+css+'</style>'+
+    '<div style="max-width:850px;margin:18px auto;padding:0 12px"><div style="font-size:12px;color:#5b6b72;margin-bottom:10px">'+esc(clinic)+' · '+ids.length+' chart(s) for Medical-Director audit · '+new Date().toISOString().slice(0,10)+'</div>'+body+'</div>';
+  var blob=new Blob([html],{type:'text/html'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='allyos-charts-'+clinic.replace(/[^A-Za-z0-9]/g,'').toLowerCase()+'-'+new Date().toISOString().slice(0,10)+'.html';a.click();URL.revokeObjectURL(a.href);
+  closeOv();
+}
+// clinic → MD: export this device's de-identified audit log for the Medical Director to import
+function exportAuditForMD(){
+  var data=[],denom={};
+  try{data=JSON.parse(localStorage.getItem('allyos_audit_v1')||'[]');}catch(e){}
+  try{denom=JSON.parse(localStorage.getItem('allyos_audit_denom_v1')||'{}');}catch(e){}
+  if(!data.length){alert('No audit encounters recorded on this device yet — sign infusion notes first.');return;}
+  var clinic=(ses&&ses.clinic)||'clinic';
+  var payload={app:'AllyOS',type:'audit-export',clinic:clinic,exported:new Date().toISOString(),encounters:data.length,denom:denom,data:data};
+  var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='allyos-audit-'+clinic.replace(/[^A-Za-z0-9]/g,'').toLowerCase()+'-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(a.href);
+}
+function importBackup(file){if(!file)return;var r=new FileReader();
+  r.onload=function(){try{var j=JSON.parse(r.result);var d=j.data||j;
+    if(!confirm('Restore this backup? It overwrites the current data on THIS device.'))return;
+    var n=0;Object.keys(d).forEach(function(k){if(isAllyKey(k)){localStorage.setItem(k,d[k]);n++;}});
+    alert('Restored '+n+' item(s). Reloading.');location.reload();
+  }catch(e){alert('That is not a valid AllyOS backup file.');}};
+  r.readAsText(file);}
+render();
+</script>
+<!-- Netlify Forms registration for the Get Help widget (de-identified support requests) -->
+<form name="allyos-support" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input name="form-name" value="allyos-support"><input name="bot-field">
+  <input name="clinic"><input name="role"><input name="name"><input name="page"><input name="browser">
+  <textarea name="message"></textarea><textarea name="diagnostic"></textarea><textarea name="triage"></textarea>
+</form>
+<script src="supabase-client.js"></script>
+<script>
+// cloud status badge — additive, fail-soft
+(function(){ if(!window.AllyOSCloud)return;
+  var el=document.getElementById('cloud'); if(!el)return;
+  AllyOSCloud.ready.then(function(ok){ if(!ok)return;
+    AllyOSCloud.user().then(function(u){
+      if(u){ el.innerHTML='☁ <b style="color:var(--green,#2bd49a)">'+(u.email||'cloud')+'</b> <a href="#" onclick="AllyOSCloud.signOut().then(function(){location.reload();});return false" style="color:var(--muted)">(sign out cloud)</a>';
+        // server-authoritative config: the owner's clinic config wins over local edits.
+        AllyOSCloud.myClinic().then(function(cfg){ if(!cfg)return;
+          try{localStorage.setItem('allyos_clinic_config_v1',JSON.stringify({name:cfg.name,city:cfg.city,falconIsMd:cfg.falconIsMd,rnIvModel:cfg.rnIvModel}));}catch(e){}
+          try{localStorage.setItem('allyos_clinic_lines_v1',JSON.stringify(cfg.lines));}catch(e){}
+          render(); // re-render tools/lines from the synced config
+        });
+      }
+      else { el.innerHTML='<a href="login.html" style="color:var(--teal,#28c2b8)">☁ Cloud sign-in</a>'; }
+    });
+  });
+})();
+</script>
+<script src="allyos-help.js"></script>
+</body></html>

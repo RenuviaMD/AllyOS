@@ -29,13 +29,21 @@ h1{font:600 1.4rem/1.2 Georgia,serif;margin-bottom:2px}.sub{color:var(--muted);f
 .sched{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--muted);margin-top:6px}.sched .c{color:var(--teal);font-weight:700}
 footer{color:var(--faint);font-size:11px;border-top:1px solid var(--line);margin-top:26px;padding-top:14px;line-height:1.6}
 .proto{font-size:10px;color:var(--gold);border:1px solid #463413;border-radius:4px;padding:1px 7px;margin-left:6px}
-</style></head><body>
+</style><script src="allyos-auth.js"></script></head><body>
 <div class="top"><div class="brand">Ally<b>OS</b> Admin</div><span class="tag">master console</span>
 <div class="right"><span class="lock"><span class="dot"></span> PHI-free · content &amp; ops only</span><span>Dr. Falcon · admin</span></div></div>
 <div class="wrap">
   <h1>Master Console <span class="proto">prototype</span></h1>
   <div class="sub">Daily audit &amp; debug across the platform — fix content and AI behavior once, heal every provider.</div>
   <div class="phi">🔒 <b>Patient data is never visible here.</b> Encounters stay on each provider's device (PHI-free architecture). This console governs the <b>shared engine</b>: clinical content, Ally's behavior, system health, and regulatory currency — fixes here propagate to all providers without touching anyone's patient data.</div>
+
+  <div class="grp">Authoring</div>
+  <div class="tiles">
+    <div class="tile"><div class="h"><b>New entries console</b><span class="st run">authoring</span></div>
+      <p>Add a new <b>ingredient</b>, <b>protocol</b>, <b>provider</b>, or <b>clinic</b> in the canonical format — one card per type, each wired to its destination (repo JSON or Supabase). Generates a sign-off-ready block; non-PHI only.</p>
+      <div class="meta">Format spec: protocols/AUTHORING.md · schema: supabase/schema.sql</div>
+      <a class="btn pri" href="authoring.html">＋ Open authoring console</a></div>
+  </div>
 
   <div class="grp">Daily agents</div>
   <div class="tiles">
@@ -83,6 +91,10 @@ footer{color:var(--faint);font-size:11px;border-top:1px solid var(--line);margin
   <footer><b style="color:#dfeae8">AllyOS Admin — Master Console.</b> Governs shared clinical content, Ally behavior, system health, and regulatory currency. Handles no PHI. Prototype — daily execution wires to a scheduled GitHub Action + the Claude API; figures shown are illustrative. © 2026 RenuviaMD®.</footer>
 </div>
 <script>
+// Master Console is the MD's cross-clinic governance tool — not a clinic feature.
+if(window.AllyOSAuth){AllyOSAuth.guard(['admin','provider']);var _s=AllyOSAuth.session();
+  if(_s&&!_s.mdAudit){document.documentElement.innerHTML='<body style="font-family:-apple-system,Segoe UI,Arial,sans-serif;background:#0b0f11;color:#e8eef0;display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center;padding:24px"><div><h2>Medical-Director console</h2><p style="color:#8b9aa1;max-width:46ch">The Master Console governs shared clinical content across all clinics — it is the Medical Director\'s tool, not a clinic feature.</p><p style="margin-top:14px"><a style="color:#29b8a8" href="dashboard.html">← Dashboard</a></p></div></body>';}
+}
 fetch('admin-status.json').then(function(r){return r.json()}).then(function(d){
   var ok=d.json_valid&&d.calc_ok&&(!d.errors||!d.errors.length);
   var st=document.getElementById('hStat'); if(st){st.textContent=ok?'healthy':'issues';st.className='st '+(ok?'ok':'warn');}
