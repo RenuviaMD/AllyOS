@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="allyos-theme.css">
 <script src="allyos-auth.js"></script>
 <script src="allyos-credentials.js"></script>
+<script src="supabase-client.js"></script>
 <style>
 .wrap{max-width:920px;margin:0 auto;padding:18px}
 .top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
@@ -162,8 +163,27 @@ function saveAll(){
   var lines={iv:document.getElementById('lIv').checked,peptides:document.getElementById('lPep').checked,bhrt:document.getElementById('lBhrt').checked};
   try{localStorage.setItem(LKEY,JSON.stringify(lines));}catch(e){}
   setSeats(SEATS);
-  var s=document.getElementById('saved');s.textContent='✓ Saved';setTimeout(function(){s.textContent='';},2200);
+  // mirror to the server (owner-only; RLS rejects non-admins). Local stays as the offline cache.
+  if(window.AllyOSCloud&&CLOUD_CLINIC){
+    AllyOSCloud.saveClinicConfig(CLOUD_CLINIC,Object.assign({},cfg,{lines:lines})).then(function(r){
+      flag(r&&r.ok?'✓ Saved to cloud':'✓ Saved locally (cloud write rejected — owner only)');
+    });
+  } else { flag('✓ Saved'); }
 }
+function flag(t){var s=document.getElementById('saved');s.textContent=t;setTimeout(function(){s.textContent='';},2600);}
 load();
+
+// pull the server-authoritative config (owner-controlled). Fail-soft: stays local if offline / not signed in.
+var CLOUD_CLINIC=null;
+if(window.AllyOSCloud){AllyOSCloud.ready.then(function(ok){if(!ok)return;
+  AllyOSCloud.user().then(function(u){if(!u)return;
+    AllyOSCloud.myClinic().then(function(cfg){if(!cfg)return;
+      CLOUD_CLINIC=cfg.id;
+      try{localStorage.setItem(CFG,JSON.stringify({name:cfg.name,city:cfg.city,falconIsMd:cfg.falconIsMd,rnIvModel:cfg.rnIvModel}));}catch(e){}
+      try{localStorage.setItem(LKEY,JSON.stringify(cfg.lines));}catch(e){}
+      load();
+    });
+  });
+});}
 </script>
 </body></html>

@@ -124,5 +124,37 @@
     });
   };
 
+  // ---- clinic care-model config (server-authoritative; owner writes, clinic reads) ----
+  function clinicToCfg(c) {
+    if (!c) return null;
+    var lines = c.lines || [];
+    return {
+      id: c.id, name: c.name, city: c.city_state || "",
+      falconIsMd: (c.md_arrangement === "renuviamd" || !!c.md_of_record),
+      rnIvModel: !!c.rn_iv_model,
+      lines: { iv: lines.indexOf("iv") >= 0, peptides: lines.indexOf("peptides") >= 0, bhrt: lines.indexOf("bhrt") >= 0 },
+      status: c.status,
+    };
+  }
+  // the signed-in user's clinic (RLS returns only theirs), mapped to the app config shape
+  Cloud.myClinic = function () {
+    if (!guard()) return Promise.resolve(null);
+    return Cloud.listClinics().then(function (cs) { return clinicToCfg((cs && cs[0]) || null); }).catch(function () { return null; });
+  };
+  // owner-only write (RLS: only app_admin may UPDATE clinics — the RN/clinic cannot)
+  Cloud.saveClinicConfig = function (clinicId, cfg) {
+    if (!guard() || !clinicId) return Promise.resolve({ ok: false, error: "cloud not available" });
+    var lines = [];
+    if (cfg.lines) ["iv", "peptides", "bhrt"].forEach(function (k) { if (cfg.lines[k]) lines.push(k); });
+    var patch = {
+      md_arrangement: cfg.falconIsMd ? "renuviamd" : "own", md_of_record: !!cfg.falconIsMd,
+      rn_iv_model: !!cfg.rnIvModel, lines: lines,
+    };
+    if (cfg.name) patch.name = cfg.name;
+    if (cfg.city) patch.city_state = cfg.city;
+    return Cloud._sb.from("clinics").update(patch).eq("id", clinicId)
+      .then(function (r) { return { ok: !r.error, error: r.error }; });
+  };
+
   window.AllyOSCloud = Cloud;
 })();

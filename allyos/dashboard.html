@@ -235,7 +235,14 @@ render();
   var el=document.getElementById('cloud'); if(!el)return;
   AllyOSCloud.ready.then(function(ok){ if(!ok)return;
     AllyOSCloud.user().then(function(u){
-      if(u){ el.innerHTML='☁ <b style="color:var(--green,#2bd49a)">'+(u.email||'cloud')+'</b> <a href="#" onclick="AllyOSCloud.signOut().then(function(){location.reload();});return false" style="color:var(--muted)">(sign out cloud)</a>'; }
+      if(u){ el.innerHTML='☁ <b style="color:var(--green,#2bd49a)">'+(u.email||'cloud')+'</b> <a href="#" onclick="AllyOSCloud.signOut().then(function(){location.reload();});return false" style="color:var(--muted)">(sign out cloud)</a>';
+        // server-authoritative config: the owner's clinic config wins over local edits.
+        AllyOSCloud.myClinic().then(function(cfg){ if(!cfg)return;
+          try{localStorage.setItem('allyos_clinic_config_v1',JSON.stringify({name:cfg.name,city:cfg.city,falconIsMd:cfg.falconIsMd,rnIvModel:cfg.rnIvModel}));}catch(e){}
+          try{localStorage.setItem('allyos_clinic_lines_v1',JSON.stringify(cfg.lines));}catch(e){}
+          render(); // re-render tools/lines from the synced config
+        });
+      }
       else { el.innerHTML='<a href="login.html" style="color:var(--teal,#28c2b8)">☁ Cloud sign-in</a>'; }
     });
   });

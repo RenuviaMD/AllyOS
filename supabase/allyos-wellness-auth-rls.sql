@@ -103,3 +103,17 @@ create policy cm_read  on public.clinic_members for select to authenticated usin
 create policy cm_write on public.clinic_members for all    to authenticated using (public.is_clinic_md(clinic_id)) with check (public.is_clinic_md(clinic_id));
 -- app_admins (read own / admin; writes via trigger + service role only)
 create policy admins_read on public.app_admins for select to authenticated using (user_id = auth.uid() or public.is_app_admin());
+
+-- ============================================================================
+-- 2026-06-29 · Clinic care-model config is OWNER-controlled (provisioning record)
+-- ----------------------------------------------------------------------------
+-- The clinics row holds what the clinic is provisioned for (lines + MD arrangement
+-- + care model); billing depends on it. Add the RN-run IV flag and make config
+-- writes owner-only so neither the RN nor the clinic's own MD can flip lines /
+-- arrangement to drop the subscription. Clinics still READ their own row.
+alter table public.clinics add column if not exists rn_iv_model boolean not null default false;
+
+drop policy if exists clinic_update on public.clinics;
+create policy clinic_update on public.clinics
+  for update using (is_app_admin()) with check (is_app_admin());
+-- GFE tab is hidden for a clinic ⇔ md_arrangement='renuviamd' AND rn_iv_model=true.
