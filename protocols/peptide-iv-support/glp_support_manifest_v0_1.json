@@ -1,0 +1,56 @@
+{
+  "package_name": "glp_support_iv_im_stack_v0_1",
+  "date_updated": "2026-06-29",
+  "scope": "GLP/GIP/amylin wellness IV/IM support",
+  "wellness_goal_trigger_allowed": true,
+  "deficiency_required": false,
+  "safety_gate_required_before_support": true,
+  "no_regulatory_logic": true,
+  "no_dosing_or_rate_logic": true,
+  "counts": {
+    "protocol_records": 1,
+    "support_options": 6,
+    "safety_gates": 9,
+    "guardrails": 3,
+    "validation_cases": 8,
+    "source_audit_records": 10
+  },
+  "unresolved_source_ids": [],
+  "files": [
+    {
+      "filename": "glp_support_iv_im_protocol_v0_1.jsonl",
+      "bytes": 5647,
+      "sha256": "2df0b3ef62b3d99384954896944b6907608e3665c4824dc8b5654fe8d570d454"
+    },
+    {
+      "filename": "glp_support_iv_im_protocol_v0_1.csv",
+      "bytes": 3707,
+      "sha256": "c6081968d155e24fd7ff97462c574954e6d5e5d84bf67afc9ca1ba721be84c25"
+    },
+    {
+      "filename": "glp_support_iv_im_safety_gates_v0_1.jsonl",
+      "bytes": 4960,
+      "sha256": "880f2001f6ecbb8d1eca79d40a42cb7e9fa6db45a51f1efa04be3e50a5518616"
+    },
+    {
+      "filename": "glp_support_iv_im_guardrails_v0_1.jsonl",
+      "bytes": 1113,
+      "sha256": "5e1244697360f000ccedfbce2f0ae092d1b3e099683ab7ece19374462b01c977"
+    },
+    {
+      "filename": "glp_support_iv_im_source_audit_v0_1.csv",
+      "bytes": 4656,
+      "sha256": "3482934b58009ca06a8b0cba41f9b2f0d9dfad503e3f87cf21158595fef313a0"
+    },
+    {
+      "filename": "glp_support_iv_im_validation_cases_v0_1.csv",
+      "bytes": 1156,
+      "sha256": "0cb44ab31cea204d464a866c90fa9a43a2349794339c1f125c38a50fcb43c862"
+    },
+    {
+      "filename": "glp_support_iv_im_report_v0_1.md",
+      "bytes": 2302,
+      "sha256": "e2f9313d2bfd2691c390ce5bb3d8583a7ca77fd4432006aa66374acba231c4b2"
+    }
+  ]
+}

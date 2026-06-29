@@ -61,6 +61,32 @@
     { "axis_id": "AXIS_MITOCHONDRIAL_AMPK_NAD", "name": "Mitochondrial / AMPK / NAD", "peptides": ["MOTS-c", "SS-31", "epitalon"], "triggers": ["fatigue_recovery_context", "provider_selected_NAD_pathway", "exercise_intolerance_without_red_flags"], "support_options": ["Niagen/NR or NAD+", "B-complex/B12", "Glutathione (redox)", "CoQ10 (IM)"], "red_flags_hold": ["active_chest_pain", "unstable_arrhythmia", "syncope", "hypoxia", "active_malignancy_review", "pregnancy_lactation_review"] }
   ],
 
+  "glp_support": {
+    "note": "Deep elaboration of AXIS_METABOLIC_INCRETIN_GLUCAGON for GLP/GIP/amylin patients (semaglutide, tirzepatide, retatrutide, cagrilintide, pramlintide) — the largest population. Source: protocols/peptide-iv-support/glp_support_*. Wellness-elective, no doses, no efficacy claim.",
+    "client_facing_safe_language": "This is GLP wellness support for hydration, energy, nutrient status, beauty, recovery, or metabolic-support goals. It is NOT presented as making GLP medication work better or increasing weight loss.",
+    "options": [
+      { "id": "GLP_IV_001_HYDRATION_ELECTROLYTE", "name": "GLP Hydration / Electrolyte IV", "ingredients": ["hydration base", "electrolytes"], "goals": ["hydration", "energy when low intake", "constipation with low fluids"], "evidence": "W2", "do_not_claim": ["prevents GLP side effects", "improves weight loss", "required for all GLP clients"] },
+      { "id": "GLP_IV_002_ENERGY_B12", "name": "GLP Energy IV/IM B-complex/B12", "ingredients": ["B-complex", "B12"], "goals": ["energy", "focus", "low intake support"], "evidence": "W2 (A when B12 deficiency/risk)", "do_not_claim": ["B12 makes GLP work better", "guaranteed energy", "treats fatigue disease"] },
+      { "id": "GLP_IV_003_METABOLIC_MIC", "name": "GLP Metabolic / MIC / L-carnitine", "ingredients": ["B-complex", "B12", "L-carnitine", "MIC/lipotropic IM if separately authorized"], "goals": ["body composition", "metabolic support"], "evidence": "W3/W4", "do_not_claim": ["burns fat", "boosts GLP weight loss", "proven lipotropic synergy"] },
+      { "id": "GLP_IV_004_BEAUTY", "name": "GLP Hair / Skin / Nail Beauty", "ingredients": ["biotin", "vitamin C", "B-complex/B12", "glutathione if screened", "trace if safe"], "goals": ["hair", "skin", "nails", "glow during weight loss"], "evidence": "W2/W3", "do_not_claim": ["prevents GLP hair shedding", "guarantees hair growth", "reverses alopecia", "proven GLP beauty synergy"] },
+      { "id": "GLP_IV_005_RECOVERY_AMINO", "name": "GLP Recovery / Amino IV", "ingredients": ["amino blend", "B-complex/B12", "magnesium if safe", "hydration base"], "goals": ["recovery", "lean support", "low protein intake during GLP appetite suppression"], "evidence": "W3", "do_not_claim": ["prevents muscle loss", "builds muscle without training/nutrition", "potentiates GLP"] },
+      { "id": "GLP_IM_006_SHOTS", "name": "GLP IM Support: B12 / MIC / L-carnitine shots", "ingredients": ["B12 IM", "MIC IM if authorized", "L-carnitine IM"], "goals": ["energy", "body composition", "metabolic support"], "evidence": "W2 (B12) / W3-W4 (MIC/carnitine)", "do_not_claim": ["increases GLP weight loss", "melts fat", "guaranteed energy"] }
+    ],
+    "glp_context_safety_gates": {
+      "note": "NEW layer — these gate on the PATIENT BEING ON A GLP DRUG (its pharmacology/GI effects), NOT the IV ingredient. Distinct from, and additive to, the iv-module ingredient screens. Safety gates run BEFORE support selection.",
+      "drug_context_gates": [
+        { "id": "GLP_GATE_001_SEVERE_GI_DEHYDRATION", "severity": "yellow→red", "trigger": ["persistent vomiting", "persistent diarrhea", "orthostasis", "syncope", "inability to keep fluids down", "AKI symptoms", "known CKD with GI symptoms"], "action": "not simple wellness — provider review; renal/electrolyte assessment or escalation if unstable" },
+        { "id": "GLP_GATE_002_PANCREAS_GALLBLADDER", "severity": "red HARD STOP", "trigger": ["severe persistent abdominal pain", "pain radiating to back", "jaundice", "RUQ pain with fever", "dark urine / pale stools"], "action": "do NOT infuse; urgent clinical evaluation" },
+        { "id": "GLP_GATE_003_HYPOGLYCEMIA_MED_CONTEXT", "severity": "yellow→red", "trigger": ["insulin use", "sulfonylurea use", "hypoglycemia symptoms", "low glucose", "missed meals / low intake"], "action": "glucose context required; do NOT mask hypoglycemia as fatigue" },
+        { "id": "GLP_GATE_004_ORAL_MED_ABSORPTION", "severity": "yellow", "trigger": ["oral contraceptive + tirzepatide", "narrow-therapeutic-index oral med", "severe gastroparesis symptoms"], "action": "do NOT claim IV solves absorption; provider reviews oral-med timing" },
+        { "id": "GLP_GATE_009_PREGNANCY_LACTATION", "severity": "yellow→red", "trigger": ["pregnancy", "suspected pregnancy", "lactation", "status unknown when relevant"], "action": "hold or provider review; do not auto-clear elective wellness IV/IM" }
+      ],
+      "ingredient_gates_delegated_to_iv_module": ["GLP_GATE_005 fluid-overload/renal → ING_NS + vital-hold", "GLP_GATE_006 magnesium-renal → ING_MGCL", "GLP_GATE_007 biotin-lab-interference → ING_BIOTIN", "GLP_GATE_008 vitamin-C screen → ING_VITC"]
+    },
+    "guardrails": ["GLP_SUPPORT_NO_EFFICACY_BOOST (no 'boosts GLP / enhances weight loss / semaglutide synergy')", "GLP_SUPPORT_WELLNESS_GOAL_ALLOWED (deficiency not required)", "GLP_SUPPORT_SAFETY_GATE_FIRST"],
+    "sources_note": "DailyMed labels (Ozempic/Wegovy/Mounjaro/Zepbound) for GI/dehydration/AKI/oral-absorption/hypoglycemia context; NIH ODS (B12/Mg/VitC/Biotin); FDA biotin lab-interference; MSD Myers evidence-limit. Full audit in glp_support_source_audit_v0_1.csv (each with does_not_support)."
+  },
+
   "ingredient_matrix": [
     { "ingredient": "0.9% saline / hydration", "iv_module_id": "ING_NS", "goals": ["energy_if_low_intake", "GLP1_tolerance_support", "travel/exercise_recovery"], "axes": ["AXIS_METABOLIC_INCRETIN_GLUCAGON"], "fires_when": ["low_oral_intake", "nausea_vomiting", "diarrhea", "orthostasis", "heat_exposure", "post_travel"], "evidence": "W2", "do_not_claim": ["increases peptide weight loss", "needed for all peptide patients"] },
     { "ingredient": "B-complex", "iv_module_id": "ING_VITACOMPLEX", "goals": ["energy", "focus", "metabolic_support"], "axes": ["AXIS_MITOCHONDRIAL_AMPK_NAD", "AXIS_GH_IGF1_RECOVERY"], "fires_when": ["client_wants_energy", "low_intake", "weight_management_program", "fatigue_recovery_goal"], "evidence": "W2", "do_not_claim": ["guaranteed energy", "proven peptide potentiator"] },
@@ -137,10 +163,13 @@
       "citation_regulatory": "PASS-WITH-NOTES (2026-06-29) — no efficacy overclaim, sources consistent with do_not_support, 503B/Medical-Director/no-doses posture correct. Notes APPLIED: Niagen evidence normalized to tolerability-only (dropped stray B-C); A–D scale documented as imported/illustrative via evidence_labels._scale_note.",
       "schema": "PASS-WITH-NOTES (2026-06-29) — strict-valid JSON, full referential integrity (all 17 iv_module_ids map, all axes resolve, guardrail ids unique). Notes APPLIED: dual-scale documented; consumer renderer null-guards optional fields (gate_note/route/red_flags_hold) and treats stacks.list[].axis as descriptive, not an FK."
     },
+    "added_after_lock": "GLP Support IV/IM v0.1 integrated (glp_support: 6 options + 9 GLP-drug-context safety gates + 3 guardrails + 8 validation cases + DailyMed-grounded sources). Deepens AXIS_METABOLIC_INCRETIN_GLUCAGON for the GLP/GIP/amylin population. NEW layer: GLP-pharmacology gates (pancreatitis/gallbladder red flags, dehydration/AKI, hypoglycemia-with-insulin, oral-absorption) — distinct from the iv-module ingredient screens. Needs a re-audit pass before final sign-off.",
+    "coverage_gap": "Still MISSING two axes from the v0.5 stack file: Sexual/HPG (PT-141 + Kisspeptin → Vitality) and Neuro/Cognitive (Semax + Selank + DSIP → Cognition), plus the named-IV-stack mapping (IV-07 Neuro, IV-08 Metabolic Burner). Upload the v0.5 file to close options 3–6.",
     "pending": [
-      "Author the Repair Stack monograph in workspace.html (from the locked BPC-157/TB-500/GHK-Cu components).",
+      "Integrate the v0.5 stack file → add Sexual/HPG + Neuro/Cognitive axes + named-IV-stack (IV-07/IV-08) mapping.",
+      "Re-audit pass to cover the GLP block (+ v0.5 once added).",
+      "Author the Repair Stack monograph in workspace.html.",
       "Apply iv-module screen extensions at its next re-lock (CoQ10 no-IV, Mg hypotension, Vit C hemochromatosis).",
-      "3-auditor lock (clinical / citation+regulatory / schema).",
       "Medical Director sign-off (Falcon, MD) → set effective + flip to locked."
     ]
   }
