@@ -50,6 +50,26 @@
 .pgid{font-family:ui-monospace,Menlo,monospace;color:var(--teal);font-size:.8rem;min-width:80px}
 .pgplan{flex:1;color:var(--ink);font-size:.8rem}
 .pggo{color:var(--gold);font-size:.74rem;font-weight:700}
+.cfgbtn{color:var(--gold);text-decoration:none;font-size:.78rem;font-weight:600;border:1px solid #4a3c18;background:rgba(212,168,67,.1);border-radius:9px;padding:5px 12px;cursor:pointer}
+.mback{position:fixed;inset:0;background:rgba(3,7,13,.74);display:none;align-items:flex-start;justify-content:center;padding:34px 16px;overflow:auto;z-index:50}
+.mback.on{display:flex}
+.msheet{background:linear-gradient(180deg,#101f2c,#0b1521);border:1px solid var(--line2);border-radius:16px;padding:20px 22px;max-width:480px;width:100%}
+.msheet h2{font-family:var(--fdisp);font-size:1.2rem;margin-bottom:3px}
+.msheet .msub{font-size:.74rem;color:var(--muted);margin-bottom:15px}
+.fld{margin-bottom:13px}
+.fld label{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:5px}
+.fld input[type=text]{width:100%;background:#0c1925;border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--ink);font-size:.86rem}
+.tgl{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#0c1925;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer}
+.tgl .tl{font-size:.82rem}.tgl .td{font-size:.66rem;color:var(--muted);margin-top:2px}
+.tgl input{width:17px;height:17px;accent-color:var(--teal);flex:0 0 auto}
+.lboxes{display:flex;gap:8px;flex-wrap:wrap}
+.lbx{flex:1;min-width:90px;display:flex;align-items:center;gap:8px;background:#0c1925;border:1px solid var(--line);border-radius:10px;padding:9px 11px;cursor:pointer;font-size:.82rem}
+.lbx input{accent-color:var(--teal)}
+.gfeNote{font-size:.7rem;color:var(--gold);background:#191307;border:1px solid #4a3c18;border-radius:9px;padding:8px 11px;margin:4px 0 14px;line-height:1.5}
+.mrow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px}
+.msave{background:var(--teal);color:#05131a;border:none;border-radius:10px;padding:10px 20px;font-weight:700;font-size:.84rem;cursor:pointer}
+.mcancel{background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer}
+.msaved{font-size:.72rem;color:var(--green);font-weight:600}
 </style></head>
 <body class="allyos"><div class="wrap">
   <div class="top">
@@ -66,6 +86,30 @@
   <div id="cloudreq"></div>
   <div class="card" id="auditCard" style="border-color:#1c4763"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px">📋 System audit &amp; content updates</div><div id="auditBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
   <div id="clinics"></div>
+
+  <div class="mback" id="cfgBack">
+    <div class="msheet">
+      <h2 id="cfgTitle">Configure clinic</h2>
+      <div class="msub">You set the care model and active lines — this is the network owner's decision, not the clinic's. Saved to the clinic's record; the Clinic Card shows it read-only.</div>
+      <div class="fld"><label>Clinic name</label><input type="text" id="cfgName" placeholder="Clinic name"></div>
+      <div class="fld"><label>City, state</label><input type="text" id="cfgCity" placeholder="Coral Gables, FL"></div>
+      <div class="fld"><label>Care model</label>
+        <label class="tgl"><div><div class="tl">RenuviaMD is MD-of-record</div><div class="td">You carry the GFE + oversight (counts toward the §400.9935 cap of 5). Off = clinic uses its own MD.</div></div><input type="checkbox" id="cfgMd"></label>
+        <label class="tgl"><div><div class="tl">RN-run IV model</div><div class="td">Licensed RN runs IVs under your standing orders; you sign the GFE.</div></div><input type="checkbox" id="cfgRn"></label>
+      </div>
+      <div class="gfeNote" id="cfgGfe">GFE: …</div>
+      <div class="fld"><label>Active lines</label>
+        <div class="lboxes">
+          <label class="lbx"><input type="checkbox" id="cfgIv"> 💧 IV / IM</label>
+          <label class="lbx"><input type="checkbox" id="cfgPep"> 🧬 Peptides</label>
+          <label class="lbx"><input type="checkbox" id="cfgBhrt"> ⚖ BHRT</label>
+        </div>
+      </div>
+      <div class="mrow"><span class="msaved" id="cfgMsg"></span>
+        <div><button class="mcancel" onclick="closeCfg()">Cancel</button> <button class="msave" onclick="saveCfg()">Save</button></div>
+      </div>
+    </div>
+  </div>
 
   <div class="disc">Recurring revenue = $199/mo per active line, per clinic. MD-of-record clinics count toward the FL §400.9935 cap of 5 per physician; clinics that use their own MD are not capped and are not your liability. Today's GFE counts come from a clinic's own device (this one shows the active clinic); remote clinics show — until the PHI-free hub is wired. © <span id="yr"></span> RenuviaMD® PLLC.</div>
 </div>
@@ -87,6 +131,8 @@ function loadClinics(){try{var c=JSON.parse(localStorage.getItem(CKEY)||'null');
     falconIsMd:cfg.falconIsMd!==false,rnIvModel:!!cfg.rnIvModel,status:'active',device:true}];
 }
 function saveClinics(c){try{localStorage.setItem(CKEY,JSON.stringify(c));}catch(e){}}
+var CLINICS=loadClinics();   // module-level; cloud refresh replaces it in place
+function deviceClinicId(){return (ses&&ses.clinicId)||'lemus';}
 function lineKeys(l){return ['iv','peptides','bhrt'].filter(function(k){return l&&l[k];});}
 function lineLabel(k){return k==='iv'?'IV':k==='peptides'?'PEP':k==='bhrt'?'BHRT':k;}
 function mrrOf(c){return lineKeys(c.lines).length*PRICE;}
@@ -101,7 +147,7 @@ function pendingGFEs(){try{var s=JSON.parse(localStorage.getItem('allyos_chairsi
 }catch(e){return [];}}
 
 function render(){
-  var cl=loadClinics();
+  var cl=CLINICS;
   var mdCount=cl.filter(function(c){return c.falconIsMd;}).length;
   var mrr=cl.reduce(function(a,c){return a+mrrOf(c);},0);
   var linesActive=cl.reduce(function(a,c){return a+lineKeys(c.lines).length;},0);
@@ -131,7 +177,7 @@ function cardHTML(c){
     '</div>'+
     pendingPanel(c)+
     '<div class="crow2"><span style="font-size:.72rem;color:var(--muted)">'+keys.length+' line'+(keys.length===1?'':'s')+' · '+(c.falconIsMd?'you carry the GFE + oversight':'clinic owns the GFE')+'</span>'+
-      '<a class="open" href="'+(c.device?'dashboard.html':'clinic-card.html')+'">Open →</a></div></div>';
+      '<span style="display:flex;gap:10px;align-items:center"><button class="cfgbtn" onclick="openCfg('+"'"+esc(c.id)+"'"+')">⚙ Configure</button><a class="open" href="'+(c.device?'dashboard.html':'clinic-card.html')+'">Open →</a></span></div></div>';
 }
 function pendingPanel(c){
   if(!c.device)return '';
@@ -142,12 +188,90 @@ function pendingPanel(c){
 function slotHTML(n){
   var html='';
   for(var i=n;i<CAP;i++){
-    html+='<div class="slot"><div><div class="st">Slot '+(i+1)+' — onboard a clinic</div><div class="sd">Set care model, lines &amp; roster · MD-of-record cap '+CAP+' per physician (§400.9935)</div></div>'+
-      '<a class="add" href="clinic-card.html"><span class="addic">+</span> Add clinic</a></div>';
+    html+='<div class="slot"><div><div class="st">Slot '+(i+1)+' — onboard a clinic</div><div class="sd">You set the care model &amp; lines here · MD-of-record cap '+CAP+' per physician (§400.9935)</div></div>'+
+      '<button class="add" onclick="openCfg(null)"><span class="addic">+</span> Add clinic</button></div>';
   }
   return html;
 }
 render();
+
+// ---- real clinics from the cloud (owner sees every provisioned clinic, RLS-scoped) ----
+function mapCloudClinic(c){
+  var lines=c.lines||[];
+  return {id:c.id,name:c.name,city:c.city_state||'',
+    lines:{iv:lines.indexOf('iv')>=0,peptides:lines.indexOf('peptides')>=0,bhrt:lines.indexOf('bhrt')>=0},
+    falconIsMd:(c.md_arrangement==='renuviamd'||!!c.md_of_record),rnIvModel:!!c.rn_iv_model,
+    status:c.status||'active',device:c.id===deviceClinicId()};
+}
+function loadCloudClinics(){
+  if(!window.AllyOSCloud)return;
+  AllyOSCloud.ready.then(function(ok){if(!ok)return;
+    AllyOSCloud.listClinics().then(function(cs){
+      if(!cs||!cs.length)return;
+      CLINICS=cs.map(mapCloudClinic);
+      saveClinics(CLINICS);   // cache for offline / next load
+      render();
+    }).catch(function(){});
+  });
+}
+loadCloudClinics();
+
+// ---- owner-only care-model + lines editor (moved here from the Clinic Card) ----
+var cfgEditingId=null;
+function findClinic(id){for(var i=0;i<CLINICS.length;i++){if(CLINICS[i].id===id)return CLINICS[i];}return null;}
+function gfeText(md,rn){
+  if(md&&rn)return 'GFE: RenuviaMD MD-of-record. RN runs IVs under standing orders; you sign each GFE (counts toward the §400.9935 cap).';
+  if(md)return 'GFE: RenuviaMD MD-of-record. You sign each clinic GFE (counts toward the §400.9935 cap of 5).';
+  return 'GFE: the clinic’s own MD is responsible — not capped, not your liability.';
+}
+function refreshGfeNote(){document.getElementById('cfgGfe').textContent=gfeText(document.getElementById('cfgMd').checked,document.getElementById('cfgRn').checked);}
+['cfgMd','cfgRn'].forEach(function(id){document.getElementById(id).addEventListener('change',refreshGfeNote);});
+function openCfg(id){
+  cfgEditingId=id;var c=id?findClinic(id):null;
+  document.getElementById('cfgTitle').textContent=c?('Configure — '+c.name):'Onboard a clinic';
+  document.getElementById('cfgName').value=c?c.name:'';
+  document.getElementById('cfgCity').value=c?(c.city||''):'';
+  document.getElementById('cfgMd').checked=c?!!c.falconIsMd:true;
+  document.getElementById('cfgRn').checked=c?!!c.rnIvModel:true;
+  document.getElementById('cfgIv').checked=c?!!(c.lines&&c.lines.iv):true;
+  document.getElementById('cfgPep').checked=c?!!(c.lines&&c.lines.peptides):false;
+  document.getElementById('cfgBhrt').checked=c?!!(c.lines&&c.lines.bhrt):false;
+  document.getElementById('cfgMsg').textContent='';
+  refreshGfeNote();
+  document.getElementById('cfgBack').classList.add('on');
+}
+function closeCfg(){document.getElementById('cfgBack').classList.remove('on');}
+document.getElementById('cfgBack').addEventListener('click',function(e){if(e.target===this)closeCfg();});
+function saveCfg(){
+  var cfg={
+    name:document.getElementById('cfgName').value.trim()||'Untitled clinic',
+    city:document.getElementById('cfgCity').value.trim(),
+    falconIsMd:document.getElementById('cfgMd').checked,
+    rnIvModel:document.getElementById('cfgRn').checked,
+    lines:{iv:document.getElementById('cfgIv').checked,peptides:document.getElementById('cfgPep').checked,bhrt:document.getElementById('cfgBhrt').checked}
+  };
+  var c=cfgEditingId?findClinic(cfgEditingId):null;
+  if(c){Object.assign(c,cfg);}
+  else{c=Object.assign({id:'local-'+Date.now(),status:'active',device:false},cfg);CLINICS.push(c);}
+  saveClinics(CLINICS);
+  // if this is the device clinic, mirror to the local config the Clinic Card reads (read-only there)
+  if(c.device){try{
+    localStorage.setItem('allyos_clinic_config_v1',JSON.stringify({name:c.name,city:c.city,falconIsMd:c.falconIsMd,rnIvModel:c.rnIvModel}));
+    localStorage.setItem('allyos_clinic_lines_v1',JSON.stringify(c.lines));
+  }catch(e){}}
+  render();
+  var msg=document.getElementById('cfgMsg');msg.textContent='Saved locally';
+  // owner-only write to the clinic record (RLS: only app_admin may UPDATE clinics)
+  var cloudId=(c.id&&c.id.indexOf('local-')!==0)?c.id:null;
+  if(cloudId&&window.AllyOSCloud){
+    AllyOSCloud.saveClinicConfig(cloudId,cfg).then(function(r){
+      msg.textContent=r&&r.ok?'Saved · synced to clinic record':'Saved locally (cloud write deferred)';
+    }).catch(function(){msg.textContent='Saved locally (offline)';});
+  }else if(!cloudId){
+    msg.textContent='Saved locally — provision a clinic record to sync';
+  }
+  setTimeout(closeCfg,900);
+}
 
 // System audit + content-update agents (reads the daily-audit status; Run-now triggers the workflow).
 function renderAudit(){
@@ -170,8 +294,8 @@ function renderAudit(){
     '</div>'+
     '<div style="margin-top:12px">'+
       '<a class="add" target="_blank" href="https://github.com/RenuviaMD/AllyOS/actions/workflows/daily-audit.yml" style="text-decoration:none"><span class="addic">▶</span> Run daily audit &amp; health ↗</a>'+
-      '<div style="font-size:.7rem;color:var(--gold);margin-top:8px;line-height:1.5">⚠ On the Actions page, set <b>"Use workflow from" → Branch: claude/funny-sagan-clvl38</b> before Run. The Opus content auditor lives on that branch — running on <b>main</b> only does the structure/health check (which is why your runs finished in 10s).</div>'+
-      '<div style="font-size:.68rem;color:var(--muted);margin-top:5px">Auto: daily 04:00 UTC. The content re-verification + PubMed/ClinicalTrials sentinels run on that branch once the ANTHROPIC_API_KEY secret is set.'+(o.date?' Content last checked '+esc((''+o.date).slice(0,10))+'.':'')+'</div>'+
+      '<div style="font-size:.7rem;color:var(--gold);margin-top:8px;line-height:1.5">Run from <b>main</b> (production) — the Opus content auditor + PubMed/ClinicalTrials sentinels are now merged there. Requires the <b>ANTHROPIC_API_KEY</b> repo secret (Settings → Secrets → Actions); without it the run still does the structure/health check and source sentinels, content re-verification is skipped.</div>'+
+      '<div style="font-size:.68rem;color:var(--muted);margin-top:5px">Auto: daily 04:00 UTC. '+(o.date?'Content last checked '+esc((''+o.date).slice(0,10))+'.':'Awaiting first content run.')+'</div>'+
     '</div>';
   }).catch(function(){el.innerHTML='<span style="color:var(--muted)">Audit status unavailable.</span>';});
 }
