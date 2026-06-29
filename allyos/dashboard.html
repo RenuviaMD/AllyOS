@@ -100,23 +100,14 @@ function render(){
       '<div class="ic">'+L.ic+'</div><h3>'+esc(L.name)+'</h3><p>'+esc(L.short)+'</p>'+
       (active?'':'<div class="lockrow">🔒 Add this line</div>')+'</div>';
   }).join('');
-  // tools — role-gated, plus: GFE/inventory/calc are IV-line only; Audit is the MD-of-record's private tool.
+  // Lean clinic toolset. AllyOS = decision-support (+ real-time IV charting), NOT practice management.
+  // Drip is auto-calculated and inventory is a stock-confirm gate INSIDE the nursing station — no tiles.
+  // Owner tools (cockpit, audit, authoring) are NOT here — they live in the admin cockpit.
   var T=[];
   T.push({t:'Schedule',i:'📅',href:'schedule.html',roles:['provider','admin','nurse']}); // appointments per line + live IV chair board
-  if(!gfeBlocked()) T.push({t:'GFE Dashboard',i:'🩺',href:'gfe.html',roles:['provider','admin'],iv:true}); // GFE applies only to IV; hidden when the MD does it for an RN-run clinic
-  T.push({t:'Clinic Card',i:'🏥',href:'clinic-card.html',roles:['provider','admin']}); // care model · lines · roster
-  T.push({t:'BHRT Provider CDS',i:'⚕️',href:'bhrt.html',roles:['provider','admin']}); // BHRT is provider-led; the page gates the role itself
-  T.push({t:'Peptides Provider CDS',i:'🧬',href:'peptides.html',roles:['provider','admin']}); // grade→tier, red-flag screen, contraindications, interactions, monitoring
-  T.push({t:'Team Seats',i:'👥',href:'admin-seats.html',roles:['provider','admin']});
-  T.push({t:'Authoring',i:'✚',href:'authoring.html',roles:['provider','admin']});
-  T.push({t:'Inventory',i:'📦',href:'iv-inventory.html',roles:['provider','admin','nurse'],iv:true});
-  T.push({t:'Calculator',i:'🧮',href:'iv-calculator.html',roles:['provider','admin','nurse'],iv:true});
-  T.push({t:'Export audit (for MD)',i:'📤',roles:['provider','admin','nurse'],iv:true,fn:'exportAuditForMD()'}); // clinic sends its de-identified audit to its MD
-  T.push({t:'Export charts for MD',i:'📑',roles:['provider','admin','nurse'],iv:true,fn:'openChartExport()'}); // signed GFE+note for the MD's selected Encounter IDs
-  T.push({t:'Backup & Restore',i:'💾',roles:['provider','admin'],fn:'openBackup()'});
-  T.push({t:'Admin Console',i:'⚙️',href:'admin.html',roles:['admin']});
-  T.push({t:'Clinic Network',i:'🏥',href:'clinic-network.html',roles:['provider','admin'],md:true}); // MD owner cockpit — all clinics, lines, MRR, today's GFEs
-  T.push({t:'AllyAuditPro Cockpit',i:'📋',href:'md-audit.html',roles:['provider','admin'],md:true}); // MD-of-record only — every clinic you govern
+  if(!gfeBlocked()) T.push({t:'GFE Dashboard',i:'🩺',href:'gfe.html',roles:['provider','admin'],iv:true}); // the IV gate; hidden when the MD does the GFE for an RN-run clinic
+  T.push({t:'Clinic Card',i:'🏥',href:'clinic-card.html',roles:['provider','admin']}); // admin: clinic info · users & access
+  T.push({t:'Backup & Restore',i:'💾',roles:['provider','admin'],fn:'openBackup()'}); // device data safety (occasional)
   document.getElementById('tools').innerHTML=T.filter(function(x){
     if(x.iv && !on.iv) return false;
     if(x.md && !(ses && ses.mdAudit)) return false;
