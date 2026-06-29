@@ -15,10 +15,16 @@
   var KEY = "allyos_seats_v1";
 
   // the Medical Director of record — his real credentials travel on every signature.
-  var MD_OF_RECORD = { name: "Armando Falcon", cred: "MD", npi: "1447295126", license: "ME 84789", role: "provider", status: "active" };
+  var MD_OF_RECORD = { name: "Armando Augusto Falcon", cred: "MD", npi: "1447295126", license: "FL ME 84789", role: "provider", status: "active" };
+  // Lemus go-live roster default (real, from the executed collaborative practice protocol).
+  var DEFAULT_ROSTER = [
+    MD_OF_RECORD,
+    { name: "Milagro Magalys Morejon Valero", cred: "ARNP", license: "FL APRN 11043901", role: "provider", status: "active" }
+  ];
   function roster() {
     var r = [];
     try { r = JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { r = []; }
+    if (!r.length) return DEFAULT_ROSTER.map(function (x) { return Object.assign({}, x); });
     // backfill the MD-of-record's NPI + license on any existing Falcon/MD seat
     var hasPhysician = false;
     r.forEach(function (s) {
