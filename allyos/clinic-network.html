@@ -43,6 +43,13 @@
 .add{display:inline-flex;align-items:center;gap:7px;background:rgba(212,168,67,.12);border:1px solid #4a3c18;color:var(--gold);border-radius:10px;padding:8px 14px;font-size:.78rem;font-weight:700;text-decoration:none;cursor:pointer}
 .addic{width:28px;height:28px;border-radius:8px;border:1px dashed var(--line2);display:inline-flex;align-items:center;justify-content:center;color:var(--gold);font-size:1rem}
 .disc{font-size:.72rem;color:var(--muted);margin-top:18px;line-height:1.6}
+.pgwrap{margin-top:13px;border:1px solid #4a3c18;background:#191307;border-radius:11px;padding:10px 12px}
+.pgh{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--gold);font-weight:700;margin-bottom:8px}
+.pgrow{display:flex;align-items:center;gap:12px;text-decoration:none;padding:8px 10px;border-radius:8px;background:#0c1925;border:1px solid var(--line);margin-bottom:5px}
+.pgrow:hover{border-color:var(--teal)}
+.pgid{font-family:ui-monospace,Menlo,monospace;color:var(--teal);font-size:.8rem;min-width:80px}
+.pgplan{flex:1;color:var(--ink);font-size:.8rem}
+.pggo{color:var(--gold);font-size:.74rem;font-weight:700}
 </style></head>
 <body class="allyos"><div class="wrap">
   <div class="top">
@@ -85,6 +92,11 @@ function mrrOf(c){return lineKeys(c.lines).length*PRICE;}
 function gfeCounts(){try{var s=JSON.parse(localStorage.getItem('allyos_chairside_v1')||'{}');var q=s.q||[];
   var done=0,pend=0;q.forEach(function(p){if(p.gfe)done++;else pend++;});return {total:q.length,done:done,pend:pend};
 }catch(e){return null;}}
+// de-identified pending-GFE worklist (Encounter ID + plan only — no PHI)
+function pendingGFEs(){try{var s=JSON.parse(localStorage.getItem('allyos_chairside_v1')||'{}');var q=s.q||[];
+  return q.filter(function(p){return !p.gfe;}).map(function(p){
+    return {enc:p.encId||'—',plan:(p.proto==='ALACARTE'?'Micronutrient Infusion':(p.proto||'—'))};});
+}catch(e){return [];}}
 
 function render(){
   var cl=loadClinics();
@@ -111,12 +123,19 @@ function cardHTML(c){
       '<div class="cmeta">'+esc(c.city||'')+(c.device?' · this device':'')+'</div></div></div>'+
     '<div class="cgrid">'+
       '<div class="cbox"><div class="bl">Active lines</div><div class="lchips">'+(keys.length?keys.map(function(k){return '<span class="lchip">'+lineLabel(k)+'</span>';}).join(''):'<span class="bv" style="color:var(--muted)">none</span>')+'</div></div>'+
-      '<div class="cbox"><div class="bl">GFE today</div><div class="bv">'+(g?('<b style="color:var(--green)">'+g.done+'</b> done · <b style="color:var(--gold)">'+g.pend+'</b> pending'):'<span style="color:var(--muted)">—</span>')+'</div></div>'+
+      (g?'<a class="cbox" style="text-decoration:none;display:block" href="gfe.html?filter=pending"><div class="bl">GFE today</div><div class="bv"><b style="color:var(--green)">'+g.done+'</b> done · <b style="color:var(--gold)">'+g.pend+'</b> pending</div></a>':'<div class="cbox"><div class="bl">GFE today</div><div class="bv"><span style="color:var(--muted)">—</span></div></div>')+
       '<div class="cbox"><div class="bl">GFE model</div><div class="bv" style="font-size:.78rem">'+gfeMode+'</div></div>'+
       '<div class="cbox"><div class="bl">Recurring</div><div class="bv" style="color:var(--gold)">$'+mrrOf(c).toLocaleString()+'/mo</div></div>'+
     '</div>'+
+    pendingPanel(c)+
     '<div class="crow2"><span style="font-size:.72rem;color:var(--muted)">'+keys.length+' line'+(keys.length===1?'':'s')+' · '+(c.falconIsMd?'you carry the GFE + oversight':'clinic owns the GFE')+'</span>'+
       '<a class="open" href="'+(c.device?'dashboard.html':'clinic-card.html')+'">Open →</a></div></div>';
+}
+function pendingPanel(c){
+  if(!c.device)return '';
+  var p=pendingGFEs();if(!p.length)return '';
+  return '<div class="pgwrap"><div class="pgh">🩺 Today’s pending GFEs — '+p.length+' to clear</div>'+
+    p.map(function(r){return '<a class="pgrow" href="gfe.html?enc='+encodeURIComponent(r.enc)+'"><span class="pgid">'+esc(r.enc)+'</span><span class="pgplan">'+esc(r.plan)+'</span><span class="pggo">Do GFE →</span></a>';}).join('')+'</div>';
 }
 function slotHTML(n){
   var html='';

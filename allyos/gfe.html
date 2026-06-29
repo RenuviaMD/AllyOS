@@ -132,7 +132,16 @@ var _pidSeq=0;function pid(){return 'g'+(++_pidSeq)+'x'+Math.floor(Math.random()
 // load protocol titles for context (optional — page still works if it fails)
 fetch('../protocols/iv-module.json').then(function(r){return r.json();}).then(function(d){
   (d.stacks||[]).forEach(function(s){STACKS[s.code]={code:s.code,title:s.title,indication:s.indication};});
-}).catch(function(){}).then(function(){render();});
+}).catch(function(){}).then(function(){render();deepLink();});
+
+// deep-link from the cockpit: ?filter=pending pre-filters; ?enc=JX-4821 (or ?open=<id>) opens that GFE form
+function deepLink(){
+  try{var qs=new URLSearchParams(location.search);
+    var f=qs.get('filter');if(f){var sel=document.getElementById('filter');if(sel){sel.value=f;render();}}
+    var key=qs.get('enc')||qs.get('open');
+    if(key){var q=loadQueue();for(var i=0;i<q.length;i++){if(q[i].encId===key||q[i].id===key){openForm(i);break;}}}
+  }catch(e){}
+}
 
 function pchip(st){return st.k==='pending'?'<span class="pchip pend">Pending</span>':st.k==='expired'?'<span class="pchip exp">Expired</span>':'<span class="pchip cur">Current</span>';}
 function render(){
