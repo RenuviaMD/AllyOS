@@ -760,7 +760,7 @@ function composeNote(i){var c=CHAIRS[i],p=c.patient,df=15,g=gfeState(p);
       '<div class="nrow"><span class="nk">Tolerance</span><span>'+aeLine+'</span></div>'+
       '<div class="nrow"><span class="nk">Discharge</span><span>'+(c.suspended?('<b style="color:#b3261e">Infusion SUSPENDED</b> — '+esc(c.suspendReason)+' · ~'+(c.mlGiven!=null?c.mlGiven:'?')+' of '+c.vol+' mL infused'):(c.dTol?'Stable':'See note'))+(c.dAmb?' · ambulating without orthostatic symptoms · aftercare reviewed':'')+'</span></div></div>'+
     '<div class="nsec"><h3>Compliance attestation</h3><div class="ncomp">'+
-      '✓ Valid GFE '+(g.k==='done'?'current':'('+esc(g.label)+')')+' &nbsp; ✓ Consent on file &nbsp; ✓ Ingredient contraindication screen performed &nbsp; ✓ Within adult wellness scope (non-disease) &nbsp; ✓ Emergency escalation pathway available'+
+      '✓ Standing order on file'+(MOD&&MOD.meta?' (IV protocol v'+esc(MOD.meta.version||'')+' · locked &amp; MD-signed · eff '+esc(MOD.meta.effective||'')+')':'')+' &nbsp; ✓ Valid GFE '+(g.k==='done'?'current':'('+esc(g.label)+')')+' &nbsp; ✓ Consent on file &nbsp; ✓ Ingredient contraindication screen performed &nbsp; ✓ Within adult wellness scope (non-disease) &nbsp; ✓ Emergency escalation pathway available'+
       (aes.length?' &nbsp; ⚠ FORM-04 adverse-event report required':'')+'</div></div>'+
     '<div class="nsign">'+(sig?
       ('<div class="nrow"><span class="nk">Provider signature</span><span><b>'+esc(sig.provider)+'</b></span></div><div class="nrow"><span class="nk">Date / time</span><span class="stamp">'+esc(sig.stamp)+' (auto-stamped)</span></div>'):
