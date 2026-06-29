@@ -139,3 +139,16 @@ create policy gfe_req_read   on public.gfe_requests for select using (is_clinic_
 create policy gfe_req_insert on public.gfe_requests for insert with check (is_clinic_member(clinic_id) or is_clinic_md(clinic_id));
 -- only the MD may sign / change the determination (the RN can request but cannot self-sign)
 create policy gfe_req_update on public.gfe_requests for update using (is_clinic_md(clinic_id) or is_app_admin()) with check (is_clinic_md(clinic_id) or is_app_admin());
+
+-- ============================================================================
+-- 2026-06-29 · Owner login (Dr. Falcon) + app_admin reads all clinics
+-- ----------------------------------------------------------------------------
+-- Real Supabase auth user seeded out-of-band: drfalcon@renuviamd.com (email-confirmed,
+-- app_admin via the signup trigger + app_admin_emails). Password set with pgcrypto bcrypt.
+-- The owner/MD-of-record (app_admin) is the cockpit, so they read across ALL clinics:
+drop policy if exists clinic_read on public.clinics;
+create policy clinic_read on public.clinics for select
+  using (is_clinic_member(id) or is_clinic_md(id) or is_app_admin());
+drop policy if exists audit_read on public.audit_encounters;
+create policy audit_read on public.audit_encounters for select
+  using (is_clinic_member(clinic_id) or is_clinic_md(clinic_id) or is_app_admin());

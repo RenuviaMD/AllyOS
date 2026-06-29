@@ -72,8 +72,16 @@ function doLogin(e){
   var err=document.getElementById('err');
   if(r.error){ err.textContent=r.error; err.className='err show'; return false; }
   var next=nextPage();
-  // if a specific page was requested, honor it; else route by role
-  location.href = (location.search.indexOf('next=')>=0) ? next : landing(r.session);
+  var dest=(location.search.indexOf('next=')>=0) ? next : landing(r.session);
+  // also open the real Supabase session with the same credentials (so cloud-enforced features activate).
+  if(window.AllyOSCloud){
+    AllyOSCloud.ready.then(function(ok){ if(!ok){location.href=dest;return;}
+      AllyOSCloud.signInWithPassword(document.getElementById('email').value.trim(), document.getElementById('password').value)
+        .then(function(){ location.href=dest; })
+        .catch(function(){ location.href=dest; });
+    });
+    setTimeout(function(){ if(!document.hidden) location.href=dest; }, 1500); // fail-soft: never block the demo login
+  } else { location.href=dest; }
   return false;
 }
 // already signed in? bounce to role landing

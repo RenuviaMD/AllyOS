@@ -37,7 +37,8 @@ window.AllyOSAuth = (function () {
       clinic: 'Lemus Natural Medicine', md_of_record: true, pilot: true,
       lines: { iv: true, peptides: true, bhrt: true } },
     // --- Dr. Falcon — owner / Medical Director login (sees the Clinic Network cockpit + AllyAuditPro). ---
-    { email: 'falcon@renuviamd.com', password: 'md', name: 'Falcon', credential: 'MD', role: 'provider',
+    // Same credentials exist as a real Supabase auth user (app_admin) — the login also opens the cloud session.
+    { email: 'drfalcon@renuviamd.com', password: 'RenuviaMD2026', name: 'Falcon', credential: 'MD', role: 'provider',
       clinic: 'RenuviaMD — Medical Director', md_of_record: true, md_audit: true, pilot: true,
       lines: { iv: true, peptides: true, bhrt: true } }
   ];
