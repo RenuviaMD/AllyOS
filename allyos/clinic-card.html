@@ -95,20 +95,21 @@ td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
   </div>
 
   <div class="fsec">
-    <div class="fsec-h"><span class="n">4</span> Staff roster <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— name · title · function (drives the signature boxes)</span></div>
-    <div class="fgrid" style="grid-template-columns:1.4fr .8fr 1.2fr;align-items:end">
-      <div><label>Name</label><input id="rName" placeholder="Milagros"></div>
+    <div class="fsec-h"><span class="n">4</span> Users &amp; access <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— define each user, their title &amp; access level</span></div>
+    <div class="fgrid" style="grid-template-columns:1.3fr .7fr 1fr;align-items:end">
+      <div><label>Name</label><input id="rName" placeholder="Milagro Morejon Valero"></div>
       <div><label>Title</label><select id="rCred"><option value="">—</option><option>MD</option><option>DO</option><option>NP</option><option>PA</option><option>APRN</option><option>RN</option><option>LPN</option><option>MA</option></select></div>
-      <div><label>Function</label><input id="rFunc" placeholder="e.g. GFE provider"></div>
+      <div><label>Access level</label><select id="rRole"><option value="provider">Provider</option><option value="nurse">Nurse</option><option value="admin">Admin</option><option value="md">Medical Director</option></select></div>
     </div>
-    <div class="fgrid" style="grid-template-columns:1.2fr 1.2fr;align-items:end;margin-top:8px">
-      <div><label>State license <span style="color:#5b6b72;text-transform:none;letter-spacing:0">(credential of record)</span></label><input id="rLic" placeholder="e.g. FL ME 84789"></div>
-      <div><label>NPI <span style="color:#5b6b72;text-transform:none;letter-spacing:0">(optional — cash-pay clinics may not have one)</span></label><input id="rNpi" inputmode="numeric" maxlength="10" placeholder="10 digits"></div>
+    <div class="fgrid" style="grid-template-columns:1.3fr 1fr .8fr;align-items:end;margin-top:8px">
+      <div><label>Email <span style="color:#5b6b72;text-transform:none;letter-spacing:0">(their login)</span></label><input id="rEmail" type="email" placeholder="name@clinic.com"></div>
+      <div><label>State license <span style="color:#5b6b72;text-transform:none;letter-spacing:0">(of record)</span></label><input id="rLic" placeholder="FL APRN 11043901"></div>
+      <div><label>NPI <span style="color:#5b6b72;text-transform:none;letter-spacing:0">(optional)</span></label><input id="rNpi" inputmode="numeric" maxlength="10" placeholder="10 digits"></div>
     </div>
     <label style="display:flex;gap:8px;align-items:flex-start;margin-top:11px;font-size:.78rem;color:var(--ink);cursor:pointer"><input type="checkbox" id="rAttest" style="width:auto;margin-top:2px"> <span>I attest this person is a <b>licensed professional</b> and is <b>authorized by this clinic</b> to perform the acts indicated. (This — not the NPI — is the access gate; the clinic owns it.)</span></label>
-    <div style="margin-top:10px;display:flex;gap:8px;align-items:center"><button class="btn ghost" id="addBtn" onclick="addSeat()">＋ Add to roster</button><span id="npiResult" style="font-size:.78rem"></span></div>
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center"><button class="btn ghost" id="addBtn" onclick="addSeat()">＋ Add user</button><span id="npiResult" style="font-size:.78rem"></span></div>
     <div style="overflow:auto"><table id="roster"></table></div>
-    <div style="font-size:.72rem;color:var(--muted);margin-top:8px">Signature authority by title — <b>Standing order</b>: MD/DO · <b>GFE</b>: MD/DO/APP · <b>Infusion note</b>: MD/DO/APP/RN. AllyOS shows the eligible names; the clinic credentials its own staff and owns who signs.</div>
+    <div style="font-size:.72rem;color:var(--muted);margin-top:8px"><b>Access levels:</b> Provider — GFE, build &amp; sign, full station · Nurse — chairside execution · Admin — clinic operations + cockpit · Medical Director — MD-of-record + cockpit. The <b>title</b> sets signature authority (Standing order: MD/DO · GFE: MD/DO/APP · Note: MD/DO/APP/RN); the <b>access level</b> sets what they see. Provisioning the actual login is done by the owner.</div>
   </div>
 
   <div style="display:flex;align-items:center;gap:4px"><button class="btn" onclick="saveAll()">Save clinic card</button><span class="saved" id="saved"></span></div>
@@ -150,43 +151,48 @@ function syncNote(){
   if(md&&rn){el.className='gfenote block';el.innerHTML='⛔ <b>GFE tab hidden for this clinic.</b> You (the MD) perform the GFE; the RN floor cannot create one. An RN never appears in the GFE signer list regardless.';}
   else{el.className='gfenote open';el.innerHTML='✓ <b>GFE tab open.</b> The clinic\'s credentialed APP/MD signs it (from the roster). '+(md?'You remain MD-of-record for oversight.':'The clinic\'s own MD owns the GFE — AllyOS does not regulate it.');}
 }
-function pushSeat(n,cred,func,lic,npi,vobj){
-  SEATS.push({id:sid(),name:n,cred:cred,func:func,license:lic||'',role:roleFor(cred),status:'active',
+function pushSeat(n,cred,role,email,lic,npi,vobj){
+  SEATS.push({id:sid(),name:n,cred:cred,role:role||roleFor(cred),email:email||'',license:lic||'',status:'active',
     attested:true,attestedAt:new Date().toISOString(),
     npi:npi||'',npiVerified:!!(vobj&&vobj.found),npiName:(vobj&&vobj.name)||'',npiCred:(vobj&&vobj.credential)||'',npiTaxonomy:(vobj&&vobj.taxonomy)||'',npiStatus:(vobj&&vobj.status)||''});
-  document.getElementById('rName').value='';document.getElementById('rCred').value='';document.getElementById('rFunc').value='';document.getElementById('rLic').value='';document.getElementById('rNpi').value='';document.getElementById('rAttest').checked=false;
+  document.getElementById('rName').value='';document.getElementById('rCred').value='';document.getElementById('rRole').value='provider';document.getElementById('rEmail').value='';document.getElementById('rLic').value='';document.getElementById('rNpi').value='';document.getElementById('rAttest').checked=false;
   setSeats(SEATS);renderRoster();
 }
 function addSeat(){
   var n=document.getElementById('rName').value.trim();if(!n){alert('Name required.');return;}
   if(!document.getElementById('rAttest').checked){var rr=document.getElementById('npiResult');rr.style.color='var(--gold)';rr.textContent='Check the attestation — it is the access gate (the clinic vouches for the provider).';return;}
   var cred=document.getElementById('rCred').value.trim();
-  var func=document.getElementById('rFunc').value.trim();
+  var role=document.getElementById('rRole').value;
+  var email=document.getElementById('rEmail').value.trim();
   var lic=document.getElementById('rLic').value.trim();
   var npi=(document.getElementById('rNpi').value||'').replace(/\D/g,'');
   var res=document.getElementById('npiResult'), btn=document.getElementById('addBtn');
   // NPI is OPTIONAL — a cash-pay clinic may have none. State license + clinic attestation is the credential of record.
-  if(!npi){ res.style.color='var(--muted)';res.textContent='Added — credential of record is the state license. (NPI optional.)';pushSeat(n,cred,func,lic,'',null);return; }
+  if(!npi){ res.style.color='var(--muted)';res.textContent='Added — credential of record is the state license. (NPI optional.)';pushSeat(n,cred,role,email,lic,'',null);return; }
   if(npi.length!==10){ res.style.color='var(--gold)';res.textContent='NPI must be 10 digits (or leave blank).';return; }
   res.style.color='var(--muted)';res.textContent='Verifying NPI against NPPES…';btn.disabled=true;
   // OPTIONAL anti-fraud check against the federal registry (server-side; not scope-policing, not required)
   fetch('/.netlify/functions/npi?npi='+encodeURIComponent(npi)).then(function(r){return r.json();}).then(function(v){
     btn.disabled=false;
-    if(v&&v.found){ res.style.color='var(--green)';res.textContent='✓ NPPES: '+v.name+(v.credential?', '+v.credential:'')+' · '+(v.status||'')+(v.taxonomy?' · '+v.taxonomy:'');pushSeat(n,cred,func,lic,npi,v); }
-    else if(v&&v.valid){ res.style.color='var(--gold)';res.textContent='Valid format but no active NPPES record — added on state license (confirm NPI manually).';pushSeat(n,cred,func,lic,npi,null); }
-    else { res.style.color='var(--gold)';res.textContent=(v&&(v.error||v.note))||'NPI invalid — added on state license without it.';pushSeat(n,cred,func,lic,'',null); }
-  }).catch(function(){ btn.disabled=false;res.style.color='var(--gold)';res.textContent='Registry unreachable — added on state license (verify NPI later).';pushSeat(n,cred,func,lic,npi,null); });
+    if(v&&v.found){ res.style.color='var(--green)';res.textContent='✓ NPPES: '+v.name+(v.credential?', '+v.credential:'')+' · '+(v.status||'')+(v.taxonomy?' · '+v.taxonomy:'');pushSeat(n,cred,role,email,lic,npi,v); }
+    else if(v&&v.valid){ res.style.color='var(--gold)';res.textContent='Valid format but no active NPPES record — added on state license (confirm NPI manually).';pushSeat(n,cred,role,email,lic,npi,null); }
+    else { res.style.color='var(--gold)';res.textContent=(v&&(v.error||v.note))||'NPI invalid — added on state license without it.';pushSeat(n,cred,role,email,lic,'',null); }
+  }).catch(function(){ btn.disabled=false;res.style.color='var(--gold)';res.textContent='Registry unreachable — added on state license (verify NPI later).';pushSeat(n,cred,role,email,lic,npi,null); });
 }
 function rmSeat(id){SEATS=SEATS.filter(function(s){return s.id!==id;});setSeats(SEATS);renderRoster();}
+function accLabel(r){return r==='nurse'?'Nurse':r==='admin'?'Admin':r==='md'?'Medical Director':'Provider';}
+function accClass(r){return r==='md'?'md':r==='admin'?'other':r==='nurse'?'rn':'app';}
 function renderRoster(){
   var rows=SEATS.filter(function(s){return s.status!=='removed';}).map(function(s){var k=credClass(s.cred);
     var signs=[]; if(k==='md')signs=['Standing order','GFE','Infusion note']; else if(k==='app')signs=['GFE','Infusion note']; else if(k==='rn')signs=['Infusion note'];
-    var nameCell='<b>'+esc(s.name)+'</b>'+(s.attested?' <span class="badge rn" title="Clinic attested '+esc((s.attestedAt||'').slice(0,10))+'">✓ attested</span>':'')+(s.func?'<div style="font-size:.66rem;color:var(--muted)">'+esc(s.func)+'</div>':'');
+    var nameCell='<b>'+esc(s.name)+'</b>'+(s.attested?' <span class="badge rn" title="Clinic attested '+esc((s.attestedAt||'').slice(0,10))+'">✓ attested</span>':'')+
+      (s.email?'<div style="font-size:.66rem;color:var(--muted)">'+esc(s.email)+'</div>':'')+
+      (signs.length?'<div style="font-size:.6rem;color:var(--muted)">signs: '+signs.join(' · ')+'</div>':'');
     var licCell=s.license?('<span style="font-size:.78rem">'+esc(s.license)+'</span>'):'<span style="color:var(--muted)">—</span>';
-    var npiCell=s.npi?('<span style="font-family:ui-monospace,Menlo,monospace;font-size:.74rem">'+esc(s.npi)+'</span> '+(s.npiVerified?'<span class="badge rn" title="'+esc((s.npiName||'')+' '+(s.npiCred||''))+'">✓ NPPES</span>':'<span class="badge other">unverified</span>')):'<span style="color:var(--muted)">—</span>';
-    return '<tr><td>'+nameCell+'</td><td><span class="badge '+(k)+'">'+esc(s.cred||'—')+'</span></td><td>'+licCell+'</td><td>'+npiCell+'</td><td style="font-size:.74rem;color:var(--muted)">'+(signs.join(' · ')||'—')+'</td><td style="text-align:right"><button class="btn-s" onclick="rmSeat(\''+s.id+'\')">remove</button></td></tr>';
+    var npiCell=s.npi?('<span style="font-family:ui-monospace,Menlo,monospace;font-size:.74rem">'+esc(s.npi)+'</span> '+(s.npiVerified?'<span class="badge rn">✓</span>':'<span class="badge other">?</span>')):'<span style="color:var(--muted)">—</span>';
+    return '<tr><td>'+nameCell+'</td><td><span class="badge '+(k)+'">'+esc(s.cred||'—')+'</span></td><td><span class="badge '+accClass(s.role)+'">'+accLabel(s.role)+'</span></td><td>'+licCell+'</td><td>'+npiCell+'</td><td style="text-align:right"><button class="btn-s" onclick="rmSeat(\''+s.id+'\')">remove</button></td></tr>';
   }).join('');
-  document.getElementById('roster').innerHTML='<tr><th>Name</th><th>Title</th><th>State license</th><th>NPI <span style="font-weight:400;text-transform:none">(optional)</span></th><th>Can sign</th><th></th></tr>'+(rows||'<tr><td colspan="6" class="muted" style="padding:14px;color:var(--muted)">No staff yet — add the roster from onboarding.</td></tr>');
+  document.getElementById('roster').innerHTML='<tr><th>Name · email</th><th>Title</th><th>Access</th><th>License</th><th>NPI</th><th></th></tr>'+(rows||'<tr><td colspan="6" class="muted" style="padding:14px;color:var(--muted)">No users yet — add them above.</td></tr>');
 }
 function saveAll(){
   var cfg={name:document.getElementById('cName').value.trim(),dba:document.getElementById('cDba').value.trim(),
