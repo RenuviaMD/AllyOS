@@ -17,7 +17,7 @@ secret in CI). Writes allyos/ops-audit-status.json + allyos/ops-audit-review-que
   python3 scripts/ops-audit.py
 Exit 0 = no hard FAIL (PASS / notes); exit 1 = a module FAILed re-verification.
 """
-import json, os, sys, csv, urllib.request, datetime
+import json, os, sys, csv, time, urllib.request, urllib.parse, datetime
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PKG = os.path.join(ROOT, "protocols", "cds-update-agent")
@@ -70,44 +70,107 @@ def audit(name, content):
     txt = "".join(b.get("text", "") for b in data.get("content", []) if b.get("type") == "text")
     return json.loads(txt[txt.index("{"): txt.rindex("}") + 1])
 
+# ---- live source sentinels (UPD_001-003): monitor public registries for change triggers ----
+# No API key needed; these are REVIEW TRIGGERS only (per the design: new literature/trials =
+# review for relevance, never auto-applied). Fail-soft: a source that errors is marked unverified.
+WATCH = ["retatrutide", "tirzepatide", "nicotinamide riboside intravenous",
+         "BPC-157", "tesamorelin", "bremelanotide PT-141", "MOTS-c"]
+
+def http_json(url, timeout=30):
+    req = urllib.request.Request(url, headers={"accept": "application/json", "user-agent": "AllyOS-ops-audit/1.0"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read())
+
+def pubmed_recent(term, days=60):
+    today = datetime.date.today(); start = today - datetime.timedelta(days=days)
+    url = ("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmode=json&retmax=5"
+           "&datetype=pdat&mindate=" + start.strftime("%Y/%m/%d") + "&maxdate=" + today.strftime("%Y/%m/%d") +
+           "&term=" + urllib.parse.quote(term))
+    r = http_json(url).get("esearchresult", {})
+    return int(r.get("count", "0")), r.get("idlist", [])
+
+def trials_recent(term, days=90):
+    start = (datetime.date.today() - datetime.timedelta(days=days)).strftime("%Y-%m-%d")
+    url = ("https://clinicaltrials.gov/api/v2/studies?countTotal=true&pageSize=1&query.term=" +
+           urllib.parse.quote(term) + "&filter.advanced=" +
+           urllib.parse.quote("AREA[LastUpdatePostDate]RANGE[" + start + ",MAX]"))
+    return int(http_json(url).get("totalCount", 0))
+
+def source_scan():
+    items, sources = [], {}
+    for term in WATCH:
+        try:
+            n, ids = pubmed_recent(term)
+            if n > 0:
+                items.append({"summary": str(n) + " new PubMed item(s) (60d) for '" + term + "' — review for relevance to the locked protocols. PMIDs: " + ",".join(ids[:5]),
+                              "change_class": "NEW_EVIDENCE", "risk_class": "low", "evidence_directness": "insufficient",
+                              "proposed_action": "Literature Sentinel: triage new papers; downgrade/flag, do not auto-apply", "requires_signoff": True,
+                              "target_library": "watchlist:" + term, "source": "SRC_NCBI_PUBMED_EUTILITIES"})
+        except Exception:
+            sources["pubmed:" + term] = "unverified_this_run"
+        try:
+            t = trials_recent(term)
+            if t > 0:
+                items.append({"summary": str(t) + " ClinicalTrials.gov study(ies) updated (90d) for '" + term + "' — trial activity only unless results posted/audited.",
+                              "change_class": "NEW_EVIDENCE", "risk_class": "low", "evidence_directness": "insufficient",
+                              "proposed_action": "Trial Sentinel: check status/results; activity only, no efficacy claim", "requires_signoff": True,
+                              "target_library": "watchlist:" + term, "source": "SRC_CLINICALTRIALS_API"})
+        except Exception:
+            sources["trials:" + term] = "unverified_this_run"
+        time.sleep(0.4)   # be polite to NCBI / CT.gov
+    return items, sources
+
 def main():
     report = {"date": datetime.datetime.utcnow().isoformat() + "Z", "model": MODEL,
-              "agent": "ops-audit", "mode": "protocol_only+citation_audit", "modules": []}
+              "agent": "ops-audit", "mode": "source_scan+protocol_only+citation_audit", "modules": []}
     review_rows, run_id = [], "ops-" + datetime.datetime.utcnow().strftime("%Y%m%dT%H%M")
+
+    def push(target, it):
+        review_rows.append({
+            "review_item_id": run_id + "-" + str(len(review_rows) + 1), "run_id": run_id,
+            "date_detected": report["date"][:10], "target_library": it.get("target_library", target),
+            "affected_record_id": "", "change_class": it.get("change_class", ""), "risk_class": it.get("risk_class", ""),
+            "summary": it.get("summary", ""), "source_ids": it.get("source", ""),
+            "evidence_directness": it.get("evidence_directness", ""), "proposed_action": it.get("proposed_action", ""),
+            "clinician_decision": "", "reviewer": "", "review_date": "",
+            "notes": "requires_signoff" if it.get("requires_signoff") else "",
+        })
+
+    # 1. live source sentinels (no Anthropic key needed) — review triggers only
+    print("source sentinels: scanning PubMed + ClinicalTrials for", len(WATCH), "watch terms...")
+    src_items, src_unverified = source_scan()
+    for it in src_items:
+        push("", it)
+    report["sources_unverified"] = list(src_unverified.keys())
+    report["source_triggers"] = len(src_items)
+
+    # 2. content re-verification (needs the Anthropic key)
+    fails = 0
     if not KEY:
-        report["status"] = "skipped"; report["detail"] = "no ANTHROPIC_API_KEY in the environment"
-        write_status(report); print("ops-audit: skipped (no ANTHROPIC_API_KEY)"); return 0
-    seen, fails, review_total = set(), 0, 0
-    for m in dict.fromkeys(MODULES):            # de-dupe, keep order
-        path = os.path.join(ROOT, m)
-        if not os.path.exists(path) or m in seen:
-            continue
-        seen.add(m)
-        try:
-            v = audit(m, read(path))
-        except Exception as e:
-            v = {"verdict": "ERROR", "review_items": [{"summary": str(e)[:200], "change_class": "SOURCE_STALE",
-                 "risk_class": "low", "evidence_directness": "insufficient", "proposed_action": "retry", "requires_signoff": False}]}
-        verdict, items = v.get("verdict", "UNKNOWN"), v.get("review_items", []) or []
-        if verdict == "FAIL":
-            fails += 1
-        review_total += len(items)
-        report["modules"].append({"module": m, "verdict": verdict, "review_items": len(items)})
-        for it in items:
-            review_rows.append({
-                "review_item_id": run_id + "-" + str(len(review_rows) + 1), "run_id": run_id,
-                "date_detected": report["date"][:10], "target_library": m,
-                "affected_record_id": "", "change_class": it.get("change_class", ""),
-                "risk_class": it.get("risk_class", ""), "summary": it.get("summary", ""),
-                "source_ids": "", "evidence_directness": it.get("evidence_directness", ""),
-                "proposed_action": it.get("proposed_action", ""), "clinician_decision": "",
-                "reviewer": "", "review_date": "", "notes": "requires_signoff" if it.get("requires_signoff") else "",
-            })
-        print(m, "->", verdict, "(" + str(len(items)) + " review items)")
-    report["status"] = "FAIL" if fails else ("NOTES" if review_total else "PASS")
-    report["fails"], report["review_total"] = fails, review_total
+        report["content_audit"] = "skipped — no ANTHROPIC_API_KEY (source sentinels still ran)"
+        print("content audit skipped (no ANTHROPIC_API_KEY); source sentinels ran:", len(src_items), "triggers")
+    else:
+        for m in dict.fromkeys(MODULES):
+            path = os.path.join(ROOT, m)
+            if not os.path.exists(path):
+                continue
+            try:
+                v = audit(m, read(path))
+            except Exception as e:
+                v = {"verdict": "ERROR", "review_items": [{"summary": str(e)[:200], "change_class": "SOURCE_STALE",
+                     "risk_class": "low", "evidence_directness": "insufficient", "proposed_action": "retry", "requires_signoff": False}]}
+            verdict, items = v.get("verdict", "UNKNOWN"), v.get("review_items", []) or []
+            if verdict == "FAIL":
+                fails += 1
+            report["modules"].append({"module": m, "verdict": verdict, "review_items": len(items)})
+            for it in items:
+                push(m, it)
+            print(m, "->", verdict, "(" + str(len(items)) + " review items)")
+
+    report["status"] = "FAIL" if fails else ("NOTES" if review_rows else "PASS")
+    report["fails"], report["review_total"] = fails, len(review_rows)
     write_status(report); write_queue(review_rows)
-    print("ops-audit:", report["status"], "·", fails, "fails ·", review_total, "review items")
+    print("ops-audit:", report["status"], "·", fails, "fails ·", len(review_rows), "review items ·", len(src_items), "source triggers")
     return 1 if fails else 0
 
 def write_status(report):
