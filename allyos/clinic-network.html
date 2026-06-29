@@ -63,6 +63,7 @@
   <div class="sub">Every wellness clinic you run on AllyOS, in one place — care model, active lines, today's GFEs, and recurring revenue. <b>PHI-free</b>: counts and Encounter IDs only; patient identity stays on each clinic's device.</div>
 
   <div class="kpis" id="kpis"></div>
+  <div id="cloudreq"></div>
   <div id="clinics"></div>
 
   <div class="disc">Recurring revenue = $199/mo per active line, per clinic. MD-of-record clinics count toward the FL §400.9935 cap of 5 per physician; clinics that use their own MD are not capped and are not your liability. Today's GFE counts come from a clinic's own device (this one shows the active clinic); remote clinics show — until the PHI-free hub is wired. © <span id="yr"></span> RenuviaMD® PLLC.</div>
@@ -146,5 +147,25 @@ function slotHTML(n){
   return html;
 }
 render();
+
+// Cross-device inbox: real GFE requests pushed from clinics (PHI-free — Encounter ID + plan).
+function renderCloud(){
+  if(!window.AllyOSCloud)return;
+  AllyOSCloud.ready.then(function(ok){if(!ok)return;
+    AllyOSCloud.user().then(function(u){if(!u)return;
+      AllyOSCloud.listClinics().then(function(cs){
+        Promise.all((cs||[]).map(function(c){return AllyOSCloud.pullGfeRequests(c.id,'requested').then(function(rs){return {c:c,rs:rs||[]};});}))
+        .then(function(groups){
+          var items=[];groups.forEach(function(g){g.rs.forEach(function(r){items.push({clinic:g.c.name,enc:r.enc,plan:r.plan||'—'});});});
+          var el=document.getElementById('cloudreq');if(!el)return;
+          if(!items.length){el.innerHTML='';return;}
+          el.innerHTML='<div class="card" style="border-color:#4a3c18"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px">📨 Remote GFE requests — '+items.length+' from your clinics</div>'+
+            items.map(function(r){return '<a class="pgrow" style="text-decoration:none" href="gfe.html?enc='+encodeURIComponent(r.enc)+'&cloud=1"><span class="pgid">'+esc(r.enc)+'</span><span class="pgplan">'+esc(r.clinic)+' · '+esc(r.plan)+'</span><span class="pggo">Do GFE →</span></a>';}).join('')+'</div>';
+        });
+      });
+    });
+  });
+}
+renderCloud();
 </script>
 </body></html>

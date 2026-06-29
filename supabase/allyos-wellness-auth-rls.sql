@@ -117,3 +117,25 @@ drop policy if exists clinic_update on public.clinics;
 create policy clinic_update on public.clinics
   for update using (is_app_admin()) with check (is_app_admin());
 -- GFE tab is hidden for a clinic ⇔ md_arrangement='renuviamd' AND rn_iv_model=true.
+
+-- ============================================================================
+-- 2026-06-29 · De-identified GFE request/result sync (remote MD-of-record loop)
+-- ----------------------------------------------------------------------------
+-- PHI-FREE: Encounter ID (initials+4digits) + age/sex + clinical screen + the MD's
+-- determination. NEVER name/DOB/MRN — identity stays on the clinic device.
+-- Flow: RN requests -> appears in MD cockpit -> MD signs -> status syncs back.
+create table if not exists public.gfe_requests (
+  id uuid primary key default gen_random_uuid(),
+  clinic_id uuid not null references public.clinics(id) on delete cascade,
+  enc text not null, plan text, age int, sex text,
+  screen jsonb not null default '{}'::jsonb,
+  status text not null default 'requested' check (status in ('requested','signed','deferred','declined')),
+  determination text, signer text, signed_at timestamptz,
+  created_at timestamptz not null default now(),
+  unique (clinic_id, enc)
+);
+alter table public.gfe_requests enable row level security;
+create policy gfe_req_read   on public.gfe_requests for select using (is_clinic_member(clinic_id) or is_clinic_md(clinic_id) or is_app_admin());
+create policy gfe_req_insert on public.gfe_requests for insert with check (is_clinic_member(clinic_id) or is_clinic_md(clinic_id));
+-- only the MD may sign / change the determination (the RN can request but cannot self-sign)
+create policy gfe_req_update on public.gfe_requests for update using (is_clinic_md(clinic_id) or is_app_admin()) with check (is_clinic_md(clinic_id) or is_app_admin());

@@ -226,7 +226,7 @@
 .frow input,.frow select,.modal textarea{width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink);font-size:.85rem;font-family:inherit}
 .disc{font-size:.66rem;color:var(--muted);text-align:center;padding:8px 16px 24px;line-height:1.5}
 </style>
-<script src="allyos-auth.js"></script><script src="allyos-credentials.js"></script></head>
+<script src="allyos-auth.js"></script><script src="allyos-credentials.js"></script><script src="supabase-client.js"></script></head>
 <body class="allyos">
 <div class="topbar">
   <div class="brand">Renuvia<b>MD</b>® · AllyOS <span style="color:var(--teal)">Chairside</span></div>
@@ -938,11 +938,33 @@ function openGFE(id){var p=qById(id);if(!p)return;
   showModal('<button class="x" onclick="closeModal()">×</button><h3>Good Faith Exam — '+(done?'on file ✓':'pending')+'</h3>'+
     '<div class="sub">'+esc(dispName(p))+(done?(' — recorded '+(p.gfeDate?esc(fmtDob(p.gfeDate)):'prior')+'.'):'')+'</div>'+
     (done?'<div class="flag ok" style="margin-top:8px"><b>GFE current</b>Cleared by a provider. No full exam document attached.</div>':
-      '<div class="flag crit" style="margin-top:8px"><b>GFE required — provider only</b>Must be performed &amp; signed by an MD/DO/NP/PA in the GFE Dashboard before infusion. An RN cannot perform it.</div>'+
-      '<a class="btn neon" style="width:100%;margin-top:8px;text-decoration:none" href="gfe.html" target="_blank">Open GFE Dashboard ↗</a>')+
+      '<div class="flag crit" style="margin-top:8px"><b>GFE required — provider only</b>Must be performed &amp; signed by an MD/DO/NP/PA before infusion. An RN cannot perform it.</div>'+
+      '<a class="btn neon" style="width:100%;margin-top:8px;text-decoration:none" href="gfe.html" target="_blank">Open GFE Dashboard ↗</a>'+
+      '<button class="btn ghost" style="width:100%;margin-top:6px" onclick="requestMdGfe(\''+id+'\')">📨 Request MD GFE (remote)</button>')+
     '<div class="muted" style="font-size:.72rem;margin-top:8px">The nursing station shows GFE status only; the exam lives in the separate provider module.</div>');
 }
 function openGFEDoc(id){var p=qById(id);if(p&&p.gfeDoc)showModal(composeGFE(p));}
+// ---- de-identified remote-GFE sync (PHI-free: Encounter ID + plan/age/sex only) ----
+var CLOUD_CLINIC=null;
+function requestMdGfe(id){var p=qById(id);if(!p)return;
+  if(!window.AllyOSCloud||!CLOUD_CLINIC){alert('Sign in to AllyOS Cloud first (the MD receives the request in their cockpit).');return;}
+  encId(p);save();
+  AllyOSCloud.pushGfeRequest(CLOUD_CLINIC,{enc:p.encId,plan:(p.proto==='ALACARTE'?'Micronutrient Infusion':p.proto),age:ageOf(p),sex:p.sex||null,screen:{conditions:p.alerts||[]},status:'requested'})
+    .then(function(r){closeModal();showModal('<button class="x" onclick="closeModal()">×</button><h3>'+(r&&r.ok?'📨 Requested':'Could not send')+'</h3><div class="sub" style="margin-top:6px">'+(r&&r.ok?('GFE request <b>'+esc(p.encId)+'</b> sent to the Medical Director. It appears in their cockpit; when signed, this card flips to GFE on file.'):'Cloud unavailable — try again when online.')+'</div>');});
+}
+function syncRemoteGfe(){
+  if(!window.AllyOSCloud)return;
+  AllyOSCloud.ready.then(function(ok){if(!ok)return;AllyOSCloud.user().then(function(u){if(!u)return;
+    AllyOSCloud.myClinic().then(function(c){if(!c)return;CLOUD_CLINIC=c.id;
+      AllyOSCloud.pullGfeRequests(c.id).then(function(rs){var ch=false;
+        (rs||[]).forEach(function(r){if(r.status!=='signed')return;
+          QUEUE.forEach(function(p){if(p.encId===r.enc&&!p.gfe){p.gfe=true;p.gfeDate=(r.signed_at||'').slice(0,10)||todayISO();ch=true;}});});
+        if(ch){save();if(typeof renderQueue==='function')renderQueue();}
+      });
+    });
+  });});
+}
+syncRemoteGfe();
 // printable, signed GFE document (mirrors the infusion note / aftercare handout)
 function composeGFE(p){var d=p.gfeDoc||{},age=ageOf(p),s=stackByCode(p.proto),v=d.vitals||{};
   var conds=(p.alerts||[]).length?(p.alerts||[]).map(esc).join(', '):'none reported';

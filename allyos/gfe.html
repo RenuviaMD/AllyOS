@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="allyos-theme.css">
 <script src="allyos-auth.js"></script>
 <script src="allyos-credentials.js"></script>
+<script src="supabase-client.js"></script>
 <style>
 .wrap{max-width:1080px;margin:0 auto;padding:18px}
 .top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:4px}
@@ -210,6 +211,17 @@ function openForm(i){var q=loadQueue(),p=q[i];if(!p)return;var s=stackByCode(p.p
   window.scrollTo(0,0);
 }
 function backToDash(){document.getElementById('formview').style.display='none';document.getElementById('formview').innerHTML='';document.getElementById('dashview').style.display='';render();}
+// cloud clinic id (for the de-identified GFE sync). Fail-soft.
+var CLOUD_CLINIC=null;
+if(window.AllyOSCloud){AllyOSCloud.ready.then(function(ok){if(!ok)return;AllyOSCloud.user().then(function(u){if(!u)return;AllyOSCloud.myClinic().then(function(c){if(c)CLOUD_CLINIC=c.id;});});});}
+function mirrorGfeToCloud(p,elig,prov){
+  if(!window.AllyOSCloud||!CLOUD_CLINIC||!p.encId)return;
+  var d=p.gfeDoc||{},v=d.vitals||{};
+  AllyOSCloud.pushGfeRequest(CLOUD_CLINIC,{enc:p.encId,plan:(p.proto==='ALACARTE'?'Micronutrient Infusion':p.proto),
+    age:ageOf(p),sex:p.sex||null,
+    screen:{conditions:p.alerts||[],vitals:v,allergies:d.allergies||'',meds:d.meds||'',goal:d.goal||'',exam:!!d.exam,screened:!!d.screen},
+    status:(elig==='eligible'?'signed':(elig==='defer'?'deferred':'declined')),determination:elig,signer:prov,signed_at:new Date().toISOString()});
+}
 function signForm(i){var q=loadQueue(),p=q[i];if(!p)return;
   var elig=(document.querySelector('input[name=gElig]:checked')||{}).value||'eligible';
   var conds=[];Array.prototype.forEach.call(document.querySelectorAll('.gfecond:checked'),function(c){conds.push(c.value);});
@@ -221,6 +233,7 @@ function signForm(i){var q=loadQueue(),p=q[i];if(!p)return;
     eligibility:elig,note:val('gNote'),provider:prov,stamp:nowStamp(),proto:p.proto};
   if(elig==='eligible'){p.gfe=true;p.gfeDate=todayISO();}else{p.gfe=false;p.gfeDate='';}
   q[i]=p;saveQueue(q);
+  mirrorGfeToCloud(p,elig,prov); // de-identified: records the determination so other devices/cockpit sync
   backToDash();
   if(elig==='eligible')viewReport(i);
   else{document.getElementById('md').innerHTML='<button class="x" onclick="closeM()">×</button><h3 style="color:var(--gold)">GFE recorded — '+(elig==='defer'?'deferred':'not eligible')+'</h3><div class="sub" style="margin-top:6px">'+esc(dispName(p))+' is <b>not cleared</b> for infusion; the determination is saved on the chart and the station will show it as pending.</div><button class="btn ghost" style="width:100%;margin-top:10px" onclick="closeM()">Close</button>';show();}

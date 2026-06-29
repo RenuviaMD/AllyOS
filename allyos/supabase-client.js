@@ -156,5 +156,35 @@
       .then(function (r) { return { ok: !r.error, error: r.error }; });
   };
 
+  // ---- de-identified GFE request/result sync (remote MD-of-record loop; PHI-free) ----
+  // push a de-identified GFE request (nurse device -> cloud). NEVER include name/DOB/MRN.
+  Cloud.pushGfeRequest = function (clinicId, r) {
+    if (!guard() || !clinicId || !r || !r.enc) return Promise.resolve({ ok: false });
+    var row = {
+      clinic_id: clinicId, enc: r.enc, plan: r.plan || null, age: (r.age != null ? r.age : null),
+      sex: r.sex || null, screen: r.screen || {},
+      status: r.status || "requested", determination: r.determination || null,
+      signer: r.signer || null, signed_at: r.signed_at || null,
+    };
+    return Cloud._sb.from("gfe_requests").upsert(row, { onConflict: "clinic_id,enc" })
+      .then(function (x) { return { ok: !x.error, error: x.error }; });
+  };
+  // pull a clinic's GFE requests (RLS-scoped). Optional status filter.
+  Cloud.pullGfeRequests = function (clinicId, status) {
+    if (!guard() || !clinicId) return Promise.resolve([]);
+    var q = Cloud._sb.from("gfe_requests").select("*").eq("clinic_id", clinicId);
+    if (status) q = q.eq("status", status);
+    return q.order("created_at", { ascending: true }).then(function (x) { return (x && x.data) || []; });
+  };
+  // the MD signs a request (RLS rejects non-MD). determination: eligible|defer|no.
+  Cloud.signGfeRequest = function (clinicId, enc, determination, signer) {
+    if (!guard() || !clinicId || !enc) return Promise.resolve({ ok: false });
+    var status = determination === "eligible" ? "signed" : (determination === "defer" ? "deferred" : "declined");
+    return Cloud._sb.from("gfe_requests")
+      .update({ status: status, determination: determination, signer: signer || null, signed_at: new Date().toISOString() })
+      .eq("clinic_id", clinicId).eq("enc", enc)
+      .then(function (x) { return { ok: !x.error, error: x.error }; });
+  };
+
   window.AllyOSCloud = Cloud;
 })();
