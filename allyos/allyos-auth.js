@@ -31,8 +31,11 @@ window.AllyOSAuth = (function () {
     { email: 'rn@clinic.test',    password: 'demo', name: 'Chen',   credential: 'RN', role: 'nurse' },
     { email: 'admin@clinic.test', password: 'demo', name: 'Office', credential: '',   role: 'admin' },
     // --- Lemus pilot (interim localStorage auth; swap to Supabase before real multi-user). ---
+    // DEMO: full-lines clinic (IV + Peptides + BHRT) so the whole platform is visible.
+    // We narrow this back to IV-only later (set lines to {iv:true,peptides:false,bhrt:false}).
     { email: 'lemus@allyos.app',  password: 'pilot', name: 'Lemus NP', credential: 'NP', role: 'provider',
-      clinic: 'Lemus Natural Medicine', md_of_record: true, pilot: true }
+      clinic: 'Lemus Natural Medicine', md_of_record: true, pilot: true,
+      lines: { iv: true, peptides: true, bhrt: true } }
   ];
   // Clinic context (in Supabase this is a row in `clinics`). md_of_record = is RenuviaMD the MD here?
   var CLINIC = { id: 'demo-clinic', name: 'Demo Wellness Clinic', md_of_record: false };
@@ -54,6 +57,8 @@ window.AllyOSAuth = (function () {
       demo: true, pilot: !!u.pilot
     };
     setSession(s);
+    // Seed this clinic's active lines (demo/pilot). Real multi-user reads clinic_modules from Supabase.
+    if (u.lines) { try { localStorage.setItem('allyos_clinic_lines_v1', JSON.stringify(u.lines)); } catch (e) {} }
     return { session: s };
   }
 

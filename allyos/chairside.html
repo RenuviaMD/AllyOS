@@ -368,7 +368,7 @@ function findIng(id){for(var i=0;i<MENU.length;i++)if(MENU[i].id===id)return MEN
 function matchByName(n){n=(n||'').toLowerCase();for(var i=0;i<MENU.length;i++){var m=(MENU[i].name||'').toLowerCase();if(n.indexOf(m.split(' ')[0])>=0||m.indexOf(n.split(' ')[0])>=0)return MENU[i];}return null;}
 function qById(id){for(var i=0;i<QUEUE.length;i++)if(QUEUE[i].id===id)return QUEUE[i];return null;}
 
-function fillProto(){var el=document.getElementById('qProto');if(!el)return;var h='<option value="ALACARTE">À la carte (custom)</option>';(MOD.stacks||[]).forEach(function(s){h+='<option value="'+s.code+'">'+esc(s.code)+' — '+esc(s.title)+'</option>';});el.innerHTML=h;}
+function fillProto(){var el=document.getElementById('qProto');if(!el)return;var h='<option value="ALACARTE">Micronutrient Infusion (custom build)</option>';(MOD.stacks||[]).forEach(function(s){h+='<option value="'+s.code+'">'+esc(s.code)+' — '+esc(s.title)+'</option>';});el.innerHTML=h;}
 function todayISO(){var n=new Date();return n.getFullYear()+'-'+('0'+(n.getMonth()+1)).slice(-2)+'-'+('0'+n.getDate()).slice(-2);}
 function renderStats(){var el=document.getElementById('stats');if(!el)return;var occ=CHAIRS.filter(Boolean).length,avail=6-occ,wait=QUEUE.length,ending=CHAIRS.filter(function(c){return c&&c.state==='ended';}).length,inf=CHAIRS.filter(function(c){return c&&c.state==='infusing';}).length;
   el.innerHTML=stat('blue','Scheduled',wait+occ)+stat('amber','Waiting',wait)+stat('','In chair',inf)+stat('green','Available',avail)+stat('violet','Ending / done',ending);}
@@ -377,7 +377,7 @@ function stat(cls,lbl,n){return '<div class="stat '+cls+'"><div class="lbl">'+lb
 // ---------- QUEUE (Patient ID cards) ----------
 function openIntake(){
   var alerts=ALERT_CATALOG.map(function(a){return '<label class="muted" style="font-size:.76rem;display:flex;gap:6px;align-items:center;width:48%"><input type="checkbox" class="ialert" value="'+esc(a)+'"> '+esc(a)+'</label>';}).join('');
-  var protoOpts='<option value="ALACARTE">À la carte (choose later)</option>'+allStacks().map(function(s){return '<option value="'+s.code+'">'+esc(s.code)+' — '+esc(s.title)+(s.status==='draft'?' (DRAFT)':'')+'</option>';}).join('');
+  var protoOpts='<option value="ALACARTE">Micronutrient Infusion (choose later)</option>'+allStacks().map(function(s){return '<option value="'+s.code+'">'+esc(s.code)+' — '+esc(s.title)+(s.status==='draft'?' (DRAFT)':'')+'</option>';}).join('');
   var h='<button class="x" onclick="closeModal()">×</button><h3>New patient</h3><div class="sub">PHI stays on this device only — nothing is sent to a server.</div>'+
     '<div class="frow"><div><label>First name</label><input id="iFirst" placeholder="Sarah"></div><div><label>Last name</label><input id="iLast" placeholder="Martinez"></div></div>'+
     '<div class="frow"><div><label>Date of birth</label><input id="iDob" type="date" oninput="document.getElementById(\'iAge\').textContent=intakeAge()"></div><div><label>Age</label><input value="" id="iAgeBox" placeholder="auto" readonly style="opacity:.7"><span id="iAge" style="display:none"></span></div><div><label>Sex</label><select id="iSex"><option>F</option><option>M</option><option>Other</option></select></div></div>'+
@@ -499,7 +499,7 @@ function setMode(id,m,silent){var p=qById(id);if(!p)return;p.buildMode=m;if(!sil
 function setProto(id,code){var p=qById(id);if(!p)return;p.proto=code;p.buildMode='stack';save();renderDetail();}
 function clearGive(id){var p=qById(id);if(!p)return;p.buildMode=null;p.staged=false;delete p.prep;if(PREP&&PREP.pid===id)PREP=null;save();renderQueue();renderPrep();renderDetail();}
 function clearBench(){if(PREP){var p=qById(PREP.pid);if(p){delete p.prep;p.staged=false;}}PREP=null;save();renderQueue();renderPrep();renderDetail();}
-function txLabel(p){return p.proto==='ALACARTE'?'À la carte build':(p.proto?(p.proto+(stackByCode(p.proto)?' — '+stackByCode(p.proto).title:'')):'Custom build');}
+function txLabel(p){return p.proto==='ALACARTE'?'Micronutrient Infusion':(p.proto?(p.proto+(stackByCode(p.proto)?' — '+stackByCode(p.proto).title:'')):'Custom build');}
 function paletteHTML(){
   var byCat={};MENU.forEach(function(i){if(i.in_primary_library===false&&/KETOROLAC|FAMOTIDINE|METHYLENE/.test(i.id))return;var c=catOf(i);(byCat[c]=byCat[c]||[]).push(i);});
   var order=['Base fluids','Vitamins','Minerals & electrolytes','Amino acids','Antioxidants & specialty','Lipotropic / metabolic','Rx & administration adjuncts','Other'];
@@ -614,7 +614,7 @@ function sendToChair(){var p=qById(PREP.pid);if(!p)return;
   if(!p.consent){return hardStop('consent',p);}
   var an=analyzePrep();if(an.crit>0&&!PREP.override&&mdMode()){showAlertPopup(an);return;}
   var free=CHAIRS.indexOf(null);if(free<0){alert('All 6 chairs are full — keeping them on the bench. Tap "Back to waiting" to stage, then send when a chair frees.');return;}
-  CHAIRS[free]={patient:p,protoLabel:(p.proto==='ALACARTE'?'À LA CARTE':p.proto),bag:PREP.items.slice(),base:PREP.base,vol:PREP.vol,time:PREP.time,remain:PREP.time*60,total:PREP.time*60,state:'ready',timer:null,lastBeep:0,monitoring:[],override:PREP.override||'',alertSummary:(function(){var a=analyzePrep();return a.flags.filter(function(f){return f.l==='crit'||f.l==='warn';}).map(function(f){return f.t;}).join('; ');})()};
+  CHAIRS[free]={patient:p,protoLabel:(p.proto==='ALACARTE'?'Micronutrient Infusion':p.proto),bag:PREP.items.slice(),base:PREP.base,vol:PREP.vol,time:PREP.time,remain:PREP.time*60,total:PREP.time*60,state:'ready',timer:null,lastBeep:0,monitoring:[],override:PREP.override||'',alertSummary:(function(){var a=analyzePrep();return a.flags.filter(function(f){return f.l==='crit'||f.l==='warn';}).map(function(f){return f.t;}).join('; ');})()};
   delete p.prep;p.staged=false;
   QUEUE=QUEUE.filter(function(x){return x.id!==p.id;});PREP=null;selId=null;save();renderQueue();renderChairs();renderPrep();renderDetail();
 }
@@ -735,7 +735,7 @@ function composeNote(i){var c=CHAIRS[i],p=c.patient,df=15,g=gfeState(p);
   var monStr=mons.length?mons.map(function(m){return '<div class="nrow"><span class="nk">'+esc(m.t)+'</span><span>'+esc(m.note)+'</span></div>';}).join(''):'<div class="nrow"><span class="nk">—</span><span>No mid-infusion concerns logged.</span></div>';
   var pre=c.preVitals||{},post=c.postVitals||{};
   var s=stackByCode(p.proto);
-  var why=s&&s.indication?esc(s.indication):(p.proto==='ALACARTE'?'Provider-directed à-la-carte wellness infusion.':'Wellness IV infusion.');
+  var why=s&&s.indication?esc(s.indication):(p.proto==='ALACARTE'?'Provider-directed micronutrient wellness infusion.':'Wellness IV infusion.');
   var alertLine=c.override?('Decision-support flag overridden — reason: '+esc(c.override)):(c.alertSummary?('Cautions noted &amp; addressed: '+esc(c.alertSummary)):'No critical decision-support conflicts.');
   var aeLine=aes.length?('<b style="color:#b3261e">Adverse event(s) logged — FORM-04 required.</b> '+aes.map(function(m){return esc(m.note);}).join(' | ')):'No adverse event. Tolerated well.';
   var sig=c.noteSigned;
@@ -944,7 +944,7 @@ function composeGFE(p){var d=p.gfeDoc||{},age=ageOf(p),s=stackByCode(p.proto),v=
     '<div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h2>Good Faith Exam</h2><div class="nmeta">RenuviaMD® · AllyOS · FORM-INTAKE-GFE-01 · '+esc(d.stamp||nowStamp())+'</div></div><div style="font-size:.66rem;color:#5b6b72;text-align:right">Adult wellness IV/IM<br>Internal clinical record</div></div>'+
     '<div class="nsec"><div class="nrow"><span class="nk">Patient</span><span>'+esc(dispName(p))+' · '+(age!=null?age+'y':'—')+' '+esc(p.sex||'')+(p.dob?(' · DOB '+esc(fmtDob(p.dob))):'')+'</span></div>'+
       '<div class="nrow"><span class="nk">Visit goal</span><span>'+esc(d.goal||'Wellness optimization')+'</span></div>'+
-      '<div class="nrow"><span class="nk">Today\'s plan</span><span>'+esc(p.proto==='ALACARTE'?'À LA CARTE':p.proto)+(s?' — '+esc(s.title):'')+'</span></div></div>'+
+      '<div class="nrow"><span class="nk">Today\'s plan</span><span>'+esc(p.proto==='ALACARTE'?'Micronutrient Infusion':p.proto)+(s?' — '+esc(s.title):'')+'</span></div></div>'+
     '<div class="nsec"><h3>History &amp; screen (Section B)</h3>'+
       '<div class="nrow"><span class="nk">Conditions</span><span>'+conds+'</span></div>'+
       '<div class="nrow"><span class="nk">Allergies</span><span>'+esc(d.allergies||'NKDA')+'</span></div>'+

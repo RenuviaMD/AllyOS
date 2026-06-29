@@ -132,7 +132,7 @@ function render(){
     var act=st.k==='current'?'<button class="btn-s" onclick="viewReport('+o.i+')">View report</button> <button class="btn-s" onclick="openForm('+o.i+')">Re-do</button>':
       '<button class="btn-s go" onclick="openForm('+o.i+')">Perform GFE →</button>'+(p.gfeDoc?' <button class="btn-s" onclick="viewReport('+o.i+')">View</button>':'');
     return '<tr><td><b>'+esc(dispName(p))+'</b></td><td>'+(ageOf(p)!=null?ageOf(p)+'y ':'')+esc(p.sex||'')+'</td>'+
-      '<td>'+esc(p.proto==='ALACARTE'?'À LA CARTE':p.proto||'—')+(s?' · '+esc(s.title):'')+'</td>'+
+      '<td>'+esc(p.proto==='ALACARTE'?'Micronutrient Infusion':p.proto||'—')+(s?' · '+esc(s.title):'')+'</td>'+
       '<td>'+pchip(st)+'</td><td>'+(p.gfeDate?esc(fmtDob(p.gfeDate)):'<span class="muted">—</span>')+'</td>'+
       '<td style="text-align:right">'+act+'</td></tr>';}).join(''):'<tr><td colspan="6" class="muted" style="padding:22px;text-align:center">No patients'+(f!=='all'?' ('+f+')':'')+'. Add a patient or have the front desk register them at the station.</td></tr>';
   document.getElementById('tbl').innerHTML=th+body;
@@ -141,7 +141,7 @@ function stat(cls,lbl,n){return '<div class="stat '+cls+'"><div class="lbl">'+lb
 
 // ---- add a patient (work ahead of the visit) ----
 function openAdd(){
-  var opts='<option value="ALACARTE">À la carte</option>'+Object.keys(STACKS).map(function(c){return '<option value="'+c+'">'+esc(c)+' — '+esc(STACKS[c].title)+'</option>';}).join('');
+  var opts='<option value="ALACARTE">Micronutrient Infusion (custom build)</option>'+Object.keys(STACKS).map(function(c){return '<option value="'+c+'">'+esc(c)+' — '+esc(STACKS[c].title)+'</option>';}).join('');
   document.getElementById('md').innerHTML='<button class="x" onclick="closeM()">×</button><h3>Add patient</h3>'+
     '<div class="frow"><div><label>First name</label><input id="aFirst"></div><div><label>Last name</label><input id="aLast"></div></div>'+
     '<div class="frow"><div><label>DOB</label><input id="aDob" type="date"></div><div><label>Sex</label><select id="aSex"><option value="">—</option><option>F</option><option>M</option><option>X</option></select></div></div>'+
@@ -157,7 +157,7 @@ function addPatient(){var f=val('aFirst').trim(),l=val('aLast').trim();if(!f){al
 function openForm(i){var q=loadQueue(),p=q[i];if(!p)return;var s=stackByCode(p.proto),age=ageOf(p),d=p.gfeDoc||{},v=d.vitals||{};
   var conds=ALERT_CATALOG.map(function(c){var on=(p.alerts||[]).indexOf(c)>=0;return '<label class="gchk"><input type="checkbox" class="gfecond" value="'+esc(c)+'" '+(on?'checked':'')+'> '+esc(c)+'</label>';}).join('');
   document.getElementById('md').innerHTML='<button class="x" onclick="closeM()">×</button>'+
-    '<h3>Good Faith Exam</h3><div class="sub" style="margin:2px 0">'+esc(dispName(p))+' · '+(age!=null?age+'y ':'')+esc(p.sex||'')+' · plan: <b>'+esc(p.proto==='ALACARTE'?'À LA CARTE':p.proto)+(s?' — '+esc(s.title):'')+'</b></div>'+
+    '<h3>Good Faith Exam</h3><div class="sub" style="margin:2px 0">'+esc(dispName(p))+' · '+(age!=null?age+'y ':'')+esc(p.sex||'')+' · plan: <b>'+esc(p.proto==='ALACARTE'?'Micronutrient Infusion':p.proto)+(s?' — '+esc(s.title):'')+'</b></div>'+
     '<label class="glab">Reason / wellness goal</label><input id="gGoal" value="'+esc(d.goal||'')+'" placeholder="e.g. energy · hydration · recovery">'+
     '<label class="glab">Section B — conditions screen (check all that apply)</label><div class="gconds">'+conds+'</div>'+
     '<div class="frow" style="margin-top:8px"><div><label>Allergies</label><input id="gAllg" value="'+esc(d.allergies||'')+'" placeholder="NKDA or list"></div><div><label>Current meds</label><input id="gMeds" value="'+esc(d.meds||'')+'" placeholder="incl. anticoagulants"></div></div>'+
@@ -168,7 +168,7 @@ function openForm(i){var q=loadQueue(),p=q[i];if(!p)return;var s=stackByCode(p.p
       '<label class="gradio"><input type="radio" name="gElig" value="eligible" checked> ✓ Eligible — cleared for wellness IV/IM</label>'+
       '<label class="gradio"><input type="radio" name="gElig" value="defer"> ⏸ Defer — needs more info / modify plan</label>'+
       '<label class="gradio"><input type="radio" name="gElig" value="no"> ⛔ Not eligible today</label></div>'+
-    '<label class="glab">Clinical note (optional)</label><textarea id="gNote" rows="2" placeholder="Plan / reason if deferred">'+esc(d.note||'')+'</textarea>'+
+    '<div id="gNoteWrap" style="display:none"><textarea id="gNote" rows="2"></textarea></div>'+
     '<div class="frow" style="margin-top:8px"><div><label>Signing provider <span style="color:#5b6b72;font-weight:400">(GFE — MD/DO or APP)</span></label>'+
       '<select id="gProv">'+(window.AllyOSCred?AllyOSCred.options(AllyOSCred.DOC.GFE,esc(d.provider||'')):'<option value="">— select —</option>')+'</select></div></div>'+
     '<button class="btn" style="width:100%;margin-top:10px" onclick="signForm('+i+')">Sign GFE</button>';
@@ -190,7 +190,7 @@ function signForm(i){var q=loadQueue(),p=q[i];if(!p)return;
 }
 function viewReport(i){var q=loadQueue(),p=q[i];if(!p||!p.gfeDoc){alert('No GFE on file.');return;}
   document.getElementById('md').innerHTML=composeGFE(p)+
-    '<div class="noprint" style="display:flex;gap:8px;margin-top:12px"><button class="btn" style="flex:1" onclick="window.print()">🖨 Print</button><button class="btn ghost" style="flex:1" onclick="downloadGFE('+i+')">⬇ Download</button><button class="btn ghost" style="flex:1" onclick="closeM()">Close</button></div>';
+    '<div class="noprint" style="display:flex;gap:8px;margin-top:12px"><button class="btn" style="flex:1" onclick="window.print()">🖨 Print</button><button class="btn ghost" style="flex:1" onclick="downloadGFE('+i+')">⬇ Download PDF</button><button class="btn ghost" style="flex:1" onclick="closeM()">Close</button></div>';
   show();render();
 }
 function composeGFE(p){var d=p.gfeDoc||{},age=ageOf(p),s=stackByCode(p.proto),v=d.vitals||{};
@@ -200,7 +200,7 @@ function composeGFE(p){var d=p.gfeDoc||{},age=ageOf(p),s=stackByCode(p.proto),v=
     '<div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h2>Good Faith Exam</h2><div class="nmeta">RenuviaMD® · AllyOS · FORM-INTAKE-GFE-01 · '+esc(d.stamp||nowStamp())+'</div></div><div style="font-size:.66rem;color:#5b6b72;text-align:right">Adult wellness IV/IM<br>Internal clinical record</div></div>'+
     '<div class="nsec"><div class="nrow"><span class="nk">Patient</span><span>'+esc(dispName(p))+' · '+(age!=null?age+'y':'—')+' '+esc(p.sex||'')+(p.dob?(' · DOB '+esc(fmtDob(p.dob))):'')+'</span></div>'+
       '<div class="nrow"><span class="nk">Visit goal</span><span>'+esc(d.goal||'Wellness optimization')+'</span></div>'+
-      '<div class="nrow"><span class="nk">Today\'s plan</span><span>'+esc(p.proto==='ALACARTE'?'À LA CARTE':p.proto)+(s?' — '+esc(s.title):'')+'</span></div></div>'+
+      '<div class="nrow"><span class="nk">Today\'s plan</span><span>'+esc(p.proto==='ALACARTE'?'Micronutrient Infusion':p.proto)+(s?' — '+esc(s.title):'')+'</span></div></div>'+
     '<div class="nsec"><h3>History &amp; screen (Section B)</h3>'+
       '<div class="nrow"><span class="nk">Conditions</span><span>'+conds+'</span></div>'+
       '<div class="nrow"><span class="nk">Allergies</span><span>'+esc(d.allergies||'NKDA')+'</span></div>'+
@@ -216,10 +216,10 @@ function composeGFE(p){var d=p.gfeDoc||{},age=ageOf(p),s=stackByCode(p.proto),v=
     '</div>';
 }
 function downloadGFE(i){var q=loadQueue(),p=q[i];if(!p||!p.gfeDoc)return;
-  var html='<!doctype html><meta charset="utf-8"><title>GFE — '+esc(dispName(p))+'</title><style>body{font-family:-apple-system,Segoe UI,Arial,sans-serif;max-width:800px;margin:24px auto;padding:0 16px}'+
-    '.notepaper{color:#1c2b32;font-size:14px;line-height:1.5}h2{color:#0e3a40;margin:0}.nmeta{font-size:11px;color:#5b6b72}.nsec{margin:12px 0;padding-top:9px;border-top:1px solid #e3ecea}.nsec h3{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#0e8a8a;margin:0 0 5px}.nrow{display:flex;gap:8px;padding:2px 0}.nk{min-width:120px;color:#5b6b72;font-size:12px}.ncomp{background:#e9f6f0;border-left:3px solid #1e9e6a;padding:9px 11px;border-radius:5px;margin-top:10px}.nsign{border-top:1px solid #e3ecea;margin-top:12px;padding-top:10px}.stamp{color:#0c7a4d;font-weight:700}</style>'+composeGFE(p).replace('id="repDoc"','');
-  var b=new Blob([html],{type:'text/html'}),u=URL.createObjectURL(b),a=document.createElement('a');
-  a.href=u;a.download='GFE-'+dispName(p).replace(/[^A-Za-z]/g,'')+'-'+todayISO()+'.html';a.click();URL.revokeObjectURL(u);}
+  var html='<!doctype html><html><head><meta charset="utf-8"><title>GFE-'+esc(dispName(p).replace(/[^A-Za-z]/g,''))+'-'+todayISO()+'</title><style>@page{margin:14mm}body{font-family:-apple-system,Segoe UI,Arial,sans-serif;max-width:800px;margin:0 auto;padding:0 16px;color:#1c2b32}'+
+    '.notepaper{font-size:14px;line-height:1.5}h2{color:#0e3a40;margin:0}.nmeta{font-size:11px;color:#5b6b72}.nsec{margin:12px 0;padding-top:9px;border-top:1px solid #e3ecea}.nsec h3{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#0e8a8a;margin:0 0 5px}.nrow{display:flex;gap:8px;padding:2px 0}.nk{min-width:120px;color:#5b6b72;font-size:12px}.ncomp{background:#e9f6f0;border-left:3px solid #1e9e6a;padding:9px 11px;border-radius:5px;margin-top:10px}.nsign{border-top:1px solid #e3ecea;margin-top:12px;padding-top:10px}.stamp{color:#0c7a4d;font-weight:700}</style></head><body>'+composeGFE(p).replace('id="repDoc"','')+'<scr'+'ipt>window.onload=function(){setTimeout(function(){window.print();},250);};window.onafterprint=function(){window.close();};</scr'+'ipt></body></html>';
+  var w=window.open('','_blank');if(!w){alert('Allow pop-ups to save the PDF.');return;}
+  w.document.open();w.document.write(html);w.document.close();}
 function show(){document.getElementById('ov').classList.add('show');}
 function closeM(){document.getElementById('ov').classList.remove('show');}
 </script>
