@@ -39,10 +39,12 @@ button:hover{filter:brightness(1.06)}
   </form>
 
   <div class="roles">
-    <h3>Access by role</h3>
-    <div class="role"><b>Provider (MD/DO/NP/PA)</b> — Good Faith Exam, authorize protocols, sign, full station, build.</div>
-    <div class="role"><b>Nurse (RN/LPN)</b> — execute only: assign chairs, run infusions, document.</div>
-    <div class="role"><b>Admin / Medical Director</b> — inventory &amp; pricing, users, audit.</div>
+    <h3>Seats — each clinic assigns these by its own design</h3>
+    <div class="role"><b>Provider (MD/DO/NP/PA)</b> — clinical surface: Good Faith Exam, build &amp; authorize protocols, sign, full station.</div>
+    <div class="role"><b>Nurse (RN/LPN)</b> — chairside station: assign chairs, run infusions, document under the standing order.</div>
+    <div class="role"><b>Admin</b> — clinic operations: inventory, pricing, team seats.</div>
+    <div class="role" style="border-left:2px solid var(--gold,#c9a24b);padding-left:8px"><b>Medical Director — you, above the clinics</b>: Clinic Network cockpit + AllyAuditPro. Not a clinic seat.</div>
+    <div style="font-size:.72rem;color:var(--muted,#8aa3ad);margin-top:8px">The clinic credentials and assigns its own seats; AllyOS routes and the provider owns every decision. Only the Medical Director of record has the network + audit view. Enforcement applies only where RenuviaMD is the MD of record.</div>
   </div>
 
   <div class="demo">
