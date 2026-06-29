@@ -133,9 +133,9 @@ function fillLineSelect(){
   fl.innerHTML=pills;
 }
 function setFilter(k){filterLine=k;fillLineSelect();renderAppts();}
-// Hourly slots: IV has 6 per hour (the 6 chairs); every other line has 1 per hour (single provider consult).
-function cap(line){return line==='iv'?6:1;}
-var HOURS=['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
+// Hourly slots, 8am-8pm. Booking is NOT capacity-enforced — clients book any time
+// (IV runs as a group session). The count is shown for awareness only.
+var HOURS=['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'];
 function fmtHour(h){var p=(h||'').split(':'),H=+p[0]||0,ap=H>=12?'PM':'AM',h12=H%12||12;return h12+':'+(p[1]||'00')+' '+ap;}
 function fillHours(){document.getElementById('aTime').innerHTML=HOURS.map(function(h){return '<option value="'+h+'">'+fmtHour(h)+'</option>';}).join('');}
 function used(line,date,hour){return load().filter(function(x){return x.status!=='cancelled'&&x.line===line&&x.date===date&&x.time===hour;}).length;}
@@ -144,22 +144,20 @@ function onLineDate(){updateAvail();}
 function updateAvail(){
   var line=val('aLine'),date=val('aDate'),hour=val('aTime'),el=document.getElementById('avail');
   if(!line||!date||!hour){el.textContent='';return;}
-  var c=cap(line),u=used(line,date,hour),open=c-u;
-  if(open<=0){el.innerHTML='<span style="color:#f0a59d">● Full ('+u+'/'+c+') at '+fmtHour(hour)+'</span> — '+(line==='iv'?'all 6 IV chairs booked that hour.':'this line allows 1/hr.')+' Pick another hour.';}
-  else{el.innerHTML='<span style="color:var(--green)">● '+open+' of '+c+' open</span> at '+fmtHour(hour)+(line==='iv'?' · IV = 6 chairs/hr':' · 1 slot/hr');}
+  var u=used(line,date,hour);
+  el.innerHTML='<span style="color:var(--muted)">'+(u?u+' already booked':'open')+' at '+fmtHour(hour)+'</span>'+(line==='iv'?' · IV runs as a group session — book freely.':'');
 }
 function book(){
   var name=val('aName').trim(),m=document.getElementById('bookMsg');
   if(!name){m.style.color='var(--gold)';m.textContent='Client name required.';return;}
   var date=val('aDate'),time=val('aTime');
   if(!date||!time){m.style.color='var(--gold)';m.textContent='Pick a date and hour.';return;}
-  var n=parseInt(val('aSessions'),10)||1, line=val('aLine'), plan=val('aPlan').trim(), prov=val('aProv').trim(), c=cap(line);
-  var d0=new Date(date+'T'+time+':00'), conflicts=[], dates=[];
-  for(var i=0;i<n;i++){var ds=ymd(new Date(d0.getTime()+i*7*24*3600*1000));dates.push(ds);if(used(line,ds,time)>=c)conflicts.push(fmtDay(ds));}
-  if(conflicts.length){m.style.color='var(--gold)';m.textContent='Full at '+fmtHour(time)+' on '+conflicts.join(', ')+' — pick another hour.';return;}
-  var enc=encId(name), appts=load();
-  dates.forEach(function(ds,i){appts.push({id:'a'+Date.now().toString(36)+i,name:name,enc:enc,line:line,plan:plan,
-    date:ds,time:time,sessionN:i+1,sessionTotal:n,provider:prov,status:'booked',createdAt:Date.now()});});
+  var n=parseInt(val('aSessions'),10)||1, line=val('aLine'), plan=val('aPlan').trim(), prov=val('aProv').trim();
+  // no capacity gate — clients book any time 8am-8pm (group IV)
+  var d0=new Date(date+'T'+time+':00'), enc=encId(name), appts=load();
+  for(var i=0;i<n;i++){var ds=ymd(new Date(d0.getTime()+i*7*24*3600*1000));
+    appts.push({id:'a'+Date.now().toString(36)+i,name:name,enc:enc,line:line,plan:plan,
+      date:ds,time:time,sessionN:i+1,sessionTotal:n,provider:prov,status:'booked',createdAt:Date.now()});}
   save(appts);
   document.getElementById('aName').value='';document.getElementById('aPlan').value='';document.getElementById('aProv').value='';
   m.style.color='var(--green)';m.textContent='✓ Booked '+n+' session'+(n>1?'s':'')+' · '+enc;
