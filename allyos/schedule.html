@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="allyos-theme.css">
 <script src="allyos-auth.js"></script>
 <style>
-.wrap{max-width:1080px;margin:0 auto;padding:18px}
+.wrap{max-width:1120px;margin:0 auto;padding:18px}
 .top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
 .kick{font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:700}
 .top h1{font-family:var(--fdisp);font-size:1.5rem}.top a{color:var(--teal);text-decoration:none;font-size:.85rem}
@@ -13,38 +13,54 @@
 .fsec{background:linear-gradient(180deg,#10202f,#0b1622);border:1px solid var(--line);border-radius:14px;padding:15px 18px;margin-bottom:14px}
 .fsec-h{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:9px;font-weight:700}
 .fsec-h .ro{font-size:.58rem;color:var(--muted);border:1px solid var(--line2);border-radius:5px;padding:1px 6px;letter-spacing:.05em}
-label{display:block;font-size:.7rem;color:var(--muted);margin:0 0 4px;text-transform:uppercase;letter-spacing:.03em}
-input,select{width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--ink);font-size:.88rem;font-family:inherit}
-input:focus,select:focus{outline:none;border-color:var(--teal)}
-.fgrid{display:grid;gap:10px 14px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--fdisp);font-weight:600;border:none;border-radius:999px;padding:11px 20px;cursor:pointer;background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a;font-size:.9rem}
-.btn-s{font-size:.72rem;padding:5px 10px;border-radius:7px;border:1px solid var(--line2);background:rgba(255,255,255,.04);color:var(--ink);cursor:pointer;font-family:inherit}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--fdisp);font-weight:600;border:none;border-radius:999px;padding:10px 18px;cursor:pointer;background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a;font-size:.88rem}
+.btn.ghost{background:transparent;border:1px solid var(--line2);color:var(--ink)}
+.btn-s{font-size:.7rem;padding:5px 9px;border-radius:7px;border:1px solid var(--line2);background:rgba(255,255,255,.04);color:var(--ink);cursor:pointer;font-family:inherit}
 .btn-s:hover{border-color:var(--teal)}
 /* chair board */
 .chairs{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
-@media(max-width:780px){.chairs{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:460px){.chairs{grid-template-columns:1fr 1fr}}
-.chair{border:1px solid var(--line);border-radius:11px;padding:11px;background:#0c1925;min-height:88px}
+@media(max-width:780px){.chairs{grid-template-columns:repeat(3,1fr)}}@media(max-width:460px){.chairs{grid-template-columns:1fr 1fr}}
+.chair{border:1px solid var(--line);border-radius:11px;padding:11px;background:#0c1925;min-height:84px}
 .chair .cn{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.chair.free{border-style:dashed;opacity:.7}
-.chair .who{font-family:var(--fdisp);font-size:.92rem;margin-top:4px}
-.chair .st{font-size:.64rem;margin-top:3px;font-weight:700;letter-spacing:.03em}
-.chair.busy .st{color:var(--gold)}.chair.ended .st{color:var(--violet,#b79bff)}.chair.ready .st{color:var(--teal)}
-.chair .tm{font-family:ui-monospace,Menlo,monospace;font-size:1.1rem;margin-top:5px}
-.chair .free-l{color:var(--green);font-weight:700;font-size:.8rem;margin-top:8px}
-.legend{font-size:.68rem;color:var(--muted);margin-top:9px}
-/* appointments */
-.lpills{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:4px}
-.lpill{font-size:.72rem;padding:6px 12px;border:1px solid var(--line);border-radius:8px;cursor:pointer;color:var(--muted)}
+.chair.free{border-style:dashed;opacity:.7}.chair .who{font-family:var(--fdisp);font-size:.92rem;margin-top:4px}
+.chair .st{font-size:.64rem;margin-top:3px;font-weight:700}.chair.busy .st{color:var(--gold)}.chair.ended .st{color:#b79bff}.chair.ready .st{color:var(--teal)}
+.chair .tm{font-family:ui-monospace,Menlo,monospace;font-size:1.05rem;margin-top:4px}.chair .free-l{color:var(--green);font-weight:700;font-size:.8rem;margin-top:8px}
+/* controls */
+.ctrls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.tabs{display:inline-flex;border:1px solid var(--line2);border-radius:9px;overflow:hidden}
+.tab{padding:8px 15px;font-size:.82rem;cursor:pointer;color:var(--muted);background:transparent;border:none;font-family:inherit}
+.tab.on{background:rgba(40,194,184,.12);color:var(--teal)}
+.lpills{display:flex;gap:6px;flex-wrap:wrap}
+.lpill{font-size:.7rem;padding:6px 11px;border:1px solid var(--line);border-radius:8px;cursor:pointer;color:var(--muted)}
 .lpill.on{border-color:var(--teal);color:var(--teal);background:rgba(40,194,184,.08)}
-.daygroup{margin-top:12px}
+.wknav{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--muted)}
+.spacer{flex:1}
+/* appts list */
+.daygroup{margin-bottom:12px}
 .dayhdr{font-size:.66rem;text-transform:uppercase;letter-spacing:.04em;color:var(--gold);font-weight:700;border-bottom:1px solid var(--line2);padding-bottom:4px;margin-bottom:6px}
-.appt{display:flex;align-items:center;gap:12px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;margin-bottom:6px;background:#0c1925}
-.appt .tm{font-family:ui-monospace,Menlo,monospace;color:var(--teal);min-width:64px;font-size:.82rem}
-.appt .who{flex:1}.appt .who b{font-size:.9rem}
-.appt .meta{font-size:.66rem;color:var(--muted)}
-.lchip{font-size:.58rem;font-weight:700;padding:1px 7px;border-radius:6px;background:rgba(40,194,184,.12);color:var(--teal);border:1px solid var(--line2);margin-right:6px}
+.appt{display:flex;align-items:center;gap:11px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;margin-bottom:6px;background:#0c1925}
+.appt .tm{font-family:ui-monospace,Menlo,monospace;color:var(--teal);min-width:62px;font-size:.8rem}
+.appt .who{flex:1}.appt .who b{font-size:.9rem}.appt .meta{font-size:.66rem;color:var(--muted)}
+.lchip{font-size:.56rem;font-weight:700;padding:1px 7px;border-radius:6px;background:rgba(40,194,184,.12);color:var(--teal);border:1px solid var(--line2);margin-right:6px}
 .sess{font-size:.62rem;color:var(--gold)}
+.empty{color:var(--muted);font-size:.82rem;padding:12px 0}
+/* week grid */
+.week{display:grid;grid-template-columns:repeat(7,minmax(135px,1fr));gap:8px;overflow-x:auto}
+.wday{border:1px solid var(--line);border-radius:10px;background:#0c1925;min-height:120px;padding:7px}
+.wday.today{border-color:var(--teal)}
+.wday .wh{font-size:.62rem;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.wday .wh .add{cursor:pointer;color:var(--teal);font-size:.9rem}
+.wappt{font-size:.68rem;background:#10202f;border:1px solid var(--line2);border-radius:6px;padding:4px 6px;margin-bottom:4px;cursor:pointer}
+.wappt .wt{font-family:ui-monospace,Menlo,monospace;color:var(--teal)}
+/* modal */
+.overlay{position:fixed;inset:0;background:#04080fcc;display:none;align-items:flex-start;justify-content:center;padding:32px 14px;overflow:auto;z-index:60}
+.overlay.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--line2);border-radius:16px;max-width:520px;width:100%;padding:20px}
+.modal h3{font-family:var(--fdisp);margin-bottom:2px}.modal .x{float:right;background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer}
+label{display:block;font-size:.7rem;color:var(--muted);margin:8px 0 4px;text-transform:uppercase;letter-spacing:.03em}
+input,select{width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--ink);font-size:.88rem;font-family:inherit}
+input:focus,select:focus{outline:none;border-color:var(--teal)}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
 .disc{font-size:.72rem;color:var(--muted);margin-top:16px;line-height:1.6}
 </style></head>
 <body class="allyos"><div class="wrap">
@@ -52,48 +68,52 @@ input:focus,select:focus{outline:none;border-color:var(--teal)}
     <div><div class="kick">AllyOS · Front desk</div><h1>Schedule</h1></div>
     <div><a href="dashboard.html">← Dashboard</a> &nbsp; <span class="muted" id="who" style="font-size:.78rem"></span></div>
   </div>
-  <div class="sub">Book appointments per line and see live IV chair availability. <b>PHI stays on this device</b> — nothing is sent to a server.</div>
+  <div class="sub">Book appointments per line and see live IV chair availability. <b>PHI stays on this device.</b></div>
 
   <div class="fsec" id="chairSec">
     <div class="fsec-h"><span>💧 IV chair board</span> <span class="ro">read-only · live</span></div>
     <div class="chairs" id="chairs"></div>
-    <div class="legend">Live from the nursing station — book around the open chairs. The front desk views only; nurses run the chairs.</div>
   </div>
 
-  <div class="fsec">
-    <div class="fsec-h">📅 Book an appointment</div>
-    <div class="fgrid" style="grid-template-columns:1.4fr 1fr;align-items:end">
-      <div><label>Client name</label><input id="aName" placeholder="First Last"></div>
-      <div><label>Line</label><select id="aLine" onchange="onLineDate()"></select></div>
+  <div class="ctrls">
+    <div class="tabs">
+      <button class="tab on" id="tabToday" onclick="setView('today')">Today</button>
+      <button class="tab" id="tabWeek" onclick="setView('week')">Week</button>
+      <button class="tab" id="tabUp" onclick="setView('upcoming')">Upcoming</button>
     </div>
-    <div class="fgrid" style="grid-template-columns:1.6fr 1fr 1fr;align-items:end;margin-top:8px">
-      <div><label>Plan / reason</label><input id="aPlan" placeholder="e.g. Myers Cocktail · weight mgmt"></div>
-      <div><label>Date</label><input id="aDate" type="date" onchange="onLineDate()"></div>
-      <div><label>Hour (1-hr slot)</label><select id="aTime" onchange="updateAvail()"></select></div>
-    </div>
-    <div id="avail" style="font-size:.74rem;margin-top:8px"></div>
-    <div class="fgrid" style="grid-template-columns:1fr 1fr;align-items:end;margin-top:8px">
-      <div><label>Sessions <span style="color:#5b6b72;text-transform:none">(books weekly)</span></label><select id="aSessions"><option value="1">1 session</option><option value="2">2 sessions</option><option value="3">3 sessions</option><option value="4">4 sessions</option></select></div>
-      <div><label>Provider (optional)</label><input id="aProv" placeholder="e.g. Milagros, ARNP"></div>
-    </div>
-    <div style="margin-top:11px;display:flex;gap:8px;align-items:center"><button class="btn" onclick="book()">＋ Book</button><span id="bookMsg" style="font-size:.78rem"></span></div>
-  </div>
-
-  <div class="fsec">
-    <div class="fsec-h">🗓 Upcoming</div>
+    <div class="wknav" id="wknav" style="display:none"><button class="btn-s" onclick="weekNav(-1)">‹</button><span id="wklabel"></span><button class="btn-s" onclick="weekNav(1)">›</button> <button class="btn-s" onclick="weekNav(0)">This week</button></div>
     <div class="lpills" id="filters"></div>
-    <div id="appts"></div>
+    <div class="spacer"></div>
+    <button class="btn" onclick="openBook()">＋ Book</button>
   </div>
+  <div id="view"></div>
 
-  <div class="disc">Appointments and the chair board live on this device only (PHI-free architecture). Each appointment carries a de-identified Encounter ID that matches the GFE + nursing station. © <span id="yr"></span> RenuviaMD® PLLC.</div>
+  <div class="disc">Appointments and the chair board live on this device only (PHI-free). Each appointment carries a de-identified Encounter ID that matches the GFE + nursing station. © <span id="yr"></span> RenuviaMD® PLLC.</div>
 </div>
+
+<div class="overlay" id="ov"><div class="modal" id="md">
+  <button class="x" onclick="closeM()">×</button><h3>Book appointment</h3>
+  <div style="font-size:.78rem;color:var(--muted);margin-bottom:6px">1-hr slots, 8am–8pm. IV runs as a group — book freely.</div>
+  <label>Client name</label><input id="aName" placeholder="First Last">
+  <div class="mgrid">
+    <div><label>Line</label><select id="aLine" onchange="updateAvail()"></select></div>
+    <div><label>Plan / reason</label><input id="aPlan" placeholder="Myers · weight mgmt"></div>
+    <div><label>Date</label><input id="aDate" type="date" onchange="updateAvail()"></div>
+    <div><label>Hour</label><select id="aTime" onchange="updateAvail()"></select></div>
+    <div><label>Sessions (weekly)</label><select id="aSessions"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div>
+    <div><label>Provider (optional)</label><input id="aProv" placeholder="Milagros, ARNP"></div>
+  </div>
+  <div id="avail" style="font-size:.74rem;margin-top:8px"></div>
+  <button class="btn" style="width:100%;margin-top:12px" onclick="book()">＋ Book appointment</button>
+  <div id="bookMsg" style="font-size:.78rem;margin-top:6px"></div>
+</div></div>
 <script>
 document.getElementById('yr').textContent=new Date().getFullYear();
 var ses=null;
 if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin','nurse','frontdesk']);ses=AllyOSAuth.session();
   if(ses){document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+(ses.clinic||'');
     if(ses.role==='frontdesk'){var dl=document.querySelector('.top a[href="dashboard.html"]');if(dl){dl.textContent='Logout';dl.href='#';dl.onclick=function(){AllyOSAuth.signOut();return false;};}}}}
-var SKEY='allyos_schedule_v1', filterLine='all';
+var SKEY='allyos_schedule_v1', view='today', filterLine='all', weekStart=mondayOf(new Date());
 function load(){try{return JSON.parse(localStorage.getItem(SKEY)||'[]');}catch(e){return [];}}
 function save(a){try{localStorage.setItem(SKEY,JSON.stringify(a));}catch(e){}}
 function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -103,6 +123,12 @@ function initials(name){var p=(name||'').trim().split(/\s+/);return((p[0]||'').c
 function encId(name){return initials(name)+'-'+(''+Math.floor(1000+Math.random()*9000));}
 function lineLabel(k){return k==='iv'?'IV':k==='peptides'?'PEP':k==='bhrt'?'BHRT':k;}
 var LINEMETA={iv:'IV & IM Infusion',peptides:'Advanced Peptides',bhrt:'BHRT'};
+function ymd(d){return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
+function mondayOf(d){var x=new Date(d);var day=(x.getDay()+6)%7;x.setDate(x.getDate()-day);x.setHours(0,0,0,0);return x;}
+function fmtDay(ymdStr){var p=ymdStr.split('-');var d=new Date(p[0],p[1]-1,p[2]);return d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});}
+function todayStr(){return ymd(new Date());}
+var HOURS=['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'];
+function fmtHour(h){var p=(h||'').split(':'),H=+p[0]||0,ap=H>=12?'PM':'AM',h12=H%12||12;return h12+':'+(p[1]||'00')+' '+ap;}
 
 // ---- live IV chair board (read-only) ----
 function ivChairs(){try{var s=JSON.parse(localStorage.getItem('allyos_chairside_v1')||'{}');return s.chairs||[];}catch(e){return [];}}
@@ -111,12 +137,11 @@ function mmss(sec){var m=Math.floor(sec/60),s=sec%60;return m+':'+(s<10?'0':'')+
 function pInit(p){if(!p)return '';var n=p.name||((p.first||'')+' '+(p.last||''));return p.encId||initials(n);}
 function renderChairs(){
   var sec=document.getElementById('chairSec');
-  if(!lines().iv){ sec.style.display='none'; return; } sec.style.display='';
-  var ch=ivChairs(), html='';
+  if(!lines().iv){sec.style.display='none';return;}sec.style.display='';
+  var ch=ivChairs(),html='';
   for(var i=0;i<6;i++){var c=ch[i];
-    if(!c||!c.patient){ html+='<div class="chair free"><div class="cn">Chair '+(i+1)+'</div><div class="free-l">● Available</div></div>'; continue; }
-    var st=c.state||'ready', rem=chairRemain(c);
-    var stl=st==='infusing'?'busy':st==='ended'?'ended':'ready';
+    if(!c||!c.patient){html+='<div class="chair free"><div class="cn">Chair '+(i+1)+'</div><div class="free-l">● Available</div></div>';continue;}
+    var st=c.state||'ready',rem=chairRemain(c),stl=st==='infusing'?'busy':st==='ended'?'ended':'ready';
     var stLabel=st==='infusing'?'INFUSING':st==='ended'?'ENDED':st==='ready'?'READY':st.toUpperCase();
     html+='<div class="chair '+stl+' busy"><div class="cn">Chair '+(i+1)+'</div><div class="who">'+esc(pInit(c.patient))+'</div><div class="st">'+stLabel+'</div>'+
       (st==='infusing'?'<div class="tm">'+mmss(rem)+'</div>':(st==='ended'?'<div class="tm" style="color:var(--green)">done</div>':''))+'</div>';
@@ -124,69 +149,64 @@ function renderChairs(){
   document.getElementById('chairs').innerHTML=html;
 }
 
-// ---- booking ----
-function fillLineSelect(){
-  var L=lines(),sel=document.getElementById('aLine'),fl=document.getElementById('filters');
-  var opts='',pills='<span class="lpill '+(filterLine==='all'?'on':'')+'" onclick="setFilter(\'all\')">All</span>';
-  ['iv','peptides','bhrt'].forEach(function(k){if(L[k]){opts+='<option value="'+k+'">'+LINEMETA[k]+'</option>';pills+='<span class="lpill '+(filterLine===k?'on':'')+'" onclick="setFilter(\''+k+'\')">'+LINEMETA[k]+'</span>';}});
-  sel.innerHTML=opts||'<option value="iv">IV & IM Infusion</option>';
-  fl.innerHTML=pills;
+// ---- filters / view ----
+function fillFilters(){var L=lines(),fl=document.getElementById('filters');
+  var pills='<span class="lpill '+(filterLine==='all'?'on':'')+'" onclick="setFilter(\'all\')">All</span>';
+  ['iv','peptides','bhrt'].forEach(function(k){if(L[k])pills+='<span class="lpill '+(filterLine===k?'on':'')+'" onclick="setFilter(\''+k+'\')">'+LINEMETA[k]+'</span>';});
+  fl.innerHTML=pills;}
+function setFilter(k){filterLine=k;fillFilters();render();}
+function setView(v){view=v;['today','week','upcoming'].forEach(function(t){document.getElementById('tab'+(t==='upcoming'?'Up':t.charAt(0).toUpperCase()+t.slice(1))).classList.toggle('on',t===v);});
+  document.getElementById('wknav').style.display=(v==='week'?'flex':'none');render();}
+function weekNav(delta){if(delta===0)weekStart=mondayOf(new Date());else weekStart=new Date(weekStart.getTime()+delta*7*86400000);render();}
+
+function apptsFor(ds){return load().filter(function(x){return x.status!=='cancelled'&&x.date===ds&&(filterLine==='all'||x.line===filterLine);}).sort(function(a,b){return a.time.localeCompare(b.time);});}
+function apptRow(x){
+  return '<div class="appt"><span class="tm">'+fmtHour(x.time)+'</span><div class="who"><b>'+esc(x.name)+'</b> <span class="muted" style="font-family:ui-monospace,Menlo,monospace;font-size:.68rem">'+esc(x.enc)+'</span>'+
+    '<div class="meta"><span class="lchip">'+lineLabel(x.line)+'</span>'+esc(x.plan||'—')+(x.sessionTotal>1?' · <span class="sess">'+x.sessionN+'/'+x.sessionTotal+'</span>':'')+(x.provider?' · '+esc(x.provider):'')+'</div></div>'+
+    (x.status==='arrived'?'<span class="lchip" style="background:#0e2a1d;color:var(--green);border-color:#1c5238">arrived</span>':'<button class="btn-s" onclick="setStatus(\''+x.id+'\',\'arrived\')">Check in</button>')+
+    ' <button class="btn-s" onclick="setStatus(\''+x.id+'\',\'cancelled\')">✕</button></div>';
 }
-function setFilter(k){filterLine=k;fillLineSelect();renderAppts();}
-// Hourly slots, 8am-8pm. Booking is NOT capacity-enforced — clients book any time
-// (IV runs as a group session). The count is shown for awareness only.
-var HOURS=['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'];
-function fmtHour(h){var p=(h||'').split(':'),H=+p[0]||0,ap=H>=12?'PM':'AM',h12=H%12||12;return h12+':'+(p[1]||'00')+' '+ap;}
+function setStatus(id,s){var a=load();a.forEach(function(x){if(x.id===id)x.status=s;});save(a);render();}
+function render(){
+  var el=document.getElementById('view');
+  if(view==='today'){var a=apptsFor(todayStr());
+    el.innerHTML='<div class="fsec"><div class="fsec-h">📅 Today · '+fmtDay(todayStr())+'</div>'+(a.length?a.map(apptRow).join(''):'<div class="empty">No appointments today.</div>')+'</div>';return;}
+  if(view==='week'){
+    document.getElementById('wklabel').textContent=fmtDay(ymd(weekStart)).replace(/^\w+, /,'')+' – '+fmtDay(ymd(new Date(weekStart.getTime()+6*86400000))).replace(/^\w+, /,'');
+    var cols='';for(var i=0;i<7;i++){var d=new Date(weekStart.getTime()+i*86400000),ds=ymd(d),isT=ds===todayStr(),a=apptsFor(ds);
+      cols+='<div class="wday'+(isT?' today':'')+'"><div class="wh"><span>'+d.toLocaleDateString(undefined,{weekday:'short'})+' '+d.getDate()+'</span><span class="add" title="Book" onclick="openBook(\''+ds+'\')">＋</span></div>'+
+        (a.length?a.map(function(x){return '<div class="wappt" onclick="openBook(\''+ds+'\')"><span class="wt">'+fmtHour(x.time).replace(' ','')+'</span> '+esc(x.name)+' <span class="lchip">'+lineLabel(x.line)+'</span></div>';}).join(''):'<div style="font-size:.64rem;color:var(--muted)">—</div>')+'</div>';}
+    el.innerHTML='<div class="week">'+cols+'</div>';return;}
+  // upcoming
+  var all=load().filter(function(x){return x.status!=='cancelled'&&(filterLine==='all'||x.line===filterLine)&&x.date>=todayStr();}).sort(function(a,b){return (a.date+a.time).localeCompare(b.date+b.time);});
+  if(!all.length){el.innerHTML='<div class="fsec"><div class="empty">No upcoming appointments.</div></div>';return;}
+  var days={},order=[];all.forEach(function(x){if(!days[x.date]){days[x.date]=[];order.push(x.date);}days[x.date].push(x);});
+  el.innerHTML='<div class="fsec">'+order.map(function(dy){return '<div class="daygroup"><div class="dayhdr">'+fmtDay(dy)+(dy===todayStr()?' · Today':'')+'</div>'+days[dy].map(apptRow).join('')+'</div>';}).join('')+'</div>';
+}
+
+// ---- booking modal ----
 function fillHours(){document.getElementById('aTime').innerHTML=HOURS.map(function(h){return '<option value="'+h+'">'+fmtHour(h)+'</option>';}).join('');}
+function fillLineSel(){var L=lines(),opts='';['iv','peptides','bhrt'].forEach(function(k){if(L[k])opts+='<option value="'+k+'">'+LINEMETA[k]+'</option>';});document.getElementById('aLine').innerHTML=opts||'<option value="iv">IV & IM Infusion</option>';}
+function openBook(date){fillLineSel();fillHours();document.getElementById('aName').value='';document.getElementById('aPlan').value='';document.getElementById('aProv').value='';document.getElementById('aSessions').value='1';document.getElementById('bookMsg').textContent='';
+  document.getElementById('aDate').value=date||todayStr();updateAvail();document.getElementById('ov').classList.add('show');setTimeout(function(){document.getElementById('aName').focus();},50);}
+function closeM(){document.getElementById('ov').classList.remove('show');}
 function used(line,date,hour){return load().filter(function(x){return x.status!=='cancelled'&&x.line===line&&x.date===date&&x.time===hour;}).length;}
-function ymd(d){return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
-function onLineDate(){updateAvail();}
-function updateAvail(){
-  var line=val('aLine'),date=val('aDate'),hour=val('aTime'),el=document.getElementById('avail');
-  if(!line||!date||!hour){el.textContent='';return;}
-  var u=used(line,date,hour);
-  el.innerHTML='<span style="color:var(--muted)">'+(u?u+' already booked':'open')+' at '+fmtHour(hour)+'</span>'+(line==='iv'?' · IV runs as a group session — book freely.':'');
-}
+function updateAvail(){var line=val('aLine'),date=val('aDate'),hour=val('aTime'),el=document.getElementById('avail');
+  if(!line||!date||!hour){el.textContent='';return;}var u=used(line,date,hour);
+  el.innerHTML='<span style="color:var(--muted)">'+(u?u+' already booked':'open')+' at '+fmtHour(hour)+'</span>'+(line==='iv'?' · IV is a group session':'');}
 function book(){
   var name=val('aName').trim(),m=document.getElementById('bookMsg');
   if(!name){m.style.color='var(--gold)';m.textContent='Client name required.';return;}
-  var date=val('aDate'),time=val('aTime');
-  if(!date||!time){m.style.color='var(--gold)';m.textContent='Pick a date and hour.';return;}
-  var n=parseInt(val('aSessions'),10)||1, line=val('aLine'), plan=val('aPlan').trim(), prov=val('aProv').trim();
-  // no capacity gate — clients book any time 8am-8pm (group IV)
-  var d0=new Date(date+'T'+time+':00'), enc=encId(name), appts=load();
-  for(var i=0;i<n;i++){var ds=ymd(new Date(d0.getTime()+i*7*24*3600*1000));
-    appts.push({id:'a'+Date.now().toString(36)+i,name:name,enc:enc,line:line,plan:plan,
-      date:ds,time:time,sessionN:i+1,sessionTotal:n,provider:prov,status:'booked',createdAt:Date.now()});}
-  save(appts);
-  document.getElementById('aName').value='';document.getElementById('aPlan').value='';document.getElementById('aProv').value='';
-  m.style.color='var(--green)';m.textContent='✓ Booked '+n+' session'+(n>1?'s':'')+' · '+enc;
-  renderAppts();updateAvail();
-}
-function setStatus(id,s){var a=load();a.forEach(function(x){if(x.id===id)x.status=s;});save(a);renderAppts();}
-function fmtDay(ymd){var p=ymd.split('-');var d=new Date(p[0],p[1]-1,p[2]);return d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});}
-function renderAppts(){
-  var a=load().filter(function(x){return x.status!=='cancelled'&&(filterLine==='all'||x.line===filterLine);});
-  var todayStr=new Date().toISOString().slice(0,10);
-  a=a.filter(function(x){return x.date>=todayStr;}).sort(function(x,y){return (x.date+x.time).localeCompare(y.date+y.time);});
-  if(!a.length){document.getElementById('appts').innerHTML='<div class="muted" style="font-size:.8rem;padding:10px 0">No upcoming appointments.</div>';return;}
-  var days={},order=[];
-  a.forEach(function(x){if(!days[x.date]){days[x.date]=[];order.push(x.date);}days[x.date].push(x);});
-  document.getElementById('appts').innerHTML=order.map(function(dy){
-    return '<div class="daygroup"><div class="dayhdr">'+fmtDay(dy)+(dy===todayStr?' · Today':'')+'</div>'+
-      days[dy].map(function(x){
-        return '<div class="appt"><span class="tm">'+esc(x.time)+'</span><div class="who"><b>'+esc(x.name)+'</b> <span class="muted" style="font-family:ui-monospace,Menlo,monospace;font-size:.7rem">'+esc(x.enc)+'</span>'+
-          '<div class="meta"><span class="lchip">'+lineLabel(x.line)+'</span>'+esc(x.plan||'—')+(x.sessionTotal>1?' · <span class="sess">session '+x.sessionN+'/'+x.sessionTotal+'</span>':'')+(x.provider?' · '+esc(x.provider):'')+'</div></div>'+
-          (x.status==='arrived'?'<span class="lchip" style="background:#0e2a1d;color:var(--green);border-color:#1c5238">arrived</span>':'<button class="btn-s" onclick="setStatus(\''+x.id+'\',\'arrived\')">Check in</button>')+
-          ' <button class="btn-s" onclick="setStatus(\''+x.id+'\',\'cancelled\')">✕</button></div>';
-      }).join('')+'</div>';
-  }).join('');
+  var date=val('aDate'),time=val('aTime');if(!date||!time){m.style.color='var(--gold)';m.textContent='Pick a date and hour.';return;}
+  var n=parseInt(val('aSessions'),10)||1,line=val('aLine'),plan=val('aPlan').trim(),prov=val('aProv').trim();
+  var d0=new Date(date+'T'+time+':00'),enc=encId(name),appts=load();
+  for(var i=0;i<n;i++){var ds=ymd(new Date(d0.getTime()+i*7*86400000));
+    appts.push({id:'a'+Date.now().toString(36)+i,name:name,enc:enc,line:line,plan:plan,date:ds,time:time,sessionN:i+1,sessionTotal:n,provider:prov,status:'booked',createdAt:Date.now()});}
+  save(appts);closeM();render();
 }
 function tick(){renderChairs();}
-fillHours();fillLineSelect();renderAppts();renderChairs();
-document.getElementById('aDate').value=new Date().toISOString().slice(0,10);
-updateAvail();
+fillFilters();renderChairs();render();
 setInterval(tick,5000);
-window.addEventListener('storage',function(e){if(e.key==='allyos_chairside_v1')renderChairs();if(e.key===SKEY)renderAppts();});
+window.addEventListener('storage',function(e){if(e.key==='allyos_chairside_v1')renderChairs();if(e.key===SKEY)render();});
 </script>
 </body></html>
