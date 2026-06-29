@@ -35,6 +35,10 @@ window.AllyOSAuth = (function () {
     // We narrow this back to IV-only later (set lines to {iv:true,peptides:false,bhrt:false}).
     { email: 'lemus@allyos.app',  password: 'pilot', name: 'Lemus NP', credential: 'NP', role: 'provider',
       clinic: 'Lemus Natural Medicine', md_of_record: true, pilot: true,
+      lines: { iv: true, peptides: true, bhrt: true } },
+    // --- Dr. Falcon — owner / Medical Director login (sees the Clinic Network cockpit + AllyAuditPro). ---
+    { email: 'falcon@renuviamd.com', password: 'md', name: 'Falcon', credential: 'MD', role: 'provider',
+      clinic: 'RenuviaMD — Medical Director', md_of_record: true, md_audit: true, pilot: true,
       lines: { iv: true, peptides: true, bhrt: true } }
   ];
   // Clinic context (in Supabase this is a row in `clinics`). md_of_record = is RenuviaMD the MD here?
