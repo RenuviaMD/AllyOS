@@ -1,0 +1,7 @@
+{
+  "date": null,
+  "agent": "ops-audit",
+  "status": "pending",
+  "detail": "Clinical-content auditor is wired and scheduled (daily 04:00 UTC + Run now). Awaiting first run: add the ANTHROPIC_API_KEY GitHub Actions secret, then trigger Run now.",
+  "modules": []
+}
