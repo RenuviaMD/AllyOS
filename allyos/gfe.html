@@ -64,6 +64,17 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
 .notepaper .nsign{border-top:1px solid #e3ecea;margin-top:12px;padding-top:10px}
 .notepaper .stamp{color:#0c7a4d;font-weight:700}
 @media print{body *{visibility:hidden!important}#repDoc,#repDoc *{visibility:visible!important}#repDoc{position:absolute;left:0;top:0;width:100%;padding:0}.noprint{display:none!important}}
+/* full-page sectioned GFE form (AHCA-style) */
+#formview{display:none}
+.fhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin:6px 0 16px}
+.fhead .ftitle{font-family:var(--fdisp);font-size:1.5rem}
+.fhead .fmeta{color:var(--muted);font-size:.85rem;margin-top:3px}.fhead .fmeta b{color:var(--ink)}
+.fsec{background:linear-gradient(180deg,#10202f,#0b1622);border:1px solid var(--line);border-radius:14px;padding:15px 18px;margin-bottom:13px}
+.fsec-h{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:9px;font-weight:700}
+.fsec-h .n{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:6px;background:rgba(40,194,184,.12);border:1px solid var(--line2);color:var(--teal);font-size:.7rem}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+.fgrid.v5{grid-template-columns:repeat(5,1fr)}
+@media(max-width:640px){.fgrid,.fgrid.v5{grid-template-columns:1fr 1fr}}
 </style></head>
 <body class="allyos"><div class="wrap">
   <div class="top">
@@ -72,6 +83,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
   </div>
   <div class="sub">Provider worklist for the <b>Good Faith Exam</b> (FORM-INTAKE-GFE-01). Performed &amp; signed by <b>MD / DO / NP / PA</b> — independent of the nursing station. Clearing a GFE here feeds the patient's card and the read-only report popup at chairside. <b>Adults ≥ 18 · wellness scope only.</b></div>
 
+  <div id="dashview">
   <div class="stats" id="stats"></div>
   <div class="ctrls noprint">
     <input id="q" placeholder="Search patient / initials…" oninput="render()">
@@ -85,6 +97,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
   </div>
   <div style="overflow:auto"><table id="tbl"></table></div>
   <div class="disc">GFE is a provider clinical-judgment act — performed &amp; signed by an <b>MD/DO or APP (NP/PA)</b>. This module is the provider's workspace; the nursing station shows status only and opens the finished report read-only. AllyOS is advisory decision-support; the provider owns every determination and signature. PHI stays on this device. © <span id="yr"></span> RenuviaMD® PLLC.</div>
+  </div>
+  <div id="formview"></div>
 </div>
 <div class="overlay" id="ov"><div class="modal" id="md"></div></div>
 <script>
@@ -104,6 +118,11 @@ function fmtDob(d){if(!d)return'';var p=(''+d).split('-');return p.length===3?(p
 function fmtClock(d){var h=d.getHours(),m=d.getMinutes(),ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+(m<10?'0':'')+m+' '+ap;}
 function nowStamp(){return fmtDob(todayISO())+' '+fmtClock(new Date());}
 function dispName(p){var f=p.first||((p.name||'').split(' ')[0]||'');var l=p.last||((p.name||'').split(' ').slice(1).join(' ')||'');return f+(l?(' '+l.charAt(0)+'.'):'');}
+function initialsOf(p){var f=(p.first||((p.name||'').split(' ')[0]||''));var l=(p.last||((p.name||'').split(' ').slice(1).join(' ')||''));var s=((f.charAt(0)||'')+(l.charAt(0)||'')).toUpperCase();return s||'XX';}
+// De-identified Encounter ID = client initials + 4 digits (e.g. JX-4821). PHI-free key that
+// ties this record to the clinic's local name map; safe to show in cockpit/audit. Stable per patient.
+function encId(p){if(p&&!p.encId){p.encId=initialsOf(p)+'-'+(''+Math.floor(1000+Math.random()*9000));}return p?p.encId:'';}
+function ensureEncIds(){var q=loadQueue(),ch=false;q.forEach(function(p){if(!p.encId){encId(p);ch=true;}});if(ch)saveQueue(q);}
 function ageOf(p){if(!p.dob)return null;var d=new Date(p.dob+'T00:00:00'),n=new Date();var a=n.getFullYear()-d.getFullYear();if(n.getMonth()<d.getMonth()||(n.getMonth()===d.getMonth()&&n.getDate()<d.getDate()))a--;return a>=0&&a<130?a:null;}
 function gfeState(p){if(!p.gfe)return{k:'pending',label:'GFE NEEDED'};if(p.gfeDate){var d=new Date(p.gfeDate+'T00:00:00'),n=new Date(),mo=(n-d)/(1000*60*60*24*30.44);if(mo>12)return{k:'expired',label:'GFE EXPIRED'};}return{k:'current',label:'GFE current'};}
 function stackByCode(c){return STACKS[c]||null;}
@@ -119,6 +138,7 @@ function pchip(st){return st.k==='pending'?'<span class="pchip pend">Pending</sp
 function render(){
   var q=(val('q')||'').toLowerCase(),f=val('filter');
   var queue=loadQueue();
+  var _ch=false;queue.forEach(function(p){if(!p.encId){encId(p);_ch=true;}});if(_ch)saveQueue(queue);
   var list=queue.map(function(p,i){return {p:p,i:i,seated:false};});
   var rows=list.filter(function(o){var st=gfeState(o.p);
     if(f!=='all'&&st.k!==f)return false;
@@ -131,7 +151,7 @@ function render(){
   var body=rows.length?rows.map(function(o){var p=o.p,st=gfeState(p),s=stackByCode(p.proto);
     var act=st.k==='current'?'<button class="btn-s" onclick="viewReport('+o.i+')">View report</button> <button class="btn-s" onclick="openForm('+o.i+')">Re-do</button>':
       '<button class="btn-s go" onclick="openForm('+o.i+')">Perform GFE →</button>'+(p.gfeDoc?' <button class="btn-s" onclick="viewReport('+o.i+')">View</button>':'');
-    return '<tr><td><b>'+esc(dispName(p))+'</b></td><td>'+(ageOf(p)!=null?ageOf(p)+'y ':'')+esc(p.sex||'')+'</td>'+
+    return '<tr><td><b>'+esc(dispName(p))+'</b><div class="muted" style="font-size:.64rem;font-family:var(--fmono,monospace);letter-spacing:.03em">'+esc(encId(p))+'</div></td><td>'+(ageOf(p)!=null?ageOf(p)+'y ':'')+esc(p.sex||'')+'</td>'+
       '<td>'+esc(p.proto==='ALACARTE'?'Micronutrient Infusion':p.proto||'—')+(s?' · '+esc(s.title):'')+'</td>'+
       '<td>'+pchip(st)+'</td><td>'+(p.gfeDate?esc(fmtDob(p.gfeDate)):'<span class="muted">—</span>')+'</td>'+
       '<td style="text-align:right">'+act+'</td></tr>';}).join(''):'<tr><td colspan="6" class="muted" style="padding:22px;text-align:center">No patients'+(f!=='all'?' ('+f+')':'')+'. Add a patient or have the front desk register them at the station.</td></tr>';
@@ -153,27 +173,34 @@ function addPatient(){var f=val('aFirst').trim(),l=val('aLast').trim();if(!f){al
   var q=loadQueue();q.push({id:pid(),first:f,last:l,name:(f+' '+l).trim(),dob:val('aDob'),sex:val('aSex'),proto:val('aProto'),alerts:[],gfe:false,gfeDate:'',consent:false});
   saveQueue(q);closeM();render();}
 
-// ---- the GFE exam form ----
+// ---- the GFE exam form (full-page, sectioned — AHCA-style) ----
 function openForm(i){var q=loadQueue(),p=q[i];if(!p)return;var s=stackByCode(p.proto),age=ageOf(p),d=p.gfeDoc||{},v=d.vitals||{};
+  if(!p.encId){encId(p);saveQueue(q);}
+  var planLbl=esc(p.proto==='ALACARTE'?'Micronutrient Infusion':p.proto)+(s?' — '+esc(s.title):'');
   var conds=ALERT_CATALOG.map(function(c){var on=(p.alerts||[]).indexOf(c)>=0;return '<label class="gchk"><input type="checkbox" class="gfecond" value="'+esc(c)+'" '+(on?'checked':'')+'> '+esc(c)+'</label>';}).join('');
-  document.getElementById('md').innerHTML='<button class="x" onclick="closeM()">×</button>'+
-    '<h3>Good Faith Exam</h3><div class="sub" style="margin:2px 0">'+esc(dispName(p))+' · '+(age!=null?age+'y ':'')+esc(p.sex||'')+' · plan: <b>'+esc(p.proto==='ALACARTE'?'Micronutrient Infusion':p.proto)+(s?' — '+esc(s.title):'')+'</b></div>'+
-    '<label class="glab">Reason / wellness goal</label><input id="gGoal" value="'+esc(d.goal||'')+'" placeholder="e.g. energy · hydration · recovery">'+
-    '<label class="glab">Section B — conditions screen (check all that apply)</label><div class="gconds">'+conds+'</div>'+
-    '<div class="frow" style="margin-top:8px"><div><label>Allergies</label><input id="gAllg" value="'+esc(d.allergies||'')+'" placeholder="NKDA or list"></div><div><label>Current meds</label><input id="gMeds" value="'+esc(d.meds||'')+'" placeholder="incl. anticoagulants"></div></div>'+
-    '<label class="glab">Vitals</label><div class="frow"><div><label>BP</label><input id="gBP" inputmode="numeric" oninput="bpMask(this)" value="'+esc(v.bp||'')+'" placeholder="118/76"></div><div><label>HR</label><input id="gHR" value="'+esc(v.hr||'')+'" placeholder="70"></div><div><label>SpO2</label><input id="gO2" value="'+esc(v.o2||'')+'" placeholder="98"></div><div><label>Temp</label><input id="gT" value="'+esc(v.t||'')+'" placeholder="98.4"></div><div><label>Wt lb</label><input id="gWt" value="'+esc(v.wt||'')+'"></div></div>'+
-    '<label class="gchk" style="margin-top:6px"><input type="checkbox" id="gExam" checked> Focused exam: well-appearing, no acute distress, no red-flag symptom; IV access adequate.</label>'+
-    '<label class="gchk"><input type="checkbox" id="gScreen" checked> Allergies/meds, pregnancy/G6PD/renal/cardiac reviewed against the selected protocol — no contraindication identified.</label>'+
-    '<label class="glab">Eligibility determination</label><div class="gelig">'+
+  document.getElementById('formview').innerHTML=
+    '<div class="fhead"><div><div class="ftitle">Good Faith Exam <span style="font-size:.82rem;font-family:var(--fmono,monospace);color:var(--teal);border:1px solid var(--line2);border-radius:7px;padding:2px 8px;vertical-align:middle;margin-left:6px">'+esc(encId(p))+'</span></div><div class="fmeta">'+esc(dispName(p))+' · '+(age!=null?age+'y ':'')+esc(p.sex||'')+' · plan: <b>'+planLbl+'</b></div></div>'+
+      '<button class="btn ghost" onclick="backToDash()">← Worklist</button></div>'+
+    '<div class="fsec"><div class="fsec-h"><span class="n">A</span> Visit &amp; wellness goal</div>'+
+      '<label>Reason / wellness goal</label><input id="gGoal" value="'+esc(d.goal||'')+'" placeholder="e.g. energy · hydration · recovery"></div>'+
+    '<div class="fsec"><div class="fsec-h"><span class="n">B</span> Conditions screen — check all that apply</div><div class="gconds">'+conds+'</div></div>'+
+    '<div class="fsec"><div class="fsec-h"><span class="n">C</span> History</div><div class="fgrid"><div><label>Allergies</label><input id="gAllg" value="'+esc(d.allergies||'')+'" placeholder="NKDA or list"></div><div><label>Current meds</label><input id="gMeds" value="'+esc(d.meds||'')+'" placeholder="incl. anticoagulants"></div></div></div>'+
+    '<div class="fsec"><div class="fsec-h"><span class="n">D</span> Vitals &amp; focused exam</div><div class="fgrid v5"><div><label>BP</label><input id="gBP" inputmode="numeric" oninput="bpMask(this)" value="'+esc(v.bp||'')+'" placeholder="118/76"></div><div><label>HR</label><input id="gHR" value="'+esc(v.hr||'')+'" placeholder="70"></div><div><label>SpO2</label><input id="gO2" value="'+esc(v.o2||'')+'" placeholder="98"></div><div><label>Temp</label><input id="gT" value="'+esc(v.t||'')+'" placeholder="98.4"></div><div><label>Wt lb</label><input id="gWt" value="'+esc(v.wt||'')+'"></div></div>'+
+      '<label class="gchk" style="margin-top:11px"><input type="checkbox" id="gExam" checked> Focused exam: well-appearing, no acute distress, no red-flag symptom; IV access adequate.</label>'+
+      '<label class="gchk"><input type="checkbox" id="gScreen" checked> Allergies/meds, pregnancy/G6PD/renal/cardiac reviewed against the selected protocol — no contraindication identified.</label></div>'+
+    '<div class="fsec"><div class="fsec-h"><span class="n">E</span> Determination &amp; signature</div><div class="gelig">'+
       '<label class="gradio"><input type="radio" name="gElig" value="eligible" checked> ✓ Eligible — cleared for wellness IV/IM</label>'+
       '<label class="gradio"><input type="radio" name="gElig" value="defer"> ⏸ Defer — needs more info / modify plan</label>'+
       '<label class="gradio"><input type="radio" name="gElig" value="no"> ⛔ Not eligible today</label></div>'+
-    '<div id="gNoteWrap" style="display:none"><textarea id="gNote" rows="2"></textarea></div>'+
-    '<div class="frow" style="margin-top:8px"><div><label>Signing provider <span style="color:#5b6b72;font-weight:400">(GFE — MD/DO or APP)</span></label>'+
-      '<select id="gProv">'+(window.AllyOSCred?AllyOSCred.options(AllyOSCred.DOC.GFE,esc(d.provider||'')):'<option value="">— select —</option>')+'</select></div></div>'+
-    '<button class="btn" style="width:100%;margin-top:10px" onclick="signForm('+i+')">Sign GFE</button>';
-  show();
+      '<div id="gNoteWrap" style="display:none"><textarea id="gNote" rows="2"></textarea></div>'+
+      '<div class="fgrid" style="margin-top:11px"><div><label>Signing provider <span style="color:#5b6b72;font-weight:400">(GFE — MD/DO or APP)</span></label>'+
+        '<select id="gProv">'+(window.AllyOSCred?AllyOSCred.options(AllyOSCred.DOC.GFE,esc(d.provider||'')):'<option value="">— select —</option>')+'</select></div>'+
+        '<div style="display:flex;align-items:flex-end"><button class="btn" style="width:100%" onclick="signForm('+i+')">Sign GFE</button></div></div></div>';
+  document.getElementById('dashview').style.display='none';
+  document.getElementById('formview').style.display='block';
+  window.scrollTo(0,0);
 }
+function backToDash(){document.getElementById('formview').style.display='none';document.getElementById('formview').innerHTML='';document.getElementById('dashview').style.display='';render();}
 function signForm(i){var q=loadQueue(),p=q[i];if(!p)return;
   var elig=(document.querySelector('input[name=gElig]:checked')||{}).value||'eligible';
   var conds=[];Array.prototype.forEach.call(document.querySelectorAll('.gfecond:checked'),function(c){conds.push(c.value);});
@@ -185,8 +212,9 @@ function signForm(i){var q=loadQueue(),p=q[i];if(!p)return;
     eligibility:elig,note:val('gNote'),provider:prov,stamp:nowStamp(),proto:p.proto};
   if(elig==='eligible'){p.gfe=true;p.gfeDate=todayISO();}else{p.gfe=false;p.gfeDate='';}
   q[i]=p;saveQueue(q);
+  backToDash();
   if(elig==='eligible')viewReport(i);
-  else{document.getElementById('md').innerHTML='<button class="x" onclick="closeM()">×</button><h3 style="color:var(--gold)">GFE recorded — '+(elig==='defer'?'deferred':'not eligible')+'</h3><div class="sub" style="margin-top:6px">'+esc(dispName(p))+' is <b>not cleared</b> for infusion; the determination is saved on the chart and the station will show it as pending.</div><button class="btn ghost" style="width:100%;margin-top:10px" onclick="closeM()">Close</button>';render();}
+  else{document.getElementById('md').innerHTML='<button class="x" onclick="closeM()">×</button><h3 style="color:var(--gold)">GFE recorded — '+(elig==='defer'?'deferred':'not eligible')+'</h3><div class="sub" style="margin-top:6px">'+esc(dispName(p))+' is <b>not cleared</b> for infusion; the determination is saved on the chart and the station will show it as pending.</div><button class="btn ghost" style="width:100%;margin-top:10px" onclick="closeM()">Close</button>';show();}
 }
 function viewReport(i){var q=loadQueue(),p=q[i];if(!p||!p.gfeDoc){alert('No GFE on file.');return;}
   document.getElementById('md').innerHTML=composeGFE(p)+
@@ -197,7 +225,7 @@ function composeGFE(p){var d=p.gfeDoc||{},age=ageOf(p),s=stackByCode(p.proto),v=
   var conds=(p.alerts||[]).length?(p.alerts||[]).map(esc).join(', '):'none reported';
   var eligLabel=d.eligibility==='eligible'?'ELIGIBLE — cleared for wellness IV/IM':(d.eligibility==='defer'?'DEFERRED — not cleared today':'NOT ELIGIBLE today');
   return '<div class="notepaper" id="repDoc">'+
-    '<div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h2>Good Faith Exam</h2><div class="nmeta">RenuviaMD® · AllyOS · FORM-INTAKE-GFE-01 · '+esc(d.stamp||nowStamp())+'</div></div><div style="font-size:.66rem;color:#5b6b72;text-align:right">Adult wellness IV/IM<br>Internal clinical record</div></div>'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h2>Good Faith Exam</h2><div class="nmeta">RenuviaMD® · AllyOS · FORM-INTAKE-GFE-01 · '+esc(d.stamp||nowStamp())+'</div></div><div style="font-size:.66rem;color:#5b6b72;text-align:right">Encounter <b style="color:#0e3a40">'+esc(encId(p))+'</b><br>Adult wellness IV/IM · Internal clinical record</div></div>'+
     '<div class="nsec"><div class="nrow"><span class="nk">Patient</span><span>'+esc(dispName(p))+' · '+(age!=null?age+'y':'—')+' '+esc(p.sex||'')+(p.dob?(' · DOB '+esc(fmtDob(p.dob))):'')+'</span></div>'+
       '<div class="nrow"><span class="nk">Visit goal</span><span>'+esc(d.goal||'Wellness optimization')+'</span></div>'+
       '<div class="nrow"><span class="nk">Today\'s plan</span><span>'+esc(p.proto==='ALACARTE'?'Micronutrient Infusion':p.proto)+(s?' — '+esc(s.title):'')+'</span></div></div>'+

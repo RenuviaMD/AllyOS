@@ -322,7 +322,9 @@ function load(){try{var s=JSON.parse(localStorage.getItem(KEY)||'{}');QUEUE=s.q|
     if(s.ally&&s.ally.length){ALLY_HIST=s.ally;}
   }catch(e){QUEUE=seedQueue();}
   // heal duplicate / missing ids saved by older builds (performance.now() could collide)
-  var seen={},fixed=false;QUEUE.forEach(function(p){if(!p.id||seen[p.id]){p.id=pid();fixed=true;}seen[p.id]=1;});if(fixed)save();
+  var seen={},fixed=false;QUEUE.forEach(function(p){if(!p.id||seen[p.id]){p.id=pid();fixed=true;}seen[p.id]=1;});
+  // backfill the shared de-identified Encounter ID (same value the GFE page shows)
+  QUEUE.forEach(function(p){if(!p.encId){encId(p);fixed=true;}});if(fixed)save();
   // resume live countdowns for chairs that were mid-infusion when the page was unloaded (refresh / tablet sleep / nav)
   CHAIRS.forEach(function(c,i){if(c&&c.state==='infusing'&&c.remain>0)runChair(i,true);});}
 // serialize a chair for on-device persistence — strips the live timer handle; stores an
@@ -351,6 +353,10 @@ var ALERT_CATALOG=['Diabetes','High blood pressure','Heart disease / stroke','Ki
 // map each condition to the screening-map condition key
 var ALERT_TO_KEY={'Diabetes':'diabetes','High blood pressure':'htn','Heart disease / stroke':'cardiac','Kidney disease / dialysis':'renal','Liver disease':'hepatic','Asthma / COPD':'respiratory','Active cancer / treatment':'cancer','Pregnancy / breastfeeding':'pregnancy_lactation','Bleeding disorder / blood thinners':'bleeding_anticoag','G6PD deficiency':'g6pd','Recent hospitalization / surgery <30d':'recent_procedure_30d','Severe allergy / anaphylaxis hx':'allergy'};
 function dispName(p){var f=p.first||((p.name||'').split(' ')[0]||'');var l=p.last||((p.name||'').split(' ').slice(1).join(' ')||'');return f+(l?(' '+l.charAt(0)+'.'):'');}
+function initialsOf(p){var f=(p.first||((p.name||'').split(' ')[0]||''));var l=(p.last||((p.name||'').split(' ').slice(1).join(' ')||''));var s=((f.charAt(0)||'')+(l.charAt(0)||'')).toUpperCase();return s||'XX';}
+// De-identified Encounter ID = initials + 4 digits (e.g. JX-4821). SHARED with the GFE page via
+// the same patient object in allyos_chairside_v1 — assigned once, identical everywhere. PHI-free.
+function encId(p){if(p&&!p.encId){p.encId=initialsOf(p)+'-'+(''+Math.floor(1000+Math.random()*9000));}return p?p.encId:'';}
 function ageOf(p){if(!p.dob)return null;var d=new Date(p.dob+'T00:00:00'),n=new Date();var a=n.getFullYear()-d.getFullYear();if(n.getMonth()<d.getMonth()||(n.getMonth()===d.getMonth()&&n.getDate()<d.getDate()))a--;return a>=0&&a<130?a:null;}
 function gfeState(p){if(!p.gfe)return{k:'missing',label:'GFE NEEDED'};if(p.gfeDate){var d=new Date(p.gfeDate+'T00:00:00'),n=new Date(),mo=(n-d)/(1000*60*60*24*30.44);if(mo>12)return{k:'expired',label:'GFE EXPIRED'};}return{k:'done',label:'GFE current'};}
 // Status reflects the GATES only (GFE + consent). A noted health condition is
@@ -391,7 +397,8 @@ function intakeAge(){var v=val('iDob');if(!v)return'';var p={dob:v};var a=ageOf(
 function saveIntake(){var f=val('iFirst').trim(),l=val('iLast').trim();if(!f){alert('First name required.');return;}
   var alerts=[];Array.prototype.forEach.call(document.querySelectorAll('.ialert:checked'),function(c){alerts.push(c.value);});
   var gd=val('iGfeDate');
-  QUEUE.push({id:pid(),first:f,last:l,name:(f+' '+l).trim(),dob:val('iDob'),sex:val('iSex'),proto:val('iProto'),alerts:alerts,gfe:!!gd,gfeDate:gd,consent:false});
+  var np={id:pid(),first:f,last:l,name:(f+' '+l).trim(),dob:val('iDob'),sex:val('iSex'),proto:val('iProto'),alerts:alerts,gfe:!!gd,gfeDate:gd,consent:false};
+  encId(np);QUEUE.push(np);
   save();closeModal();renderQueue();}
 function matchSearch(p,q){if(!q)return true;q=q.toLowerCase();return (p.name||'').toLowerCase().indexOf(q)>=0||(p.proto||'').toLowerCase().indexOf(q)>=0;}
 function renderQueue(){var el=document.getElementById('queue');var q=(document.getElementById('search')||{}).value||'';
@@ -411,7 +418,7 @@ function pcardHTML(p){
   // COLLAPSED = compact (name + status + age/sex). Details show only when open.
   var h='<div class="pcard s-'+st.k+(p.staged?' staged':'')+(sel?' sel open':'')+'" onclick="selectPatient(\''+p.id+'\')">'+
     '<div class="ptop"><span class="nm">'+esc(dispName(p))+'</span><span class="spill s-'+st.k+'">'+st.label+'</span><span class="chev">'+(sel?'▲':'▼')+'</span></div>'+
-    '<div class="pmeta">'+(age!=null?age+'y':'—')+' · '+(p.sex||'—')+(sel&&p.dob?(' · DOB '+fmtDob(p.dob)):'')+'</div>'+
+    '<div class="pmeta"><span style="font-family:ui-monospace,Menlo,monospace;color:var(--teal)">'+esc(encId(p))+'</span> · '+(age!=null?age+'y':'—')+' · '+(p.sex||'—')+(sel&&p.dob?(' · DOB '+fmtDob(p.dob)):'')+'</div>'+
     (p.staged&&p.prep?'<div class="stagedbadge">⏸ Prepared · '+esc(txLabel(p))+' · '+(p.prep.items.length)+' items — needs a chair</div>':'');
   if(sel){
     h+='<div class="pexpand" onclick="event.stopPropagation()">'+
