@@ -79,7 +79,15 @@ td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
       <div><div class="tl">RN-run IV model (GFE done by the MD)</div><div class="td">The floor is RN-run with no on-site GFE provider. Combined with the toggle above, the GFE tab is hidden for this clinic and the GFE is yours. If the clinic has an APP/MD who does the GFE, leave this off.</div></div>
       <label class="switch"><input type="checkbox" id="tRn" onchange="syncNote()"><span class="slider"></span></label>
     </div>
-    <div id="gfeNote" class="gfenote"></div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
+      <label id="mdNpiLabel">Medical Director — credential of record</label>
+      <div class="fgrid" style="grid-template-columns:1fr 1.2fr;align-items:end">
+        <div><label style="font-size:.64rem">State license</label><input id="mdLic" placeholder="e.g. FL ME 84789"></div>
+        <div><label style="font-size:.64rem">NPI <span style="text-transform:none;letter-spacing:0">(optional)</span></label><div style="display:flex;gap:6px"><input id="mdNpi" inputmode="numeric" maxlength="10" placeholder="10 digits"><button class="btn ghost" id="mdNpiBtn" onclick="verifyMdNpi()" style="padding:9px 13px;white-space:nowrap">Verify</button></div></div>
+      </div>
+      <div id="mdNpiResult" style="font-size:.78rem;margin-top:7px"></div>
+    </div>
+    <div id="gfeNote" class="gfenote" style="margin-top:14px"></div>
   </div>
 
   <div class="fsec">
@@ -93,13 +101,16 @@ td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
 
   <div class="fsec">
     <div class="fsec-h"><span class="n">4</span> Staff roster <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— name · title · function (drives the signature boxes)</span></div>
-    <div class="fgrid" style="grid-template-columns:1.4fr .8fr 1fr 1.2fr;align-items:end">
+    <div class="fgrid" style="grid-template-columns:1.4fr .8fr 1.2fr;align-items:end">
       <div><label>Name</label><input id="rName" placeholder="Milagros"></div>
       <div><label>Title</label><select id="rCred"><option value="">—</option><option>MD</option><option>DO</option><option>NP</option><option>PA</option><option>APRN</option><option>RN</option><option>LPN</option><option>MA</option></select></div>
-      <div><label>NPI</label><input id="rNpi" inputmode="numeric" maxlength="10" placeholder="10 digits"></div>
       <div><label>Function</label><input id="rFunc" placeholder="e.g. GFE provider"></div>
     </div>
-    <div style="margin-top:10px;display:flex;gap:8px;align-items:center"><button class="btn ghost" id="addBtn" onclick="addSeat()">＋ Verify NPI &amp; add</button><span id="npiResult" style="font-size:.78rem"></span></div>
+    <div class="fgrid" style="grid-template-columns:1.2fr 1.2fr;align-items:end;margin-top:8px">
+      <div><label>State license <span style="color:#5b6b72;text-transform:none;letter-spacing:0">(credential of record)</span></label><input id="rLic" placeholder="e.g. FL ME 84789"></div>
+      <div><label>NPI <span style="color:#5b6b72;text-transform:none;letter-spacing:0">(optional — cash-pay clinics may not have one)</span></label><input id="rNpi" inputmode="numeric" maxlength="10" placeholder="10 digits"></div>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center"><button class="btn ghost" id="addBtn" onclick="addSeat()">＋ Add to roster</button><span id="npiResult" style="font-size:.78rem"></span></div>
     <div style="overflow:auto"><table id="roster"></table></div>
     <div style="font-size:.72rem;color:var(--muted);margin-top:8px">Signature authority by title — <b>Standing order</b>: MD/DO · <b>GFE</b>: MD/DO/APP · <b>Infusion note</b>: MD/DO/APP/RN. AllyOS shows the eligible names; the clinic credentials its own staff and owns who signs.</div>
   </div>
@@ -140,49 +151,80 @@ function syncNote(){
   var el=document.getElementById('gfeNote');
   if(md&&rn){el.className='gfenote block';el.innerHTML='⛔ <b>GFE tab hidden for this clinic.</b> You (the MD) perform the GFE; the RN floor cannot create one. An RN never appears in the GFE signer list regardless.';}
   else{el.className='gfenote open';el.innerHTML='✓ <b>GFE tab open.</b> The clinic\'s credentialed APP/MD signs it (from the roster). '+(md?'You remain MD-of-record for oversight.':'The clinic\'s own MD owns the GFE — AllyOS does not regulate it.');}
+  updateMdNpiUI();
 }
-function pushSeat(n,cred,func,npi,vobj){
-  SEATS.push({id:sid(),name:n,cred:cred,func:func,role:roleFor(cred),status:'active',
+// Medical Director NPI — adapts to the Falcon toggle (you, vs the clinic's own MD)
+var mdNpiState={npi:'',verified:false,name:'',lic:''};
+function updateMdNpiUI(){
+  var isFalcon=document.getElementById('tFalcon').checked;
+  var inp=document.getElementById('mdNpi'),lic=document.getElementById('mdLic'),res=document.getElementById('mdNpiResult'),lbl=document.getElementById('mdNpiLabel'),btn=document.getElementById('mdNpiBtn');
+  lbl.textContent=isFalcon?'Medical Director — credential of record (you)':"Clinic's Medical Director — credential of record";
+  if(isFalcon){
+    lic.value='FL ME 84789';lic.readOnly=true;inp.value='1447295126';inp.readOnly=true;btn.style.display='none';
+    res.style.color='var(--green)';res.textContent='✓ Armando Falcon, MD · FL ME 84789 · NPI 1447295126 (you — MD-of-record)';
+    mdNpiState={npi:'1447295126',verified:true,name:'Armando Falcon, MD',lic:'FL ME 84789'};
+  } else {
+    lic.readOnly=false;inp.readOnly=false;btn.style.display='';
+    var c=getCfg();
+    if(lic.value==='FL ME 84789')lic.value=c.mdLic||'';
+    if(inp.value==='1447295126')inp.value=(c.mdNpi&&c.mdNpi!=='1447295126')?c.mdNpi:'';
+    mdNpiState={npi:(c.mdNpi&&c.mdNpi!=='1447295126')?c.mdNpi:'',verified:!!c.mdNpiVerified,name:c.mdName||'',lic:c.mdLic||''};
+    res.style.color=c.mdNpiVerified?'var(--green)':'var(--muted)';res.textContent=c.mdNpiVerified?('✓ NPI '+(c.mdName||'verified')):'State license is the credential of record; NPI optional.';
+  }
+}
+function verifyMdNpi(){
+  var npi=(document.getElementById('mdNpi').value||'').replace(/\D/g,''),res=document.getElementById('mdNpiResult'),btn=document.getElementById('mdNpiBtn');
+  if(npi.length!==10){res.style.color='var(--gold)';res.textContent='NPI must be 10 digits.';return;}
+  res.style.color='var(--muted)';res.textContent='Verifying against NPPES…';btn.disabled=true;
+  fetch('/.netlify/functions/npi?npi='+encodeURIComponent(npi)).then(function(r){return r.json();}).then(function(v){
+    btn.disabled=false;
+    if(v&&v.found){res.style.color='var(--green)';res.textContent='✓ NPPES: '+v.name+(v.credential?', '+v.credential:'')+' · '+(v.status||'')+(v.taxonomy?' · '+v.taxonomy:'');
+      mdNpiState={npi:npi,verified:true,name:v.name+(v.credential?', '+v.credential:'')};}
+    else if(v&&v.valid){res.style.color='var(--gold)';res.textContent='Valid format but no active NPPES record — confirm manually.';mdNpiState={npi:npi,verified:false,name:''};}
+    else{res.style.color='var(--gold)';res.textContent=(v&&(v.error||v.note))||'NPI failed validation.';mdNpiState={npi:'',verified:false,name:''};}
+  }).catch(function(){btn.disabled=false;res.style.color='var(--gold)';res.textContent='Registry unreachable — try when online.';});
+}
+function pushSeat(n,cred,func,lic,npi,vobj){
+  SEATS.push({id:sid(),name:n,cred:cred,func:func,license:lic||'',role:roleFor(cred),status:'active',
     npi:npi||'',npiVerified:!!(vobj&&vobj.found),npiName:(vobj&&vobj.name)||'',npiCred:(vobj&&vobj.credential)||'',npiTaxonomy:(vobj&&vobj.taxonomy)||'',npiStatus:(vobj&&vobj.status)||''});
-  document.getElementById('rName').value='';document.getElementById('rCred').value='';document.getElementById('rFunc').value='';document.getElementById('rNpi').value='';
+  document.getElementById('rName').value='';document.getElementById('rCred').value='';document.getElementById('rFunc').value='';document.getElementById('rLic').value='';document.getElementById('rNpi').value='';
   setSeats(SEATS);renderRoster();
 }
 function addSeat(){
   var n=document.getElementById('rName').value.trim();if(!n){alert('Name required.');return;}
   var cred=document.getElementById('rCred').value.trim();
   var func=document.getElementById('rFunc').value.trim();
+  var lic=document.getElementById('rLic').value.trim();
   var npi=(document.getElementById('rNpi').value||'').replace(/\D/g,'');
   var res=document.getElementById('npiResult'), btn=document.getElementById('addBtn');
-  if(!npi){ res.style.color='var(--muted)';res.textContent='Added without NPI (verify later — NPI is the access credential).';pushSeat(n,cred,func,'',null);return; }
-  if(npi.length!==10){ res.style.color='var(--gold)';res.textContent='NPI must be 10 digits.';return; }
-  res.style.color='var(--muted)';res.textContent='Verifying against NPPES…';btn.disabled=true;
-  // access-gate check against the federal registry (server-side proxy; access-only, not scope-policing)
+  // NPI is OPTIONAL — a cash-pay clinic may have none. State license + clinic attestation is the credential of record.
+  if(!npi){ res.style.color='var(--muted)';res.textContent='Added — credential of record is the state license. (NPI optional.)';pushSeat(n,cred,func,lic,'',null);return; }
+  if(npi.length!==10){ res.style.color='var(--gold)';res.textContent='NPI must be 10 digits (or leave blank).';return; }
+  res.style.color='var(--muted)';res.textContent='Verifying NPI against NPPES…';btn.disabled=true;
+  // OPTIONAL anti-fraud check against the federal registry (server-side; not scope-policing, not required)
   fetch('/.netlify/functions/npi?npi='+encodeURIComponent(npi)).then(function(r){return r.json();}).then(function(v){
     btn.disabled=false;
-    if(v&&v.found){
-      res.style.color='var(--green)';res.textContent='✓ NPPES: '+v.name+(v.credential?', '+v.credential:'')+' · '+(v.status||'')+(v.taxonomy?' · '+v.taxonomy:'');
-      pushSeat(n,cred,func,npi,v);
-    } else if(v&&v.valid){
-      res.style.color='var(--gold)';res.textContent='Valid format but no active NPPES record — added unverified (confirm manually).';
-      pushSeat(n,cred,func,npi,null);
-    } else {
-      res.style.color='var(--gold)';res.textContent=(v&&(v.error||v.note))||'NPI failed validation — not added.';
-    }
-  }).catch(function(){ btn.disabled=false;res.style.color='var(--gold)';res.textContent='Registry unreachable — added unverified (verify when online).';pushSeat(n,cred,func,npi,null); });
+    if(v&&v.found){ res.style.color='var(--green)';res.textContent='✓ NPPES: '+v.name+(v.credential?', '+v.credential:'')+' · '+(v.status||'')+(v.taxonomy?' · '+v.taxonomy:'');pushSeat(n,cred,func,lic,npi,v); }
+    else if(v&&v.valid){ res.style.color='var(--gold)';res.textContent='Valid format but no active NPPES record — added on state license (confirm NPI manually).';pushSeat(n,cred,func,lic,npi,null); }
+    else { res.style.color='var(--gold)';res.textContent=(v&&(v.error||v.note))||'NPI invalid — added on state license without it.';pushSeat(n,cred,func,lic,'',null); }
+  }).catch(function(){ btn.disabled=false;res.style.color='var(--gold)';res.textContent='Registry unreachable — added on state license (verify NPI later).';pushSeat(n,cred,func,lic,npi,null); });
 }
 function rmSeat(id){SEATS=SEATS.filter(function(s){return s.id!==id;});setSeats(SEATS);renderRoster();}
 function renderRoster(){
   var rows=SEATS.filter(function(s){return s.status!=='removed';}).map(function(s){var k=credClass(s.cred);
     var signs=[]; if(k==='md')signs=['Standing order','GFE','Infusion note']; else if(k==='app')signs=['GFE','Infusion note']; else if(k==='rn')signs=['Infusion note'];
-    var npiCell=s.npi?('<span style="font-family:ui-monospace,Menlo,monospace;font-size:.76rem">'+esc(s.npi)+'</span> '+(s.npiVerified?'<span class="badge rn" title="'+esc((s.npiName||'')+' '+(s.npiCred||''))+'">✓ NPPES</span>':'<span class="badge other">unverified</span>')):'<span style="color:var(--muted)">—</span>';
-    return '<tr><td><b>'+esc(s.name)+'</b></td><td><span class="badge '+(k)+'">'+esc(s.cred||'—')+'</span></td><td>'+npiCell+'</td><td>'+esc(s.func||'')+'</td><td style="font-size:.74rem;color:var(--muted)">'+(signs.join(' · ')||'—')+'</td><td style="text-align:right"><button class="btn-s" onclick="rmSeat(\''+s.id+'\')">remove</button></td></tr>';
+    var nameCell='<b>'+esc(s.name)+'</b>'+(s.func?'<div style="font-size:.66rem;color:var(--muted)">'+esc(s.func)+'</div>':'');
+    var licCell=s.license?('<span style="font-size:.78rem">'+esc(s.license)+'</span>'):'<span style="color:var(--muted)">—</span>';
+    var npiCell=s.npi?('<span style="font-family:ui-monospace,Menlo,monospace;font-size:.74rem">'+esc(s.npi)+'</span> '+(s.npiVerified?'<span class="badge rn" title="'+esc((s.npiName||'')+' '+(s.npiCred||''))+'">✓ NPPES</span>':'<span class="badge other">unverified</span>')):'<span style="color:var(--muted)">—</span>';
+    return '<tr><td>'+nameCell+'</td><td><span class="badge '+(k)+'">'+esc(s.cred||'—')+'</span></td><td>'+licCell+'</td><td>'+npiCell+'</td><td style="font-size:.74rem;color:var(--muted)">'+(signs.join(' · ')||'—')+'</td><td style="text-align:right"><button class="btn-s" onclick="rmSeat(\''+s.id+'\')">remove</button></td></tr>';
   }).join('');
-  document.getElementById('roster').innerHTML='<tr><th>Name</th><th>Title</th><th>NPI</th><th>Function</th><th>Can sign</th><th></th></tr>'+(rows||'<tr><td colspan="6" class="muted" style="padding:14px;color:var(--muted)">No staff yet — add the roster from onboarding.</td></tr>');
+  document.getElementById('roster').innerHTML='<tr><th>Name</th><th>Title</th><th>State license</th><th>NPI <span style="font-weight:400;text-transform:none">(optional)</span></th><th>Can sign</th><th></th></tr>'+(rows||'<tr><td colspan="6" class="muted" style="padding:14px;color:var(--muted)">No staff yet — add the roster from onboarding.</td></tr>');
 }
 function saveAll(){
   var cfg={name:document.getElementById('cName').value.trim(),dba:document.getElementById('cDba').value.trim(),
     city:document.getElementById('cCity').value.trim(),email:document.getElementById('cEmail').value.trim(),
-    falconIsMd:document.getElementById('tFalcon').checked,rnIvModel:document.getElementById('tRn').checked};
+    falconIsMd:document.getElementById('tFalcon').checked,rnIvModel:document.getElementById('tRn').checked,
+    mdLic:document.getElementById('mdLic').value.trim(),mdNpi:mdNpiState.npi,mdNpiVerified:mdNpiState.verified,mdName:mdNpiState.name};
   try{localStorage.setItem(CFG,JSON.stringify(cfg));}catch(e){}
   var lines={iv:document.getElementById('lIv').checked,peptides:document.getElementById('lPep').checked,bhrt:document.getElementById('lBhrt').checked};
   try{localStorage.setItem(LKEY,JSON.stringify(lines));}catch(e){}
