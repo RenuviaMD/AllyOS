@@ -74,3 +74,35 @@ The MD cockpit and cloud sync gate on an active subscription too.
 3. Wire the dashboard locked-line cards → checkout; "Manage billing" link.
 4. Entitlement read in dashboard/cockpit.
 5. Test full loop with Stripe test cards → then flip to live keys.
+
+---
+
+## 10. Pricing reconciliation — SETTLE THIS FIRST (code audit, 2026-06-29)
+
+Before wiring Stripe we have to pick **one** billing unit, because the codebase currently states the price three different ways. This is the single decision that unblocks everything else — the Stripe Product/Price objects can't be created until it's made.
+
+**What the code says today (three sources, not aligned):**
+| Source | What it charges | Implication |
+|---|---|---|
+| `allyos/pricing.html` (Platform tier) | **$199/mo per *location*** — all lines included; unlimited nurse seats; **+ per authorizing-provider seat** add-on | Flat per clinic; lines are *not* metered |
+| `allyos/clinic-network.html` cockpit MRR | **$199/mo × number of *active lines*** (IV+PEP+BHRT ⇒ up to $597/clinic) | Per-line metered |
+| `allyos/dashboard.html` / `onboard.html` | "$199/mo **per line** … bundle all three for less" | Per-line, with an unspecified bundle discount |
+
+So a 3-line clinic is **$199** (pricing.html) vs **$597** (cockpit) vs "$597 minus a bundle discount" (dashboard). These can't all ship.
+
+**The decision (pick one):**
+- **A — Per location, flat $199** (matches pricing.html). Simplest Stripe: one recurring Price, `quantity = 1` per clinic. Lines become free entitlements you toggle in the cockpit. Cockpit MRR math changes to `clinics × 199` (not × lines).
+- **B — Per active line $199** (matches the cockpit today). Stripe: one recurring Price, `quantity = #active lines`. Clean metering, higher ARPU, but contradicts the public pricing page.
+- **C — Per location + bundle tiers** (matches the dashboard hint). e.g. 1 line $199 / 2 lines $349 / 3 lines $499. Stripe: three Prices or a tiered Price. Most marketing-friendly, most config.
+
+**Recommendation: A (flat per location).** It's what the public pricing page already promises, it's the least surprising to a clinic, and it makes the §400.9935 story clean (you sell *the platform per site*; the authorizing-provider seat is the only metered unit — and that maps to the MD-of-record tier, which §7 already keeps OUT of this Stripe). If you want more ARPU later, add the provider-seat add-on as a second Price — no re-architecture.
+
+**Second decision — the authorizing-provider seat.** pricing.html sells "+ per authorizing provider (MD/DO/NP/PA who signs GFEs)" as a license-bound seat. Is that:
+- (i) **folded into the MD-of-record agreement** (off-Stripe, per §7) — simplest, **recommended**; or
+- (ii) a **metered Stripe add-on** Price for clinics that bring their own provider but want extra signer seats?
+
+**If A is chosen, two small code follow-ups (I can do when you're back):**
+1. Cockpit MRR → `clinics.length × 199` and the per-clinic card shows "$199/mo" flat (drop the `× lines` math in `mrrOf`).
+2. `pricing.html` DRAFT banner can come off once amounts are final.
+
+**Everything in §1–§9 still holds** regardless of A/B/C — only the Product/Price object count and the `mrrOf` calculation change. Bring: (1) A/B/C choice, (2) provider-seat i/ii choice, (3) the actual dollar amounts (set in the Stripe dashboard, never committed), (4) confirm Stripe account + test mode.
