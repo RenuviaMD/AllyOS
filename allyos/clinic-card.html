@@ -105,6 +105,7 @@ td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
       <div><label>State license <span style="color:#5b6b72;text-transform:none;letter-spacing:0">(credential of record)</span></label><input id="rLic" placeholder="e.g. FL ME 84789"></div>
       <div><label>NPI <span style="color:#5b6b72;text-transform:none;letter-spacing:0">(optional — cash-pay clinics may not have one)</span></label><input id="rNpi" inputmode="numeric" maxlength="10" placeholder="10 digits"></div>
     </div>
+    <label style="display:flex;gap:8px;align-items:flex-start;margin-top:11px;font-size:.78rem;color:var(--ink);cursor:pointer"><input type="checkbox" id="rAttest" style="width:auto;margin-top:2px"> <span>I attest this person is a <b>licensed professional</b> and is <b>authorized by this clinic</b> to perform the acts indicated. (This — not the NPI — is the access gate; the clinic owns it.)</span></label>
     <div style="margin-top:10px;display:flex;gap:8px;align-items:center"><button class="btn ghost" id="addBtn" onclick="addSeat()">＋ Add to roster</button><span id="npiResult" style="font-size:.78rem"></span></div>
     <div style="overflow:auto"><table id="roster"></table></div>
     <div style="font-size:.72rem;color:var(--muted);margin-top:8px">Signature authority by title — <b>Standing order</b>: MD/DO · <b>GFE</b>: MD/DO/APP · <b>Infusion note</b>: MD/DO/APP/RN. AllyOS shows the eligible names; the clinic credentials its own staff and owns who signs.</div>
@@ -151,12 +152,14 @@ function syncNote(){
 }
 function pushSeat(n,cred,func,lic,npi,vobj){
   SEATS.push({id:sid(),name:n,cred:cred,func:func,license:lic||'',role:roleFor(cred),status:'active',
+    attested:true,attestedAt:new Date().toISOString(),
     npi:npi||'',npiVerified:!!(vobj&&vobj.found),npiName:(vobj&&vobj.name)||'',npiCred:(vobj&&vobj.credential)||'',npiTaxonomy:(vobj&&vobj.taxonomy)||'',npiStatus:(vobj&&vobj.status)||''});
-  document.getElementById('rName').value='';document.getElementById('rCred').value='';document.getElementById('rFunc').value='';document.getElementById('rLic').value='';document.getElementById('rNpi').value='';
+  document.getElementById('rName').value='';document.getElementById('rCred').value='';document.getElementById('rFunc').value='';document.getElementById('rLic').value='';document.getElementById('rNpi').value='';document.getElementById('rAttest').checked=false;
   setSeats(SEATS);renderRoster();
 }
 function addSeat(){
   var n=document.getElementById('rName').value.trim();if(!n){alert('Name required.');return;}
+  if(!document.getElementById('rAttest').checked){var rr=document.getElementById('npiResult');rr.style.color='var(--gold)';rr.textContent='Check the attestation — it is the access gate (the clinic vouches for the provider).';return;}
   var cred=document.getElementById('rCred').value.trim();
   var func=document.getElementById('rFunc').value.trim();
   var lic=document.getElementById('rLic').value.trim();
@@ -178,7 +181,7 @@ function rmSeat(id){SEATS=SEATS.filter(function(s){return s.id!==id;});setSeats(
 function renderRoster(){
   var rows=SEATS.filter(function(s){return s.status!=='removed';}).map(function(s){var k=credClass(s.cred);
     var signs=[]; if(k==='md')signs=['Standing order','GFE','Infusion note']; else if(k==='app')signs=['GFE','Infusion note']; else if(k==='rn')signs=['Infusion note'];
-    var nameCell='<b>'+esc(s.name)+'</b>'+(s.func?'<div style="font-size:.66rem;color:var(--muted)">'+esc(s.func)+'</div>':'');
+    var nameCell='<b>'+esc(s.name)+'</b>'+(s.attested?' <span class="badge rn" title="Clinic attested '+esc((s.attestedAt||'').slice(0,10))+'">✓ attested</span>':'')+(s.func?'<div style="font-size:.66rem;color:var(--muted)">'+esc(s.func)+'</div>':'');
     var licCell=s.license?('<span style="font-size:.78rem">'+esc(s.license)+'</span>'):'<span style="color:var(--muted)">—</span>';
     var npiCell=s.npi?('<span style="font-family:ui-monospace,Menlo,monospace;font-size:.74rem">'+esc(s.npi)+'</span> '+(s.npiVerified?'<span class="badge rn" title="'+esc((s.npiName||'')+' '+(s.npiCred||''))+'">✓ NPPES</span>':'<span class="badge other">unverified</span>')):'<span style="color:var(--muted)">—</span>';
     return '<tr><td>'+nameCell+'</td><td><span class="badge '+(k)+'">'+esc(s.cred||'—')+'</span></td><td>'+licCell+'</td><td>'+npiCell+'</td><td style="font-size:.74rem;color:var(--muted)">'+(signs.join(' · ')||'—')+'</td><td style="text-align:right"><button class="btn-s" onclick="rmSeat(\''+s.id+'\')">remove</button></td></tr>';

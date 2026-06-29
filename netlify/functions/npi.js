@@ -2,11 +2,13 @@
 // GET /.netlify/functions/npi?npi=1234567890
 //   -> { valid, found, npi, name, credential, taxonomy, enumeration, status, roleSuggestion, note }
 //
-// PURPOSE: this is an ACCESS gate only — it confirms the person is a real,
-// enumerated, licensed professional (so we can grant paid access) and it is
-// anti-fraud. It does NOT decide clinical scope or who may perform a GFE — that
-// is the practice's Medical Director and the state board. We name no role as
-// "allowed to authorize"; we only surface what NPPES says and a suggested seat.
+// PURPOSE: an OPTIONAL anti-fraud confirmation — it confirms the person is
+// ENUMERATED in the federal NPPES registry (a real, registered professional
+// entity). It does NOT prove the license is active and does NOT decide clinical
+// scope or who may perform a GFE — licensure is the state board's, scope is the
+// practice's Medical Director's. NPI is not required (cash-pay clinics may have
+// none); the credential of record is the state license + the clinic's attestation.
+// We name no role as "allowed to authorize"; we only surface what NPPES says.
 //
 // NPPES (the federal registry) has no CORS headers, so the lookup must run
 // server-side. No API key is required for the public NPPES Registry API.
