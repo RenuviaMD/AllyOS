@@ -107,6 +107,7 @@ a{color:var(--teal)}
     <h2>🧪 Protocol Reference</h2>
     <div class="muted" style="font-size:.72rem;margin-bottom:8px">Reference only — the protocol comes from the provider's GFE order, not picked here.</div>
     <div id="protoRef"></div>
+    <div id="pepIvSupport" style="display:none;margin-top:16px"></div>
   </div>
 </div>
 
@@ -120,13 +121,33 @@ var MOD=null, MENU=[], INV={}, QUEUE=[], CHAIRS=[null,null,null,null,null,null],
 
 if(window.AllyOSAuth){ AllyOSAuth.guard(['nurse','provider','admin']); }
 
+// ---- Peptide-IV support (cross-line: shows ONLY for clinics running BOTH IV and peptides) ----
+function clinicLines(){try{return Object.assign({iv:true,peptides:false,bhrt:false},JSON.parse(localStorage.getItem('allyos_clinic_lines_v1')||'{}'));}catch(e){return {iv:true,peptides:false,bhrt:false};}}
+function renderPepIvSupport(){
+  var el=document.getElementById('pepIvSupport'); if(!el)return;
+  var L=clinicLines();
+  if(!(L.iv && L.peptides)){ el.style.display='none'; el.innerHTML=''; return; } // not a peptide clinic → hidden
+  fetch('../protocols/peptide-iv-support.json').then(function(r){return r.json()}).then(function(d){
+    var ax=(d.axes||[]).map(function(a){
+      var holds=(a.red_flags_hold||[]); var opts=(a.support_options||[]).map(esc).join(' · ');
+      return '<div class="proto-item"><div class="t">'+esc(a.name||'')+'</div>'+
+        (opts?'<div class="d">Support (if goal/trigger): '+opts+'</div>':'')+
+        (holds.length?'<div class="d" style="color:var(--gold)">⚠ Hold/eval: '+holds.slice(0,4).map(function(x){return esc((''+x).split(' (')[0]);}).join(', ')+(holds.length>4?'…':'')+'</div>':'')+'</div>';
+    }).join('');
+    el.style.display='block';
+    el.innerHTML='<h2 style="margin-top:0">🧬💧 Peptide-IV Support <span style="font-size:.58rem;color:var(--gold);border:1px solid var(--gold);border-radius:5px;padding:1px 6px;vertical-align:middle;letter-spacing:.06em">SELECTIVE</span></h2>'+
+      '<div class="muted" style="font-size:.7rem;margin-bottom:8px">Optional support for peptide patients. A client goal (or symptom) can match — <b>deficiency not required</b>. Safety gates clear first; <b>no synergy / efficacy claims</b>. Doses come from the locked standing order.</div>'+ax+
+      '<div class="muted" style="font-size:.64rem;margin-top:6px">Advisory — the provider selects; the engine pulls every contraindication/ceiling from the locked IV module. Not a treatment claim.</div>';
+  }).catch(function(){ el.style.display='none'; });
+}
+
 fetch('../protocols/iv-module.json').then(function(r){return r.json()}).then(function(d){
   MOD=d; MENU=d.ingredients||[];
   try{var s=JSON.parse(localStorage.getItem('allyos_iv_inventory_v1')||'{}');INV=s.inv||{};}catch(e){INV={};}
   var sess=window.AllyOSAuth&&AllyOSAuth.session();
   if(sess){var w=document.getElementById('who');if(w)w.textContent=AllyOSAuth.greeting()+' · '+((AllyOSAuth.ROLES[sess.role]||{}).label||sess.role);var mm=document.getElementById('mdMode');if(mm)mm.checked=!!sess.mdOfRecord;}
   document.getElementById('disc').innerHTML='AllyOS is advisory decision-support for licensed providers — it informs how/what to run an IV/IM bar but does not stop the practice; the provider reviews and signs. Gates enforce only in MD-of-record mode. No PHI is stored (browser-local). © 2026 RenuviaMD® Compliance Division.';
-  fillProtoSelect(); renderProtoRef(); renderQueue(); renderChairs();
+  fillProtoSelect(); renderProtoRef(); renderQueue(); renderChairs(); renderPepIvSupport();
 }).catch(function(e){ document.getElementById('chairs').innerHTML='<div class="flag crit">Could not load the IV module ('+e.message+').</div>'; });
 
 function mdMode(){return document.getElementById('mdMode').checked;}
