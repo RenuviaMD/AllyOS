@@ -70,6 +70,20 @@
 .msave{background:var(--teal);color:#05131a;border:none;border-radius:10px;padding:10px 20px;font-weight:700;font-size:.84rem;cursor:pointer}
 .mcancel{background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer}
 .msaved{font-size:.72rem;color:var(--green);font-weight:600}
+.cds{display:flex;gap:11px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);background:#0c1925;border-radius:10px;margin-bottom:6px}
+.cds.done{opacity:.5}
+.cds .rk{font-size:.56rem;font-weight:800;padding:2px 7px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em;flex:0 0 auto;margin-top:1px}
+.rk.high{background:#3a1414;color:#f0a59d;border:1px solid #6a2020}
+.rk.medium{background:#2a230e;color:var(--gold);border:1px solid #4a3c18}
+.rk.low{background:#0e2a1d;color:var(--green);border:1px solid #1c5238}
+.cds .cmid{flex:1;min-width:0}
+.cds .ctitle{font-size:.82rem;color:var(--ink);line-height:1.4}
+.cds .cmeta2{font-size:.66rem;color:var(--muted);margin-top:4px}
+.cds .cact{font-size:.7rem;color:var(--teal);margin-top:4px}
+.cds .crev{background:none;border:1px solid var(--line2);color:var(--muted);border-radius:8px;padding:4px 10px;font-size:.68rem;cursor:pointer;flex:0 0 auto;align-self:center}
+.cds .crev:hover{border-color:var(--teal);color:var(--teal)}
+.cdsfoot{font-size:.68rem;color:var(--muted);margin-top:8px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.cdsfoot a{color:var(--teal);text-decoration:none}
 </style></head>
 <body class="allyos"><div class="wrap">
   <div class="top">
@@ -85,6 +99,7 @@
   <div class="kpis" id="kpis"></div>
   <div id="cloudreq"></div>
   <div class="card" id="auditCard" style="border-color:#1c4763"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px">📋 System audit &amp; content updates</div><div id="auditBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
+  <div class="card" id="cdsCard" style="border-color:#4a3c18;display:none"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:4px">🧬 CDS update — clinician review queue</div><div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">Drift, new evidence, and source triggers the CDS Update Agent surfaced for your decision. Nothing here is auto-applied — clinical changes need your sign-off.</div><div id="cdsBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
   <div id="clinics"></div>
 
   <div class="mback" id="cfgBack">
@@ -300,6 +315,60 @@ function renderAudit(){
   }).catch(function(){el.innerHTML='<span style="color:var(--muted)">Audit status unavailable.</span>';});
 }
 renderAudit();
+
+// ---- CDS update review queue: list the agent's review items for clinician sign-off ----
+// Reads ops-audit-review-queue.csv. Decisions are tracked locally (PHI-free) keyed by a
+// stable content hash so a "reviewed" item stays cleared across re-runs (run_ids change daily).
+var CDS_REV='allyos_cds_reviewed_v1';
+function cdsReviewed(){try{return JSON.parse(localStorage.getItem(CDS_REV)||'{}');}catch(e){return {};}}
+function cdsHash(s){var h=5381;for(var i=0;i<s.length;i++){h=((h<<5)+h+s.charCodeAt(i))>>>0;}return 'h'+h.toString(36);}
+function parseCSV(text){
+  var rows=[],row=[],f='',q=false;
+  for(var i=0;i<text.length;i++){var ch=text[i];
+    if(q){if(ch==='"'){if(text[i+1]==='"'){f+='"';i++;}else q=false;}else f+=ch;}
+    else if(ch==='"')q=true;
+    else if(ch===','){row.push(f);f='';}
+    else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&text[i+1]==='\n')i++;row.push(f);f='';if(row.length>1||row[0]!=='')rows.push(row);row=[];}
+    else f+=ch;}
+  if(f!==''||row.length){row.push(f);if(row.length>1||row[0]!=='')rows.push(row);}
+  return rows;
+}
+function renderCds(){
+  fetch('ops-audit-review-queue.csv?_='+Date.now()).then(function(r){return r.ok?r.text():'';}).then(function(txt){
+    var card=document.getElementById('cdsCard'),el=document.getElementById('cdsBody');if(!el)return;
+    card.style.display='';
+    var rows=parseCSV(txt||'');
+    var emptyMsg='<div style="color:var(--muted);font-size:.82rem">No review items in the queue yet — they appear here after the CDS Update Agent runs (daily 04:00 UTC, or on-demand). Drift, new evidence, and source triggers land here for your sign-off.</div>';
+    if(rows.length<1){el.innerHTML=emptyMsg;return;}
+    var head=rows[0],idx={};head.forEach(function(h,i){idx[h]=i;});
+    var items=rows.slice(1).map(function(r){return {
+      cls:r[idx.change_class]||'',risk:(r[idx.risk_class]||'low').toLowerCase(),
+      summary:r[idx.summary]||'',action:r[idx.proposed_action]||'',
+      target:r[idx.target_library]||'',src:r[idx.source_ids]||'',
+      dir:r[idx.evidence_directness]||'',needs:(r[idx.notes]||'').indexOf('requires_signoff')>=0
+    };}).filter(function(it){return it.summary;});
+    if(!items.length){el.innerHTML=emptyMsg;return;}
+    items.forEach(function(it){it.id=cdsHash(it.target+'|'+it.cls+'|'+it.summary);});
+    var done=cdsReviewed();
+    var rank={high:0,medium:1,low:2};
+    items.sort(function(a,b){var da=!!done[a.id],db=!!done[b.id];if(da!==db)return da?1:-1;return (rank[a.risk]||3)-(rank[b.risk]||3);});
+    var open=items.filter(function(it){return !done[it.id];}).length;
+    card.style.display='';
+    el.innerHTML=items.map(function(it){var d=!!done[it.id];
+      return '<div class="cds'+(d?' done':'')+'">'+
+        '<span class="rk '+(rank[it.risk]!=null?it.risk:'low')+'">'+esc(it.risk)+'</span>'+
+        '<div class="cmid"><div class="ctitle">'+esc(it.summary)+'</div>'+
+          '<div class="cmeta2">'+esc(it.cls)+(it.dir?' · '+esc(it.dir):'')+(it.needs?' · <b style="color:var(--gold)">sign-off required</b>':'')+(it.src?' · '+esc(it.src):'')+'</div>'+
+          (it.action?'<div class="cact">→ '+esc(it.action)+'</div>':'')+'</div>'+
+        '<button class="crev" onclick="cdsMark('+"'"+it.id+"'"+','+(d?'false':'true')+')">'+(d?'Reopen':'Mark reviewed')+'</button>'+
+      '</div>';
+    }).join('')+
+    '<div class="cdsfoot"><span>'+open+' open · '+items.length+' total — decisions tracked on this device</span>'+
+      '<a target="_blank" href="https://github.com/RenuviaMD/AllyOS/blob/main/allyos/ops-audit-review-queue.csv">Full queue (CSV) ↗</a></div>';
+  }).catch(function(){var card=document.getElementById('cdsCard');if(card)card.style.display='none';});
+}
+function cdsMark(id,on){var d=cdsReviewed();if(on)d[id]=1;else delete d[id];try{localStorage.setItem(CDS_REV,JSON.stringify(d));}catch(e){}renderCds();}
+renderCds();
 
 // Cross-device inbox: real GFE requests pushed from clinics (PHI-free — Encounter ID + plan).
 function renderCloud(){
