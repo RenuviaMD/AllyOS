@@ -152,3 +152,13 @@ create policy clinic_read on public.clinics for select
 drop policy if exists audit_read on public.audit_encounters;
 create policy audit_read on public.audit_encounters for select
   using (is_clinic_member(clinic_id) or is_clinic_md(clinic_id) or is_app_admin());
+
+-- ============================================================================
+-- 2026-06-29 · GO LIVE: real auth (demo removed), Lemus 3 lines, self-read profile
+-- ----------------------------------------------------------------------------
+-- Login now authenticates against Supabase and builds a session from the profile
+-- (app_admin flag + clinic_members + clinic.lines). Demo accounts removed.
+update public.clinics set lines='{iv,peptides,bhrt}'::text[], status='active' where name ilike 'Lemus%';
+-- self-read so the app can build the session/profile at login:
+create policy if not exists app_admins_self on public.app_admins for select using (user_id = auth.uid());
+create policy if not exists members_self    on public.clinic_members for select using (user_id = auth.uid());

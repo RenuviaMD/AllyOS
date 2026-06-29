@@ -45,52 +45,46 @@ button:hover{filter:brightness(1.06)}
     <div class="err" id="cloudMsg"></div>
   </div>
 
-  <details class="demo" style="margin-top:18px" open>
-    <summary style="cursor:pointer">Demo accounts</summary>
-    <div style="margin-top:8px">password <b>demo</b> — tap to fill:
-      <div style="margin-top:5px">
-        <span class="chip" onclick="fill('md@clinic.test')">md@ · MD</span>
-        <span class="chip" onclick="fill('np@clinic.test')">np@ · provider</span>
-        <span class="chip" onclick="fill('rn@clinic.test')">rn@ · nurse</span>
-        <span class="chip" onclick="fill('admin@clinic.test')">admin@ · admin</span>
-      </div>
-    </div>
-  </details>
-
-  <div class="note">PHI-free. The magic-link path is server-enforced (Row-Level Security on every table); demo sign-in is a local scaffold for click-through.</div>
+  <div class="note">PHI-free · server-enforced (Row-Level Security on every table). Access is for the clinic's credentialed staff; the clinic assigns each seat. Forgot your password? Contact your clinic's Medical Director.</div>
 </div>
 <script src="allyos-auth.js"></script>
 <script src="supabase-client.js"></script>
 <script>
-function fill(email){ document.getElementById('email').value=email; document.getElementById('password').value='demo'; }
 function nextPage(){ var m=location.search.match(/[?&]next=([^&]+)/); return m?decodeURIComponent(m[1]):'nursing-station.html'; }
 // the Medical Director lands on the Clinic Network (multi-clinic home); clinic staff land on their practice hub.
 function landing(s){ return (s && s.mdAudit) ? 'clinic-network.html' : 'dashboard.html'; }
+function go(s){ location.href=(location.search.indexOf('next=')>=0)?nextPage():landing(s); }
+function fail(msg){ var err=document.getElementById('err'); err.textContent=msg; err.className='err show'; err.style.color='#f0b3aa'; }
+
+// REAL login: authenticate against Supabase, build the profile, adopt the session (guards then pass).
 function doLogin(e){
   e.preventDefault();
-  var r=AllyOSAuth.signIn(document.getElementById('email').value, document.getElementById('password').value);
+  var email=document.getElementById('email').value.trim(), pw=document.getElementById('password').value;
   var err=document.getElementById('err');
-  if(r.error){ err.textContent=r.error; err.className='err show'; return false; }
-  var next=nextPage();
-  var dest=(location.search.indexOf('next=')>=0) ? next : landing(r.session);
-  // also open the real Supabase session with the same credentials (so cloud-enforced features activate).
-  if(window.AllyOSCloud){
-    AllyOSCloud.ready.then(function(ok){ if(!ok){location.href=dest;return;}
-      AllyOSCloud.signInWithPassword(document.getElementById('email').value.trim(), document.getElementById('password').value)
-        .then(function(){ location.href=dest; })
-        .catch(function(){ location.href=dest; });
+  if(!window.AllyOSCloud){ fail('Cloud unavailable — check your connection.'); return false; }
+  err.textContent='Signing in…'; err.className='err show'; err.style.color='var(--muted)';
+  AllyOSCloud.ready.then(function(ok){
+    if(!ok){ fail('Cloud unavailable — check your connection.'); return; }
+    AllyOSCloud.signInWithPassword(email, pw).then(function(r){
+      if(r&&r.error){ fail(r.error.message||'Invalid email or password.'); return; }
+      AllyOSCloud.profile().then(function(p){
+        if(!p||!p.email){ fail('Signed in, but no profile is set up for this account. Contact your administrator.'); return; }
+        go(AllyOSAuth.adopt(p));
+      });
     });
-    setTimeout(function(){ if(!document.hidden) location.href=dest; }, 1500); // fail-soft: never block the demo login
-  } else { location.href=dest; }
+  });
   return false;
 }
-// already signed in? bounce to role landing
-(function(){ var s=AllyOSAuth.session(); if(s){ location.href = (location.search.indexOf('next=')>=0)?nextPage():landing(s); } })();
-// reveal cloud sign-in when the hub is reachable; if already cloud-authed, go to dashboard
-(function(){ if(!window.AllyOSCloud)return; AllyOSCloud.ready.then(function(ok){ if(!ok)return;
-  document.getElementById('cloudBox').style.display='block';
-  AllyOSCloud.user().then(function(u){ if(u) location.href=landing(AllyOSAuth.session()); });
-}); })();
+// already signed in? (local session, or a live Supabase session to rebuild)
+(function(){ var s=AllyOSAuth.session(); if(s){ go(s); return; }
+  if(window.AllyOSCloud){ AllyOSCloud.ready.then(function(ok){ if(!ok)return;
+    AllyOSCloud.user().then(function(u){ if(!u)return;
+      AllyOSCloud.profile().then(function(p){ if(p&&p.email){ go(AllyOSAuth.adopt(p)); } });
+    });
+  }); }
+})();
+// reveal the magic-link option when the cloud hub is reachable
+(function(){ if(!window.AllyOSCloud)return; AllyOSCloud.ready.then(function(ok){ if(ok) document.getElementById('cloudBox').style.display='block'; }); })();
 function cloudLink(){
   var email=document.getElementById('cloudEmail').value.trim(), m=document.getElementById('cloudMsg');
   if(!email){ m.textContent='Enter your email.'; m.className='err show'; return; }

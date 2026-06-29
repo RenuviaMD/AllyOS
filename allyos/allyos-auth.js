@@ -24,47 +24,28 @@ window.AllyOSAuth = (function () {
     admin:    { label: 'Admin / Medical Director',can: ['execute', 'manage_inventory', 'manage_users', 'view_admin', 'audit'] }
   };
 
-  // ---- DEMO backend (replace with Supabase for real enforcement) ----
-  var DEMO_USERS = [
-    { email: 'md@clinic.test',    password: 'demo', name: 'Falcon', credential: 'MD', role: 'provider', md_audit: true },
-    { email: 'np@clinic.test',    password: 'demo', name: 'Rivera', credential: 'NP', role: 'provider' },
-    { email: 'rn@clinic.test',    password: 'demo', name: 'Chen',   credential: 'RN', role: 'nurse' },
-    { email: 'admin@clinic.test', password: 'demo', name: 'Office', credential: '',   role: 'admin' },
-    // --- Lemus pilot (interim localStorage auth; swap to Supabase before real multi-user). ---
-    // DEMO: full-lines clinic (IV + Peptides + BHRT) so the whole platform is visible.
-    // We narrow this back to IV-only later (set lines to {iv:true,peptides:false,bhrt:false}).
-    { email: 'lemus@allyos.app',  password: 'pilot', name: 'Lemus NP', credential: 'NP', role: 'provider',
-      clinic: 'Lemus Natural Medicine', md_of_record: true, pilot: true,
-      lines: { iv: true, peptides: true, bhrt: true } },
-    // --- Dr. Falcon — owner / Medical Director login (sees the Clinic Network cockpit + AllyAuditPro). ---
-    // Same credentials exist as a real Supabase auth user (app_admin) — the login also opens the cloud session.
-    { email: 'drfalcon@renuviamd.com', password: 'RenuviaMD2026', name: 'Falcon', credential: 'MD', role: 'provider',
-      clinic: 'RenuviaMD — Medical Director', md_of_record: true, md_audit: true, pilot: true,
-      lines: { iv: true, peptides: true, bhrt: true } }
-  ];
-  // Clinic context (in Supabase this is a row in `clinics`). md_of_record = is RenuviaMD the MD here?
-  var CLINIC = { id: 'demo-clinic', name: 'Demo Wellness Clinic', md_of_record: false };
-
+  // ---- session store ----
   function session() { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } }
   function setSession(s) { localStorage.setItem(KEY, JSON.stringify(s)); }
-  function signOut() { localStorage.removeItem(KEY); location.href = 'login.html'; }
+  function signOut() {
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    if (window.AllyOSCloud) { try { AllyOSCloud.signOut(); } catch (e) {} }
+    location.href = 'login.html';
+  }
 
-  function signIn(email, password) {
-    email = (email || '').trim().toLowerCase();
-    // DEMO match. (Supabase: await supabase.auth.signInWithPassword(...) then load the profile row.)
-    var u = DEMO_USERS.filter(function (x) { return x.email === email && x.password === password; })[0];
-    if (!u) return { error: 'Invalid email or password. Demo accounts: md@ / np@ / rn@ / admin@clinic.test — password "demo".' };
+  // Adopt a real session from the Supabase profile (AllyOSCloud.profile()). Replaces the old demo accounts:
+  // login authenticates against Supabase, builds the profile, and adopts it so the page guards pass.
+  function adopt(p) {
+    if (!p || !p.email) return null;
     var s = {
-      userId: email, email: email, name: u.name, credential: u.credential, role: u.role,
-      clinicId: u.clinicId || CLINIC.id, clinic: u.clinic || CLINIC.name,
-      mdOfRecord: (u.md_of_record != null ? u.md_of_record : CLINIC.md_of_record),
-      mdAudit: !!u.md_audit, // the MD-of-record's private oversight tool (not a clinic feature)
-      demo: true, pilot: !!u.pilot
+      userId: p.userId || p.email, email: p.email, name: p.name || 'Provider',
+      credential: p.credential || (p.mdAudit ? 'MD' : ''), role: p.role || 'provider',
+      clinicId: p.clinicId || null, clinic: p.clinic || '',
+      mdOfRecord: !!p.mdOfRecord, mdAudit: !!p.mdAudit, cloud: true
     };
     setSession(s);
-    // Seed this clinic's active lines (demo/pilot). Real multi-user reads clinic_modules from Supabase.
-    if (u.lines) { try { localStorage.setItem('allyos_clinic_lines_v1', JSON.stringify(u.lines)); } catch (e) {} }
-    return { session: s };
+    if (p.lines) { try { localStorage.setItem('allyos_clinic_lines_v1', JSON.stringify(p.lines)); } catch (e) {} }
+    return s;
   }
 
   // ---- DEMO / sandbox session (no signup) — clearly fake, never a real chart ----
@@ -101,7 +82,7 @@ window.AllyOSAuth = (function () {
 
   function esc(x) { return ('' + (x == null ? '' : x)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
-  return { ROLES: ROLES, session: session, signIn: signIn, signOut: signOut, can: can, hasRole: hasRole, guard: guard, greeting: greeting, startDemo: startDemo };
+  return { ROLES: ROLES, session: session, adopt: adopt, signOut: signOut, can: can, hasRole: hasRole, guard: guard, greeting: greeting, startDemo: startDemo };
 
   /* =====================================================================
    * SUPABASE swap (makes the role boundary REAL — server-enforced)

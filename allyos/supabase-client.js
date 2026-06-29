@@ -186,5 +186,36 @@
       .then(function (x) { return { ok: !x.error, error: x.error }; });
   };
 
+  // ---- real session profile (replaces demo accounts): who am I, what clinic, what lines ----
+  Cloud.profile = function () {
+    if (!guard()) return Promise.resolve(null);
+    return Cloud.user().then(function (u) {
+      if (!u) return null;
+      var isAdmin = false, membership = null;
+      return Cloud._sb.from("app_admins").select("user_id").eq("user_id", u.id).maybeSingle()
+        .then(function (a) { isAdmin = !!(a && a.data); })
+        .then(function () {
+          return Cloud._sb.from("clinic_members").select("clinic_id, role, is_md, clinics(name, lines)").eq("user_id", u.id);
+        })
+        .then(function (m) {
+          membership = (m && m.data && m.data[0]) || null;
+          var clinic = membership && membership.clinics ? membership.clinics : null;
+          var lines = clinic && clinic.lines ? clinic.lines : [];
+          var localPart = (u.email || "").split("@")[0].replace(/^dr[._-]?/i, "").replace(/[._-]/g, " ").trim();
+          var nameFromEmail = localPart.replace(/\b\w/g, function (c) { return c.toUpperCase(); }) || "Provider";
+          return {
+            userId: u.id, email: u.email, name: nameFromEmail,
+            role: membership ? membership.role : (isAdmin ? "admin" : "provider"),
+            clinic: clinic ? clinic.name : (isAdmin ? "RenuviaMD — Medical Director" : ""),
+            clinicId: membership ? membership.clinic_id : null,
+            mdOfRecord: membership ? !!membership.is_md : false,
+            mdAudit: isAdmin,
+            lines: { iv: lines.indexOf("iv") >= 0, peptides: lines.indexOf("peptides") >= 0, bhrt: lines.indexOf("bhrt") >= 0 },
+            cloud: true,
+          };
+        });
+    }).catch(function () { return null; });
+  };
+
   window.AllyOSCloud = Cloud;
 })();
