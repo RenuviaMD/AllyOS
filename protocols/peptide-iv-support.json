@@ -1,0 +1,141 @@
+{
+  "meta": {
+    "id": "peptide-iv-support",
+    "title": "AllyOS Peptide ↔ IV Support — wellness-elective matching + claim discipline (DRAFT)",
+    "version": "1.0-draft",
+    "status": "draft",
+    "requires_md_signoff": true,
+    "effective": null,
+    "source": "Consolidated from two provider-supplied packages: stack-level recommender v0.4 + ingredient-level match matrix v0.1 (see protocols/peptide-iv-support/). Safety is DELEGATED to the locked iv-module — this layer adds matching, evidence labels, and claim guardrails only.",
+    "curated_by": "Armando A. Falcon, MD (FL ME 84789) — RenuviaMD® PLLC, AllyOS Compliance Division",
+    "scope": "Selective, OPTIONAL IV support for peptide patients. Wellness-elective: a healthy client's GOAL (energy, glow, recovery, calm) may trigger an ingredient/option match — deficiency is NOT required. The provider's role is SAFETY + contraindication rule-out, not treating a disease.",
+    "posture": {
+      "wellness_goal_trigger_allowed": true,
+      "deficiency_required": false,
+      "safety_gate_required_before_match": true,
+      "mandatory": false,
+      "no_doses": "This layer issues no doses/rates — it routes to the locked IV standing order, which enforces ceilings/screens.",
+      "no_regulatory_logic": true,
+      "evidence_basis": "Evidence here is about what NOT to infuse and what to gate, and how honestly to label the wellness rationale — not proof the IV treats anything or improves the peptide."
+    }
+  },
+
+  "safety_delegation": {
+    "principle": "ONE safety source of truth. This layer never re-states a contraindication/ceiling — it references the locked iv-module ingredient ID. The deterministic engine pulls the gate from there (ingredient-screening-contraindications.json + iv-module ceilings/compatibility).",
+    "map": {
+      "0.9% saline / hydration": "ING_NS", "B-complex": "ING_VITACOMPLEX", "Methylcobalamin / B12": "ING_METHYLB12",
+      "NAD+ IV": "ING_NAD", "Niagen / NR": "ING_NIAGEN_NR", "Glutathione IV push": "ING_GLUTATHIONE",
+      "Vitamin C": "ING_VITC", "Biotin": "ING_BIOTIN", "Magnesium": "ING_MGCL", "Amino blend": "ING_AMINOBLEND",
+      "L-carnitine": "ING_CARNITINE", "Taurine": "ING_TAURINE", "MIC / lipotropic": "ING_LIPOTROPIC",
+      "Zinc / trace": "ING_ZINC", "CoQ10": "ING_COQ10", "NAC": "ING_NAC", "Vitamin D3": "ING_VITD3"
+    },
+    "extensions_to_add_at_iv_module_relock": [
+      "ING_COQ10: explicit 'IM only — no oil-based IV route'",
+      "ING_MGCL: add 'significant hypotension'",
+      "ING_VITC: confirm hemochromatosis / iron-overload note"
+    ],
+    "ceilings_enforced_at_standing_order": "NAD+ 500mg · Glutathione 1200mg (push) · Vitamin C 10g (CARD-VC) · Magnesium 2g · Biotin 10mg · Calcium 1g · B-complex 2mL · Methyl-B12 5000mcg · Amino 10mL"
+  },
+
+  "evidence_labels": {
+    "W2": "Biologic/nutrient wellness support; stronger when deficiency/risk exists.",
+    "W3": "Mechanistic, axis-aligned support; human outcome evidence limited.",
+    "W4": "Market-common wellness support; weak direct outcome evidence.",
+    "A": "Strong deficiency/clinical-use evidence — but deficiency is NOT required for wellness matching.",
+    "S": "Safety gate only."
+  },
+
+  "guardrails": [
+    { "id": "ING_MATCH_WELLNESS_GOAL_ALLOWED", "rule": "A wellness goal alone may trigger eligibility, but the evidence label must say wellness support and cannot guarantee an outcome.", "required": "wellness goal allowed; deficiency/lab risk increases confidence but is not required." },
+    { "id": "ING_MATCH_SAFETY_GATE_FIRST", "rule": "Matching runs ONLY after safety gates clear (from the locked iv-module). Never 'client wants it so infuse despite red flags.'" },
+    { "id": "AXIS_IV_NO_PEPTIDE_ENHANCEMENT_CLAIM", "rule": "Never state an IV improves peptide efficacy unless direct human combination evidence exists.", "blocked": ["boosts peptide", "potentiates peptide", "proven synergy", "makes retatrutide work better", "MOTS-c synergy", "guaranteed energy/hair/fat loss"], "required": "axis-aligned wellness support only." },
+    { "id": "AXIS_IV_PATIENT_TRIGGER_OPTIONAL", "rule": "A wellness goal OR a patient-factor trigger may match. The peptide stack ALONE never auto-indicates an IV; it is selective/optional." },
+    { "id": "AXIS_IV_NIAGEN_DISTINCT", "rule": "Niagen/NR is nicotinamide riboside chloride, a NAD+ precursor — distinct from NAD+ IV; limited IV tolerability data; no peptide-combination evidence. Published as reference; CLINICAL use requires the clinic's MEDICAL DIRECTOR to sign a standing order; injectable NR is commonly 503B-compounded — VERIFY current FDA 503B status." },
+    { "id": "AXIS_IV_NO_DOSES", "rule": "No doses/rates here; route to the specific locked standing order, which enforces the ceiling/screen." }
+  ],
+
+  "axes": [
+    { "axis_id": "AXIS_METABOLIC_INCRETIN_GLUCAGON", "name": "Metabolic incretin / glucagon", "peptides": ["retatrutide", "semaglutide", "tirzepatide", "liraglutide"], "triggers": ["nausea", "vomiting", "diarrhea", "low_oral_intake", "orthostasis", "heat_exposure", "constipation_with_low_fluid"], "support_options": ["Hydration/Electrolyte", "B12/B-complex/Myers"], "do_not_recommend_by_axis_alone": ["NAD+", "Niagen/NR", "Glutathione", "Amino"] },
+    { "axis_id": "AXIS_GH_IGF1_RECOVERY", "name": "GH / IGF-1 / recovery", "peptides": ["tesamorelin", "sermorelin", "CJC-1295", "ipamorelin", "GHRP-2", "GHRP-6", "hexarelin", "MK-677"], "triggers": ["low_protein_intake", "high_training_load", "poor_recovery", "sarcopenia_risk", "cramps"], "support_options": ["Amino blend / recovery", "Magnesium recovery (renal screen)"], "monitoring_reminder": ["IGF-1", "A1c/glucose if GH-axis load", "edema/carpal-tunnel review"] },
+    { "axis_id": "AXIS_MITOCHONDRIAL_AMPK_NAD", "name": "Mitochondrial / AMPK / NAD", "peptides": ["MOTS-c", "SS-31", "epitalon"], "triggers": ["fatigue_recovery_context", "provider_selected_NAD_pathway", "exercise_intolerance_without_red_flags"], "support_options": ["Niagen/NR or NAD+", "B-complex/B12", "Glutathione (redox)", "CoQ10 (IM)"], "red_flags_hold": ["active_chest_pain", "unstable_arrhythmia", "syncope", "hypoxia", "active_malignancy_review", "pregnancy_lactation_review"] }
+  ],
+
+  "ingredient_matrix": [
+    { "ingredient": "0.9% saline / hydration", "iv_module_id": "ING_NS", "goals": ["energy_if_low_intake", "GLP1_tolerance_support", "travel/exercise_recovery"], "axes": ["AXIS_METABOLIC_INCRETIN_GLUCAGON"], "fires_when": ["low_oral_intake", "nausea_vomiting", "diarrhea", "orthostasis", "heat_exposure", "post_travel"], "evidence": "W2", "do_not_claim": ["increases peptide weight loss", "needed for all peptide patients"] },
+    { "ingredient": "B-complex", "iv_module_id": "ING_VITACOMPLEX", "goals": ["energy", "focus", "metabolic_support"], "axes": ["AXIS_MITOCHONDRIAL_AMPK_NAD", "AXIS_GH_IGF1_RECOVERY"], "fires_when": ["client_wants_energy", "low_intake", "weight_management_program", "fatigue_recovery_goal"], "evidence": "W2", "do_not_claim": ["guaranteed energy", "proven peptide potentiator"] },
+    { "ingredient": "Methylcobalamin / B12", "iv_module_id": "ING_METHYLB12", "goals": ["energy", "focus", "neurologic_wellness"], "axes": ["AXIS_METABOLIC_INCRETIN_GLUCAGON", "AXIS_MITOCHONDRIAL_AMPK_NAD"], "fires_when": ["client_wants_energy", "low_intake", "metformin_or_PPI_context", "restricted_diet"], "evidence": "W2 (A when deficiency/risk present)", "do_not_claim": ["B12 makes GLP-1 work better", "guaranteed energy"] },
+    { "ingredient": "NAD+ IV", "iv_module_id": "ING_NAD", "goals": ["energy", "fatigue_recovery", "mitochondrial_support"], "axes": ["AXIS_MITOCHONDRIAL_AMPK_NAD"], "fires_when": ["client_wants_energy", "provider_selected_NAD_pathway", "fatigue_recovery_goal", "no_unstable_CV_symptoms"], "evidence": "W3 (preliminary IV tolerability; outcome limited)", "do_not_claim": ["proven anti-aging", "guaranteed energy", "proven MOTS-c synergy"], "ceiling_note": "500 mg/session, dedicated bag — per locked standing order" },
+    { "ingredient": "Niagen / NR", "iv_module_id": "ING_NIAGEN_NR", "goals": ["energy", "fatigue_recovery", "mitochondrial_support"], "axes": ["AXIS_MITOCHONDRIAL_AMPK_NAD"], "fires_when": ["client_wants_NAD_precursor", "provider_selected_NR_pathway", "no_red_flags"], "evidence": "W3 / B-C (preliminary IV tolerability; not proven outcome)", "status_note": "Published as reference; NOT in the locked primary library. NAD+ PRECURSOR, distinct from NAD+ IV. Clinical use requires the clinic's MEDICAL DIRECTOR to sign a standing order; injectable NR commonly 503B-compounded — VERIFY FDA 503B status.", "do_not_claim": ["same as NAD+ IV", "proven anti-aging", "guaranteed energy", "proven peptide synergy"] },
+    { "ingredient": "Glutathione IV push", "iv_module_id": "ING_GLUTATHIONE", "goals": ["skin_glow", "redox/antioxidant_support", "mitochondrial_support"], "axes": ["AXIS_MITOCHONDRIAL_AMPK_NAD"], "fires_when": ["client_wants_skin_glow", "client_wants_redox_support", "provider_selected_antioxidant_support"], "evidence": "W3 (mechanistic antioxidant; outcome limited)", "do_not_claim": ["detoxes disease", "proven skin lightening", "proven peptide synergy"], "compat_note": "IV push only — never in a Vit C bag (per locked compatibility)" },
+    { "ingredient": "Vitamin C", "iv_module_id": "ING_VITC", "goals": ["skin_collagen_support", "immune_wellness", "redox_support"], "axes": ["AXIS_GH_IGF1_RECOVERY"], "fires_when": ["client_wants_better_skin", "client_wants_glow", "client_wants_immune_wellness", "wound_repair_nutrition_context"], "evidence": "W2 (collagen biology; IV outcome not guaranteed)", "do_not_claim": ["guaranteed collagen", "proven GHK-Cu synergy", "treats infection"], "gate_note": "G6PD screen >2g / CARD-VC ≥6g, 10g ceiling — per locked standing order" },
+    { "ingredient": "Biotin", "iv_module_id": "ING_BIOTIN", "goals": ["hair", "skin", "nails", "beauty_glow"], "axes": ["AXIS_GH_IGF1_RECOVERY"], "fires_when": ["client_wants_better_hair", "client_wants_stronger_nails", "client_wants_skin_glow"], "evidence": "W2/W3 (aesthetic support; nondeficient outcome limited)", "do_not_claim": ["guaranteed hair growth", "proven GHK-Cu synergy", "reverses alopecia"], "gate_note": "Lab interference (troponin/TSH/hCG) — hold before labs / inform lab" },
+    { "ingredient": "Magnesium", "iv_module_id": "ING_MGCL", "goals": ["calm", "muscle_recovery", "sleep_support"], "axes": ["AXIS_GH_IGF1_RECOVERY"], "fires_when": ["client_wants_calm", "client_wants_sleep_recovery", "cramps_tension", "migraine_phenotype"], "evidence": "W2 (safety screen essential)", "do_not_claim": ["treats anxiety", "treats insomnia", "proven Semax/Selank synergy"], "gate_note": "Renal/AV-block/myasthenia/hypotension gate — per locked standing order; slow ≥15 min, 2g ceiling" },
+    { "ingredient": "Amino blend", "iv_module_id": "ING_AMINOBLEND", "goals": ["recovery", "performance", "lean_support"], "axes": ["AXIS_GH_IGF1_RECOVERY"], "fires_when": ["client_wants_recovery", "low_protein_intake", "high_training_load", "sarcopenia_risk"], "evidence": "W3 (recovery support; not peptide outcome proof)", "do_not_claim": ["potentiates GH peptides", "guarantees muscle gain", "accelerates wound healing"] },
+    { "ingredient": "L-carnitine", "iv_module_id": "ING_CARNITINE", "goals": ["energy", "body_composition", "performance"], "axes": ["AXIS_METABOLIC_INCRETIN_GLUCAGON"], "fires_when": ["client_wants_body_composition", "structured_weight_management_program", "training_program"], "evidence": "W3 (metabolic rationale; outcome limited)", "do_not_claim": ["guaranteed fat loss", "proven GLP-1 support", "proven AOD synergy"] },
+    { "ingredient": "Taurine", "iv_module_id": "ING_TAURINE", "goals": ["calm", "focus", "muscle_recovery"], "axes": ["AXIS_GH_IGF1_RECOVERY"], "fires_when": ["client_wants_calm_focus", "stress_recovery", "performance_support"], "evidence": "W3 (mechanistic; direct peptide evidence absent)", "do_not_claim": ["treats anxiety", "proven nootropic synergy"] },
+    { "ingredient": "MIC / lipotropic", "iv_module_id": "ING_LIPOTROPIC", "goals": ["body_composition", "metabolic_support"], "axes": ["AXIS_METABOLIC_INCRETIN_GLUCAGON"], "fires_when": ["client_wants_body_composition", "structured_weight_management_program"], "evidence": "W4 (market-common; weak outcome evidence)", "do_not_claim": ["melts fat", "boosts GLP-1", "proven AOD synergy"] },
+    { "ingredient": "Zinc / trace", "iv_module_id": "ING_ZINC", "goals": ["immune_wellness", "skin", "repair", "hair_nails"], "axes": ["AXIS_GH_IGF1_RECOVERY"], "fires_when": ["client_wants_immune_wellness", "client_wants_skin_hair_nails", "wound_repair_nutrition_context"], "evidence": "W3 (nutrient support; avoid outcome overclaim)", "do_not_claim": ["treats infection", "boosts immune peptides", "guaranteed hair growth"], "gate_note": "Copper/manganese accumulation; no standalone zinc+selenium same session as trace blend" },
+    { "ingredient": "CoQ10", "iv_module_id": "ING_COQ10", "route": "IM ONLY — no oil-based IV route", "goals": ["energy", "mitochondrial_support"], "axes": ["AXIS_MITOCHONDRIAL_AMPK_NAD"], "fires_when": ["client_wants_energy", "mitochondrial_support_request", "provider_selected_mitochondrial_support"], "evidence": "W3 (route/formulation specific)", "do_not_claim": ["proven SS-31 synergy", "guaranteed energy"], "gate_note": "Warfarin/INR screen; IM only" },
+    { "ingredient": "NAC", "iv_module_id": "ING_NAC", "goals": ["redox/antioxidant_support", "glutathione_precursor"], "axes": ["AXIS_MITOCHONDRIAL_AMPK_NAD"], "fires_when": ["client_wants_redox_support", "provider_selected_antioxidant_support"], "evidence": "W3 (redox wellness; not disease treatment)", "do_not_claim": ["treats lung disease", "detoxifies disease", "proven peptide synergy"] },
+    { "ingredient": "Vitamin D3", "iv_module_id": "ING_VITD3", "route": "IM", "goals": ["bone_wellness", "immune_wellness", "mood_wellness"], "axes": ["AXIS_GH_IGF1_RECOVERY"], "fires_when": ["client_wants_bone_wellness", "client_wants_immune_wellness", "low_25OH_vitamin_D"], "evidence": "W2 if low/risk; W3 general", "do_not_claim": ["weight loss", "proven peptide support"] }
+  ],
+
+  "stack_recommender_example": {
+    "stack": "retatrutide + tesamorelin/ipamorelin + MOTS-c",
+    "first_question": "What is the patient actually experiencing: GI intolerance/low intake, poor recovery/low protein, or fatigue/mitochondrial-support request?",
+    "ranked": [
+      { "rank": 1, "option": "Hydration / Electrolyte", "fires_if": ["nausea", "vomiting", "diarrhea", "orthostasis", "low_oral_intake"], "evidence": "B/C", "do_not_say": "improves retatrutide weight loss" },
+      { "rank": 2, "option": "B12 / B-complex / Myers", "fires_if": ["low_intake", "metformin_or_PPI", "deficiency_risk"], "evidence": "A for B12 risk; C generic", "do_not_say": "makes peptides work better" },
+      { "rank": 3, "option": "Amino / Recovery", "fires_if": ["low_protein_intake", "high_training_load", "sarcopenia_risk"], "evidence": "C/D", "do_not_say": "potentiates GH peptides" },
+      { "rank": 4, "option": "Niagen/NR or NAD+", "fires_if": ["provider_selected_mitochondrial_support", "no_CV_red_flags"], "evidence": "B/C tolerability; D combination", "do_not_say": "proves MOTS-c works better" },
+      { "rank": 5, "option": "Glutathione (antioxidant)", "fires_if": ["oxidative_stress_context", "provider_selected"], "evidence": "D", "do_not_say": "detoxes or boosts the stack" }
+    ],
+    "automatic_no_recommendation_if": ["peptide_use_only", "no_symptom_trigger", "no_wellness_goal", "no_provider_rationale"]
+  },
+
+  "stacks": {
+    "note": "Stack roster reconciled. Naming collision resolved; Repair Stack added; orphan GH-secretagogues and melanocortin/HPG agents assigned. Full clinical monographs live in workspace.html; this is the roster + axis mapping.",
+    "list": [
+      { "name": "Metabolic Stack", "components": ["≤1 GLP-1 backbone (sema/tirze/reta/lira)", "1–3 cyclable adjuncts (Sermorelin/AOD-9604/MOTS-c/SS-31)"], "axis": "AXIS_METABOLIC_INCRETIN_GLUCAGON", "note": "The weight/metabolic build (commercial). Resolves the prior naming collision: this keeps 'Metabolic Stack'." },
+      { "name": "Recovery Stack", "components": ["Tesamorelin", "CJC-1295 / Ipamorelin blend", "AOD-9604", "MOTS-c"], "axis": "AXIS_GH_IGF1_RECOVERY", "note": "RENAMED from the former GH/mito 'Metabolic Stack' to remove the collision." },
+      { "name": "Growth Stack", "components": ["Sermorelin", "Ipamorelin"], "axis": "AXIS_GH_IGF1_RECOVERY", "adjuncts_assignable": ["GHRP-2", "GHRP-6", "Hexarelin", "MK-677"] },
+      { "name": "Repair Stack", "components": ["BPC-157", "TB-500", "GHK-Cu"], "axis": "AXIS_GH_IGF1_RECOVERY (tissue repair)", "status": "ADDED — was missing; monograph to author in workspace.html (contraindication union: active/prior malignancy, pregnancy, lactation, age <18, hypersensitivity)." },
+      { "name": "Longevity Stack", "components": ["Epitalon", "MOTS-c", "SS-31"], "axis": "AXIS_MITOCHONDRIAL_AMPK_NAD" },
+      { "name": "Cognition Stack", "components": ["Selank", "Semax", "DSIP", "Cerebrolysin"], "axis": "neuro_calm_focus" },
+      { "name": "Immunity Stack", "components": ["Thymosin Alpha-1", "KPV"], "axis": "immune_modulatory" },
+      { "name": "Vitality Stack", "components": ["PT-141", "Kisspeptin-10"], "axis": "sexual_HPG", "adjuncts_assignable": ["Melanotan-II", "Gonadorelin"] }
+    ]
+  },
+
+  "validation_cases": [
+    "Healthy client on peptides, no symptom/goal → NO automatic IV (selective).",
+    "GHK-Cu + wants hair/skin → biotin/VitC/glutathione/B-complex may match; biotin lab warning; must NOT require deficiency.",
+    "MOTS-c+SS-31 + wants energy → NR/NAD+/B-complex/Mg/glutathione; must NOT say guaranteed energy/synergy.",
+    "Retatrutide + low intake/nausea → hydration + B12; must NOT say IV improves weight loss.",
+    "Semax/Selank/DSIP + calm/focus → B-complex/Mg/taurine; must NOT treat anxiety/ADHD/insomnia.",
+    "Biotin + chest pain/troponin → HOLD pending labs; must NOT clear beauty IV without warning.",
+    "Magnesium match + low eGFR → exclude Mg pending provider review.",
+    "Any NAD/Niagen + active chest pain → HOLD, urgent evaluation.",
+    "Active infection/fever asks immune IV → no wellness IV; medical evaluation."
+  ],
+
+  "sources_note": "Full source audit (with does_not_support per source) in protocols/peptide-iv-support/*source_audit*.csv. Key: NEJM retatrutide 2023; DailyMed semaglutide/tirzepatide/tesamorelin labels; Frontiers NR vs NAD+ IV tolerability 2026; NIH ODS B12/Mg/VitC/Biotin; FDA biotin lab-interference; GHK-Cu / MOTS-c / SS-31 reviews; MSD Myers evidence-limit.",
+
+  "signoff_ledger": {
+    "status": "DRAFT — consolidated + reconciled to the locked iv-module (zero conflicts); pending 3-auditor lock + MD sign-off.",
+    "applied_fixes": [
+      "Niagen status line (published reference; clinical use = clinic Medical Director's standing order).",
+      "'detox' domains → 'redox/antioxidant support'.",
+      "CoQ10 marked IM-only (no oil-based IV route).",
+      "Metabolic Stack naming collision resolved (commercial keeps 'Metabolic Stack'; GH/mito renamed 'Recovery Stack').",
+      "Repair Stack added (BPC-157 + TB-500 + GHK-Cu); GH-secretagogue + melanocortin/HPG orphans assigned."
+    ],
+    "auditors": { "clinical": "PENDING", "citation_regulatory": "PENDING", "schema": "PENDING" },
+    "pending": [
+      "Author the Repair Stack monograph in workspace.html (from the locked BPC-157/TB-500/GHK-Cu components).",
+      "Apply iv-module screen extensions at its next re-lock (CoQ10 no-IV, Mg hypotension, Vit C hemochromatosis).",
+      "3-auditor lock (clinical / citation+regulatory / schema).",
+      "Medical Director sign-off (Falcon, MD) → set effective + flip to locked."
+    ]
+  }
+}
