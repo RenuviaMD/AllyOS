@@ -19,9 +19,10 @@ window.AllyOSAuth = (function () {
   var KEY = 'allyos_session';
 
   var ROLES = {
-    provider: { label: 'Provider (MD/DO/NP/PA)', can: ['gfe', 'authorize', 'execute', 'build', 'view_inventory', 'view_admin'] },
-    nurse:    { label: 'Nurse (RN/LPN)',         can: ['execute'] },
-    admin:    { label: 'Admin / Medical Director',can: ['execute', 'manage_inventory', 'manage_users', 'view_admin', 'audit'] }
+    provider:  { label: 'Provider (MD/DO/NP/PA)', can: ['gfe', 'authorize', 'execute', 'build', 'schedule', 'view_inventory', 'view_admin'] },
+    nurse:     { label: 'Nurse (RN/LPN)',          can: ['execute', 'schedule'] },
+    admin:     { label: 'Admin / Medical Director', can: ['execute', 'schedule', 'manage_inventory', 'manage_users', 'view_admin', 'audit'] },
+    frontdesk: { label: 'Front desk',               can: ['schedule'] }  // scheduling/appointments only — no clinical screens
   };
 
   // ---- session store ----

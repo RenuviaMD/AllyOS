@@ -52,7 +52,7 @@ button:hover{filter:brightness(1.06)}
 <script>
 function nextPage(){ var m=location.search.match(/[?&]next=([^&]+)/); return m?decodeURIComponent(m[1]):'nursing-station.html'; }
 // the Medical Director lands on the Clinic Network (multi-clinic home); clinic staff land on their practice hub.
-function landing(s){ return (s && s.mdAudit) ? 'clinic-network.html' : 'dashboard.html'; }
+function landing(s){ if(!s) return 'dashboard.html'; if(s.mdAudit) return 'clinic-network.html'; if(s.role==='frontdesk') return 'schedule.html'; return 'dashboard.html'; }
 function go(s){ location.href=(location.search.indexOf('next=')>=0)?nextPage():landing(s); }
 function fail(msg){ var err=document.getElementById('err'); err.textContent=msg; err.className='err show'; err.style.color='#f0b3aa'; }
 

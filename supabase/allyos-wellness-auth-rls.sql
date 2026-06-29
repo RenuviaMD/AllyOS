@@ -162,3 +162,8 @@ update public.clinics set lines='{iv,peptides,bhrt}'::text[], status='active' wh
 -- self-read so the app can build the session/profile at login:
 create policy if not exists app_admins_self on public.app_admins for select using (user_id = auth.uid());
 create policy if not exists members_self    on public.clinic_members for select using (user_id = auth.uid());
+
+-- 2026-06-29 · front-desk (non-clinical scheduling) role on clinic_members
+alter table public.clinic_members drop constraint if exists clinic_members_role_check;
+alter table public.clinic_members add constraint clinic_members_role_check
+  check (role = any (array['provider','nurse','admin','frontdesk']));
