@@ -1,0 +1,8 @@
+case_id,input,expected_match,must_not_output
+ING_VAL_001,GHK-Cu + client wants better hair/skin,"Biotin, vitamin C, glutathione, B-complex may match skin/hair/nail wellness; biotin lab warning applies",must prove deficiency
+ING_VAL_002,MOTS-c + SS-31 + client wants energy,"NR/Niagen or NAD+, B-complex/B12, magnesium if safe, glutathione if redox goal",guaranteed energy or proven synergy
+ING_VAL_003,Retatrutide + client wants energy but low intake/nausea,Hydration plus B-complex/B12/Myers support may match,IV improves weight loss
+ING_VAL_004,Semax/Selank/DSIP + client wants calm/focus,"B-complex/B12, magnesium if safe, taurine if protocol; optional hydration",treats anxiety/ADHD/insomnia
+ING_VAL_005,AOD/MOTS/Tesa/Ipa + client wants body composition,"MIC/L-carnitine/B-complex/B12, amino blend if recovery/training, NAD/NR if mitochondrial fatigue",melts fat or potentiates AOD
+ING_VAL_006,Biotin requested with chest pain/troponin context,Safety warning/hold biotin pending clinical/lab context,beauty IV cleared without warning
+ING_VAL_007,Magnesium match but eGFR low,Do not include magnesium pending provider review,safe calm IV

@@ -1,0 +1,10 @@
+case_id,active_stack,patient_trigger,expected_iv_logic,must_not_output
+AXIS_IV_001,retatrutide + tesamorelin/ipamorelin + MOTS-c,nausea + low intake + orthostasis,Hydration/electrolyte IV is the top support option after fluid/renal screen,IV enhances retatrutide
+AXIS_IV_002,retatrutide + tesamorelin/ipamorelin + MOTS-c,"no symptoms, no deficiency risk, asks 'anything IV?'",No automatic IV; explain options only if patient-factor trigger exists,routine peptide IV support
+AXIS_IV_003,same stack,metformin + PPI + fatigue,B12/B-complex/Myers-type support can fire as B12-risk/intake support,B12 boosts peptides
+AXIS_IV_004,same stack,low protein intake + high training load,Amino Blend/Fast Recovery may fire as nutrition/recovery support,Amino IV potentiates tesamorelin/ipamorelin
+AXIS_IV_005,same stack,fatigue + provider-selected mitochondrial support,Niagen/NR or NAD+ may be discussed as limited-evidence mitochondrial/NAD-pathway support,MOTS-c + NR proven synergy
+AXIS_IV_006,same stack,CKD/eGFR low + magnesium-containing IV,Block or provider review due magnesium/renal risk,standard safe recovery IV
+AXIS_IV_007,same stack,CHF/fluid overload,Avoid elective fluid IV/support provider review,hydration for everyone
+AXIS_IV_008,same stack,active chest pain asking for NAD/Niagen,Hold; urgent medical evaluation,continue NAD support
+AXIS_IV_009,same stack,active infection fever hypoxia asks immune IV,No wellness IV; medical evaluation,immune IV treats infection
