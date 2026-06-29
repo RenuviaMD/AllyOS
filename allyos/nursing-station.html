@@ -123,21 +123,33 @@ if(window.AllyOSAuth){ AllyOSAuth.guard(['nurse','provider','admin']); }
 
 // ---- Peptide-IV support (cross-line: shows ONLY for clinics running BOTH IV and peptides) ----
 function clinicLines(){try{return Object.assign({iv:true,peptides:false,bhrt:false},JSON.parse(localStorage.getItem('allyos_clinic_lines_v1')||'{}'));}catch(e){return {iv:true,peptides:false,bhrt:false};}}
+var PEP_FAM_NAME={FAM01:'Metabolic / GLP / Body-Composition',FAM02:'GH / Lean Mass / Recovery',FAM03:'Mitochondrial / Energy / Longevity',FAM04:'Repair / Injury / Connective Tissue',FAM05:'Skin / Hair / Glow / Aesthetic',FAM06:'Sexual Vitality / HPG Axis',FAM07:'Neuro / Focus / Calm / Sleep',FAM08:'Immune / Inflammatory Wellness',FAM09:'Non-GLP Fat-Loss / Metabolic Wellness'};
 function renderPepIvSupport(){
   var el=document.getElementById('pepIvSupport'); if(!el)return;
   var L=clinicLines();
   if(!(L.iv && L.peptides)){ el.style.display='none'; el.innerHTML=''; return; } // not a peptide clinic → hidden
-  fetch('../protocols/peptide-iv-support.json').then(function(r){return r.json()}).then(function(d){
-    var ax=(d.axes||[]).map(function(a){
-      var holds=(a.red_flags_hold||[]); var opts=(a.support_options||[]).map(esc).join(' · ');
-      return '<div class="proto-item"><div class="t">'+esc(a.name||'')+'</div>'+
-        (opts?'<div class="d">Support (if goal/trigger): '+opts+'</div>':'')+
-        (holds.length?'<div class="d" style="color:var(--gold)">⚠ Hold/eval: '+holds.slice(0,4).map(function(x){return esc((''+x).split(' (')[0]);}).join(', ')+(holds.length>4?'…':'')+'</div>':'')+'</div>';
+  // Load the locked support-matching axes AND the locked 9-family hard-stop gate-map.
+  Promise.all([
+    fetch('../protocols/peptide-iv-support.json').then(function(r){return r.json()}).catch(function(){return {};}),
+    fetch('../protocols/peptide-stack-family-safety-gate-map.json').then(function(r){return r.json()}).catch(function(){return {};})
+  ]).then(function(res){
+    var sup=res[0]||{}, gm=res[1]||{};
+    // map each elaborated support axis to its family so support options surface under the right family
+    var AXIS_FAM={AXIS_METABOLIC_INCRETIN_GLUCAGON:'FAM01',AXIS_GH_IGF1_RECOVERY:'FAM02',AXIS_MITOCHONDRIAL_AMPK_NAD:'FAM03'};
+    var supByFam={};(sup.axes||[]).forEach(function(a){var f=AXIS_FAM[a.axis_id];if(f)supByFam[f]=(a.support_options||[]).map(esc).join(' · ');});
+    var fams=(gm.families||[]);
+    var rows=fams.map(function(f){
+      var id=(f.family_id||'').slice(0,5); var nm=PEP_FAM_NAME[id]||(f.family_id||'');
+      var flags=(f.primary_red_flags||[]); var opts=supByFam[id]||'';
+      return '<div class="proto-item"><div class="t">'+esc(id)+' · '+esc(nm)+'</div>'+
+        (opts?'<div class="d">Support (if goal/trigger): '+opts+'</div>':'<div class="d muted">Support matched per goal — routes to the locked standing order.</div>')+
+        (flags.length?'<div class="d" style="color:var(--gold)">⚠ Hard-stop / eval: '+flags.slice(0,3).map(function(x){return esc((''+x).split(' (')[0]);}).join(', ')+(flags.length>3?'…':'')+'</div>':'')+'</div>';
     }).join('');
     el.style.display='block';
-    el.innerHTML='<h2 style="margin-top:0">🧬💧 Peptide-IV Support <span style="font-size:.58rem;color:var(--gold);border:1px solid var(--gold);border-radius:5px;padding:1px 6px;vertical-align:middle;letter-spacing:.06em">SELECTIVE</span></h2>'+
-      '<div class="muted" style="font-size:.7rem;margin-bottom:8px">Optional support for peptide patients. A client goal (or symptom) can match — <b>deficiency not required</b>. Safety gates clear first; <b>no synergy / efficacy claims</b>. Doses come from the locked standing order.</div>'+ax+
-      '<div class="muted" style="font-size:.64rem;margin-top:6px">Advisory — the provider selects; the engine pulls every contraindication/ceiling from the locked IV module. Not a treatment claim.</div>';
+    el.innerHTML='<h2 style="margin-top:0">🧬💧 Peptide-IV Support <span style="font-size:.58rem;color:var(--gold);border:1px solid var(--gold);border-radius:5px;padding:1px 6px;vertical-align:middle;letter-spacing:.06em">SELECTIVE · 9 FAMILIES</span></h2>'+
+      '<div class="muted" style="font-size:.7rem;margin-bottom:8px">Optional support for peptide patients, organized by the 9 locked stack families. A client goal (or symptom) can match — <b>deficiency not required</b>. The shared hard-stop gate clears first; <b>no synergy / efficacy claims</b>. Doses come from the locked standing order.</div>'+
+      (rows||'<div class="muted" style="font-size:.7rem">Family gate-map unavailable.</div>')+
+      '<div class="muted" style="font-size:.64rem;margin-top:6px">Advisory — the provider selects and signs. Hard-stops delegate to the locked <b>wellness-iv-hard-stop</b> gate package; every contraindication/ceiling comes from the locked IV module. Not a treatment claim.</div>';
   }).catch(function(){ el.style.display='none'; });
 }
 

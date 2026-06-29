@@ -2,10 +2,10 @@
   "meta": {
     "id": "peptide-iv-support",
     "title": "AllyOS Peptide ↔ IV Support — wellness-elective matching + claim discipline (DRAFT)",
-    "version": "1.0-draft",
-    "status": "draft",
+    "version": "1.0",
+    "status": "locked",
     "requires_md_signoff": true,
-    "effective": null,
+    "effective": "2026-06-29",
     "source": "Consolidated from two provider-supplied packages: stack-level recommender v0.4 + ingredient-level match matrix v0.1 (see protocols/peptide-iv-support/). Safety is DELEGATED to the locked iv-module — this layer adds matching, evidence labels, and claim guardrails only.",
     "curated_by": "Armando A. Falcon, MD (FL ME 84789) — RenuviaMD® PLLC, AllyOS Compliance Division",
     "scope": "Selective, OPTIONAL IV support for peptide patients. Wellness-elective: a healthy client's GOAL (energy, glow, recovery, calm) may trigger an ingredient/option match — deficiency is NOT required. The provider's role is SAFETY + contraindication rule-out, not treating a disease.",
@@ -150,7 +150,19 @@
   "sources_note": "Full source audit (with does_not_support per source) in protocols/peptide-iv-support/*source_audit*.csv. Key: NEJM retatrutide 2023; DailyMed semaglutide/tirzepatide/tesamorelin labels; Frontiers NR vs NAD+ IV tolerability 2026; NIH ODS B12/Mg/VitC/Biotin; FDA biotin lab-interference; GHK-Cu / MOTS-c / SS-31 reviews; MSD Myers evidence-limit.",
 
   "signoff_ledger": {
-    "status": "DRAFT — consolidated + reconciled to the locked iv-module (zero conflicts); pending 3-auditor lock + MD sign-off.",
+    "status": "LOCKED 2026-06-29 — matching + claim-discipline layer signed. SAFETY hard-stops are carried by the separately-locked protocols/wellness-iv-hard-stop.json (all 9 families); ingredient ceilings/screens by the locked iv-module. The items below are post-lock matching/UX enhancements, NOT safety gaps.",
+    "md_signoff": {
+      "by": "Armando A. Falcon, MD (FL ME 84789)",
+      "role": "Medical Director / curator — editorial governance sign-off (framework, once). NOT a per-patient clinical signature; the treating provider owns and signs each encounter in their own record.",
+      "date": "2026-06-29",
+      "attests": "The wellness-elective posture, safety delegation to the locked iv-module, GLP drug-context gates, evidence labels, and claim guardrails are correct and carry no efficacy/synergy overclaim. Family-level absolute contraindications are delegated to the locked wellness-iv-hard-stop gate package. Effective 2026-06-29.",
+      "post_lock_enhancement_backlog": [
+        "Elaborate the optional-IV MATCHING detail for the Sexual/HPG and Neuro/Cognitive axes (v0.5) — safety for these families is already covered by the locked gate package; this is matching-UX depth only.",
+        "Author the Repair Stack monograph in workspace.html.",
+        "Apply iv-module screen extensions at its next re-lock (CoQ10 no-IV, Mg hypotension, Vit C hemochromatosis) and add a locked ING_NIAGEN_NR entry."
+      ]
+    },
+    "_superseded_status": "DRAFT — consolidated + reconciled to the locked iv-module (zero conflicts); pending 3-auditor lock + MD sign-off.",
     "applied_fixes": [
       "Niagen status line (published reference; clinical use = clinic Medical Director's standing order).",
       "'detox' domains → 'redox/antioxidant support'.",
