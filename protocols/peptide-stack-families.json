@@ -1,11 +1,11 @@
 {
   "meta": {
     "id": "peptide-stack-families",
-    "title": "AllyOS Peptide Stack Family Master Selector — v1 (DRAFT)",
+    "title": "AllyOS Peptide Stack Family Master Selector — v1",
     "version": "1.0",
-    "status": "draft",
+    "status": "locked",
     "requires_md_signoff": true,
-    "effective": null,
+    "effective": "2026-06-29",
     "source": "peptide_stack_family_master_v1 (physician-authored). Canonical top-level selector for the peptides line. Full source in protocols/peptide-stack-families/. Supersedes the v0.4 stack recommender and the loose stacks.list in peptide-iv-support.json.",
     "curated_by": "Armando A. Falcon, MD (FL ME 84789) — RenuviaMD® PLLC, AllyOS Compliance Division",
     "architecture": "client goal → ONE stack family → 2/3/4-peptide build → safety gate → IV/IM support match → standing order.",
@@ -115,7 +115,8 @@
   "sources_ref": "protocols/peptide-stack-families/source_audit_v1.csv (22 sources — DailyMed labels, NEJM retatrutide, PubMed mechanistic, NIH ODS, FDA biotin, MSD Myers — each with does_not_support).",
 
   "signoff_ledger": {
-    "status": "DRAFT — canonical v1 selector, constrained to the 30 injectables; 3-auditor lock complete (all PASS / PASS-WITH-NOTES, notes applied). Audit-clean; pending only the gate package + workspace migration + MD sign-off.",
+    "status": "LOCKED 2026-06-29 — canonical v1 selector, constrained to the 30 injectables; 3-auditor lock complete (all PASS / PASS-WITH-NOTES, notes applied); gate package + workspace migration done; MD sign-off recorded.",
+  "md_signoff": { "by": "Armando A. Falcon, MD (FL ME 84789)", "role": "Medical Director / curator — editorial governance sign-off (framework, once). NOT a per-patient clinical signature.", "date": "2026-06-29", "attests": "The 9-family taxonomy, anchor-one-family rule, claim discipline, and 30-injectable constraint are sound and fabrication-free; family key_gates carry the absolute contraindications; the shared wellness-iv-hard-stop gate package and the workspace 9-family migration are in place. Effective 2026-06-29." },
     "auditors": {
       "clinical": "PASS-WITH-NOTES (2026-06-29) — architecture/anchor-rule/claim-discipline/constraint-honesty sound, zero fabrication. Notes APPLIED: added family-level key_gates surfacing absolute contraindications — FAM01 (MTC/MEN2 + retatrutide CV + MOTS-c hypoglycemia), FAM02 (GH-axis malignancy + IGF-1/glucose), FAM04 & FAM05 (pro-angiogenic active/prior malignancy + GHK-Cu Wilson/copper), FAM06 (hormone-sensitive malignancy + pituitary, kisspeptin/gonadorelin), FAM07 (Cerebrolysin seizure/renal + sedation).",
       "citation_regulatory": "PASS-WITH-NOTES (2026-06-29) — no efficacy overclaim, sources consistent with does_not_support, regulatory posture correct, constraint honestly documented. Notes APPLIED: FAM09 evidence_language now carries the AOD failed-trial efficacy-limitation; FAM07 now surfaces DSIP weak/limited sleep evidence.",

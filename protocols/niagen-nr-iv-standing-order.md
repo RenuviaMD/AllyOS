@@ -124,8 +124,10 @@ neurodegenerative disease" · "Detoxifies the body" · "Makes peptides work bett
 IV" · "Superior clinical outcome vs NAD+ IV" · "Safe in all patients."
 
 ## 13. Source audit summary
-*(⚠ UNDER AllyOS citation audit — status PENDING at the time of this draft. Each citation below will be
-confirmed, reworded, or pulled based on the audit before this standing order is locked into the module.)*
+*(✅ AllyOS citation audit COMPLETE 2026-06-24 — all three primary sources confirmed real and accurately
+represented (Reyna PMID 41704678; Conze PMID 31278280, oral NR background; Hawkins medRxiv preprint —
+unverifiable via PubMed, expected for a preprint, not fake). Verified ≠ proven: tolerability moderate,
+outcomes low. Re-confirmed at the iv-module v1.1 re-lock 2026-06-29.)*
 1. **Reyna et al., Frontiers in Aging, 2026** — retrospective commercial-setting tolerability study; 500 mg
    NR IV (or NAD+ IV) × 4 consecutive days; NR mean infusion 37 ± 13 min; minor transient symptoms; no
    significant ALT/AST, hsCRP, BUN/creatinine, or TSH change at 30 days. Limitations: small, retrospective,
