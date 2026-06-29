@@ -57,7 +57,7 @@ td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
     <div><div class="kick">AllyOS — Admin · Clinic Configuration</div><h1>Clinic <b>Card</b></h1></div>
     <div><a href="dashboard.html">← Dashboard</a> &nbsp; <span class="muted" id="who" style="font-size:.78rem"></span></div>
   </div>
-  <div class="sub">One card per clinic — set the care model, active lines, and staff roster you collected at onboarding. The roster drives every signature box (standing order · GFE · infusion note) by title. <b>PHI-free</b>: no patient data here.</div>
+  <div class="sub">Your clinic's information and staff roster. The roster drives every signature box (standing order · GFE · infusion note) by title. The care model + active lines are provisioned by RenuviaMD (shown read-only). <b>PHI-free</b>: no patient data here.</div>
 
   <div class="fsec">
     <div class="fsec-h"><span class="n">1</span> Clinic information</div>
@@ -72,30 +72,13 @@ td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
   </div>
 
   <div class="fsec">
-    <div class="fsec-h"><span class="n">2</span> Medical director &amp; care model</div>
-    <div class="tog">
-      <div><div class="tl">Dr. Falcon is the Medical Director</div><div class="td">RenuviaMD serves as MD-of-record for this clinic (you carry supervising authority + the GFE). Off = the clinic uses its own MD; AllyOS does not credential or regulate it.</div></div>
-      <label class="switch"><input type="checkbox" id="tFalcon" onchange="syncNote()"><span class="slider"></span></label>
-    </div>
-    <div class="tog">
-      <div><div class="tl">RN-run IV model (GFE done by the MD)</div><div class="td">The floor is RN-run with no on-site GFE provider. Combined with the toggle above, the GFE tab is hidden for this clinic and the GFE is yours. If the clinic has an APP/MD who does the GFE, leave this off.</div></div>
-      <label class="switch"><input type="checkbox" id="tRn" onchange="syncNote()"><span class="slider"></span></label>
-    </div>
-    <div style="margin-top:12px;font-size:.74rem;color:var(--muted)">The Medical Director is a provider on the roster below — verified there by NPI. This card holds the clinic's care model, not a clinic-level NPI.</div>
-    <div id="gfeNote" class="gfenote" style="margin-top:12px"></div>
+    <div class="fsec-h"><span class="n">2</span> Care model &amp; lines <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— provisioned by RenuviaMD (read-only here)</span></div>
+    <div id="careRO" style="font-size:.84rem;color:var(--muted)">Loading…</div>
+    <div style="margin-top:10px;font-size:.72rem;color:var(--muted)">The MD-of-record, GFE model, and active lines are set by RenuviaMD in the network cockpit — not by the clinic. Your part below is the staff roster.</div>
   </div>
 
   <div class="fsec">
-    <div class="fsec-h"><span class="n">3</span> Active lines</div>
-    <div class="lines">
-      <label class="lchip"><input type="checkbox" id="lIv"> 💧 IV &amp; IM Infusion</label>
-      <label class="lchip"><input type="checkbox" id="lPep"> 🧬 Advanced Peptides</label>
-      <label class="lchip"><input type="checkbox" id="lBhrt"> ⚕️ BHRT</label>
-    </div>
-  </div>
-
-  <div class="fsec">
-    <div class="fsec-h"><span class="n">4</span> Users &amp; access <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— define each user, their title &amp; access level</span></div>
+    <div class="fsec-h"><span class="n">3</span> Users &amp; access <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— define each user, their title &amp; access level</span></div>
     <div class="fgrid" style="grid-template-columns:1.3fr .7fr 1fr;align-items:end">
       <div><label>Name</label><input id="rName" placeholder="Milagro Morejon Valero"></div>
       <div><label>Title</label><select id="rCred"><option value="">—</option><option>MD</option><option>DO</option><option>NP</option><option>PA</option><option>APRN</option><option>RN</option><option>LPN</option><option>MA</option></select></div>
@@ -138,18 +121,21 @@ function load(){
   document.getElementById('cCity').value=c.city||'';
   document.getElementById('cPhone').value=c.phone||'';
   document.getElementById('cEmail').value=c.email||'';
-  document.getElementById('tFalcon').checked=c.falconIsMd!==false;
-  document.getElementById('tRn').checked=c.rnIvModel!==false;
-  document.getElementById('lIv').checked=!!l.iv;
-  document.getElementById('lPep').checked=!!l.peptides;
-  document.getElementById('lBhrt').checked=!!l.bhrt;
-  syncNote();renderRoster();
+  renderCareRO(c,l);renderRoster();
 }
-function syncNote(){
-  var md=document.getElementById('tFalcon').checked, rn=document.getElementById('tRn').checked;
-  var el=document.getElementById('gfeNote');
-  if(md&&rn){el.className='gfenote block';el.innerHTML='⛔ <b>GFE tab hidden for this clinic.</b> You (the MD) perform the GFE; the RN floor cannot create one. An RN never appears in the GFE signer list regardless.';}
-  else{el.className='gfenote open';el.innerHTML='✓ <b>GFE tab open.</b> The clinic\'s credentialed APP/MD signs it (from the roster). '+(md?'You remain MD-of-record for oversight.':'The clinic\'s own MD owns the GFE — AllyOS does not regulate it.');}
+// read-only view of the owner-provisioned care model + lines (set in the cockpit, not here)
+function renderCareRO(c,l){
+  var md=c.falconIsMd!==false, rn=!!c.rnIvModel;
+  var keys=['iv','peptides','bhrt'].filter(function(k){return l[k];});
+  var LN={iv:'💧 IV & IM',peptides:'🧬 Peptides',bhrt:'⚕️ BHRT'};
+  var gfe=(md&&rn)?'<span style="color:#f0a59d">GFE done by the MD (tab hidden on the floor)</span>':'<span style="color:var(--green)">GFE done by the clinic\'s credentialed APP/MD</span>';
+  document.getElementById('careRO').innerHTML=
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px">'+
+      '<div><span style="color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.03em">MD-of-record</span><div style="color:var(--ink)">'+(md?'RenuviaMD — Armando Falcon, MD':'The clinic\'s own MD')+'</div></div>'+
+      '<div><span style="color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.03em">Care model</span><div>'+(md&&rn?'RN-run (MD does the GFE)':'On-site provider model')+'</div></div>'+
+      '<div style="grid-column:1/-1"><span style="color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.03em">GFE</span><div>'+gfe+'</div></div>'+
+      '<div style="grid-column:1/-1"><span style="color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.03em">Active lines</span><div style="margin-top:3px">'+(keys.length?keys.map(function(k){return '<span class="badge app" style="margin-right:5px">'+LN[k]+'</span>';}).join(''):'<span class="muted">none</span>')+'</div></div>'+
+    '</div>';
 }
 function pushSeat(n,cred,role,email,lic,npi,vobj){
   SEATS.push({id:sid(),name:n,cred:cred,role:role||roleFor(cred),email:email||'',license:lic||'',status:'active',
@@ -200,18 +186,17 @@ function renderRoster(){
   document.getElementById('roster').innerHTML='<tr><th>Name · email</th><th>Title</th><th>Access</th><th>License</th><th>NPI</th><th></th></tr>'+(rows||'<tr><td colspan="6" class="muted" style="padding:14px;color:var(--muted)">No users yet — add them above.</td></tr>');
 }
 function saveAll(){
-  var cfg={name:document.getElementById('cName').value.trim(),dba:document.getElementById('cDba').value.trim(),
+  // The clinic edits its own INFO + roster. Care model + lines are owner-set (cockpit) — preserve them.
+  var cur=getCfg();
+  var cfg=Object.assign({},cur,{name:document.getElementById('cName').value.trim(),dba:document.getElementById('cDba').value.trim(),
     addr:document.getElementById('cAddr').value.trim(),city:document.getElementById('cCity').value.trim(),
-    phone:document.getElementById('cPhone').value.trim(),email:document.getElementById('cEmail').value.trim(),
-    falconIsMd:document.getElementById('tFalcon').checked,rnIvModel:document.getElementById('tRn').checked};
+    phone:document.getElementById('cPhone').value.trim(),email:document.getElementById('cEmail').value.trim()});
   try{localStorage.setItem(CFG,JSON.stringify(cfg));}catch(e){}
-  var lines={iv:document.getElementById('lIv').checked,peptides:document.getElementById('lPep').checked,bhrt:document.getElementById('lBhrt').checked};
-  try{localStorage.setItem(LKEY,JSON.stringify(lines));}catch(e){}
   setSeats(SEATS);
-  // mirror to the server (owner-only; RLS rejects non-admins). Local stays as the offline cache.
+  // mirror clinic INFO to the server (owner write succeeds; a clinic admin's write is RLS-rejected -> local only).
   if(window.AllyOSCloud&&CLOUD_CLINIC){
-    AllyOSCloud.saveClinicConfig(CLOUD_CLINIC,Object.assign({},cfg,{lines:lines})).then(function(r){
-      flag(r&&r.ok?'✓ Saved to cloud':'✓ Saved locally (cloud write rejected — owner only)');
+    AllyOSCloud.saveClinicConfig(CLOUD_CLINIC,Object.assign({},cfg,{lines:getLines()})).then(function(r){
+      flag(r&&r.ok?'✓ Saved':'✓ Saved locally (clinic info; care model/lines are owner-set)');
     });
   } else { flag('✓ Saved'); }
 }
