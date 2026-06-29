@@ -226,7 +226,7 @@
 .frow input,.frow select,.modal textarea{width:100%;background:#0e1f29;border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink);font-size:.85rem;font-family:inherit}
 .disc{font-size:.66rem;color:var(--muted);text-align:center;padding:8px 16px 24px;line-height:1.5}
 </style>
-<script src="allyos-auth.js"></script></head>
+<script src="allyos-auth.js"></script><script src="allyos-credentials.js"></script></head>
 <body class="allyos">
 <div class="topbar">
   <div class="brand">Renuvia<b>MD</b>® · AllyOS <span style="color:var(--teal)">Chairside</span></div>
@@ -764,7 +764,7 @@ function composeNote(i){var c=CHAIRS[i],p=c.patient,df=15,g=gfeState(p);
       (aes.length?' &nbsp; ⚠ FORM-04 adverse-event report required':'')+'</div></div>'+
     '<div class="nsign">'+(sig?
       ('<div class="nrow"><span class="nk">Provider signature</span><span><b>'+esc(sig.provider)+'</b></span></div><div class="nrow"><span class="nk">Date / time</span><span class="stamp">'+esc(sig.stamp)+' (auto-stamped)</span></div>'):
-      ('<label style="font-size:.72rem;color:#5b6b72">Provider name / credential</label><input id="noteProv" class="noprint" placeholder="Falcon, MD" style="width:100%;padding:8px;border:1px solid #cdd9d7;border-radius:6px;margin-top:3px">'+
+      ('<label style="font-size:.72rem;color:#5b6b72">Signing provider <span style="color:#9aa9b0">(infusion note — MD/DO, APP, or RN)</span></label><select id="noteProv" class="noprint" style="width:100%;padding:8px;border:1px solid #cdd9d7;border-radius:6px;margin-top:3px;background:#fff">'+(window.AllyOSCred?AllyOSCred.options(AllyOSCred.DOC.INFUSION_NOTE,""):"<option value=\"\">— select —</option>")+'</select>'+
        '<div class="noprint" style="display:flex;gap:8px;margin-top:10px"><button class="btn neon-green" style="flex:1" onclick="signNote('+i+')">✓ Sign &amp; date-stamp</button></div>'))+
     '</div></div>'+
     '<div class="noprint" style="display:flex;gap:8px;margin-top:12px">'+(sig?'<button class="btn neon" style="flex:1" onclick="window.print()">🖨 Print / Save PDF</button><button class="btn ghost" style="flex:1" onclick="freeChair('+i+')">Close chart &amp; free chair</button>':'<button class="btn ghost" style="flex:1" onclick="closeModal()">Back</button>')+'</div>';

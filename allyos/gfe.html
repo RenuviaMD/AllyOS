@@ -4,6 +4,7 @@
 <link rel="icon" type="image/png" href="ally-avatar-64.png">
 <link rel="stylesheet" href="allyos-theme.css">
 <script src="allyos-auth.js"></script>
+<script src="allyos-credentials.js"></script>
 <style>
 .wrap{max-width:1080px;margin:0 auto;padding:18px}
 .top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:4px}
@@ -83,7 +84,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
     <button class="btn" onclick="openAdd()">＋ Add patient</button>
   </div>
   <div style="overflow:auto"><table id="tbl"></table></div>
-  <div class="disc">GFE is a provider clinical-judgment act (MD/DO/NP/PA) — an RN cannot perform or sign it. This module is the provider's workspace; the nursing station shows status only and opens the finished report read-only. AllyOS is advisory decision-support; the provider owns every determination and signature. PHI stays on this device. © <span id="yr"></span> RenuviaMD® PLLC.</div>
+  <div class="disc">GFE is a provider clinical-judgment act — performed &amp; signed by an <b>MD/DO or APP (NP/PA)</b>. This module is the provider's workspace; the nursing station shows status only and opens the finished report read-only. AllyOS is advisory decision-support; the provider owns every determination and signature. PHI stays on this device. © <span id="yr"></span> RenuviaMD® PLLC.</div>
 </div>
 <div class="overlay" id="ov"><div class="modal" id="md"></div></div>
 <script>
@@ -168,7 +169,8 @@ function openForm(i){var q=loadQueue(),p=q[i];if(!p)return;var s=stackByCode(p.p
       '<label class="gradio"><input type="radio" name="gElig" value="defer"> ⏸ Defer — needs more info / modify plan</label>'+
       '<label class="gradio"><input type="radio" name="gElig" value="no"> ⛔ Not eligible today</label></div>'+
     '<label class="glab">Clinical note (optional)</label><textarea id="gNote" rows="2" placeholder="Plan / reason if deferred">'+esc(d.note||'')+'</textarea>'+
-    '<div class="frow" style="margin-top:8px"><div><label>Performing provider</label><input id="gProv" value="'+esc(d.provider||((ses&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||''))+'" placeholder="Provider name, credential"></div></div>'+
+    '<div class="frow" style="margin-top:8px"><div><label>Signing provider <span style="color:#5b6b72;font-weight:400">(GFE — MD/DO or APP)</span></label>'+
+      '<select id="gProv">'+(window.AllyOSCred?AllyOSCred.options(AllyOSCred.DOC.GFE,esc(d.provider||'')):'<option value="">— select —</option>')+'</select></div></div>'+
     '<button class="btn" style="width:100%;margin-top:10px" onclick="signForm('+i+')">Sign GFE</button>';
   show();
 }
