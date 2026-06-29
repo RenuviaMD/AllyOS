@@ -1,0 +1,11 @@
+{"agent_id": "UPD_001", "name": "Source Monitor", "purpose": "Check reachability, date/version/hash, redirects, staleness.", "auto_publish_allowed": false}
+{"agent_id": "UPD_002", "name": "Literature Sentinel", "purpose": "Scan PubMed/PMC watchlist for new studies, reviews, corrections, retractions.", "auto_publish_allowed": false}
+{"agent_id": "UPD_003", "name": "Trial Sentinel", "purpose": "Check ClinicalTrials.gov trial status/results/dataTimestamp changes.", "auto_publish_allowed": false}
+{"agent_id": "UPD_004", "name": "Safety Signal Sentinel", "purpose": "Check openFDA/FAERS as signal-only review triggers.", "auto_publish_allowed": false}
+{"agent_id": "UPD_005", "name": "Protocol Diff", "purpose": "Compare current protocols/rules to updated evidence and manifests.", "auto_publish_allowed": false}
+{"agent_id": "UPD_006", "name": "Citation Auditor", "purpose": "Verify every citation supports the exact claim and directness label.", "auto_publish_allowed": false}
+{"agent_id": "UPD_007", "name": "Evidence Grader", "purpose": "Assign evidence levels and prevent overstatement.", "auto_publish_allowed": false}
+{"agent_id": "UPD_008", "name": "Safety Gate Auditor", "purpose": "Identify new red flags, hard stops, or review gates.", "auto_publish_allowed": false}
+{"agent_id": "UPD_009", "name": "Validation Test Agent", "purpose": "Create regression tests for every proposed clinical change.", "auto_publish_allowed": false}
+{"agent_id": "UPD_010", "name": "Clinician Review Queue", "purpose": "Prepare physician/medical-director review rows.", "auto_publish_allowed": false}
+{"agent_id": "UPD_011", "name": "Version Publisher", "purpose": "After signoff only, publish manifest, changelog, rollback info.", "auto_publish_allowed": "metadata_only_without_signoff; clinical_logic_requires_signoff"}

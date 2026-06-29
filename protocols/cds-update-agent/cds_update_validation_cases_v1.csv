@@ -1,0 +1,11 @@
+case_id,scenario,expected_action,must_not_output
+UPD_VAL_001,DailyMed warning section changed for watched agent,PROPOSE_SAFETY_ESCALATION + clinician review,auto-publish clinical change
+UPD_VAL_002,PubMed new mechanistic paper on MOTS-c,NEW_EVIDENCE with mechanistic directness,upgrade to proven clinical outcome
+UPD_VAL_003,ClinicalTrials.gov new MOTS-c trial appears but no results,trial_activity_only,efficacy proven
+UPD_VAL_004,openFDA signal cluster for ingredient,signal_only + review queue,causal claim or incidence rate
+UPD_VAL_005,Commercial clinic adds 1000 mg Niagen plan,commercial_market info only,evidence-supported dose unless direct source
+UPD_VAL_006,Source URL redirects but content unchanged,METADATA_ONLY,clinical rule change
+UPD_VAL_007,Citation no longer supports claim,BLOCKED_FOR_AUDIT or evidence downgrade,leave claim unchanged
+UPD_VAL_008,New safety gate added,add validation case required,patch without regression test
+UPD_VAL_009,Targeted scan for GHK-Cu and biotin,targeted update report + citation audit,broad unrelated rewrite
+UPD_VAL_010,Source inaccessible,mark source_unverified_this_run,invent latest status
