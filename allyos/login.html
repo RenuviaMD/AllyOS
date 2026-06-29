@@ -70,7 +70,8 @@ button:hover{filter:brightness(1.06)}
 <script>
 function fill(email){ document.getElementById('email').value=email; document.getElementById('password').value='demo'; }
 function nextPage(){ var m=location.search.match(/[?&]next=([^&]+)/); return m?decodeURIComponent(m[1]):'nursing-station.html'; }
-function landing(role){ return 'dashboard.html'; } // the practice hub routes onward by line + role
+// the Medical Director lands on the Clinic Network (multi-clinic home); clinic staff land on their practice hub.
+function landing(s){ return (s && s.mdAudit) ? 'clinic-network.html' : 'dashboard.html'; }
 function doLogin(e){
   e.preventDefault();
   var r=AllyOSAuth.signIn(document.getElementById('email').value, document.getElementById('password').value);
@@ -78,15 +79,15 @@ function doLogin(e){
   if(r.error){ err.textContent=r.error; err.className='err show'; return false; }
   var next=nextPage();
   // if a specific page was requested, honor it; else route by role
-  location.href = (location.search.indexOf('next=')>=0) ? next : landing(r.session.role);
+  location.href = (location.search.indexOf('next=')>=0) ? next : landing(r.session);
   return false;
 }
 // already signed in? bounce to role landing
-(function(){ var s=AllyOSAuth.session(); if(s){ location.href = (location.search.indexOf('next=')>=0)?nextPage():landing(s.role); } })();
+(function(){ var s=AllyOSAuth.session(); if(s){ location.href = (location.search.indexOf('next=')>=0)?nextPage():landing(s); } })();
 // reveal cloud sign-in when the hub is reachable; if already cloud-authed, go to dashboard
 (function(){ if(!window.AllyOSCloud)return; AllyOSCloud.ready.then(function(ok){ if(!ok)return;
   document.getElementById('cloudBox').style.display='block';
-  AllyOSCloud.user().then(function(u){ if(u) location.href='dashboard.html'; });
+  AllyOSCloud.user().then(function(u){ if(u) location.href=landing(AllyOSAuth.session()); });
 }); })();
 function cloudLink(){
   var email=document.getElementById('cloudEmail').value.trim(), m=document.getElementById('cloudMsg');
