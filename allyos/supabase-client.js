@@ -201,8 +201,9 @@
           membership = (m && m.data && m.data[0]) || null;
           var clinic = membership && membership.clinics ? membership.clinics : null;
           var lines = clinic && clinic.lines ? clinic.lines : [];
+          var metaName = (u.user_metadata && u.user_metadata.name) || "";
           var localPart = (u.email || "").split("@")[0].replace(/^dr[._-]?/i, "").replace(/[._-]/g, " ").trim();
-          var nameFromEmail = localPart.replace(/\b\w/g, function (c) { return c.toUpperCase(); }) || "Provider";
+          var nameFromEmail = metaName || localPart.replace(/\b\w/g, function (c) { return c.toUpperCase(); }) || "Provider";
           return {
             userId: u.id, email: u.email, name: nameFromEmail,
             role: membership ? membership.role : (isAdmin ? "admin" : "provider"),
