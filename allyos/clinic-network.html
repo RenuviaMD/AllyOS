@@ -390,8 +390,11 @@ function renderCds(){
     var rank={high:0,medium:1,low:2};
     items.sort(function(a,b){var da=!!done[a.id],db=!!done[b.id];if(da!==db)return da?1:-1;return (rank[a.risk]||3)-(rank[b.risk]||3);});
     var open=items.filter(function(it){return !done[it.id];}).length;
+    var highs=items.filter(function(it){return it.risk==='high'&&!done[it.id];}).length;
     card.style.display='';
-    el.innerHTML=items.map(function(it){var d=!!done[it.id];
+    // Collapsed by default — the 🔬 verifier above is the primary review. This deeper Opus
+    // semantic pass is reference-only; expand on demand instead of dumping every row.
+    var rows=items.map(function(it){var d=!!done[it.id];
       return '<div class="cds'+(d?' done':'')+'">'+
         '<span class="rk '+(rank[it.risk]!=null?it.risk:'low')+'">'+esc(it.risk)+'</span>'+
         '<div class="cmid"><div class="ctitle">'+esc(it.summary)+'</div>'+
@@ -399,9 +402,14 @@ function renderCds(){
           (it.action?'<div class="cact">→ '+esc(it.action)+'</div>':'')+'</div>'+
         '<button class="crev" onclick="cdsMark('+"'"+it.id+"'"+','+(d?'false':'true')+')">'+(d?'Reopen':'Mark reviewed')+'</button>'+
       '</div>';
-    }).join('')+
-    '<div class="cdsfoot"><span>'+open+' open · '+items.length+' total — decisions tracked on this device</span>'+
-      '<a target="_blank" href="https://github.com/RenuviaMD/AllyOS/blob/main/allyos/ops-audit-review-queue.csv">Full queue (CSV) ↗</a></div>';
+    }).join('');
+    el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">'+
+        '<span style="font-size:.82rem">Deeper Opus semantic pass — <b>'+open+'</b> open'+(highs?' · <b style="color:#f0a59d">'+highs+' high</b>':'')+'. The verifier above is your primary review; this is reference-only.</span>'+
+        '<button class="crev" onclick="var d=document.getElementById(\'cdsRows\');d.style.display=d.style.display===\'none\'?\'block\':\'none\';">Show / hide</button>'+
+      '</div>'+
+      '<div id="cdsRows" style="display:none;margin-top:10px">'+rows+
+      '<div class="cdsfoot"><span>'+open+' open · '+items.length+' total — decisions tracked on this device</span>'+
+        '<a target="_blank" href="https://github.com/RenuviaMD/AllyOS/blob/main/allyos/ops-audit-review-queue.csv">Full queue (CSV) ↗</a></div></div>';
   }).catch(function(){var card=document.getElementById('cdsCard');if(card)card.style.display='none';});
 }
 function cdsMark(id,on){var d=cdsReviewed();if(on)d[id]=1;else delete d[id];try{localStorage.setItem(CDS_REV,JSON.stringify(d));}catch(e){}renderCds();}
