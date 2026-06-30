@@ -3,6 +3,14 @@
 [build]
   publish = "."
 
+[build.environment]
+  # SUPABASE_URL is the PUBLIC project URL (it ships in the browser client by design,
+  # protected by Row Level Security) — not a secret. Exclude it from secrets scanning so
+  # the build doesn't fail on its presence in supabase-client.js. All real secrets
+  # (STRIPE_SECRET_KEY, SUPABASE_SERVICE_ROLE_KEY, STRIPE_WEBHOOK_SECRET, ANTHROPIC_API_KEY)
+  # are NOT in the repo and remain scanned.
+  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_URL"
+
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
