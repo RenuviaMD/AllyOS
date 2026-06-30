@@ -3,6 +3,14 @@
 @media print{
   @page{ margin:16mm 14mm; }
   body{ background:#fff !important; }
+  /* Re-map the dark theme variables for print so inline var(--ink)/var(--muted) etc.
+     resolve to dark-on-light. This fixes any text that uses inline CSS-variable colors
+     (e.g. the symptom-map domain names), which class overrides alone cannot reach. */
+  #out, .poc{
+    --ink:#1c2b32; --ink2:#1c2b32; --muted:#5b6b72; --dim:#5b6b72; --faint:#7d8b91;
+    --green:#0e6e5a; --teal:#0e8a8a; --amber:#9a6300;
+    --line:#e3ecea; --line2:#cfe3e3;
+  }
   body *{ visibility:hidden !important; }
   #out, #out *{ visibility:visible !important; }
   #out{ position:absolute; left:0; top:0; width:100%; }
