@@ -1,0 +1,15 @@
+{
+  "date": null,
+  "agent": "reg-radar",
+  "mode": "INFO ONLY — awareness; does NOT affect protocol logic or decisions",
+  "status": "pending",
+  "total_federal": 0,
+  "federal": [],
+  "florida_links": [
+    { "label": "FL Administrative Register / Code (flrules.org)", "url": "https://flrules.org", "note": "Official Florida rule notices" },
+    { "label": "FL Board of Pharmacy — compounding rules + agendas", "url": "https://floridaspharmacy.gov", "note": "" },
+    { "label": "FL Board of Medicine — practice rules", "url": "https://flboardofmedicine.gov", "note": "" },
+    { "label": "FL Legislature — bill search", "url": "https://www.flsenate.gov/Session/Bills", "note": "" }
+  ],
+  "unverified": []
+}
