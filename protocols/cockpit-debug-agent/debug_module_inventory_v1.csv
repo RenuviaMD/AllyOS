@@ -1,0 +1,11 @@
+module_id,module_name,source_of_truth_files,debug_checks,clinical_review_required_if_changed
+MOD_001,Peptide Stack Family Selector,peptide_stack_family_master_v1.jsonl; peptide_stack_selector_logic_v1.jsonl,wrong family; wrong build size; cross-family leak,yes
+MOD_002,IV/IM Ingredient Axis Match,peptide_iv_ingredient_axis_match_matrix_v0_1.jsonl,ingredient mismatch; unsupported ingredient claim,yes
+MOD_003,Wellness IV Safety Gate,wellness_iv_hard_stop_gate_rules_v0_1.jsonl,hard stop missed; safety gate not run; missing data ignored,yes
+MOD_004,GLP Support IV/IM,glp_support_iv_im_protocol_v0_1.jsonl; glp_support_iv_im_safety_gates_v0_1.jsonl,GLP red flag missed; hydration suggested incorrectly,yes
+MOD_005,Lab Recommendation Engine,locked_protocol_monitoring_map_v0_1.jsonl; lab_recommendation_engine_rules_v0_1.jsonl,lab invented; lab missed; stale/missing lab ignored,yes
+MOD_006,Patient-Factor Modifier Rules,patient_factor_modifier_rules_v0_1.jsonl,eGFR/A1c/med/comorbidity rule missed,yes
+MOD_007,Source/Citation Audit,*_source_audit_*.csv,unsupported citation; stale source; missing source ID,yes if clinical claim affected
+MOD_008,CDS Update Agent,cds_update_agent_design_package_v1.zip,update failed; source change missed; review queue missing,clinical changes yes
+MOD_009,Niagen/NR Protocol,niagen_plus_nr_protocol_v0_2.md,dose evidence mismatch; commercial vs evidence-supported dose conflated,yes
+MOD_010,Frontend/Cockpit UI,cockpit app repo,display bug; wrong clinic/version shown,no unless clinical display affects decision

@@ -1,0 +1,6 @@
+severity,label,definition,examples,required_action
+SEV-1,Safety critical,Unsafe recommendation or hard stop missed,Chest pain cleared for NAD; low eGFR magnesium suggested,"Contain output, alert cockpit, clinician review"
+SEV-2,Clinical logic wrong,Wrong CDS logic without immediate danger,Wrong stack family; lab rule failed,"Trace, patch proposal, validation, clinician review"
+SEV-3,Evidence/source/version issue,"Citation unsupported, stale protocol, manifest mismatch",Old protocol version used,"Source audit, manifest check, patch if needed"
+SEV-4,Nonclinical/UI/integration bug,Display/API issue with no clinical effect,"Broken link, table rendering issue",Engineering ticket
+SEV-5,Enhancement,Improvement request,Add new filter/family,Product backlog
