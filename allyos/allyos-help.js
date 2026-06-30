@@ -113,15 +113,37 @@
     // run the debugger agent for an instant triage, then forward the diagnosed issue to the MD
     fetch('/.netlify/functions/debug', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ diagnostic: snap, message: msg }) })
       .then(function (x) { return x.json(); })
-      .then(function (d) { var t = d && d.triage; showTriage(t); post(snap, msg, t); })
-      .catch(function () { post(snap, msg, null); });
+      .then(function (d) { var t = d && d.triage; showTriage(t); post(snap, msg, t); pushCloud(snap, msg, t); })
+      .catch(function () { post(snap, msg, null); pushCloud(snap, msg, null); });
+  }
+  // also land the incident in the MD cockpit's triage queue (PHI-free; fail-soft if no table/cloud)
+  function pushCloud(snap, msg, t) {
+    try {
+      var s = ses();
+      if (!window.AllyOSCloud || !s.clinicId) return;
+      AllyOSCloud.ready.then(function (ok) {
+        if (!ok) return;
+        AllyOSCloud.pushIncident(s.clinicId, {
+          environment: snap.page, workflow: snap.page, incident_summary: msg,
+          reporter_role: s.role || '', diagnostic: snap, triage: t || {},
+        });
+      });
+    } catch (e) {}
   }
   function showTriage(t) {
     var r = document.getElementById('allyhelp-result'); if (!r) return;
     if (!t) { r.innerHTML = '<div class="ok">✓ Sent to your Medical Director.</div>'; return; }
-    r.innerHTML = '<div style="background:#0e1f29;border:1px solid #243446;border-radius:9px;padding:10px;margin-top:8px;font-size:.84rem">' +
-      '<b>Quick check:</b> ' + esc(t.likely_cause || '—') + ' <span style="color:#90a3b6">(' + esc(t.scope || '') + (t.confidence ? ', ' + esc(t.confidence) : '') + ')</span>' +
-      (t.clinic_fix ? '<br><b>Try:</b> ' + esc(t.clinic_fix) : '') + '</div>' +
+    var unsafe = t.sev === 'SEV-1' || t.sev === 'SEV-2' || t.safety_concern === 'yes';
+    var safetyBanner = unsafe
+      ? '<div style="background:#3a1414;border:1px solid #6a2020;color:#f7c9c2;border-radius:9px;padding:11px 12px;margin-top:8px;font-size:.86rem">' +
+        '<b style="color:#f0a59d">⛔ ' + esc(t.sev || 'Safety') + ' — hold this recommendation.</b><br>' +
+        'Do not proceed on the AI suggestion. Contact your Medical Director before continuing this patient.</div>'
+      : '';
+    var sevTag = t.sev ? '<span style="color:#90a3b6"> · ' + esc(t.sev) + (t.failure_class && t.failure_class !== 'UNKNOWN' ? ' · ' + esc(t.failure_class) : '') + '</span>' : '';
+    r.innerHTML = safetyBanner +
+      '<div style="background:#0e1f29;border:1px solid #243446;border-radius:9px;padding:10px;margin-top:8px;font-size:.84rem">' +
+      '<b>Quick check:</b> ' + esc(t.likely_cause || '—') + ' <span style="color:#90a3b6">(' + esc(t.scope || '') + (t.confidence ? ', ' + esc(t.confidence) : '') + ')</span>' + sevTag +
+      (t.clinic_fix ? '<br><b>' + (unsafe ? 'Do' : 'Try') + ':</b> ' + esc(t.clinic_fix) : '') + '</div>' +
       '<div class="ok">✓ Also sent to your Medical Director.</div>';
   }
   function post(snap, msg, t) {

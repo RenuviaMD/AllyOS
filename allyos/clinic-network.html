@@ -98,6 +98,7 @@
 
   <div class="kpis" id="kpis"></div>
   <div id="cloudreq"></div>
+  <div id="incidents"></div>
   <div class="card" id="auditCard" style="border-color:#1c4763"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px">📋 System audit &amp; content updates</div><div id="auditBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
   <div class="card" id="cdsCard" style="border-color:#4a3c18;display:none"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:4px">🧬 CDS update — clinician review queue</div><div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">Drift, new evidence, and source triggers the CDS Update Agent surfaced for your decision. Nothing here is auto-applied — clinical changes need your sign-off.</div><div id="cdsBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
   <div id="clinics"></div>
@@ -389,5 +390,54 @@ function renderCloud(){
   });
 }
 renderCloud();
+
+// ---- Incident-triage queue: field incidents reported by clinics (PHI-free) ----
+// Severity-ranked per the Cockpit Debugging Agent (SEV-1 safety first). The MD triages
+// here: mark triaged / close. Fail-soft — empty/hidden if the incidents table isn't live.
+var SEVRANK={'SEV-1':0,'SEV-2':1,'SEV-3':2,'SEV-4':3,'SEV-5':4};
+var SEVCLR={'SEV-1':'high','SEV-2':'high','SEV-3':'medium','SEV-4':'low','SEV-5':'low'};
+function renderIncidents(){
+  if(!window.AllyOSCloud)return;
+  AllyOSCloud.ready.then(function(ok){if(!ok)return;
+    AllyOSCloud.user().then(function(u){if(!u)return;
+      AllyOSCloud.listClinics().then(function(cs){
+        Promise.all((cs||[]).map(function(c){return AllyOSCloud.pullIncidents(c.id).then(function(rs){return {c:c,rs:(rs||[]).filter(function(r){return r.status!=='closed';})};});}))
+        .then(function(groups){
+          var items=[];groups.forEach(function(g){g.rs.forEach(function(r){r._clinic=g.c.name;items.push(r);});});
+          var el=document.getElementById('incidents');if(!el)return;
+          if(!items.length){el.innerHTML='';return;}
+          items.sort(function(a,b){var ra=SEVRANK[a.sev]!=null?SEVRANK[a.sev]:5,rb=SEVRANK[b.sev]!=null?SEVRANK[b.sev]:5;if(ra!==rb)return ra-rb;return (''+(b.created_at||'')).localeCompare(''+(a.created_at||''));});
+          var sev1=items.filter(function(r){return r.sev==='SEV-1';}).length;
+          el.innerHTML='<div class="card" style="border-color:'+(sev1?'#6a2020':'#1c4763')+'"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:'+(sev1?'#f0a59d':'var(--gold)')+';font-weight:700;margin-bottom:10px">🛟 Incident triage — '+items.length+' open'+(sev1?' · '+sev1+' SEV-1 safety':'')+'</div>'+
+            items.map(incRow).join('')+
+            '<div class="cdsfoot"><span>Reported from clinic devices · PHI-free · grounded in the Cockpit Debugging Agent</span></div></div>';
+        });
+      });
+    });
+  });
+}
+function incRow(r){
+  var t=r.triage||{};var sev=r.sev||t.sev||'—';var clr=SEVCLR[sev]||'low';
+  var fix=t.clinic_fix||'';var mdn=t.md_note||'';
+  var meta=[r._clinic, (r.failure_class||t.failure_class), (r.module||t.module), (r.environment)].filter(Boolean).map(esc).join(' · ');
+  return '<div class="cds">'+
+    '<span class="rk '+clr+'">'+esc(sev)+'</span>'+
+    '<div class="cmid"><div class="ctitle">'+esc(r.incident_summary||'(no summary)')+'</div>'+
+      '<div class="cmeta2">'+meta+(r.safety_concern==='yes'?' · <b style="color:#f0a59d">safety</b>':'')+'</div>'+
+      (mdn?'<div class="cact">'+esc(mdn)+'</div>':'')+
+      (fix?'<div class="cmeta2" style="font-size:.66rem;color:var(--muted);margin-top:3px">Clinic told: '+esc(fix)+'</div>':'')+'</div>'+
+    '<span style="display:flex;flex-direction:column;gap:5px;align-self:center">'+
+      (r.status==='open'?'<button class="crev" onclick="incSet('+"'"+esc(r.id)+"','triaged'"+')">Mark triaged</button>':'<span style="font-size:.62rem;color:var(--gold);text-align:center">'+esc(r.status)+'</span>')+
+      '<button class="crev" onclick="incSet('+"'"+esc(r.id)+"','closed'"+')">Close</button>'+
+    '</span>'+
+  '</div>';
+}
+function incSet(id,status){
+  if(!window.AllyOSCloud)return;
+  AllyOSCloud.setIncidentStatus(id,{status:status,reviewer:(ses&&ses.name)||'MD'}).then(function(r){
+    if(r&&r.ok)renderIncidents();
+  });
+}
+renderIncidents();
 </script>
 </body></html>
