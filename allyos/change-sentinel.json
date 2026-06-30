@@ -1,0 +1,8 @@
+{
+  "date": null,
+  "agent": "change-sentinel",
+  "mode": "deterministic — no LLM; facts + links only; fail-closed",
+  "status": "pending",
+  "changes_total": 0,
+  "lines": {}
+}

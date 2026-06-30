@@ -1,0 +1,23 @@
+{
+  "_doc": "Curated, MD-approved watch list for the DETERMINISTIC Change Sentinel (scripts/change-sentinel.py). NO LLM is involved in detection — every flag is a fact from NCBI / ClinicalTrials.gov / openFDA with a link to the exact record. The agent NEVER edits a protocol; it points, the MD reads the primary source, then Approve/Reject. Unverifiable this run => 'unverified', never a fabricated change.",
+  "_rules": {
+    "retraction_watch": "EVERY cited PMID across all published protocols is checked for a PubMed 'Retracted Publication' record. Source of truth: NCBI esummary pubtype. No config needed.",
+    "trial_status_watch": "EVERY cited NCT is checked; flags only if overallStatus is TERMINATED / WITHDRAWN / SUSPENDED. Source of truth: ClinicalTrials.gov v2 statusModule.overallStatus.",
+    "fda_label_watch": "ONLY the agents explicitly listed below (agent -> openFDA brand_name) are watched. Flags only when the label's effective_time is NEWER than the recorded baseline. No fuzzy name matching — unlisted agents are not label-watched (peptides without an FDA label rely on retraction + trial-status only).",
+    "fail_closed": "A source that cannot be reached is reported 'unverified' and is NOT treated as a change."
+  },
+  "fda_label_watch": [
+    { "agent": "fezolinetant", "line": "HRT", "brand": "VEOZAH" },
+    { "agent": "estradiol", "line": "HRT", "brand": "ESTRADIOL" },
+    { "agent": "micronized progesterone", "line": "HRT", "brand": "PROMETRIUM" },
+    { "agent": "testosterone", "line": "HRT", "brand": "ANDRODERM" },
+    { "agent": "bremelanotide", "line": "Peptides", "brand": "VYLEESI" },
+    { "agent": "tesamorelin", "line": "Peptides", "brand": "EGRIFTA" },
+    { "agent": "semaglutide", "line": "Peptides", "brand": "WEGOVY" },
+    { "agent": "tirzepatide", "line": "Peptides", "brand": "ZEPBOUND" },
+    { "agent": "liraglutide", "line": "Peptides", "brand": "SAXENDA" },
+    { "agent": "ondansetron", "line": "IV", "brand": "ZOFRAN" },
+    { "agent": "ketorolac", "line": "IV", "brand": "TORADOL" },
+    { "agent": "famotidine", "line": "IV", "brand": "PEPCID" }
+  ]
+}

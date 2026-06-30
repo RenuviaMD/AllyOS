@@ -100,6 +100,7 @@
   <div id="cloudreq"></div>
   <div id="incidents"></div>
   <div class="card" id="auditCard" style="border-color:#1c4763"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px">📋 System audit &amp; content updates</div><div id="auditBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
+  <div class="card" id="csCard" style="border-color:#1c4763;display:none"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:4px">🛡 Decision-change watch <span style="color:var(--muted);font-weight:400;text-transform:none">· deterministic, no AI guessing</span></div><div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">Only <b>facts that change a decision</b> — a cited paper retracted, a cited trial halted, or an FDA label changed — scoped to <b>our</b> agents, by line. Each links to the source so you read it and Approve/Reject. Silence = nothing changed.</div><div id="csBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
   <div class="card" id="pvCard" style="border-color:#1c5238;display:none"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--green);font-weight:700;margin-bottom:4px">🔬 Published-protocol verification</div><div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">Auto-checks every <b>published</b> protocol (not drafts): each citation resolved live, and what's new per protocol. The machine confirms the real ones — you only see what failed.</div><div id="pvBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
   <div class="card" id="cdsCard" style="border-color:#4a3c18;display:none"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:4px">🧬 CDS update — clinician review queue</div><div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">Drift, new evidence, and source triggers the CDS Update Agent surfaced for your decision. Nothing here is auto-applied — clinical changes need your sign-off.</div><div id="cdsBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
   <div id="clinics"></div>
@@ -352,6 +353,42 @@ function renderPv(){
   }).catch(function(){var c=document.getElementById('pvCard');if(c)c.style.display='none';});
 }
 renderPv();
+
+// Deterministic decision-change watch — per line, source-linked, Approve/Reject (recorded on-device).
+var CS_DEC='allyos_cs_decisions_v1';
+function csDec(){try{return JSON.parse(localStorage.getItem(CS_DEC)||'{}');}catch(e){return {};}}
+function csSet(id,v){var d=csDec();if(v)d[id]=v;else delete d[id];try{localStorage.setItem(CS_DEC,JSON.stringify(d));}catch(e){}renderCs();}
+function csHash(s){var h=5381;for(var i=0;i<s.length;i++){h=((h<<5)+h+s.charCodeAt(i))>>>0;}return 'c'+h.toString(36);}
+function renderCs(){
+  var card=document.getElementById('csCard'),el=document.getElementById('csBody');if(!el)return;
+  fetch('change-sentinel.json?_='+Date.now()).then(function(r){return r.ok?r.json():null;}).then(function(o){
+    if(!o){card.style.display='none';return;}
+    card.style.display='';
+    if(o.status==='pending'||!o.date){el.innerHTML='<div style="color:var(--muted);font-size:.82rem">Awaiting first run — runs daily (04:00 UTC) and on-demand. Deterministic: it reports only retractions, halted trials, and FDA label changes for our agents, each with a source link. No API key needed.</div>';return;}
+    var dec=csDec();var lines=o.lines||{};var total=o.changes_total||0;
+    var head='<div style="font-size:.72rem;color:'+(total?'var(--gold)':'var(--green)')+';margin-bottom:10px">'+(total?('⚠ '+total+' decision-affecting change(s) — read the source, then Approve or Reject.'):'✓ Library current — no decision-affecting changes this run.')+' <span style="color:var(--muted)">Checked '+esc((''+o.date).slice(0,10))+'.</span></div>';
+    var body='';
+    ['IV','Peptides','HRT'].forEach(function(ln){
+      var L=lines[ln]||{};var ch=(L.changes||[]);var w=L.watched||{};
+      body+='<div style="font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--teal);font-weight:700;margin:12px 0 6px">▸ '+ln+' line '+(ch.length?'<span style="color:var(--gold)">· '+ch.length+' change</span>':'<span style="color:var(--green)">· ✓ current</span>')+' <span style="color:var(--muted);font-weight:400">('+(w.pmids||0)+' citations · '+(w.ncts||0)+' trials · '+(w.labels||0)+' labels watched)</span></div>';
+      ch.forEach(function(c){
+        var id=csHash(ln+'|'+c.agent+'|'+c.type+'|'+c.fact);var d=dec[id];
+        body+='<div class="cds'+(d?' done':'')+'"><span class="rk '+(c.type==='RETRACTION'?'high':c.type==='TRIAL_STATUS'?'high':'medium')+'">'+esc(c.type)+'</span>'+
+          '<div class="cmid"><div class="ctitle">'+esc(c.agent)+'</div><div class="cmeta2">'+esc(c.fact)+'</div>'+
+            (c.source_url?'<div class="cact"><a target="_blank" rel="noopener" href="'+esc(c.source_url)+'">Read the source ↗</a></div>':'')+
+            (d?'<div class="cmeta2" style="color:'+(d==='approved'?'var(--green)':'#f0a59d')+'">'+esc(d)+'</div>':'')+'</div>'+
+          '<span style="display:flex;flex-direction:column;gap:5px;align-self:center">'+
+            (d?'<button class="crev" onclick="csSet('+"'"+id+"',''"+')">Reopen</button>':
+               '<button class="crev" style="border-color:#1c5238;color:var(--green)" onclick="csSet('+"'"+id+"','approved'"+')">Approve</button><button class="crev" style="border-color:#6a2020;color:#f0a59d" onclick="csSet('+"'"+id+"','rejected'"+')">Reject</button>')+
+          '</span></div>';
+      });
+      var unv=(L.unverified||[]);
+      if(unv.length){body+='<div class="cmeta2" style="color:var(--muted);margin:2px 0 0 2px">'+unv.length+' source(s) unverified this run (network) — not treated as a change.</div>';}
+    });
+    el.innerHTML=head+body+'<div class="cdsfoot"><span>Deterministic — facts from NCBI / ClinicalTrials.gov / openFDA. Decisions tracked on this device.</span><a target="_blank" href="https://github.com/RenuviaMD/AllyOS/blob/main/allyos/change-sentinel-queue.csv">Queue (CSV) ↗</a></div>';
+  }).catch(function(){var c=document.getElementById('csCard');if(c)c.style.display='none';});
+}
+renderCs();
 
 // ---- CDS update review queue: list the agent's review items for clinician sign-off ----
 // Reads ops-audit-review-queue.csv. Decisions are tracked locally (PHI-free) keyed by a
