@@ -1,5 +1,5 @@
 -- ============================================================================
--- AllyOS · incidents table  (PROPOSAL — NOT YET APPLIED to production)
+-- AllyOS · incidents table  (APPLIED 2026-06-30 → project allyos-wellness)
 -- ----------------------------------------------------------------------------
 -- Backs the Cockpit Debugging / Incident-Triage Agent (protocols/cockpit-debug-agent).
 -- A clinic reports a field incident from the dashboard; it lands here PHI-FREE and

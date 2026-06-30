@@ -30,6 +30,11 @@ This is the **third** AllyOS agent design, and it is complementary, not redundan
 - PHI-free by contract: the trigger schema **forbids** name, full DOB, phone, email, address, SSN, insurance/payment, raw chart.
 - Never downgrade a SEV-1 without clinician review; never call a commercial source clinical proof.
 
-## What is built vs. pending
-- **Built (UI slice, local-first):** a "Report a problem" incident modal on the clinic dashboard (captures the schema's required fields + a PHI guard) and an **Incident triage** card on the cockpit that severity-ranks open incidents for the MD. Stored device-local for now, in the incident-schema shape.
-- **Pending (one approval):** a Supabase `incidents` table + RLS (mirrors `gfe_requests`) so a clinic's incident reaches the cockpit cross-device, and the Opus triage runner (`scripts/incident-triage.py`) that produces the root-cause report + patch proposal. Proposed migration: `supabase/incidents-table.sql` (NOT yet applied).
+## What is built (live as of 2026-06-30)
+- **INSTANT deterministic safety hold** (`allyos-help.js` → `instantScreen`): the moment a provider reports an issue, a synchronous, offline, zero-latency screen matches emergency/contraindication red flags (chest pain, anaphylaxis/airway, stroke, syncope, seizure; pregnancy, renal+electrolyte, melanoma+melanocortin, uncontrolled-HTN+PT-141) and shows a **⛔ STOP** hold *before any network call*. The provider never waits on the API or the MD. Bias: round UP, never downgrade.
+- **AI triage (background enrichment):** `netlify/functions/debug.js` — grounded in this package (TECHNICAL vs CLINICAL track, SEV-1..5, clinical failure classes, module inventory). It refines/labels the incident but can **never downgrade** the instant deterministic verdict (`mergeTriage` keeps the more severe SEV).
+- **Cockpit incident-triage queue:** `clinic-network.html` — SEV-1-first ranking; the MD marks triaged / closed. Backed by the **applied** Supabase `incidents` table (`supabase/incidents-table.sql`), RLS mirrors `gfe_requests` (clinics report, only MD/owner triages).
+
+## Pending (next)
+- The Opus triage *runner* that turns a confirmed incident into a full root-cause report + patch proposal + validation case (`debug_root_cause_report_template`, `debug_patch_proposal_schema`) for MD sign-off — today the cockpit shows the triage; the structured patch artifact is manual.
+- Proactive point-of-care screening: run `instantScreen` at the moment Ally/chairside *shows* a suggestion (not only when the provider reports it), so the hold appears without anyone having to ask.
