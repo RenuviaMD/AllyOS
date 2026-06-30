@@ -1,0 +1,54 @@
+{
+  "package_name": "mens_hrt_cds_package_v0_1",
+  "date_updated": "2026-06-30",
+  "scope": "men's testosterone/HRT and wellness triage decision support",
+  "wellness_goal_trigger_allowed": true,
+  "trt_requires_diagnostic_gate": true,
+  "no_dosing_logic": true,
+  "no_regulatory_logic": true,
+  "counts": {
+    "modules": 10,
+    "safety_gates": 9,
+    "guardrails": 4,
+    "validation_cases": 12,
+    "source_audit_records": 6
+  },
+  "unresolved_source_ids": [],
+  "files": [
+    {
+      "filename": "mens_hrt_cds_modules_v0_1.jsonl",
+      "bytes": 2903,
+      "sha256": "cf0384d5d41706686a4ca4aa361d36d0c83322332f5835dcbbe2acd7db297c1d"
+    },
+    {
+      "filename": "mens_hrt_safety_gates_v0_1.jsonl",
+      "bytes": 2652,
+      "sha256": "6113b198db7a6aa5b60ad6c938935a951dd370b2cc05883c6f738c32b57e5f09"
+    },
+    {
+      "filename": "mens_hrt_selector_logic_v0_1.jsonl",
+      "bytes": 759,
+      "sha256": "6e84357bb90b720e9f96e0a3120802872b0e859690799cb03051d97b077a372f"
+    },
+    {
+      "filename": "mens_hrt_language_guardrails_v0_1.jsonl",
+      "bytes": 1176,
+      "sha256": "49d461b70b2102e558bf6f2e19ed9fd362115e12acc2afaf7c24ad925ac7983a"
+    },
+    {
+      "filename": "mens_hrt_source_audit_v0_1.csv",
+      "bytes": 2736,
+      "sha256": "085e50d2066b3cd67b708a9f523613f688988730fec93aeab7841e240a16f846"
+    },
+    {
+      "filename": "mens_hrt_validation_cases_v0_1.csv",
+      "bytes": 1206,
+      "sha256": "acc42a57dbd3592430e85a9c338606889d1f4185dec1b0e443a673bf9cc63e2f"
+    },
+    {
+      "filename": "mens_hrt_cds_report_v0_1.md",
+      "bytes": 1326,
+      "sha256": "bac4a52aee4722be3d02984ab0dbe2388ee6e65a242db0393d29ad7fb93996da"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+case_id,scenario,expected_output,must_not_output
+MEN_VAL_001,"Energy only, no testosterone labs",wellness pathway + lab evaluation; no TRT candidate,testosterone for energy
+MEN_VAL_002,Low libido + two low morning T levels,TRT candidate logic may proceed after safety gates,diagnosis from one lab
+MEN_VAL_003,Planning fertility,fertility gate; no automatic exogenous TRT,TRT cleared
+MEN_VAL_004,Elevated hematocrit,hold/provider review before TRT,start TRT
+MEN_VAL_005,MI 3 months ago,CV gate; hold/specialist review,routine TRT
+MEN_VAL_006,Untreated severe OSA,hold/review until OSA addressed,TRT cleared
+MEN_VAL_007,Severe LUTS/BPH symptoms,urology/provider review and monitoring,auto-clear
+MEN_VAL_008,Age-related low T wants cognition/energy,block energy/cognition claim; no TRT for that purpose,TRT for vitality
+MEN_VAL_009,Age-related low T with sexual dysfunction,shared decision and response tracking if safety gates clear,guaranteed benefit
+MEN_VAL_010,"Diabetes, asks testosterone for glucose",block glycemic-control claim,T improves diabetes
+MEN_VAL_011,PSA high without urology eval,prostate/PSA gate; hold,TRT cleared
+MEN_VAL_012,BP uncontrolled,BP/CV review before TRT,ignore BP
