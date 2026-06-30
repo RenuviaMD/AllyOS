@@ -110,7 +110,7 @@
       <div class="fld"><label>Clinic name</label><input type="text" id="cfgName" placeholder="Clinic name"></div>
       <div class="fld"><label>City, state</label><input type="text" id="cfgCity" placeholder="Coral Gables, FL"></div>
       <div class="fld"><label>Care model</label>
-        <label class="tgl"><div><div class="tl">RenuviaMD is MD-of-record</div><div class="td">You carry the GFE + oversight (counts toward the §400.9935 cap of 5). Off = clinic uses its own MD.</div></div><input type="checkbox" id="cfgMd"></label>
+        <label class="tgl"><div><div class="tl">RenuviaMD is MD-of-record</div><div class="td">You carry the GFE + oversight. Off = clinic uses its own MD.</div></div><input type="checkbox" id="cfgMd"></label>
         <label class="tgl"><div><div class="tl">RN-run IV model</div><div class="td">Licensed RN runs IVs under your standing orders; you sign the GFE.</div></div><input type="checkbox" id="cfgRn"></label>
       </div>
       <div class="gfeNote" id="cfgGfe">GFE: …</div>
@@ -127,7 +127,7 @@
     </div>
   </div>
 
-  <div class="disc">Platform revenue = per clinic, by active lines: 1 line $199 · 2 lines $349 · 3 lines $499/mo (bundle &amp; save). MD-of-record is billed separately at myFloridaMedicalDirector.com and is <b>not</b> in this total. MD-of-record clinics count toward the FL §400.9935 cap of 5 per physician; clinics that use their own MD are not capped and are not your liability. Today's GFE counts come from a clinic's own device (this one shows the active clinic); remote clinics show — until the PHI-free hub is wired. © <span id="yr"></span> RenuviaMD® PLLC.</div>
+  <div class="disc">Platform revenue = per clinic, by active lines: 1 line $199 · 2 lines $349 · 3 lines $499/mo (bundle &amp; save). MD-of-record is billed separately at myFloridaMedicalDirector.com and is <b>not</b> in this total; supervision-cap tracking (FL §400.9935) lives in ACHA Pro, not here. Today's GFE counts come from a clinic's own device (this one shows the active clinic); remote clinics show — until the PHI-free hub is wired. © <span id="yr"></span> RenuviaMD® PLLC.</div>
 </div>
 <script>
 document.getElementById('yr').textContent=new Date().getFullYear();
@@ -136,9 +136,9 @@ if(window.AllyOSAuth){AllyOSAuth.guard(['admin','provider']);ses=AllyOSAuth.sess
   if(ses&&!ses.mdAudit){document.documentElement.innerHTML='<body style="font-family:-apple-system,Segoe UI,Arial,sans-serif;background:#05080f;color:#eaf1f6;display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center;padding:24px"><div><h2>Medical-Director cockpit</h2><p style="color:#90a3b6;max-width:46ch">The Clinic Network is the Medical Director\'s multi-clinic view — not a single-clinic feature.</p><p style="margin-top:14px"><a style="color:#2ee6d6" href="dashboard.html">← Dashboard</a></p></div></body>';}
   if(ses)document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+((ses.credential==='MD'||ses.credential==='DO')?'FL #ME 84789 · ':'')+'Medical Director';
 }
-var PRICE=199, CAP=5, CKEY='allyos_owner_clinics_v1';
-// platform pricing: per clinic, bundle by active-line count (MD-of-record is billed externally
-// at myFloridaMedicalDirector.com — NOT counted here; the MD KPI below is a §400.9935 cap tracker).
+var CKEY='allyos_owner_clinics_v1';
+// platform pricing: per clinic, bundle by active-line count. MD-of-record is billed externally
+// at myFloridaMedicalDirector.com, and the §400.9935 cap is tracked in ACHA Pro — NOT the cockpit.
 var BUNDLE={0:0,1:199,2:349,3:499};
 function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function loadClinics(){try{var c=JSON.parse(localStorage.getItem(CKEY)||'null');if(c&&c.length)return c;}catch(e){}
@@ -173,7 +173,7 @@ function render(){
   var g=gfeCounts();
   document.getElementById('kpis').innerHTML=
     kpi('teal','🏥 Active clinics',cl.length,'')+
-    kpi('amber','⚖ MD-of-record',mdCount+' / '+CAP,'FL §400.9935 cap')+
+    kpi('amber','⚖ MD-of-record',mdCount,'clinics you cover')+
     kpi('green','$ MRR','$'+mrr.toLocaleString(),'recurring monthly')+
     kpi('teal','💧 Lines active',linesActive,'across the network')+
     kpi('amber','🩺 Pending GFE',g?g.pend:'—','active clinic today');
@@ -205,9 +205,8 @@ function pendingPanel(c){
     p.map(function(r){return '<a class="pgrow" href="gfe.html?enc='+encodeURIComponent(r.enc)+'"><span class="pgid">'+esc(r.enc)+'</span><span class="pgplan">'+esc(r.plan)+'</span><span class="pggo">Do GFE →</span></a>';}).join('')+'</div>';
 }
 function slotHTML(n){
-  // No platform cap on clinics — the §400.9935 cap of 5 applies ONLY to MD-of-record clinics
-  // (tracked in the KPI above). Clinics that use their own MD are unlimited and uncapped.
-  return '<div class="slot"><div><div class="st">Onboard a clinic</div><div class="sd">You set the care model &amp; lines · <b>unlimited</b> clinics on the platform — only <b>MD-of-record</b> clinics count toward the §400.9935 cap of '+CAP+'</div></div>'+
+  // No platform cap on clinics. (MD-of-record supervision limits, if any, are tracked in ACHA Pro.)
+  return '<div class="slot"><div><div class="st">Onboard a clinic</div><div class="sd">You set the care model &amp; active lines · <b>unlimited</b> clinics on the platform</div></div>'+
     '<button class="add" onclick="openCfg(null)"><span class="addic">+</span> Add clinic</button></div>';
 }
 render();
@@ -237,9 +236,9 @@ loadCloudClinics();
 var cfgEditingId=null;
 function findClinic(id){for(var i=0;i<CLINICS.length;i++){if(CLINICS[i].id===id)return CLINICS[i];}return null;}
 function gfeText(md,rn){
-  if(md&&rn)return 'GFE: RenuviaMD MD-of-record. RN runs IVs under standing orders; you sign each GFE (counts toward the §400.9935 cap).';
-  if(md)return 'GFE: RenuviaMD MD-of-record. You sign each clinic GFE (counts toward the §400.9935 cap of 5).';
-  return 'GFE: the clinic’s own MD is responsible — not capped, not your liability.';
+  if(md&&rn)return 'GFE: RenuviaMD MD-of-record. RN runs IVs under standing orders; you sign each GFE.';
+  if(md)return 'GFE: RenuviaMD MD-of-record. You sign each clinic GFE.';
+  return 'GFE: the clinic’s own MD is responsible — not your liability.';
 }
 function refreshGfeNote(){document.getElementById('cfgGfe').textContent=gfeText(document.getElementById('cfgMd').checked,document.getElementById('cfgRn').checked);}
 ['cfgMd','cfgRn'].forEach(function(id){document.getElementById(id).addEventListener('change',refreshGfeNote);});
