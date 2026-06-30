@@ -1,0 +1,14 @@
+category,lab_or_measure,timing,purpose,decision_support_note
+Androgen axis,"Total Testosterone, morning",Baseline; repeat confirmation if low/borderline,Core androgen-axis mapping,Do not use one random/non-morning value as sole basis for testosterone pathway
+Androgen axis,Free Testosterone + SHBG,"Baseline when borderline, SHBG risk, obesity/aging/thyroid/liver context",Clarifies bioavailable androgen pattern,Use with clinical symptoms and total T
+Pituitary-gonadal axis,LH + FSH,After low T confirmed or baseline protocol,Differentiate primary vs secondary pattern,Triggers additional workup if secondary pattern suspected
+Estrogen balance,Sensitive Estradiol,Baseline if obesity/aromatization symptoms/gynecomastia/sexual symptoms,Maps aromatization and symptom context,Do not over-suppress estradiol by default
+Adrenal/vitality,DHEA-S,Baseline optional/targeted,Adrenal androgen reserve,Supplement decisions require provider review
+Safety,CBC with Hematocrit,Baseline; 6–12 weeks/3 months; 6 months; annual or per protocol,Polycythemia safety monitoring,Hold/review if elevated or missing before testosterone
+Safety/metabolic,CMP,Baseline; 3–6 months; annual,Liver/kidney/metabolic screen,Helps interpret fatigue/supplement safety
+Prostate,PSA ± prostate exam when age/risk appropriate,Baseline; follow per age/risk/provider protocol,Prostate risk screening/monitoring,Elevated/concerning findings require review
+Cardiometabolic,"BP, waist circumference, BMI/body composition",Every visit,CV/metabolic response and safety,BP warning included in 2025 FDA update
+Metabolic,"Fasting glucose, HbA1c, fasting insulin/HOMA-IR",Baseline; 3–6 months; annual,Insulin resistance/metabolic phenotype,TRT is not a glycemic-control treatment
+Lipids,Lipid panel ± ApoB,Baseline; 3–6 months; annual,Cardiometabolic risk,Guides lifestyle/cardiometabolic optimization
+Fatigue differential,TSH + Free T4,Baseline if fatigue/weight/mood symptoms,Rule out thyroid mimic,Do not misattribute all fatigue to testosterone
+Nutrient/fatigue,"Vitamin D, B12, ferritin/iron when indicated",Baseline/targeted,"Fatigue, muscle, bone, recovery differential",Treat deficiencies separately
