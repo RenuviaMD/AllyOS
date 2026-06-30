@@ -1,7 +1,43 @@
 {
-  "date": null,
+  "date": "2026-06-30T07:54:04.510039Z",
+  "model": "claude-opus-4-8",
   "agent": "ops-audit",
-  "status": "pending",
-  "detail": "Wired: source sentinels (PubMed/ClinicalTrials) + content auditor. Awaiting first CI run — add ANTHROPIC_API_KEY (GitHub Actions secret), then Run now.",
-  "modules": []
+  "mode": "source_scan+protocol_only+citation_audit",
+  "modules": [
+    {
+      "module": "protocols/iv-module.json",
+      "verdict": "PASS-WITH-NOTES",
+      "review_items": 7
+    },
+    {
+      "module": "protocols/peptide-module.json",
+      "verdict": "PASS-WITH-NOTES",
+      "review_items": 6
+    },
+    {
+      "module": "protocols/bhrt-module.json",
+      "verdict": "PASS-WITH-NOTES",
+      "review_items": 5
+    },
+    {
+      "module": "protocols/peptide-stack-families.json",
+      "verdict": "PASS-WITH-NOTES",
+      "review_items": 6
+    },
+    {
+      "module": "protocols/wellness-iv-hard-stop.json",
+      "verdict": "PASS-WITH-NOTES",
+      "review_items": 5
+    },
+    {
+      "module": "protocols/peptide-iv-support.json",
+      "verdict": "ERROR",
+      "review_items": 1
+    }
+  ],
+  "sources_unverified": [],
+  "source_triggers": 11,
+  "status": "NOTES",
+  "fails": 0,
+  "review_total": 41
 }
