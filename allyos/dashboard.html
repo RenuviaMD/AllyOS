@@ -107,7 +107,7 @@ function render(){
   T.push({t:'Schedule',i:'📅',href:'schedule.html',roles:['provider','admin','nurse']}); // appointments per line + live IV chair board
   if(!gfeBlocked()) T.push({t:'GFE Dashboard',i:'🩺',href:'gfe.html',roles:['provider','admin'],iv:true}); // the IV gate; hidden when the MD does the GFE for an RN-run clinic
   T.push({t:'Clinic Card',i:'🏥',href:'clinic-card.html',roles:['provider','admin']}); // admin: clinic info · users & access
-  T.push({t:'Billing',i:'💳',roles:['provider','admin'],fn:'openPortal()'}); // Stripe customer portal — plan/card/cancel
+  T.push({t:'Billing',i:'💳',roles:['provider','admin'],fn:'openBilling()'}); // subscribe (Checkout) or manage (Portal)
   T.push({t:'Backup & Restore',i:'💾',roles:['provider','admin'],fn:'openBackup()'}); // device data safety (occasional)
   document.getElementById('tools').innerHTML=T.filter(function(x){
     if(x.iv && !on.iv) return false;
@@ -155,6 +155,19 @@ function openPortal(){
   fetch('/.netlify/functions/billing-portal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clinic_id:cid})})
     .then(function(r){return r.json();})
     .then(function(d){ if(d&&d.url){location.href=d.url;} else if(d&&d.error==='no_customer'){alert('No subscription yet — open a line to start one.');} else {alert(d&&d.error==='not_configured'?'Billing isn’t switched on yet.':'Billing portal unavailable.');} })
+    .catch(function(){alert('Could not reach billing right now.');});
+}
+// Billing tool entry: no subscription yet -> start Checkout; existing customer -> open the Portal.
+function openBilling(){
+  var cid=billClinicId();
+  if(!cid){alert('Sign in to your clinic first.');return;}
+  fetch('/.netlify/functions/billing-portal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clinic_id:cid})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d&&d.url){location.href=d.url;}                         // existing customer → manage
+      else if(d&&d.error==='no_customer'){startCheckout();}      // first time → subscribe (current line count)
+      else {alert(d&&d.error==='not_configured'?'Billing isn’t switched on yet (Stripe key not set).':'Billing unavailable right now.');}
+    })
     .catch(function(){alert('Could not reach billing right now.');});
 }
 if(location.search.indexOf('billing=success')>=0){setTimeout(function(){alert('✓ Subscription started — thank you. Manage it any time under the Billing tool.');},300);}
