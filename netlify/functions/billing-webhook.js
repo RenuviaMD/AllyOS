@@ -7,12 +7,14 @@ const B = require("./lib/billing");
 async function applySub(clinicId, sub) {
   if (!clinicId || !sub) return;
   const item = (sub.items && sub.items.data && sub.items.data[0]) || {};
+  // current_period_end lives on the subscription (older API) OR on the item (2025+ API versions)
+  const cpe = sub.current_period_end || item.current_period_end || null;
   await B.sbPatch("clinics?id=eq." + encodeURIComponent(clinicId), {
     stripe_subscription_id: sub.id,
     stripe_customer_id: sub.customer,
     subscription_status: sub.status || "none",
     plan: (item.quantity || 1) + "-line",
-    current_period_end: sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null,
+    current_period_end: cpe ? new Date(cpe * 1000).toISOString() : null,
     billing_updated_at: new Date().toISOString(),
   });
 }
