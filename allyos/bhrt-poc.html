@@ -131,42 +131,75 @@ function renderMrs(){
 }
 renderChips();renderMrs();
 
-// ---- clinical domains: score from items, map to source-grounded oriented recommendations ----
+// ---- clinical domains (for the symptom map) ----
 function score(keys){var m=0;keys.forEach(function(k){if((sev[k]||0)>m)m=sev[k];});return m;}
 function pri(s){return s>=3?['crit','CRITICAL']:s===2?['high','HIGH']:['mod','MODERATE'];}
-
 function domains(){
   return [
-   {name:'Vasomotor (VMS)', s:score(['vms','vms2']),
-    mech:'Low estradiol → hypothalamic thermoregulatory dysregulation → narrowed thermoneutral zone.',
-    rx:function(g){ return systemicEstrogen(g, 'VMS') + nonHormonalVMS(); }},
-   {name:'Genitourinary (GSM)', s:score(['vag','bladder']),
-    mech:'Low estradiol → urogenital atrophy → loss of glycogen/lactobacilli → ↑ vaginal pH.',
-    rx:function(){ return '<div class="rx"><b>Local (vaginal) estrogen</b> — low-dose vaginal estradiol cream/tablet/ring <i>(FDA-approved)</i>; alternatives: vaginal DHEA/prasterone, or ospemifene PO. Local therapy is not gated by the systemic-estrogen uterus rule. <span style="color:var(--muted)">NAMS 2022 · AUA 2025 GSM.</span></div>' + compNote(); }},
-   {name:'Sleep', s:score(['sleep']),
-    mech:'VMS + low progesterone → loss of GABA-ergic sleep effect → circadian disruption.',
-    rx:function(g){ return '<div class="rx"><b>Micronized progesterone at bedtime</b> <i>(FDA-approved; also required for endometrial protection if uterus intact + systemic estrogen)</i> — GABA-ergic, sleep-supportive. Treat co-existing VMS. <span style="color:var(--muted)">NAMS 2022.</span></div>' + compNote(); }},
-   {name:'Mood / anxiety / irritability', s:score(['mood','irrit','anx']),
-    mech:'Low estradiol → ↓ serotonin/dopamine signaling.',
-    rx:function(){ return '<div class="rx">Menopause-transition mood symptoms may improve with <b>systemic estradiol</b> (see VMS). For a standalone/severe mood disorder, evaluate/refer to mental-health care — do not treat primary psychiatric illness with hormones alone. <span style="color:var(--muted)">NAMS 2022.</span></div>'; }},
-   {name:'Cognition / exhaustion', s:score(['cog']),
-    mech:'Low estradiol → impaired hippocampal function; often secondary to sleep/VMS burden.',
-    rx:function(){ return '<div class="rx">Treat the drivers (VMS, sleep). <b>Do not initiate hormone therapy for cognition alone</b> — not an evidence-based indication. <span style="color:var(--muted)">ACP 2020 · NAMS 2022.</span></div>'; }},
-   {name:'Sexual — low desire + distress', s:score(['sex']),
-    mech:'Low androgens + estradiol → urogenital atrophy + dopaminergic changes.',
-    rx:function(){ return '<div class="rx">First address GSM and reversible factors (sleep, mood, meds, relationship). If <b>low desire WITH personal distress (HSDD)</b> persists: a <b>provider-level testosterone discussion</b> — off-label in women, HSDD only, not for energy/mood/weight. <span style="color:var(--muted)">ISSWSH 2021 (PMID 33792440) · Global Consensus 2019.</span></div>' + compNote(); }},
-   {name:'Musculoskeletal', s:score(['msk']),
-    mech:'Estradiol depletion → ↑ bone resorption + arthralgia.',
-    rx:function(g){ return '<div class="rx">Menopausal arthralgia may improve with <b>systemic estradiol</b> (see VMS). For bone-loss prevention in appropriate candidates (<60 or within 10 yr of menopause), systemic estrogen is an option; assess fracture risk / DXA. <span style="color:var(--muted)">NAMS 2022.</span></div>'; }}
+   {name:'Vasomotor (VMS)', s:score(['vms','vms2']), mech:'Low estradiol → hypothalamic thermoregulatory dysregulation → narrowed thermoneutral zone.'},
+   {name:'Genitourinary (GSM)', s:score(['vag','bladder']), mech:'Low estradiol → urogenital atrophy → loss of glycogen/lactobacilli → ↑ vaginal pH.'},
+   {name:'Sleep', s:score(['sleep']), mech:'VMS + low progesterone → loss of GABA-ergic sleep effect → circadian disruption.'},
+   {name:'Mood / anxiety / irritability', s:score(['mood','irrit','anx']), mech:'Low estradiol → ↓ serotonin/dopamine signaling.'},
+   {name:'Cognition / exhaustion', s:score(['cog']), mech:'Low estradiol → impaired hippocampal function; often secondary to sleep/VMS burden.'},
+   {name:'Sexual — low desire + distress', s:score(['sex']), mech:'Low androgens + estradiol → urogenital atrophy + dopaminergic changes.'},
+   {name:'Musculoskeletal', s:score(['msk']), mech:'Estradiol depletion → ↑ bone resorption + arthralgia.'}
   ];
 }
-function systemicEstrogen(g, why){
+function compNote(){return '<div class="rxc">Compounded option (e.g., Biest 80/20, compounded progesterone/testosterone) may be used <b>per the provider\'s decision and pharmacy of choice</b>, with documented rationale — not first-line when an FDA-approved option exists; no superiority/safety claim. <span style="color:#9a8fc0">ACOG 2023 · NASEM 2020.</span></div>';}
+
+// ---- STAGE 2: structured, dosed treatment plan (transcribed from RenuviaMD protocols + NAMS) ----
+// Doses are the provider's starting regimens; the engine PROPOSES, the provider decides & signs.
+function treatmentPlan(){
   var ut=document.getElementById('uterus').value;
-  var prog = ut==='intact' ? ' <b>+ micronized progesterone</b> nightly (endometrial protection — mandatory with systemic estrogen + intact uterus)' : (ut==='removed' ? ' (no progestogen needed — hysterectomy)' : ' <b>+ micronized progesterone</b> (confirm uterus status; protection required if intact)');
-  return '<div class="rx"><b>Systemic transdermal 17β-estradiol</b> (patch/gel/spray) <i>(FDA-approved; transdermal preferred — lower VTE/stroke risk than oral)</i>'+prog+'. Target symptom relief; titrate q4wk. <span style="color:var(--muted)">NAMS 2022 · ESE 2025.</span></div>';
+  var vmsS=score(['vms','vms2']), moodS=score(['mood','irrit','anx']), sleepS=score(['sleep']),
+      gsmS=score(['vag','bladder']), sexS=score(['sex']), mskS=score(['msk']);
+  var needSys = vmsS>=1 || moodS>=2 || mskS>=2 || sleepS>=2;
+  var blocks=[];
+  if(needSys){
+    var prog = ut==='intact' ? '<br>· <b>+ micronized progesterone — REQUIRED</b> (endometrial protection with systemic estrogen + intact uterus).'
+             : ut==='removed' ? '<br>· No progestogen required (hysterectomy).'
+             : '<br>· <b>Confirm uterus status</b> — micronized progesterone required for protection if intact.';
+    blocks.push('<div class="rx"><b>Systemic 17β-estradiol</b> <i>(FDA-approved; transdermal preferred — lower VTE/stroke vs oral)</i>'+
+      '<br>· <b>Start 0.025–0.05 mg/day</b>; reassess q4wk and titrate by symptom response toward <b>0.05–0.1 mg/day</b> (ceiling 0.1).'+
+      '<br>· Apply: patch 1–2×/wk, or gel/spray once daily — rotate sites; <b>never on the breasts</b>.'+
+      '<br>· Expect: VMS &amp; sleep improve 2–4 wk; mood 4–8 wk.'+
+      '<br>· If labs used (confirmatory): on-therapy estradiol target ~50–150 pg/mL (ultrasensitive LC/MS/MS).'+prog+
+      ' <span style="color:var(--muted)">NAMS 2022 · ESE 2025.</span></div>'+compNote());
+  }
+  if(needSys && ut!=='removed'){
+    blocks.push('<div class="rx"><b>Micronized progesterone</b> <i>(FDA-approved)</i> — <b>100 mg orally at bedtime</b> (continuous), or 200 mg ×12–14 days/cycle. Endometrial protection + GABA-ergic sleep/anxiety benefit (expected sedation). <span style="color:var(--muted)">NAMS 2022.</span></div>');
+  }
+  if(gsmS>=1){
+    blocks.push('<div class="rx"><b>Local (vaginal) estrogen</b> <i>(FDA-approved)</i> — low-dose vaginal estradiol cream/tablet/ring; alternatives: vaginal DHEA/prasterone, or ospemifene PO. <b>Not gated by the systemic-estrogen uterus rule.</b> <span style="color:var(--muted)">NAMS 2022 · AUA 2025 GSM.</span></div>'+compNote());
+  }
+  if(sexS>=2){
+    blocks.push('<div class="rx"><b>Testosterone — HSDD only, off-label in women.</b> First address GSM + reversible factors (sleep, mood, meds, relationship). If low desire WITH personal distress persists: provider-level discussion; low-dose transdermal titrated to female physiologic range; <b>not</b> for energy/mood/weight. Monitor androgenic effects (acne, hirsutism). <span style="color:var(--muted)">ISSWSH 2021 (PMID 33792440) · Global Consensus 2019.</span></div>'+compNote());
+  }
+  if(vmsS>=2){
+    blocks.push('<div class="rx" style="border-color:#3a4452;background:#0e243622"><b>If MHT declined / not used (non-hormonal VMS):</b> fezolinetant 45 mg (FDA; baseline + monthly×3 LFTs), paroxetine 7.5 mg (FDA for VMS), or an SSRI/SNRI; CBT for bother/sleep. <span style="color:var(--muted)">NAMS 2023 nonhormone.</span></div>');
+  }
+  if(!blocks.length) blocks.push('<div class="rx" style="color:var(--muted)">No pharmacologic hormone indication from the current symptom profile — see Lifestyle. Reassess as symptoms evolve.</div>');
+  return blocks.join('');
 }
-function nonHormonalVMS(){return '<div class="rx">If MHT not used/declined: <b>fezolinetant 45 mg</b> (FDA; LFT monitoring), <b>paroxetine 7.5 mg</b> (FDA for VMS), or an SSRI/SNRI; CBT for bother/sleep. <span style="color:var(--muted)">NAMS 2023 nonhormone.</span></div>';}
-function compNote(){return '<div class="rxc">Compounded BHRT (e.g., Biest, compounded progesterone/testosterone) may be used <b>per the provider\'s decision and pharmacy of choice</b>, with documented rationale — not first-line when an FDA-approved option exists; no superiority/safety claim. <span style="color:#9a8fc0">ACOG 2023 · NASEM 2020.</span></div>';}
+function titrationBlock(){
+  return '<div class="rx"><b>Reassess at 8–12 weeks</b> (plus the symptom-specific timelines above), then periodically:'+
+    '<br>• Controlled + tolerated → <b>maintain</b>; reassess in 3–6 months.'+
+    '<br>• Symptom persists + tolerated + below ceiling → <b>step the dose up one level</b> (e.g., estradiol 0.05 → 0.075 → 0.1 mg/day) and re-time the reassessment.'+
+    '<br>• Side effects (breast tenderness, unscheduled bleeding) → reduce dose / re-evaluate progestogen; <b>any new postmenopausal bleeding → evaluate the endometrium</b>.'+
+    '<br>• Persists at ceiling → reconsider diagnosis; add non-hormonal (fezolinetant/SSRI) or refer.'+
+    '<br>• Safety: review BP &amp; hematocrit as indicated; testosterone → monitor androgenic effects.'+
+    ' <span style="color:var(--muted)">NAMS 2022.</span></div>';
+}
+function lifestyleBlock(){
+  var msk=score(['msk']), vms=score(['vms','vms2']), sleep=score(['sleep']), mood=score(['mood','irrit','anx']);
+  var L=['<b>Exercise:</b> ≥150–300 min/wk moderate aerobic + resistance ≥2 d/wk <span style="color:var(--muted)">(Physical Activity Guidelines 2018, PMID 30418471)</span>.'];
+  if(msk>=1) L.push('<b>Bone / muscle:</b> weight-bearing + resistance training; calcium + vitamin D <span style="color:var(--muted)">(NIH ODS)</span>; adequate protein <span style="color:var(--muted)">(PROT-AGE, PMID 23867520)</span>.');
+  if(vms>=1) L.push('<b>VMS:</b> weight management, trigger avoidance, cooling, CBT <span style="color:var(--muted)">(NAMS 2023)</span>.');
+  if(sleep>=1) L.push('<b>Sleep:</b> sleep hygiene; limit alcohol &amp; caffeine.');
+  if(mood>=1) L.push('<b>Mood:</b> regular activity + stress management.');
+  return '<div class="rx">'+L.map(function(x){return '• '+x;}).join('<br>')+
+    '<br><span style="color:#9a8fc0">Supplements are general wellness support — not a hot-flash treatment, and not sold or brokered.</span></div>';
+}
 
 function providerSig(){
   var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};
@@ -191,14 +224,14 @@ function generate(){
   var map=ds.map(function(d){var p=pri(d.s);
     return '<div class="row"><span class="pri '+p[0]+'">'+p[1]+'</span><div><div style="font-size:13.5px;color:var(--ink)">'+esc(d.name)+' <span style="color:var(--muted)">· severity '+d.s+'/4</span></div><div style="font-size:11.5px;color:var(--muted);margin-top:2px">'+esc(d.mech)+'</div></div></div>';
   }).join('');
-  var rec=ds.map(function(d){return '<div style="margin-top:10px"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--teal);font-weight:700">'+esc(d.name)+'</div>'+d.rx(gl)+'</div>';}).join('');
   var goals=Object.keys(gl).filter(function(k){return gl[k];}).map(function(k){return GOALS[k];});
   out.innerHTML='<div class="poc">'+
     '<h2>BHRT Plan of Care — DRAFT</h2><div class="meta">Symptom-based · '+esc(document.getElementById('stage').value||'menopause transition')+' · uterus: '+esc(document.getElementById('uterus').value||'—')+(goals.length?' · goals: '+esc(goals.join(', ')):'')+'</div>'+
     '<div class="grp" style="margin-top:14px">Symptom map (severity-ranked)</div><div class="map">'+map+'</div>'+
-    '<div class="grp">Oriented recommendations</div>'+rec+
-    '<div class="grp">Monitoring</div><div class="rx">Reassess symptoms at 8–12 weeks and periodically; titrate to response. If labs used (confirmatory): on-therapy estradiol target ~50–150 pg/mL (ultrasensitive assay); review hematocrit/BP as indicated. Discontinue if no meaningful benefit.</div>'+
-    '<div class="rxc" style="margin-top:10px">Reminder: this is <b>symptom-based</b> decision support. Labs confirm and monitor — they do not determine whether to treat symptoms. Doses/formulations and pharmacy are the provider\'s decision.</div>'+
+    '<div class="grp">Treatment plan (starting regimens)</div>'+treatmentPlan()+
+    '<div class="grp">Monitoring &amp; titration — "if symptoms persist"</div>'+titrationBlock()+
+    '<div class="grp">Lifestyle (advisory)</div>'+lifestyleBlock()+
+    '<div class="rxc" style="margin-top:10px">Reminder: <b>symptom-based</b> decision support per NAMS 2022. Labs confirm and monitor — they do not determine whether to treat symptoms. <b>Doses, formulations, titration, and pharmacy are the provider\'s decision and signature.</b></div>'+
     providerSig()+
     '<div class="noprint" style="margin-top:14px"><button class="gen" onclick="window.print()">🖨 Print / export Plan of Care</button></div>'+
   '</div>';
