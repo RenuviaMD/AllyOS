@@ -149,31 +149,44 @@ var CADENCE=[
 ];
 function tbl(rows,cols){return '<table><thead><tr>'+cols.map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+c+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table>';}
 
-// ---- Testosterone starting regimens (Endocrine Society 2018, PMID 29562364, + FDA labels) ----
-// Shown ONLY when eligibility = candidate-review (cls 'go'). Engine proposes a starting
-// regimen; the provider titrates to mid-normal and signs. Schedule III controlled substance.
+// ---- Testosterone target/dosing/administration (RenuviaMD addendum v0.1; AUA + Endocrine 2018 + DailyMed labels) ----
+// Shown ONLY when eligibility = candidate-review (cls 'go'). Engine proposes a starting regimen;
+// provider titrates to the 450–600 ng/dL wellness target and signs. Schedule III controlled substance.
 function testosteroneRx(cls){
   if(cls!=='go'){
     return '<div class="rx" style="border-color:#4a3c18;background:#2a221022;color:#e0c98a"><b>Testosterone — eligibility step only; no dosing yet.</b> Resolve the eligibility path above first (fertility / safety gate / lab mapping / foundational optimization). When the provider reaches a <b>candidate decision with safety gates clear</b>, the starting regimens appear here. Blocked claims: T for energy / anti-aging / fat-loss / diabetes; "safe for everyone"; "compounded/pellets automatically superior."</div>';
   }
   return '<div class="grp">Testosterone — starting regimens (provider titrates &amp; signs)</div>'+
-    '<div class="rx" style="border-color:#4a3c18;background:#2a221022;color:#e6d6a8"><b>DEA Schedule III controlled substance.</b> Prescribe under the <b>treating provider\'s own DEA / state authority</b> — never the software owner\'s. The engine proposes a starting regimen; per Endocrine Society 2018, the provider titrates to the <b>mid-normal total-testosterone range</b> with any approved formulation and signs.</div>'+
-    '<div class="rx"><b>Injectable — testosterone cypionate or enanthate (IM or SC)</b>'+
-      '<br>· <b>Start ≈100 mg once weekly</b> (or 200 mg every 2 weeks). Weekly / subcutaneous dosing gives steadier levels and less erythrocytosis than every-2-week IM.'+
-      '<br>· Check <b>trough</b> total T (just before the next dose) at steady state (~6 weeks); titrate toward <b>mid-normal (~400–700 ng/dL)</b>.'+
-      ' <span style="color:var(--muted)">Endocrine Society 2018 (PMID 29562364) · FDA cypionate label.</span></div>'+
-    '<div class="rx"><b>Transdermal — testosterone gel</b>'+
-      '<br>· <b>1.62% gel: start 40.5 mg once daily</b> (range 20.25–81 mg), or 1% gel 50–100 mg/day. Apply to clean, dry shoulders / upper arms; <b>wash hands and cover the site</b>.'+
-      '<br>· <b>FDA secondary-exposure warning:</b> prevent skin-to-skin transfer to women and children.'+
-      '<br>· Check total T ≥1 week after start (2–8 h post-application, or any time at steady state); titrate to mid-normal.'+
-      ' <span style="color:var(--muted)">FDA gel label · Endocrine Society 2018.</span></div>'+
-    '<div class="rx"><b>Monitoring &amp; safety titration</b>'+
-      '<br>· Total T + <b>hematocrit</b> + symptoms at <b>baseline, 3–6 months, then annually</b>.'+
-      '<br>· <b>Hematocrit &gt;54% → stop</b> until it normalizes; evaluate for OSA / hypoxia; restart at a reduced dose or shift toward transdermal.'+
-      '<br>· <b>PSA / prostate</b> assessment within 3–12 months of starting, then per screening guidelines; urology referral for a guideline-level PSA change.'+
-      '<br>· BP (FDA class-wide warning · TRAVERSE); re-confirm fertility intent — exogenous T suppresses spermatogenesis (fertility-preserving path if conception is desired).'+
-      ' <span style="color:var(--muted)">Endocrine Society 2018 · FDA 2025 BP labeling · AUA TD.</span></div>'+
-    '<div class="rx" style="color:var(--muted);font-size:12px">Formulation per the provider\'s decision &amp; pharmacy of choice; <b>compounded testosterone and pellets carry no automatic superiority</b>. Not for energy / anti-aging / fat-loss / diabetes. The treating provider owns the regimen and the signature.</div>';
+    '<div class="rx" style="border-color:#4a3c18;background:#2a221022;color:#e6d6a8"><b>DEA Schedule III controlled substance.</b> Prescribe under the <b>treating provider\'s own DEA / state authority</b> — never the software owner\'s. <b>Goal = physiologic restoration, not enhancement.</b> Target total T <b>450–600 ng/dL preferred</b> (monitored ~450–750 if symptoms improve &amp; safety markers stay clean); <b>avoid sustained supraphysiologic levels (&gt;900–1000)</b>; use the <b>lowest effective dose &amp; route</b>. Free T to mid/upper-mid normal when SHBG is abnormal. <span style="color:var(--muted)">AUA middle tertile ≈450–600 · Endocrine Society 2018 mid-normal (PMID 29562364).</span></div>'+
+    '<div class="rx" style="border-color:#2a5a7e;background:#0e243622"><b>Preferred wellness route order</b> — (1) topical gel (conservative, reversible, smooth) → (2) weekly low-peak injectable → (3) weekly SC auto-injector. Selected-use: (4) oral undecanoate · (5) pellets (<b>not first-line</b>). Pick the lowest-peak route that meets the patient\'s priority goals.</div>'+
+    '<div class="rx"><b>1 · Topical gel <span style="color:var(--green)">(first-line — conservative/reversible)</span></b>'+
+      '<br>· <b>1.62% gel: start 40.5 mg once daily</b> (adjust 20.25–81 mg/day on pre-dose morning T); or <b>1% gel: start 50 mg/day</b> → 75 → 100 mg.'+
+      '<br>· Clean, dry shoulders / upper arms; wash hands; cover after drying. <b>FDA secondary-exposure warning</b> — prevent transfer to partners, children, pets.'+
+      '<br>· Best when: older patient, higher hematocrit concern, reversibility matters, avoiding injections. Cons: transfer risk, variable absorption, daily adherence.'+
+      ' <span style="color:var(--muted)">DailyMed gel labels (AndroGel 1.62% / 1%).</span></div>'+
+    '<div class="rx"><b>2 · Weekly injectable — cypionate or enanthate (IM or SC)</b>'+
+      '<br>· Label range 50–400 mg every 2–4 weeks, but for optimization <b>prefer smaller / more frequent</b>: AUA example <b>100 mg weekly</b> &gt; 200 mg q2wk &gt; 300–400 mg monthly (steadier levels, less Hct / estradiol / mood swing).'+
+      '<br>· Check <b>trough</b> total T at steady state; titrate toward the 450–600 target.'+
+      ' <span style="color:var(--muted)">AUA TD · DailyMed cypionate/enanthate labels.</span></div>'+
+    '<div class="rx"><b>3 · Weekly SC auto-injector — enanthate (XYOSTED-style)</b>'+
+      '<br>· <b>Start 75 mg subcutaneously once weekly</b>; <b>trough drawn 7 days after the dose</b>; adjust by ±25 mg. Predictable delivery, clean protocolization.'+
+      '<br>· Label monitoring window ≈350–650 ng/dL; titrate toward the 450–600 wellness target.'+
+      ' <span style="color:var(--muted)">DailyMed XYOSTED label. <b>VERIFY-AT-LOCK.</b></span></div>'+
+    '<div class="rx" style="border-color:#3a4452"><b>4 · Oral testosterone undecanoate <span style="color:var(--muted)">(selected-use)</span></b>'+
+      '<br>· <b>Start 200 mg twice daily with food</b> (range per label, min 100 mg daily → max 400 mg BID). Check T <b>7 days</b> after start/adjustment, <b>3–5 h after the morning dose</b>.'+
+      '<br>· Avoids injection &amp; topical transfer. Cautions: <b>BP</b>, absorption variability, cost/access.'+
+      ' <span style="color:var(--muted)">DailyMed oral-undecanoate label. <b>VERIFY-AT-LOCK.</b></span></div>'+
+    '<div class="rx" style="border-color:#3a4452"><b>5 · Pellets <span style="color:var(--amber)">(selected-use — NOT first-line)</span></b>'+
+      '<br>· 150–450 mg SC every 3–6 months. <b>Only</b> after stable response, stable safety markers, and a clear patient preference for long-duration therapy.'+
+      '<br>· Cons: low reversibility, procedure risk, extrusion / infection, hard to dose-adjust. <b>No automatic superiority.</b>'+
+      ' <span style="color:var(--muted)">DailyMed Testopel-style label.</span></div>'+
+    '<div class="rx"><b>Monitoring &amp; safety stops</b>'+
+      '<br>· Total T (target <b>450–600</b>) + <b>hematocrit</b> + symptoms at <b>baseline, 3–6 months, then annually</b>. <b>Hct &gt;54% → hold / stop / review</b> (evaluate OSA / hypoxia; restart reduced or shift to gel).'+
+      '<br>· <b>BP every visit</b> (FDA class-wide warning · TRAVERSE). <b>PSA / prostate</b> baseline when age/risk-appropriate, then monitor — do not overstate risk, do not drop monitoring.'+
+      '<br>· <b>Estradiol — do NOT auto-suppress</b>; check if gynecomastia, breast symptoms, edema, libido issue, or aromatization risk.'+
+      '<br>· <b>Fertility</b> — no exogenous T if trying to conceive without fertility-preserving review. <b>OSA</b> hold gate; <b>severe LUTS/BPH</b> review.'+
+      ' <span style="color:var(--muted)">Endocrine Society 2018 · AUA TD · FDA 2025 BP labeling · HHS/FDA 2026 prostate/BPH context.</span></div>'+
+    '<div class="rx" style="color:var(--muted);font-size:12px">Patient-specific dosing is physician-directed; formulation per the provider\'s decision &amp; pharmacy of choice — <b>compounded testosterone and pellets carry no automatic superiority</b>; do not chase the highest possible level. Not for anti-aging / fat-loss / diabetes / "all men over 40" / fatigue-without-labs. The treating provider owns the regimen and the signature.</div>';
 }
 
 // ---- Cross-line adjunct (hormone × peptide crosswalk v0.1, PubMed-verified) ----

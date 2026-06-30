@@ -18,12 +18,16 @@ Endocrine Society CPG** (Bhasin et al., JCEM 2018;103:1715-1744), PMID 29562364,
 | **Monitoring** | Total T + **hematocrit** + symptoms at **baseline, 3–6 mo, then annually**; **Hct >54% → stop** until normal, evaluate OSA/hypoxia, restart reduced; **PSA/prostate** within 3–12 mo then per screening; BP (TRAVERSE) | Endocrine Society 2018 (monitoring plan + Hct>54% stop + first-year prostate assessment); FDA 2025 class-wide BP labeling; AUA TD. | ✅ verified |
 | **Guardrails** | Schedule III — provider's own DEA/state authority; not for energy/anti-aging/fat-loss/diabetes; compounded/pellets no automatic superiority; fertility suppression note | Controlled Substances Act (T = Schedule III); ACP 2020 (PMID 31905405) wellness-claim guardrail; AUA/ASRM fertility. | ✅ verified |
 
-## Decisions for your initials
-- **Q1 — trough target window.** I used **mid-normal ~400–700 ng/dL**. Your assay's normal range may differ; confirm the numeric window or say "mid-normal per lab range." ☐ approve ☐ set to ______
-- **Q2 — injection default.** I defaulted to **~100 mg weekly (or 200 mg q2wk), IM or SC**. Confirm your house default (weekly SC vs q2wk IM). ☐ approve ☐ set to ______
-- **Q3 — gel product.** I named **1.62% (start 40.5 mg)** and **1% (50–100 mg)** generically. Confirm or pin to your formulary product. ☐ approve ☐ set to ______
-- **Q4 — pellets/nasal.** Not included (kept the two routes you asked for: injectable + transdermal). Add pellets/nasal later? ☐ keep as-is ☐ add later
-- [ ] **I, Armando A. Falcon, MD, approve the men's TRT starting-regimen logic above for live use.** Date: ______
+## Decisions — RESOLVED by your Target/Dosing/Administration Addendum v0.1 (2026-06-30, SHA cbd7d98…)
+- **Q1 — target.** RESOLVED → total T **450–600 ng/dL preferred** (monitored ~450–750), avoid sustained >900–1000, lowest effective dose. Applied. ✅
+- **Q2 — injection default.** RESOLVED → prefer smaller/more frequent: **AUA 100 mg weekly > 200 mg q2wk**; plus a dedicated **weekly SC auto-injector (XYOSTED-style) 75 mg, trough at 7 days, ±25 mg**. Applied. ✅
+- **Q3 — gel product.** RESOLVED → **1.62% start 40.5 mg (20.25–81)** and **1% start 50 → 75 → 100**, with transfer warning. Applied. ✅
+- **Q4 — other routes.** RESOLVED → added **oral undecanoate** (200 mg BID w/ food; check 7 d, 3–5 h post-dose) and **pellets** (150–450 mg q3–6 mo) as **selected-use / not-first-line**. Applied. ✅
+- **Route hierarchy (new):** topical gel (1st) → weekly injectable (2nd) → SC auto-injector (3rd) → oral (4th) → pellets (5th). Applied. ✅
+
+Two label-specific numbers carry a **VERIFY-AT-LOCK** flag against DailyMed: the XYOSTED 350–650 monitoring window and the oral-undecanoate label range.
+
+- [ ] **I, Armando A. Falcon, MD, approve the men's TRT starting-regimen logic above (as aligned to addendum v0.1) for live use.** Date: ______
 
 One thing is locked regardless: **you never appear as the prescriber** — the plan is signed by the logged-in clinic
 provider's NPI, and dosing is emitted only on the candidate-review path with all safety gates clear.
