@@ -149,6 +149,65 @@ var CADENCE=[
 ];
 function tbl(rows,cols){return '<table><thead><tr>'+cols.map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+c+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table>';}
 
+// ---- Cross-line adjunct (hormone × peptide crosswalk v0.1, PubMed-verified) ----
+// Provider-review ONLY. No auto-recommendation, no dosing, no TRT-peptide synergy claim.
+// Hormone safety gates (section 2) run first; peptide gates second.
+function crosswalkBlock(){
+  var fertility=g[0];
+  var cards=[];
+  function card(fam,tier,align,opts,iv,gates,dn){
+    cards.push('<div class="rx" style="border-color:#3a3050;background:#16122422">'+
+      '<b>'+fam+'</b> <span style="font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#b9a8e0;border:1px solid #4a3c6e;border-radius:5px;padding:2px 7px;margin-left:6px">'+tier+'</span>'+
+      '<br>· Aligned with: '+align+
+      '<br>· Peptide options <i>(provider-selected)</i>: '+opts+
+      '<br>· IV/IM support if cleared: '+iv+
+      '<br>· Safety gates first: '+gates+
+      '<br><span style="color:#c98a8a">· Do not claim: '+dn+'</span></div>');
+  }
+  if((sev.energy||0)>=2) card('FAM03 · Mitochondrial / Energy','provider review',
+    'energy / recovery / longevity wellness — after fatigue differential (thyroid, OSA, anemia)',
+    'MOTS-c + SS-31 ± Epitalon ± Humanin',
+    'NAD+/NR pathway; B-complex/B12; magnesium if safe; glutathione',
+    'TRT CV/BP/hematocrit; active malignancy; renal/liver; sleep/OSA',
+    'no anti-aging guarantee; no TRT–peptide synergy; do not bypass fatigue differential');
+  if((sev.sexual||0)>=2){
+    if(fertility) card('FAM06 · Sexual / HPG','HOLD — fertility pathway first',
+      'sexual vitality WITH fertility goal — route to fertility-preserving review before any HPG peptide or TRT',
+      'No exogenous-axis suppression until reproductive review; PT-141 only after provider review',
+      'Hydration; B-complex/B12',
+      'fertility (semen analysis / reproductive urology); BP/CV; prostate/PSA',
+      'no fertility claim without specialist review; no peptide replaces evaluation');
+    else card('FAM06 · Sexual / HPG','caution — provider review only',
+      'sexual vitality / libido — not first-line ED care; vascular/metabolic review first',
+      'PT-141 / bremelanotide ± kisspeptin-10 (provider-selected)',
+      'Hydration; B-complex/B12; magnesium if renal screen clear',
+      'BP/CV; prostate/PSA; ED vascular/metabolic review; medication review; PT-141 BP/HR',
+      'no guaranteed erections/libido; no peptide replaces TRT eligibility');
+  }
+  if((sev.body||0)>=2 || (sev.cardio||0)>=2) card('FAM01 · GLP / Metabolic','provider review',
+    'body composition / metabolic longevity — protein-first, resistance training central',
+    'GLP/GIP anchor ± MOTS-c / AOD / amylin-pathway option',
+    'Hydration/electrolytes; B-complex/B12; MIC/L-carnitine; amino support',
+    'GLP GI/dehydration; TRT BP/hematocrit/prostate; lean-mass/protein; hypoglycemia meds',
+    'no TRT–GLP synergy; do not promise fat loss; protect lean mass with resistance training');
+  if((sev.recovery||0)>=2) card('FAM02 · GH / Recovery','high caution — provider review',
+    'strength / lean-mass / recovery — avoid casual stacking with TRT',
+    'Sermorelin/ipamorelin or CJC/ipamorelin ± tesamorelin',
+    'Amino blend; B-complex/B12; hydration; magnesium if renal screen clear',
+    'TRT hematocrit/BP/OSA; GH-peptide IGF-1/glucose/edema/carpal tunnel/sleep apnea; malignancy',
+    'no anabolic guarantee; no TRT+GH synergy; avoid excessive endocrine stacking');
+  if((sev.mood||0)>=2 || (sev.sleep||0)>=2) card('FAM07 · Neuro / Calm / Sleep','caution — provider review',
+    'focus / calm / sleep-quality wellness — not a psychiatric or sleep-disorder treatment',
+    'Semax + Selank ± DSIP',
+    'Neuro IV; B-complex/B12; magnesium if safe; hydration',
+    'acute neuro symptoms; psychiatric instability/suicidality; sedative/alcohol; untreated OSA',
+    'do not treat anxiety/depression/insomnia; no hormone–peptide synergy claim');
+  if(!cards.length) return '';
+  return '<div class="grp">Cross-line adjunct options — provider review</div>'+
+    '<div class="rx" style="border-color:#4a3c6e;background:#16122433;color:#cbbce6">Optional <b>provider-review-only</b> wellness adjuncts matched to this phenotype (AllyOS hormone×peptide crosswalk). <b>Not auto-recommended · not a prescription · no dosing here · no TRT–peptide synergy claim.</b> Hormone safety gates run first, peptide gates second. Consider only if clinically appropriate — the provider decides &amp; signs.</div>'+
+    cards.join('');
+}
+
 function docHeader(title){
   var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};
   var sig={};try{sig=JSON.parse(localStorage.getItem('allyos_provider_sig_v1')||'{}');}catch(e){}
@@ -195,6 +254,7 @@ function generate(){
     '<div class="grp">Foundational optimization (always attached)</div>'+tbl(FOUND,['Domain','Target / structure','Why'])+
     '<div class="grp">Monitoring &amp; visit cadence</div>'+tbl(CADENCE,['Visit','Name','Key actions'])+
     '<div class="rx" style="border-color:#4a3c18;background:#2a221022;color:#e0c98a"><b>Testosterone:</b> eligibility only — <b>no dosing in this tool.</b> If selected after provider benefit-risk review, route to your <b>locked provider prescription protocol / standing order</b> for the regimen. Blocked claims: T for energy/anti-aging/fat-loss/diabetes; "safe for everyone"; "compounded/pellets automatically superior."</div>'+
+    crosswalkBlock()+
     providerSig()+
     '<div class="noprint" style="margin-top:14px"><button class="gen" onclick="window.print()">🖨 Print / export plan</button></div>'+
   '</div>';

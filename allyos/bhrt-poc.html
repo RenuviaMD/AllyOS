@@ -208,6 +208,61 @@ function lifestyleBlock(){
     '<br><span style="color:#9a8fc0">Supplements are general wellness support — not a hot-flash treatment, and not sold or brokered.</span></div>';
 }
 
+// ---- Cross-line adjunct (hormone × peptide crosswalk v0.1, PubMed-verified) ----
+// Provider-review ONLY. No auto-recommendation, no dosing, no hormone-peptide synergy claim.
+// Hormone safety gates (red-flag screen above) run first; peptide gates second.
+function crosswalkBlock(){
+  if(Object.keys(fl).some(function(k){return fl[k];})) return ''; // red flag suppresses adjuncts
+  var cog=score(['cog']), sexS=score(['sex']), mskS=score(['msk']),
+      sleepS=score(['sleep']), moodS=score(['mood','irrit','anx']);
+  var cards=[];
+  function card(fam,tier,align,opts,iv,gates,dn){
+    cards.push('<div class="rx" style="border-color:#3a3050;background:#16122422">'+
+      '<b>'+fam+'</b> <span style="font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#b9a8e0;border:1px solid #4a3c6e;border-radius:5px;padding:2px 7px;margin-left:6px">'+tier+'</span>'+
+      '<br>· Aligned with: '+align+
+      '<br>· Peptide options <i>(provider-selected)</i>: '+opts+
+      '<br>· IV/IM support if cleared: '+iv+
+      '<br>· Safety gates first: '+gates+
+      '<br><span style="color:#c98a8a">· Do not claim: '+dn+'</span></div>');
+  }
+  if(cog>=2) card('FAM03 · Mitochondrial / Energy','provider review',
+    'fatigue / brain fog — after thyroid, anemia & sleep causes considered',
+    'MOTS-c + SS-31 ± Epitalon ± Humanin',
+    'NAD+/NR pathway; B-complex/B12; magnesium if renal screen clear; glutathione',
+    'MHT contraindication screen; active malignancy; CV; renal/liver; pregnancy when relevant',
+    'no proven BHRT–peptide synergy; no anti-aging guarantee; no disease-treatment claim');
+  if(sexS>=2) card('FAM06 · Sexual / HPG','caution — provider review only',
+    'low desire WITH distress — after GSM pain & reversible factors addressed',
+    'PT-141 / bremelanotide (FDA-approved for premenopausal HSDD) ± kisspeptin-10',
+    'Hydration; B-complex/B12; magnesium if renal screen clear',
+    'BP/HR gate; HSDD assessment; GSM treated first; breast/cancer context; medication review',
+    'no guaranteed libido; no peptide–testosterone synergy; testosterone not for energy/mood/cognition');
+  if(mskS>=2){
+    card('FAM02 · GH / Recovery','caution — provider review',
+      'muscle / recovery / training-response wellness adjunct',
+      'Sermorelin/ipamorelin or CJC/ipamorelin ± tesamorelin (after risk review)',
+      'Amino blend; B-complex/B12; magnesium if safe; hydration',
+      'IGF-1/glucose; edema/carpal tunnel; active malignancy; sleep apnea; diabetes/retinopathy',
+      'do not claim osteoporosis treatment or GH-peptide–BHRT synergy');
+    card('FAM04 · Repair / Connective','caution — provider review',
+      'joint / tendon / recovery complaint',
+      'BPC-157 + TB-500 ± GHK-Cu / KPV',
+      'Amino blend; vitamin C; glutathione; hydration; magnesium if safe',
+      'acute injury/infection red flags; anticoagulation/surgery context; active cancer review',
+      'no healing guarantee; not a substitute for imaging / PT / orthopedic evaluation');
+  }
+  if(sleepS>=2 || moodS>=2) card('FAM07 · Neuro / Calm / Sleep','caution — provider review',
+    'focus / calm / sleep-quality wellness — not a psychiatric or sleep-disorder treatment',
+    'Semax + Selank ± DSIP',
+    'Neuro IV; B-complex/B12; magnesium if safe; hydration',
+    'acute neuro symptoms; psychiatric instability/suicidality; sedative/alcohol context; untreated OSA',
+    'do not treat anxiety/depression/insomnia; no hormone–peptide synergy claim');
+  if(!cards.length) return '';
+  return '<div class="grp">Cross-line adjunct options — provider review</div>'+
+    '<div class="rxc" style="border-color:#4a3c6e;background:#16122433;color:#cbbce6">Optional <b>provider-review-only</b> wellness adjuncts matched to this phenotype (AllyOS hormone×peptide crosswalk). <b>Not auto-recommended · not a prescription · no dosing here · no hormone–peptide synergy claim.</b> Hormone safety gates run first, peptide gates second. Consider only if clinically appropriate — the provider decides &amp; signs.</div>'+
+    cards.join('');
+}
+
 function providerSig(){
   var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};
   var sig={};try{sig=JSON.parse(localStorage.getItem('allyos_provider_sig_v1')||'{}');}catch(e){}
@@ -250,6 +305,7 @@ function generate(){
     '<div class="grp">Treatment plan (starting regimens)</div>'+treatmentPlan()+
     '<div class="grp">Monitoring &amp; titration — "if symptoms persist"</div>'+titrationBlock()+
     '<div class="grp">Lifestyle (advisory)</div>'+lifestyleBlock()+
+    crosswalkBlock()+
     '<div class="rxc" style="margin-top:10px">Reminder: <b>symptom-based</b> decision support per NAMS 2022. Labs confirm and monitor — they do not determine whether to treat symptoms. <b>Doses, formulations, titration, and pharmacy are the provider\'s decision and signature.</b></div>'+
     providerSig()+
     '<div class="noprint" style="margin-top:14px"><button class="gen" onclick="window.print()">🖨 Print / export Plan of Care</button></div>'+
