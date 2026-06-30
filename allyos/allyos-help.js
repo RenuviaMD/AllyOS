@@ -104,24 +104,101 @@
   }
   function close() { document.getElementById('allyhelp-ov').classList.remove('show'); }
 
+  // ---- INSTANT deterministic safety screen (zero latency, offline, never waits on the API or the MD) ----
+  // The provider gets the hold the moment they hit send. The AI triage + cockpit notification are
+  // BACKGROUND enrichment — they refine and log, they never gate the safety response. Bias: round UP.
+  var SEVN = { 'SEV-1': 1, 'SEV-2': 2, 'SEV-3': 3, 'SEV-4': 4, 'SEV-5': 5 };
+  var RX_EMERGENCY = [
+    { re: /chest (pain|pressure|tight)|crushing chest|pain (in|down).*(left )?arm/, r: 'Possible cardiac event' },
+    { re: /can'?t breathe|short(ness)? of breath|trouble breathing|wheez|throat (clos|swell|tight)|face (swell|swollen)|anaphylax|epi ?pen|epinephrine/, r: 'Possible anaphylaxis / airway compromise' },
+    { re: /slurred speech|face (droop|drooping)|weak(ness)? (on )?one|one side|stroke/, r: 'Possible stroke' },
+    { re: /faint(ing|ed)?|passed out|unconscious|unresponsive|loss of consciousness|syncope/, r: 'Loss of consciousness / syncope' },
+    { re: /seizure|convuls/, r: 'Seizure' },
+    { re: /worst headache|thunderclap|blue lips|cyanos|turning blue/, r: 'Critical red-flag symptom' }
+  ];
+  var RX_CONTRA = [
+    { re: /pregnan|breastfeed|lactat/, r: 'Pregnancy / lactation — hard contraindication for most lines' },
+    { re: /(low|reduced|poor) (egfr|gfr|kidney|renal)|dialysis|\bckd\b|renal (failure|impair)/, c: /magnes|potassium|\bk\+|electrolyte/, r: 'Renal impairment with an electrolyte load' },
+    { re: /melanoma|atypical (mole|nevi|nevus)/, c: /melanotan|mt-?2|pt-?141|bremelanotide|melanocort/, r: 'Melanoma history with a melanocortin agent' },
+    { re: /uncontrolled (htn|hypertension|blood pressure)|bp (1[89]\d|2\d\d)/, c: /pt-?141|bremelanotide/, r: 'Uncontrolled hypertension with PT-141' }
+  ];
+  function instantScreen(msg) {
+    var s = ' ' + (msg || '').toLowerCase() + ' ';
+    for (var i = 0; i < RX_EMERGENCY.length; i++) if (RX_EMERGENCY[i].re.test(s))
+      return { sev: 'SEV-1', failure_class: 'safety_gate_failed_to_fire', reason: RX_EMERGENCY[i].r,
+        fix: 'This may be an emergency — follow your emergency protocol and call 911 if life-threatening. Do NOT start or continue the infusion. Contact your Medical Director.' };
+    for (var j = 0; j < RX_CONTRA.length; j++) { var c = RX_CONTRA[j];
+      if (c.re.test(s) && (!c.c || c.c.test(s)))
+        return { sev: 'SEV-1', failure_class: 'safety_gate_failed_to_fire', reason: c.r,
+          fix: 'Hold — this looks like a hard contraindication. Do NOT proceed; contact your Medical Director before continuing this patient.' };
+    }
+    return null;
+  }
+  function instantToTriage(h) {
+    return { track: 'clinical', sev: h.sev, likely_cause: h.failure_class, failure_class: h.failure_class, module: '',
+      safety_concern: 'yes', scope: 'platform', confidence: 'high', clinic_fix: h.fix, needs_md_review: true,
+      md_note: h.reason + ' (instant deterministic hold)', severity: 'high' };
+  }
+  // keep the AI's richer fields but NEVER let it downgrade the instant deterministic verdict
+  function mergeTriage(instant, ai) {
+    if (!instant) return ai || null;
+    var it = instantToTriage(instant);
+    if (!ai) return it;
+    var keepInstant = (SEVN[it.sev] || 9) <= (SEVN[ai.sev] || 9);
+    if (keepInstant) { ai.sev = it.sev; ai.safety_concern = 'yes'; ai.needs_md_review = true; ai.severity = 'high'; if (!ai.clinic_fix) ai.clinic_fix = it.clinic_fix; }
+    return ai;
+  }
+  function renderHold(h) {
+    var r = document.getElementById('allyhelp-result'); if (!r) return;
+    r.innerHTML =
+      '<div style="background:#3a1414;border:1px solid #6a2020;color:#f7c9c2;border-radius:10px;padding:12px 13px;margin-top:8px;font-size:.9rem">' +
+      '<b style="color:#f0a59d;font-size:1rem">⛔ STOP — ' + esc(h.reason) + '.</b><br>' + esc(h.fix) + '</div>' +
+      '<div class="ok" style="color:#90a3b6">→ Notifying your Medical Director…</div>';
+  }
+
   function send() {
     var snap = snapshot();
     var msg = (document.getElementById('allyhelp-msg').value || '').trim();
     if (!msg) { document.getElementById('allyhelp-msg').focus(); return; }
     var r = document.getElementById('allyhelp-result');
-    if (r) r.innerHTML = '<div class="ok" style="color:#90a3b6">🔍 Checking your device…</div>';
-    // run the debugger agent for an instant triage, then forward the diagnosed issue to the MD
+    // 1) INSTANT — deterministic, synchronous, no network. The provider sees the hold NOW.
+    var instant = instantScreen(msg);
+    if (instant) renderHold(instant);
+    else if (r) r.innerHTML = '<div class="ok" style="color:#90a3b6">🔍 Checking your device…</div>';
+    // 2) BACKGROUND — AI triage refines + logs to the MD cockpit; can never downgrade the instant hold.
     fetch('/.netlify/functions/debug', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ diagnostic: snap, message: msg }) })
       .then(function (x) { return x.json(); })
-      .then(function (d) { var t = d && d.triage; showTriage(t); post(snap, msg, t); })
-      .catch(function () { post(snap, msg, null); });
+      .then(function (d) { var t = mergeTriage(instant, d && d.triage); showTriage(t); post(snap, msg, t); pushCloud(snap, msg, t); })
+      .catch(function () { var t = instant ? instantToTriage(instant) : null; if (t) showTriage(t); post(snap, msg, t); pushCloud(snap, msg, t); });
+  }
+  // also land the incident in the MD cockpit's triage queue (PHI-free; fail-soft if no table/cloud)
+  function pushCloud(snap, msg, t) {
+    try {
+      var s = ses();
+      if (!window.AllyOSCloud || !s.clinicId) return;
+      AllyOSCloud.ready.then(function (ok) {
+        if (!ok) return;
+        AllyOSCloud.pushIncident(s.clinicId, {
+          environment: snap.page, workflow: snap.page, incident_summary: msg,
+          reporter_role: s.role || '', diagnostic: snap, triage: t || {},
+        });
+      });
+    } catch (e) {}
   }
   function showTriage(t) {
     var r = document.getElementById('allyhelp-result'); if (!r) return;
     if (!t) { r.innerHTML = '<div class="ok">✓ Sent to your Medical Director.</div>'; return; }
-    r.innerHTML = '<div style="background:#0e1f29;border:1px solid #243446;border-radius:9px;padding:10px;margin-top:8px;font-size:.84rem">' +
-      '<b>Quick check:</b> ' + esc(t.likely_cause || '—') + ' <span style="color:#90a3b6">(' + esc(t.scope || '') + (t.confidence ? ', ' + esc(t.confidence) : '') + ')</span>' +
-      (t.clinic_fix ? '<br><b>Try:</b> ' + esc(t.clinic_fix) : '') + '</div>' +
+    var unsafe = t.sev === 'SEV-1' || t.sev === 'SEV-2' || t.safety_concern === 'yes';
+    var safetyBanner = unsafe
+      ? '<div style="background:#3a1414;border:1px solid #6a2020;color:#f7c9c2;border-radius:9px;padding:11px 12px;margin-top:8px;font-size:.86rem">' +
+        '<b style="color:#f0a59d">⛔ ' + esc(t.sev || 'Safety') + ' — hold this recommendation.</b><br>' +
+        'Do not proceed on the AI suggestion. Contact your Medical Director before continuing this patient.</div>'
+      : '';
+    var sevTag = t.sev ? '<span style="color:#90a3b6"> · ' + esc(t.sev) + (t.failure_class && t.failure_class !== 'UNKNOWN' ? ' · ' + esc(t.failure_class) : '') + '</span>' : '';
+    r.innerHTML = safetyBanner +
+      '<div style="background:#0e1f29;border:1px solid #243446;border-radius:9px;padding:10px;margin-top:8px;font-size:.84rem">' +
+      '<b>Quick check:</b> ' + esc(t.likely_cause || '—') + ' <span style="color:#90a3b6">(' + esc(t.scope || '') + (t.confidence ? ', ' + esc(t.confidence) : '') + ')</span>' + sevTag +
+      (t.clinic_fix ? '<br><b>' + (unsafe ? 'Do' : 'Try') + ':</b> ' + esc(t.clinic_fix) : '') + '</div>' +
       '<div class="ok">✓ Also sent to your Medical Director.</div>';
   }
   function post(snap, msg, t) {

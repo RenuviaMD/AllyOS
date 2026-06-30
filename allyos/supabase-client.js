@@ -186,6 +186,45 @@
       .then(function (x) { return { ok: !x.error, error: x.error }; });
   };
 
+  // ---- field incidents (Cockpit Debugging Agent loop; PHI-FREE — metadata only) ----
+  // a clinic reports an incident; it lands in the MD cockpit's triage queue. NEVER PHI.
+  // Fail-soft: if the incidents table isn't provisioned yet, this resolves {ok:false}.
+  Cloud.pushIncident = function (clinicId, r) {
+    if (!guard() || !clinicId || !r || !r.incident_summary) return Promise.resolve({ ok: false });
+    var t = r.triage || {};
+    var row = {
+      clinic_id: clinicId, environment: r.environment || null, workflow: r.workflow || null,
+      incident_summary: String(r.incident_summary).slice(0, 4000),
+      expected_behavior: r.expected_behavior || null, actual_behavior: r.actual_behavior || null,
+      safety_concern: r.safety_concern || t.safety_concern || "unknown",
+      sev: r.sev || t.sev || null, failure_class: r.failure_class || t.failure_class || null,
+      module: r.module || t.module || null, triage: t, diagnostic: r.diagnostic || {},
+      reporter_role: r.reporter_role || null, status: "open",
+    };
+    return Cloud._sb.from("incidents").insert(row)
+      .then(function (x) { return { ok: !x.error, error: x.error }; })
+      .catch(function (e) { return { ok: false, error: e }; });
+  };
+  // cockpit: pull a clinic's incidents (RLS-scoped). Optional status filter.
+  Cloud.pullIncidents = function (clinicId, status) {
+    if (!guard() || !clinicId) return Promise.resolve([]);
+    var q = Cloud._sb.from("incidents").select("*").eq("clinic_id", clinicId);
+    if (status) q = q.eq("status", status);
+    return q.order("created_at", { ascending: false }).then(function (x) { return (x && x.data) || []; })
+      .catch(function () { return []; });
+  };
+  // MD/owner triage: set status (+ optional severity/disposition). RLS rejects non-MD.
+  Cloud.setIncidentStatus = function (id, patch) {
+    if (!guard() || !id) return Promise.resolve({ ok: false });
+    var p = { status: patch.status, updated_at: new Date().toISOString() };
+    if (patch.sev) p.sev = patch.sev;
+    if (patch.disposition != null) p.disposition = patch.disposition;
+    if (patch.reviewer) { p.reviewer = patch.reviewer; p.reviewed_at = new Date().toISOString(); }
+    return Cloud._sb.from("incidents").update(p).eq("id", id)
+      .then(function (x) { return { ok: !x.error, error: x.error }; })
+      .catch(function (e) { return { ok: false, error: e }; });
+  };
+
   // ---- real session profile (replaces demo accounts): who am I, what clinic, what lines ----
   Cloud.profile = function () {
     if (!guard()) return Promise.resolve(null);

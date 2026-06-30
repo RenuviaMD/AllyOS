@@ -74,3 +74,62 @@ The MD cockpit and cloud sync gate on an active subscription too.
 3. Wire the dashboard locked-line cards → checkout; "Manage billing" link.
 4. Entitlement read in dashboard/cockpit.
 5. Test full loop with Stripe test cards → then flip to live keys.
+
+---
+
+## 10. Pricing reconciliation — SETTLE THIS FIRST (code audit, 2026-06-29)
+
+Before wiring Stripe we have to pick **one** billing unit, because the codebase currently states the price three different ways. This is the single decision that unblocks everything else — the Stripe Product/Price objects can't be created until it's made.
+
+**What the code says today (three sources, not aligned):**
+| Source | What it charges | Implication |
+|---|---|---|
+| `allyos/pricing.html` (Platform tier) | **$199/mo per *location*** — all lines included; unlimited nurse seats; **+ per authorizing-provider seat** add-on | Flat per clinic; lines are *not* metered |
+| `allyos/clinic-network.html` cockpit MRR | **$199/mo × number of *active lines*** (IV+PEP+BHRT ⇒ up to $597/clinic) | Per-line metered |
+| `allyos/dashboard.html` / `onboard.html` | "$199/mo **per line** … bundle all three for less" | Per-line, with an unspecified bundle discount |
+
+So a 3-line clinic is **$199** (pricing.html) vs **$597** (cockpit) vs "$597 minus a bundle discount" (dashboard). These can't all ship.
+
+**The decision (pick one):**
+- **A — Per location, flat $199** (matches pricing.html). Simplest Stripe: one recurring Price, `quantity = 1` per clinic. Lines become free entitlements you toggle in the cockpit. Cockpit MRR math changes to `clinics × 199` (not × lines).
+- **B — Per active line $199** (matches the cockpit today). Stripe: one recurring Price, `quantity = #active lines`. Clean metering, higher ARPU, but contradicts the public pricing page.
+- **C — Per location + bundle tiers** (matches the dashboard hint). e.g. 1 line $199 / 2 lines $349 / 3 lines $499. Stripe: three Prices or a tiered Price. Most marketing-friendly, most config.
+
+**Recommendation: A (flat per location).** It's what the public pricing page already promises, it's the least surprising to a clinic, and it makes the §400.9935 story clean (you sell *the platform per site*; the authorizing-provider seat is the only metered unit — and that maps to the MD-of-record tier, which §7 already keeps OUT of this Stripe). If you want more ARPU later, add the provider-seat add-on as a second Price — no re-architecture.
+
+**Second decision — the authorizing-provider seat.** pricing.html sells "+ per authorizing provider (MD/DO/NP/PA who signs GFEs)" as a license-bound seat. Is that:
+- (i) **folded into the MD-of-record agreement** (off-Stripe, per §7) — simplest, **recommended**; or
+- (ii) a **metered Stripe add-on** Price for clinics that bring their own provider but want extra signer seats?
+
+**If A is chosen, two small code follow-ups (I can do when you're back):**
+1. Cockpit MRR → `clinics.length × 199` and the per-clinic card shows "$199/mo" flat (drop the `× lines` math in `mrrOf`).
+2. `pricing.html` DRAFT banner can come off once amounts are final.
+
+**Everything in §1–§9 still holds** regardless of A/B/C — only the Product/Price object count and the `mrrOf` calculation change. Bring: (1) A/B/C choice, (2) provider-seat i/ii choice, (3) the actual dollar amounts (set in the Stripe dashboard, never committed), (4) confirm Stripe account + test mode.
+
+---
+
+## 11. DECIDED — 2026-06-30 (this is the model to build)
+
+**Billing unit: the CLINIC, never the provider.** Rationale (owner): AllyOS does not credential or meter providers; anyone on the clinic's login operates the platform, so there is no per-provider unit to bill. Staff seats (nurses, front desk, providers) are **unlimited and free** under a clinic. (The GFE *signature* is still a named legal act by one licensed person — access is un-credentialed, accountability is not anonymous.)
+
+**Shape: Option C — bundle by active-line count, uniform $199/line underneath.** Chosen because bundle-by-count only stays clean in Stripe and on the page if every line is priced the same; differentiated per-line pricing would need a SKU per line-combination and would mis-signal ("peptides is risky" / "hormone is unused").
+
+| Tier | Price (set in Stripe dashboard; not committed) | Stripe object |
+|---|---|---|
+| Free | $0 | — (no subscription) |
+| Platform · 1 line | **$199/mo** | tiered recurring Price, tier by active-line count |
+| Platform · 2 lines | **$349/mo** (save $49) | same Price, qty/tier = 2 |
+| Platform · 3 lines | **$499/mo** (save $98) | same Price, qty/tier = 3 |
+
+**The three lines** = IV/IM · Peptides · **Hormone (women BHRT + men TRT)**. Men's HRT/TRT **folds into** the hormone line (not a 4th line) — strengthens the weakest line by product, keeps the bundle at 3. *(TRT module is a separate content build, still pending.)*
+
+**MD-of-record is OUT of the AllyOS Stripe — entirely.** It is a separate engagement billed at **myFloridaMedicalDirector.com**: **$2,000/mo floor, varies by lines of supervision.** Keeping software (RenuviaMD/AllyOS) and supervision (the physician) in two businesses/sites/invoices is deliberate legal hygiene — it protects the "we sell software, not oversight brokering" + §400.9935 story. In the app, the MD-of-record care model is only **reflected** (gate-enforcement mode + the §400.9935 cap counter) and **referred out** (a link to the sister site), never charged.
+
+**Provider-seat add-on (the old §10 second decision): DROPPED.** No per-provider seat at all — superseded by per-clinic billing.
+
+**Code already updated to match this decision (2026-06-30):**
+- `allyos/pricing.html` — Platform card = bundle (199/349/499, per clinic, unlimited free seats); the MD-of-Record tier became an **external referral card** to myFloridaMedicalDirector.com ($2,000+, varies by scope); dropped the per-authorizing-provider seat; "credential-gated" → "clinic attestation"; tag/notes reworded.
+- `allyos/clinic-network.html` — cockpit MRR uses the bundle (`BUNDLE={1:199,2:349,3:499}`); footer states MD-of-record is billed externally and excluded; MD KPI is a §400.9935 cap tracker, not revenue.
+
+**Still to bring when we build Stripe:** (1) the actual dollar amounts entered in the Stripe dashboard, (2) confirm the Stripe account + start in test mode, (3) whether MD-of-record clinics get the AllyOS platform comped or pay for it separately (today: bought separately).

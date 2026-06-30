@@ -50,6 +50,40 @@
 .pgid{font-family:ui-monospace,Menlo,monospace;color:var(--teal);font-size:.8rem;min-width:80px}
 .pgplan{flex:1;color:var(--ink);font-size:.8rem}
 .pggo{color:var(--gold);font-size:.74rem;font-weight:700}
+.cfgbtn{color:var(--gold);text-decoration:none;font-size:.78rem;font-weight:600;border:1px solid #4a3c18;background:rgba(212,168,67,.1);border-radius:9px;padding:5px 12px;cursor:pointer}
+.mback{position:fixed;inset:0;background:rgba(3,7,13,.74);display:none;align-items:flex-start;justify-content:center;padding:34px 16px;overflow:auto;z-index:50}
+.mback.on{display:flex}
+.msheet{background:linear-gradient(180deg,#101f2c,#0b1521);border:1px solid var(--line2);border-radius:16px;padding:20px 22px;max-width:480px;width:100%}
+.msheet h2{font-family:var(--fdisp);font-size:1.2rem;margin-bottom:3px}
+.msheet .msub{font-size:.74rem;color:var(--muted);margin-bottom:15px}
+.fld{margin-bottom:13px}
+.fld label{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:5px}
+.fld input[type=text]{width:100%;background:#0c1925;border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--ink);font-size:.86rem}
+.tgl{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#0c1925;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer}
+.tgl .tl{font-size:.82rem}.tgl .td{font-size:.66rem;color:var(--muted);margin-top:2px}
+.tgl input{width:17px;height:17px;accent-color:var(--teal);flex:0 0 auto}
+.lboxes{display:flex;gap:8px;flex-wrap:wrap}
+.lbx{flex:1;min-width:90px;display:flex;align-items:center;gap:8px;background:#0c1925;border:1px solid var(--line);border-radius:10px;padding:9px 11px;cursor:pointer;font-size:.82rem}
+.lbx input{accent-color:var(--teal)}
+.gfeNote{font-size:.7rem;color:var(--gold);background:#191307;border:1px solid #4a3c18;border-radius:9px;padding:8px 11px;margin:4px 0 14px;line-height:1.5}
+.mrow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px}
+.msave{background:var(--teal);color:#05131a;border:none;border-radius:10px;padding:10px 20px;font-weight:700;font-size:.84rem;cursor:pointer}
+.mcancel{background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer}
+.msaved{font-size:.72rem;color:var(--green);font-weight:600}
+.cds{display:flex;gap:11px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);background:#0c1925;border-radius:10px;margin-bottom:6px}
+.cds.done{opacity:.5}
+.cds .rk{font-size:.56rem;font-weight:800;padding:2px 7px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em;flex:0 0 auto;margin-top:1px}
+.rk.high{background:#3a1414;color:#f0a59d;border:1px solid #6a2020}
+.rk.medium{background:#2a230e;color:var(--gold);border:1px solid #4a3c18}
+.rk.low{background:#0e2a1d;color:var(--green);border:1px solid #1c5238}
+.cds .cmid{flex:1;min-width:0}
+.cds .ctitle{font-size:.82rem;color:var(--ink);line-height:1.4}
+.cds .cmeta2{font-size:.66rem;color:var(--muted);margin-top:4px}
+.cds .cact{font-size:.7rem;color:var(--teal);margin-top:4px}
+.cds .crev{background:none;border:1px solid var(--line2);color:var(--muted);border-radius:8px;padding:4px 10px;font-size:.68rem;cursor:pointer;flex:0 0 auto;align-self:center}
+.cds .crev:hover{border-color:var(--teal);color:var(--teal)}
+.cdsfoot{font-size:.68rem;color:var(--muted);margin-top:8px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.cdsfoot a{color:var(--teal);text-decoration:none}
 </style></head>
 <body class="allyos"><div class="wrap">
   <div class="top">
@@ -64,10 +98,36 @@
 
   <div class="kpis" id="kpis"></div>
   <div id="cloudreq"></div>
+  <div id="incidents"></div>
   <div class="card" id="auditCard" style="border-color:#1c4763"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px">📋 System audit &amp; content updates</div><div id="auditBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
+  <div class="card" id="cdsCard" style="border-color:#4a3c18;display:none"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:4px">🧬 CDS update — clinician review queue</div><div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">Drift, new evidence, and source triggers the CDS Update Agent surfaced for your decision. Nothing here is auto-applied — clinical changes need your sign-off.</div><div id="cdsBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
   <div id="clinics"></div>
 
-  <div class="disc">Recurring revenue = $199/mo per active line, per clinic. MD-of-record clinics count toward the FL §400.9935 cap of 5 per physician; clinics that use their own MD are not capped and are not your liability. Today's GFE counts come from a clinic's own device (this one shows the active clinic); remote clinics show — until the PHI-free hub is wired. © <span id="yr"></span> RenuviaMD® PLLC.</div>
+  <div class="mback" id="cfgBack">
+    <div class="msheet">
+      <h2 id="cfgTitle">Configure clinic</h2>
+      <div class="msub">You set the care model and active lines — this is the network owner's decision, not the clinic's. Saved to the clinic's record; the Clinic Card shows it read-only.</div>
+      <div class="fld"><label>Clinic name</label><input type="text" id="cfgName" placeholder="Clinic name"></div>
+      <div class="fld"><label>City, state</label><input type="text" id="cfgCity" placeholder="Coral Gables, FL"></div>
+      <div class="fld"><label>Care model</label>
+        <label class="tgl"><div><div class="tl">RenuviaMD is MD-of-record</div><div class="td">You carry the GFE + oversight. Off = clinic uses its own MD.</div></div><input type="checkbox" id="cfgMd"></label>
+        <label class="tgl"><div><div class="tl">RN-run IV model</div><div class="td">Licensed RN runs IVs under your standing orders; you sign the GFE.</div></div><input type="checkbox" id="cfgRn"></label>
+      </div>
+      <div class="gfeNote" id="cfgGfe">GFE: …</div>
+      <div class="fld"><label>Active lines</label>
+        <div class="lboxes">
+          <label class="lbx"><input type="checkbox" id="cfgIv"> 💧 IV / IM</label>
+          <label class="lbx"><input type="checkbox" id="cfgPep"> 🧬 Peptides</label>
+          <label class="lbx"><input type="checkbox" id="cfgBhrt"> ⚖ BHRT</label>
+        </div>
+      </div>
+      <div class="mrow"><span class="msaved" id="cfgMsg"></span>
+        <div><button class="mcancel" onclick="closeCfg()">Cancel</button> <button class="msave" onclick="saveCfg()">Save</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="disc">Platform revenue = per clinic, by active lines: 1 line $199 · 2 lines $349 · 3 lines $499/mo (bundle &amp; save). MD-of-record is billed separately at myFloridaMedicalDirector.com and is <b>not</b> in this total; supervision-cap tracking (FL §400.9935) lives in ACHA Pro, not here. Today's GFE counts come from a clinic's own device (this one shows the active clinic); remote clinics show — until the PHI-free hub is wired. © <span id="yr"></span> RenuviaMD® PLLC.</div>
 </div>
 <script>
 document.getElementById('yr').textContent=new Date().getFullYear();
@@ -76,7 +136,10 @@ if(window.AllyOSAuth){AllyOSAuth.guard(['admin','provider']);ses=AllyOSAuth.sess
   if(ses&&!ses.mdAudit){document.documentElement.innerHTML='<body style="font-family:-apple-system,Segoe UI,Arial,sans-serif;background:#05080f;color:#eaf1f6;display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center;padding:24px"><div><h2>Medical-Director cockpit</h2><p style="color:#90a3b6;max-width:46ch">The Clinic Network is the Medical Director\'s multi-clinic view — not a single-clinic feature.</p><p style="margin-top:14px"><a style="color:#2ee6d6" href="dashboard.html">← Dashboard</a></p></div></body>';}
   if(ses)document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+((ses.credential==='MD'||ses.credential==='DO')?'FL #ME 84789 · ':'')+'Medical Director';
 }
-var PRICE=199, CAP=5, CKEY='allyos_owner_clinics_v1';
+var CKEY='allyos_owner_clinics_v1';
+// platform pricing: per clinic, bundle by active-line count. MD-of-record is billed externally
+// at myFloridaMedicalDirector.com, and the §400.9935 cap is tracked in ACHA Pro — NOT the cockpit.
+var BUNDLE={0:0,1:199,2:349,3:499};
 function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function loadClinics(){try{var c=JSON.parse(localStorage.getItem(CKEY)||'null');if(c&&c.length)return c;}catch(e){}
   // seed: the device clinic from the Clinic Card if present, else Lemus demo
@@ -87,9 +150,11 @@ function loadClinics(){try{var c=JSON.parse(localStorage.getItem(CKEY)||'null');
     falconIsMd:cfg.falconIsMd!==false,rnIvModel:!!cfg.rnIvModel,status:'active',device:true}];
 }
 function saveClinics(c){try{localStorage.setItem(CKEY,JSON.stringify(c));}catch(e){}}
+var CLINICS=loadClinics();   // module-level; cloud refresh replaces it in place
+function deviceClinicId(){return (ses&&ses.clinicId)||'lemus';}
 function lineKeys(l){return ['iv','peptides','bhrt'].filter(function(k){return l&&l[k];});}
 function lineLabel(k){return k==='iv'?'IV':k==='peptides'?'PEP':k==='bhrt'?'BHRT':k;}
-function mrrOf(c){return lineKeys(c.lines).length*PRICE;}
+function mrrOf(c){var n=lineKeys(c.lines).length;return BUNDLE[n]!=null?BUNDLE[n]:(n>3?499:0);}
 // today's GFE counts for the device clinic, from the shared chairside queue (PHI-free counts)
 function gfeCounts(){try{var s=JSON.parse(localStorage.getItem('allyos_chairside_v1')||'{}');var q=s.q||[];
   var done=0,pend=0;q.forEach(function(p){if(p.gfe)done++;else pend++;});return {total:q.length,done:done,pend:pend};
@@ -101,14 +166,14 @@ function pendingGFEs(){try{var s=JSON.parse(localStorage.getItem('allyos_chairsi
 }catch(e){return [];}}
 
 function render(){
-  var cl=loadClinics();
+  var cl=CLINICS;
   var mdCount=cl.filter(function(c){return c.falconIsMd;}).length;
   var mrr=cl.reduce(function(a,c){return a+mrrOf(c);},0);
   var linesActive=cl.reduce(function(a,c){return a+lineKeys(c.lines).length;},0);
   var g=gfeCounts();
   document.getElementById('kpis').innerHTML=
     kpi('teal','🏥 Active clinics',cl.length,'')+
-    kpi('amber','⚖ MD-of-record',mdCount+' / '+CAP,'FL §400.9935 cap')+
+    kpi('amber','⚖ MD-of-record',mdCount,'clinics you cover')+
     kpi('green','$ MRR','$'+mrr.toLocaleString(),'recurring monthly')+
     kpi('teal','💧 Lines active',linesActive,'across the network')+
     kpi('amber','🩺 Pending GFE',g?g.pend:'—','active clinic today');
@@ -131,7 +196,7 @@ function cardHTML(c){
     '</div>'+
     pendingPanel(c)+
     '<div class="crow2"><span style="font-size:.72rem;color:var(--muted)">'+keys.length+' line'+(keys.length===1?'':'s')+' · '+(c.falconIsMd?'you carry the GFE + oversight':'clinic owns the GFE')+'</span>'+
-      '<a class="open" href="'+(c.device?'dashboard.html':'clinic-card.html')+'">Open →</a></div></div>';
+      '<span style="display:flex;gap:10px;align-items:center"><button class="cfgbtn" onclick="openCfg('+"'"+esc(c.id)+"'"+')">⚙ Configure</button><a class="open" href="'+(c.device?'dashboard.html':'clinic-card.html')+'">Open →</a></span></div></div>';
 }
 function pendingPanel(c){
   if(!c.device)return '';
@@ -140,14 +205,89 @@ function pendingPanel(c){
     p.map(function(r){return '<a class="pgrow" href="gfe.html?enc='+encodeURIComponent(r.enc)+'"><span class="pgid">'+esc(r.enc)+'</span><span class="pgplan">'+esc(r.plan)+'</span><span class="pggo">Do GFE →</span></a>';}).join('')+'</div>';
 }
 function slotHTML(n){
-  var html='';
-  for(var i=n;i<CAP;i++){
-    html+='<div class="slot"><div><div class="st">Slot '+(i+1)+' — onboard a clinic</div><div class="sd">Set care model, lines &amp; roster · MD-of-record cap '+CAP+' per physician (§400.9935)</div></div>'+
-      '<a class="add" href="clinic-card.html"><span class="addic">+</span> Add clinic</a></div>';
-  }
-  return html;
+  // No platform cap on clinics. (MD-of-record supervision limits, if any, are tracked in ACHA Pro.)
+  return '<div class="slot"><div><div class="st">Onboard a clinic</div><div class="sd">You set the care model &amp; active lines · <b>unlimited</b> clinics on the platform</div></div>'+
+    '<button class="add" onclick="openCfg(null)"><span class="addic">+</span> Add clinic</button></div>';
 }
 render();
+
+// ---- real clinics from the cloud (owner sees every provisioned clinic, RLS-scoped) ----
+function mapCloudClinic(c){
+  var lines=c.lines||[];
+  return {id:c.id,name:c.name,city:c.city_state||'',
+    lines:{iv:lines.indexOf('iv')>=0,peptides:lines.indexOf('peptides')>=0,bhrt:lines.indexOf('bhrt')>=0},
+    falconIsMd:(c.md_arrangement==='renuviamd'||!!c.md_of_record),rnIvModel:!!c.rn_iv_model,
+    status:c.status||'active',device:c.id===deviceClinicId()};
+}
+function loadCloudClinics(){
+  if(!window.AllyOSCloud)return;
+  AllyOSCloud.ready.then(function(ok){if(!ok)return;
+    AllyOSCloud.listClinics().then(function(cs){
+      if(!cs||!cs.length)return;
+      CLINICS=cs.map(mapCloudClinic);
+      saveClinics(CLINICS);   // cache for offline / next load
+      render();
+    }).catch(function(){});
+  });
+}
+loadCloudClinics();
+
+// ---- owner-only care-model + lines editor (moved here from the Clinic Card) ----
+var cfgEditingId=null;
+function findClinic(id){for(var i=0;i<CLINICS.length;i++){if(CLINICS[i].id===id)return CLINICS[i];}return null;}
+function gfeText(md,rn){
+  if(md&&rn)return 'GFE: RenuviaMD MD-of-record. RN runs IVs under standing orders; you sign each GFE.';
+  if(md)return 'GFE: RenuviaMD MD-of-record. You sign each clinic GFE.';
+  return 'GFE: the clinic’s own MD is responsible — not your liability.';
+}
+function refreshGfeNote(){document.getElementById('cfgGfe').textContent=gfeText(document.getElementById('cfgMd').checked,document.getElementById('cfgRn').checked);}
+['cfgMd','cfgRn'].forEach(function(id){document.getElementById(id).addEventListener('change',refreshGfeNote);});
+function openCfg(id){
+  cfgEditingId=id;var c=id?findClinic(id):null;
+  document.getElementById('cfgTitle').textContent=c?('Configure — '+c.name):'Onboard a clinic';
+  document.getElementById('cfgName').value=c?c.name:'';
+  document.getElementById('cfgCity').value=c?(c.city||''):'';
+  document.getElementById('cfgMd').checked=c?!!c.falconIsMd:true;
+  document.getElementById('cfgRn').checked=c?!!c.rnIvModel:true;
+  document.getElementById('cfgIv').checked=c?!!(c.lines&&c.lines.iv):true;
+  document.getElementById('cfgPep').checked=c?!!(c.lines&&c.lines.peptides):false;
+  document.getElementById('cfgBhrt').checked=c?!!(c.lines&&c.lines.bhrt):false;
+  document.getElementById('cfgMsg').textContent='';
+  refreshGfeNote();
+  document.getElementById('cfgBack').classList.add('on');
+}
+function closeCfg(){document.getElementById('cfgBack').classList.remove('on');}
+document.getElementById('cfgBack').addEventListener('click',function(e){if(e.target===this)closeCfg();});
+function saveCfg(){
+  var cfg={
+    name:document.getElementById('cfgName').value.trim()||'Untitled clinic',
+    city:document.getElementById('cfgCity').value.trim(),
+    falconIsMd:document.getElementById('cfgMd').checked,
+    rnIvModel:document.getElementById('cfgRn').checked,
+    lines:{iv:document.getElementById('cfgIv').checked,peptides:document.getElementById('cfgPep').checked,bhrt:document.getElementById('cfgBhrt').checked}
+  };
+  var c=cfgEditingId?findClinic(cfgEditingId):null;
+  if(c){Object.assign(c,cfg);}
+  else{c=Object.assign({id:'local-'+Date.now(),status:'active',device:false},cfg);CLINICS.push(c);}
+  saveClinics(CLINICS);
+  // if this is the device clinic, mirror to the local config the Clinic Card reads (read-only there)
+  if(c.device){try{
+    localStorage.setItem('allyos_clinic_config_v1',JSON.stringify({name:c.name,city:c.city,falconIsMd:c.falconIsMd,rnIvModel:c.rnIvModel}));
+    localStorage.setItem('allyos_clinic_lines_v1',JSON.stringify(c.lines));
+  }catch(e){}}
+  render();
+  var msg=document.getElementById('cfgMsg');msg.textContent='Saved locally';
+  // owner-only write to the clinic record (RLS: only app_admin may UPDATE clinics)
+  var cloudId=(c.id&&c.id.indexOf('local-')!==0)?c.id:null;
+  if(cloudId&&window.AllyOSCloud){
+    AllyOSCloud.saveClinicConfig(cloudId,cfg).then(function(r){
+      msg.textContent=r&&r.ok?'Saved · synced to clinic record':'Saved locally (cloud write deferred)';
+    }).catch(function(){msg.textContent='Saved locally (offline)';});
+  }else if(!cloudId){
+    msg.textContent='Saved locally — provision a clinic record to sync';
+  }
+  setTimeout(closeCfg,900);
+}
 
 // System audit + content-update agents (reads the daily-audit status; Run-now triggers the workflow).
 function renderAudit(){
@@ -170,12 +310,66 @@ function renderAudit(){
     '</div>'+
     '<div style="margin-top:12px">'+
       '<a class="add" target="_blank" href="https://github.com/RenuviaMD/AllyOS/actions/workflows/daily-audit.yml" style="text-decoration:none"><span class="addic">▶</span> Run daily audit &amp; health ↗</a>'+
-      '<div style="font-size:.7rem;color:var(--gold);margin-top:8px;line-height:1.5">⚠ On the Actions page, set <b>"Use workflow from" → Branch: claude/funny-sagan-clvl38</b> before Run. The Opus content auditor lives on that branch — running on <b>main</b> only does the structure/health check (which is why your runs finished in 10s).</div>'+
-      '<div style="font-size:.68rem;color:var(--muted);margin-top:5px">Auto: daily 04:00 UTC. The content re-verification + PubMed/ClinicalTrials sentinels run on that branch once the ANTHROPIC_API_KEY secret is set.'+(o.date?' Content last checked '+esc((''+o.date).slice(0,10))+'.':'')+'</div>'+
+      '<div style="font-size:.7rem;color:var(--gold);margin-top:8px;line-height:1.5">Run from <b>main</b> (production) — the Opus content auditor + PubMed/ClinicalTrials sentinels are now merged there. Requires the <b>ANTHROPIC_API_KEY</b> repo secret (Settings → Secrets → Actions); without it the run still does the structure/health check and source sentinels, content re-verification is skipped.</div>'+
+      '<div style="font-size:.68rem;color:var(--muted);margin-top:5px">Auto: daily 04:00 UTC. '+(o.date?'Content last checked '+esc((''+o.date).slice(0,10))+'.':'Awaiting first content run.')+'</div>'+
     '</div>';
   }).catch(function(){el.innerHTML='<span style="color:var(--muted)">Audit status unavailable.</span>';});
 }
 renderAudit();
+
+// ---- CDS update review queue: list the agent's review items for clinician sign-off ----
+// Reads ops-audit-review-queue.csv. Decisions are tracked locally (PHI-free) keyed by a
+// stable content hash so a "reviewed" item stays cleared across re-runs (run_ids change daily).
+var CDS_REV='allyos_cds_reviewed_v1';
+function cdsReviewed(){try{return JSON.parse(localStorage.getItem(CDS_REV)||'{}');}catch(e){return {};}}
+function cdsHash(s){var h=5381;for(var i=0;i<s.length;i++){h=((h<<5)+h+s.charCodeAt(i))>>>0;}return 'h'+h.toString(36);}
+function parseCSV(text){
+  var rows=[],row=[],f='',q=false;
+  for(var i=0;i<text.length;i++){var ch=text[i];
+    if(q){if(ch==='"'){if(text[i+1]==='"'){f+='"';i++;}else q=false;}else f+=ch;}
+    else if(ch==='"')q=true;
+    else if(ch===','){row.push(f);f='';}
+    else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&text[i+1]==='\n')i++;row.push(f);f='';if(row.length>1||row[0]!=='')rows.push(row);row=[];}
+    else f+=ch;}
+  if(f!==''||row.length){row.push(f);if(row.length>1||row[0]!=='')rows.push(row);}
+  return rows;
+}
+function renderCds(){
+  fetch('ops-audit-review-queue.csv?_='+Date.now()).then(function(r){return r.ok?r.text():'';}).then(function(txt){
+    var card=document.getElementById('cdsCard'),el=document.getElementById('cdsBody');if(!el)return;
+    card.style.display='';
+    var rows=parseCSV(txt||'');
+    var emptyMsg='<div style="color:var(--muted);font-size:.82rem">No review items in the queue yet — they appear here after the CDS Update Agent runs (daily 04:00 UTC, or on-demand). Drift, new evidence, and source triggers land here for your sign-off.</div>';
+    if(rows.length<1){el.innerHTML=emptyMsg;return;}
+    var head=rows[0],idx={};head.forEach(function(h,i){idx[h]=i;});
+    var items=rows.slice(1).map(function(r){return {
+      cls:r[idx.change_class]||'',risk:(r[idx.risk_class]||'low').toLowerCase(),
+      summary:r[idx.summary]||'',action:r[idx.proposed_action]||'',
+      target:r[idx.target_library]||'',src:r[idx.source_ids]||'',
+      dir:r[idx.evidence_directness]||'',needs:(r[idx.notes]||'').indexOf('requires_signoff')>=0
+    };}).filter(function(it){return it.summary;});
+    if(!items.length){el.innerHTML=emptyMsg;return;}
+    items.forEach(function(it){it.id=cdsHash(it.target+'|'+it.cls+'|'+it.summary);});
+    var done=cdsReviewed();
+    var rank={high:0,medium:1,low:2};
+    items.sort(function(a,b){var da=!!done[a.id],db=!!done[b.id];if(da!==db)return da?1:-1;return (rank[a.risk]||3)-(rank[b.risk]||3);});
+    var open=items.filter(function(it){return !done[it.id];}).length;
+    card.style.display='';
+    el.innerHTML=items.map(function(it){var d=!!done[it.id];
+      return '<div class="cds'+(d?' done':'')+'">'+
+        '<span class="rk '+(rank[it.risk]!=null?it.risk:'low')+'">'+esc(it.risk)+'</span>'+
+        '<div class="cmid"><div class="ctitle">'+esc(it.summary)+'</div>'+
+          '<div class="cmeta2">'+esc(it.cls)+(it.dir?' · '+esc(it.dir):'')+(it.needs?' · <b style="color:var(--gold)">sign-off required</b>':'')+(it.src?' · '+esc(it.src):'')+'</div>'+
+          (it.action?'<div class="cact">→ '+esc(it.action)+'</div>':'')+'</div>'+
+        '<button class="crev" onclick="cdsMark('+"'"+it.id+"'"+','+(d?'false':'true')+')">'+(d?'Reopen':'Mark reviewed')+'</button>'+
+      '</div>';
+    }).join('')+
+    '<div class="cdsfoot"><span>'+open+' open · '+items.length+' total — decisions tracked on this device</span>'+
+      '<a target="_blank" href="https://github.com/RenuviaMD/AllyOS/blob/main/allyos/ops-audit-review-queue.csv">Full queue (CSV) ↗</a></div>';
+  }).catch(function(){var card=document.getElementById('cdsCard');if(card)card.style.display='none';});
+}
+function cdsMark(id,on){var d=cdsReviewed();if(on)d[id]=1;else delete d[id];try{localStorage.setItem(CDS_REV,JSON.stringify(d));}catch(e){}renderCds();}
+renderCds();
 
 // Cross-device inbox: real GFE requests pushed from clinics (PHI-free — Encounter ID + plan).
 function renderCloud(){
@@ -196,5 +390,54 @@ function renderCloud(){
   });
 }
 renderCloud();
+
+// ---- Incident-triage queue: field incidents reported by clinics (PHI-free) ----
+// Severity-ranked per the Cockpit Debugging Agent (SEV-1 safety first). The MD triages
+// here: mark triaged / close. Fail-soft — empty/hidden if the incidents table isn't live.
+var SEVRANK={'SEV-1':0,'SEV-2':1,'SEV-3':2,'SEV-4':3,'SEV-5':4};
+var SEVCLR={'SEV-1':'high','SEV-2':'high','SEV-3':'medium','SEV-4':'low','SEV-5':'low'};
+function renderIncidents(){
+  if(!window.AllyOSCloud)return;
+  AllyOSCloud.ready.then(function(ok){if(!ok)return;
+    AllyOSCloud.user().then(function(u){if(!u)return;
+      AllyOSCloud.listClinics().then(function(cs){
+        Promise.all((cs||[]).map(function(c){return AllyOSCloud.pullIncidents(c.id).then(function(rs){return {c:c,rs:(rs||[]).filter(function(r){return r.status!=='closed';})};});}))
+        .then(function(groups){
+          var items=[];groups.forEach(function(g){g.rs.forEach(function(r){r._clinic=g.c.name;items.push(r);});});
+          var el=document.getElementById('incidents');if(!el)return;
+          if(!items.length){el.innerHTML='';return;}
+          items.sort(function(a,b){var ra=SEVRANK[a.sev]!=null?SEVRANK[a.sev]:5,rb=SEVRANK[b.sev]!=null?SEVRANK[b.sev]:5;if(ra!==rb)return ra-rb;return (''+(b.created_at||'')).localeCompare(''+(a.created_at||''));});
+          var sev1=items.filter(function(r){return r.sev==='SEV-1';}).length;
+          el.innerHTML='<div class="card" style="border-color:'+(sev1?'#6a2020':'#1c4763')+'"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:'+(sev1?'#f0a59d':'var(--gold)')+';font-weight:700;margin-bottom:10px">🛟 Incident triage — '+items.length+' open'+(sev1?' · '+sev1+' SEV-1 safety':'')+'</div>'+
+            items.map(incRow).join('')+
+            '<div class="cdsfoot"><span>Reported from clinic devices · PHI-free · grounded in the Cockpit Debugging Agent</span></div></div>';
+        });
+      });
+    });
+  });
+}
+function incRow(r){
+  var t=r.triage||{};var sev=r.sev||t.sev||'—';var clr=SEVCLR[sev]||'low';
+  var fix=t.clinic_fix||'';var mdn=t.md_note||'';
+  var meta=[r._clinic, (r.failure_class||t.failure_class), (r.module||t.module), (r.environment)].filter(Boolean).map(esc).join(' · ');
+  return '<div class="cds">'+
+    '<span class="rk '+clr+'">'+esc(sev)+'</span>'+
+    '<div class="cmid"><div class="ctitle">'+esc(r.incident_summary||'(no summary)')+'</div>'+
+      '<div class="cmeta2">'+meta+(r.safety_concern==='yes'?' · <b style="color:#f0a59d">safety</b>':'')+'</div>'+
+      (mdn?'<div class="cact">'+esc(mdn)+'</div>':'')+
+      (fix?'<div class="cmeta2" style="font-size:.66rem;color:var(--muted);margin-top:3px">Clinic told: '+esc(fix)+'</div>':'')+'</div>'+
+    '<span style="display:flex;flex-direction:column;gap:5px;align-self:center">'+
+      (r.status==='open'?'<button class="crev" onclick="incSet('+"'"+esc(r.id)+"','triaged'"+')">Mark triaged</button>':'<span style="font-size:.62rem;color:var(--gold);text-align:center">'+esc(r.status)+'</span>')+
+      '<button class="crev" onclick="incSet('+"'"+esc(r.id)+"','closed'"+')">Close</button>'+
+    '</span>'+
+  '</div>';
+}
+function incSet(id,status){
+  if(!window.AllyOSCloud)return;
+  AllyOSCloud.setIncidentStatus(id,{status:status,reviewer:(ses&&ses.name)||'MD'}).then(function(r){
+    if(r&&r.ok)renderIncidents();
+  });
+}
+renderIncidents();
 </script>
 </body></html>

@@ -1,0 +1,64 @@
+{
+  "package_name": "cockpit_debug_agent_package_v1",
+  "date_updated": "2026-06-29",
+  "deployment": "central cockpit service; clinic-triggered incidents; repo validation; clinician signoff",
+  "permission_model": "read-only triage plus patch proposal; no auto clinical edits",
+  "counts": {
+    "files": 10,
+    "module_inventory_rows": 10,
+    "severity_levels": 5,
+    "validation_cases": 8
+  },
+  "files": [
+    {
+      "filename": "cockpit_debug_agent_master_prompt_v1.md",
+      "bytes": 2342,
+      "sha256": "d066a1d0cc7ee4a59657e164c8c64ca7d6988a47a4b14c1d363662ccd6cc3cc5"
+    },
+    {
+      "filename": "clinic_incident_trigger_schema_v1.jsonl",
+      "bytes": 529,
+      "sha256": "7ca3b41371eb4d8b39e24c22b74ccb919d03dac3b548991bed71c8daf8c45fcf"
+    },
+    {
+      "filename": "debug_trace_schema_v1.jsonl",
+      "bytes": 529,
+      "sha256": "0b9d4dbf9051813452a16743dec24f7ed4975c3c5a563531d2a5fbf40d6ba03c"
+    },
+    {
+      "filename": "debug_patch_proposal_schema_v1.jsonl",
+      "bytes": 532,
+      "sha256": "588b23dacd8e103a8eb6130dbc40e21bb88300b49c3507bdd2d1ac1f95aa353b"
+    },
+    {
+      "filename": "debug_module_inventory_v1.csv",
+      "bytes": 1556,
+      "sha256": "f25df9a61952e5bd6adc76a8a2451e4ab9e557def4dc668e6d3a1a125a0b4c82"
+    },
+    {
+      "filename": "debug_severity_matrix_v1.csv",
+      "bytes": 765,
+      "sha256": "eda5dae39467533ff460ae92b04c744ab83c654206d998418c5bbedc30690dce"
+    },
+    {
+      "filename": "debug_regression_test_cases_v1.csv",
+      "bytes": 1124,
+      "sha256": "10ce9df2a2dd56d46b97ce4ed3ffad11b4f9b2332b9131687cb7a8bc756547ee"
+    },
+    {
+      "filename": "debug_root_cause_report_template_v1.md",
+      "bytes": 1061,
+      "sha256": "5861167906f7e7821fd08dab3e61affe55d961f193a7d4f98b1750ceca77e52d"
+    },
+    {
+      "filename": "cockpit_debug_agent_runbook_v1.md",
+      "bytes": 932,
+      "sha256": "a710de7084d1e94f8f56e5f36652aed9ee7f566d4f82592d188db747ebf5402d"
+    },
+    {
+      "filename": "cockpit_debug_agent_architecture_v1.md",
+      "bytes": 598,
+      "sha256": "7e8b6f62813472b1192a5065701f060785e8025097a4f884d166214862349197"
+    }
+  ]
+}
