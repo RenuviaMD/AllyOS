@@ -203,9 +203,10 @@ function crosswalkBlock(){
     'acute neuro symptoms; psychiatric instability/suicidality; sedative/alcohol; untreated OSA',
     'do not treat anxiety/depression/insomnia; no hormone–peptide synergy claim');
   if(!cards.length) return '';
-  return '<div class="grp">Cross-line adjunct options — provider review</div>'+
+  return '<div class="noprint">'+
+    '<div class="grp">Cross-line adjunct options — provider review <span style="color:#9a8fc0;letter-spacing:0;text-transform:none;font-size:10px">(screen only — not printed on the patient plan)</span></div>'+
     '<div class="rx" style="border-color:#4a3c6e;background:#16122433;color:#cbbce6">Optional <b>provider-review-only</b> wellness adjuncts matched to this phenotype (AllyOS hormone×peptide crosswalk). <b>Not auto-recommended · not a prescription · no dosing here · no TRT–peptide synergy claim.</b> Hormone safety gates run first, peptide gates second. Consider only if clinically appropriate — the provider decides &amp; signs.</div>'+
-    cards.join('');
+    cards.join('')+'</div>';
 }
 
 function docHeader(title){
