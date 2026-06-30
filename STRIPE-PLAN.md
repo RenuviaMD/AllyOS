@@ -106,3 +106,30 @@ So a 3-line clinic is **$199** (pricing.html) vs **$597** (cockpit) vs "$597 min
 2. `pricing.html` DRAFT banner can come off once amounts are final.
 
 **Everything in §1–§9 still holds** regardless of A/B/C — only the Product/Price object count and the `mrrOf` calculation change. Bring: (1) A/B/C choice, (2) provider-seat i/ii choice, (3) the actual dollar amounts (set in the Stripe dashboard, never committed), (4) confirm Stripe account + test mode.
+
+---
+
+## 11. DECIDED — 2026-06-30 (this is the model to build)
+
+**Billing unit: the CLINIC, never the provider.** Rationale (owner): AllyOS does not credential or meter providers; anyone on the clinic's login operates the platform, so there is no per-provider unit to bill. Staff seats (nurses, front desk, providers) are **unlimited and free** under a clinic. (The GFE *signature* is still a named legal act by one licensed person — access is un-credentialed, accountability is not anonymous.)
+
+**Shape: Option C — bundle by active-line count, uniform $199/line underneath.** Chosen because bundle-by-count only stays clean in Stripe and on the page if every line is priced the same; differentiated per-line pricing would need a SKU per line-combination and would mis-signal ("peptides is risky" / "hormone is unused").
+
+| Tier | Price (set in Stripe dashboard; not committed) | Stripe object |
+|---|---|---|
+| Free | $0 | — (no subscription) |
+| Platform · 1 line | **$199/mo** | tiered recurring Price, tier by active-line count |
+| Platform · 2 lines | **$349/mo** (save $49) | same Price, qty/tier = 2 |
+| Platform · 3 lines | **$499/mo** (save $98) | same Price, qty/tier = 3 |
+
+**The three lines** = IV/IM · Peptides · **Hormone (women BHRT + men TRT)**. Men's HRT/TRT **folds into** the hormone line (not a 4th line) — strengthens the weakest line by product, keeps the bundle at 3. *(TRT module is a separate content build, still pending.)*
+
+**MD-of-record is OUT of the AllyOS Stripe — entirely.** It is a separate engagement billed at **myFloridaMedicalDirector.com**: **$2,000/mo floor, varies by lines of supervision.** Keeping software (RenuviaMD/AllyOS) and supervision (the physician) in two businesses/sites/invoices is deliberate legal hygiene — it protects the "we sell software, not oversight brokering" + §400.9935 story. In the app, the MD-of-record care model is only **reflected** (gate-enforcement mode + the §400.9935 cap counter) and **referred out** (a link to the sister site), never charged.
+
+**Provider-seat add-on (the old §10 second decision): DROPPED.** No per-provider seat at all — superseded by per-clinic billing.
+
+**Code already updated to match this decision (2026-06-30):**
+- `allyos/pricing.html` — Platform card = bundle (199/349/499, per clinic, unlimited free seats); the MD-of-Record tier became an **external referral card** to myFloridaMedicalDirector.com ($2,000+, varies by scope); dropped the per-authorizing-provider seat; "credential-gated" → "clinic attestation"; tag/notes reworded.
+- `allyos/clinic-network.html` — cockpit MRR uses the bundle (`BUNDLE={1:199,2:349,3:499}`); footer states MD-of-record is billed externally and excluded; MD KPI is a §400.9935 cap tracker, not revenue.
+
+**Still to bring when we build Stripe:** (1) the actual dollar amounts entered in the Stripe dashboard, (2) confirm the Stripe account + start in test mode, (3) whether MD-of-record clinics get the AllyOS platform comped or pay for it separately (today: bought separately).
