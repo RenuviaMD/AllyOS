@@ -3,6 +3,7 @@
 <title>Men's Hormone Optimization · Plan (DRAFT) · AllyOS · RenuviaMD®</title>
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="allyos-theme.css">
+<link rel="stylesheet" href="poc-print.css">
 <style>
  body.allyos{font-family:var(--fbody)}
  .top{display:flex;align-items:center;gap:14px;padding:0 20px;height:54px;background:#0a1120cc;backdrop-filter:blur(8px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
@@ -53,6 +54,12 @@
   <div class="disc">
     <b>Wellness optimization decision support.</b> Wellness goals qualify a man for evaluation; <b>testosterone is considered only after provider review</b> of symptoms, repeat morning testosterone pattern, fertility goals, and the safety gates. <b>No dosing here</b> — dosing belongs only in your locked provider protocol. Not a prescription; the treating provider owns and signs every decision. PHI stays on this device.
   </div>
+
+  <div class="grp noprint">Patient (stays on this device)</div>
+  <div class="panel noprint"><div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end">
+    <div style="flex:1;min-width:200px"><label class="q" style="margin-top:0">Name or Encounter ID</label><input id="pocName" type="text" placeholder="e.g., J. Garcia or MX-4821" style="width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:9px 11px"></div>
+    <div style="min-width:150px"><label class="q" style="margin-top:0">DOB / age</label><input id="pocDob" type="text" placeholder="mm/dd/yyyy or age" style="width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:9px 11px"></div>
+  </div><div style="font-size:11px;color:var(--dim);margin-top:8px">Only printed on the document — never transmitted. AllyOS stays PHI-free on the server.</div></div>
 
   <div class="grp">1 · Wellness goals / phenotype (rate 0 none → 4 very severe)</div>
   <div class="panel" id="phenoPanel"></div>
@@ -142,6 +149,18 @@ var CADENCE=[
 ];
 function tbl(rows,cols){return '<table><thead><tr>'+cols.map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+c+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table>';}
 
+function docHeader(title){
+  var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};
+  var sig={};try{sig=JSON.parse(localStorage.getItem('allyos_provider_sig_v1')||'{}');}catch(e){}
+  var prov=((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||s.name||'Provider')+(s.credential?(', '+s.credential):'');
+  var lic=[sig.license,sig.npi?('NPI '+sig.npi):''].filter(Boolean).join(' · ');
+  var nm=(document.getElementById('pocName')&&document.getElementById('pocName').value)||'—';
+  var dob=(document.getElementById('pocDob')&&document.getElementById('pocDob').value)||'';
+  return '<div class="dochead"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px">'+
+    '<div><div class="lh-brand">RenuviaMD®</div><div class="lh-meta">'+esc(title||'Plan of Care')+'</div></div>'+
+    '<div class="lh-meta" style="text-align:right">'+new Date().toLocaleDateString()+'<br>Provider: '+esc(prov)+(lic?('<br>'+esc(lic)):'')+'</div></div>'+
+    '<div class="lh-meta" style="margin-top:6px">Patient: <b>'+esc(nm)+'</b>'+(dob?(' · '+esc(dob)):'')+'</div></div>';
+}
 function providerSig(){
   var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};
   var sig={};try{sig=JSON.parse(localStorage.getItem('allyos_provider_sig_v1')||'{}');}catch(e){}
@@ -168,7 +187,7 @@ function generate(){
 
   if(!dom.length){out.innerHTML='<div class="poc"><div class="elig found">Rate at least one wellness domain to generate a plan.</div></div>';return;}
   var goalLine=dom.map(function(p){return esc(p.t)+' '+(sev[p.k])+'/4';}).join(' · ');
-  out.innerHTML='<div class="poc">'+
+  out.innerHTML='<div class="poc">'+docHeader('Men’s Hormone Optimization Plan')+
     '<h2>Men’s Hormone Optimization Plan — DRAFT</h2><div class="meta">Wellness-first · goals: '+goalLine+'</div>'+
     '<div class="grp" style="margin-top:14px">Eligibility determination</div>'+
       '<div class="elig '+cls+'">'+esc(elig)+'</div><div style="font-size:12.5px;color:var(--muted);line-height:1.55">'+why+'</div>'+

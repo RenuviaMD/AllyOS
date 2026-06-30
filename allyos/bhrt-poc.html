@@ -3,6 +3,7 @@
 <title>BHRT Plan of Care · Generator (DRAFT) · AllyOS · RenuviaMD®</title>
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="allyos-theme.css">
+<link rel="stylesheet" href="poc-print.css">
 <style>
  body.allyos{font-family:var(--fbody)}
  .top{display:flex;align-items:center;gap:14px;padding:0 20px;height:54px;background:#0a1120cc;backdrop-filter:blur(8px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
@@ -60,6 +61,12 @@
   <div class="disc">
     <b>Symptom-based clinical decision support — per NAMS 2022</b> (Hormone Therapy Position Statement, PMID 35797481). The provider's confirmed symptom assessment determines therapy; <b>labs are confirmatory and for monitoring, not required</b> to recommend treatment. FDA-approved BHRT options are named; compounding may be used <b>per the provider's decision and pharmacy of choice</b>. Advisory only — not a prescription. The treating provider owns and signs every decision. PHI stays on this device.
   </div>
+
+  <div class="grp noprint">Patient (stays on this device)</div>
+  <div class="panel noprint"><div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end">
+    <div style="flex:1;min-width:200px"><label class="q" style="margin-top:0">Name or Encounter ID</label><input id="pocName" type="text" placeholder="e.g., M. Garcia or MX-4821" style="width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:9px 11px"></div>
+    <div style="min-width:150px"><label class="q" style="margin-top:0">DOB / age</label><input id="pocDob" type="text" placeholder="mm/dd/yyyy or age" style="width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:9px 11px"></div>
+  </div><div style="font-size:11px;color:var(--dim);margin-top:8px">Only printed on the document — never transmitted. AllyOS stays PHI-free on the server.</div></div>
 
   <div class="grp">1 · Red-flag screen</div>
   <div class="panel">
@@ -212,11 +219,23 @@ function providerSig(){
     (sig.license?'':' <span class="noprint" style="color:var(--amber)">(Set your license &amp; NPI once in the Clinic Card so they print on the plan.)</span>')+'</div>';
 }
 
+function docHeader(title){
+  var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};
+  var sig={};try{sig=JSON.parse(localStorage.getItem('allyos_provider_sig_v1')||'{}');}catch(e){}
+  var prov=((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||s.name||'Provider')+(s.credential?(', '+s.credential):'');
+  var lic=[sig.license,sig.npi?('NPI '+sig.npi):''].filter(Boolean).join(' · ');
+  var nm=(document.getElementById('pocName')&&document.getElementById('pocName').value)||'—';
+  var dob=(document.getElementById('pocDob')&&document.getElementById('pocDob').value)||'';
+  return '<div class="dochead"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px">'+
+    '<div><div class="lh-brand">RenuviaMD®</div><div class="lh-meta">'+esc(title||'Plan of Care')+'</div></div>'+
+    '<div class="lh-meta" style="text-align:right">'+new Date().toLocaleDateString()+'<br>Provider: '+esc(prov)+(lic?('<br>'+esc(lic)):'')+'</div></div>'+
+    '<div class="lh-meta" style="margin-top:6px">Patient: <b>'+esc(nm)+'</b>'+(dob?(' · '+esc(dob)):'')+'</div></div>';
+}
 function generate(){
   var out=document.getElementById('out');
   var anyFlag=Object.keys(fl).some(function(k){return fl[k];});
   if(anyFlag){
-    out.innerHTML='<div class="poc"><h2>Wellness summary &amp; referral</h2><div class="red"><b>Red flag present — hormone-medication recommendations are suppressed.</b> Generate a wellness summary and route for evaluation/clearance or co-management before any hormone therapy.</div>'+providerSig()+'<div class="noprint" style="margin-top:12px"><button class="gen" onclick="window.print()">🖨 Print / export</button></div></div>';
+    out.innerHTML='<div class="poc">'+docHeader('BHRT — Wellness summary &amp; referral')+'<h2>Wellness summary &amp; referral</h2><div class="red"><b>Red flag present — hormone-medication recommendations are suppressed.</b> Generate a wellness summary and route for evaluation/clearance or co-management before any hormone therapy.</div>'+providerSig()+'<div class="noprint" style="margin-top:12px"><button class="gen" onclick="window.print()">🖨 Print / export</button></div></div>';
     out.scrollIntoView({behavior:'smooth'});return;
   }
   var ds=domains().filter(function(d){return d.s>0;}).sort(function(a,b){return b.s-a.s;});
@@ -225,7 +244,7 @@ function generate(){
     return '<div class="row"><span class="pri '+p[0]+'">'+p[1]+'</span><div><div style="font-size:13.5px;color:var(--ink)">'+esc(d.name)+' <span style="color:var(--muted)">· severity '+d.s+'/4</span></div><div style="font-size:11.5px;color:var(--muted);margin-top:2px">'+esc(d.mech)+'</div></div></div>';
   }).join('');
   var goals=Object.keys(gl).filter(function(k){return gl[k];}).map(function(k){return GOALS[k];});
-  out.innerHTML='<div class="poc">'+
+  out.innerHTML='<div class="poc">'+docHeader('BHRT Plan of Care')+
     '<h2>BHRT Plan of Care — DRAFT</h2><div class="meta">Symptom-based · '+esc(document.getElementById('stage').value||'menopause transition')+' · uterus: '+esc(document.getElementById('uterus').value||'—')+(goals.length?' · goals: '+esc(goals.join(', ')):'')+'</div>'+
     '<div class="grp" style="margin-top:14px">Symptom map (severity-ranked)</div><div class="map">'+map+'</div>'+
     '<div class="grp">Treatment plan (starting regimens)</div>'+treatmentPlan()+
