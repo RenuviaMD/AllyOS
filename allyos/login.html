@@ -75,11 +75,27 @@ function doLogin(e){
   });
   return false;
 }
-// already signed in? (local session, or a live Supabase session to rebuild)
-(function(){ var s=AllyOSAuth.session(); if(s){ go(s); return; }
+// already signed in? Offer a choice instead of silently redirecting — so you can switch users.
+function signedInBanner(label, sess){
+  var c=document.querySelector('.card'); if(!c||document.getElementById('siBanner'))return;
+  var b=document.createElement('div'); b.id='siBanner';
+  b.style.cssText='background:#0f2230;border:1px solid var(--line);border-radius:9px;padding:12px;margin:0 0 14px;font-size:.8rem;color:var(--muted)';
+  b.innerHTML='You’re already signed in as <b style="color:var(--ink)">'+(label||'this account')+'</b>.'+
+    '<div style="display:flex;gap:8px;margin-top:10px">'+
+    '<button type="button" id="siCont" style="flex:1">Continue</button>'+
+    '<button type="button" id="siSwitch" style="flex:1;background:transparent;border:1px solid var(--line);color:var(--ink)">Sign in as a different user</button></div>';
+  c.insertBefore(b, c.children[2] || null);   // under the logo + tagline
+  document.getElementById('siCont').onclick=function(){ go(sess); };
+  document.getElementById('siSwitch').onclick=function(){
+    var done=function(){ location.replace('login.html'); };
+    try{ if(window.AllyOSAuth)AllyOSAuth.signOut(); }catch(e){}
+    if(window.AllyOSCloud&&AllyOSCloud.signOut){ AllyOSCloud.signOut().then(done,done); } else { done(); }
+  };
+}
+(function(){ var s=AllyOSAuth.session(); if(s){ signedInBanner(s.name||s.email||'', s); return; }
   if(window.AllyOSCloud){ AllyOSCloud.ready.then(function(ok){ if(!ok)return;
     AllyOSCloud.user().then(function(u){ if(!u)return;
-      AllyOSCloud.profile().then(function(p){ if(p&&p.email){ go(AllyOSAuth.adopt(p)); } });
+      AllyOSCloud.profile().then(function(p){ if(p&&p.email){ signedInBanner(p.name||p.email, AllyOSAuth.adopt(p)); } });
     });
   }); }
 })();
