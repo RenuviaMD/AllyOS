@@ -49,13 +49,29 @@
   </div>
   <div class="sub" id="clinicLine">Your clinic's lines of care. Active lines open their station; locked lines can be added any time.</div>
 
+  <div id="bulletin"></div>
+
   <div class="sec">Lines of care</div>
   <div class="lines" id="lines"></div>
 
   <div class="sec">Tools</div>
   <div class="tools" id="tools"></div>
 
-  <div class="disc">Each line is a module you turn on per practice — pay only for what you run. AllyOS is advisory decision-support; the provider owns every clinical decision and signature. <b>PHI stays on-device.</b> © <span id="yr"></span> RenuviaMD® PLLC.</div>
+  <div style="margin-top:26px;border-top:1px solid var(--line);padding-top:18px;display:flex;flex-wrap:wrap;gap:22px;justify-content:space-between;align-items:flex-start">
+    <div style="font-size:.82rem;color:var(--muted)">
+      <div style="color:var(--ink);font-weight:700;margin-bottom:5px">AllyOS lines — add any time, pay only for what you run</div>
+      <div>💧 IV / IM · 🧬 Peptides · ⚕️ Hormone (women &amp; men)</div>
+      <div style="color:var(--gold);margin-top:5px;font-size:.9rem">1 line <b>$199</b> · 2 lines <b>$349</b> <span style="color:var(--muted)">(save $49)</span> · 3 lines <b>$499</b> <span style="color:var(--muted)">(save $98)</span> /mo</div>
+      <div style="margin-top:4px"><a class="tool" style="padding:7px 12px;font-size:.78rem;display:inline-flex" href="#" onclick="openBilling();return false">➕ Add a line / manage plan</a></div>
+    </div>
+    <div style="font-size:.82rem;color:var(--muted)">
+      <div style="color:var(--ink);font-weight:700;margin-bottom:5px">Questions? Talk to the Medical Director</div>
+      <div>Armando A. Falcon, MD · RenuviaMD® PLLC</div>
+      <div style="margin-top:3px"><a href="mailto:drfalcon@renuviamd.com" style="color:var(--teal);text-decoration:none">drfalcon@renuviamd.com</a> &nbsp;·&nbsp; <a href="tel:+13058777507" style="color:var(--teal);text-decoration:none">(305) 877-7507</a></div>
+      <div style="margin-top:3px"><a href="https://renuviamd.com" target="_blank" rel="noopener" style="color:var(--teal);text-decoration:none">renuviamd.com</a></div>
+    </div>
+  </div>
+  <div class="disc" style="margin-top:14px">AllyOS is advisory decision-support; the provider owns every clinical decision and signature. <b>PHI stays on-device.</b> © <span id="yr"></span> RenuviaMD® PLLC.</div>
 </div>
 
 <div class="ov" id="ov"><div class="card" id="card"></div></div>
@@ -171,6 +187,21 @@ function openBilling(){
     .catch(function(){alert('Could not reach billing right now.');});
 }
 if(location.search.indexOf('billing=success')>=0){setTimeout(function(){alert('✓ Subscription started — thank you. Manage it any time under the Billing tool.');},300);}
+
+// ---- Monthly bulletin (owner-curated, INFO ONLY — never changes protocols) ----
+function renderBulletin(){
+  var el=document.getElementById('bulletin');if(!el)return;
+  fetch('clinic-bulletin.json?_='+Date.now()).then(function(r){return r.ok?r.json():null;}).then(function(b){
+    if(!b||b.active===false||!b.title){el.innerHTML='';return;}
+    el.innerHTML='<div style="background:linear-gradient(180deg,#13202b,#0d1722);border:1px solid #1c4763;border-radius:13px;padding:14px 16px;margin:14px 0 4px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div style="font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;color:var(--teal);font-weight:700">📰 This month from AllyOS'+(b.month?' · '+esc(b.month):'')+'</div><div style="font-size:.6rem;color:var(--muted)">informational — does not change your protocols</div></div>'+
+      '<div style="font-family:var(--fdisp,inherit);font-size:1rem;color:var(--ink);margin:6px 0 4px">'+esc(b.title)+'</div>'+
+      '<div style="font-size:.82rem;color:var(--muted);line-height:1.5">'+esc(b.body||'')+'</div>'+
+      (b.link_url?'<div style="margin-top:8px"><a href="'+esc(b.link_url)+'" target="_blank" rel="noopener" style="color:var(--teal);text-decoration:none;font-size:.8rem;font-weight:600">'+esc(b.link_label||'Read more')+' ↗</a></div>':'')+
+    '</div>';
+  }).catch(function(){var el=document.getElementById('bulletin');if(el)el.innerHTML='';});
+}
+renderBulletin();
 function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 // ---- Backup & Restore (clinic owns the file; it contains PHI, stays on their device) ----

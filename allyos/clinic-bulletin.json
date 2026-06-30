@@ -1,0 +1,9 @@
+{
+  "_doc": "Owner-curated MONTHLY bulletin shown to clinics on their dashboard. INFORMATIONAL only — never changes protocols or decisions. Dr. Falcon edits this once a month (or leave 'active': false to hide it).",
+  "active": true,
+  "month": "July 2026",
+  "title": "FDA peptide compounding meeting — July 23–24, 2026",
+  "body": "The FDA Pharmacy Compounding Advisory Committee meets July 23–24 to evaluate BPC-157, KPV, TB-500, MOTS-c, DSIP, Semax and Epitalon for the §503A compounding list. The outcome may affect which compounded peptides remain available. This is informational awareness — it does not change any of your protocols or decisions.",
+  "link_label": "FDA meeting details",
+  "link_url": "https://www.fda.gov/advisory-committees/advisory-committee-calendar/july-23-24-2026-meeting-pharmacy-compounding-advisory-committee-07232026"
+}
