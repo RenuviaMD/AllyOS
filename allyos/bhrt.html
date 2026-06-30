@@ -73,28 +73,11 @@
   </div>
 
   <div class="pol">
-    <b>Provider-facing only.</b> Never patient-facing output. <b>PHI stays local</b> — AllyOS holds no patient identifiers; only a de-identified decision marker flows to MD oversight. BHRT is a real medical consultation: <b>the authorized provider performs it and signs</b>. RN / staff support intake and routing only.
+    <b>Advisory decision-support</b> — not a prescription. The provider owns and signs every decision; scope of practice is the clinic's. <b>PHI stays on-device.</b>
   </div>
 
-  <!-- 1. PRESCRIBER GATE -->
-  <div class="grp">1 · Prescriber authority</div>
-  <div class="panel">
-    <h3>Who is making the medication decision?</h3>
-    <p class="d">Only an authorized APP / physician provider of record may determine candidacy, select therapy, prescribe, change doses, or clear red flags (FL §464.012 APRN · §458.347 PA).</p>
-    <label class="q" for="role">Role of the person finalizing this BHRT decision</label>
-    <select id="role" onchange="recompute()">
-      <option value="">— select —</option>
-      <option value="physician">Physician (MD / DO)</option>
-      <option value="aprn">APRN / ARNP</option>
-      <option value="pa">Physician Assistant (PA)</option>
-      <option value="rn">RN</option>
-      <option value="ma">MA / coordinator / unlicensed</option>
-    </select>
-    <div class="block" id="roleBlock"><b>BLOCKED —</b> a BHRT medication decision requires an authorized APP / physician provider of record. RN / staff may support intake and routing only.</div>
-  </div>
-
-  <!-- 2. RED-FLAG SCREEN -->
-  <div class="grp">2 · Red-flag / referral screen</div>
+  <!-- 1. RED-FLAG SCREEN -->
+  <div class="grp">1 · Red-flag / referral screen</div>
   <div class="panel">
     <h3>Any of these present?</h3>
     <p class="d">Any checked item is a hard stop — generate a wellness summary + referral rationale, but <b>suppress all hormone-medication recommendations</b> until cleared or co-managed.</p>
@@ -102,7 +85,7 @@
   </div>
 
   <!-- 3. CONTEXT -->
-  <div class="grp">3 · Candidacy context</div>
+  <div class="grp">2 · Candidacy context</div>
   <div class="panel">
     <div class="grid2">
       <div>
@@ -130,27 +113,31 @@
   </div>
 
   <!-- 4. DECISION MARKER -->
-  <div class="grp">4 · Decision marker</div>
+  <div class="grp">3 · Decision marker</div>
   <div id="markerOut"></div>
 
-  <!-- MEDICATION REGISTRY -->
-  <div class="grp">Medication registry · FDA-approved before compounded</div>
-  <div class="panel"><table><thead><tr><th>Class</th><th>Option</th><th>Role</th><th>Status</th></tr></thead><tbody id="medRows"></tbody></table></div>
-  <div class="panel" style="border-color:#7a5e1c">
-    <h3 style="color:var(--amber)">Compounded exception</h3>
-    <p class="d" id="compoundNote"></p>
-    <h3 style="color:#f0635a;margin-top:6px">Suppressed / quarantine</h3>
-    <ul class="sup" id="suppRows"></ul>
-  </div>
+  <!-- Reference (formulary, evidence, governance) — collapsed by default at point of care -->
+  <button type="button" id="refToggle" onclick="var r=document.getElementById('bhrtRef');var open=r.style.display!=='none';r.style.display=open?'none':'block';this.textContent=(open?'▸ Show':'▾ Hide')+' formulary, evidence &amp; governance (reference)';" style="margin:18px 0 4px;background:transparent;border:1px solid var(--line,#243446);color:var(--teal,#2ee6d6);border-radius:9px;padding:9px 14px;font-size:.82rem;cursor:pointer">▸ Show formulary, evidence &amp; governance (reference)</button>
+  <div id="bhrtRef" style="display:none">
+    <!-- MEDICATION REGISTRY -->
+    <div class="grp">Medication registry · FDA-approved before compounded</div>
+    <div class="panel"><table><thead><tr><th>Class</th><th>Option</th><th>Role</th><th>Status</th></tr></thead><tbody id="medRows"></tbody></table></div>
+    <div class="panel" style="border-color:#7a5e1c">
+      <h3 style="color:var(--amber)">Compounded exception</h3>
+      <p class="d" id="compoundNote"></p>
+      <h3 style="color:#f0635a;margin-top:6px">Suppressed / quarantine</h3>
+      <ul class="sup" id="suppRows"></ul>
+    </div>
 
-  <!-- EVIDENCE -->
-  <div class="grp">Evidence sources</div>
-  <div class="panel">
-    <p class="d"><span id="srcCount">—</span> Every material recommendation carries a source class; no verified source = recommendation suppressed.</p>
-    <div id="srcRows"></div>
-  </div>
+    <!-- EVIDENCE -->
+    <div class="grp">Evidence sources</div>
+    <div class="panel">
+      <p class="d"><span id="srcCount">—</span> Every material recommendation carries a source class; no verified source = recommendation suppressed.</p>
+      <div id="srcRows"></div>
+    </div>
 
-  <div class="foot" id="foot"></div>
+    <div class="foot" id="foot"></div>
+  </div>
 </div>
 
 <script>
@@ -186,10 +173,6 @@ function renderChips(){
 function tog(g,k){var o=(g==='fl'?fl:dm);o[k]=!o[k];renderChips();recompute();}
 
 function recompute(){
-  var role=document.getElementById('role').value;
-  var blocked=(role==='rn'||role==='ma');
-  document.getElementById('roleBlock').classList.toggle('show',blocked);
-
   var anyFlag=Object.keys(fl).some(function(k){return fl[k];});
   var uterus=document.getElementById('uterus').value;
   var age=document.getElementById('age').value;
@@ -198,10 +181,7 @@ function recompute(){
 
   var out=document.getElementById('markerOut'), cls,mk,why,items=[];
 
-  if(blocked){
-    cls='red';mk='■ BLOCKED — authority';
-    why='RN / staff may not finalize a BHRT medication decision. Route to the authorized APP / physician provider of record.';
-  } else if(anyFlag){
+  if(anyFlag){
     cls='red';mk='■ RED — referral first';
     var routes=FLAGS.filter(function(f){return fl[f.k];}).map(function(f){return f.t+'  ('+f.route+')';});
     why='Red flag present. Suppress all hormone-medication recommendations until cleared or co-managed. A wellness summary + referral rationale may still be generated.';
@@ -209,9 +189,9 @@ function recompute(){
   } else if(age==='lt40'){
     cls='amber';mk='● AMBER — out of routine scope';
     why='Age < 40: suspected POI is outside routine wellness scope. Refer / co-manage; suppress routine BHRT draft until diagnostic evaluation is documented.';
-  } else if(!role||!uterus||!age||!doms.length){
+  } else if(!uterus||!age||!doms.length){
     cls='gray';mk='○ Incomplete';
-    why='Select prescriber role, uterus status, age band, and at least one symptom domain to evaluate candidacy.';
+    why='Select uterus status, age band, and at least one symptom domain to evaluate candidacy.';
   } else if(uterus==='unknown' && doms.indexOf('gsm')<0){
     cls='amber';mk='● AMBER — missing data';
     why='Uterus status unknown + systemic estrogen under consideration → suppress the final systemic-estrogen plan until uterus status is confirmed (endometrial-protection gate). Local GSM pathways are unaffected.';
