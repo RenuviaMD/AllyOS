@@ -1,0 +1,14 @@
+{
+  "date": null,
+  "agent": "protocol-verify",
+  "scope": "published_only (in_primary_library:true, not pending/draft)",
+  "status": "pending",
+  "published_protocols": 0,
+  "citations_checked": 0,
+  "citations_confirmed": 0,
+  "citations_failed": 0,
+  "citations_reference_nonpubmed": 0,
+  "citations_unparseable": 0,
+  "review_total": 0,
+  "protocols": []
+}

@@ -100,6 +100,7 @@
   <div id="cloudreq"></div>
   <div id="incidents"></div>
   <div class="card" id="auditCard" style="border-color:#1c4763"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px">📋 System audit &amp; content updates</div><div id="auditBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
+  <div class="card" id="pvCard" style="border-color:#1c5238;display:none"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--green);font-weight:700;margin-bottom:4px">🔬 Published-protocol verification</div><div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">Auto-checks every <b>published</b> protocol (not drafts): each citation resolved live, and what's new per protocol. The machine confirms the real ones — you only see what failed.</div><div id="pvBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
   <div class="card" id="cdsCard" style="border-color:#4a3c18;display:none"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:4px">🧬 CDS update — clinician review queue</div><div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">Drift, new evidence, and source triggers the CDS Update Agent surfaced for your decision. Nothing here is auto-applied — clinical changes need your sign-off.</div><div id="cdsBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
   <div id="clinics"></div>
 
@@ -316,6 +317,41 @@ function renderAudit(){
   }).catch(function(){el.innerHTML='<span style="color:var(--muted)">Audit status unavailable.</span>';});
 }
 renderAudit();
+
+// Published-protocol verifier — auto-confirms real citations; surfaces only failures + what's-new per protocol.
+function renderPv(){
+  var card=document.getElementById('pvCard'),el=document.getElementById('pvBody');if(!el)return;
+  fetch('protocol-verify.json?_='+Date.now()).then(function(r){return r.ok?r.json():null;}).then(function(o){
+    if(!o){card.style.display='none';return;}
+    card.style.display='';
+    if(o.status==='pending'||!o.date){el.innerHTML='<div style="color:var(--muted);font-size:.82rem">Awaiting first run — runs daily (04:00 UTC) and on-demand. It scopes to published protocols, resolves each citation live, and reports what\'s new per protocol. No API key needed.</div>';return;}
+    var fails=o.citations_failed||0;
+    el.innerHTML='<div class="cgrid">'+
+      '<div class="cbox"><div class="bl">Published protocols</div><div class="bv">'+(o.published_protocols||0)+'</div></div>'+
+      '<a class="cbox" style="text-decoration:none;display:block" href="https://github.com/RenuviaMD/AllyOS/blob/main/allyos/protocol-verify-queue.csv" target="_blank"><div class="bl">Citations</div><div class="bv"><b style="color:var(--green)">'+(o.citations_confirmed||0)+'</b> ok'+(fails?' · <b style="color:#f0a59d">'+fails+' failed</b>':'')+'</div></a>'+
+      '<div class="cbox"><div class="bl">Guideline / FDA refs</div><div class="bv" style="font-size:.82rem">'+(o.citations_reference_nonpubmed||0)+' (not auto-verifiable)</div></div>'+
+      '<div class="cbox"><div class="bl">Last run</div><div class="bv" style="font-size:.76rem">'+esc((''+(o.date||'')).slice(0,10))+'</div></div>'+
+    '</div>';
+    var protos=(o.protocols||[]);
+    // failures first, then protocols with new evidence
+    var failRows=protos.filter(function(p){return (p.citations||[]).some(function(c){return c.status==='FAILED';});});
+    var newRows=protos.filter(function(p){return p.whats_new&&((p.whats_new.papers||0)+(p.whats_new.trials||0))>0;});
+    var html='';
+    if(failRows.length){html+='<div style="font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:#f0a59d;font-weight:700;margin:12px 0 6px">⚠ Citations that failed to resolve — your review</div>';
+      failRows.forEach(function(p){(p.citations||[]).filter(function(c){return c.status==='FAILED';}).forEach(function(c){
+        html+='<div class="cds"><span class="rk high">FAIL</span><div class="cmid"><div class="ctitle">'+esc(c.cite||c.id||'')+'</div><div class="cmeta2">'+esc(p.module)+' · '+esc(p.protocol)+' · '+esc(c.type||'')+(c.detail?' · '+esc(c.detail):'')+'</div></div></div>';
+      });});
+    }
+    html+='<div style="font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--teal);font-weight:700;margin:12px 0 6px">🆕 What\'s new per protocol ('+newRows.length+')</div>';
+    if(!newRows.length){html+='<div style="color:var(--muted);font-size:.78rem">No new papers/trials this run.</div>';}
+    newRows.sort(function(a,b){return ((b.whats_new.papers||0)+(b.whats_new.trials||0))-((a.whats_new.papers||0)+(a.whats_new.trials||0));});
+    newRows.slice(0,20).forEach(function(p){var w=p.whats_new;
+      html+='<a class="pgrow" style="text-decoration:none" target="_blank" href="https://pubmed.ncbi.nlm.nih.gov/?term='+encodeURIComponent((p.agents||[]).slice(0,3).join(' OR '))+'"><span class="pgid">'+esc(p.protocol)+'</span><span class="pgplan">'+esc((p.agents||[]).slice(0,3).join(', '))+'</span><span class="pggo">'+(w.papers||0)+'📄 '+(w.trials||0)+'🧪</span></a>';
+    });
+    el.innerHTML+=html;
+  }).catch(function(){var c=document.getElementById('pvCard');if(c)c.style.display='none';});
+}
+renderPv();
 
 // ---- CDS update review queue: list the agent's review items for clinician sign-off ----
 // Reads ops-audit-review-queue.csv. Decisions are tracked locally (PHI-free) keyed by a
