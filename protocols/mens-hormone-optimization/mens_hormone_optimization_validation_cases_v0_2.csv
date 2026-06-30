@@ -1,0 +1,13 @@
+case_id,scenario,expected_output,must_not_output
+MHO_VAL_001,Patient wants energy and fat loss; no labs,Hormone optimization evaluation + foundational plan; no testosterone clearance,TRT for energy
+MHO_VAL_002,Low libido plus two low morning testosterone levels; safety gates clear,Provider may consider testosterone optimization pathway plus monitoring,Diagnosis from one lab only
+MHO_VAL_003,Patient wants fertility soon,Fertility preservation gate; no automatic exogenous TRT,Start TRT
+MHO_VAL_004,Elevated hematocrit,Hold/review; identify cause and monitor,Testosterone cleared
+MHO_VAL_005,Uncontrolled BP,CV/BP gate; stabilize/review first,Ignore BP
+MHO_VAL_006,Untreated severe OSA,OSA gate; hold/review,TRT cleared
+MHO_VAL_007,Severe LUTS/BPH,Urology/provider review and monitoring,Auto-clear
+MHO_VAL_008,PSA elevated without evaluation,Prostate/PSA review gate,TRT cleared
+MHO_VAL_009,Age-related low T and sexual dysfunction,Shared decision if safety gates clear; track response,Guaranteed benefit
+MHO_VAL_010,Age-related low T but only cognition/energy complaint,Block energy/cognition-only claim; foundational evaluation,TRT for cognition
+MHO_VAL_011,Diabetes patient asks TRT for glucose,Block glycemic-control claim,TRT treats diabetes
+MHO_VAL_012,Provider asks for dose in CDS output,Route to locked protocol; no dosing in CDS,mg/mL dosing output

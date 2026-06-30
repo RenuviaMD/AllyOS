@@ -1,0 +1,7 @@
+visit,timing,name,key_actions,outputs
+1,Day 1,Elite Men’s Wellness & Hormone Evaluation,Goals/symptom map; fertility intent; vitals/BP/waist; medical/prostate/CV/OSA/LUTS review; order baseline lab map; initiate foundational plan,"Phenotype, risk map, labs ordered, foundational optimization plan"
+2,Week 2–4,Lab Review & Optimization Decision,"Review testosterone pattern, SHBG/free T, LH/FSH, CBC/Hct, PSA context, metabolic labs; apply safety gates","Provider decision: testosterone pathway, fertility-preserving pathway, or non-TRT optimization"
+3,Week 6–8,Early Response / Safety Check,"If therapy chosen: symptom response, adverse effects, BP, hematocrit as appropriate; if non-TRT: lifestyle adherence and fatigue differential",Safety check and adjustment proposal
+4,Week 12,Performance & Metabolic Checkpoint,"Body composition/waist, libido/energy scores, BP, CBC/Hct, testosterone levels per protocol, metabolic markers as appropriate",Continue/adjust/hold decision; validation of benefit
+5,Month 6,Comprehensive Optimization Review,"Full symptom domains, CBC/Hct, BP, PSA/prostate context if applicable, metabolic labs, sleep/recovery assessment",Benefit-risk review and next-phase plan
+6,Annual,Annual Re-Assessment,"Ongoing benefit, safety labs, prostate/BP/CV review, fertility status update, program goals",Continuation shared decision and yearly plan

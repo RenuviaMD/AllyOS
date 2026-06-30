@@ -1,0 +1,90 @@
+{
+  "package_name": "mens_hormone_optimization_cds_package_v0_2",
+  "date_updated": "2026-06-30",
+  "scope": "Men's hormone optimization and vitality wellness decision support",
+  "wellness_practice_first": true,
+  "testosterone_one_tool_not_whole_program": true,
+  "wellness_goal_trigger_allowed": true,
+  "medical_eligibility_gate_required_before_testosterone": true,
+  "no_dosing_logic": true,
+  "no_regulatory_logic": true,
+  "counts": {
+    "modules": 10,
+    "safety_gates": 8,
+    "guardrails": 4,
+    "lab_map_rows": 13,
+    "lifestyle_rows": 9,
+    "visit_cadence_rows": 6,
+    "validation_cases": 12,
+    "source_audit_records": 10
+  },
+  "jsonl_parse_counts": {
+    "mens_hormone_optimization_cds_modules_v0_2.jsonl": 10,
+    "mens_hormone_optimization_safety_gates_v0_2.jsonl": 8,
+    "mens_hormone_optimization_selector_logic_v0_2.jsonl": 1,
+    "mens_hormone_optimization_language_guardrails_v0_2.jsonl": 4
+  },
+  "unresolved_source_ids": [],
+  "files": [
+    {
+      "filename": "mens_hormone_optimization_patient_plan_template_v0_2.md",
+      "bytes": 5486,
+      "sha256": "89b6175007e111c854ef1f811d2fbb2af52154059f505561d50818ca3a3ea560"
+    },
+    {
+      "filename": "mens_hormone_optimization_internal_protocol_v0_2.md",
+      "bytes": 4540,
+      "sha256": "86c17d209f0546b3510a0c16e3a7cf64bd2d4674218c38720904b3f15ab951b2"
+    },
+    {
+      "filename": "mens_hormone_optimization_cds_modules_v0_2.jsonl",
+      "bytes": 3670,
+      "sha256": "de84a4a3efe2ed1340b964b7d01d35789e736dd29ee2e4cd0cb187b9233cf200"
+    },
+    {
+      "filename": "mens_hormone_optimization_safety_gates_v0_2.jsonl",
+      "bytes": 2885,
+      "sha256": "5dab9356e33da719172f855e0cfb4db6050f15d84a682492578185a6c96506dd"
+    },
+    {
+      "filename": "mens_hormone_optimization_selector_logic_v0_2.jsonl",
+      "bytes": 926,
+      "sha256": "05ea7440454c80532d67f7da3409edbd78b5fd0b11111864e667928373971e40"
+    },
+    {
+      "filename": "mens_hormone_optimization_language_guardrails_v0_2.jsonl",
+      "bytes": 1595,
+      "sha256": "1ba9e9f8ed4b5bb2135ad262d3e1f5203e996b4faa399914391cf68b506a8865"
+    },
+    {
+      "filename": "mens_hormone_optimization_lab_map_v0_2.csv",
+      "bytes": 2188,
+      "sha256": "03d85f1cd309c2e2ff5edd32ed1bb724aa50ad29e5592773d14b6874308abaa2"
+    },
+    {
+      "filename": "mens_hormone_optimization_nutrition_exercise_supplement_map_v0_2.csv",
+      "bytes": 1576,
+      "sha256": "5e2d07a5bdb3480bbaa89104fb7bf4ebef20aec35e29851b9005cce0ffab7820"
+    },
+    {
+      "filename": "mens_hormone_optimization_visit_cadence_v0_2.csv",
+      "bytes": 1379,
+      "sha256": "c4073b624049ddfc3e0cd22e8554b43653c647ec4b1c675e72ad91692a420e60"
+    },
+    {
+      "filename": "mens_hormone_optimization_source_audit_v0_2.csv",
+      "bytes": 4336,
+      "sha256": "679cb607be770f9cff4fdd6ef80f94a318abd61dfc53f049df51b61ec69a314a"
+    },
+    {
+      "filename": "mens_hormone_optimization_validation_cases_v0_2.csv",
+      "bytes": 1374,
+      "sha256": "98852f31296bc3c4d941d5484cc3b298a79e89e6f8d904c412adecb2ee55ff73"
+    },
+    {
+      "filename": "mens_hormone_optimization_report_v0_2.md",
+      "bytes": 559,
+      "sha256": "5a60330f137e1ee001457507a59ce709171ef7889c62afc9005212963ab90744"
+    }
+  ]
+}
