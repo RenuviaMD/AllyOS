@@ -1,12 +1,12 @@
 {
-  "date": "2026-06-30T18:47:57.023757Z",
+  "date": "2026-06-30T20:27:01.171568Z",
   "json_valid": true,
   "js_ok": true,
   "calc_ok": true,
-  "files_checked": 73,
+  "files_checked": 75,
   "checks": {
-    "json": 36,
-    "js": 37
+    "json": 37,
+    "js": 38
   },
   "errors": [],
   "warnings": [],

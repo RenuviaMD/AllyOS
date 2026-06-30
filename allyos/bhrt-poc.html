@@ -1,0 +1,208 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BHRT Plan of Care · Generator (DRAFT) · AllyOS · RenuviaMD®</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="allyos-theme.css">
+<style>
+ body.allyos{font-family:var(--fbody)}
+ .top{display:flex;align-items:center;gap:14px;padding:0 20px;height:54px;background:#0a1120cc;backdrop-filter:blur(8px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+ .brand{font-family:var(--fdisp);font-weight:900}.brand b{color:var(--teal)}
+ .tag{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);border:1px solid var(--line2);border-radius:5px;padding:3px 8px}
+ .top .right{margin-left:auto}.top .right a{color:var(--teal);font-size:12.5px;text-decoration:none}
+ .wrap{max-width:1000px;margin:0 auto;padding:22px 20px 90px}
+ h1{font-family:var(--fdisp);font-weight:900;font-size:1.5rem}
+ .sub{color:var(--muted);font-size:.9rem;margin:3px 0 0}
+ .disc{font-size:11.5px;color:var(--dim);border:1px solid var(--line);border-radius:9px;padding:11px 14px;margin:14px 0;line-height:1.55}.disc b{color:var(--green)}
+ .grp{font-family:var(--fdisp);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin:24px 0 10px;display:flex;align-items:center;gap:10px}.grp:after{content:'';flex:1;height:1px;background:var(--line)}
+ .panel{background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:14px}
+ label.q{display:block;font-size:13px;font-weight:600;margin:12px 0 6px}
+ select{width:100%;max-width:280px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:9px 11px}
+ .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+ .chip{font-size:12px;border:1px solid var(--line2);border-radius:9px;padding:7px 11px;cursor:pointer;color:var(--muted);user-select:none}
+ .chip.on{background:#0e2e2b;border-color:var(--teal);color:var(--teal)}
+ .chip.red.on{background:#2a1512;border-color:#8a322c;color:#f0b3aa}
+ .mrs{border-bottom:1px solid var(--line);padding:9px 0;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+ .mrs .lab{font-size:13px}
+ .scale{display:flex;gap:4px}
+ .sc{width:30px;height:30px;border:1px solid var(--line2);border-radius:7px;background:#0a1422;color:var(--muted);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+ .sc.on{background:#11313a;border-color:var(--teal);color:var(--teal);font-weight:700}
+ .sc.sev3.on,.sc.sev4.on{background:#2a1c12;border-color:var(--amber);color:var(--amber)}
+ .gen{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a;border:none;border-radius:10px;padding:12px 20px;font-weight:800;font-size:.92rem;cursor:pointer;margin-top:8px}
+ .out{margin-top:18px}
+ .poc{background:#0a1422;border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+ .poc h2{font-family:var(--fdisp);font-size:1.15rem;margin:0}
+ .poc .meta{font-size:11.5px;color:var(--muted);margin-top:2px}
+ .map{margin:12px 0}
+ .row{display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}
+ .pri{font-size:9px;font-weight:800;letter-spacing:.04em;padding:3px 8px;border-radius:5px;white-space:nowrap;margin-top:2px}
+ .pri.crit{background:#2a1512;color:#f0635a}.pri.high{background:#2a2210;color:var(--amber)}.pri.mod{background:#0e2436;color:var(--blue)}
+ .rx{background:#0e2a1f33;border:1px solid #1c5238;border-radius:9px;padding:10px 12px;margin:8px 0;font-size:12.5px;line-height:1.55}
+ .rx b{color:var(--green)}
+ .rxc{background:#1c163322;border:1px solid #3a2f5a;border-radius:9px;padding:9px 12px;margin:8px 0;font-size:12px;color:#c9bdf0;line-height:1.5}
+ .red{background:#2a1512;border:1px solid #8a322c;border-radius:11px;padding:13px 15px;color:#f0b3aa;font-size:13px;margin:10px 0}
+ .sig{border-top:1px solid var(--line);margin-top:16px;padding-top:12px;font-size:12px;color:var(--muted)}
+ .sig b{color:var(--ink)}
+ .noprint button,.noprint a{cursor:pointer}
+ @media print{.noprint{display:none}.top{display:none}body{background:#fff}.poc{border:none}}
+</style></head>
+<body class="allyos">
+<div class="top">
+  <span class="brand"><b>Ally</b>OS</span>
+  <span class="tag">BHRT · Plan of Care</span>
+  <span class="pill gold" style="font-size:9px;background:#2a2210;color:var(--amber);border:1px solid #4a3c18;border-radius:5px;padding:3px 8px">DRAFT — symptom-based, pending MD sign-off</span>
+  <span class="right"><a href="dashboard.html">← Dashboard</a></span>
+</div>
+
+<div class="wrap">
+  <h1>BHRT Plan of Care — Generator</h1>
+  <p class="sub">Symptom-driven decision support for perimenopause / menopause. The provider reviews and signs.</p>
+
+  <div class="disc">
+    <b>Symptom-based clinical decision support — per NAMS 2022</b> (Hormone Therapy Position Statement, PMID 35797481). The provider's confirmed symptom assessment determines therapy; <b>labs are confirmatory and for monitoring, not required</b> to recommend treatment. FDA-approved BHRT options are named; compounding may be used <b>per the provider's decision and pharmacy of choice</b>. Advisory only — not a prescription. The treating provider owns and signs every decision. PHI stays on this device.
+  </div>
+
+  <div class="grp">1 · Red-flag screen</div>
+  <div class="panel">
+    <p style="font-size:12px;color:var(--muted);margin:0 0 8px">Any checked item suppresses hormone recommendations — generate a wellness summary + referral instead, until cleared/co-managed.</p>
+    <div class="chips" id="flags"></div>
+  </div>
+
+  <div class="grp">2 · Context</div>
+  <div class="panel">
+    <div style="display:flex;gap:22px;flex-wrap:wrap">
+      <div><label class="q">Uterus status</label>
+        <select id="uterus"><option value="">— select —</option><option value="intact">Intact</option><option value="removed">Hysterectomy</option><option value="unknown">Unknown</option></select></div>
+      <div><label class="q">Menopause stage</label>
+        <select id="stage"><option value="">— select —</option><option value="peri">Perimenopause</option><option value="post">Postmenopause</option><option value="surgical">Surgical/POI</option></select></div>
+    </div>
+  </div>
+
+  <div class="grp">3 · Symptoms — rate the last 4 weeks (0 none → 4 very severe)</div>
+  <div class="panel" id="mrsPanel"></div>
+
+  <div class="grp">4 · Goals (optional)</div>
+  <div class="panel"><div class="chips" id="goals"></div></div>
+
+  <div class="noprint"><button class="gen" onclick="generate()">▶ Generate Plan of Care</button></div>
+
+  <div class="out" id="out"></div>
+</div>
+
+<script src="allyos-auth.js"></script>
+<script>
+if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin','nurse']);}
+function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ---- red flags (from the locked BHRT module) ----
+var FLAGS=[
+ 'Postmenopausal / unexplained vaginal bleeding',
+ 'Breast / endometrial / estrogen-sensitive cancer (uncleared)',
+ 'Active/recent VTE · PE · stroke/TIA · MI · unstable CAD',
+ 'Active liver disease / significant unexplained LFT abnormality',
+ 'Pregnant / breastfeeding / suspected pregnancy',
+ 'Suspected endometrial pathology (pelvic mass, gross hematuria)',
+ 'Uncontrolled HTN / severe untreated condition'
+];
+var GOALS=['Fewer hot flashes / night sweats','Better sleep','Less anxiety / better mood','Restore desire','Protect bones','Clearer thinking'];
+// MRS-style symptom items -> clinical domain
+var ITEMS=[
+ {k:'vms', t:'Hot flushes, sweating, flushing'},
+ {k:'vms2',t:'Heart discomfort (racing, awareness)'},
+ {k:'sleep',t:'Sleep problems'},
+ {k:'mood',t:'Depressive mood'},
+ {k:'irrit',t:'Irritability'},
+ {k:'anx', t:'Anxiety'},
+ {k:'cog', t:'Exhaustion — memory / focus'},
+ {k:'sex', t:'Sexual problems (desire, satisfaction)'},
+ {k:'bladder',t:'Bladder problems (urgency, leaking)'},
+ {k:'vag', t:'Vaginal dryness'},
+ {k:'msk', t:'Joint & muscle discomfort'}
+];
+var fl={},gl={},sev={};
+function renderChips(){
+  document.getElementById('flags').innerHTML=FLAGS.map(function(f,i){return '<span class="chip red'+(fl[i]?' on':'')+'" onclick="fl['+i+']=!fl['+i+'];renderChips()">'+esc(f)+'</span>';}).join('');
+  document.getElementById('goals').innerHTML=GOALS.map(function(g,i){return '<span class="chip'+(gl[i]?' on':'')+'" onclick="gl['+i+']=!gl['+i+'];renderChips()">'+esc(g)+'</span>';}).join('');
+}
+function renderMrs(){
+  document.getElementById('mrsPanel').innerHTML=ITEMS.map(function(it){
+    var sc='';for(var n=0;n<=4;n++){sc+='<div class="sc sev'+n+(sev[it.k]===n?' on':'')+'" onclick="sev[\''+it.k+'\']='+n+';renderMrs()">'+n+'</div>';}
+    return '<div class="mrs"><div class="lab">'+esc(it.t)+'</div><div class="scale">'+sc+'</div></div>';
+  }).join('');
+}
+renderChips();renderMrs();
+
+// ---- clinical domains: score from items, map to source-grounded oriented recommendations ----
+function score(keys){var m=0;keys.forEach(function(k){if((sev[k]||0)>m)m=sev[k];});return m;}
+function pri(s){return s>=3?['crit','CRITICAL']:s===2?['high','HIGH']:['mod','MODERATE'];}
+
+function domains(){
+  return [
+   {name:'Vasomotor (VMS)', s:score(['vms','vms2']),
+    mech:'Low estradiol → hypothalamic thermoregulatory dysregulation → narrowed thermoneutral zone.',
+    rx:function(g){ return systemicEstrogen(g, 'VMS') + nonHormonalVMS(); }},
+   {name:'Genitourinary (GSM)', s:score(['vag','bladder']),
+    mech:'Low estradiol → urogenital atrophy → loss of glycogen/lactobacilli → ↑ vaginal pH.',
+    rx:function(){ return '<div class="rx"><b>Local (vaginal) estrogen</b> — low-dose vaginal estradiol cream/tablet/ring <i>(FDA-approved)</i>; alternatives: vaginal DHEA/prasterone, or ospemifene PO. Local therapy is not gated by the systemic-estrogen uterus rule. <span style="color:var(--muted)">NAMS 2022 · AUA 2025 GSM.</span></div>' + compNote(); }},
+   {name:'Sleep', s:score(['sleep']),
+    mech:'VMS + low progesterone → loss of GABA-ergic sleep effect → circadian disruption.',
+    rx:function(g){ return '<div class="rx"><b>Micronized progesterone at bedtime</b> <i>(FDA-approved; also required for endometrial protection if uterus intact + systemic estrogen)</i> — GABA-ergic, sleep-supportive. Treat co-existing VMS. <span style="color:var(--muted)">NAMS 2022.</span></div>' + compNote(); }},
+   {name:'Mood / anxiety / irritability', s:score(['mood','irrit','anx']),
+    mech:'Low estradiol → ↓ serotonin/dopamine signaling.',
+    rx:function(){ return '<div class="rx">Menopause-transition mood symptoms may improve with <b>systemic estradiol</b> (see VMS). For a standalone/severe mood disorder, evaluate/refer to mental-health care — do not treat primary psychiatric illness with hormones alone. <span style="color:var(--muted)">NAMS 2022.</span></div>'; }},
+   {name:'Cognition / exhaustion', s:score(['cog']),
+    mech:'Low estradiol → impaired hippocampal function; often secondary to sleep/VMS burden.',
+    rx:function(){ return '<div class="rx">Treat the drivers (VMS, sleep). <b>Do not initiate hormone therapy for cognition alone</b> — not an evidence-based indication. <span style="color:var(--muted)">ACP 2020 · NAMS 2022.</span></div>'; }},
+   {name:'Sexual — low desire + distress', s:score(['sex']),
+    mech:'Low androgens + estradiol → urogenital atrophy + dopaminergic changes.',
+    rx:function(){ return '<div class="rx">First address GSM and reversible factors (sleep, mood, meds, relationship). If <b>low desire WITH personal distress (HSDD)</b> persists: a <b>provider-level testosterone discussion</b> — off-label in women, HSDD only, not for energy/mood/weight. <span style="color:var(--muted)">ISSWSH 2021 (PMID 33792440) · Global Consensus 2019.</span></div>' + compNote(); }},
+   {name:'Musculoskeletal', s:score(['msk']),
+    mech:'Estradiol depletion → ↑ bone resorption + arthralgia.',
+    rx:function(g){ return '<div class="rx">Menopausal arthralgia may improve with <b>systemic estradiol</b> (see VMS). For bone-loss prevention in appropriate candidates (<60 or within 10 yr of menopause), systemic estrogen is an option; assess fracture risk / DXA. <span style="color:var(--muted)">NAMS 2022.</span></div>'; }}
+  ];
+}
+function systemicEstrogen(g, why){
+  var ut=document.getElementById('uterus').value;
+  var prog = ut==='intact' ? ' <b>+ micronized progesterone</b> nightly (endometrial protection — mandatory with systemic estrogen + intact uterus)' : (ut==='removed' ? ' (no progestogen needed — hysterectomy)' : ' <b>+ micronized progesterone</b> (confirm uterus status; protection required if intact)');
+  return '<div class="rx"><b>Systemic transdermal 17β-estradiol</b> (patch/gel/spray) <i>(FDA-approved; transdermal preferred — lower VTE/stroke risk than oral)</i>'+prog+'. Target symptom relief; titrate q4wk. <span style="color:var(--muted)">NAMS 2022 · ESE 2025.</span></div>';
+}
+function nonHormonalVMS(){return '<div class="rx">If MHT not used/declined: <b>fezolinetant 45 mg</b> (FDA; LFT monitoring), <b>paroxetine 7.5 mg</b> (FDA for VMS), or an SSRI/SNRI; CBT for bother/sleep. <span style="color:var(--muted)">NAMS 2023 nonhormone.</span></div>';}
+function compNote(){return '<div class="rxc">Compounded BHRT (e.g., Biest, compounded progesterone/testosterone) may be used <b>per the provider\'s decision and pharmacy of choice</b>, with documented rationale — not first-line when an FDA-approved option exists; no superiority/safety claim. <span style="color:#9a8fc0">ACOG 2023 · NASEM 2020.</span></div>';}
+
+function providerSig(){
+  var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};
+  var sig={};try{sig=JSON.parse(localStorage.getItem('allyos_provider_sig_v1')||'{}');}catch(e){}
+  var name=(window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||s.name||'Treating provider';
+  var cred=s.credential?(', '+s.credential):'';
+  var lic=sig.license?(' · '+sig.license):'';
+  var npi=sig.npi?(' · NPI '+sig.npi):'';
+  return '<div class="sig">Generated by AllyOS clinical decision-support · '+new Date().toLocaleDateString()+'.<br>Reviewed and signed by <b>'+esc(name)+esc(cred)+'</b>'+esc(lic)+esc(npi)+' — the treating provider owns this clinical decision.'+
+    (sig.license?'':' <span class="noprint" style="color:var(--amber)">(Set your license &amp; NPI once in the Clinic Card so they print on the plan.)</span>')+'</div>';
+}
+
+function generate(){
+  var out=document.getElementById('out');
+  var anyFlag=Object.keys(fl).some(function(k){return fl[k];});
+  if(anyFlag){
+    out.innerHTML='<div class="poc"><h2>Wellness summary &amp; referral</h2><div class="red"><b>Red flag present — hormone-medication recommendations are suppressed.</b> Generate a wellness summary and route for evaluation/clearance or co-management before any hormone therapy.</div>'+providerSig()+'<div class="noprint" style="margin-top:12px"><button class="gen" onclick="window.print()">🖨 Print / export</button></div></div>';
+    out.scrollIntoView({behavior:'smooth'});return;
+  }
+  var ds=domains().filter(function(d){return d.s>0;}).sort(function(a,b){return b.s-a.s;});
+  if(!ds.length){out.innerHTML='<div class="poc"><div class="red" style="background:#0e2436;border-color:var(--line2);color:var(--muted)">Rate at least one symptom to generate a plan.</div></div>';return;}
+  var map=ds.map(function(d){var p=pri(d.s);
+    return '<div class="row"><span class="pri '+p[0]+'">'+p[1]+'</span><div><div style="font-size:13.5px;color:var(--ink)">'+esc(d.name)+' <span style="color:var(--muted)">· severity '+d.s+'/4</span></div><div style="font-size:11.5px;color:var(--muted);margin-top:2px">'+esc(d.mech)+'</div></div></div>';
+  }).join('');
+  var rec=ds.map(function(d){return '<div style="margin-top:10px"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--teal);font-weight:700">'+esc(d.name)+'</div>'+d.rx(gl)+'</div>';}).join('');
+  var goals=Object.keys(gl).filter(function(k){return gl[k];}).map(function(k){return GOALS[k];});
+  out.innerHTML='<div class="poc">'+
+    '<h2>BHRT Plan of Care — DRAFT</h2><div class="meta">Symptom-based · '+esc(document.getElementById('stage').value||'menopause transition')+' · uterus: '+esc(document.getElementById('uterus').value||'—')+(goals.length?' · goals: '+esc(goals.join(', ')):'')+'</div>'+
+    '<div class="grp" style="margin-top:14px">Symptom map (severity-ranked)</div><div class="map">'+map+'</div>'+
+    '<div class="grp">Oriented recommendations</div>'+rec+
+    '<div class="grp">Monitoring</div><div class="rx">Reassess symptoms at 8–12 weeks and periodically; titrate to response. If labs used (confirmatory): on-therapy estradiol target ~50–150 pg/mL (ultrasensitive assay); review hematocrit/BP as indicated. Discontinue if no meaningful benefit.</div>'+
+    '<div class="rxc" style="margin-top:10px">Reminder: this is <b>symptom-based</b> decision support. Labs confirm and monitor — they do not determine whether to treat symptoms. Doses/formulations and pharmacy are the provider\'s decision.</div>'+
+    providerSig()+
+    '<div class="noprint" style="margin-top:14px"><button class="gen" onclick="window.print()">🖨 Print / export Plan of Care</button></div>'+
+  '</div>';
+  out.scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body></html>
