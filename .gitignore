@@ -1,0 +1,6 @@
+# Python bytecode (created when running/importing the audit scripts)
+__pycache__/
+*.pyc
+
+# OS / editor cruft
+.DS_Store
