@@ -205,12 +205,10 @@ function pendingPanel(c){
     p.map(function(r){return '<a class="pgrow" href="gfe.html?enc='+encodeURIComponent(r.enc)+'"><span class="pgid">'+esc(r.enc)+'</span><span class="pgplan">'+esc(r.plan)+'</span><span class="pggo">Do GFE →</span></a>';}).join('')+'</div>';
 }
 function slotHTML(n){
-  var html='';
-  for(var i=n;i<CAP;i++){
-    html+='<div class="slot"><div><div class="st">Slot '+(i+1)+' — onboard a clinic</div><div class="sd">You set the care model &amp; lines here · MD-of-record cap '+CAP+' per physician (§400.9935)</div></div>'+
-      '<button class="add" onclick="openCfg(null)"><span class="addic">+</span> Add clinic</button></div>';
-  }
-  return html;
+  // No platform cap on clinics — the §400.9935 cap of 5 applies ONLY to MD-of-record clinics
+  // (tracked in the KPI above). Clinics that use their own MD are unlimited and uncapped.
+  return '<div class="slot"><div><div class="st">Onboard a clinic</div><div class="sd">You set the care model &amp; lines · <b>unlimited</b> clinics on the platform — only <b>MD-of-record</b> clinics count toward the §400.9935 cap of '+CAP+'</div></div>'+
+    '<button class="add" onclick="openCfg(null)"><span class="addic">+</span> Add clinic</button></div>';
 }
 render();
 
