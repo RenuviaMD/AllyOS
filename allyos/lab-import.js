@@ -60,11 +60,40 @@ window.AllyOSLabImport = (function () {
   }
   function esc(x){return (''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
+  // ---- self-hosted PDF text extraction (pdf.js, lazy-loaded on first PDF drop; runs in-browser) ----
+  function ensurePdfjs(){
+    return new Promise(function(resolve, reject){
+      if (window.pdfjsLib) { return resolve(window.pdfjsLib); }
+      var sc = document.createElement('script'); sc.src = 'vendor/pdf.min.js';
+      sc.onload = function(){ if (window.pdfjsLib){ window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdf.worker.min.js'; resolve(window.pdfjsLib); } else reject(new Error('pdf.js not available')); };
+      sc.onerror = function(){ reject(new Error('could not load vendor/pdf.min.js')); };
+      (document.head || document.documentElement).appendChild(sc);
+    });
+  }
+  function itemsToLines(items){
+    var rows = {};
+    items.forEach(function(it){ if(!it.str||!it.transform) return; var y = Math.round(it.transform[5]); (rows[y] = rows[y] || []).push({ x: it.transform[4], s: it.str }); });
+    return Object.keys(rows).map(Number).sort(function(a,b){ return b - a; })
+      .map(function(y){ return rows[y].sort(function(a,b){ return a.x - b.x; }).map(function(o){ return o.s; }).join(' ').replace(/\s+/g,' ').trim(); })
+      .filter(Boolean);
+  }
+  function pdfToText(buf){
+    return ensurePdfjs().then(function(pdfjsLib){
+      return pdfjsLib.getDocument({ data: buf }).promise.then(function(pdf){
+        var chain = Promise.resolve(), out = [];
+        for (var i = 1; i <= pdf.numPages; i++) (function(n){
+          chain = chain.then(function(){ return pdf.getPage(n).then(function(pg){ return pg.getTextContent().then(function(tc){ out.push(itemsToLines(tc.items).join('\n')); }); }); });
+        })(i);
+        return chain.then(function(){ return out.join('\n'); });
+      });
+    });
+  }
+
   function mount(container, targets, onApply) {
     container.innerHTML =
       '<div class="li-drop" tabindex="0">' +
-        '<div class="li-hint">⬇ <b>Paste your lab report text</b> here, or <b>drag a .txt file</b>. ' +
-        'Parsed on this device only — nothing is uploaded, and you confirm every value before it fills the form.</div>' +
+        '<div class="li-hint">⬇ <b>Drag your lab PDF</b> (or a .txt), or <b>paste the report text</b> below. ' +
+        'The PDF is read <b>on this device</b> (pdf.js) — nothing is uploaded — and you confirm every value before it fills the form.</div>' +
         '<textarea class="li-ta" rows="4" placeholder="Paste the lab result text (open the report → Select All → Copy → paste here)…"></textarea>' +
         '<div class="li-row"><button type="button" class="li-btn li-extract">Extract values →</button>' +
         '<span class="li-note"></span></div>' +
@@ -104,11 +133,21 @@ window.AllyOSLabImport = (function () {
     drop.addEventListener('drop', function (ev) {
       var f = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
       if (!f) return;
-      if (/\.pdf$/i.test(f.name)) { note.textContent = 'PDF detected — open it, Select All, Copy, and paste the text above (in-browser PDF reading is not enabled yet).'; return; }
+      if (/\.pdf$/i.test(f.name) || f.type === 'application/pdf') {
+        note.textContent = 'Reading PDF on this device…';
+        var pr = new FileReader();
+        pr.onload = function () {
+          pdfToText(new Uint8Array(pr.result)).then(function (txt) {
+            ta.value = txt; note.textContent = 'PDF read locally — confirm the values below.'; showGrid(parse(txt, targets));
+          }).catch(function (e) { note.textContent = 'Could not read this PDF (' + (e && e.message || 'error') + '). Open it, Select All, Copy, and paste the text above instead.'; });
+        };
+        pr.readAsArrayBuffer(f);
+        return;
+      }
       var r = new FileReader();
       r.onload = function () { ta.value = r.result; showGrid(parse(r.result, targets)); };
       r.readAsText(f);
     });
   }
-  return { mount: mount, parse: parse };
+  return { mount: mount, parse: parse, pdfToText: pdfToText };
 })();
