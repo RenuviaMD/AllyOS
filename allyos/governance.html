@@ -1,0 +1,100 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Governance checklist · AllyOS · RenuviaMD®</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="allyos-theme.css">
+<style>
+ body.allyos{font-family:var(--fbody)}
+ .top{display:flex;align-items:center;gap:14px;padding:0 20px;height:54px;background:#0a1120cc;backdrop-filter:blur(8px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+ .brand{font-family:var(--fdisp);font-weight:900}.brand b{color:var(--teal)}
+ .tag{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);border:1px solid var(--line2);border-radius:5px;padding:3px 8px}
+ .top .right{margin-left:auto}.top .right a{color:var(--teal);font-size:12.5px;text-decoration:none}
+ .wrap{max-width:860px;margin:0 auto;padding:22px 20px 90px}
+ h1{font-family:var(--fdisp);font-weight:900;font-size:1.5rem;margin:0}
+ .sub{color:var(--muted);font-size:.9rem;margin:3px 0 0}
+ .note{font-size:11.5px;color:var(--dim);border:1px solid var(--line);border-radius:9px;padding:11px 14px;margin:14px 0;line-height:1.55}
+ .lines{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+ .lchip{font-size:12.5px;border:1px solid var(--line2);border-radius:9px;padding:8px 13px;cursor:pointer;color:var(--muted);user-select:none}
+ .lchip.on{background:#0e2e2b;border-color:var(--teal);color:var(--teal)}
+ .sumbar{display:flex;gap:16px;flex-wrap:wrap;align-items:center;background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:14px 0}
+ .sumbar .n{font-family:var(--fdisp);font-weight:900;font-size:1.2rem}
+ .sp{color:var(--green)}.sm{color:#f0b3aa}.su{color:var(--muted)}
+ details.sec{background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:12px;margin:10px 0;overflow:hidden}
+ details.sec>summary{cursor:pointer;list-style:none;padding:14px 16px;font-family:var(--fdisp);font-weight:800;font-size:14px;display:flex;align-items:center;gap:10px}
+ details.sec>summary::-webkit-details-marker{display:none}
+ details.sec>summary:before{content:'▸';color:var(--teal);font-size:12px}
+ details.sec[open]>summary:before{content:'▾'}
+ details.sec>summary .cnt{margin-left:auto;font-family:var(--fbody);font-weight:600;font-size:11.5px;color:var(--muted)}
+ .body{padding:2px 16px 14px}
+ .item{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
+ .item .lbl{flex:1;font-size:13.5px}
+ .tog{display:flex;gap:6px}
+ .tog button{font-size:12px;font-weight:700;border-radius:8px;padding:6px 12px;cursor:pointer;border:1px solid var(--line2);background:#0a1422;color:var(--muted)}
+ .tog button.on.p{background:#0e2a1f;border-color:#1e6e4a;color:var(--green)}
+ .tog button.on.m{background:#2a1512;border-color:#8a322c;color:#f0b3aa}
+ .gen{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a;border:none;border-radius:10px;padding:11px 18px;font-weight:800;font-size:.9rem;cursor:pointer;margin-top:16px}
+ @media print{.top,.lines,.noprint{display:none}.wrap{max-width:none}details.sec{break-inside:avoid}}
+</style></head>
+<body class="allyos">
+<div class="top">
+  <span class="brand"><b>Ally</b>OS</span>
+  <span class="tag">Governance checklist</span>
+  <span class="right"><a href="dashboard.html">← Dashboard</a></span>
+</div>
+<div class="wrap">
+  <h1>Governance checklist</h1>
+  <p class="sub">Wellness directorship · plain-language governance check</p>
+  <div class="note">Simple <b>Present / Missing</b> check for the clinic's wellness governance. Not an AHCA or statutory audit. Line sections appear only for the lines the clinic offers. Saved on this device.</div>
+
+  <div class="lines" id="lines"></div>
+  <div class="sumbar"><div><span class="n sp" id="nPresent">0</span> <span class="su">Present</span></div><div><span class="n sm" id="nMissing">0</span> <span class="su">Missing</span></div><div><span class="n su" id="nUnset">0</span> <span class="su">Not set</span></div></div>
+
+  <div id="sections"></div>
+
+  <div class="noprint"><button class="gen" onclick="window.print()">🖨 Print / MD QA note</button></div>
+</div>
+
+<script src="allyos-auth.js"></script>
+<script>
+if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin']);}
+var SECTIONS=[
+  {k:'req',title:'Required for every clinic',always:true,items:['Medical Director agreement','Active service list','Staff role list','Signed protocols','Consent process','GFE / eligibility process','Official chart location','Monthly chart review process','Incident reporting process','Emergency plan','Medication/source tracking','Insurance / coverage note']},
+  {k:'iv',title:'IV / IM therapy',line:'iv',items:['IV protocol','GFE before treatment','Same-day safety screen','Vitals before treatment','Treatment monitoring note','Dose / ingredients documented','Aftercare instructions','Incident form if something happened','Monthly IV chart review']},
+  {k:'pep',title:'Peptides',line:'peptides',items:['Peptide protocol','Provider of record','Reason for treatment','Peptide consent','Medication source','Dose / schedule','Follow-up plan','Side-effect check','Monthly peptide chart review']},
+  {k:'bhrt',title:'BHRT / Hormones',line:'bhrt',items:['Hormone protocol','Provider of record','Reason for treatment','Hormone consent','FDA-approved vs compounded product note','Labs / monitoring plan','Dose change note','Follow-up plan','Abnormal symptom review','Monthly hormone chart review']}
+];
+var LINES=[{k:'iv',t:'IV / IM'},{k:'peptides',t:'Peptides'},{k:'bhrt',t:'BHRT / Hormones'}];
+function clinicId(){var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};return s.clinicId||'local';}
+var SKEY='allyos_governance_v1', OKEY='allyos_governance_lines_v1';
+function load(k,d){try{return JSON.parse(localStorage.getItem(k)||'null')||d;}catch(e){return d;}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+var store=load(SKEY,{}); var cid=clinicId(); store[cid]=store[cid]||{};
+// which lines the clinic offers — from saved override, else the clinic's active lines, else all
+var offered=load(OKEY,{})[cid];
+if(!offered){ var cl=load('allyos_clinic_lines_v1',null); var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};
+  var src=cl||s.lines||['iv','peptides','bhrt']; offered={}; LINES.forEach(function(l){offered[l.k]=src.indexOf(l.k)>=0;}); }
+function setOffered(){var o=load(OKEY,{});o[cid]=offered;save(OKEY,o);}
+function st(){return store[cid];}
+function setItem(id,v){st()[id]=v;save(SKEY,store);render();}
+function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function visibleSections(){return SECTIONS.filter(function(s){return s.always||offered[s.line];});}
+function render(){
+  document.getElementById('lines').innerHTML=LINES.map(function(l){return '<span class="lchip'+(offered[l.k]?' on':'')+'" onclick="toggleLine(\''+l.k+'\')">'+esc(l.t)+(offered[l.k]?' ✓':'')+'</span>';}).join('');
+  var P=0,M=0,U=0;
+  document.getElementById('sections').innerHTML=visibleSections().map(function(sec){
+    var rows=sec.items.map(function(it,i){
+      var id=sec.k+':'+i, v=st()[id]||'';
+      if(v==='present')P++;else if(v==='missing')M++;else U++;
+      return '<div class="item"><span class="lbl">'+esc(it)+'</span><span class="tog">'+
+        '<button class="p'+(v==='present'?' on':'')+'" onclick="setItem(\''+id+'\',\'present\')">Present</button>'+
+        '<button class="m'+(v==='missing'?' on':'')+'" onclick="setItem(\''+id+'\',\'missing\')">Missing</button></span></div>';
+    }).join('');
+    var sc=sec.items.reduce(function(a,_,i){return a+(st()[sec.k+':'+i]==='present'?1:0);},0);
+    return '<details class="sec"><summary>'+esc(sec.title)+'<span class="cnt">'+sc+' / '+sec.items.length+' present</span></summary><div class="body">'+rows+'</div></details>';
+  }).join('');
+  document.getElementById('nPresent').textContent=P;document.getElementById('nMissing').textContent=M;document.getElementById('nUnset').textContent=U;
+}
+function toggleLine(k){offered[k]=!offered[k];setOffered();render();}
+render();
+</script>
+</body></html>
