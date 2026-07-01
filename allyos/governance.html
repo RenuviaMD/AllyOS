@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Governance review · AllyOS · RenuviaMD®</title>
+<title>Governance binder report · AllyOS · RenuviaMD®</title>
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="allyos-theme.css">
 <style>
@@ -16,12 +16,14 @@
  .hdr{background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0}
  .hgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 18px}
  @media(max-width:640px){.hgrid{grid-template-columns:1fr}}
- .hgrid label{display:block;font-size:11px;color:var(--dim);margin-bottom:3px;text-transform:uppercase;letter-spacing:.08em}
- .hgrid input,.hgrid select{width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:8px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px}
- .lines{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+ .hgrid label,.fl label{display:block;font-size:11px;color:var(--dim);margin-bottom:3px;text-transform:uppercase;letter-spacing:.08em}
+ .hgrid input,.hgrid select,.fl input,.fl select,.fl textarea{width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:8px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px}
+ .fl{margin-top:10px}.fl textarea{resize:vertical}
+ .grp{font-family:var(--fdisp);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin:20px 0 8px;display:flex;align-items:center;gap:10px}.grp:after{content:'';flex:1;height:1px;background:var(--line)}
+ .lines{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
  .lchip{font-size:12.5px;border:1px solid var(--line2);border-radius:9px;padding:8px 13px;cursor:pointer;color:var(--muted);user-select:none}
  .lchip.on{background:#0e2e2b;border-color:var(--teal);color:var(--teal)}
- .sumbar{display:flex;gap:16px;flex-wrap:wrap;align-items:center;background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:14px 0}
+ .sumbar{display:flex;gap:16px;flex-wrap:wrap;align-items:center;background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0}
  .sumbar .n{font-family:var(--fdisp);font-weight:900;font-size:1.2rem}
  .sp{color:var(--green)}.sm{color:#f0b3aa}.sn{color:var(--blue)}.su{color:var(--muted)}
  details.sec{background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:12px;margin:10px 0;overflow:hidden}
@@ -38,67 +40,50 @@
  .tog button.on.p{background:#0e2a1f;border-color:#1e6e4a;color:var(--green)}
  .tog button.on.m{background:#2a1512;border-color:#8a322c;color:#f0b3aa}
  .tog button.on.n{background:#0e2436;border-color:#2a5a7e;color:var(--blue)}
- .stat{display:none;font-size:12.5px;font-weight:700;min-width:96px;text-align:right}
- .corr .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
- .corr .row .ci{flex:1;min-width:180px;font-size:13px;color:#f0b3aa}
- .corr input{background:#0a1422;border:1px solid var(--line2);border-radius:8px;color:var(--ink);font:inherit;font-size:12.5px;padding:6px 9px}
- .mdnote textarea{width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:10px 12px;resize:vertical}
- .sig{margin-top:14px;font-size:13px;color:var(--muted)}.sig .line{display:inline-block;border-bottom:1px solid var(--muted);min-width:260px;margin-left:8px}
  .gen{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a;border:none;border-radius:10px;padding:11px 18px;font-weight:800;font-size:.9rem;cursor:pointer;margin-top:16px}
- /* ---- print: render as the monthly governance report ---- */
- @media print{
-   @page{margin:16mm 14mm}
-   body{background:#fff !important;color:#1c2b32}
-   .top,.lines,.sumbar,.noprint,.tog{display:none !important}
-   .wrap{max-width:none;padding:0}
-   h1{color:#0e3a40}.sub{color:#5b6b72}
-   .hdr,details.sec,.hgrid input,.hgrid select{background:#fff !important;border-color:#cfe3e3 !important;color:#1c2b32 !important}
-   .hgrid label{color:#5b6b72}
-   details.sec>summary{color:#0e6e5a}details.sec>summary:before{display:none}
-   details.sec>summary .cnt{color:#5b6b72}
-   .item{border-top:1px solid #e3ecea}.item .lbl{color:#1c2b32}
-   .stat{display:block !important;color:#1c2b32;font-weight:700}
-   .stat.statpresent{color:#0c7a4d}.stat.statmissing{color:#b3261e}.stat.statna{color:#1a5a8a}
-   .corr .row{border-top:1px solid #e3ecea}.corr .row .ci{color:#b3261e}
-   .mdnote textarea{border:none;background:#fff !important;color:#1c2b32 !important;padding:0}
-   .sig{color:#1c2b32}
- }
 </style></head>
 <body class="allyos">
 <div class="top">
   <span class="brand"><b>Ally</b>OS</span>
-  <span class="tag">Governance review</span>
+  <span class="tag">Governance binder report</span>
   <span class="right"><a href="dashboard.html">← Dashboard</a></span>
 </div>
 <div class="wrap">
-  <h1>Monthly governance review</h1>
-  <p class="sub">Wellness directorship · oversight / governance</p>
-  <div class="note noprint">Plain-language <b>Present / Missing / N/A</b> check. Not an AHCA or statutory audit. Line sections appear only for the lines the clinic offers. On <b>Print</b> this becomes the monthly report (status tables · corrections · MD note · signature). Saved on this device — no PHI.</div>
+  <h1>Monthly governance binder report</h1>
+  <p class="sub">Wellness directorship · non-AHCA oversight</p>
+  <div class="note">Fill in the clinic's details, mark each service-line item <b>Present / Missing / N/A</b>, then <b>Download report PDF</b> for a binder-ready monthly report (sections I–VIII). <b>Only the lines this clinic offers appear</b> — set them below. Saved on this device; no PHI.</div>
 
   <div class="hdr hgrid">
-    <div><label>Clinic</label><input id="hClinic" type="text" placeholder="Clinic name"></div>
-    <div><label>Month reviewed</label><input id="hMonth" type="text" placeholder="e.g. July 2026"></div>
-    <div><label>Medical Director</label><input id="hMD" type="text" placeholder="Dr. Name"></div>
-    <div><label>Clinic record location</label><input id="hRec" type="text" value="Clinic EMR / paper chart"></div>
-    <div><label>Report type</label><input id="hType" type="text" value="Monthly oversight / governance review"></div>
+    <div><label>Clinic (legal name)</label><input id="hClinic" type="text" placeholder="Clinic legal name"></div>
+    <div><label>Program / DBA</label><input id="hProgram" type="text" placeholder="DBA or program (optional)"></div>
+    <div><label>Medical Director</label><input id="hMD" type="text"></div>
+    <div><label>MD license</label><input id="hMDLic" type="text" value="Florida Medical License · ME 84789"></div>
+    <div><label>Report date</label><input id="hMonth" type="text" placeholder="e.g. July __, 2026"></div>
+    <div><label>Clinic record location</label><input id="hRec" type="text" value="Clinic EMR / paper chart remains the official record"></div>
     <div><label>Overall status</label><select id="hStatus"><option value="">— auto —</option><option>Compliant</option><option>Needs correction</option><option>Not reviewed</option></select></div>
   </div>
 
+  <div class="grp">Lines this clinic offers</div>
   <div class="lines" id="lines"></div>
+  <div style="font-size:11px;color:var(--dim)">Auto-detected from the clinic's active lines — click to correct. Lines that are off do not appear in the report.</div>
+
+  <details class="sec"><summary>Binder detail — sections I–V <span class="cnt">optional · fills the report</span></summary><div class="body">
+    <div class="fl"><label>License verification date</label><input id="dVerify" type="text" placeholder="e.g. 07/05/2026"></div>
+    <div class="fl"><label>Practitioners (one per line: Name | Position | License | Expires)</label><textarea id="dPrac" rows="3">Armando A. Falcon | Medical Director | FL Medical License · ME 84789 | Verify</textarea></div>
+    <div class="fl"><label>Scope / supervision note</label><input id="dScope" type="text" placeholder="Scope reviewed against role + signed protocol"></div>
+    <div class="fl"><label>Physician protocol status</label><input id="dProto" type="text" value="ACTIVE / COMPLIANT"></div>
+    <div class="fl"><label>Adverse incidents this period</label><select id="dAdverse"><option>NONE REPORTED</option><option>SEE INCIDENT LOG</option></select></div>
+    <div class="fl"><label>Adverse note (optional)</label><input id="dAdvNote" type="text" placeholder="none reported unless separately attached in the clinic incident log."></div>
+    <div class="hgrid" style="margin-top:10px"><div><label>Biohazard vendor</label><input id="dBio" type="text" placeholder="Vendor name"></div><div><label>Vendor active since</label><input id="dBioSince" type="text" placeholder="date"></div></div>
+    <div class="fl"><label>Records reviewed (one per line: chart ref | date of service | review type) — no PHI</label><textarea id="dCharts" rows="4" placeholder="e.g. IV-2026-018 | 07/09/2026 | IV chart audit"></textarea></div>
+  </div></details>
+
   <div class="sumbar"><div><span class="n sp" id="nPresent">0</span> <span class="su">Present</span></div><div><span class="n sm" id="nMissing">0</span> <span class="su">Missing</span></div><div><span class="n sn" id="nNa">0</span> <span class="su">N/A</span></div><div><span class="n su" id="nUnset">0</span> <span class="su">Not set</span></div><div style="margin-left:auto;font-size:12.5px" id="overallLbl"></div></div>
 
   <div id="sections"></div>
 
-  <details class="sec" id="corrWrap" open><summary>Corrections needed <span class="cnt" id="corrCnt"></span></summary><div class="body corr" id="corrections"></div></details>
-
-  <details class="sec mdnote" open><summary>Medical Director note</summary><div class="body">
-    <textarea id="mdNote" rows="3">Monthly governance review completed. Clinic records remain stored in the clinic EMR / paper chart. This report documents oversight status, protocol readiness, service-line governance, and items requiring correction.</textarea>
-    <div class="sig">Medical Director signature: <span class="line">&nbsp;</span></div>
-    <div class="sig">Date: <span class="line">&nbsp;</span></div>
-  </div></details>
-
-  <div class="noprint"><button class="gen" id="genBtn" onclick="genReport()">⬇ Download report PDF</button>
-    <span style="font-size:11.5px;color:var(--dim);margin-left:12px">Generates a binder-ready monthly report on this device — nothing uploaded.</span></div>
+  <div><button class="gen" id="genBtn" onclick="genReport()">⬇ Download report PDF</button>
+    <span style="font-size:11.5px;color:var(--dim);margin-left:12px">Binder-ready sections I–VIII · generated on this device · nothing uploaded.</span></div>
 </div>
 
 <script src="allyos-auth.js"></script>
@@ -106,94 +91,75 @@
 <script>
 if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin']);}
 var SECTIONS=[
-  {k:'req',title:'Required for every clinic',always:true,items:['Medical Director agreement','Active service list','Staff role list','Signed protocols','Consent process','GFE / eligibility process','Official chart location','Monthly chart review process','Incident reporting process','Emergency plan','Medication/source tracking','Insurance / coverage note']},
-  {k:'iv',title:'IV / IM therapy',line:'iv',items:['IV protocol','GFE before treatment','Same-day safety screen','Vitals before treatment','Treatment monitoring note','Dose / ingredients documented','Aftercare instructions','Incident form if something happened','Monthly IV chart review']},
-  {k:'pep',title:'Peptides',line:'peptides',items:['Peptide protocol','Provider of record','Reason for treatment','Peptide consent','Medication source','Dose / schedule','Follow-up plan','Side-effect check','Monthly peptide chart review']},
-  {k:'bhrt',title:'BHRT / Hormones',line:'bhrt',items:['Hormone protocol','Provider of record','Reason for treatment','Hormone consent','FDA-approved vs compounded product note','Labs / monitoring plan','Dose change note','Follow-up plan','Abnormal symptom review','Monthly hormone chart review']}
+  {k:'iv',title:'IV / IM Therapy',line:'iv',items:['IV protocol','GFE before treatment','Aftercare instructions','Signed by authorized provider','Equipment adequacy for procedures']},
+  {k:'pep',title:'Peptides',line:'peptides',items:['Peptide protocol','Provider signed','Peptide consent','Dose / schedule','Follow-up plan','Side-effect check']},
+  {k:'bhrt',title:'BHRT / HRT',line:'bhrt',items:['POC / plan of care','Provider signed','Reason for treatment','Hormone consent','Labs / monitoring plan','Dose change note','Follow-up plan']}
 ];
-var LINES=[{k:'iv',t:'IV / IM'},{k:'peptides',t:'Peptides'},{k:'bhrt',t:'BHRT / Hormones'}];
+var LINES=[{k:'iv',t:'IV / IM'},{k:'peptides',t:'Peptides'},{k:'bhrt',t:'BHRT / HRT'}];
 var STATUS={present:'Present',missing:'Missing',na:'Not applicable'};
-function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function clinicId(){var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};return s.clinicId||'local';}
-var SKEY='allyos_governance_v1', OKEY='allyos_governance_lines_v1', HKEY='allyos_governance_hdr_v1';
+var SKEY='allyos_governance_v2',OKEY='allyos_governance_lines_v1',HKEY='allyos_governance_hdr_v2';
 function load(k,d){try{return JSON.parse(localStorage.getItem(k)||'null')||d;}catch(e){return d;}}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 var cid=clinicId();
-var store=load(SKEY,{}); store[cid]=store[cid]||{status:{},corr:{}};
-if(!store[cid].status)store[cid].status={}; if(!store[cid].corr)store[cid].corr={};
+var store=load(SKEY,{});store[cid]=store[cid]||{status:{},corr:{}};if(!store[cid].status)store[cid].status={};if(!store[cid].corr)store[cid].corr={};
 var offered=load(OKEY,{})[cid];
-if(!offered){ var cl=load('allyos_clinic_lines_v1',null); var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};
-  var src=cl||s.lines||['iv','peptides','bhrt']; offered={}; LINES.forEach(function(l){offered[l.k]=src.indexOf(l.k)>=0;}); }
+if(!offered){var cl=load('allyos_clinic_lines_v1',null);var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};var src=cl||s.lines||['iv','peptides','bhrt'];offered={};LINES.forEach(function(l){offered[l.k]=src.indexOf(l.k)>=0;});}
 function setOffered(){var o=load(OKEY,{});o[cid]=offered;save(OKEY,o);}
-function stt(){return store[cid].status;} function corr(){return store[cid].corr;}
-function setItem(id,v){ if(stt()[id]===v) delete stt()[id]; else stt()[id]=v; save(SKEY,store); render(); }
-function visibleSections(){return SECTIONS.filter(function(s){return s.always||offered[s.line];});}
-// ---- header persistence + defaults ----
-var sess=(window.AllyOSAuth&&AllyOSAuth.session())||{};
-var hdr=load(HKEY,{})[cid]||{};
-var monthDefault=new Date().toLocaleString(undefined,{month:'long',year:'numeric'});
-function initHeader(){
-  document.getElementById('hClinic').value=hdr.clinic||sess.clinic||'';
-  document.getElementById('hMonth').value=hdr.month||monthDefault;
-  document.getElementById('hMD').value=hdr.md||((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||sess.name||'');
-  if(hdr.rec)document.getElementById('hRec').value=hdr.rec;
-  if(hdr.status)document.getElementById('hStatus').value=hdr.status;
-  if(hdr.note)document.getElementById('mdNote').value=hdr.note;
-  ['hClinic','hMonth','hMD','hRec','hType','hStatus','mdNote'].forEach(function(id){document.getElementById(id).addEventListener('input',saveHeader);});
-}
-function saveHeader(){var o=load(HKEY,{});o[cid]={clinic:document.getElementById('hClinic').value,month:document.getElementById('hMonth').value,md:document.getElementById('hMD').value,rec:document.getElementById('hRec').value,status:document.getElementById('hStatus').value,note:document.getElementById('mdNote').value};save(HKEY,o);render();}
+function stt(){return store[cid].status;}function corr(){return store[cid].corr;}
+function setItem(id,v){if(stt()[id]===v)delete stt()[id];else stt()[id]=v;save(SKEY,store);render();}
+function setCorr(id,f,v){corr()[id]=corr()[id]||{};corr()[id][f]=v;save(SKEY,store);}
+function visibleSections(){return SECTIONS.filter(function(s){return offered[s.line];});}
 function toggleLine(k){offered[k]=!offered[k];setOffered();render();}
-function setCorr(id,field,v){corr()[id]=corr()[id]||{};corr()[id][field]=v;save(SKEY,store);}
+var sess=(window.AllyOSAuth&&AllyOSAuth.session())||{};
+var HF=['hClinic','hProgram','hMD','hMDLic','hMonth','hRec','hStatus','dVerify','dPrac','dScope','dProto','dAdverse','dAdvNote','dBio','dBioSince','dCharts'];
+function initHeader(){
+  var h=load(HKEY,{})[cid]||{};
+  document.getElementById('hClinic').value=h.hClinic||sess.clinic||'';
+  document.getElementById('hMD').value=h.hMD||((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||sess.name||'Armando Augusto Falcon, MD');
+  HF.forEach(function(id){if(id==='hClinic'||id==='hMD')return;if(h[id]!=null&&h[id]!=='')document.getElementById(id).value=h[id];});
+  HF.forEach(function(id){document.getElementById(id).addEventListener('input',function(){saveHeader();render();});});
+}
+function saveHeader(){var o=load(HKEY,{});var v={};HF.forEach(function(id){v[id]=document.getElementById(id).value;});o[cid]=v;save(HKEY,o);}
 function render(){
   document.getElementById('lines').innerHTML=LINES.map(function(l){return '<span class="lchip'+(offered[l.k]?' on':'')+'" onclick="toggleLine(\''+l.k+'\')">'+esc(l.t)+(offered[l.k]?' ✓':'')+'</span>';}).join('');
-  var P=0,M=0,N=0,U=0, missingItems=[];
+  var P=0,M=0,N=0,U=0;
   document.getElementById('sections').innerHTML=visibleSections().map(function(sec){
     var rows=sec.items.map(function(it,i){
-      var id=sec.k+':'+i, v=stt()[id]||'';
-      if(v==='present')P++;else if(v==='missing'){M++;missingItems.push({id:id,label:it});}else if(v==='na')N++;else U++;
-      return '<div class="item"><span class="lbl">'+esc(it)+'</span>'+
-        '<span class="stat stat'+(v||'')+'">'+(v?esc(STATUS[v]):'—')+'</span>'+
-        '<span class="tog">'+
+      var id=sec.k+':'+i,v=stt()[id]||'';
+      if(v==='present')P++;else if(v==='missing')M++;else if(v==='na')N++;else U++;
+      return '<div class="item"><span class="lbl">'+esc(it)+'</span><span class="tog">'+
         '<button class="p'+(v==='present'?' on':'')+'" onclick="setItem(\''+id+'\',\'present\')">Present</button>'+
         '<button class="m'+(v==='missing'?' on':'')+'" onclick="setItem(\''+id+'\',\'missing\')">Missing</button>'+
         '<button class="n'+(v==='na'?' on':'')+'" onclick="setItem(\''+id+'\',\'na\')">N/A</button></span></div>';
     }).join('');
     var sc=sec.items.reduce(function(a,_,i){return a+(stt()[sec.k+':'+i]==='present'?1:0);},0);
     return '<details class="sec" open><summary>'+esc(sec.title)+'<span class="cnt">'+sc+' / '+sec.items.length+' present</span></summary><div class="body">'+rows+'</div></details>';
-  }).join('');
+  }).join('')||'<div class="note">No active lines selected — turn on the lines this clinic offers above.</div>';
   document.getElementById('nPresent').textContent=P;document.getElementById('nMissing').textContent=M;document.getElementById('nNa').textContent=N;document.getElementById('nUnset').textContent=U;
-  // corrections (auto from Missing)
-  document.getElementById('corrCnt').textContent=missingItems.length?(missingItems.length+' item(s)'):'none';
-  document.getElementById('corrections').innerHTML=missingItems.length?missingItems.map(function(m){
-    var c=corr()[m.id]||{};
-    return '<div class="row"><span class="ci">'+esc(m.label)+' missing</span>'+
-      '<input placeholder="Responsible party" value="'+esc(c.resp||'')+'" oninput="setCorr(\''+m.id+'\',\'resp\',this.value)">'+
-      '<input placeholder="Due date" value="'+esc(c.due||'')+'" oninput="setCorr(\''+m.id+'\',\'due\',this.value)"></div>';
-  }).join(''):'<div style="font-size:12.5px;color:var(--muted);padding:8px 0">No items marked Missing.</div>';
-  // overall status (auto unless overridden)
-  var manual=document.getElementById('hStatus').value;
-  var auto = M>0?'Needs correction':(U>0?'Not reviewed':'Compliant');
-  document.getElementById('overallLbl').innerHTML='Overall: <b class="'+(( manual||auto)==='Compliant'?'sp':((manual||auto)==='Needs correction'?'sm':'su'))+'">'+esc(manual||auto)+(manual?'':' (auto)')+'</b>';
+  var manual=document.getElementById('hStatus').value,auto=M>0?'Needs correction':(U>0?'Not reviewed':'Compliant');
+  document.getElementById('overallLbl').innerHTML='Overall: <b class="'+((manual||auto)==='Compliant'?'sp':((manual||auto)==='Needs correction'?'sm':'su'))+'">'+esc(manual||auto)+(manual?'':' (auto)')+'</b>';
 }
-initHeader();render();
-window.addEventListener('beforeprint',function(){document.querySelectorAll('details.sec').forEach(function(d){d.open=true;});});
+function parseRows(id,n){return (document.getElementById(id).value||'').split(/\r?\n/).map(function(l){return l.trim();}).filter(Boolean).map(function(l){return l.split('|').map(function(x){return x.trim();});});}
 function collectPayload(){
-  var manual=document.getElementById('hStatus').value, M=0,U=0;
+  var manual=document.getElementById('hStatus').value,M=0,U=0;
   visibleSections().forEach(function(sec){sec.items.forEach(function(_,i){var v=stt()[sec.k+':'+i];if(v==='missing')M++;else if(!v)U++;});});
-  var pl={clinic:document.getElementById('hClinic').value||'',month:document.getElementById('hMonth').value||'',md:document.getElementById('hMD').value||'',rec:document.getElementById('hRec').value||'',note:document.getElementById('mdNote').value||'',
-    overall:manual||(M>0?'Needs correction':(U>0?'Not reviewed':'Compliant')),required:[],lines:[],corrections:[]};
-  var req=SECTIONS[0];
-  pl.required=req.items.map(function(it,i){return {label:it,status:STATUS[stt()[req.k+':'+i]]||'Not set'};});
-  SECTIONS.filter(function(s){return s.line&&offered[s.line];}).forEach(function(sec){
-    pl.lines.push({title:sec.title,items:sec.items.map(function(it,i){return {label:it,status:STATUS[stt()[sec.k+':'+i]]||'Not set'};})});});
-  visibleSections().forEach(function(sec){sec.items.forEach(function(it,i){var id=sec.k+':'+i;if(stt()[id]==='missing'){var c=corr()[id]||{};pl.corrections.push({label:it,resp:c.resp,due:c.due});}});});
+  var pl={clinic:document.getElementById('hClinic').value,program:document.getElementById('hProgram').value,md:document.getElementById('hMD').value,mdLicense:document.getElementById('hMDLic').value,
+    reportDate:document.getElementById('hMonth').value,rec:document.getElementById('hRec').value,overall:manual||(M>0?'Needs correction':(U>0?'Not reviewed':'Compliant')),
+    verifyDate:document.getElementById('dVerify').value,scopeNote:document.getElementById('dScope').value,protocolStatus:document.getElementById('dProto').value,
+    adverse:document.getElementById('dAdverse').value,adverseNote:document.getElementById('dAdvNote').value,bioVendor:document.getElementById('dBio').value,bioSince:document.getElementById('dBioSince').value,
+    practitioners:parseRows('dPrac'),charts:parseRows('dCharts'),lines:[],corrections:[]};
+  visibleSections().forEach(function(sec){pl.lines.push({title:sec.title,items:sec.items.map(function(it,i){return {label:it,status:STATUS[stt()[sec.k+':'+i]]||'Not set'};})});
+    sec.items.forEach(function(it,i){var id=sec.k+':'+i;if(stt()[id]==='missing'){var c=corr()[id]||{};pl.corrections.push({label:it,resp:c.resp,due:c.due});}});});
   return pl;
 }
 function genReport(){
   if(!window.AllyOSGovReport){alert('Report module not loaded.');return;}
-  var btn=document.getElementById('genBtn'); if(btn){btn.textContent='Generating…';btn.disabled=true;}
+  var btn=document.getElementById('genBtn');if(btn){btn.textContent='Generating…';btn.disabled=true;}
   AllyOSGovReport.download(collectPayload()).then(function(){if(btn){btn.textContent='⬇ Download report PDF';btn.disabled=false;}})
     .catch(function(e){if(btn){btn.textContent='⬇ Download report PDF';btn.disabled=false;}alert('Report error: '+(e&&e.message||e));});
 }
+initHeader();render();
 </script>
 </body></html>
