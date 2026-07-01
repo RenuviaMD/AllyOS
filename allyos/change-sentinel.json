@@ -1,8 +1,40 @@
 {
-  "date": null,
+  "date": "2026-07-01T08:13:36.857465Z",
   "agent": "change-sentinel",
-  "mode": "deterministic — no LLM; facts + links only; fail-closed",
-  "status": "pending",
-  "changes_total": 0,
-  "lines": {}
+  "mode": "deterministic \u2014 no LLM; facts + links only; fail-closed",
+  "lines": {
+    "IV": {
+      "changes": [],
+      "unverified": [
+        "PMID 16215069: lookup error: HTTP Error 429: Too Many Requests",
+        "ZOFRAN: lookup error: HTTP Error 404: Not Found",
+        "TORADOL: lookup error: HTTP Error 404: Not Found"
+      ],
+      "watched": {
+        "pmids": 8,
+        "ncts": 0,
+        "labels": 3
+      }
+    },
+    "Peptides": {
+      "changes": [],
+      "unverified": [],
+      "watched": {
+        "pmids": 0,
+        "ncts": 0,
+        "labels": 5
+      }
+    },
+    "HRT": {
+      "changes": [],
+      "unverified": [],
+      "watched": {
+        "pmids": 2,
+        "ncts": 0,
+        "labels": 9
+      }
+    }
+  },
+  "status": "CLEAR",
+  "changes_total": 0
 }
