@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Governance checklist · AllyOS · RenuviaMD®</title>
+<title>Governance review · AllyOS · RenuviaMD®</title>
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="allyos-theme.css">
 <style>
@@ -9,16 +9,21 @@
  .brand{font-family:var(--fdisp);font-weight:900}.brand b{color:var(--teal)}
  .tag{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);border:1px solid var(--line2);border-radius:5px;padding:3px 8px}
  .top .right{margin-left:auto}.top .right a{color:var(--teal);font-size:12.5px;text-decoration:none}
- .wrap{max-width:860px;margin:0 auto;padding:22px 20px 90px}
+ .wrap{max-width:880px;margin:0 auto;padding:22px 20px 90px}
  h1{font-family:var(--fdisp);font-weight:900;font-size:1.5rem;margin:0}
  .sub{color:var(--muted);font-size:.9rem;margin:3px 0 0}
  .note{font-size:11.5px;color:var(--dim);border:1px solid var(--line);border-radius:9px;padding:11px 14px;margin:14px 0;line-height:1.55}
+ .hdr{background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0}
+ .hgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 18px}
+ @media(max-width:640px){.hgrid{grid-template-columns:1fr}}
+ .hgrid label{display:block;font-size:11px;color:var(--dim);margin-bottom:3px;text-transform:uppercase;letter-spacing:.08em}
+ .hgrid input,.hgrid select{width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:8px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px}
  .lines{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
  .lchip{font-size:12.5px;border:1px solid var(--line2);border-radius:9px;padding:8px 13px;cursor:pointer;color:var(--muted);user-select:none}
  .lchip.on{background:#0e2e2b;border-color:var(--teal);color:var(--teal)}
  .sumbar{display:flex;gap:16px;flex-wrap:wrap;align-items:center;background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:14px 0}
  .sumbar .n{font-family:var(--fdisp);font-weight:900;font-size:1.2rem}
- .sp{color:var(--green)}.sm{color:#f0b3aa}.su{color:var(--muted)}
+ .sp{color:var(--green)}.sm{color:#f0b3aa}.sn{color:var(--blue)}.su{color:var(--muted)}
  details.sec{background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:12px;margin:10px 0;overflow:hidden}
  details.sec>summary{cursor:pointer;list-style:none;padding:14px 16px;font-family:var(--fdisp);font-weight:800;font-size:14px;display:flex;align-items:center;gap:10px}
  details.sec>summary::-webkit-details-marker{display:none}
@@ -29,29 +34,70 @@
  .item{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
  .item .lbl{flex:1;font-size:13.5px}
  .tog{display:flex;gap:6px}
- .tog button{font-size:12px;font-weight:700;border-radius:8px;padding:6px 12px;cursor:pointer;border:1px solid var(--line2);background:#0a1422;color:var(--muted)}
+ .tog button{font-size:11.5px;font-weight:700;border-radius:8px;padding:6px 11px;cursor:pointer;border:1px solid var(--line2);background:#0a1422;color:var(--muted)}
  .tog button.on.p{background:#0e2a1f;border-color:#1e6e4a;color:var(--green)}
  .tog button.on.m{background:#2a1512;border-color:#8a322c;color:#f0b3aa}
+ .tog button.on.n{background:#0e2436;border-color:#2a5a7e;color:var(--blue)}
+ .stat{display:none;font-size:12.5px;font-weight:700;min-width:96px;text-align:right}
+ .corr .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+ .corr .row .ci{flex:1;min-width:180px;font-size:13px;color:#f0b3aa}
+ .corr input{background:#0a1422;border:1px solid var(--line2);border-radius:8px;color:var(--ink);font:inherit;font-size:12.5px;padding:6px 9px}
+ .mdnote textarea{width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:10px 12px;resize:vertical}
+ .sig{margin-top:14px;font-size:13px;color:var(--muted)}.sig .line{display:inline-block;border-bottom:1px solid var(--muted);min-width:260px;margin-left:8px}
  .gen{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a;border:none;border-radius:10px;padding:11px 18px;font-weight:800;font-size:.9rem;cursor:pointer;margin-top:16px}
- @media print{.top,.lines,.noprint{display:none}.wrap{max-width:none}details.sec{break-inside:avoid}}
+ /* ---- print: render as the monthly governance report ---- */
+ @media print{
+   @page{margin:16mm 14mm}
+   body{background:#fff !important;color:#1c2b32}
+   .top,.lines,.sumbar,.noprint,.tog{display:none !important}
+   .wrap{max-width:none;padding:0}
+   h1{color:#0e3a40}.sub{color:#5b6b72}
+   .hdr,details.sec,.hgrid input,.hgrid select{background:#fff !important;border-color:#cfe3e3 !important;color:#1c2b32 !important}
+   .hgrid label{color:#5b6b72}
+   details.sec>summary{color:#0e6e5a}details.sec>summary:before{display:none}
+   details.sec>summary .cnt{color:#5b6b72}
+   .item{border-top:1px solid #e3ecea}.item .lbl{color:#1c2b32}
+   .stat{display:block !important;color:#1c2b32;font-weight:700}
+   .stat.statpresent{color:#0c7a4d}.stat.statmissing{color:#b3261e}.stat.statna{color:#1a5a8a}
+   .corr .row{border-top:1px solid #e3ecea}.corr .row .ci{color:#b3261e}
+   .mdnote textarea{border:none;background:#fff !important;color:#1c2b32 !important;padding:0}
+   .sig{color:#1c2b32}
+ }
 </style></head>
 <body class="allyos">
 <div class="top">
   <span class="brand"><b>Ally</b>OS</span>
-  <span class="tag">Governance checklist</span>
+  <span class="tag">Governance review</span>
   <span class="right"><a href="dashboard.html">← Dashboard</a></span>
 </div>
 <div class="wrap">
-  <h1>Governance checklist</h1>
-  <p class="sub">Wellness directorship · plain-language governance check</p>
-  <div class="note">Simple <b>Present / Missing</b> check for the clinic's wellness governance. Not an AHCA or statutory audit. Line sections appear only for the lines the clinic offers. Saved on this device.</div>
+  <h1>Monthly governance review</h1>
+  <p class="sub">Wellness directorship · oversight / governance</p>
+  <div class="note noprint">Plain-language <b>Present / Missing / N/A</b> check. Not an AHCA or statutory audit. Line sections appear only for the lines the clinic offers. On <b>Print</b> this becomes the monthly report (status tables · corrections · MD note · signature). Saved on this device — no PHI.</div>
+
+  <div class="hdr hgrid">
+    <div><label>Clinic</label><input id="hClinic" type="text" placeholder="Clinic name"></div>
+    <div><label>Month reviewed</label><input id="hMonth" type="text" placeholder="e.g. July 2026"></div>
+    <div><label>Medical Director</label><input id="hMD" type="text" placeholder="Dr. Name"></div>
+    <div><label>Clinic record location</label><input id="hRec" type="text" value="Clinic EMR / paper chart"></div>
+    <div><label>Report type</label><input id="hType" type="text" value="Monthly oversight / governance review"></div>
+    <div><label>Overall status</label><select id="hStatus"><option value="">— auto —</option><option>Compliant</option><option>Needs correction</option><option>Not reviewed</option></select></div>
+  </div>
 
   <div class="lines" id="lines"></div>
-  <div class="sumbar"><div><span class="n sp" id="nPresent">0</span> <span class="su">Present</span></div><div><span class="n sm" id="nMissing">0</span> <span class="su">Missing</span></div><div><span class="n su" id="nUnset">0</span> <span class="su">Not set</span></div></div>
+  <div class="sumbar"><div><span class="n sp" id="nPresent">0</span> <span class="su">Present</span></div><div><span class="n sm" id="nMissing">0</span> <span class="su">Missing</span></div><div><span class="n sn" id="nNa">0</span> <span class="su">N/A</span></div><div><span class="n su" id="nUnset">0</span> <span class="su">Not set</span></div><div style="margin-left:auto;font-size:12.5px" id="overallLbl"></div></div>
 
   <div id="sections"></div>
 
-  <div class="noprint"><button class="gen" onclick="window.print()">🖨 Print / MD QA note</button></div>
+  <details class="sec" id="corrWrap" open><summary>Corrections needed <span class="cnt" id="corrCnt"></span></summary><div class="body corr" id="corrections"></div></details>
+
+  <details class="sec mdnote" open><summary>Medical Director note</summary><div class="body">
+    <textarea id="mdNote" rows="3">Monthly governance review completed. Clinic records remain stored in the clinic EMR / paper chart. This report documents oversight status, protocol readiness, service-line governance, and items requiring correction.</textarea>
+    <div class="sig">Medical Director signature: <span class="line">&nbsp;</span></div>
+    <div class="sig">Date: <span class="line">&nbsp;</span></div>
+  </div></details>
+
+  <div class="noprint"><button class="gen" onclick="window.print()">🖨 Print / export monthly report</button></div>
 </div>
 
 <script src="allyos-auth.js"></script>
@@ -64,37 +110,70 @@ var SECTIONS=[
   {k:'bhrt',title:'BHRT / Hormones',line:'bhrt',items:['Hormone protocol','Provider of record','Reason for treatment','Hormone consent','FDA-approved vs compounded product note','Labs / monitoring plan','Dose change note','Follow-up plan','Abnormal symptom review','Monthly hormone chart review']}
 ];
 var LINES=[{k:'iv',t:'IV / IM'},{k:'peptides',t:'Peptides'},{k:'bhrt',t:'BHRT / Hormones'}];
+var STATUS={present:'Present',missing:'Missing',na:'Not applicable'};
+function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function clinicId(){var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};return s.clinicId||'local';}
-var SKEY='allyos_governance_v1', OKEY='allyos_governance_lines_v1';
+var SKEY='allyos_governance_v1', OKEY='allyos_governance_lines_v1', HKEY='allyos_governance_hdr_v1';
 function load(k,d){try{return JSON.parse(localStorage.getItem(k)||'null')||d;}catch(e){return d;}}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-var store=load(SKEY,{}); var cid=clinicId(); store[cid]=store[cid]||{};
-// which lines the clinic offers — from saved override, else the clinic's active lines, else all
+var cid=clinicId();
+var store=load(SKEY,{}); store[cid]=store[cid]||{status:{},corr:{}};
+if(!store[cid].status)store[cid].status={}; if(!store[cid].corr)store[cid].corr={};
 var offered=load(OKEY,{})[cid];
 if(!offered){ var cl=load('allyos_clinic_lines_v1',null); var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};
   var src=cl||s.lines||['iv','peptides','bhrt']; offered={}; LINES.forEach(function(l){offered[l.k]=src.indexOf(l.k)>=0;}); }
 function setOffered(){var o=load(OKEY,{});o[cid]=offered;save(OKEY,o);}
-function st(){return store[cid];}
-function setItem(id,v){st()[id]=v;save(SKEY,store);render();}
-function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function stt(){return store[cid].status;} function corr(){return store[cid].corr;}
+function setItem(id,v){ if(stt()[id]===v) delete stt()[id]; else stt()[id]=v; save(SKEY,store); render(); }
 function visibleSections(){return SECTIONS.filter(function(s){return s.always||offered[s.line];});}
+// ---- header persistence + defaults ----
+var sess=(window.AllyOSAuth&&AllyOSAuth.session())||{};
+var hdr=load(HKEY,{})[cid]||{};
+var monthDefault=new Date().toLocaleString(undefined,{month:'long',year:'numeric'});
+function initHeader(){
+  document.getElementById('hClinic').value=hdr.clinic||sess.clinic||'';
+  document.getElementById('hMonth').value=hdr.month||monthDefault;
+  document.getElementById('hMD').value=hdr.md||((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||sess.name||'');
+  if(hdr.rec)document.getElementById('hRec').value=hdr.rec;
+  if(hdr.status)document.getElementById('hStatus').value=hdr.status;
+  if(hdr.note)document.getElementById('mdNote').value=hdr.note;
+  ['hClinic','hMonth','hMD','hRec','hType','hStatus','mdNote'].forEach(function(id){document.getElementById(id).addEventListener('input',saveHeader);});
+}
+function saveHeader(){var o=load(HKEY,{});o[cid]={clinic:document.getElementById('hClinic').value,month:document.getElementById('hMonth').value,md:document.getElementById('hMD').value,rec:document.getElementById('hRec').value,status:document.getElementById('hStatus').value,note:document.getElementById('mdNote').value};save(HKEY,o);render();}
+function toggleLine(k){offered[k]=!offered[k];setOffered();render();}
+function setCorr(id,field,v){corr()[id]=corr()[id]||{};corr()[id][field]=v;save(SKEY,store);}
 function render(){
   document.getElementById('lines').innerHTML=LINES.map(function(l){return '<span class="lchip'+(offered[l.k]?' on':'')+'" onclick="toggleLine(\''+l.k+'\')">'+esc(l.t)+(offered[l.k]?' ✓':'')+'</span>';}).join('');
-  var P=0,M=0,U=0;
+  var P=0,M=0,N=0,U=0, missingItems=[];
   document.getElementById('sections').innerHTML=visibleSections().map(function(sec){
     var rows=sec.items.map(function(it,i){
-      var id=sec.k+':'+i, v=st()[id]||'';
-      if(v==='present')P++;else if(v==='missing')M++;else U++;
-      return '<div class="item"><span class="lbl">'+esc(it)+'</span><span class="tog">'+
+      var id=sec.k+':'+i, v=stt()[id]||'';
+      if(v==='present')P++;else if(v==='missing'){M++;missingItems.push({id:id,label:it});}else if(v==='na')N++;else U++;
+      return '<div class="item"><span class="lbl">'+esc(it)+'</span>'+
+        '<span class="stat stat'+(v||'')+'">'+(v?esc(STATUS[v]):'—')+'</span>'+
+        '<span class="tog">'+
         '<button class="p'+(v==='present'?' on':'')+'" onclick="setItem(\''+id+'\',\'present\')">Present</button>'+
-        '<button class="m'+(v==='missing'?' on':'')+'" onclick="setItem(\''+id+'\',\'missing\')">Missing</button></span></div>';
+        '<button class="m'+(v==='missing'?' on':'')+'" onclick="setItem(\''+id+'\',\'missing\')">Missing</button>'+
+        '<button class="n'+(v==='na'?' on':'')+'" onclick="setItem(\''+id+'\',\'na\')">N/A</button></span></div>';
     }).join('');
-    var sc=sec.items.reduce(function(a,_,i){return a+(st()[sec.k+':'+i]==='present'?1:0);},0);
-    return '<details class="sec"><summary>'+esc(sec.title)+'<span class="cnt">'+sc+' / '+sec.items.length+' present</span></summary><div class="body">'+rows+'</div></details>';
+    var sc=sec.items.reduce(function(a,_,i){return a+(stt()[sec.k+':'+i]==='present'?1:0);},0);
+    return '<details class="sec" open><summary>'+esc(sec.title)+'<span class="cnt">'+sc+' / '+sec.items.length+' present</span></summary><div class="body">'+rows+'</div></details>';
   }).join('');
-  document.getElementById('nPresent').textContent=P;document.getElementById('nMissing').textContent=M;document.getElementById('nUnset').textContent=U;
+  document.getElementById('nPresent').textContent=P;document.getElementById('nMissing').textContent=M;document.getElementById('nNa').textContent=N;document.getElementById('nUnset').textContent=U;
+  // corrections (auto from Missing)
+  document.getElementById('corrCnt').textContent=missingItems.length?(missingItems.length+' item(s)'):'none';
+  document.getElementById('corrections').innerHTML=missingItems.length?missingItems.map(function(m){
+    var c=corr()[m.id]||{};
+    return '<div class="row"><span class="ci">'+esc(m.label)+' missing</span>'+
+      '<input placeholder="Responsible party" value="'+esc(c.resp||'')+'" oninput="setCorr(\''+m.id+'\',\'resp\',this.value)">'+
+      '<input placeholder="Due date" value="'+esc(c.due||'')+'" oninput="setCorr(\''+m.id+'\',\'due\',this.value)"></div>';
+  }).join(''):'<div style="font-size:12.5px;color:var(--muted);padding:8px 0">No items marked Missing.</div>';
+  // overall status (auto unless overridden)
+  var manual=document.getElementById('hStatus').value;
+  var auto = M>0?'Needs correction':(U>0?'Not reviewed':'Compliant');
+  document.getElementById('overallLbl').innerHTML='Overall: <b class="'+(( manual||auto)==='Compliant'?'sp':((manual||auto)==='Needs correction'?'sm':'su'))+'">'+esc(manual||auto)+(manual?'':' (auto)')+'</b>';
 }
-function toggleLine(k){offered[k]=!offered[k];setOffered();render();}
-render();
+initHeader();render();
+window.addEventListener('beforeprint',function(){document.querySelectorAll('details.sec').forEach(function(d){d.open=true;});});
 </script>
 </body></html>
