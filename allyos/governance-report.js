@@ -42,7 +42,6 @@ window.AllyOSGovReport = (function () {
       pl.address?{text:pl.address,style:'clinicAddr'}:{text:'',margin:[0,0]},
       {canvas:[{type:'line',x1:0,y1:0,x2:512,y2:0,lineWidth:1,lineColor:NAVY}],margin:[0,6,0,8]},
       {text:'Monthly Medical Director Governance Binder Report',style:'coverTitle'},
-      {text:'Ally Wellness · Non-AHCA Clinic Oversight — Binder-Ready Monthly Report',style:'subtitle'},
       {text:' ',margin:[0,4]},
       dataTable(['Field','Detail'],[
         ['Clinic / Program',(pl.clinic||'—')+(pl.program?(' / '+pl.program):'')],
@@ -91,7 +90,7 @@ window.AllyOSGovReport = (function () {
     return {
       pageSize:'LETTER',pageMargins:[50,46,50,54],
       info:{title:'Ally Monthly Governance Binder Report',author:pl.md||'Medical Director'},
-      footer:function(cp,pc){return {margin:[50,8,50,0],columns:[{text:'Ally Monthly Governance Binder Report · internal clinic binder copy',color:SLATE,fontSize:7.5},{text:'Page '+cp+' of '+pc,color:SLATE,fontSize:7.5,alignment:'right'}]};},
+      footer:function(cp,pc){return {margin:[50,8,50,0],columns:[{text:'Ally AuditPro · powered by RenuviaMD Compliance Division',color:SLATE,fontSize:7.5},{text:'Page '+cp+' of '+pc,color:SLATE,fontSize:7.5,alignment:'right'}]};},
       content:content,
       styles:{clinicName:{fontSize:15,bold:true,color:NAVY,alignment:'center'},clinicAddr:{fontSize:9.5,color:SLATE,alignment:'center',margin:[0,2,0,0]},coverTitle:{fontSize:17,bold:true,color:NAVY,alignment:'center',margin:[0,0,0,4]},subtitle:{fontSize:10,color:SLATE,alignment:'center'},sectionTitle:{fontSize:13,bold:true,color:NAVY,margin:[0,14,0,6]},body:{fontSize:9.5,color:INK,lineHeight:1.25}},
       defaultStyle:{fontSize:9.5,color:INK}
