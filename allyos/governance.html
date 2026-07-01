@@ -53,6 +53,13 @@
   <p class="sub">Wellness directorship · non-AHCA oversight</p>
   <div class="note">Fill in the clinic's details, mark each service-line item <b>Present / Missing / N/A</b>, then <b>Download report PDF</b> for a binder-ready monthly report (sections I–VIII). <b>Only the lines this clinic offers appear</b> — set them below. Saved on this device; no PHI.</div>
 
+  <div class="grp">Clinic</div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
+    <select id="clinicPicker" onchange="switchClinic(this.value)" style="min-width:240px;background:#0a1422;border:1px solid var(--line2);border-radius:8px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px"></select>
+    <button onclick="addClinic()" style="background:#0a1422;border:1px solid var(--line2);border-radius:8px;color:var(--teal);font:inherit;font-size:12.5px;font-weight:700;padding:8px 12px;cursor:pointer">+ Add clinic</button>
+    <span style="font-size:11px;color:var(--dim)">Each clinic keeps its own letterhead, lines &amp; monthly state — details pre-load from the Clinic Card.</span>
+  </div>
+
   <div class="hdr hgrid">
     <div><label>Clinic (legal name)</label><input id="hClinic" type="text" placeholder="e.g. Lemus Natural Medicine, Inc."></div>
     <div><label>Program / DBA</label><input id="hProgram" type="text" placeholder="DBA or program (optional)"></div>
@@ -103,26 +110,53 @@ function clinicId(){var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};return s
 var SKEY='allyos_governance_v2',OKEY='allyos_governance_lines_v1',HKEY='allyos_governance_hdr_v2';
 function load(k,d){try{return JSON.parse(localStorage.getItem(k)||'null')||d;}catch(e){return d;}}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-var cid=clinicId();
-var store=load(SKEY,{});store[cid]=store[cid]||{status:{},corr:{}};if(!store[cid].status)store[cid].status={};if(!store[cid].corr)store[cid].corr={};
-var offered=load(OKEY,{})[cid];
-if(!offered){var cl=load('allyos_clinic_lines_v1',null);var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};var src=cl||s.lines||['iv','peptides','bhrt'];offered={};LINES.forEach(function(l){offered[l.k]=src.indexOf(l.k)>=0;});}
+var sess=(window.AllyOSAuth&&AllyOSAuth.session())||{};
+var CLKEY='allyos_governance_clinics_v1',CURKEY='allyos_governance_current_v1';
+function clinicList(){var a=load(CLKEY,null);if(!a||!a.length){var nm=(load('allyos_clinic_config_v1',{}).name)||sess.clinic||'Primary clinic';a=[{id:clinicId(),name:nm}];save(CLKEY,a);}return a;}
+var clinics=clinicList();
+var cid=load(CURKEY,null);if(!cid||!clinics.some(function(c){return c.id===cid;}))cid=clinics[0].id;
+var store=load(SKEY,{});
+function ensureStore(){store[cid]=store[cid]||{status:{},corr:{}};if(!store[cid].status)store[cid].status={};if(!store[cid].corr)store[cid].corr={};}
+ensureStore();
+var offered={};
+function loadOffered(){
+  offered=load(OKEY,{})[cid];
+  if(offered)return;
+  offered={};
+  var src=(cid===clinicId())?load('allyos_clinic_lines_v1',null):null;   // Clinic Card lines (object {iv:true,...}) or array
+  if(src&&!Array.isArray(src)){ LINES.forEach(function(l){offered[l.k]=!!src[l.k];}); return; }
+  var arr=Array.isArray(src)?src:(Array.isArray(sess.lines)?sess.lines:['iv','peptides','bhrt']);
+  LINES.forEach(function(l){offered[l.k]=arr.indexOf(l.k)>=0;});
+}
+loadOffered();
 function setOffered(){var o=load(OKEY,{});o[cid]=offered;save(OKEY,o);}
 function stt(){return store[cid].status;}function corr(){return store[cid].corr;}
 function setItem(id,v){if(stt()[id]===v)delete stt()[id];else stt()[id]=v;save(SKEY,store);render();}
 function setCorr(id,f,v){corr()[id]=corr()[id]||{};corr()[id][f]=v;save(SKEY,store);}
 function visibleSections(){return SECTIONS.filter(function(s){return offered[s.line];});}
 function toggleLine(k){offered[k]=!offered[k];setOffered();render();}
-var sess=(window.AllyOSAuth&&AllyOSAuth.session())||{};
 var HF=['hClinic','hProgram','hAddr','hMD','hMDLic','hMonth','hRec','hStatus','dVerify','dPrac','dScope','dProto','dAdverse','dAdvNote','dBio','dBioSince','dCharts'];
-function initHeader(){
+var DEFAULTS={hRec:'Clinic EMR / paper chart remains the official record',hMDLic:'Florida Medical License · ME 84789',dProto:'ACTIVE / COMPLIANT',dAdverse:'NONE REPORTED',dPrac:'Armando A. Falcon | Medical Director | FL Medical License · ME 84789 | Verify'};
+var listenersAttached=false;
+function attachListeners(){if(listenersAttached)return;listenersAttached=true;HF.forEach(function(id){document.getElementById(id).addEventListener('input',function(){saveHeader();render();});});}
+function loadHeaderValues(){
   var h=load(HKEY,{})[cid]||{};
-  document.getElementById('hClinic').value=h.hClinic||sess.clinic||'';
-  document.getElementById('hMD').value=h.hMD||((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||sess.name||'Armando Augusto Falcon, MD');
-  HF.forEach(function(id){if(id==='hClinic'||id==='hMD')return;if(h[id]!=null&&h[id]!=='')document.getElementById(id).value=h[id];});
-  HF.forEach(function(id){document.getElementById(id).addEventListener('input',function(){saveHeader();render();});});
+  HF.forEach(function(id){document.getElementById(id).value=DEFAULTS[id]||'';});
+  document.getElementById('hMD').value=(window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||sess.name||'Armando Augusto Falcon, MD';
+  HF.forEach(function(id){if(h[id]!=null&&h[id]!=='')document.getElementById(id).value=h[id];});
+  preloadFromCard();
+}
+function preloadFromCard(){
+  if(cid!==clinicId())return;   // pre-load only the Clinic-Card's own clinic
+  var cfg=load('allyos_clinic_config_v1',{}),C=document.getElementById('hClinic'),P=document.getElementById('hProgram'),A=document.getElementById('hAddr');
+  if(!C.value&&cfg.name)C.value=cfg.name;
+  if(!P.value&&cfg.dba)P.value=cfg.dba;
+  if(!A.value&&(cfg.addr||cfg.city))A.value=[cfg.addr,cfg.city].filter(Boolean).join(', ');
 }
 function saveHeader(){var o=load(HKEY,{});var v={};HF.forEach(function(id){v[id]=document.getElementById(id).value;});o[cid]=v;save(HKEY,o);}
+function renderPicker(){var sel=document.getElementById('clinicPicker');if(!sel)return;sel.innerHTML=clinics.map(function(c){return '<option value="'+esc(c.id)+'"'+(c.id===cid?' selected':'')+'>'+esc(c.name)+'</option>';}).join('');}
+function switchClinic(id){saveHeader();cid=id;save(CURKEY,cid);ensureStore();loadOffered();loadHeaderValues();saveHeader();renderPicker();render();}
+function addClinic(){var nm=prompt('New clinic name:');if(!nm||!nm.trim())return;var id='gc'+Date.now().toString(36);clinics.push({id:id,name:nm.trim()});save(CLKEY,clinics);switchClinic(id);}
 function render(){
   document.getElementById('lines').innerHTML=LINES.map(function(l){return '<span class="lchip'+(offered[l.k]?' on':'')+'" onclick="toggleLine(\''+l.k+'\')">'+esc(l.t)+(offered[l.k]?' ✓':'')+'</span>';}).join('');
   var P=0,M=0,N=0,U=0;
@@ -161,6 +195,6 @@ function genReport(){
   AllyOSGovReport.download(collectPayload()).then(function(){if(btn){btn.textContent='⬇ Download report PDF';btn.disabled=false;}})
     .catch(function(e){if(btn){btn.textContent='⬇ Download report PDF';btn.disabled=false;}alert('Report error: '+(e&&e.message||e));});
 }
-initHeader();render();
+renderPicker();attachListeners();loadHeaderValues();saveHeader();render();
 </script>
 </body></html>
