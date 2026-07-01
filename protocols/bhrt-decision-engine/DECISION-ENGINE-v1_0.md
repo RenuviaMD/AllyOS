@@ -32,7 +32,16 @@ Collapsible "Safety & route factors" under section 2; symptom-led plan unchanged
   - Outputs a route recommendation (transdermal-preferred when route-risk present) + staging note; the gate governs
     safety & route, NOT candidacy. Verified by render: green / amber (BMI+migraine → transdermal) / red (BP defer).
 
-## Phase 2 — BACKLOG
-Configurable lab anchors + context flags (the Module-4 table); abnormal-bleeding engine (Module 8); compounded-exception
-documentation (Module 6); monitoring-cadence table (Module 7); DHEA lane (Lane E); elinzanetant added to the nonhormonal
-lane (after Lynkuet PI verification); QA/audit checklist (Module 11).
+## Phase 2 — BUILT
+- **Context labs** (optional, collapsible, importable): TG, A1c, glucose, ALT, Hct, ferritin, B12, vit D, prolactin,
+  SHBG (+ FSH/E2/TSH/Total T). Folded into the gate: TG≥150 / A1c / glucose / ALT>70 → route ambers; TSH-abnormal,
+  ferritin<30, B12<300, vitD<30, prolactin>25, Total T ≥ female range, Hct high → "mimics / context to address."
+- **Testosterone lane guard:** Total T at/above female range → testosterone block replaced by an EXCLUSION note.
+- **Monitoring cadence + abnormal-bleeding pathway** table (Module 7 + Module 8) added to every plan.
+- **DHEA lane (Lane E)** note when sexual symptoms present; **elinzanetant** added to the nonhormonal lane
+  (flagged VERIFY-AT-LOCK vs the Lynkuet PI) alongside gabapentin/oxybutynin/CBT/hypnosis and the wild-yam caution.
+
+## Phase 3 — remaining (reference/governance, not interactive engine)
+Compounded-exception documentation template (Module 6), QA/audit checklist (Module 11), full note-template (Module 10) —
+these are documentation the provider follows; can be added as printable checklists if wanted. Elinzanetant label to
+confirm at lock.

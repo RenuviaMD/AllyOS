@@ -105,12 +105,11 @@
     <div class="panel">
       <div style="font-size:11.5px;color:var(--dim);margin-bottom:10px">BHRT is <b>symptom-based per NAMS 2022</b> — labs confirm and monitor, they do not determine whether to treat. This is optional documentation only.</div>
       <div id="labimport"></div>
-      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-top:12px">
-        <div><label class="q" style="margin-top:0">FSH</label><input id="fsh" type="number" step="0.1" placeholder="mIU/mL" style="width:100px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px"></div>
-        <div><label class="q" style="margin-top:0">Estradiol</label><input id="e2" type="number" step="0.1" placeholder="pg/mL" style="width:100px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px"></div>
-        <div><label class="q" style="margin-top:0">TSH</label><input id="tsh" type="number" step="0.01" placeholder="mIU/L" style="width:100px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px"></div>
-        <div><label class="q" style="margin-top:0">Total T</label><input id="tt" type="number" step="1" placeholder="ng/dL" style="width:100px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px"></div>
-      </div>
+      <div style="font-size:11px;color:var(--dim);margin:12px 0 6px">Confirmation / staging:</div>
+      <div id="bhrtLabRow1" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end"></div>
+      <div style="font-size:11px;color:var(--dim);margin:14px 0 6px">Safety &amp; mimic context (metabolic · hepatic · nutrient · androgen):</div>
+      <div id="bhrtLabRow2" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end"></div>
+      <div style="font-size:11px;color:var(--dim);margin-top:10px">Significant abnormalities feed the <b>safety &amp; route gate</b> (e.g. high TG → transdermal; abnormal TSH / low ferritin/B12/vitD → treat the mimic first; testosterone above female range → no testosterone/DHEA). They still do not decide whether to treat symptoms.</div>
     </div>
   </details>
 
@@ -166,25 +165,31 @@ function renderMrs(){
   }).join('');
 }
 renderChips();renderMrs();
-// Optional PHI-free lab import — confirmatory only (BHRT is symptom-based; labs never gate the plan).
+// optional confirmatory + context labs (BHRT is symptom-based; labs never gate — they flag safety/route/mimics)
+var BHRT_LABS={row1:[['fsh','FSH','mIU/mL'],['e2','Estradiol','pg/mL'],['tsh','TSH','mIU/L'],['tt','Total T','ng/dL']],
+  row2:[['tg','Triglycerides','mg/dL'],['a1c','A1c','%'],['glu','Glucose','mg/dL'],['alt','ALT','U/L'],['hct','Hct','%'],['ferritin','Ferritin','ng/mL'],['b12','B12','pg/mL'],['vitd','Vit D','ng/mL'],['prl','Prolactin','ng/mL'],['shbg','SHBG','nmol/L']]};
+function renderBhrtLabs(){
+  function f(a){return '<div style="display:flex;flex-direction:column"><label class="q" style="margin:0 0 4px">'+a[1]+'</label><input id="'+a[0]+'" type="number" step="any" placeholder="'+a[2]+'" style="width:92px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:7px 9px"></div>';}
+  var r1=document.getElementById('bhrtLabRow1'), r2=document.getElementById('bhrtLabRow2');
+  if(r1)r1.innerHTML=BHRT_LABS.row1.map(f).join(''); if(r2)r2.innerHTML=BHRT_LABS.row2.map(f).join('');
+}
+renderBhrtLabs();
 if(window.AllyOSLabImport&&document.getElementById('labimport')){
   AllyOSLabImport.mount(document.getElementById('labimport'),[
-    {id:'fsh',label:'FSH',pats:[/\bfsh\b/i,/follicle/i]},
-    {id:'e2',label:'Estradiol',pats:[/estradiol/i]},
-    {id:'tsh',label:'TSH',pats:[/\btsh\b/i,/thyroid\s*stim/i]},
-    {id:'tt',label:'Total testosterone',pats:[/total\s*test/i,/test\w*,?\s*total/i],exclude:/free|bioavail|globulin/i}
+    {id:'fsh',label:'FSH',pats:[/\bfsh\b/i,/follicle/i]},{id:'e2',label:'Estradiol',pats:[/estradiol/i]},
+    {id:'tsh',label:'TSH',pats:[/\btsh\b/i,/thyroid\s*stim/i]},{id:'tt',label:'Total testosterone',pats:[/total\s*test/i,/test\w*,?\s*total/i],exclude:/free|bioavail|globulin/i},
+    {id:'tg',label:'Triglycerides',pats:[/triglyceride/i]},{id:'a1c',label:'A1c',pats:[/glycohemoglobin/i,/hemoglobin\s*a1c/i,/\ba1c\b/i]},
+    {id:'glu',label:'Glucose',pats:[/glucose/i],exclude:/tolerance/i},{id:'alt',label:'ALT',pats:[/\balt\b/i,/alanine/i]},
+    {id:'hct',label:'Hematocrit',pats:[/hematocrit/i,/\bhct\b/i]},{id:'ferritin',label:'Ferritin',pats:[/ferritin/i]},
+    {id:'b12',label:'B12',pats:[/\bb12\b/i,/cobalamin/i]},{id:'vitd',label:'Vitamin D',pats:[/vitamin\s*d/i,/25[- ]?oh/i,/25[- ]?hydroxy/i]},
+    {id:'prl',label:'Prolactin',pats:[/prolactin/i]},{id:'shbg',label:'SHBG',pats:[/shbg/i,/sex hormone[- ]?binding/i]}
   ]);
 }
 function confLabs(){
   function nv(id){var el=document.getElementById(id);if(!el)return null;var n=parseFloat(el.value);return isFinite(n)?n:null;}
-  var f=nv('fsh'),e=nv('e2'),t=nv('tsh'),tt=nv('tt');
-  var parts=[];
-  if(f!=null)parts.push('FSH '+f);
-  if(e!=null)parts.push('Estradiol '+e);
-  if(t!=null)parts.push('TSH '+t+(t<0.4||t>4.5?' (abnormal — thyroid can mimic VMS/mood; evaluate)':''));
-  if(tt!=null)parts.push('Total T '+tt);
+  var parts=[]; BHRT_LABS.row1.concat(BHRT_LABS.row2).forEach(function(a){var v=nv(a[0]); if(v!=null)parts.push(a[1]+' '+v);});
   if(!parts.length) return '';
-  return '<div class="grp">Confirmatory labs (optional · on file)</div><div class="rxc">'+parts.join(' · ')+'. <b>Symptom-based decision unchanged</b> — per NAMS 2022, labs confirm/monitor and do not determine whether to treat symptoms.</div>';
+  return '<div class="grp">Confirmatory &amp; context labs (optional · on file)</div><div class="rxc">'+parts.join(' · ')+'. <b>Symptom-based decision unchanged</b> — per NAMS 2022, labs confirm/monitor and do not determine whether to treat symptoms (safety/route/mimic flags appear in the gate above).</div>';
 }
 
 // ---- clinical domains (for the symptom map) ----
@@ -228,12 +233,15 @@ function treatmentPlan(){
   if(gsmS>=1){
     blocks.push('<div class="rx"><b>Local (vaginal) estrogen</b> <i>(FDA-approved)</i> — low-dose vaginal estradiol cream/tablet/ring; alternatives: vaginal DHEA/prasterone, or ospemifene PO. <b>Not gated by the systemic-estrogen uterus rule.</b> <span style="color:var(--muted)">NAMS 2022 · AUA 2025 GSM · <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=9accbcc9-78ee-4f84-9b7e-704f2ab1c413" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed Osphena ✓</a></span></div>'+compNote());
   }
-  if(sexS>=2){
+  var ttv=(function(){var el=document.getElementById('tt');if(!el)return null;var n=parseFloat(el.value);return isFinite(n)?n:null;})();
+  if(sexS>=2 && ttv!=null && ttv>60){
+    blocks.push('<div class="rx" style="border-color:#8a322c;background:#2a151222;color:#f0b3aa"><b>Testosterone — EXCLUDED here.</b> Entered total testosterone ('+ttv+' ng/dL) is at/above the female reference range, so testosterone/DHEA is not appropriate (Lane D exclusion). Evaluate the androgen source; address GSM / reversible factors for low desire instead. <span style="color:var(--muted)">Global Consensus 2019 (PMID 31498871).</span></div>');
+  } else if(sexS>=2){
     blocks.push('<div class="rx"><b>Testosterone — HSDD only, off-label in women.</b> First address GSM + reversible factors (sleep, mood, meds, relationship). If low desire WITH personal distress persists: provider-level discussion; low-dose transdermal titrated to female physiologic range; <b>not</b> for energy/mood/weight. Monitor androgenic effects (acne, hirsutism). <span style="color:var(--muted)">ISSWSH 2021 (PMID 33792440) · Global Consensus 2019 (PMID 31498871).</span>'+
       '<div class="rxc" style="margin-top:8px">Formulation per ISSWSH 2021: use a <b>government-approved male transdermal testosterone product dosed to the female physiologic premenopausal range</b>; total testosterone is a monitoring baseline, <b>not</b> a diagnostic. <b>Compounded testosterone is not recommended</b> for women (insufficient efficacy/safety data). <span style="color:#9a8fc0">ISSWSH 2021, PMID 33792440.</span></div></div>');
   }
   if(vmsS>=2){
-    blocks.push('<div class="rx" style="border-color:#3a4452;background:#0e243622"><b>If MHT declined / not used (non-hormonal VMS):</b> fezolinetant 45 mg (FDA; LFTs at <b>baseline, then months 1, 2, 3, 6, and 9</b>, plus liver-symptom counseling — per the updated FDA Veozah label), paroxetine 7.5 mg (FDA for VMS), or an SSRI/SNRI; CBT for bother/sleep. <span style="color:var(--muted)">NAMS 2023 nonhormone · <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=cae9f798-24f9-4580-a4fc-e6c710cbda3c" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed Veozah ✓</a> (LFT schedule confirmed)</span></div>');
+    blocks.push('<div class="rx" style="border-color:#3a4452;background:#0e243622"><b>If MHT declined / not used (non-hormonal VMS):</b> fezolinetant 45 mg (FDA; LFTs at <b>baseline, then months 1, 2, 3, 6, and 9</b>, plus liver-symptom counseling — per the updated FDA Veozah label), elinzanetant (NK1/NK3, <b>VERIFY-AT-LOCK</b> vs the Lynkuet PI — hepatic thresholds + pregnancy contraindication), paroxetine 7.5 mg (FDA for VMS) or SSRI/SNRI, gabapentin (nocturnal/sleep-dominant), oxybutynin; CBT / clinical hypnosis for bother/sleep. Do NOT position wild yam / unstandardized "hormone-balancing" creams as core VMS therapy. <span style="color:var(--muted)">NAMS 2023 nonhormone · <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=cae9f798-24f9-4580-a4fc-e6c710cbda3c" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed Veozah ✓</a> (LFT schedule confirmed) · Lynkuet PI (verify)</span></div>');
   }
   if(!blocks.length) blocks.push('<div class="rx" style="color:var(--muted)">No pharmacologic hormone indication from the current symptom profile — see Lifestyle. Reassess as symptoms evolve.</div>');
   return blocks.join('');
@@ -246,6 +254,19 @@ function titrationBlock(){
     '<br>• Persists at ceiling → reconsider diagnosis; add non-hormonal (fezolinetant/SSRI) or refer.'+
     '<br>• Safety: review BP &amp; hematocrit as indicated; testosterone → monitor androgenic effects.'+
     ' <span style="color:var(--muted)">NAMS 2022.</span></div>';
+}
+function cadenceBlock(){
+  var rows=[
+   ['Baseline','Symptom inventory + goals · contraindication screen · uterus status · BP/BMI/cardiometabolic risk · screening status (mammo/cervical/colon/DEXA). CBC/CMP/A1c/lipid/TSH + pregnancy if applicable. FSH/E2 only if <45 or unclear. Testosterone/SHBG only if HSDD pathway.'],
+   ['6–12 weeks','Symptom response · side effects · BP · bleeding pattern · breast symptoms · mood/sleep · adherence · route/tolerability. Testosterone labs if prescribed; hepatic labs if NK-antagonist pathway.'],
+   ['3-month review','Continue / adjust / stop by benefit vs side effects. Ask directly about vaginal bleeding. Confirm progesterone adherence if uterus intact + systemic estrogen. Confirm correct treatment lane.'],
+   ['Every 6–12 months','Annual risk-benefit review · BP/BMI · med + contraindication review · CBC/CMP/lipids/A1c by risk · testosterone level only if used · mammo/cervical/colon/bone screening per age/risk.']
+  ];
+  return '<table><thead><tr><th>Timing</th><th>Minimum review</th></tr></thead><tbody>'+rows.map(function(r){return '<tr><td style="white-space:nowrap"><b>'+r[0]+'</b></td><td>'+r[1]+'</td></tr>';}).join('')+'</tbody></table>'+
+    '<div class="rxc" style="margin-top:8px"><b>Abnormal bleeding:</b> unscheduled bleeding &lt;6 mo of systemic HRT → assess severity/adherence/regimen; bleeding after 6 mo on stable therapy, heavy, or postmenopausal → gynecology pathway. Unopposed systemic estrogen in an intact uterus → stop and evaluate endometrial risk. <span style="color:var(--muted)">NICE NG23 · NAMS 2022.</span></div>';
+}
+function dheaNote(){
+  return '<div class="rxc"><b>DHEA (Lane E):</b> local vaginal DHEA/prasterone may be considered for GSM when vaginal estrogen isn\'t desired/tolerated. <b>Systemic DHEA is a low-priority adjunct</b> (weaker evidence); avoid if high DHEA-S, androgenic symptoms/PCOS, or testosterone already in use. Not a routine BHRT component.</div>';
 }
 function lifestyleBlock(){
   var msk=score(['msk']), vms=score(['vms','vms2']), sleep=score(['sleep']), mood=score(['mood','irrit','anx']);
@@ -350,6 +371,20 @@ function safetyRouteGate(){
   if(age!=null&&age>60) ambers.push('Age '+age+' (>60 / farther from onset) — more cautious risk-benefit review.');
   if(age!=null&&age<40) ambers.push('Age '+age+' (&lt;40) — confirm POI (repeat FSH, evaluate) before routine wellness BHRT; POI often warrants HT once confirmed.');
   AMBER.forEach(function(a,i){ if(am[i]) ambers.push(a+' — transdermal-preferred.'); });
+  // optional lab context — metabolic/hepatic → route ambers; mimics/androgen → context list
+  var tg=nvb('tg'), a1c=nvb('a1c'), glu=nvb('glu'), alt=nvb('alt'), tshv=nvb('tsh'), ferritin=nvb('ferritin'), b12=nvb('b12'), vitd=nvb('vitd'), prl=nvb('prl'), hctv=nvb('hct'), ttv=nvb('tt');
+  if(tg!=null&&tg>=150) ambers.push('Triglycerides '+tg+' (≥150) — avoid oral estrogen; transdermal-preferred.');
+  if(a1c!=null){ if(a1c>=6.5) ambers.push('A1c '+a1c+'% (diabetes range) — metabolic pathway; transdermal-preferred.'); else if(a1c>=5.7) ambers.push('A1c '+a1c+'% (prediabetes) — metabolic pathway.'); }
+  if(glu!=null){ if(glu>=126) ambers.push('Fasting glucose '+glu+' (diabetes range) — confirm/manage.'); else if(glu>=100) ambers.push('Fasting glucose '+glu+' (prediabetes) — metabolic pathway.'); }
+  if(alt!=null&&alt>70) ambers.push('ALT '+alt+' (elevated) — clarify cause; avoid oral estrogen until stable.');
+  var context=[];
+  if(tshv!=null&&(tshv<0.4||tshv>4.5)) context.push('TSH '+tshv+' abnormal — treat thyroid first; it mimics menopause (fatigue, mood, weight, lipids).');
+  if(ferritin!=null&&ferritin<30) context.push('Ferritin '+ferritin+' (&lt;30) — iron repletion + evaluate bleeding source (fatigue/hair mimic).');
+  if(b12!=null&&b12<300) context.push('B12 '+b12+' (low/borderline) — replete (fatigue/brain-fog mimic).');
+  if(vitd!=null&&vitd<30) context.push('Vitamin D '+vitd+' (&lt;30) — replete for bone/wellness (not a hormone indication).');
+  if(prl!=null&&prl>25) context.push('Prolactin '+prl+' (&gt;25) — evaluate cause before attributing amenorrhea/symptoms to menopause.');
+  if(ttv!=null&&ttv>60) context.push('Total T '+ttv+' — at/above female range → do NOT add testosterone/DHEA (Lane D exclusion).');
+  if(hctv!=null&&hctv>46) context.push('Hct '+hctv+' (high) — evaluate before any testosterone/androgen.');
   var status = reds.length?'red':(ambers.length?'yellow':'green');
   var routeRisk = ambers.length>0 || (bmi!=null&&bmi>30);
   var routeRec = routeRisk ? '<b>Transdermal estradiol preferred</b> for this profile (lower VTE / stroke / triglyceride risk than oral).' : 'Oral or transdermal per shared preference (no route-risk flags entered).';
@@ -358,13 +393,14 @@ function safetyRouteGate(){
     if(age>45) staging='Age '+age+' — menopause is usually a <b>clinical diagnosis</b>; routine FSH/estradiol not required (NICE NG23).';
     else if(age>=40) staging='Age '+age+' (40–45) — <b>selective</b> FSH/estradiol + mimic labs (TSH, prolactin, pregnancy) may help confirm.';
     else staging='Age '+age+' (&lt;40) — <b>POI pathway</b>: do not diagnose from one lab; repeat FSH, evaluate, consider referral before routine wellness BHRT (POI often warrants HT once confirmed).'; }
-  var any=reds.length||ambers.length||staging;
+  var any=reds.length||ambers.length||staging||context.length;
   var bg=status==='red'?'#2a1512':(status==='yellow'?'#2a2410':'#0e2a1f'), bd=status==='red'?'#8a322c':(status==='yellow'?'#6e5a1c':'#1c6e4f'), cl=status==='red'?'#f0b3aa':(status==='yellow'?'var(--amber)':'var(--green)');
   var label=status==='red'?'🔴 RED — control before systemic estrogen':(status==='yellow'?'🟡 AMBER — transdermal-preferred · document':'🟢 GREEN — no route-risk flags on the entered values');
   var items=reds.concat(ambers);
   var panel = any ? ('<div class="grp">Safety &amp; route gate</div><div style="border-radius:11px;padding:12px 14px;margin:8px 0;font-size:13px;background:'+bg+';border:1px solid '+bd+';color:'+cl+'"><b>'+label+'</b>'+
     (items.length?('<ul style="margin:6px 0 0 16px;padding:0">'+items.map(function(x){return '<li style="margin:3px 0">'+x+'</li>';}).join('')+'</ul>'):'')+
     '<div style="margin-top:8px">Route: '+routeRec+'</div>'+(staging?('<div style="font-size:11.5px;margin-top:6px;opacity:.9">Staging: '+staging+'</div>'):'')+
+    (context.length?('<div style="font-size:11.5px;margin-top:8px;opacity:.92"><b>Mimics / context to address:</b><ul style="margin:4px 0 0 16px;padding:0">'+context.map(function(x){return '<li style="margin:3px 0">'+x+'</li>';}).join('')+'</ul></div>'):'')+
     '<div style="font-size:11px;margin-top:8px;opacity:.8">Symptoms choose the lane; this gate governs <b>safety &amp; route</b>, not whether to treat (NICE NG23 / NAMS 2022).</div></div>') : '';
   return { status:status, reds:reds, panel:panel };
 }
@@ -390,6 +426,8 @@ function generate(){
     sg.panel+
     '<div class="grp">Treatment plan (starting regimens)</div>'+treatmentPlan()+
     '<div class="grp">Monitoring &amp; titration — "if symptoms persist"</div>'+titrationBlock()+
+    '<div class="grp">Monitoring cadence &amp; bleeding pathway</div>'+cadenceBlock()+
+    (score(['sex'])>=2?('<div class="grp">DHEA (adjunct)</div>'+dheaNote()):'')+
     '<div class="grp">Lifestyle (advisory)</div>'+lifestyleBlock()+
     confLabs()+
     crosswalkBlock()+
