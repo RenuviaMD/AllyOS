@@ -171,20 +171,20 @@ function treatmentPlan(){
       '<br>· Apply: patch 1–2×/wk, or gel/spray once daily — rotate sites; <b>never on the breasts</b>.'+
       '<br>· Expect: VMS &amp; sleep improve 2–4 wk; mood 4–8 wk.'+
       '<br>· If labs used (confirmatory): on-therapy estradiol target ~50–150 pg/mL (ultrasensitive LC/MS/MS).'+prog+
-      ' <span style="color:var(--muted)">NAMS 2022 · ESE 2025.</span></div>'+compNote());
+      ' <span style="color:var(--muted)">NAMS 2022 · ESE 2025 · <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=03ab0226-b494-4607-8e8b-7381082fa780" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed estradiol TDS ✓</a></span></div>'+compNote());
   }
   if(needSys && ut!=='removed'){
-    blocks.push('<div class="rx"><b>Micronized progesterone</b> <i>(FDA-approved)</i> — <b>100 mg orally at bedtime</b> (continuous), or 200 mg ×12–14 days/cycle. Endometrial protection + GABA-ergic sleep/anxiety benefit (expected sedation). <span style="color:var(--muted)">NAMS 2022.</span></div>');
+    blocks.push('<div class="rx"><b>Micronized progesterone</b> <i>(FDA-approved)</i> — <b>100 mg orally at bedtime</b> (continuous), or 200 mg ×12–14 days/cycle. Endometrial protection + GABA-ergic sleep/anxiety benefit (expected sedation). <span style="color:var(--muted)">NAMS 2022 · <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=cf73c385-5173-4b54-af23-069581c5d560" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed Prometrium ✓</a></span></div>');
   }
   if(gsmS>=1){
-    blocks.push('<div class="rx"><b>Local (vaginal) estrogen</b> <i>(FDA-approved)</i> — low-dose vaginal estradiol cream/tablet/ring; alternatives: vaginal DHEA/prasterone, or ospemifene PO. <b>Not gated by the systemic-estrogen uterus rule.</b> <span style="color:var(--muted)">NAMS 2022 · AUA 2025 GSM.</span></div>'+compNote());
+    blocks.push('<div class="rx"><b>Local (vaginal) estrogen</b> <i>(FDA-approved)</i> — low-dose vaginal estradiol cream/tablet/ring; alternatives: vaginal DHEA/prasterone, or ospemifene PO. <b>Not gated by the systemic-estrogen uterus rule.</b> <span style="color:var(--muted)">NAMS 2022 · AUA 2025 GSM · <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=9accbcc9-78ee-4f84-9b7e-704f2ab1c413" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed Osphena ✓</a></span></div>'+compNote());
   }
   if(sexS>=2){
     blocks.push('<div class="rx"><b>Testosterone — HSDD only, off-label in women.</b> First address GSM + reversible factors (sleep, mood, meds, relationship). If low desire WITH personal distress persists: provider-level discussion; low-dose transdermal titrated to female physiologic range; <b>not</b> for energy/mood/weight. Monitor androgenic effects (acne, hirsutism). <span style="color:var(--muted)">ISSWSH 2021 (PMID 33792440) · Global Consensus 2019 (PMID 31498871).</span>'+
       '<div class="rxc" style="margin-top:8px">Formulation per ISSWSH 2021: use a <b>government-approved male transdermal testosterone product dosed to the female physiologic premenopausal range</b>; total testosterone is a monitoring baseline, <b>not</b> a diagnostic. <b>Compounded testosterone is not recommended</b> for women (insufficient efficacy/safety data). <span style="color:#9a8fc0">ISSWSH 2021, PMID 33792440.</span></div></div>');
   }
   if(vmsS>=2){
-    blocks.push('<div class="rx" style="border-color:#3a4452;background:#0e243622"><b>If MHT declined / not used (non-hormonal VMS):</b> fezolinetant 45 mg (FDA; LFTs at <b>baseline, then months 1, 2, 3, 6, and 9</b>, plus liver-symptom counseling — per the updated FDA Veozah label), paroxetine 7.5 mg (FDA for VMS), or an SSRI/SNRI; CBT for bother/sleep. <span style="color:var(--muted)">NAMS 2023 nonhormone · FDA Veozah PI (hepatotoxicity update).</span></div>');
+    blocks.push('<div class="rx" style="border-color:#3a4452;background:#0e243622"><b>If MHT declined / not used (non-hormonal VMS):</b> fezolinetant 45 mg (FDA; LFTs at <b>baseline, then months 1, 2, 3, 6, and 9</b>, plus liver-symptom counseling — per the updated FDA Veozah label), paroxetine 7.5 mg (FDA for VMS), or an SSRI/SNRI; CBT for bother/sleep. <span style="color:var(--muted)">NAMS 2023 nonhormone · <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=cae9f798-24f9-4580-a4fc-e6c710cbda3c" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed Veozah ✓</a> (LFT schedule confirmed)</span></div>');
   }
   if(!blocks.length) blocks.push('<div class="rx" style="color:var(--muted)">No pharmacologic hormone indication from the current symptom profile — see Lifestyle. Reassess as symptoms evolve.</div>');
   return blocks.join('');
