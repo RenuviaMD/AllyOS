@@ -10,6 +10,7 @@
     { "agent": "fezolinetant", "line": "HRT", "brand": "VEOZAH" },
     { "agent": "estradiol", "line": "HRT", "brand": "ESTRADIOL" },
     { "agent": "micronized progesterone", "line": "HRT", "brand": "PROMETRIUM" },
+    { "agent": "ospemifene", "line": "HRT", "brand": "OSPHENA" },
     { "agent": "testosterone gel", "line": "HRT", "brand": "ANDROGEL" },
     { "agent": "testosterone cypionate", "line": "HRT", "brand": "DEPO-TESTOSTERONE" },
     { "agent": "testosterone enanthate SC auto-injector", "line": "HRT", "brand": "XYOSTED" },
