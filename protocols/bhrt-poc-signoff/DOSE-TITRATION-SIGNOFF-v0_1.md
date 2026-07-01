@@ -66,10 +66,9 @@ According to PubMed, citations verified as noted. Each row: what the tool prints
 **No fabricated dose or citation found.** All regimens map to FDA labels + NAMS 2022 / ISSWSH 2021 / Global Consensus 2019.
 Two recommended refinements (R1 wording, R3 safety-monitoring) and one optional (gel/spray detail).
 
-### Your sign-off
-- [ ] **R1** — testosterone compounding note → ISSWSH stance: ☐ approve ☐ modify ☐ leave
-- [ ] **R3** — fezolinetant LFT schedule → baseline,1,2,3,6,9 mo: ☐ approve ☐ leave
-- [ ] **Optional** — gel/spray per-product dosing: ☐ add ☐ skip
-- [ ] **I, Armando A. Falcon, MD, approve the BHRT dose/titration logic above for live use in the AllyOS Hormone line.**  Date: ________
+### Sign-off — APPROVED (2026-07-01)
+- [x] **R1 — APPROVED & applied.** Testosterone block uses the ISSWSH stance (government-approved male transdermal product dosed to the female physiologic range; compounded testosterone not recommended).
+- [x] **R3 — APPROVED & applied.** Fezolinetant LFT schedule extended to baseline, 1, 2, 3, 6, and 9 months (updated FDA Veozah label).
+- [x] **I, Armando A. Falcon, MD, approve the BHRT dose/titration logic above for live use in the AllyOS Hormone line.**  Date: **2026-07-01**.
 
-Once you initial, I apply R1/R3 (if approved), flip `bhrt-poc.html` out of DRAFT, and wire it into the clinic Hormone line.
+Status: **MD-signed.** R1/R3 applied in `bhrt-poc.html`; live in the Hormone line with the MD-signed badge. Estradiol ladder (0.025–0.1 mg/day) and micronized progesterone verified vs FDA labels + NAMS 2022.
