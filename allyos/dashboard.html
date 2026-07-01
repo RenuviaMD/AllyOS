@@ -123,6 +123,7 @@ function render(){
   T.push({t:'Schedule',i:'📅',href:'schedule.html',roles:['provider','admin','nurse']}); // appointments per line + live IV chair board
   if(!gfeBlocked()) T.push({t:'GFE Dashboard',i:'🩺',href:'gfe.html',roles:['provider','admin'],iv:true}); // the IV gate; hidden when the MD does the GFE for an RN-run clinic
   T.push({t:'Clinic Card',i:'🏥',href:'clinic-card.html',roles:['provider','admin']}); // admin: clinic info · users & access
+  T.push({t:'Governance',i:'✅',href:'governance.html',roles:['provider','admin']}); // plain-language Present/Missing governance checklist (non-AHCA)
   T.push({t:'Billing',i:'💳',roles:['provider','admin'],fn:'openBilling()'}); // subscribe (Checkout) or manage (Portal)
   T.push({t:'Backup & Restore',i:'💾',roles:['provider','admin'],fn:'openBackup()'}); // device data safety (occasional)
   document.getElementById('tools').innerHTML=T.filter(function(x){
