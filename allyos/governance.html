@@ -97,10 +97,12 @@
     <div class="sig">Date: <span class="line">&nbsp;</span></div>
   </div></details>
 
-  <div class="noprint"><button class="gen" onclick="window.print()">🖨 Print / export monthly report</button></div>
+  <div class="noprint"><button class="gen" id="genBtn" onclick="genReport()">⬇ Download report PDF</button>
+    <span style="font-size:11.5px;color:var(--dim);margin-left:12px">Generates a binder-ready monthly report on this device — nothing uploaded.</span></div>
 </div>
 
 <script src="allyos-auth.js"></script>
+<script src="governance-report.js"></script>
 <script>
 if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin']);}
 var SECTIONS=[
@@ -175,5 +177,23 @@ function render(){
 }
 initHeader();render();
 window.addEventListener('beforeprint',function(){document.querySelectorAll('details.sec').forEach(function(d){d.open=true;});});
+function collectPayload(){
+  var manual=document.getElementById('hStatus').value, M=0,U=0;
+  visibleSections().forEach(function(sec){sec.items.forEach(function(_,i){var v=stt()[sec.k+':'+i];if(v==='missing')M++;else if(!v)U++;});});
+  var pl={clinic:document.getElementById('hClinic').value||'',month:document.getElementById('hMonth').value||'',md:document.getElementById('hMD').value||'',rec:document.getElementById('hRec').value||'',note:document.getElementById('mdNote').value||'',
+    overall:manual||(M>0?'Needs correction':(U>0?'Not reviewed':'Compliant')),required:[],lines:[],corrections:[]};
+  var req=SECTIONS[0];
+  pl.required=req.items.map(function(it,i){return {label:it,status:STATUS[stt()[req.k+':'+i]]||'Not set'};});
+  SECTIONS.filter(function(s){return s.line&&offered[s.line];}).forEach(function(sec){
+    pl.lines.push({title:sec.title,items:sec.items.map(function(it,i){return {label:it,status:STATUS[stt()[sec.k+':'+i]]||'Not set'};})});});
+  visibleSections().forEach(function(sec){sec.items.forEach(function(it,i){var id=sec.k+':'+i;if(stt()[id]==='missing'){var c=corr()[id]||{};pl.corrections.push({label:it,resp:c.resp,due:c.due});}});});
+  return pl;
+}
+function genReport(){
+  if(!window.AllyOSGovReport){alert('Report module not loaded.');return;}
+  var btn=document.getElementById('genBtn'); if(btn){btn.textContent='Generating…';btn.disabled=true;}
+  AllyOSGovReport.download(collectPayload()).then(function(){if(btn){btn.textContent='⬇ Download report PDF';btn.disabled=false;}})
+    .catch(function(e){if(btn){btn.textContent='⬇ Download report PDF';btn.disabled=false;}alert('Report error: '+(e&&e.message||e));});
+}
 </script>
 </body></html>
