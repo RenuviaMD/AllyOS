@@ -39,6 +39,21 @@
  table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
  th{font-family:var(--fdisp);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
  .sig{border-top:1px solid var(--line);margin-top:16px;padding-top:12px;font-size:12px;color:var(--muted)}.sig b{color:var(--ink)}
+ details.grpc{margin:16px 0 14px}
+ details.grpc>summary{font-family:var(--fdisp);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;padding:4px 0}
+ details.grpc>summary::-webkit-details-marker{display:none}
+ details.grpc>summary:before{content:'▸';color:var(--teal);transition:transform .15s;font-size:11px}
+ details.grpc[open]>summary:before{transform:rotate(90deg)}
+ details.grpc>summary:after{content:'';flex:1;height:1px;background:var(--line)}
+ .labgrid{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+ .fw{display:flex;flex-direction:column}.fw .q{margin:0 0 5px}
+ .li{width:104px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px}
+ .u{font-size:10px;color:var(--dim);margin-top:3px}
+ .ryg{border-radius:11px;padding:12px 14px;margin:10px 0;font-size:13px}
+ .ryg.green{background:#0e2a1f;border:1px solid #1c6e4f;color:var(--green)}
+ .ryg.yellow{background:#2a2410;border:1px solid #6e5a1c;color:var(--amber)}
+ .ryg.red{background:#2a1512;border:1px solid #8a322c;color:#f0b3aa}
+ .ryg ul{margin:6px 0 0 16px;padding:0}.ryg li{margin:3px 0}
  @media print{.noprint{display:none}.top{display:none}body{background:#fff}.poc{border:none}}
 </style></head>
 <body class="allyos">
@@ -70,21 +85,43 @@
     <div class="chips" id="gates"></div>
   </div>
 
-  <div class="grp">3 · Androgen labs (AM) &amp; confirmation</div>
+  <div class="grp">3 · Androgen labs (AM)</div>
   <div class="panel">
-    <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">
-      <div><label class="q" style="margin-top:0">Total T (ng/dL)</label><input id="tt" type="number" step="1" placeholder="e.g. 454" style="width:110px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px"></div>
-      <div><label class="q" style="margin-top:0">Free T (value)</label><input id="ft" type="number" step="0.1" placeholder="e.g. 38.4" style="width:100px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px"></div>
-      <div><label class="q" style="margin-top:0">Free T — your lab ref-low</label><input id="ftlow" type="number" step="0.1" placeholder="e.g. 46" style="width:120px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px"></div>
-      <div><label class="q" style="margin-top:0">Bioavailable T</label><input id="bt" type="number" step="0.1" placeholder="e.g. 74.1" style="width:110px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px"></div>
-      <div><label class="q" style="margin-top:0">Bio T — your lab ref-low</label><input id="btlow" type="number" step="0.1" placeholder="e.g. 110" style="width:120px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px"></div>
-      <div><label class="q" style="margin-top:0">SHBG (nmol/L)</label><input id="shbg" type="number" step="1" placeholder="e.g. 56" style="width:100px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px"></div>
-      <div><label class="q" style="margin-top:0">Hematocrit (%)</label><input id="hct" type="number" step="0.1" placeholder="opt" style="width:90px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px"></div>
+    <div class="labgrid">
+      <div class="fw"><label class="q">Total T</label><input id="tt" class="li" type="number" step="1" placeholder="e.g. 454"><span class="u">ng/dL</span></div>
+      <div class="fw"><label class="q">Free T</label><input id="ft" class="li" type="number" step="0.1" placeholder="e.g. 38.4"><span class="u">pg/mL (or lab unit)</span></div>
+      <div class="fw"><label class="q">Bioavailable T</label><input id="bt" class="li" type="number" step="0.1" placeholder="e.g. 74.1"><span class="u">ng/dL</span></div>
+      <div class="fw"><label class="q">SHBG</label><input id="shbg" class="li" type="number" step="1" placeholder="e.g. 56"><span class="u">nmol/L</span></div>
     </div>
     <div style="margin-top:12px"><label class="q">Repeat AM labs confirm the pattern?</label>
       <select id="confirmed"><option value="no" selected>No / not yet</option><option value="yes">Yes — repeat confirms</option></select></div>
-    <div style="font-size:11px;color:var(--dim);margin-top:8px">Enter <b>your lab's own reference-low</b> for free/bioavailable T — assays differ widely, so the engine flags "low" against <b>your</b> range, not a fixed number. A normal total T with low free/bioavailable T (often high SHBG) is still a candidate pattern once confirmed. Values stay on this device.</div>
+    <details class="grpc"><summary>Reference ranges — pre-filled (Quest); edit to match YOUR lab</summary>
+      <div class="labgrid" style="margin-top:8px">
+        <div class="fw"><label class="q">Total T — low</label><input id="ttlow" class="li" type="number" step="1" value="300"><span class="u">decision (AUA 300)</span></div>
+        <div class="fw"><label class="q">Total T — high</label><input id="tthigh" class="li" type="number" step="1" value="1100"><span class="u">above = ?exogenous</span></div>
+        <div class="fw"><label class="q">Free T — low</label><input id="ftlow" class="li" type="number" step="0.1" value="46"><span class="u">your lab ref-low</span></div>
+        <div class="fw"><label class="q">Free T — high</label><input id="fthigh" class="li" type="number" step="0.1" value="224"><span class="u">your lab ref-high</span></div>
+        <div class="fw"><label class="q">Bio T — low</label><input id="btlow" class="li" type="number" step="0.1" value="110"><span class="u">your lab ref-low</span></div>
+        <div class="fw"><label class="q">Bio T — high</label><input id="bthigh" class="li" type="number" step="0.1" value="575"><span class="u">your lab ref-high</span></div>
+      </div>
+      <div style="font-size:11px;color:var(--dim);margin-top:8px"><b>Ranges are configurable</b> — the engine flags "low/high" against these, not a hardcoded database. Lab's-own-range first (per assay/age/units). Defaults are Quest adult-male LC/MS. Values stay on this device.</div>
+    </details>
   </div>
+
+  <details class="grpc"><summary>4 · Start-safety gate (Hct · BP · PSA · OSA · LUTS) — optional, recommended</summary>
+    <div class="panel">
+      <div class="labgrid">
+        <div class="fw"><label class="q">Hematocrit</label><input id="hct" class="li" type="number" step="0.1" placeholder="opt"><span class="u">% (≥50 defer · ≥54 stop)</span></div>
+        <div class="fw"><label class="q">Systolic BP</label><input id="sbp" class="li" type="number" step="1" placeholder="opt"><span class="u">mmHg</span></div>
+        <div class="fw"><label class="q">Diastolic BP</label><input id="dbp" class="li" type="number" step="1" placeholder="opt"><span class="u">mmHg</span></div>
+        <div class="fw"><label class="q">PSA</label><input id="psa" class="li" type="number" step="0.1" placeholder="opt"><span class="u">ng/mL</span></div>
+        <div class="fw"><label class="q">STOP-BANG</label><input id="stopbang" class="li" type="number" step="1" min="0" max="8" placeholder="0–8"><span class="u">OSA risk</span></div>
+        <div class="fw"><label class="q">IPSS / LUTS</label><input id="ipss" class="li" type="number" step="1" min="0" max="35" placeholder="0–35"><span class="u">&gt;19 severe</span></div>
+      </div>
+      <div style="margin-top:12px"><label class="q">High prostate risk? (family hx · Black race · prior abnormal)</label>
+        <select id="psarisk"><option value="no" selected>No / average</option><option value="yes">Yes — high risk</option></select></div>
+    </div>
+  </details>
 
   <div class="noprint"><button class="gen" onclick="generate()">▶ Generate optimization plan</button></div>
   <div class="out" id="out"></div>
@@ -281,14 +318,44 @@ function generate(){
   var fertility=g[0];
   function nv(id){var el=document.getElementById(id);if(!el)return null;var n=parseFloat(el.value);return isFinite(n)?n:null;}
   var confirmed=document.getElementById('confirmed').value==='yes';
-  var tt=nv('tt'), ft=nv('ft'), ftlow=nv('ftlow'), bt=nv('bt'), btlow=nv('btlow'), shbg=nv('shbg'), hct=nv('hct');
-  var lowTotal = tt!=null && tt<300;                                   // AUA total-T cutoff
-  var lowFree  = ft!=null && ftlow!=null && ft<ftlow;                  // vs the provider's own lab ref-low
+  var tt=nv('tt'), ft=nv('ft'), bt=nv('bt'), shbg=nv('shbg'), hct=nv('hct');
+  // configurable reference limits (default Quest; provider-editable) — lab's-own-range first
+  var ttlow=nv('ttlow')||300, tthigh=nv('tthigh')||1100, ftlow=nv('ftlow'), fthigh=nv('fthigh'), btlow=nv('btlow'), bthigh=nv('bthigh');
+  var lowTotal = tt!=null && tt<ttlow;
+  var highTotal= tt!=null && tt>tthigh;                                 // above range → ?exogenous/AAS
+  var lowFree  = ft!=null && ftlow!=null && ft<ftlow;                   // vs the provider's own lab ref-low
   var lowBio   = bt!=null && btlow!=null && bt<btlow;
+  var highFree = ft!=null && fthigh!=null && ft>fthigh;
   var highSHBG = shbg!=null && shbg>=45;
-  var discordant = tt!=null && tt>=300 && (lowFree||lowBio);           // normal total, low usable androgen
+  var discordant = tt!=null && tt>=ttlow && (lowFree||lowBio);          // normal total, low usable androgen
   var deficiency = lowTotal || lowFree || lowBio;
-  var haveLabs = tt!=null && (ft!=null || bt!=null);                   // enough to read the axis
+  var haveLabs = tt!=null && (ft!=null || bt!=null);                    // enough to read the axis
+  // implausible-value guard (likely unit mistake) — WARN, never silently decide
+  var warns=[];
+  if(tt!=null && tt<30) warns.push('Total T '+tt+' looks like nmol/L — enter ng/dL (×28.8).');
+  if(shbg!=null && shbg>250) warns.push('SHBG '+shbg+' is implausibly high for nmol/L — check units.');
+  if(hct!=null && (hct<20||hct>70)) warns.push('Hematocrit '+hct+'% is outside the plausible 20–70% range — check the value.');
+  if(highTotal) warns.push('Total T '+tt+' is above your range ('+tthigh+') — review exogenous androgen / AAS / "test boosters" before any start or escalation.');
+  if(highFree) warns.push('Free T '+ft+' is above your range ('+fthigh+') — suggests over-exposure; do not start/escalate, investigate.');
+  // ---- start-safety gate (Red / Yellow / Green) from configurable thresholds ----
+  var sbp=nv('sbp'), dbp=nv('dbp'), psa=nv('psa'), stopbang=nv('stopbang'), ipss=nv('ipss');
+  var psarisk=(document.getElementById('psarisk')||{}).value==='yes';
+  var sgReds=[], sgYellows=[];
+  if(hct!=null){ if(hct>=54) sgReds.push('Hematocrit '+hct+'% (≥54) — hard stop: hold therapy, evaluate hypoxia/OSA, restart only when safe.');
+    else if(hct>=50) sgReds.push('Hematocrit '+hct+'% (≥50) — defer until etiology investigated (conservative gate).');
+    else if(hct>=48) sgYellows.push('Hematocrit '+hct+'% (48–49.9) — caution, esp. injectable: consider lower/split dose, topical, or closer CBC.'); }
+  if(sbp!=null||dbp!=null){ var s=sbp||0,d=dbp||0;
+    if(s>180||d>120) sgReds.push('BP '+s+'/'+d+' — hypertensive crisis; urgent pathway before anything.');
+    else if(s>=160||d>=100) sgReds.push('BP '+s+'/'+d+' (≥160/100) — defer elective start; manage first.');
+    else if(s>=140||d>=90) sgYellows.push('BP '+s+'/'+d+' (≥140/90) — confirm home/ABPM and manage before aggressive optimization.');
+    else if(s>=130||d>=80) sgYellows.push('BP '+s+'/'+d+' (130–139/80–89) — document trend.'); }
+  if(psa!=null){ if(psa>4) sgReds.push('PSA '+psa+' (>4) — defer; urology evaluation before start.');
+    else if(psarisk && psa>3) sgReds.push('PSA '+psa+' (>3 in a high-risk man) — defer; urology evaluation.'); }
+  if(stopbang!=null){ if(stopbang>=5) sgYellows.push('STOP-BANG '+stopbang+' (high OSA risk) — sleep pathway first; untreated severe OSA is a hard stop.');
+    else if(stopbang>=3) sgYellows.push('STOP-BANG '+stopbang+' (intermediate OSA risk) — evaluate.'); }
+  if(ipss!=null){ if(ipss>19) sgReds.push('IPSS '+ipss+' (severe LUTS) — defer or urology evaluation.');
+    else if(ipss>=8) sgYellows.push('IPSS '+ipss+' (moderate LUTS) — document/manage.'); }
+  var sgStatus = sgReds.length?'red':(sgYellows.length?'yellow':'green');
   var dom=PHENO.filter(function(p){return (sev[p.k]||0)>0;}).sort(function(a,b){return (sev[b.k]||0)-(sev[a.k]||0);});
   var sexualOrAxis=(sev.sexual||0)>=2;
   var burden=['sexual','energy','body','strength','mood','sleep','cardio'].reduce(function(a,k){return a+(sev[k]||0);},0);
@@ -302,12 +369,20 @@ function generate(){
   else if(deficiency && symptomatic && confirmed){ elig='TESTOSTERONE OPTIMIZATION — CANDIDATE REVIEW'; cls='go'; why=(discordant?('Normal total T ('+tt+' ng/dL) but LOW '+[lowFree?'free':'',lowBio?'bioavailable':''].filter(Boolean).join(' & ')+' T'+(highSHBG?(' with high-ish SHBG ('+shbg+' nmol/L)'):'')+' — usable androgen is low despite a normal total. '):'Confirmed low testosterone. ')+'Repeat AM labs confirm the pattern, symptoms align, and safety gates pass → the provider may consider the testosterone optimization pathway with monitoring (shared decision, not an automatic prescription).'; }
   else if(deficiency && symptomatic && !confirmed){ elig='CONFIRM-FIRST — repeat AM labs'; cls='hold'; why='Suspicious pattern ('+(discordant?'normal total, low free/bioavailable T':'low T')+') with high symptom burden, but a single panel is not enough to start. Repeat 7–10 AM fasting labs (total + free/calculated with SHBG + albumin) to confirm before candidacy (Endocrine Society 2018). Foundational optimization proceeds now.'; }
   else { elig='FOUNDATIONAL OPTIMIZATION FIRST'; cls='found'; why='The entered labs do not show a total or free/bioavailable-T deficiency against your lab ranges (or symptoms are goal-only). ACP: do not start testosterone for energy/vitality/cognition alone. Optimize foundations; re-evaluate with repeat labs.'; }
+  // a RED start-safety flag defers an otherwise-eligible candidate (dosing withheld)
+  if(cls==='go' && sgStatus==='red'){ cls='hold'; elig='DEFER — start-safety gate (RED)'; why='The androgen + symptom pattern supports candidacy, but a RED start-safety flag must be resolved before any testosterone start: '+sgReds.join(' '); }
   // lab read (shown in the plan)
-  var labRead = (tt!=null?('Total T <b>'+tt+'</b> ('+(lowTotal?'LOW &lt;300':'not low')+'). '):'Total T not entered. ')
+  var labRead = (tt!=null?('Total T <b>'+tt+'</b> ('+(lowTotal?('LOW &lt;'+ttlow):(highTotal?'ABOVE range':'not low'))+'). '):'Total T not entered. ')
     +(ft!=null?('Free T <b>'+ft+'</b>'+(ftlow!=null?(' vs your ref-low '+ftlow):'')+' ('+(lowFree?'<b style=\"color:var(--amber)\">LOW</b>':'ok')+'). '):'')
     +(bt!=null?('Bioavailable T <b>'+bt+'</b>'+(btlow!=null?(' vs your ref-low '+btlow):'')+' ('+(lowBio?'<b style=\"color:var(--amber)\">LOW</b>':'ok')+'). '):'')
     +(shbg!=null?('SHBG <b>'+shbg+'</b>'+(highSHBG?' (high-ish — binds T, lowers the free fraction)':'')+'. '):'')
     +(discordant?'<b style=\"color:var(--amber)\">Discordant pattern:</b> normal total testosterone with low <i>usable</i> androgen.':'');
+  // start-safety gate panel (RYG) + unit/plausibility warnings
+  var anySG = [hct,sbp,dbp,psa,stopbang,ipss].some(function(x){return x!=null;});
+  var sgLabel = sgStatus==='red'?'🔴 RED — resolve before any start':(sgStatus==='yellow'?'🟡 YELLOW — proceed with documentation/management':'🟢 GREEN — no start-safety flags on the entered values');
+  var sgItems = sgReds.concat(sgYellows);
+  var sgHTML = anySG ? ('<div class="grp">Start-safety gate</div><div class="ryg '+sgStatus+'"><b>'+sgLabel+'</b>'+(sgItems.length?('<ul>'+sgItems.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'):'')+'<div style="font-size:11px;margin-top:8px;opacity:.85">Thresholds: Hct 48/50/54 · BP AHA · PSA &gt;4 (&gt;3 high-risk) · IPSS &gt;19 · STOP-BANG. Qualitative gates (fertility, cancer, CV/VTE) are the checkboxes above.</div></div>') : '';
+  var warnHTML = warns.length ? ('<div class="ryg yellow" style="margin-top:8px"><b>⚠ Check before deciding:</b><ul>'+warns.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>') : '';
 
   if(!dom.length){out.innerHTML='<div class="poc"><div class="elig found">Rate at least one wellness domain to generate a plan.</div></div>';return;}
   var goalLine=dom.map(function(p){return esc(p.t)+' '+(sev[p.k])+'/4';}).join(' · ');
@@ -316,6 +391,8 @@ function generate(){
     '<div class="grp" style="margin-top:14px">Eligibility determination</div>'+
       '<div class="elig '+cls+'">'+esc(elig)+'</div><div style="font-size:12.5px;color:var(--muted);line-height:1.55">'+why+'</div>'+
       (haveLabs?'<div class="rx" style="border-color:#2a5a7e;background:#0e243622;margin-top:10px"><b>Lab read (vs your lab ranges):</b> '+labRead+'</div>':'')+
+      warnHTML+
+      sgHTML+
     (cls==='go'
       ? '<div class="grp">Baseline &amp; safety labs</div><div class="rx" style="color:var(--muted);font-size:12px">Eligibility labs are confirmed for this candidate (see the lab read above). Ongoing safety labs (T to the 450–600 target, hematocrit, PSA, BP, estradiol, metabolic) follow the <b>visit cadence</b> and the <b>dosing safety stops</b> below — not re-ordered here.</div>'
       : '<div class="grp">Hormone-axis &amp; safety labs to order</div>'+tbl(LABMAP,['Lab / measure','Timing','Decision note']))+
