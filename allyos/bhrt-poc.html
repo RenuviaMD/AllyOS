@@ -90,12 +90,26 @@
   <div class="grp">4 · Goals (optional)</div>
   <div class="panel"><div class="chips" id="goals"></div></div>
 
+  <details class="grpc noprint" style="margin:16px 0 14px"><summary style="font-family:var(--fdisp);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);cursor:pointer;padding:4px 0">5 · Confirmatory labs (optional) — attach if you have them · does NOT change the symptom-based plan</summary>
+    <div class="panel">
+      <div style="font-size:11.5px;color:var(--dim);margin-bottom:10px">BHRT is <b>symptom-based per NAMS 2022</b> — labs confirm and monitor, they do not determine whether to treat. This is optional documentation only.</div>
+      <div id="labimport"></div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-top:12px">
+        <div><label class="q" style="margin-top:0">FSH</label><input id="fsh" type="number" step="0.1" placeholder="mIU/mL" style="width:100px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px"></div>
+        <div><label class="q" style="margin-top:0">Estradiol</label><input id="e2" type="number" step="0.1" placeholder="pg/mL" style="width:100px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px"></div>
+        <div><label class="q" style="margin-top:0">TSH</label><input id="tsh" type="number" step="0.01" placeholder="mIU/L" style="width:100px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px"></div>
+        <div><label class="q" style="margin-top:0">Total T</label><input id="tt" type="number" step="1" placeholder="ng/dL" style="width:100px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px"></div>
+      </div>
+    </div>
+  </details>
+
   <div class="noprint"><button class="gen" onclick="generate()">▶ Generate Plan of Care</button></div>
 
   <div class="out" id="out"></div>
 </div>
 
 <script src="allyos-auth.js"></script>
+<script src="lab-import.js"></script>
 <script>
 if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin','nurse']);}
 function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -137,6 +151,26 @@ function renderMrs(){
   }).join('');
 }
 renderChips();renderMrs();
+// Optional PHI-free lab import — confirmatory only (BHRT is symptom-based; labs never gate the plan).
+if(window.AllyOSLabImport&&document.getElementById('labimport')){
+  AllyOSLabImport.mount(document.getElementById('labimport'),[
+    {id:'fsh',label:'FSH',pats:[/\bfsh\b/i,/follicle/i]},
+    {id:'e2',label:'Estradiol',pats:[/estradiol/i]},
+    {id:'tsh',label:'TSH',pats:[/\btsh\b/i,/thyroid\s*stim/i]},
+    {id:'tt',label:'Total testosterone',pats:[/total\s*test/i,/test\w*,?\s*total/i],exclude:/free|bioavail|globulin/i}
+  ]);
+}
+function confLabs(){
+  function nv(id){var el=document.getElementById(id);if(!el)return null;var n=parseFloat(el.value);return isFinite(n)?n:null;}
+  var f=nv('fsh'),e=nv('e2'),t=nv('tsh'),tt=nv('tt');
+  var parts=[];
+  if(f!=null)parts.push('FSH '+f);
+  if(e!=null)parts.push('Estradiol '+e);
+  if(t!=null)parts.push('TSH '+t+(t<0.4||t>4.5?' (abnormal — thyroid can mimic VMS/mood; evaluate)':''));
+  if(tt!=null)parts.push('Total T '+tt);
+  if(!parts.length) return '';
+  return '<div class="grp">Confirmatory labs (optional · on file)</div><div class="rxc">'+parts.join(' · ')+'. <b>Symptom-based decision unchanged</b> — per NAMS 2022, labs confirm/monitor and do not determine whether to treat symptoms.</div>';
+}
 
 // ---- clinical domains (for the symptom map) ----
 function score(keys){var m=0;keys.forEach(function(k){if((sev[k]||0)>m)m=sev[k];});return m;}
@@ -307,6 +341,7 @@ function generate(){
     '<div class="grp">Treatment plan (starting regimens)</div>'+treatmentPlan()+
     '<div class="grp">Monitoring &amp; titration — "if symptoms persist"</div>'+titrationBlock()+
     '<div class="grp">Lifestyle (advisory)</div>'+lifestyleBlock()+
+    confLabs()+
     crosswalkBlock()+
     '<div class="rxc" style="margin-top:10px">Reminder: <b>symptom-based</b> decision support per NAMS 2022. Labs confirm and monitor — they do not determine whether to treat symptoms. <b>Doses, formulations, titration, and pharmacy are the provider\'s decision and signature.</b></div>'+
     providerSig()+
