@@ -25,9 +25,11 @@ Endocrine Society CPG** (Bhasin et al., JCEM 2018;103:1715-1744), PMID 29562364,
 - **Q4 — other routes.** RESOLVED → added **oral undecanoate** (200 mg BID w/ food; check 7 d, 3–5 h post-dose) and **pellets** (150–450 mg q3–6 mo) as **selected-use / not-first-line**. Applied. ✅
 - **Route hierarchy (new):** topical gel (1st) → weekly injectable (2nd) → SC auto-injector (3rd) → oral (4th) → pellets (5th). Applied. ✅
 
-Two label-specific numbers carry a **VERIFY-AT-LOCK** flag against DailyMed: the XYOSTED 350–650 monitoring window and the oral-undecanoate label range.
+**VERIFY-AT-LOCK — CLEARED (2026-07-01):** the XYOSTED window (350–650, abdomen-only SC) and AndroGel 1.62% / cypionate / Testopel dosing were verified against the official DailyMed labels and linked in the engine. Oral-undecanoate made product-specific (KYZATREX 200 BID / JATENZO 237 BID / TLANDO 225 BID).
 
-- [ ] **I, Armando A. Falcon, MD, approve the men's TRT starting-regimen logic above (as aligned to addendum v0.1) for live use.** Date: ______
+**Route-order update (2026-07-01 directive) — supersedes addendum v0.1 §5:** first-line is now **injectable (weekly IM/SC) for rapid, trackable optimization**, then SC auto-injector, then topical gel (needle-free alternative, *not inferior*), then oral, then pellets. Safety monitoring identical across routes. Rationale: patients pay for fast, measurable optimization; injectable gives the cleanest trough-based titration while all safety gates stay on.
+
+- [x] **Approved — A. Falcon, MD (2026-07-01).** Men's TRT starting-regimen logic (addendum v0.1 + injectable-first route order) is live on the candidate path. Badge flipped to MD-signed.
 
 One thing is locked regardless: **you never appear as the prescriber** — the plan is signed by the logged-in clinic
 provider's NPI, and dosing is emitted only on the candidate-review path with all safety gates clear.
