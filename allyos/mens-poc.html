@@ -123,6 +123,25 @@
     </div>
   </details>
 
+  <details class="grpc"><summary>5 · Context labs (E2 · axis · CBC · metabolic · CMP · thyroid) — optional</summary>
+    <div class="panel">
+      <div class="labgrid">
+        <div class="fw"><label class="q">Estradiol</label><input id="e2" class="li" type="number" step="0.1" placeholder="opt"><span class="u">pg/mL (US ≤29)</span></div>
+        <div class="fw"><label class="q">LH</label><input id="lh" class="li" type="number" step="0.1" placeholder="opt"><span class="u">mIU/mL</span></div>
+        <div class="fw"><label class="q">FSH</label><input id="fsh" class="li" type="number" step="0.1" placeholder="opt"><span class="u">mIU/mL</span></div>
+        <div class="fw"><label class="q">Prolactin</label><input id="prl" class="li" type="number" step="0.1" placeholder="opt"><span class="u">ng/mL (&gt;18)</span></div>
+        <div class="fw"><label class="q">Hemoglobin</label><input id="hgb" class="li" type="number" step="0.1" placeholder="opt"><span class="u">g/dL</span></div>
+        <div class="fw"><label class="q">A1c</label><input id="a1c" class="li" type="number" step="0.1" placeholder="opt"><span class="u">% (5.7 / 6.5)</span></div>
+        <div class="fw"><label class="q">Fasting glucose</label><input id="glu" class="li" type="number" step="1" placeholder="opt"><span class="u">mg/dL</span></div>
+        <div class="fw"><label class="q">ApoB</label><input id="apob" class="li" type="number" step="1" placeholder="opt"><span class="u">mg/dL (&lt;90)</span></div>
+        <div class="fw"><label class="q">eGFR</label><input id="egfr" class="li" type="number" step="1" placeholder="opt"><span class="u">mL/min (&lt;30 defer)</span></div>
+        <div class="fw"><label class="q">ALT</label><input id="alt" class="li" type="number" step="1" placeholder="opt"><span class="u">U/L</span></div>
+        <div class="fw"><label class="q">TSH</label><input id="tsh" class="li" type="number" step="0.01" placeholder="opt"><span class="u">mIU/L (0.4–4.5)</span></div>
+      </div>
+      <div style="font-size:11px;color:var(--dim);margin-top:8px">Context / <b>yellow</b> flags — these shape the risk conversation, lifestyle plan, and monitoring cadence; they rarely block a start (<b>eGFR &lt;30 defers</b>). Standard thresholds (ADA / AHA / Quest); assay- and age-specific interpretation applies. Values stay on this device.</div>
+    </div>
+  </details>
+
   <div class="noprint"><button class="gen" onclick="generate()">▶ Generate optimization plan</button></div>
   <div class="out" id="out"></div>
 </div>
@@ -229,6 +248,12 @@ function testosteroneRx(cls){
       '<br>· <b>Estradiol — do NOT auto-suppress</b>; check if gynecomastia, breast symptoms, edema, libido issue, or aromatization risk.'+
       '<br>· <b>Fertility</b> — no exogenous T if trying to conceive without fertility-preserving review. <b>OSA</b> hold gate; <b>severe LUTS/BPH</b> review.'+
       ' <span style="color:var(--muted)">Endocrine Society 2018 · AUA TD · FDA 2025 BP labeling · HHS/FDA 2026 prostate/BPH context.</span></div>'+
+    '<div class="rx"><b>Testosterone-level timing by route</b> — do not adjust dose from a level unless timing relative to route is documented:'+
+      '<br>· Weekly IM/SQ cypionate/enanthate: <b>trough</b> (just before next dose), consistent.'+
+      '<br>· Split IM/SQ twice-weekly: trough before next injection, or a consistent midpoint.'+
+      '<br>· Topical gel: after ≥1 week of steady use, <b>2–8 h post-application</b>, consistent timing.'+
+      '<br>· Patch: <b>3–12 h after application</b>. · Pellets: end of dosing interval. · Oral undecanoate: product-specific, meal/fat-dependent — follow label.'+
+      ' <span style="color:var(--muted)">Endocrine Society 2018 monitoring table (PMID 29562364).</span></div>'+
     '<div class="rx" style="color:var(--muted);font-size:12px">Patient-specific dosing is physician-directed; formulation per the provider\'s decision &amp; pharmacy of choice — <b>compounded testosterone and pellets carry no automatic superiority</b>; do not chase the highest possible level. Not for anti-aging / fat-loss / diabetes / "all men over 40" / fatigue-without-labs. The treating provider owns the regimen and the signature.</div>';
 }
 
@@ -355,6 +380,24 @@ function generate(){
     else if(stopbang>=3) sgYellows.push('STOP-BANG '+stopbang+' (intermediate OSA risk) — evaluate.'); }
   if(ipss!=null){ if(ipss>19) sgReds.push('IPSS '+ipss+' (severe LUTS) — defer or urology evaluation.');
     else if(ipss>=8) sgYellows.push('IPSS '+ipss+' (moderate LUTS) — document/manage.'); }
+  // ---- context labs (Phase 2): yellow context flags; eGFR<30 defers ----
+  var e2=nv('e2'), lh=nv('lh'), fsh=nv('fsh'), prl=nv('prl'), hgb=nv('hgb'), a1c=nv('a1c'), glu=nv('glu'), apob=nv('apob'), egfr=nv('egfr'), alt=nv('alt'), tsh=nv('tsh');
+  if(e2!=null){ if(e2>29) sgYellows.push('Estradiol '+e2+' (&gt;29) — aromatization context; review obesity/alcohol/liver/meds. Do NOT use automatic aromatase-inhibitor protocols.');
+    else if(e2<10) sgYellows.push('Estradiol '+e2+' (low) — review AI over-use / low androgen substrate; watch bone/joint/libido.'); }
+  if(egfr!=null){ if(egfr<30) sgReds.push('eGFR '+egfr+' (&lt;30) — defer elective optimization or obtain renal/specialist review.');
+    else if(egfr<60) sgYellows.push('eGFR '+egfr+' (30–59) — review renal history/meds; monitor.'); }
+  if(a1c!=null){ if(a1c>=6.5) sgYellows.push('A1c '+a1c+'% (diabetes range) — confirm/manage; testosterone is NOT a diabetes therapy.');
+    else if(a1c>=5.7) sgYellows.push('A1c '+a1c+'% (prediabetes) — nutrition / resistance training / sleep / weight plan.'); }
+  if(glu!=null){ if(glu>=126) sgYellows.push('Fasting glucose '+glu+' (diabetes range) — confirm/manage.');
+    else if(glu>=100) sgYellows.push('Fasting glucose '+glu+' (prediabetes) — metabolic plan.'); }
+  if(apob!=null && apob>=90) sgYellows.push('ApoB '+apob+' (≥90) — atherogenic risk; manage per ASCVD risk. Testosterone is not CV therapy.');
+  if(alt!=null && alt>100) sgYellows.push('ALT '+alt+' (marked) — evaluate meds / alcohol / viral / fatty liver before aggressive optimization.');
+  if(tsh!=null && (tsh<0.4||tsh>4.5)) sgYellows.push('TSH '+tsh+' (abnormal) — thyroid changes SHBG and mimics low-T; evaluate before attributing symptoms to testosterone.');
+  if(prl!=null && prl>18) sgYellows.push('Prolactin '+prl+' (&gt;18) — repeat fasting AM, review meds/macroprolactin; marked/persistent or pituitary symptoms → endocrine evaluation before start.');
+  if(hgb!=null && hgb<13) sgYellows.push('Hemoglobin '+hgb+' (low) — evaluate anemia before attributing fatigue to low testosterone.');
+  if(deficiency && lh!=null){ if(lh>9.3) sgYellows.push('LH '+lh+' (high) with low T — <b>primary</b> (testicular) pattern.');
+    else sgYellows.push('LH '+lh+' (low/normal) with low T — <b>secondary</b> pattern; review prolactin, opioids, glucocorticoids, pituitary, prior AAS/TRT.'); }
+  if(fsh!=null && fsh>8) sgYellows.push('FSH '+fsh+' (high) — impaired-spermatogenesis context; if fertility relevant, semen analysis / fertility pathway before exogenous testosterone.');
   var sgStatus = sgReds.length?'red':(sgYellows.length?'yellow':'green');
   var dom=PHENO.filter(function(p){return (sev[p.k]||0)>0;}).sort(function(a,b){return (sev[b.k]||0)-(sev[a.k]||0);});
   var sexualOrAxis=(sev.sexual||0)>=2;
@@ -378,10 +421,10 @@ function generate(){
     +(shbg!=null?('SHBG <b>'+shbg+'</b>'+(highSHBG?' (high-ish — binds T, lowers the free fraction)':'')+'. '):'')
     +(discordant?'<b style=\"color:var(--amber)\">Discordant pattern:</b> normal total testosterone with low <i>usable</i> androgen.':'');
   // start-safety gate panel (RYG) + unit/plausibility warnings
-  var anySG = [hct,sbp,dbp,psa,stopbang,ipss].some(function(x){return x!=null;});
+  var anySG = [hct,sbp,dbp,psa,stopbang,ipss,e2,lh,fsh,prl,hgb,a1c,glu,apob,egfr,alt,tsh].some(function(x){return x!=null;});
   var sgLabel = sgStatus==='red'?'🔴 RED — resolve before any start':(sgStatus==='yellow'?'🟡 YELLOW — proceed with documentation/management':'🟢 GREEN — no start-safety flags on the entered values');
   var sgItems = sgReds.concat(sgYellows);
-  var sgHTML = anySG ? ('<div class="grp">Start-safety gate</div><div class="ryg '+sgStatus+'"><b>'+sgLabel+'</b>'+(sgItems.length?('<ul>'+sgItems.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'):'')+'<div style="font-size:11px;margin-top:8px;opacity:.85">Thresholds: Hct 48/50/54 · BP AHA · PSA &gt;4 (&gt;3 high-risk) · IPSS &gt;19 · STOP-BANG. Qualitative gates (fertility, cancer, CV/VTE) are the checkboxes above.</div></div>') : '';
+  var sgHTML = anySG ? ('<div class="grp">Start-safety &amp; context gate</div><div class="ryg '+sgStatus+'"><b>'+sgLabel+'</b>'+(sgItems.length?('<ul>'+sgItems.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'):'')+'<div style="font-size:11px;margin-top:8px;opacity:.85">Start-safety: Hct 48/50/54 · BP AHA · PSA &gt;4 (&gt;3 risk) · IPSS &gt;19 · STOP-BANG · eGFR &lt;30. Context: E2 · LH/FSH/prolactin · A1c/glucose · ApoB · ALT · TSH · Hgb. Qualitative hard stops (fertility, cancer, CV/VTE) are the checkboxes above.</div></div>') : '';
   var warnHTML = warns.length ? ('<div class="ryg yellow" style="margin-top:8px"><b>⚠ Check before deciding:</b><ul>'+warns.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>') : '';
 
   if(!dom.length){out.innerHTML='<div class="poc"><div class="elig found">Rate at least one wellness domain to generate a plan.</div></div>';return;}

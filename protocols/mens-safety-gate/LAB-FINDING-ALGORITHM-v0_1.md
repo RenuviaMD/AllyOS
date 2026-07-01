@@ -29,9 +29,19 @@ and the safety gate are collapsed.
   (nmol/L?), SHBG >250, Hct outside 20–70%, and total/free T above range (→ review exogenous androgen/AAS).
 - Qualitative hard stops (fertility, cancer, CV/VTE/HF) remain the section-2 checkboxes.
 
-## Phase 2 — BACKLOG (context depth + monitoring)
-Estradiol (≤29 ultrasensitive), LH/FSH/prolactin axis, full CBC, metabolic (A1c/glucose/lipids/ApoB), CMP,
-thyroid (TSH/FT4) as yellow-context flags; the full §10 monitoring cadence table; §11 route-specific test timing.
+## Phase 2 — BUILT (context depth + route timing)
+Collapsible "5 · Context labs" section (E2, LH, FSH, prolactin, hemoglobin, A1c, glucose, ApoB, eGFR, ALT, TSH)
+folded into the SAME Red/Yellow/Green gate as **yellow context flags** (the §12 summary):
+- E2 >29 aromatization (no auto-AI) / <10 low; A1c 5.7/6.5 & glucose 100/126; ApoB ≥90; ALT >100; TSH abnormal
+  (changes SHBG); prolactin >18; hemoglobin low (anemia differential); FSH >8 (spermatogenesis); LH primary-vs-
+  secondary with low T. **eGFR <30 = RED (defer)**; 30–59 yellow.
+- §11 **route-specific test-timing table** added to the dosing block (weekly trough · gel 2–8h · patch 3–12h ·
+  pellets end-interval · oral per label) — "do not adjust dose unless timing is documented."
+Yellow context never blocks a start (documentation/management); only reds defer. Verified by render.
+
+## Phase 2b — remaining backlog
+Optional: make context-lab thresholds individually configurable (currently standard ADA/AHA/Quest defaults);
+paste/drag client-side lab import (extract → confirm → fill).
 
 ## Citations to wire as guardrails (from §13)
 Endocrine Society/JCEM (PMID 29562364) · Quest hypogonadism lab guide · FDA testosterone class-wide labeling ·
