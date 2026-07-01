@@ -54,8 +54,9 @@
   <div class="note">Fill in the clinic's details, mark each service-line item <b>Present / Missing / N/A</b>, then <b>Download report PDF</b> for a binder-ready monthly report (sections I–VIII). <b>Only the lines this clinic offers appear</b> — set them below. Saved on this device; no PHI.</div>
 
   <div class="hdr hgrid">
-    <div><label>Clinic (legal name)</label><input id="hClinic" type="text" placeholder="Clinic legal name"></div>
+    <div><label>Clinic (legal name)</label><input id="hClinic" type="text" placeholder="e.g. Lemus Natural Medicine, Inc."></div>
     <div><label>Program / DBA</label><input id="hProgram" type="text" placeholder="DBA or program (optional)"></div>
+    <div style="grid-column:1 / -1"><label>Clinic address</label><input id="hAddr" type="text" placeholder="e.g. 395 Alhambra Circle, Suite 301, Coral Gables, FL 33134"></div>
     <div><label>Medical Director</label><input id="hMD" type="text"></div>
     <div><label>MD license</label><input id="hMDLic" type="text" value="Florida Medical License · ME 84789"></div>
     <div><label>Report date</label><input id="hMonth" type="text" placeholder="e.g. July __, 2026"></div>
@@ -113,7 +114,7 @@ function setCorr(id,f,v){corr()[id]=corr()[id]||{};corr()[id][f]=v;save(SKEY,sto
 function visibleSections(){return SECTIONS.filter(function(s){return offered[s.line];});}
 function toggleLine(k){offered[k]=!offered[k];setOffered();render();}
 var sess=(window.AllyOSAuth&&AllyOSAuth.session())||{};
-var HF=['hClinic','hProgram','hMD','hMDLic','hMonth','hRec','hStatus','dVerify','dPrac','dScope','dProto','dAdverse','dAdvNote','dBio','dBioSince','dCharts'];
+var HF=['hClinic','hProgram','hAddr','hMD','hMDLic','hMonth','hRec','hStatus','dVerify','dPrac','dScope','dProto','dAdverse','dAdvNote','dBio','dBioSince','dCharts'];
 function initHeader(){
   var h=load(HKEY,{})[cid]||{};
   document.getElementById('hClinic').value=h.hClinic||sess.clinic||'';
@@ -145,7 +146,7 @@ function parseRows(id,n){return (document.getElementById(id).value||'').split(/\
 function collectPayload(){
   var manual=document.getElementById('hStatus').value,M=0,U=0;
   visibleSections().forEach(function(sec){sec.items.forEach(function(_,i){var v=stt()[sec.k+':'+i];if(v==='missing')M++;else if(!v)U++;});});
-  var pl={clinic:document.getElementById('hClinic').value,program:document.getElementById('hProgram').value,md:document.getElementById('hMD').value,mdLicense:document.getElementById('hMDLic').value,
+  var pl={clinic:document.getElementById('hClinic').value,program:document.getElementById('hProgram').value,address:document.getElementById('hAddr').value,md:document.getElementById('hMD').value,mdLicense:document.getElementById('hMDLic').value,
     reportDate:document.getElementById('hMonth').value,rec:document.getElementById('hRec').value,overall:manual||(M>0?'Needs correction':(U>0?'Not reviewed':'Compliant')),
     verifyDate:document.getElementById('dVerify').value,scopeNote:document.getElementById('dScope').value,protocolStatus:document.getElementById('dProto').value,
     adverse:document.getElementById('dAdverse').value,adverseNote:document.getElementById('dAdvNote').value,bioVendor:document.getElementById('dBio').value,bioSince:document.getElementById('dBioSince').value,
