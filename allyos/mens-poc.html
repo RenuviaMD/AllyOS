@@ -1,8 +1,9 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Men's Hormone Optimization · Plan (DRAFT) · AllyOS · RenuviaMD®</title>
+<title>Men's Hormone Optimization · Plan · AllyOS · RenuviaMD®</title>
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="allyos-theme.css">
+<link rel="stylesheet" href="poc-print.css">
 <style>
  body.allyos{font-family:var(--fbody)}
  .top{display:flex;align-items:center;gap:14px;padding:0 20px;height:54px;background:#0a1120cc;backdrop-filter:blur(8px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
@@ -44,15 +45,21 @@
 <div class="top">
   <span class="brand"><b>Ally</b>OS</span>
   <span class="tag">Men's Hormone Optimization</span>
-  <span class="pill gold" style="font-size:9px;background:#2a2210;color:var(--amber);border:1px solid #4a3c18;border-radius:5px;padding:3px 8px">DRAFT — wellness-first, pending MD sign-off</span>
+  <span class="pill" style="font-size:9px;background:#0e2a1f;color:var(--green);border:1px solid #1e6e4a;border-radius:5px;padding:3px 8px">MD-signed dose logic · wellness-first · injectable-first</span>
   <span class="right"><a href="dashboard.html">← Dashboard</a></span>
 </div>
 <div class="wrap">
   <h1>Men's Hormone Optimization — Plan</h1>
   <p class="sub">Wellness-first. Goals trigger evaluation; testosterone is one physician-directed tool, not the program.</p>
   <div class="disc">
-    <b>Wellness optimization decision support.</b> Wellness goals qualify a man for evaluation; <b>testosterone is considered only after provider review</b> of symptoms, repeat morning testosterone pattern, fertility goals, and the safety gates. <b>No dosing here</b> — dosing belongs only in your locked provider protocol. Not a prescription; the treating provider owns and signs every decision. PHI stays on this device.
+    <b>Wellness optimization decision support.</b> Wellness goals qualify a man for evaluation; <b>testosterone is considered only after provider review</b> of symptoms, repeat morning testosterone pattern, fertility goals, and the safety gates. <b>Dosing appears only when the review reaches a candidate decision with gates clear</b> — shown as a starting regimen the provider titrates to mid-normal and signs (testosterone is a Schedule III controlled substance; prescribe under your own DEA / state authority). Not a prescription; the treating provider owns and signs every decision. PHI stays on this device.
   </div>
+
+  <div class="grp noprint">Patient (stays on this device)</div>
+  <div class="panel noprint"><div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end">
+    <div style="flex:1;min-width:200px"><label class="q" style="margin-top:0">Name or Encounter ID</label><input id="pocName" type="text" placeholder="e.g., J. Garcia or MX-4821" style="width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:9px 11px"></div>
+    <div style="min-width:150px"><label class="q" style="margin-top:0">DOB / age</label><input id="pocDob" type="text" placeholder="mm/dd/yyyy or age" style="width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:9px 11px"></div>
+  </div><div style="font-size:11px;color:var(--dim);margin-top:8px">Only printed on the document — never transmitted. AllyOS stays PHI-free on the server.</div></div>
 
   <div class="grp">1 · Wellness goals / phenotype (rate 0 none → 4 very severe)</div>
   <div class="panel" id="phenoPanel"></div>
@@ -113,7 +120,7 @@ renderPheno();renderGates();
 // ---- lab map (v0.2) ----
 var LABMAP=[
  ['Total testosterone (AM)','Baseline; repeat if low/borderline','Core androgen axis — never one random/non-morning value alone'],
- ['Free T + SHBG','Borderline / SHBG-altering context','Bioavailable androgen pattern, with symptoms'],
+ ['Free / bioavailable T · SHBG · albumin','If total T near lower-normal, or SHBG-altering context (obesity, diabetes, thyroid, aging, liver, anticonvulsants)','Free T by equilibrium dialysis or accurate calculation (needs SHBG + albumin) — reframes a borderline total T (Endocrine Society 2018, PMID 29562364)'],
  ['LH + FSH','After low T confirmed','Primary vs secondary differentiation'],
  ['Sensitive estradiol','Obesity / gynecomastia / sexual symptoms','Aromatization context — do not over-suppress'],
  ['CBC / hematocrit','Baseline; 3 mo; 6 mo; annual','Polycythemia safety'],
@@ -142,6 +149,118 @@ var CADENCE=[
 ];
 function tbl(rows,cols){return '<table><thead><tr>'+cols.map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+c+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table>';}
 
+// ---- Testosterone target/dosing/administration (RenuviaMD addendum v0.1; AUA + Endocrine 2018 + DailyMed labels) ----
+// Shown ONLY when eligibility = candidate-review (cls 'go'). Engine proposes a starting regimen;
+// provider titrates to the 450–600 ng/dL wellness target and signs. Schedule III controlled substance.
+function testosteroneRx(cls){
+  if(cls!=='go'){
+    return '<div class="rx" style="border-color:#4a3c18;background:#2a221022;color:#e0c98a"><b>Testosterone — eligibility step only; no dosing yet.</b> Resolve the eligibility path above first (fertility / safety gate / lab mapping / foundational optimization). When the provider reaches a <b>candidate decision with safety gates clear</b>, the starting regimens appear here. Blocked claims: T for energy / anti-aging / fat-loss / diabetes; "safe for everyone"; "compounded/pellets automatically superior."</div>';
+  }
+  return '<div class="grp">Testosterone — starting regimens (provider titrates &amp; signs)</div>'+
+    '<div class="rx" style="border-color:#4a3c18;background:#2a221022;color:#e6d6a8"><b>DEA Schedule III controlled substance.</b> Prescribe under the <b>treating provider\'s own DEA / state authority</b> — never the software owner\'s. <b>Goal = physiologic restoration, not enhancement.</b> Target total T <b>450–600 ng/dL preferred</b> (monitored ~450–750 if symptoms improve &amp; safety markers stay clean); <b>avoid sustained supraphysiologic levels (&gt;900–1000)</b>; use the <b>lowest effective dose &amp; route</b>. Free T to mid/upper-mid normal when SHBG is abnormal. <span style="color:var(--muted)">AUA middle tertile ≈450–600 · Endocrine Society 2018 mid-normal (PMID 29562364).</span></div>'+
+    '<div class="rx" style="border-color:#2a5a7e;background:#0e243622"><b>Preferred route order — rapid, trackable optimization</b> — (1) weekly injectable → (2) weekly SC auto-injector → (3) topical gel (needle-free alternative, <b>not inferior</b>). Selected-use: (4) oral undecanoate · (5) pellets (<b>not first-line</b>). Injectable is favored for fast, measurable optimization with clean trough-based titration; gel suits needle-averse men, higher-Hct concern, or reversibility. <b>Safety monitoring is identical across every route.</b></div>'+
+    '<div class="rx"><b>1 · Weekly injectable — cypionate or enanthate (IM or SC) <span style="color:var(--green)">(first-line — rapid optimization)</span></b>'+
+      '<br>· Label range 50–400 mg every 2–4 weeks, but for optimization <b>prefer smaller / more frequent</b>: AUA example <b>100 mg weekly</b> &gt; 200 mg q2wk &gt; 300–400 mg monthly (steadier levels, less Hct / estradiol / mood swing).'+
+      '<br>· Check <b>trough</b> total T at steady state; titrate toward the 450–600 target. Generic SC use is common but off-label; the FDA-labeled SC option is the enanthate auto-injector below.'+
+      ' <span style="color:var(--muted)">AUA TD · <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=cfbb53d4-b868-4a28-8436-f9112eb01c39" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed cypionate label ✓</a></span></div>'+
+    '<div class="rx"><b>2 · Weekly SC auto-injector — enanthate (XYOSTED)</b>'+
+      '<br>· <b>Start 75 mg subcutaneously once weekly — abdomen only</b> (strengths 50 / 75 / 100 mg); <b>trough drawn 7 days after the dose</b> (steady state ~6 wk), adjust by ±25 mg.'+
+      '<br>· Label normal-range window <b>350–650 ng/dL</b>; titrate toward the 450–600 wellness target.'+
+      ' <span style="color:var(--muted)"><a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=8a3d204c-be26-49e0-8599-0ac12a272e81" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed XYOSTED label ✓</a></span></div>'+
+    '<div class="rx"><b>3 · Topical gel <span style="color:var(--muted)">(needle-free alternative — not inferior)</span></b>'+
+      '<br>· <b>1.62% gel: start 40.5 mg once daily</b> (adjust 20.25–81 mg/day); or <b>1% gel: start 50 mg/day</b> → 75 → 100 mg. Titrate on <b>pre-dose morning T at ~14 and 28 days</b> after start/adjustment.'+
+      '<br>· Clean, dry shoulders / upper arms; wash hands; cover after drying. <b>FDA secondary-exposure warning</b> — prevent transfer to partners, children, pets.'+
+      '<br>· Best when: needle-averse, higher hematocrit concern, reversibility matters. Cons: transfer risk, variable absorption, daily adherence.'+
+      ' <span style="color:var(--muted)"><a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=f4e8d29b-8707-4d47-e053-2a95a90aecee" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed AndroGel 1.62% label ✓</a></span></div>'+
+    '<div class="rx" style="border-color:#3a4452"><b>4 · Oral testosterone undecanoate <span style="color:var(--muted)">(selected-use)</span></b>'+
+      '<br>· <b>Product-specific dosing</b> — e.g., KYZATREX 200 mg BID; JATENZO 237 mg BID; TLANDO 225 mg BID (fixed) — <b>all with food</b>. Check T <b>7 days</b> after start/adjustment, <b>3–5 h after the morning dose</b>.'+
+      '<br>· Avoids injection &amp; topical transfer. Cautions: <b>BP</b>, absorption variability, cost/access.'+
+      ' <span style="color:var(--muted)"><a href="https://dailymed.nlm.nih.gov/dailymed/search.cfm?query=testosterone+undecanoate+oral" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed oral-undecanoate labels ✓</a></span></div>'+
+    '<div class="rx" style="border-color:#3a4452"><b>5 · Pellets <span style="color:var(--amber)">(selected-use — NOT first-line)</span></b>'+
+      '<br>· 150–450 mg SC every 3–6 months. <b>Only</b> after stable response, stable safety markers, and a clear patient preference for long-duration therapy.'+
+      '<br>· Cons: low reversibility, procedure risk, extrusion / infection, hard to dose-adjust. <b>No automatic superiority.</b>'+
+      ' <span style="color:var(--muted)"><a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=a1741a0b-3d4c-42dc-880d-a06e96cce9ef" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed Testopel label ✓</a></span></div>'+
+    '<div class="rx"><b>Monitoring &amp; safety stops</b>'+
+      '<br>· Total T (target <b>450–600</b>) + <b>hematocrit</b> + symptoms at <b>baseline, 3–6 months, then annually</b>. <b>Hct &gt;54% → hold / stop / review</b> (evaluate OSA / hypoxia; restart reduced or shift to gel).'+
+      '<br>· <b>BP every visit</b> (FDA class-wide warning · TRAVERSE). <b>PSA / prostate</b> baseline when age/risk-appropriate, then monitor — do not overstate risk, do not drop monitoring.'+
+      '<br>· <b>Estradiol — do NOT auto-suppress</b>; check if gynecomastia, breast symptoms, edema, libido issue, or aromatization risk.'+
+      '<br>· <b>Fertility</b> — no exogenous T if trying to conceive without fertility-preserving review. <b>OSA</b> hold gate; <b>severe LUTS/BPH</b> review.'+
+      ' <span style="color:var(--muted)">Endocrine Society 2018 · AUA TD · FDA 2025 BP labeling · HHS/FDA 2026 prostate/BPH context.</span></div>'+
+    '<div class="rx" style="color:var(--muted);font-size:12px">Patient-specific dosing is physician-directed; formulation per the provider\'s decision &amp; pharmacy of choice — <b>compounded testosterone and pellets carry no automatic superiority</b>; do not chase the highest possible level. Not for anti-aging / fat-loss / diabetes / "all men over 40" / fatigue-without-labs. The treating provider owns the regimen and the signature.</div>';
+}
+
+// ---- Cross-line adjunct (hormone × peptide crosswalk v0.1, PubMed-verified) ----
+// Provider-review ONLY. No auto-recommendation, no dosing, no TRT-peptide synergy claim.
+// Hormone safety gates (section 2) run first; peptide gates second.
+function crosswalkBlock(){
+  var fertility=g[0];
+  var cards=[];
+  function card(fam,tier,align,opts,iv,gates,dn){
+    cards.push('<div class="rx" style="border-color:#3a3050;background:#16122422">'+
+      '<b>'+fam+'</b> <span style="font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#b9a8e0;border:1px solid #4a3c6e;border-radius:5px;padding:2px 7px;margin-left:6px">'+tier+'</span>'+
+      '<br>· Aligned with: '+align+
+      '<br>· Peptide options <i>(provider-selected)</i>: '+opts+
+      '<br>· IV/IM support if cleared: '+iv+
+      '<br>· Safety gates first: '+gates+
+      '<br><span style="color:#c98a8a">· Do not claim: '+dn+'</span></div>');
+  }
+  if((sev.energy||0)>=2) card('FAM03 · Mitochondrial / Energy','provider review',
+    'energy / recovery / longevity wellness — after fatigue differential (thyroid, OSA, anemia)',
+    'MOTS-c + SS-31 ± Epitalon ± Humanin',
+    'NAD+/NR pathway; B-complex/B12; magnesium if safe; glutathione',
+    'TRT CV/BP/hematocrit; active malignancy; renal/liver; sleep/OSA',
+    'no anti-aging guarantee; no TRT–peptide synergy; do not bypass fatigue differential');
+  if((sev.sexual||0)>=2){
+    if(fertility) card('FAM06 · Sexual / HPG','HOLD — fertility pathway first',
+      'sexual vitality WITH fertility goal — route to fertility-preserving review before any HPG peptide or TRT',
+      'No exogenous-axis suppression until reproductive review; PT-141 only after provider review',
+      'Hydration; B-complex/B12',
+      'fertility (semen analysis / reproductive urology); BP/CV; prostate/PSA',
+      'no fertility claim without specialist review; no peptide replaces evaluation');
+    else card('FAM06 · Sexual / HPG','caution — provider review only',
+      'sexual vitality / libido — not first-line ED care; vascular/metabolic review first',
+      'PT-141 / bremelanotide ± kisspeptin-10 (provider-selected)',
+      'Hydration; B-complex/B12; magnesium if renal screen clear',
+      'BP/CV; prostate/PSA; ED vascular/metabolic review; medication review; PT-141 BP/HR',
+      'no guaranteed erections/libido; no peptide replaces TRT eligibility');
+  }
+  if((sev.body||0)>=2 || (sev.cardio||0)>=2) card('FAM01 · GLP / Metabolic','provider review',
+    'body composition / metabolic longevity — protein-first, resistance training central',
+    'GLP/GIP anchor ± MOTS-c / AOD / amylin-pathway option',
+    'Hydration/electrolytes; B-complex/B12; MIC/L-carnitine; amino support',
+    'GLP GI/dehydration; TRT BP/hematocrit/prostate; lean-mass/protein; hypoglycemia meds',
+    'no TRT–GLP synergy; do not promise fat loss; protect lean mass with resistance training');
+  if((sev.recovery||0)>=2) card('FAM02 · GH / Recovery','high caution — provider review',
+    'strength / lean-mass / recovery — avoid casual stacking with TRT',
+    'Sermorelin/ipamorelin or CJC/ipamorelin ± tesamorelin',
+    'Amino blend; B-complex/B12; hydration; magnesium if renal screen clear',
+    'TRT hematocrit/BP/OSA; GH-peptide IGF-1/glucose/edema/carpal tunnel/sleep apnea; malignancy',
+    'no anabolic guarantee; no TRT+GH synergy; avoid excessive endocrine stacking');
+  if((sev.mood||0)>=2 || (sev.sleep||0)>=2) card('FAM07 · Neuro / Calm / Sleep','caution — provider review',
+    'focus / calm / sleep-quality wellness — not a psychiatric or sleep-disorder treatment',
+    'Semax + Selank ± DSIP',
+    'Neuro IV; B-complex/B12; magnesium if safe; hydration',
+    'acute neuro symptoms; psychiatric instability/suicidality; sedative/alcohol; untreated OSA',
+    'do not treat anxiety/depression/insomnia; no hormone–peptide synergy claim');
+  if(!cards.length) return '';
+  return '<div class="noprint">'+
+    '<div class="grp">Cross-line adjunct options — provider review <span style="color:#9a8fc0;letter-spacing:0;text-transform:none;font-size:10px">(screen only — not printed on the patient plan)</span></div>'+
+    '<div class="rx" style="border-color:#4a3c6e;background:#16122433;color:#cbbce6">Optional <b>provider-review-only</b> wellness adjuncts matched to this phenotype (AllyOS hormone×peptide crosswalk). <b>Not auto-recommended · not a prescription · no dosing here · no TRT–peptide synergy claim.</b> Hormone safety gates run first, peptide gates second. Consider only if clinically appropriate — the provider decides &amp; signs.</div>'+
+    cards.join('')+'</div>';
+}
+
+function docHeader(title){
+  var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};
+  var sig={};try{sig=JSON.parse(localStorage.getItem('allyos_provider_sig_v1')||'{}');}catch(e){}
+  var prov=((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||s.name||'Provider')+(s.credential?(', '+s.credential):'');
+  var lic=[sig.license,sig.npi?('NPI '+sig.npi):''].filter(Boolean).join(' · ');
+  var nm=(document.getElementById('pocName')&&document.getElementById('pocName').value)||'—';
+  var dob=(document.getElementById('pocDob')&&document.getElementById('pocDob').value)||'';
+  return '<div class="dochead"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px">'+
+    '<div><div class="lh-brand">RenuviaMD®</div><div class="lh-meta">'+esc(title||'Plan of Care')+'</div></div>'+
+    '<div class="lh-meta" style="text-align:right">'+new Date().toLocaleDateString()+'<br>Provider: '+esc(prov)+(lic?('<br>'+esc(lic)):'')+'</div></div>'+
+    '<div class="lh-meta" style="margin-top:6px">Patient: <b>'+esc(nm)+'</b>'+(dob?(' · '+esc(dob)):'')+'</div></div>';
+}
 function providerSig(){
   var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};
   var sig={};try{sig=JSON.parse(localStorage.getItem('allyos_provider_sig_v1')||'{}');}catch(e){}
@@ -168,14 +287,15 @@ function generate(){
 
   if(!dom.length){out.innerHTML='<div class="poc"><div class="elig found">Rate at least one wellness domain to generate a plan.</div></div>';return;}
   var goalLine=dom.map(function(p){return esc(p.t)+' '+(sev[p.k])+'/4';}).join(' · ');
-  out.innerHTML='<div class="poc">'+
-    '<h2>Men’s Hormone Optimization Plan — DRAFT</h2><div class="meta">Wellness-first · goals: '+goalLine+'</div>'+
+  out.innerHTML='<div class="poc">'+docHeader('Men’s Hormone Optimization Plan')+
+    '<h2>Men’s Hormone Optimization Plan</h2><div class="meta">Wellness-first · goals: '+goalLine+'</div>'+
     '<div class="grp" style="margin-top:14px">Eligibility determination</div>'+
       '<div class="elig '+cls+'">'+esc(elig)+'</div><div style="font-size:12.5px;color:var(--muted);line-height:1.55">'+why+'</div>'+
     '<div class="grp">Hormone-axis &amp; safety labs to map</div>'+tbl(LABMAP,['Lab / measure','Timing','Decision note'])+
     '<div class="grp">Foundational optimization (always attached)</div>'+tbl(FOUND,['Domain','Target / structure','Why'])+
     '<div class="grp">Monitoring &amp; visit cadence</div>'+tbl(CADENCE,['Visit','Name','Key actions'])+
-    '<div class="rx" style="border-color:#4a3c18;background:#2a221022;color:#e0c98a"><b>Testosterone:</b> eligibility only — <b>no dosing in this tool.</b> If selected after provider benefit-risk review, route to your <b>locked provider prescription protocol / standing order</b> for the regimen. Blocked claims: T for energy/anti-aging/fat-loss/diabetes; "safe for everyone"; "compounded/pellets automatically superior."</div>'+
+    testosteroneRx(cls)+
+    crosswalkBlock()+
     providerSig()+
     '<div class="noprint" style="margin-top:14px"><button class="gen" onclick="window.print()">🖨 Print / export plan</button></div>'+
   '</div>';

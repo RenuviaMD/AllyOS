@@ -1,0 +1,39 @@
+/* AllyOS Plan-of-Care export — print only the generated plan as a clean, light, branded document. */
+.dochead{display:none}
+@media print{
+  @page{ margin:16mm 14mm; }
+  body{ background:#fff !important; }
+  /* Re-map the dark theme variables for print so inline var(--ink)/var(--muted) etc.
+     resolve to dark-on-light. This fixes any text that uses inline CSS-variable colors
+     (e.g. the symptom-map domain names), which class overrides alone cannot reach. */
+  #out, .poc{
+    --ink:#1c2b32; --ink2:#1c2b32; --muted:#5b6b72; --dim:#5b6b72; --faint:#7d8b91;
+    --green:#0e6e5a; --teal:#0e8a8a; --amber:#9a6300;
+    --line:#e3ecea; --line2:#cfe3e3;
+  }
+  body *{ visibility:hidden !important; }
+  #out, #out *{ visibility:visible !important; }
+  #out{ position:absolute; left:0; top:0; width:100%; }
+  .noprint{ display:none !important; }
+  .poc{ border:none !important; background:#fff !important; color:#1c2b32 !important; padding:0 !important; box-shadow:none !important; }
+  .poc h2{ color:#0e3a40 !important; }
+  .poc .meta{ color:#5b6b72 !important; }
+  .poc .grp{ color:#0e8a8a !important; }
+  .poc .grp:after{ background:#cfe3e3 !important; }
+  .poc .rx, .poc .rxc, .poc .elig, .poc .marker{ background:#f4f9f9 !important; color:#1c2b32 !important; border-color:#cfe3e3 !important; }
+  .poc .rx b{ color:#0e6e5a !important; }
+  .poc table, .poc th, .poc td{ color:#1c2b32 !important; border-color:#e3ecea !important; }
+  .poc th{ color:#5b6b72 !important; }
+  .poc .row{ border-color:#e3ecea !important; }
+  .poc .pri.crit{ background:#fde2de !important; color:#b3261e !important; }
+  .poc .pri.high{ background:#fdeccb !important; color:#9a6300 !important; }
+  .poc .pri.mod{ background:#e4f0f7 !important; color:#1a5a8a !important; }
+  .poc .elig.go{ background:#e9f6f0 !important; color:#0c7a4d !important; border-color:#1e9e6a !important; }
+  .poc .elig.hold{ background:#fdecec !important; color:#b3261e !important; border-color:#e3a9a3 !important; }
+  .poc .elig.found{ background:#eaf2f8 !important; color:#1a5a8a !important; border-color:#bcd4e6 !important; }
+  .poc .sig{ color:#5b6b72 !important; border-color:#e3ecea !important; }
+  .poc .sig b{ color:#1c2b32 !important; }
+  .poc .dochead{ display:block !important; border-bottom:2px solid #0e8a8a; padding-bottom:10px; margin-bottom:16px; }
+  .poc .dochead .lh-brand{ font-weight:900; font-size:1.25rem; color:#0e3a40; }
+  .poc .dochead .lh-meta{ font-size:10.5px; color:#5b6b72; line-height:1.5; }
+}
