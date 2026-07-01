@@ -1,0 +1,54 @@
+{
+  "package_name": "hormone_peptide_crosswalk_package_v0_1",
+  "date_updated": "2026-06-30",
+  "scope": "Crosswalk BHRT/MHT and men\u2019s hormone optimization with peptide stack family recommendations",
+  "no_dosing_logic": true,
+  "no_regulatory_logic": true,
+  "auto_recommendation_allowed": false,
+  "provider_review_required": true,
+  "counts": {
+    "crosswalk_records": 13,
+    "selector_records": 1,
+    "guardrails": 4,
+    "validation_cases": 10,
+    "source_audit_records": 10
+  },
+  "unresolved_source_ids": [],
+  "files": [
+    {
+      "filename": "hormone_peptide_crosswalk_v0_1.csv",
+      "bytes": 7995,
+      "sha256": "380a4b0fecb0a02dd74e2502db8e82bed96db6f9dec3313d0dd5ec4b21c25791"
+    },
+    {
+      "filename": "hormone_peptide_crosswalk_v0_1.jsonl",
+      "bytes": 10858,
+      "sha256": "a395ff391d625b9b917737032174bba937b8c8bf2ef2f45198b5d79b4dfc6c15"
+    },
+    {
+      "filename": "hormone_peptide_selector_logic_v0_1.jsonl",
+      "bytes": 805,
+      "sha256": "ebb375be52d55743f3c85efef1d828ee1819dad58f2763fbc64f7c6075bb35e3"
+    },
+    {
+      "filename": "hormone_peptide_language_guardrails_v0_1.jsonl",
+      "bytes": 1278,
+      "sha256": "3ffd45a642fd3aa168da8b98e4c5ed5ede311da9067919f1404bddcd562c2be0"
+    },
+    {
+      "filename": "hormone_peptide_source_audit_v0_1.csv",
+      "bytes": 3486,
+      "sha256": "b62209ebfd3d50a2335f7fe462bc28387a57915635484ef7d53956ca14a49a45"
+    },
+    {
+      "filename": "hormone_peptide_validation_cases_v0_1.csv",
+      "bytes": 1569,
+      "sha256": "031b075de31a31605c0f1de4a1ed982de98efaa2387db0f17d1076fbe7f63529"
+    },
+    {
+      "filename": "hormone_peptide_crosswalk_report_v0_1.md",
+      "bytes": 3600,
+      "sha256": "086343703d04f7f7b4d9c2a7f9ccf18d278a2a024483cb840228aa5033961890"
+    }
+  ]
+}
