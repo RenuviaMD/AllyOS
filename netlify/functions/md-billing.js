@@ -25,11 +25,17 @@ function form(obj, prefix) {
   });
   return parts.filter(Boolean).join("&");
 }
-async function stripePost(path, params, secret) {
-  const res = await fetch("https://api.stripe.com/v1/" + path, { method: "POST", headers: { Authorization: "Bearer " + secret, "Content-Type": "application/x-www-form-urlencoded", "Stripe-Version": STRIPE_VERSION }, body: form(params) });
+async function stripePost(path, params, secret, idemKey) {
+  const headers = { Authorization: "Bearer " + secret, "Content-Type": "application/x-www-form-urlencoded", "Stripe-Version": STRIPE_VERSION };
+  if (idemKey) headers["Idempotency-Key"] = idemKey;
+  const res = await fetch("https://api.stripe.com/v1/" + path, { method: "POST", headers: headers, body: form(params) });
   const data = await res.json();
   if (!res.ok) throw new Error("stripe " + path + ": " + ((data.error && data.error.message) || res.status));
   return data;
+}
+async function stripeDelete(path, secret) {
+  const res = await fetch("https://api.stripe.com/v1/" + path, { method: "DELETE", headers: { Authorization: "Bearer " + secret, "Stripe-Version": STRIPE_VERSION } });
+  return res.ok;
 }
 async function stripeGet(path, secret) {
   const res = await fetch("https://api.stripe.com/v1/" + path, { headers: { Authorization: "Bearer " + secret, "Stripe-Version": STRIPE_VERSION } });
@@ -118,12 +124,13 @@ exports.handler = async (event) => {
       if (!clinic.md_billing_email) return json(400, { error: "no_email", hint: "Set the clinic's billing email first so Stripe can send the bill." });
 
       const customer = await ensureCustomer(clinic, key);
-      // Pending invoice items for each line (base + extras).
-      for (var i = 0; i < items.length; i++) {
-        await stripePost("invoiceitems", { customer: customer, currency: "usd", amount: items[i].cents, description: items[i].description }, key);
-      }
-      // One invoice that sweeps the pending items → emailed to the clinic (Robinhood-style),
-      // pay by BANK (ACH) or card on Stripe's hosted page.
+      // bill_key (client-generated per bill) makes the whole operation idempotent on Stripe's
+      // side — a double-click or network retry returns the SAME invoice instead of a second one.
+      const billKey = (body.bill_key || "").toString().replace(/[^\w-]/g, "").slice(0, 64) || null;
+      const idem = function (suffix) { return billKey ? "mdbill-" + billKey + suffix : undefined; };
+      // Create the DRAFT invoice FIRST, then attach every line DIRECTLY to it. Lines never sit
+      // as floating "pending" items that a later invoice could sweep (or a failed run leave
+      // behind to double-bill next month).
       const inv = await stripePost("invoices", {
         customer: customer,
         collection_method: "send_invoice",
@@ -132,9 +139,25 @@ exports.handler = async (event) => {
         metadata: { clinic_id: clinicId, type: "md_of_record" },
         payment_settings: { payment_method_types: ["us_bank_account", "card"] },
         auto_advance: true,
-      }, key);
-      const finalized = await stripePost("invoices/" + encodeURIComponent(inv.id) + "/finalize", {}, key);
-      let sent = finalized;
+        pending_invoice_items_behavior: "exclude",
+      }, key, idem(""));
+      try {
+        for (var i = 0; i < items.length; i++) {
+          await stripePost("invoiceitems", { customer: customer, invoice: inv.id, currency: "usd", amount: items[i].cents, description: items[i].description }, key, idem("-it" + i));
+        }
+      } catch (e) {
+        // A line failed — delete the draft so no partial invoice survives, then surface the error.
+        try { await stripeDelete("invoices/" + encodeURIComponent(inv.id), key); } catch (e2) {}
+        throw e;
+      }
+      let sent;
+      try {
+        sent = await stripePost("invoices/" + encodeURIComponent(inv.id) + "/finalize", {}, key);
+      } catch (e) {
+        // Idempotent retry of an already-finalized invoice — fetch it instead of failing.
+        sent = await stripeGet("invoices/" + encodeURIComponent(inv.id), key);
+        if (sent.status === "draft") throw e;
+      }
       try { sent = await stripePost("invoices/" + encodeURIComponent(inv.id) + "/send", {}, key); } catch (e) {}
       return json(200, { ok: true, number: sent.number, amount_due: money(sent.amount_due), status: sent.status, url: sent.hosted_invoice_url || null, email: clinic.md_billing_email });
     }

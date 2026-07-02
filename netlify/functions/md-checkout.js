@@ -61,6 +61,11 @@ exports.handler = async (event) => {
     // Start auto-pay: needs a fee set by the owner first.
     if (!(fee > 0)) return json(200, Object.assign({ ok: false, no_fee: true }, quote));
 
+    // Already on auto-pay -> never create a SECOND subscription (double-charges the clinic).
+    if (clinic.md_subscription_id && ["active", "trialing", "past_due"].indexOf(clinic.md_subscription_status || "") >= 0) {
+      return json(200, Object.assign({ ok: false, already_active: true }, quote));
+    }
+
     let customer = clinic.stripe_customer_id;
     if (!customer) {
       const c = await stripe("customers", { name: clinic.name || "AllyOS clinic", metadata: { clinic_id: clinicId } }, key);

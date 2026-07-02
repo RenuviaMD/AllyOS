@@ -220,8 +220,11 @@ function applyLinesRemote(newLines){
 function startCheckout(k){
   var cid=billClinicId();
   if(!cid){alert('Sign in to your clinic to subscribe.');return;}
-  if(k)setLine(k,true);                       // reflect the line you're adding
-  var n=Math.max(1,Math.min(3,activeCount()));
+  // The line being added stays LOCKED until payment completes — it's stashed as pending
+  // and only unlocked on the billing=success return. Abandoned checkout = nothing changes.
+  var adding=(k&&!lines()[k])?1:0;
+  try{if(k)sessionStorage.setItem('allyos_pending_line',k);else sessionStorage.removeItem('allyos_pending_line');}catch(e){}
+  var n=Math.max(1,Math.min(3,activeCount()+adding));
   closeOv();
   AllyOSCloud.postAuthed('/.netlify/functions/billing-checkout',{clinic_id:cid,quantity:n})
     .then(function(r){return r.json();})
@@ -252,7 +255,11 @@ function openBilling(){
     })
     .catch(function(){alert('Could not reach billing right now.');});
 }
-if(location.search.indexOf('billing=success')>=0){setTimeout(function(){alert('✓ Subscription started — thank you. Manage it any time under the Billing tool.');},300);}
+if(location.search.indexOf('billing=success')>=0){
+  // Payment confirmed — NOW unlock the line that was pending through checkout.
+  try{var pk=sessionStorage.getItem('allyos_pending_line');if(pk){setLine(pk,true);sessionStorage.removeItem('allyos_pending_line');}}catch(e){}
+  setTimeout(function(){alert('✓ Subscription started — thank you. Manage it any time under the Billing tool.');},300);
+}
 
 // ---- Monthly bulletin (owner-curated, INFO ONLY — never changes protocols) ----
 function renderBulletin(){
