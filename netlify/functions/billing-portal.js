@@ -24,6 +24,12 @@ async function stripe(path, params, secret) {
   if (!res.ok) throw new Error("stripe " + path + ": " + ((data.error && data.error.message) || res.status));
   return data;
 }
+async function stripeGet(path, secret) {
+  const res = await fetch("https://api.stripe.com/v1/" + path, { headers: { Authorization: "Bearer " + secret, "Stripe-Version": STRIPE_VERSION } });
+  const data = await res.json();
+  if (!res.ok) throw new Error("stripe GET " + path + ": " + ((data.error && data.error.message) || res.status));
+  return data;
+}
 function sbHeaders() { const k = process.env.SUPABASE_SERVICE_ROLE_KEY; return { apikey: k, Authorization: "Bearer " + k, "Content-Type": "application/json" }; }
 function sbUrl() { return (process.env.SUPABASE_URL || "").replace(/\/$/, ""); }
 async function sbGet(query) { const res = await fetch(sbUrl() + "/rest/v1/" + query, { headers: sbHeaders() }); return res.ok ? res.json() : []; }
@@ -43,7 +49,12 @@ exports.handler = async (event) => {
   try {
     const rows = await sbGet("clinics?id=eq." + encodeURIComponent(clinicId) + "&select=stripe_customer_id");
     const clinic = rows[0];
-    if (!clinic || !clinic.stripe_customer_id) return json(400, { error: "no_customer" });
+    if (!clinic || !clinic.stripe_customer_id) return json(200, { ok: false, needs_checkout: true });
+    // A customer can exist with NO subscription (e.g. abandoned checkout) — the portal would be
+    // empty. Only send them to the portal if there's something to manage; else route to checkout.
+    const subs = await stripeGet("subscriptions?customer=" + encodeURIComponent(clinic.stripe_customer_id) + "&status=all&limit=5", key);
+    const hasSub = (subs.data || []).some(function (s) { return ["active", "trialing", "past_due", "unpaid"].indexOf(s.status) >= 0; });
+    if (!hasSub) return json(200, { ok: false, needs_checkout: true });
     const site = siteOf(event);
     const ps = await stripe("billing_portal/sessions", { customer: clinic.stripe_customer_id, return_url: site + "/allyos/dashboard.html" }, key);
     return json(200, { url: ps.url });
