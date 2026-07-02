@@ -3,7 +3,7 @@ import type { YesNo } from "../lib/types";
 
 export function Section(props: { num: number; title: string; tag: string; children: ReactNode; readOnly?: boolean }) {
   return (
-    <div className={`section${props.readOnly ? " readonly" : ""}`}>
+    <div id={`section-${props.num}`} className={`section${props.readOnly ? " readonly" : ""}`}>
       <div className="section-head">
         <span className="section-num">{props.num}</span>
         <span className="section-title">{props.title}</span>

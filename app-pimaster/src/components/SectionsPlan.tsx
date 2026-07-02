@@ -232,6 +232,14 @@ export function Section9ImagingReview({ form, patch, readOnly }: SectionProps) {
       >
         📄 {i.name}
         <span className={`badge${i.reviewed ? " reviewed" : ""}`}>{badge}</span>
+        <button
+          type="button"
+          className="btn ghost"
+          style={{ marginLeft: "auto", padding: "2px 8px" }}
+          onClick={() => setReviewed(i.name, !i.reviewed)}
+        >
+          {i.reviewed ? "Undo" : "Mark reviewed"}
+        </button>
       </div>
     ));
   }

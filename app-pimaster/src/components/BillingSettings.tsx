@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { billableCpts, loadBillingSettings, saveBillingSettings, type BillingSettings } from "../lib/billing";
 import { loadImagingConfig, type ImagingConfig, type ImagingMode } from "../lib/imaging";
 import { saveClinicBilling, saveImagingConfigCloud, syncBillingFromCloud, upsertServiceCatalog } from "../lib/store";
@@ -17,17 +17,24 @@ export function BillingSettingsCard(props: { onClose: () => void }) {
       .catch(() => {});
   }, []);
 
+  // One cloud write per pause in typing, not per keystroke
+  const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  function debounced(key: string, fn: () => void, ms = 700) {
+    clearTimeout(timers.current[key]);
+    timers.current[key] = setTimeout(fn, ms);
+  }
+
   function updateImg(partial: Partial<ImagingConfig>) {
     const next = { ...img, ...partial };
     setImg(next);
-    saveImagingConfigCloud(next).catch(() => {});
+    debounced("imaging", () => saveImagingConfigCloud(next).catch(() => {}));
   }
 
   function update(partial: Partial<BillingSettings>) {
     const next = { ...s, ...partial };
     setS(next);
     saveBillingSettings(next);
-    saveClinicBilling({ ein: next.ein, billing_npi: next.billingNpi, rendering_npi: next.renderingNpi }).catch(() => {});
+    debounced("identity", () => saveClinicBilling({ ein: next.ein, billing_npi: next.billingNpi, rendering_npi: next.renderingNpi }).catch(() => {}));
   }
 
   function setFee(cpt: string, charge: string) {
@@ -35,18 +42,20 @@ export function BillingSettingsCard(props: { onClose: () => void }) {
     setS(next);
     saveBillingSettings(next);
     const item = billableCpts().find((c) => c.cpt === cpt);
-    upsertServiceCatalog({
-      cpt,
-      name: item?.name ?? cpt,
-      category: cpt.startsWith("99") ? "em" : "pt",
-      default_units: 1,
-      charge: charge || null,
-      active: true,
-    }).catch(() => {});
+    debounced(`fee-${cpt}`, () =>
+      upsertServiceCatalog({
+        cpt,
+        name: item?.name ?? cpt,
+        category: cpt.startsWith("99") ? "em" : "pt",
+        default_units: 1,
+        charge: charge || null,
+        active: true,
+      }).catch(() => {}),
+    );
   }
 
   return (
-    <div className="modal-back" onClick={props.onClose}>
+    <div className="modal-back">
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <Section num={0} title="Billing Settings" tag="Used by Superbill & CMS-1500">
           <p className="status">

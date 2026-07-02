@@ -13,6 +13,7 @@ const MODE_LABELS: Record<string, string> = {
 export function ReportsArchive(props: { onClose: () => void }) {
   const [reports, setReports] = useState<SavedReport[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     listReports()
@@ -38,6 +39,12 @@ export function ReportsArchive(props: { onClose: () => void }) {
         {!reports && !error && <p className="status">Loading…</p>}
         {reports && reports.length === 0 && <p className="status">No reports yet.</p>}
         {reports && reports.length > 0 && (
+          <div className="field" style={{ marginBottom: 10 }}>
+            <label>Filter by patient</label>
+            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Start typing a name…" />
+          </div>
+        )}
+        {reports && reports.length > 0 && (
           <table className="rom-table">
             <thead>
               <tr>
@@ -48,7 +55,9 @@ export function ReportsArchive(props: { onClose: () => void }) {
               </tr>
             </thead>
             <tbody>
-              {reports.map((r) => (
+              {reports
+                .filter((r) => !query.trim() || r.patient_label.toLowerCase().includes(query.trim().toLowerCase()))
+                .map((r) => (
                 <tr key={r.id}>
                   <td>{r.dos}</td>
                   <td>{MODE_LABELS[r.mode] ?? r.mode}</td>

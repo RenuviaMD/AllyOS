@@ -102,7 +102,7 @@ export function CatalogPage(props: { onClose: () => void }) {
   );
 
   return (
-    <div className="modal-back" onClick={props.onClose}>
+    <div className="modal-back">
       <div className="modal" style={{ width: "min(860px, 94vw)" }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
           <h2 style={{ margin: 0, color: "var(--gold)" }}>Clinic Catalogs</h2>

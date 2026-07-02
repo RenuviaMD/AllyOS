@@ -102,6 +102,15 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth?.userId, views.join(",")]);
 
+  function jumpToIssue(issue: string) {
+    const m = issue.match(/Section (\d+)/);
+    const el = m && document.getElementById(`section-${m[1]}`);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    el.classList.add("flash");
+    setTimeout(() => el.classList.remove("flash"), 1600);
+  }
+
   async function doChangePassword() {
     const pw = prompt("New password (min 8 characters):");
     if (!pw) return;
@@ -250,7 +259,8 @@ export default function App() {
   }
 
   function newVisit() {
-    if (!confirm("Start a new blank visit? The current draft will be replaced.")) return;
+    const who = `${form.patient.firstName} ${form.patient.lastName}`.trim();
+    if (!confirm(`Start a new blank visit?${who ? ` The unsaved draft for ${who} will be replaced.` : " The current draft will be replaced."}`)) return;
     setForm(emptyForm());
   }
 
@@ -276,27 +286,57 @@ export default function App() {
           <span className="brand-title">PI MASTER™</span>
           <span className="brand-sub">by RenuviaMD® Network — {CLINIC.name}</span>
         </div>
-        <div className="seg">
-          {(Object.keys(VISIT_LABELS) as VisitType[]).map((v) => (
-            <button key={v} className={vt === v ? "active" : ""} onClick={() => setVisitType(v)}>
-              {VISIT_LABELS[v]}
-            </button>
-          ))}
+        <div className="seg-wrap">
+          <span className="seg-label">Visit type</span>
+          <div className="seg">
+            {(Object.keys(VISIT_LABELS) as VisitType[]).map((v) => (
+              <button key={v} className={vt === v ? "active" : ""} onClick={() => setVisitType(v)}>
+                {VISIT_LABELS[v]}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="seg">
-          {(Object.keys(MODE_LABELS) as VisitMode[]).map((v) => (
-            <button key={v} className={form.visitMode === v ? "active" : ""} onClick={() => setVisitMode(v)}>
-              {MODE_LABELS[v]}
-            </button>
-          ))}
+        <div className="seg-wrap">
+          <span className="seg-label">Modality</span>
+          <div className="seg">
+            {(Object.keys(MODE_LABELS) as VisitMode[]).map((v) => (
+              <button key={v} className={form.visitMode === v ? "active" : ""} onClick={() => setVisitMode(v)}>
+                {MODE_LABELS[v]}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="chip">
+          <b>{`${form.patient.firstName} ${form.patient.lastName}`.trim() || "No patient yet"}</b>
+          <span className="status">DOS</span>
+          <input
+            type="date"
+            value={form.visitDate}
+            onChange={(e) => setForm((f) => ({ ...f, visitDate: e.target.value }))}
+          />
+          {form.visitDate !== new Date().toISOString().slice(0, 10) && (
+            <>
+              <span className="stale">≠ today</span>
+              <button
+                className="btn ghost"
+                style={{ padding: "2px 8px" }}
+                onClick={() => setForm((f) => ({ ...f, visitDate: new Date().toISOString().slice(0, 10) }))}
+              >
+                Set today
+              </button>
+            </>
+          )}
         </div>
         <div className="spacer" />
-        <div className="seg">
-          {views.map((r) => (
-            <button key={r} className={role === r ? "active" : ""} onClick={() => chooseRole(r)}>
-              {ROLE_LABELS[r]}
-            </button>
-          ))}
+        <div className="seg-wrap">
+          <span className="seg-label">Viewing as</span>
+          <div className="seg">
+            {views.map((r) => (
+              <button key={r} className={role === r ? "active" : ""} onClick={() => chooseRole(r)}>
+                {ROLE_LABELS[r]}
+              </button>
+            ))}
+          </div>
         </div>
         <span className={`status ${saveState === "cloud" ? "ok" : saveState === "local" ? "warn" : ""}`}>
           {saveState === "saving" && "Saving…"}
@@ -326,21 +366,6 @@ export default function App() {
         {show.s10 && <Section10Discharge form={form} patch={patch} />}
         {show.s11 && <Section11PtDaily form={form} patch={patch} />}
         {show.s12 && <Section12PtWeekly form={form} patch={patch} />}
-
-        {auditIssues.length > 0 && (
-          <div className="section" style={{ borderColor: "var(--warning)" }}>
-            <div className="section-head">
-              <span className="section-title">Note Audit</span>
-            </div>
-            <div className="section-body">
-              <ul className="dx-list">
-                {auditIssues.map((i) => (
-                  <li key={i}>{i}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )}
 
         <div className="toolbar">
           {role === "physician" && (
@@ -401,6 +426,23 @@ export default function App() {
           </button>
           <span className="status">{genState}</span>
         </div>
+
+        {auditIssues.length > 0 && (
+          <div className="section" style={{ borderColor: "var(--warning)", marginBottom: 60 }}>
+            <div className="section-head">
+              <span className="section-title">Note Audit — tap an item to jump to it</span>
+            </div>
+            <div className="section-body">
+              <ul className="dx-list">
+                {auditIssues.map((i) => (
+                  <li key={i} className="audit-item" onClick={() => jumpToIssue(i)}>
+                    {i}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
       </main>
 
       {showArchive && <ReportsArchive onClose={() => setShowArchive(false)} />}

@@ -122,6 +122,46 @@ export function Section5Exam({ form, patch }: SectionProps) {
     patch("jointTenderness", { [regionId]: { ...cur, [side]: value } });
   }
 
+  /** One-tap normal: every maneuver in the region WNL; hands-on findings "Absent" when in person. */
+  function markRegionNormal(region: (typeof EXAM_REGIONS)[number]) {
+    const rom: Record<string, RomGrade> = {};
+    for (const mv of region.maneuvers) rom[mv.id] = "wnl";
+    patch("romExam", rom);
+    if (region.kind === "joint" && !telehealth) {
+      patch("jointTenderness", { [region.id]: { R: "no", L: "no" } });
+    }
+    if (region.kind === "spine" && (SPINE_REGION_IDS as readonly string[]).includes(region.id)) {
+      const id = region.id as (typeof SPINE_REGION_IDS)[number];
+      patch("spineExam", {
+        [id]: telehealth
+          ? { ...form.spineExam[id], rom: "wnl" }
+          : { tenderness: "no", spasm: "no", rom: "wnl" },
+      });
+    }
+  }
+
+  function markEntireExamNormal() {
+    const rom: Record<string, RomGrade> = {};
+    for (const region of EXAM_REGIONS) for (const mv of region.maneuvers) rom[mv.id] = "wnl";
+    patch("romExam", rom);
+    if (!telehealth) {
+      const jt: Record<string, { R: YesNo; L: YesNo }> = {};
+      for (const region of JOINT_REGIONS) jt[region.id] = { R: "no", L: "no" };
+      patch("jointTenderness", jt);
+      patch("spineExam", {
+        cervical: { tenderness: "no", spasm: "no", rom: "wnl" },
+        thoracic: { tenderness: "no", spasm: "no", rom: "wnl" },
+        lumbar: { tenderness: "no", spasm: "no", rom: "wnl" },
+      });
+    } else {
+      patch("spineExam", {
+        cervical: { ...form.spineExam.cervical, rom: "wnl" },
+        thoracic: { ...form.spineExam.thoracic, rom: "wnl" },
+        lumbar: { ...form.spineExam.lumbar, rom: "wnl" },
+      });
+    }
+  }
+
   const spineRegions = EXAM_REGIONS.filter((r) => r.kind === "spine");
 
   return (
@@ -136,6 +176,12 @@ export function Section5Exam({ form, patch }: SectionProps) {
           functional limitation only — normal values are reference ranges, not measurements.
         </p>
       )}
+
+      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+        <button type="button" className="bulk-btn" onClick={markEntireExamNormal}>
+          ✓ Mark entire exam normal — then change only abnormal findings
+        </button>
+      </div>
 
       <h3 className="exam-h">Spine Examination</h3>
       <table className="rom-table" style={{ marginBottom: 14 }}>
@@ -171,11 +217,16 @@ export function Section5Exam({ form, patch }: SectionProps) {
 
       {spineRegions.map((region) => (
         <div key={region.id} style={{ marginBottom: 14 }}>
-          <h3 className="exam-h">{region.label} — Functional Maneuvers</h3>
+          <h3 className="exam-h">
+            {region.label} — Functional Maneuvers{" "}
+            <button type="button" className="bulk-btn" style={{ marginLeft: 8 }} onClick={() => markRegionNormal(region)}>
+              All WNL
+            </button>
+          </h3>
           {region.maneuvers.map((mv) => (
             <div key={mv.id} className="maneuver-row">
               <div className="maneuver-info">
-                <span className="maneuver-name">{mv.icon} {mv.label}</span>
+                <span className="maneuver-name">{mv.label}</span>
                 <span className="maneuver-script">“{mv.script}”</span>
                 <span className="maneuver-normal">Normal: {mv.normalLabel}</span>
               </div>
@@ -190,6 +241,9 @@ export function Section5Exam({ form, patch }: SectionProps) {
         <div key={region.id} style={{ marginBottom: 14 }}>
           <div className="joint-head">
             <span className="maneuver-name">{region.label}</span>
+            <button type="button" className="bulk-btn" onClick={() => markRegionNormal(region)}>
+              All WNL
+            </button>
             {!telehealth && (
               <>
                 <TendernessToggle
@@ -208,7 +262,7 @@ export function Section5Exam({ form, patch }: SectionProps) {
           {region.maneuvers.map((mv) => (
             <div key={mv.id} className="maneuver-row">
               <div className="maneuver-info">
-                <span className="maneuver-name">{mv.icon} {mv.label}</span>
+                <span className="maneuver-name">{mv.label}</span>
                 <span className="maneuver-script">“{mv.script}”</span>
                 <span className="maneuver-normal">Normal: {mv.normalLabel}</span>
               </div>

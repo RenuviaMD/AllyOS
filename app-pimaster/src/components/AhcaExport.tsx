@@ -99,7 +99,7 @@ export function AhcaExportPage(props: { onClose: () => void }) {
   }
 
   return (
-    <div className="modal-back" onClick={props.onClose}>
+    <div className="modal-back">
       <div className="modal" style={{ width: "min(1040px, 97vw)" }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8, flexWrap: "wrap" }}>
           <h2 style={{ margin: 0, color: "var(--gold)" }}>Encounter Export — Last 30 Days</h2>

@@ -397,14 +397,24 @@ export function buildPtReportHtml(form: VisitForm, kind: "ptdaily" | "ptprogress
   return wrap(`PT Note — ${form.patient.lastName}`, b + signature());
 }
 
-/** Open a print window for the generated HTML (print → Save as PDF). */
-export function printHtml(html: string): void {
+/** Open a print window for the generated HTML (print → Save as PDF).
+ * Popup blockers (default on iPad Safari) silently kill window.open —
+ * surface that instead of failing quietly. Returns false when blocked. */
+export function printHtml(html: string): boolean {
   const w = window.open("", "_blank");
-  if (!w) return;
+  if (!w) {
+    const note = document.createElement("div");
+    note.className = "popup-note";
+    note.textContent = "The document window was blocked. Allow pop-ups for this site, then click the button again.";
+    document.body.appendChild(note);
+    setTimeout(() => note.remove(), 7000);
+    return false;
+  }
   w.document.write(html);
   w.document.close();
   w.focus();
   setTimeout(() => w.print(), 300);
+  return true;
 }
 
 /** The stored signed report, or a freshly built note from the saved form data. */
