@@ -130,7 +130,9 @@ function render(){
                    :'<span class="chip locked">Locked</span>';
     return '<div class="line '+(active?'active':'locked')+'" onclick="lineClick(\''+L.k+'\')">'+chip+
       '<div class="ic">'+L.ic+'</div><h3>'+esc(L.name)+'</h3><p>'+esc(L.short)+'</p>'+
-      (active?'':'<div class="lockrow">🔒 Add this line · <b>+$'+(planTotal(Math.min(3,activeCount()+1))-planTotal(activeCount()))+'/mo</b></div>')+'</div>';
+      (active
+        ?'<div style="margin-top:10px;font-size:.74rem"><span onclick="event.stopPropagation();manageLine(\''+L.k+'\')" style="cursor:pointer;color:var(--teal)">⚙ Manage / remove line</span></div>'
+        :'<div class="lockrow">🔒 Add this line · <b>+$'+(planTotal(Math.min(3,activeCount()+1))-planTotal(activeCount()))+'/mo</b></div>')+'</div>';
   }).join('');
   // Lean clinic toolset. AllyOS = decision-support (+ real-time IV charting), NOT practice management.
   // Drip is auto-calculated and inventory is a stock-confirm gate INSIDE the nursing station — no tiles.
@@ -180,6 +182,41 @@ function planTotal(n){n=Math.max(0,Math.min(3,n));return BUNDLE[n];}
 function marginalAdd(){var n=activeCount();return planTotal(Math.min(3,n+1))-planTotal(n);}
 function firstLockedLine(){var on=lines();for(var i=0;i<LINES.length;i++){if(!on[LINES[i].k])return LINES[i].k;}return null;}
 function addLinePrompt(){var k=firstLockedLine();if(k){popup(k,false);}else{alert('All three lines are already active. Use Manage plan to review your billing.');}}
+var VALID_LINES=['iv','peptides','bhrt'];
+function currentLines(){var l=lines();return VALID_LINES.filter(function(k){return l[k];});}
+// Manage an ACTIVE line: open its tool, or remove it (in-place downgrade via billing-update — no redirect).
+function manageLine(k){var L=byKey(k);var after=currentLines().filter(function(x){return x!==k;});var m=Math.max(1,after.length);
+  document.getElementById('card').innerHTML='<div class="ic">'+L.ic+'</div><h3>'+esc(L.name)+'</h3>'+
+    '<p>Open this line, or remove it from your plan for this billing cycle.</p>'+
+    '<a class="btn go" href="'+L.tool+'">Open '+esc(L.name)+'</a>'+
+    (after.length>=1
+      ? '<button class="btn ghost" onclick="removeLine(\''+k+'\')">Remove this line → <b>$'+planTotal(m)+'/mo</b></button>'
+      : '<div class="ev" style="margin-top:8px">This is your only active line. To stop entirely, use <a href="#" onclick="openPortal();return false" style="color:var(--teal)">Manage plan → cancel</a>.</div>')+
+    '<button class="btn ghost" onclick="closeOv()">Close</button>';
+  document.getElementById('ov').classList.add('show');
+}
+function removeLine(k){var after=currentLines().filter(function(x){return x!==k;});
+  if(after.length<1){alert('Keep at least one line. To stop entirely, use Manage plan → cancel.');return;}
+  applyLinesRemote(after);
+}
+// Set the clinic's active-line set. Existing subscription → in-place change (billing-update, prorated,
+// no redirect). First-timer (no sub yet) → first checkout. Demo / billing-off → apply locally.
+function applyLinesRemote(newLines){
+  var cid=billClinicId();
+  var applyLocal=function(){var set={};VALID_LINES.forEach(function(k){set[k]=newLines.indexOf(k)>=0;});try{localStorage.setItem(LKEY,JSON.stringify(set));}catch(e){}closeOv();render();};
+  if(isDemo()||!cid){applyLocal();return;}
+  fetch('/.netlify/functions/billing-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clinic_id:cid,lines:newLines})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d&&d.error==='not_configured'){applyLocal();return;}           // billing not switched on → local only
+      if(d&&d.needs_checkout){closeOv();startCheckout();return;}         // no subscription yet → first checkout
+      if(d&&d.ok){applyLocal();
+        var tail=d.direction==='downgrade'?' — the credit is prorated to your next invoice.':(d.direction==='upgrade'?' — prorated on your next invoice.':'.');
+        setTimeout(function(){alert('✓ Plan updated: '+d.quantity+' line'+(d.quantity>1?'s':'')+' = $'+d.monthly+'/mo'+tail);},180);return;}
+      alert('Could not update the plan right now — please try again.');
+    })
+    .catch(function(){alert('Could not reach billing right now.');});
+}
 function startCheckout(k){
   var cid=billClinicId();
   if(!cid){alert('Sign in to your clinic to subscribe.');return;}
