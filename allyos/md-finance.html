@@ -1,0 +1,160 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Medical Director Finance — RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
+<link rel="stylesheet" href="allyos-theme.css">
+<script src="allyos-auth.js"></script>
+<style>
+.wrap{max-width:1080px;margin:0 auto;padding:22px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+.kick{font-size:.66rem;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);font-weight:700}
+h1{font-family:var(--fdisp);font-size:1.6rem;margin-top:2px}
+.who{font-size:.8rem;color:var(--muted);margin-top:3px}
+.top .r{text-align:right;font-size:.82rem}.top .r a{color:var(--teal);text-decoration:none}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+@media(max-width:640px){.kpis{grid-template-columns:1fr}}
+.kpi{background:linear-gradient(180deg,#10202f,#0b1622);border:1px solid var(--line);border-radius:13px;padding:15px 16px}
+.kpi .l{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.kpi .v{font-family:var(--fdisp);font-size:1.7rem;margin-top:5px}.kpi.green .v{color:var(--green)}.kpi.gold .v{color:var(--gold)}.kpi.teal .v{color:var(--teal)}
+.card{background:linear-gradient(180deg,#101f2c,#0b1521);border:1px solid var(--line2);border-radius:15px;padding:16px 18px;margin-bottom:12px}
+.crow{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.cname{font-family:var(--fdisp);font-size:1.06rem}
+.tag{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 8px;border-radius:20px;border:1px solid var(--line2);color:var(--muted)}
+.tag.acha{background:#2a1330;color:#e59be5;border-color:#5a2f5a}.tag.pi{background:#31220e;color:var(--gold);border-color:#4a3c18}
+.tag.np{background:#0e2a1d;color:var(--green);border-color:#1c5238}.tag.ally{background:#0f2830;color:var(--teal);border-color:#1c4763}
+.fee{font-family:var(--fdisp);color:var(--gold)}
+.pill{font-size:.62rem;font-weight:700;padding:2px 9px;border-radius:20px}
+.pill.on{background:#0e2a1d;color:var(--green);border:1px solid #1c5238}.pill.off{background:#1a222b;color:var(--muted);border:1px solid var(--line2)}
+.btn{font-family:var(--fdisp);font-weight:600;border:none;border-radius:10px;padding:8px 14px;font-size:.82rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn.go{background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a}
+.btn.ghost{background:transparent;border:1px solid var(--line2);color:var(--ink)}
+.btn.gold{background:linear-gradient(120deg,var(--gold),#caa23e);color:#241a05}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.mback{position:fixed;inset:0;background:rgba(4,7,13,.8);display:none;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto;z-index:60}
+.mback.on{display:flex}
+.msheet{background:linear-gradient(180deg,#101f2c,#0b1521);border:1px solid var(--line2);border-radius:16px;padding:20px 22px;max-width:480px;width:100%}
+.msheet h2{font-family:var(--fdisp);font-size:1.15rem;margin-bottom:3px}.msheet .sub{font-size:.76rem;color:var(--muted);margin-bottom:14px}
+.fld{margin-bottom:12px}.fld label{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:5px}
+.fld input,.fld select{width:100%;background:#0c1925;border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--ink);font-size:.9rem}
+.lineitem{display:flex;gap:8px;margin-bottom:8px}.lineitem input.desc{flex:1}.lineitem input.amt{width:110px}.lineitem .rm{background:none;border:1px solid var(--line2);color:var(--muted);border-radius:8px;padding:0 10px;cursor:pointer}
+.tot{display:flex;justify-content:space-between;align-items:center;margin:10px 0 4px;font-size:.95rem}.tot b{font-family:var(--fdisp);color:var(--gold);font-size:1.2rem}
+.mrow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px}
+.msg{font-size:.76rem;color:var(--green)}
+.inv{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid var(--line);font-size:.82rem}
+.inv:first-child{border-top:none}
+.st{font-size:.62rem;font-weight:700;padding:1px 8px;border-radius:20px}
+.st.paid{background:#0e2a1d;color:var(--green)}.st.open{background:#31220e;color:var(--gold)}.st.other{background:#1a222b;color:var(--muted)}
+.disc{font-size:.72rem;color:var(--muted);margin-top:18px;line-height:1.6}
+</style></head>
+<body class="allyos"><div class="wrap">
+  <div class="top">
+    <div>
+      <div class="kick">RenuviaMD® · Medical Director Finance</div>
+      <h1>Governance billing</h1>
+      <div class="who" id="who">Every clinic you supervise — one place to bill and track. Billed by bank/ACH, separate from AllyOS.</div>
+    </div>
+    <div class="r"><div id="whoR" style="color:var(--ink)"></div><div style="margin-top:4px"><a href="clinic-network.html">← Cockpit</a> &nbsp;·&nbsp; <a href="#" onclick="if(window.AllyOSAuth)AllyOSAuth.signOut();return false" style="color:var(--muted)">Logout</a></div></div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi teal"><div class="l">🏥 Governed clinics</div><div class="v" id="kClinics">—</div></div>
+    <div class="kpi gold"><div class="l">$ Monthly recurring</div><div class="v" id="kMrr">—</div></div>
+    <div class="kpi green"><div class="l">🏦 Paid by bank</div><div class="v" id="kBank">—</div></div>
+  </div>
+
+  <div id="list"><div class="card" style="color:var(--muted)">Loading clinics…</div></div>
+
+  <div class="disc">Statements are emailed by Stripe (pay by bank / ACH — ~$5 fee, not card %). This is your Medical-Director revenue, kept separate from the AllyOS software subscription. Fees are complexity-based and set per clinic; one-off extras are added per bill.</div>
+</div>
+
+<!-- Set fee modal -->
+<div class="mback" id="feeBack"><div class="msheet">
+  <h2>Set clinic fee</h2><div class="sub" id="feeName"></div>
+  <div class="fld"><label>Clinic name</label><input id="fName"></div>
+  <div class="fld"><label>Governance type</label>
+    <select id="fType"><option value="">— none —</option><option value="acha">ACHA (medical director of record)</option><option value="pi">Personal injury</option><option value="np">NP / PA supervision</option><option value="ally">AllyOS clinic</option></select></div>
+  <div class="fld"><label>Base monthly fee ($)</label><input id="fFee" type="number" min="0" step="1" placeholder="1850"></div>
+  <div class="fld"><label>Billing email (where the statement goes)</label><input id="fEmail" type="email" placeholder="billing@clinic.com"></div>
+  <div class="mrow"><span class="msg" id="feeMsg"></span><div><button class="btn ghost" onclick="closeFee()">Cancel</button> <button class="btn go" onclick="saveFee()">Save</button></div></div>
+</div></div>
+
+<!-- Bill modal -->
+<div class="mback" id="billBack"><div class="msheet">
+  <h2>Bill this clinic</h2><div class="sub" id="billName"></div>
+  <div id="lines"></div>
+  <button class="btn ghost" style="font-size:.78rem;padding:6px 12px" onclick="addLine('',' ')">+ Add extra charge</button>
+  <div class="tot">Total this bill <b id="billTot">$0</b></div>
+  <div class="fld" style="margin-top:8px"><label>Due in (days)</label><input id="bDue" type="number" min="1" max="60" value="15"></div>
+  <div style="font-size:.72rem;color:var(--muted)">Stripe emails the statement to the clinic with a “pay by bank” button — like a card bill. You’ll see it here as Paid once they pay.</div>
+  <div class="mrow"><span class="msg" id="billMsg"></span><div><button class="btn ghost" onclick="closeBill()">Cancel</button> <button class="btn gold" onclick="sendBill()">Send bill →</button></div></div>
+</div></div>
+
+<script>
+var ses=null;
+if(window.AllyOSAuth){AllyOSAuth.guard(['admin','provider']);ses=AllyOSAuth.session();
+  if(ses&&!ses.mdAudit){document.documentElement.innerHTML='<body style="font-family:system-ui;background:#05080f;color:#eaf1f6;display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center;padding:24px"><div><h2>Medical Director only</h2><p style="color:#90a3b6">This is the Medical Director finance console.</p><p style="margin-top:12px"><a style="color:#2ee6d6" href="dashboard.html">← Dashboard</a></p></div></body>';}
+  if(ses){var wr=document.getElementById('whoR');if(wr)wr.textContent=AllyOSAuth.greeting();}
+}
+function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function money(n){return '$'+(Number(n)||0).toLocaleString(undefined,{maximumFractionDigits:0});}
+function api(payload){return fetch('/.netlify/functions/md-billing',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(function(r){return r.json();});}
+var CLINICS=[];
+function load(){
+  api({action:'roster'}).then(function(d){
+    if(!d||d.error){document.getElementById('list').innerHTML='<div class="card" style="color:var(--muted)">'+(d&&d.error==='not_configured'?'Billing isn’t switched on yet (Stripe key not set).':'Could not load — try again.')+'</div>';return;}
+    CLINICS=d.clinics||[];
+    document.getElementById('kClinics').textContent=d.count||0;
+    document.getElementById('kMrr').textContent=money(d.monthly_recurring||0);
+    document.getElementById('kBank').textContent=CLINICS.filter(function(c){return c.status==='active';}).length;
+    document.getElementById('list').innerHTML=CLINICS.length?CLINICS.map(card).join(''):'<div class="card" style="color:var(--muted)">No clinics yet.</div>';
+  }).catch(function(){document.getElementById('list').innerHTML='<div class="card" style="color:var(--muted)">Could not reach billing.</div>';});
+}
+function tagChip(t){if(!t)return '';var lbl={acha:'ACHA',pi:'Personal injury',np:'NP/PA supervision',ally:'AllyOS'}[t]||t;return '<span class="tag '+t+'">'+esc(lbl)+'</span>';}
+function card(c){
+  var feeTxt=c.md_fee!=null?'<span class="fee">'+money(c.md_fee)+'</span> /mo':'<span style="color:var(--muted)">fee not set</span>';
+  var bank=c.status==='active'?'<span class="pill on">bank on file</span>':'<span class="pill off">no autopay</span>';
+  return '<div class="card"><div class="crow">'+
+    '<div><div class="cname">'+esc(c.name||'Clinic')+' '+tagChip(c.governance_type)+'</div>'+
+      '<div style="font-size:.8rem;color:var(--muted);margin-top:3px">'+feeTxt+' &nbsp;·&nbsp; '+bank+(c.email?' &nbsp;·&nbsp; '+esc(c.email):' &nbsp;·&nbsp; <span style="color:var(--gold)">no billing email</span>')+'</div></div>'+
+    '<div class="actions"><button class="btn ghost" onclick="openFee(\''+c.id+'\')">⚙ Fee</button>'+
+      '<button class="btn gold" onclick="openBill(\''+c.id+'\')">Bill →</button></div>'+
+    '</div><div id="inv-'+c.id+'"></div></div>';
+}
+function byId(id){for(var i=0;i<CLINICS.length;i++)if(CLINICS[i].id===id)return CLINICS[i];return null;}
+
+// ---- set fee ----
+var feeId=null;
+function openFee(id){feeId=id;var c=byId(id);document.getElementById('feeName').textContent=c.name||'';document.getElementById('fName').value=c.name||'';document.getElementById('fType').value=c.governance_type||'';document.getElementById('fFee').value=c.md_fee!=null?c.md_fee:'';document.getElementById('fEmail').value=c.email||'';document.getElementById('feeMsg').textContent='';document.getElementById('feeBack').classList.add('on');}
+function closeFee(){document.getElementById('feeBack').classList.remove('on');}
+function saveFee(){var m=document.getElementById('feeMsg');m.textContent='Saving…';
+  api({action:'set_fee',clinic_id:feeId,name:document.getElementById('fName').value.trim(),governance_type:document.getElementById('fType').value,md_fee:document.getElementById('fFee').value,md_billing_email:document.getElementById('fEmail').value.trim()})
+   .then(function(d){if(d&&d.ok){m.textContent='Saved';setTimeout(function(){closeFee();load();},500);}else{m.textContent='Could not save';m.style.color='var(--red)';}});
+}
+
+// ---- bill ----
+var billId=null;
+function openBill(id){billId=id;var c=byId(id);document.getElementById('billName').textContent=c.name||'';document.getElementById('billMsg').textContent='';
+  document.getElementById('lines').innerHTML='';
+  var month=new Date().toLocaleString(undefined,{month:'long'});
+  addLine('Medical Director — '+month, c.md_fee!=null?c.md_fee:'');
+  document.getElementById('billBack').classList.add('on');recalc();
+}
+function closeBill(){document.getElementById('billBack').classList.remove('on');}
+function addLine(desc,amt){var d=document.createElement('div');d.className='lineitem';
+  d.innerHTML='<input class="desc" placeholder="Description" value="'+esc(desc||'')+'"><input class="amt" type="number" min="0" step="1" placeholder="0" value="'+(amt===''||amt==null?'':esc(amt))+'" oninput="recalc()"><button class="rm" onclick="this.parentNode.remove();recalc()">✕</button>';
+  document.getElementById('lines').appendChild(d);recalc();
+}
+function recalc(){var t=0;document.querySelectorAll('#lines .amt').forEach(function(i){t+=Number(i.value)||0;});document.getElementById('billTot').textContent=money(t);}
+function sendBill(){
+  var items=[];document.querySelectorAll('#lines .lineitem').forEach(function(row){var desc=row.querySelector('.desc').value.trim();var amt=Number(row.querySelector('.amt').value)||0;if(amt>0)items.push({description:desc||'Charge',amount:amt});});
+  if(!items.length){document.getElementById('billMsg').textContent='Add at least one amount.';document.getElementById('billMsg').style.color='var(--red)';return;}
+  var m=document.getElementById('billMsg');m.style.color='var(--green)';m.textContent='Sending…';
+  api({action:'bill',clinic_id:billId,items:items,due_days:Number(document.getElementById('bDue').value)||15})
+   .then(function(d){
+     if(d&&d.ok){m.textContent='✓ Bill '+(d.number||'')+' sent to '+(d.email||'the clinic')+' — '+money(d.amount_due);setTimeout(function(){closeBill();load();},1500);}
+     else{m.style.color='var(--red)';m.textContent=(d&&d.hint)||'Could not send — try again.';}
+   }).catch(function(){m.style.color='var(--red)';m.textContent='Could not reach billing.';});
+}
+document.querySelectorAll('.mback').forEach(function(b){b.addEventListener('click',function(e){if(e.target===this)this.classList.remove('on');});});
+load();
+</script></body></html>
