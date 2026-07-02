@@ -261,7 +261,7 @@
       ],
       "infusion_time": "45–60 min; Mg total time ≥ 15 min",
       "key_gates": ["GFE Gate-0", "Vital hold/referral", "Mg renal/AV-block screen", "Dehydrated patients higher vasovagal risk", "CARD-VC if Vit C > 6 g"],
-      "citations": ["Mah E et al. (2018) Nutrients", "Pekala J et al. (2011) Curr Drug Metab"],
+      "citations": ["Liska D, Mah E et al. (2019) Nutrients 11(1):70 — hydration & health narrative review (general hydration-support rationale, not IV-specific). DOI 10.3390/nu11010070", "Pekala J et al. (2011) Curr Drug Metab"],
       "in_primary_library": true
     },
     {
@@ -376,7 +376,7 @@
       "infusion_time": "30–45 min",
       "frequency": "Single 500 mg IV, or 500 mg daily up to 4 consecutive days (provider-approved with documented rationale + monitoring). No routine indefinite maintenance in this protocol.",
       "key_gates": ["GFE Gate-0", "Vital hold/referral", "Hypersensitivity / prior NAD-NR reaction screen", "Evidence-gap physician review: active/recent malignancy · hepatic/LFT · advanced CKD · immunocompromise · uncontrolled diabetes · polypharmacy", "Do NOT mix in-bag with other nutrients; do NOT label as NAD+ IV", "No pregnancy/breastfeeding without separate physician evaluation"],
-      "citations": ["Reyna et al. (2026) Front Aging fragi.2026.1652582 (PMC12907335)", "Hawkins et al. (2024) medRxiv preprint", "Conze et al. (2019) Sci Rep (oral NR — background)"],
+      "citations": ["Reyna et al. (2026) Front Aging fragi.2026.1652582 (PMC12907335)", "Hawkins et al. (2024) medRxiv preprint", "Conze et al. (2019) Sci Rep 9:9772 — oral NR safety, background only. DOI 10.1038/s41598-019-46120-z"],
       "in_primary_library": true
     },
     {
@@ -571,7 +571,7 @@
     { "id": "C_GRANT2019", "ref": "Grant R et al. (2019) Front Aging Neurosci 11:257 — IV NAD+ pharmacokinetics" },
     { "id": "C_BRAKEDAL2022", "ref": "Brakedal B et al. (2022) Cell Metab 34(3):396–407 — NAD+ supplementation" },
     { "id": "C_POOYANDJOO2016", "ref": "Pooyandjoo M et al. (2016) Obes Rev — L-Carnitine in weight management" },
-    { "id": "C_MAH2018", "ref": "Mah E et al. (2018) Nutrients — IV hydration in exercise recovery" },
+    { "id": "C_MAH2018", "ref": "Liska D, Mah E et al. (2019) Nutrients 11(1):70 — narrative review of hydration & selected health outcomes (general hydration-support rationale; NOT an IV-route or exercise-recovery-specific trial). DOI 10.3390/nu11010070 · PMID 30609670", "corrected": "2026-07-02: was mis-cited as 'Mah E (2018) Nutrients — IV hydration in exercise recovery'; resolved to the actual Mah-coauthored 2019 hydration review and re-scoped to general hydration support." },
     { "id": "C_AANP", "ref": "AANP IV Nutrient Therapy Position Paper" },
     { "id": "C_USP797", "ref": "USP <797> Immediate-Use compounding standard" },
     { "id": "C_CDC_INJ", "ref": "CDC Injection Safety — One needle, one syringe, only one time" },
