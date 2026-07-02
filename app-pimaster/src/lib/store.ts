@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { loadBillingSettings, saveBillingSettings } from "./billing";
+import { DEFAULT_CLINIC, setActiveClinic, type ClinicProfile } from "./clinic";
 import { defaultImagingConfig, saveImagingConfig, type ImagingConfig } from "./imaging";
 import type { VisitForm } from "./types";
 
@@ -16,6 +17,62 @@ export function supabase(): SupabaseClient {
 }
 
 export type ReportMode = "initial" | "followup" | "final" | "ptdaily" | "ptprogress";
+
+// ---------- Active clinic (tenancy) ----------
+
+const CLINIC_LS_KEY = "pimaster-clinic";
+
+/** The clinic every read/write is scoped to. RLS enforces it server-side;
+ * this keeps the platform admin's cross-clinic view coherent client-side. */
+export function activeClinicId(): string {
+  return localStorage.getItem(CLINIC_LS_KEY) || DEFAULT_CLINIC.id;
+}
+
+export function setActiveClinicId(id: string): void {
+  localStorage.setItem(CLINIC_LS_KEY, id);
+}
+
+export interface ClinicRow {
+  id: string;
+  name: string;
+  address: string | null;
+  phone: string | null;
+  fax: string | null;
+  email: string | null;
+  provider_name: string | null;
+  provider_license: string | null;
+  provider_npi: string | null;
+  active: boolean;
+}
+
+export async function listClinics(): Promise<ClinicRow[]> {
+  const { data, error } = await supabase().from("clinics").select("*").order("name");
+  if (error) throw error;
+  return (data ?? []) as ClinicRow[];
+}
+
+/** Load the active clinic's profile into the letterhead singleton. */
+export async function loadActiveClinicProfile(): Promise<void> {
+  try {
+    const { data } = await supabase().from("clinics").select("*").eq("id", activeClinicId()).maybeSingle();
+    if (data) {
+      const profile: Partial<ClinicProfile> & { id: string } = {
+        id: data.id,
+        name: data.name ?? DEFAULT_CLINIC.name,
+        address: data.address ?? "",
+        phone: data.phone ?? "",
+        fax: data.fax ?? "",
+        email: data.email ?? "",
+        provider: data.provider_name ?? "",
+        license: data.provider_license ?? "",
+        npi: data.provider_npi ?? "",
+      };
+      setActiveClinic(profile);
+    }
+  } catch {
+    // offline: keep current/default letterhead
+  }
+}
 
 function deviceKey(): string {
   const k = "pimaster-device-key";
@@ -36,7 +93,7 @@ export async function saveDraft(form: VisitForm): Promise<"cloud" | "local"> {
     const { error } = await supabase()
       .from("form_state")
       .upsert(
-        { device_key: deviceKey(), mode: form.visitType, state_data: form, updated_at: new Date().toISOString() },
+        { device_key: deviceKey(), mode: form.visitType, state_data: form, clinic_id: activeClinicId(), updated_at: new Date().toISOString() },
         { onConflict: "device_key,mode" },
       );
     if (error) throw error;
@@ -52,6 +109,7 @@ export async function loadDraft(): Promise<VisitForm | null> {
       .from("form_state")
       .select("state_data, updated_at")
       .eq("device_key", deviceKey())
+      .eq("clinic_id", activeClinicId())
       .order("updated_at", { ascending: false })
       .limit(1);
     if (error) throw error;
@@ -89,7 +147,7 @@ export async function saveReport(args: {
       form_data: args.auditTrail ? { ...args.form, _audit: args.auditTrail } : args.form,
       icd_codes: args.icdCodes,
       cpt_codes: args.cptCodes,
-      clinic_id: "wellness_hcc",
+      clinic_id: activeClinicId(),
     });
     if (error) throw error;
     return { ok: true };
@@ -110,6 +168,7 @@ export async function fetchSameAccidentForms(accidentDate: string, excludePatien
       .select("form_data")
       .in("mode", ["initial", "followup", "final"])
       .eq("status", "active")
+      .eq("clinic_id", activeClinicId())
       .eq("form_data->accident->>accidentDate", accidentDate)
       .order("created_at", { ascending: false })
       .limit(500);
@@ -135,6 +194,7 @@ export async function listReports(limit = 50): Promise<SavedReport[]> {
     .from("reports")
     .select("id, mode, dos, created_at, form_data")
     .eq("status", "active")
+    .eq("clinic_id", activeClinicId())
     .order("created_at", { ascending: false })
     .limit(limit);
   if (error) throw error;
@@ -163,18 +223,19 @@ export interface AppUserRow {
   email: string;
   roles: string[];
   active: boolean;
+  clinic_id: string | null;
 }
 
 export async function listAppUsers(): Promise<AppUserRow[]> {
   const { data, error } = await supabase()
     .from("app_users")
-    .select("user_id, email, roles, active")
+    .select("user_id, email, roles, active, clinic_id")
     .order("email");
   if (error) throw error;
   return (data ?? []) as AppUserRow[];
 }
 
-export async function updateAppUser(userId: string, partial: { roles?: string[]; active?: boolean }): Promise<{ ok: boolean; error?: string }> {
+export async function updateAppUser(userId: string, partial: { roles?: string[]; active?: boolean; clinic_id?: string | null }): Promise<{ ok: boolean; error?: string }> {
   try {
     const { error } = await supabase().from("app_users").update(partial).eq("user_id", userId);
     if (error) throw error;
@@ -192,6 +253,7 @@ export async function listReportMeta(): Promise<{ id: string; mode: string; dos:
     .from("reports")
     .select("id, mode, dos, form_data")
     .eq("status", "active")
+    .eq("clinic_id", activeClinicId())
     .order("dos", { ascending: true })
     .limit(1000);
   if (error) throw error;
@@ -229,7 +291,7 @@ export async function logDisclosure(details: object): Promise<void> {
       action: "attorney_package_disclosure",
       entity_type: "reports",
       details,
-      clinic_id: "wellness_hcc",
+      clinic_id: activeClinicId(),
     });
   } catch {
     // disclosure logging must never block the release itself
@@ -265,6 +327,7 @@ export async function listReportsForWindow(endDate: string, days = 30): Promise<
     .from("reports")
     .select("id, mode, dos, form_data, icd_codes, cpt_codes")
     .eq("status", "active")
+    .eq("clinic_id", activeClinicId())
     .gte("dos", startIso)
     .lte("dos", endDate)
     .order("dos", { ascending: true });
@@ -308,6 +371,7 @@ export async function listDxCatalog(): Promise<DxCatalogRow[]> {
   const { data, error } = await supabase()
     .from("clinic_dx_catalog")
     .select("id, code, description, region, kind, auto_derive, active")
+    .eq("clinic_id", activeClinicId())
     .order("region")
     .order("code");
   if (error) throw error;
@@ -318,7 +382,7 @@ export async function upsertDxCatalog(row: Omit<DxCatalogRow, "id"> & { id?: str
   try {
     const { error } = await supabase()
       .from("clinic_dx_catalog")
-      .upsert({ ...row, clinic_id: "wellness_hcc" }, { onConflict: "clinic_id,code" });
+      .upsert({ ...row, clinic_id: activeClinicId() }, { onConflict: "clinic_id,code" });
     if (error) throw error;
     return { ok: true };
   } catch (e) {
@@ -340,6 +404,7 @@ export async function listServiceCatalog(): Promise<ServiceCatalogRow[]> {
   const { data, error } = await supabase()
     .from("clinic_service_catalog")
     .select("id, cpt, name, category, default_units, charge, active")
+    .eq("clinic_id", activeClinicId())
     .order("category")
     .order("cpt");
   if (error) throw error;
@@ -351,7 +416,7 @@ export async function upsertServiceCatalog(row: Omit<ServiceCatalogRow, "id"> & 
     const { error } = await supabase()
       .from("clinic_service_catalog")
       .upsert(
-        { ...row, charge: row.charge ? Number(row.charge) : null, clinic_id: "wellness_hcc" },
+        { ...row, charge: row.charge ? Number(row.charge) : null, clinic_id: activeClinicId() },
         { onConflict: "clinic_id,cpt" },
       );
     if (error) throw error;
@@ -372,7 +437,7 @@ export async function loadClinicBilling(): Promise<ClinicBillingIdentity | null>
     const { data, error } = await supabase()
       .from("clinic_settings")
       .select("ein, billing_npi, rendering_npi")
-      .eq("clinic_id", "wellness_hcc")
+      .eq("clinic_id", activeClinicId())
       .maybeSingle();
     if (error) throw error;
     return data ? { ein: data.ein ?? "", billing_npi: data.billing_npi ?? "", rendering_npi: data.rendering_npi ?? "" } : null;
@@ -384,7 +449,7 @@ export async function loadClinicBilling(): Promise<ClinicBillingIdentity | null>
 export async function saveClinicBilling(b: ClinicBillingIdentity): Promise<void> {
   const { error } = await supabase()
     .from("clinic_settings")
-    .upsert({ clinic_id: "wellness_hcc", ...b, updated_at: new Date().toISOString() }, { onConflict: "clinic_id" });
+    .upsert({ clinic_id: activeClinicId(), ...b, updated_at: new Date().toISOString() }, { onConflict: "clinic_id" });
   if (error) throw error;
 }
 
@@ -411,7 +476,7 @@ export async function loadImagingConfigCloud(): Promise<ImagingConfig | null> {
     const { data, error } = await supabase()
       .from("clinic_settings")
       .select("imaging_mode, dx_center_name, dx_center_address, dx_center_phone, dx_center_fax")
-      .eq("clinic_id", "wellness_hcc")
+      .eq("clinic_id", activeClinicId())
       .maybeSingle();
     if (error || !data) return null;
     const base = defaultImagingConfig();
@@ -433,7 +498,7 @@ export async function saveImagingConfigCloud(c: ImagingConfig): Promise<void> {
     .from("clinic_settings")
     .upsert(
       {
-        clinic_id: "wellness_hcc",
+        clinic_id: activeClinicId(),
         imaging_mode: c.mode,
         dx_center_name: c.centerName || null,
         dx_center_address: c.centerAddress || null,

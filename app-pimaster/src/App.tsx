@@ -9,6 +9,7 @@ import { CatalogPage } from "./components/CatalogPage";
 import { AhcaExportPage } from "./components/AhcaExport";
 import { AttorneyPackagePage } from "./components/AttorneyPackage";
 import { UsersPanel } from "./components/UsersPanel";
+import { OnboardingWizard } from "./components/OnboardingWizard";
 import { SignInScreen } from "./components/SignIn";
 import { allowedViews, changePassword, fetchAuthState, onAuthChange, signOut, type AuthState } from "./lib/auth";
 import { auditNote } from "./lib/audit";
@@ -36,7 +37,7 @@ import {
   type PeerNote,
   type SimilarityHit,
 } from "./lib/similarity";
-import { fetchSameAccidentForms, loadDraft, saveDraft, saveReport, syncBillingFromCloud, type ReportMode } from "./lib/store";
+import { activeClinicId, fetchSameAccidentForms, listClinics, loadActiveClinicProfile, loadDraft, saveDraft, saveReport, setActiveClinicId, syncBillingFromCloud, type ClinicRow, type ReportMode } from "./lib/store";
 import { emptyForm, type Role, type VisitForm, type VisitMode, type VisitType } from "./lib/types";
 
 const VISIT_LABELS: Record<VisitType, string> = { initial: "Initial", followup: "Follow-Up", final: "Final" };
@@ -55,6 +56,9 @@ export default function App() {
   const [showExport, setShowExport] = useState(false);
   const [showAttorney, setShowAttorney] = useState(false);
   const [showUsers, setShowUsers] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [clinics, setClinics] = useState<ClinicRow[]>([]);
+  const [clinicId, setClinicId] = useState<string>(activeClinicId());
   const [showCatalogs, setShowCatalogs] = useState(false);
   const loaded = useRef(false);
   const dirty = useRef(false);
@@ -67,12 +71,32 @@ export default function App() {
 
   useEffect(() => {
     if (!auth) return;
+    setClinicId(activeClinicId());
+    loadActiveClinicProfile().catch(() => {});
+    if (auth.isPlatform) listClinics().then(setClinics).catch(() => {});
     loadDraft().then((d) => {
       if (d && !dirty.current) setForm({ ...emptyForm(), ...d });
       loaded.current = true;
     });
     syncBillingFromCloud().catch(() => {});
   }, [auth?.userId]);
+
+  function switchClinic(id: string) {
+    setActiveClinicId(id);
+    setClinicId(id);
+    dirty.current = false;
+    loaded.current = false;
+    setForm(emptyForm());
+    setAuditIssues([]);
+    setGenState("");
+    loadActiveClinicProfile()
+      .then(() => syncBillingFromCloud())
+      .catch(() => {});
+    loadDraft().then((d) => {
+      if (d) setForm({ ...emptyForm(), ...d });
+      loaded.current = true;
+    });
+  }
 
   // Debounced autosave
   useEffect(() => {
@@ -317,6 +341,20 @@ export default function App() {
           <span className="brand-title">PI MASTER™</span>
           <span className="brand-sub">by RenuviaMD® Network — {CLINIC.name}</span>
         </div>
+        {auth.isPlatform && clinics.length > 0 && (
+          <div className="seg-wrap">
+            <span className="seg-label">Clinic</span>
+            <select
+              value={clinicId}
+              onChange={(e) => switchClinic(e.target.value)}
+              style={{ background: "var(--hover)", color: "var(--text)", border: "1px solid var(--accent)", borderRadius: 6, padding: "8px 10px" }}
+            >
+              {clinics.map((cl) => (
+                <option key={cl.id} value={cl.id}>{cl.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="seg-wrap">
           <span className="seg-label">Visit type</span>
           <div className="seg">
@@ -378,6 +416,11 @@ export default function App() {
         {auth.roles.includes("admin") && (
           <button className="btn ghost" onClick={() => setShowUsers(true)}>
             Users
+          </button>
+        )}
+        {auth.isPlatform && (
+          <button className="btn ghost" onClick={() => setShowOnboarding(true)}>
+            New Clinic
           </button>
         )}
         <button className="btn ghost" onClick={doChangePassword} title="Change password">
@@ -488,7 +531,17 @@ export default function App() {
       {showBilling && <BillingSettingsCard onClose={() => setShowBilling(false)} />}
       {showExport && <AhcaExportPage onClose={() => setShowExport(false)} />}
       {showAttorney && <AttorneyPackagePage onClose={() => setShowAttorney(false)} generatedBy={auth.email} />}
-      {showUsers && <UsersPanel onClose={() => setShowUsers(false)} selfId={auth.userId} />}
+      {showUsers && <UsersPanel onClose={() => setShowUsers(false)} selfId={auth.userId} isPlatform={auth.isPlatform} />}
+      {showOnboarding && (
+        <OnboardingWizard
+          onClose={() => setShowOnboarding(false)}
+          onCreated={(id) => {
+            setShowOnboarding(false);
+            listClinics().then(setClinics).catch(() => {});
+            switchClinic(id);
+          }}
+        />
+      )}
       {showCatalogs && <CatalogPage onClose={() => setShowCatalogs(false)} />}
     </>
   );

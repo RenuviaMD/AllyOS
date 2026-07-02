@@ -55,9 +55,9 @@ PI Master handles **clinical operations only** — documentation, orders, and bi
 
 `netlify.toml` is included (base `app-pimaster`, publish `dist`). Point the Netlify site at this repo/folder and map `pimaster.renuviamd.com`.
 
-## Authentication & access
+## Authentication, access & multi-clinic tenancy
 
-Sign-in is required (Supabase Auth). Roles come from the `app_users` table — staff / physician / pt, with `admin` unlocking all views — and Row Level Security enforces them server-side: clinical records require an active account; catalogs, billing settings, and the encounter export are restricted to physician/admin. Accounts are provisioned by the administrator (no open signup).
+Sign-in is required (Supabase Auth). Roles come from `app_users` — staff / physician / pt, `admin` unlocks all views, and `platform` marks the cross-clinic platform administrator. Every clinical row carries a `clinic_id` and Row Level Security scopes all access to the caller's clinic (`can_touch()`); the platform admin can switch clinics from the header and onboard new clinics ("New Clinic": identity + provider + billing identity + imaging setup + seeded catalogs). New staff self-register on the sign-in screen and have no access until an admin assigns their clinic and roles. Letterheads, signatures, and NPIs on every generated document come from the active clinic's profile in the `clinics` table.
 
 ## Important compliance notes
 

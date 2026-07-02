@@ -1,20 +1,28 @@
 import { useEffect, useState } from "react";
-import { listAppUsers, updateAppUser, type AppUserRow } from "../lib/store";
+import { listAppUsers, listClinics, updateAppUser, type AppUserRow, type ClinicRow } from "../lib/store";
 
 const ALL_ROLES = ["staff", "physician", "pt", "admin"] as const;
 
 /** Admin-only: assign roles and activate/deactivate accounts. New staff create
  * their own login on the sign-in screen and appear here with no roles. */
-export function UsersPanel(props: { onClose: () => void; selfId: string }) {
+export function UsersPanel(props: { onClose: () => void; selfId: string; isPlatform: boolean }) {
   const [users, setUsers] = useState<AppUserRow[]>([]);
+  const [clinics, setClinics] = useState<ClinicRow[]>([]);
   const [status, setStatus] = useState("");
 
   function refresh() {
     listAppUsers()
       .then(setUsers)
       .catch((e) => setStatus(`Load failed: ${e instanceof Error ? e.message : e}`));
+    if (props.isPlatform) listClinics().then(setClinics).catch(() => {});
   }
   useEffect(refresh, []);
+
+  async function assignClinic(u: AppUserRow, clinicId: string) {
+    const res = await updateAppUser(u.user_id, { clinic_id: clinicId || null });
+    setStatus(res.ok ? `${u.email}: clinic assigned.` : `Update failed: ${res.error}`);
+    refresh();
+  }
 
   async function toggleRole(u: AppUserRow, role: string) {
     if (u.user_id === props.selfId && role === "admin" && u.roles.includes("admin")) {
@@ -51,7 +59,7 @@ export function UsersPanel(props: { onClose: () => void; selfId: string }) {
         </p>
         <table className="rom-table">
           <thead>
-            <tr><th>Email</th><th>Roles</th><th>Status</th></tr>
+            <tr><th>Email</th><th>Clinic</th><th>Roles</th><th>Status</th></tr>
           </thead>
           <tbody>
             {users.map((u) => (
@@ -60,6 +68,23 @@ export function UsersPanel(props: { onClose: () => void; selfId: string }) {
                   {u.email}
                   {u.user_id === props.selfId && <span className="status"> (you)</span>}
                   {u.roles.length === 0 && u.active && <div className="status warn">Awaiting role assignment</div>}
+                </td>
+                <td>
+                  {props.isPlatform ? (
+                    <select
+                      value={u.clinic_id ?? ""}
+                      onChange={(e) => assignClinic(u, e.target.value)}
+                      style={{ background: "var(--hover)", color: "var(--text)", border: "1px solid #46627f", borderRadius: 4, padding: "4px 6px" }}
+                    >
+                      <option value="">— none —</option>
+                      {clinics.map((cl) => (
+                        <option key={cl.id} value={cl.id}>{cl.name}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span className="status">{u.clinic_id ?? "—"}</span>
+                  )}
+                  {!u.clinic_id && u.active && <div className="status warn">No clinic</div>}
                 </td>
                 <td>
                   <div className="checkgroup" style={{ gridTemplateColumns: "repeat(2, minmax(110px, 1fr))" }}>
