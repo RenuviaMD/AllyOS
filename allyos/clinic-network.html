@@ -84,6 +84,20 @@
 .cds .crev:hover{border-color:var(--teal);color:var(--teal)}
 .cdsfoot{font-size:.68rem;color:var(--muted);margin-top:8px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .cdsfoot a{color:var(--teal);text-decoration:none}
+/* Collapsible audit group — keeps the clinic list reachable without scrolling past the monitors */
+.auditgroup{border:1px solid #1c4763;border-radius:15px;background:linear-gradient(180deg,#0e1a27,#0a131d);margin-bottom:16px;overflow:hidden}
+.auditgroup>summary{list-style:none;cursor:pointer;padding:15px 18px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.auditgroup>summary::-webkit-details-marker{display:none}
+.auditgroup>summary:hover .ag-t{color:var(--teal)}
+.auditgroup>summary .ag-t{font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.auditgroup>summary .ag-h{font-size:.72rem;color:var(--muted);font-weight:400}
+.auditgroup>summary .ag-badge{margin-left:auto;display:none;font-size:.62rem;font-weight:700;padding:2px 10px;border-radius:20px;background:#3a1414;color:#f0a59d;border:1px solid #6a2020}
+.auditgroup>summary .ag-chev{margin-left:auto;color:var(--muted);transition:transform .2s;font-size:.85rem}
+.auditgroup>summary .ag-badge+.ag-chev{margin-left:8px}
+.auditgroup[open]>summary .ag-chev{transform:rotate(90deg)}
+.auditgroup[open]>summary{border-bottom:1px solid var(--line2)}
+.auditgroup .agbody{padding:14px 14px 2px}
+.auditgroup .agbody .card{margin-bottom:12px}
 </style></head>
 <body class="allyos"><div class="wrap">
   <div class="top">
@@ -99,11 +113,13 @@
   <div class="kpis" id="kpis"></div>
   <div id="cloudreq"></div>
   <div id="incidents"></div>
+  <details class="auditgroup" id="auditGroup"><summary><span class="ag-t">📋 System audit &amp; monitoring</span><span class="ag-h">— health · decision-change watch · protocol verification · regulatory radar · CDS queue</span><span class="ag-badge" id="auditBadge"></span><span class="ag-chev">▸</span></summary><div class="agbody">
   <div class="card" id="auditCard" style="border-color:#1c4763"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px">📋 System audit &amp; content updates</div><div id="auditBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
   <div class="card" id="csCard" style="border-color:#1c4763;display:none"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:4px">🛡 Decision-change watch <span style="color:var(--muted);font-weight:400;text-transform:none">· deterministic, no AI guessing</span></div><div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">Only <b>facts that change a decision</b> — a cited paper retracted, a cited trial halted, or an FDA label changed — scoped to <b>our</b> agents, by line. Each links to the source so you read it and Approve/Reject. Silence = nothing changed.</div><div id="csBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
   <div class="card" id="pvCard" style="border-color:#1c5238;display:none"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--green);font-weight:700;margin-bottom:4px">🔬 Published-protocol verification</div><div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">Auto-checks every <b>published</b> protocol (not drafts): each citation resolved live, and what's new per protocol. The machine confirms the real ones — you only see what failed.</div><div id="pvBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
-  <div class="card" id="radarCard" style="border-color:#2a3340;display:none"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:4px">📰 Regulatory radar <span style="font-weight:400;text-transform:none">· info only — does not affect protocol logic</span></div><div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">Peptide / compounding regulatory news for your awareness. Federal (FDA · Federal Register) is live; Florida is curated official links to check directly.</div><div id="radarBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
+  <div class="card" id="radarCard" style="border-color:#2a3340;display:none"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:4px">📰 Regulatory radar <span style="font-weight:400;text-transform:none">· info only — does not affect protocol logic</span></div><div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">Peptide / compounding regulatory news for your awareness — federal level only (FDA · Federal Register).</div><div id="radarBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
   <div class="card" id="cdsCard" style="border-color:#4a3c18;display:none"><div class="fsec-h" style="font-size:.66rem;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:4px">🧬 CDS update — clinician review queue</div><div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">Drift, new evidence, and source triggers the CDS Update Agent surfaced for your decision. Nothing here is auto-applied — clinical changes need your sign-off.</div><div id="cdsBody" style="font-size:.8rem;color:var(--muted)">Loading…</div></div>
+  </div></details>
   <div id="clinics"></div>
 
   <div class="mback" id="cfgBack">
@@ -320,6 +336,11 @@ function renderAudit(){
 }
 renderAudit();
 
+// Attention badge on the collapsed audit group — so collapsing never hides a real alert.
+// Counts only things that genuinely need you: failed citations, decision-change events, high-risk CDS items.
+var AUDITF={};
+function bumpAudit(k,n){AUDITF[k]=n||0;var b=document.getElementById('auditBadge');if(!b)return;var t=0;for(var x in AUDITF){t+=AUDITF[x];}if(t>0){b.textContent='● '+t+' need'+(t===1?'s':'')+' attention';b.style.display='';}else{b.style.display='none';}}
+
 // Published-protocol verifier — auto-confirms real citations; surfaces only failures + what's-new per protocol.
 function renderPv(){
   var card=document.getElementById('pvCard'),el=document.getElementById('pvBody');if(!el)return;
@@ -328,6 +349,7 @@ function renderPv(){
     card.style.display='';
     if(o.status==='pending'||!o.date){el.innerHTML='<div style="color:var(--muted);font-size:.82rem">Awaiting first run — runs daily (04:00 UTC) and on-demand. It scopes to published protocols, resolves each citation live, and reports what\'s new per protocol. No API key needed.</div>';return;}
     var fails=o.citations_failed||0;
+    bumpAudit('pv',fails);
     el.innerHTML='<div class="cgrid">'+
       '<div class="cbox"><div class="bl">Published protocols</div><div class="bv">'+(o.published_protocols||0)+'</div></div>'+
       '<a class="cbox" style="text-decoration:none;display:block" href="https://github.com/RenuviaMD/AllyOS/blob/main/allyos/protocol-verify-queue.csv" target="_blank"><div class="bl">Citations</div><div class="bv"><b style="color:var(--green)">'+(o.citations_confirmed||0)+'</b> ok'+(fails?' · <b style="color:#f0a59d">'+fails+' failed</b>':'')+'</div></a>'+
@@ -367,6 +389,7 @@ function renderCs(){
     card.style.display='';
     if(o.status==='pending'||!o.date){el.innerHTML='<div style="color:var(--muted);font-size:.82rem">Awaiting first run — runs daily (04:00 UTC) and on-demand. Deterministic: it reports only retractions, halted trials, and FDA label changes for our agents, each with a source link. No API key needed.</div>';return;}
     var dec=csDec();var lines=o.lines||{};var total=o.changes_total||0;
+    bumpAudit('cs',total);
     var head='<div style="font-size:.72rem;color:'+(total?'var(--gold)':'var(--green)')+';margin-bottom:10px">'+(total?('⚠ '+total+' decision-affecting change(s) — read the source, then Approve or Reject.'):'✓ Library current — no decision-affecting changes this run.')+' <span style="color:var(--muted)">Checked '+esc((''+o.date).slice(0,10))+'.</span></div>';
     var body='';
     ['IV','Peptides','HRT'].forEach(function(ln){
@@ -450,6 +473,7 @@ function renderCds(){
     items.sort(function(a,b){var da=!!done[a.id],db=!!done[b.id];if(da!==db)return da?1:-1;return (rank[a.risk]||3)-(rank[b.risk]||3);});
     var open=items.filter(function(it){return !done[it.id];}).length;
     var highs=items.filter(function(it){return it.risk==='high'&&!done[it.id];}).length;
+    bumpAudit('cds',highs);
     card.style.display='';
     // Collapsed by default — the 🔬 verifier above is the primary review. This deeper Opus
     // semantic pass is reference-only; expand on demand instead of dumping every row.
