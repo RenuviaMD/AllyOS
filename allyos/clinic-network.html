@@ -105,8 +105,13 @@
       <div class="kick">Medical Director Network · AllyOS</div>
       <h1>Clinic Network</h1>
       <div class="who" id="who">Armando Falcon MD · FL #ME 84789 · Medical Director</div>
+      <div class="who" id="clinicAddr" style="margin-top:2px;color:var(--muted)"></div>
     </div>
-    <div style="text-align:right"><div class="pill-status">● OPERATIONAL</div><div style="margin-top:6px"><a href="md-audit.html">AllyAuditPro →</a> &nbsp; <a href="#" onclick="if(window.AllyOSAuth)AllyOSAuth.signOut();return false" style="color:var(--muted)">Logout</a></div></div>
+    <div style="text-align:right">
+      <div class="pill-status">● OPERATIONAL</div>
+      <div style="margin-top:6px;font-size:.82rem;color:var(--ink)"><span id="whoR"></span> <span style="color:var(--muted)">signed in</span></div>
+      <div style="margin-top:3px;font-size:.82rem"><a href="md-audit.html" style="color:var(--teal);text-decoration:none">AllyAuditPro →</a> &nbsp;·&nbsp; <a href="#" onclick="if(window.AllyOSAuth)AllyOSAuth.signOut();return false" style="color:var(--muted);text-decoration:none">Logout</a></div>
+    </div>
   </div>
   <div class="sub">Every wellness clinic you run on AllyOS, in one place — care model, active lines, today's GFEs, and recurring revenue. <b>PHI-free</b>: counts and Encounter IDs only; patient identity stays on each clinic's device.</div>
 
@@ -163,7 +168,11 @@ document.getElementById('yr').textContent=new Date().getFullYear();
 var ses=null;
 if(window.AllyOSAuth){AllyOSAuth.guard(['admin','provider']);ses=AllyOSAuth.session();
   if(ses&&!ses.mdAudit){document.documentElement.innerHTML='<body style="font-family:-apple-system,Segoe UI,Arial,sans-serif;background:#05080f;color:#eaf1f6;display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center;padding:24px"><div><h2>Medical-Director cockpit</h2><p style="color:#90a3b6;max-width:46ch">The Clinic Network is the Medical Director\'s multi-clinic view — not a single-clinic feature.</p><p style="margin-top:14px"><a style="color:#2ee6d6" href="dashboard.html">← Dashboard</a></p></div></body>';}
-  if(ses)document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+((ses.credential==='MD'||ses.credential==='DO')?'FL #ME 84789 · ':'')+'Medical Director';
+  if(ses){document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+((ses.credential==='MD'||ses.credential==='DO')?'FL #ME 84789 · ':'')+'Medical Director';
+    var wr=document.getElementById('whoR');if(wr)wr.textContent=AllyOSAuth.greeting();
+    var hcfg={};try{hcfg=JSON.parse(localStorage.getItem('allyos_clinic_config_v1')||'{}');}catch(e){}
+    var haddr=[hcfg.name,[hcfg.addr,hcfg.city].filter(Boolean).join(', ')].filter(Boolean).join(' · ');
+    var ca=document.getElementById('clinicAddr');if(ca)ca.textContent=haddr;}
 }
 var CKEY='allyos_owner_clinics_v1';
 // platform pricing: per clinic, bundle by active-line count. MD-of-record is billed externally
