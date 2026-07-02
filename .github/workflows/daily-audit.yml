@@ -1,9 +1,12 @@
-name: AllyOS daily audit & health
+name: AllyOS monthly audit & health
 
-# The two Master-Console agents, run daily + on demand ("Run now" = workflow_dispatch).
+# Master-Console agents. Runs MONTHLY (with the governance-binder rhythm) + on demand.
+# Noise policy: citation / clinical-content / regulatory jobs are fail-SOFT (they update the
+# cockpit queue but never send a red email). Only the Change Sentinel — real retraction /
+# FDA-label / trial-halt events — is allowed to fail loud. Silence = nothing actionable.
 on:
   schedule:
-    - cron: '0 4 * * *'      # 04:00 UTC daily
+    - cron: '0 4 1 * *'     # 04:00 UTC on the 1st of each month
   workflow_dispatch: {}       # manual trigger from the Actions tab (the admin "Run now" button)
   push:                       # CI gate — also run on every push that touches AllyOS
     paths: ['allyos/**', 'protocols/**', 'netlify/**', 'scripts/**', '.github/workflows/daily-audit.yml']
@@ -39,6 +42,7 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     needs: health
+    continue-on-error: true    # fail-SOFT: writes the cockpit queue, never sends a red email
     permissions:
       contents: write
     steps:
@@ -73,6 +77,7 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     needs: health
+    continue-on-error: true    # fail-SOFT: an unresolved citation updates the cockpit queue, no red email
     permissions:
       contents: write
     steps:
@@ -94,6 +99,8 @@ jobs:
   # Change Sentinel — DETERMINISTIC decision-change watch. NO LLM, no key. Watches only the
   # agents in our PUBLISHED protocols and flags ONLY facts that change a decision (retractions,
   # terminated trials, FDA label changes), each with a source link. Fail-closed; silence = clear.
+  # This is the ONE job left hard-fail on purpose: a red run here = a real safety change to
+  # something we recommend, and that is the only email worth waking up for.
   change-sentinel:
     name: Change Sentinel — deterministic decision-change watch
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -124,6 +131,7 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     needs: health
+    continue-on-error: true    # fail-SOFT: info only, never sends a red email
     permissions:
       contents: write
     steps:

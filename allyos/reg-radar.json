@@ -1,15 +1,15 @@
 {
-  "date": null,
+  "date": "2026-07-02T08:13:15.041449Z",
   "agent": "reg-radar",
-  "mode": "INFO ONLY — awareness; does NOT affect protocol logic or decisions",
-  "status": "pending",
-  "total_federal": 0,
+  "mode": "INFO ONLY \u2014 federal-level awareness; does NOT affect protocol logic or decisions",
+  "scope": "federal_only",
   "federal": [],
-  "florida_links": [
-    { "label": "FL Administrative Register / Code (flrules.org)", "url": "https://flrules.org", "note": "Official Florida rule notices" },
-    { "label": "FL Board of Pharmacy — compounding rules + agendas", "url": "https://floridaspharmacy.gov", "note": "" },
-    { "label": "FL Board of Medicine — practice rules", "url": "https://flboardofmedicine.gov", "note": "" },
-    { "label": "FL Legislature — bill search", "url": "https://www.flsenate.gov/Session/Bills", "note": "" }
+  "total_federal": 0,
+  "unverified": [
+    "federal_register:peptide: <urlopen error Tunnel connection failed: 403 Forbidden>",
+    "federal_register:Pharmacy Compounding Advisory Committee: <urlopen error Tunnel connection failed: 403 Forbidden>",
+    "federal_register:503A bulk drug substances: <urlopen error Tunnel connection failed: 403 Forbidden>",
+    "federal_register:503B bulk: <urlopen error Tunnel connection failed: 403 Forbidden>"
   ],
-  "unverified": []
+  "status": "unverified"
 }
