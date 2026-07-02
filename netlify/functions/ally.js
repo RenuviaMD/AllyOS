@@ -32,7 +32,7 @@ exports.handler = async (event) => {
   // GET = health check. Reports whether the key is configured WITHOUT calling
   // the model (no cost) — visit /.netlify/functions/ally in a browser to verify.
   if (event.httpMethod === "GET") {
-    return json(200, { ok: true, configured: !!key, model: "claude-opus-4-8" });
+    return json(200, { ok: true, configured: !!key, model: "claude-sonnet-5" });
   }
 
   if (event.httpMethod !== "POST") {
@@ -117,7 +117,9 @@ exports.handler = async (event) => {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-opus-4-8",
+        // Sonnet 5 for the live grounded chat (A/B-verified vs Opus; ~1/3 the cost).
+        // The library is already client-scoped here, so no server-side routing needed.
+        model: "claude-sonnet-5",
         max_tokens: 1200,
         system: system,
         output_config: { effort: "medium" },
