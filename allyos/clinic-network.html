@@ -391,13 +391,13 @@ function renderCs(){
 }
 renderCs();
 
-// Regulatory radar — INFO ONLY (no decisions, no protocol impact). Federal Register feed + curated FL links.
+// Regulatory radar — INFO ONLY (no decisions, no protocol impact). Federal Register feed (federal-only).
 function renderRadar(){
   var card=document.getElementById('radarCard'),el=document.getElementById('radarBody');if(!el)return;
   fetch('reg-radar.json?_='+Date.now()).then(function(r){return r.ok?r.json():null;}).then(function(o){
     if(!o){card.style.display='none';return;}
     card.style.display='';
-    var fed=(o.federal||[]),fl=(o.florida_links||[]);
+    var fed=(o.federal||[]);
     var html='';
     html+='<div style="font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--teal);font-weight:700;margin:2px 0 6px">🇺🇸 Federal (FDA · Federal Register)'+(o.date?' <span style="color:var(--muted);font-weight:400;text-transform:none">· '+esc((''+o.date).slice(0,10))+'</span>':'')+'</div>';
     if(o.status==='pending'||!o.date){html+='<div style="color:var(--muted);font-size:.8rem">Awaiting first run — pulls FDA peptide/compounding/PCAC notices daily. No key needed.</div>';}
@@ -406,8 +406,6 @@ function renderRadar(){
       var tag=(d.mentions_library&&d.mentions_library.length)?' <span class="lchip" style="background:#2a230e;color:var(--gold);border-color:#4a3c18">mentions: '+esc(d.mentions_library.slice(0,4).join(', '))+'</span>':'';
       return '<a class="pgrow" style="text-decoration:none" target="_blank" rel="noopener" href="'+esc(d.url)+'"><span class="pgid" style="min-width:74px">'+esc((d.date||'').slice(0,10))+'</span><span class="pgplan">'+esc(d.title)+tag+'</span><span class="pggo">'+esc(d.type||'')+' ↗</span></a>';
     }).join('');}
-    html+='<div style="font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--teal);font-weight:700;margin:14px 0 6px">🌴 Florida <span style="color:var(--muted);font-weight:400;text-transform:none">· curated — check directly (no clean API)</span></div>';
-    html+=fl.map(function(l){return '<a class="pgrow" style="text-decoration:none" target="_blank" rel="noopener" href="'+esc(l.url)+'"><span class="pgplan">'+esc(l.label)+(l.note?' <span style="color:var(--muted)">— '+esc(l.note)+'</span>':'')+'</span><span class="pggo">Open ↗</span></a>';}).join('');
     html+='<div class="cdsfoot"><span>Awareness only — not clinical advice, not a gate. The platform never acts on this.</span></div>';
     el.innerHTML=html;
   }).catch(function(){var c=document.getElementById('radarCard');if(c)c.style.display='none';});

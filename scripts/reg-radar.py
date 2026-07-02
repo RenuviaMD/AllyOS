@@ -6,9 +6,9 @@ IMPORTANT: this is purely informational. It does NOT touch protocol logic, gates
 any decision. It surfaces headlines + official links + dates so the MD can read primary
 sources. It is walled off from the deterministic Change Sentinel by design.
 
-Federal lane (automated): the Federal Register API (free, no key) — FDA notices, Pharmacy
+Federal lane only (automated): the Federal Register API (free, no key) — FDA notices, Pharmacy
 Compounding Advisory Committee (PCAC) meetings, §503A/§503B bulk-substance actions, peptide rules.
-Florida lane (curated): authoritative FL pages (no clean API) the MD checks directly.
+(No state/Florida lane — kept to the federal level by design.)
 
 Optionally tags an item when it mentions an agent that's in our peptide library — still info-only.
 
@@ -21,16 +21,6 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Federal Register search terms (FDA agency) — peptide + compounding regulatory activity.
 FED_TERMS = ["peptide", "Pharmacy Compounding Advisory Committee", "503A bulk drug substances", "503B bulk"]
-
-# Curated Florida links — no clean API, so these are static authoritative pages to check directly.
-FLORIDA_LINKS = [
-    {"label": "FL Administrative Register / Code (flrules.org) — search 'peptide' / 'compounding'", "url": "https://flrules.org", "note": "Official Florida rule notices — the state's Federal Register"},
-    {"label": "FL Board of Pharmacy — compounding rules + meeting agendas", "url": "https://floridaspharmacy.gov", "note": "Where a FL peptide-compounding change appears first"},
-    {"label": "FL Board of Medicine — physician practice / standard-of-care rules", "url": "https://flboardofmedicine.gov", "note": ""},
-    {"label": "Rule 64B16-27.700 — Compounding", "url": "https://flrules.org/gateway/ruleNo.asp?id=64B16-27.700", "note": ""},
-    {"label": "Rule 64B16-27.797 — Sterile compounding standards", "url": "https://flrules.org/gateway/ruleNo.asp?id=64B16-27.797", "note": ""},
-    {"label": "FL Legislature — bill search (pharmacy / compounding / wellness)", "url": "https://www.flsenate.gov/Session/Bills", "note": ""},
-]
 
 # Library peptide agents (for the optional 'mentions our agent' info tag). Static + module-derived.
 PEPTIDE_SEED = ["BPC-157", "TB-500", "KPV", "MOTS-c", "Epitalon", "Semax", "Selank", "DSIP", "GHK-Cu",
@@ -85,13 +75,14 @@ def main():
     federal.sort(key=lambda x: x.get("date", ""), reverse=True)
 
     report = {"date": datetime.datetime.utcnow().isoformat() + "Z", "agent": "reg-radar",
-              "mode": "INFO ONLY — awareness; does NOT affect protocol logic or decisions",
-              "federal": federal[:40], "florida_links": FLORIDA_LINKS,
+              "mode": "INFO ONLY — federal-level awareness; does NOT affect protocol logic or decisions",
+              "scope": "federal_only",
+              "federal": federal[:40],
               "total_federal": len(federal), "unverified": unverified,
               "status": "ok" if federal or not unverified else "unverified"}
     with open(os.path.join(ROOT, "allyos", "reg-radar.json"), "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2)
-    print("reg-radar:", len(federal), "federal item(s),", len(unverified), "unverified ·", len(FLORIDA_LINKS), "FL links")
+    print("reg-radar:", len(federal), "federal item(s),", len(unverified), "unverified · federal-only")
     return 0
 
 if __name__ == "__main__":
