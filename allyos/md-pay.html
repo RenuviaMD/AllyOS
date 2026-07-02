@@ -1,0 +1,89 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pay your Medical Director — RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
+<link rel="stylesheet" href="allyos-theme.css">
+<script src="allyos-auth.js"></script>
+<style>
+.wrap{max-width:560px;margin:0 auto;padding:26px 20px}
+.brand{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:6px}
+.brand img{width:34px;height:34px;border-radius:9px}
+.brand .b{font-family:var(--fdisp);font-size:1.15rem}.brand .b span{color:var(--gold)}
+.sub{text-align:center;color:var(--muted);font-size:.82rem;margin-bottom:20px}
+.hero{background:linear-gradient(180deg,#10202f,#0b1622);border:1px solid var(--line2);border-radius:18px;padding:26px 22px;text-align:center;margin-bottom:16px}
+.hero .lab{font-size:.64rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.hero .amt{font-family:var(--fdisp);font-size:2.8rem;margin:6px 0 2px;line-height:1}
+.hero .amt.due{color:var(--gold)}.hero .amt.clear{color:var(--green)}
+.hero .note{font-size:.82rem;color:var(--muted);margin-top:6px}
+.btn{display:block;width:100%;font-family:var(--fdisp);font-weight:600;border:none;border-radius:999px;padding:15px;margin-top:14px;cursor:pointer;text-decoration:none;font-size:1rem;text-align:center}
+.btn.go{background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a}
+.pay-note{font-size:.72rem;color:var(--muted);text-align:center;margin-top:10px}
+.card{background:linear-gradient(180deg,#101f2c,#0b1521);border:1px solid var(--line2);border-radius:14px;padding:16px 18px;margin-bottom:14px}
+.card h3{font-family:var(--fdisp);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--teal);margin-bottom:10px}
+.inv{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid var(--line);font-size:.86rem}
+.inv:first-of-type{border-top:none}
+.inv .meta{color:var(--muted);font-size:.72rem}
+.inv a{color:var(--teal);text-decoration:none;font-weight:600;font-size:.8rem}
+.st{font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:20px}
+.st.paid{background:#0e2a1d;color:var(--green)}.st.open{background:#31220e;color:var(--gold)}.st.other{background:#1a222b;color:var(--muted)}
+.foot{font-size:.72rem;color:var(--muted);text-align:center;line-height:1.6;margin-top:8px}
+.foot a{color:var(--teal);text-decoration:none}
+.who{text-align:center;font-size:.74rem;color:var(--dim);margin-top:18px}.who a{color:var(--muted)}
+</style></head>
+<body class="allyos"><div class="wrap">
+  <div class="brand"><img src="ally-avatar-64.png" alt=""><div class="b">Renuvia<span>MD</span>® · Medical Director</div></div>
+  <div class="sub" id="clinicSub">Your monthly Medical Director account</div>
+
+  <div id="body"><div class="card" style="text-align:center;color:var(--muted)">Loading your account…</div></div>
+
+  <div class="foot">Payments are secured by <b>Stripe</b>. Pay from your <b>bank account</b> (no card fees) — RenuviaMD never sees or stores your account number. Questions? <a href="mailto:drfalcon@renuviamd.com">drfalcon@renuviamd.com</a></div>
+  <div class="who" id="who"></div>
+</div>
+<script>
+var ses=null;
+if(window.AllyOSAuth){AllyOSAuth.guard(['admin','provider','nurse']);ses=AllyOSAuth.session();
+  if(ses){document.getElementById('who').innerHTML=esc(AllyOSAuth.greeting())+' · '+esc(ses.clinic||'')+' &nbsp;·&nbsp; <a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a>';}
+}
+function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function money(n){return '$'+(Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
+function dt(s){try{return new Date(s).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});}catch(e){return '';}}
+function stClass(s){return s==='paid'?'paid':(s==='open'?'open':'other');}
+function load(){
+  var cid=ses&&ses.clinicId;
+  if(!cid){document.getElementById('body').innerHTML='<div class="card" style="text-align:center;color:var(--muted)">Sign in with your clinic account to see your statement.</div>';return;}
+  fetch('/.netlify/functions/md-billing',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'clinic',clinic_id:cid})})
+    .then(function(r){return r.json();}).then(render).catch(function(){document.getElementById('body').innerHTML='<div class="card" style="text-align:center;color:var(--muted)">Could not reach billing right now.</div>';});
+}
+function render(d){
+  if(!d||d.error){document.getElementById('body').innerHTML='<div class="card" style="text-align:center;color:var(--muted)">'+(d&&d.error==='not_configured'?'Billing isn’t switched on yet.':'Could not load your account.')+'</div>';return;}
+  if(d.name)document.getElementById('clinicSub').textContent=d.name+' · Medical Director account';
+  var invoices=d.invoices||[];
+  var openInv=invoices.filter(function(v){return v.status==='open';}).sort(function(a,b){return new Date(a.due||a.created)-new Date(b.due||b.created);})[0];
+  var out=d.outstanding||0;
+  var html='';
+  // hero
+  if(out>0){
+    html+='<div class="hero"><div class="lab">Amount due</div><div class="amt due">'+money(out)+'</div>'+
+      '<div class="note">'+(openInv&&openInv.due?('Due '+dt(openInv.due)):'Payable now')+' · pay from your bank account</div>'+
+      (openInv&&openInv.url?'<a class="btn go" href="'+esc(openInv.url)+'" target="_blank" rel="noopener">Make a payment →</a>':'')+
+      '</div><div class="pay-note">One tap → pay by bank (ACH) or card on Stripe’s secure page.</div>';
+  }else{
+    html+='<div class="hero"><div class="lab">Balance</div><div class="amt clear">$0.00</div>'+
+      '<div class="note">You’re all caught up — thank you. 🎉</div></div>';
+  }
+  // fee line
+  if(d.md_fee!=null){html+='<div class="card"><h3>Your monthly fee</h3><div style="display:flex;justify-content:space-between;font-size:.9rem"><span style="color:var(--muted)">Medical Director — monthly</span><b style="font-family:var(--fdisp);color:var(--gold)">'+money(d.md_fee)+'</b></div><div style="font-size:.72rem;color:var(--muted);margin-top:6px">Complexity-based; one-off extras appear on that month’s statement.</div></div>';}
+  // history
+  if(invoices.length){
+    html+='<div class="card"><h3>Statements</h3>'+invoices.map(function(v){
+      var label=v.status==='paid'?'Receipt':(v.status==='open'?'Pay':'View');
+      return '<div class="inv"><div><div>'+money(v.amount_due||v.amount_paid)+' <span class="st '+stClass(v.status)+'">'+esc(v.status)+'</span></div><div class="meta">'+(v.number?esc(v.number)+' · ':'')+dt(v.created)+'</div></div>'+(v.url?'<a href="'+esc(v.url)+'" target="_blank" rel="noopener">'+label+' ↗</a>':(v.pdf?'<a href="'+esc(v.pdf)+'" target="_blank" rel="noopener">PDF ↗</a>':''))+'</div>';
+    }).join('')+'</div>';
+  }else{
+    html+='<div class="card" style="text-align:center;color:var(--muted);font-size:.82rem">No statements yet. When Dr. Falcon bills your clinic, it’ll appear here and you’ll get an email.</div>';
+  }
+  document.getElementById('body').innerHTML=html;
+}
+if(location.search.indexOf('paid=1')>=0){setTimeout(function(){alert('✓ Thank you — your payment is processing. A receipt will be emailed to you.');},250);}
+load();
+</script></body></html>
