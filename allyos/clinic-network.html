@@ -341,6 +341,15 @@ renderAudit();
 var AUDITF={};
 function bumpAudit(k,n){AUDITF[k]=n||0;var b=document.getElementById('auditBadge');if(!b)return;var t=0;for(var x in AUDITF){t+=AUDITF[x];}if(t>0){b.textContent='● '+t+' need'+(t===1?'s':'')+' attention';b.style.display='';}else{b.style.display='none';}}
 
+// Build a source link for any citation string: DOI → doi.org, PMC/PMID → NCBI, NCT → ClinicalTrials,
+// and if it carries no ID (e.g. a failed one), fall back to a PubMed search so there is ALWAYS a link.
+function citeLink(text){var t=''+(text||'');var m;
+  if((m=t.match(/10\.\d{4,9}\/[^\s"'<>)\]]+/)))return 'https://doi.org/'+m[0].replace(/[.,;]+$/,'');
+  if((m=t.match(/PMC(\d{5,9})/)))return 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC'+m[1]+'/';
+  if((m=t.match(/PMID[:\s]*([0-9]{6,9})/i)))return 'https://pubmed.ncbi.nlm.nih.gov/'+m[1]+'/';
+  if((m=t.match(/NCT\d{8}/)))return 'https://clinicaltrials.gov/study/'+m[0];
+  return 'https://pubmed.ncbi.nlm.nih.gov/?term='+encodeURIComponent(t.replace(/\s+/g,' ').slice(0,200));}
+
 // Published-protocol verifier — auto-confirms real citations; surfaces only failures + what's-new per protocol.
 function renderPv(){
   var card=document.getElementById('pvCard'),el=document.getElementById('pvBody');if(!el)return;
@@ -363,7 +372,8 @@ function renderPv(){
     var html='';
     if(failRows.length){html+='<div style="font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:#f0a59d;font-weight:700;margin:12px 0 6px">⚠ Citations that failed to resolve — your review</div>';
       failRows.forEach(function(p){(p.citations||[]).filter(function(c){return c.status==='FAILED';}).forEach(function(c){
-        html+='<div class="cds"><span class="rk high">FAIL</span><div class="cmid"><div class="ctitle">'+esc(c.cite||c.id||'')+'</div><div class="cmeta2">'+esc(p.module)+' · '+esc(p.protocol)+' · '+esc(c.type||'')+(c.detail?' · '+esc(c.detail):'')+'</div></div></div>';
+        var ct=c.cite||c.id||'';
+        html+='<div class="cds"><span class="rk high">FAIL</span><div class="cmid"><div class="ctitle"><a href="'+esc(citeLink(ct))+'" target="_blank" rel="noopener" style="color:var(--teal);text-decoration:none">'+esc(ct)+' ↗</a></div><div class="cmeta2">'+esc(p.module)+' · '+esc(p.protocol)+' · '+esc(c.type||'')+(c.detail?' · '+esc(c.detail):'')+'</div></div></div>';
       });});
     }
     html+='<div style="font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--teal);font-weight:700;margin:12px 0 6px">🆕 What\'s new per protocol ('+newRows.length+')</div>';
