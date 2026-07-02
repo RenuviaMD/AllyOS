@@ -83,6 +83,10 @@ h1{font-family:var(--fdisp);font-size:1.6rem;margin-top:2px}
   <h2>Bill this clinic</h2><div class="sub" id="billName"></div>
   <div id="lines"></div>
   <button class="btn ghost" style="font-size:.78rem;padding:6px 12px" onclick="addLine('',' ')">+ Add extra charge</button>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding:8px 10px;background:var(--panel);border:1px solid var(--line);border-radius:9px;font-size:.82rem">
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--muted)"><input type="checkbox" id="bFee" checked onchange="recalc()" style="accent-color:var(--teal)"> Processing fee (bank/ACH)</label>
+    <b style="color:var(--ink)">$5</b>
+  </div>
   <div class="tot">Total this bill <b id="billTot">$0</b></div>
   <div class="fld" style="margin-top:8px"><label>Due in (days)</label><input id="bDue" type="number" min="1" max="60" value="15"></div>
   <div style="font-size:.72rem;color:var(--muted)">Stripe emails the statement to the clinic with a “pay by bank” button — like a card bill. You’ll see it here as Paid once they pay.</div>
@@ -144,12 +148,15 @@ function addLine(desc,amt){var d=document.createElement('div');d.className='line
   d.innerHTML='<input class="desc" placeholder="Description" value="'+esc(desc||'')+'"><input class="amt" type="number" min="0" step="1" placeholder="0" value="'+(amt===''||amt==null?'':esc(amt))+'" oninput="recalc()"><button class="rm" onclick="this.parentNode.remove();recalc()">✕</button>';
   document.getElementById('lines').appendChild(d);recalc();
 }
-function recalc(){var t=0;document.querySelectorAll('#lines .amt').forEach(function(i){t+=Number(i.value)||0;});document.getElementById('billTot').textContent=money(t);}
+function recalc(){var t=0;document.querySelectorAll('#lines .amt').forEach(function(i){t+=Number(i.value)||0;});
+  var f=document.getElementById('bFee');if(f&&f.checked)t+=5;
+  document.getElementById('billTot').textContent=money(t);}
 function sendBill(){
   var items=[];document.querySelectorAll('#lines .lineitem').forEach(function(row){var desc=row.querySelector('.desc').value.trim();var amt=Number(row.querySelector('.amt').value)||0;if(amt>0)items.push({description:desc||'Charge',amount:amt});});
   if(!items.length){document.getElementById('billMsg').textContent='Add at least one amount.';document.getElementById('billMsg').style.color='var(--red)';return;}
   var m=document.getElementById('billMsg');m.style.color='var(--green)';m.textContent='Sending…';
-  api({action:'bill',clinic_id:billId,items:items,due_days:Number(document.getElementById('bDue').value)||15})
+  var feeOn=document.getElementById('bFee');
+  api({action:'bill',clinic_id:billId,items:items,processing_fee:(feeOn&&feeOn.checked)?5:0,due_days:Number(document.getElementById('bDue').value)||15})
    .then(function(d){
      if(d&&d.ok){m.textContent='✓ Bill '+(d.number||'')+' sent to '+(d.email||'the clinic')+' — '+money(d.amount_due);setTimeout(function(){closeBill();load();},1500);}
      else{m.style.color='var(--red)';m.textContent=(d&&d.hint)||'Could not send — try again.';}
