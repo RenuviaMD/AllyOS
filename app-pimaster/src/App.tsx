@@ -7,6 +7,7 @@ import { Section6Assessment, Section7Plan, Section8ImageOrders, Section9ImagingR
 import { BillingSettingsCard } from "./components/BillingSettings";
 import { CatalogPage } from "./components/CatalogPage";
 import { AhcaExportPage } from "./components/AhcaExport";
+import { AttorneyPackagePage } from "./components/AttorneyPackage";
 import { SignInScreen } from "./components/SignIn";
 import { allowedViews, changePassword, fetchAuthState, onAuthChange, signOut, type AuthState } from "./lib/auth";
 import { auditNote } from "./lib/audit";
@@ -50,6 +51,7 @@ export default function App() {
   const [showArchive, setShowArchive] = useState(false);
   const [showBilling, setShowBilling] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [showAttorney, setShowAttorney] = useState(false);
   const [showCatalogs, setShowCatalogs] = useState(false);
   const loaded = useRef(false);
 
@@ -413,6 +415,9 @@ export default function App() {
               <button className="btn ghost" onClick={() => setShowExport(true)}>
                 Encounter Export
               </button>
+              <button className="btn ghost" onClick={() => setShowAttorney(true)}>
+                Attorney Package
+              </button>
               <button className="btn ghost" onClick={() => setShowCatalogs(true)}>
                 Catalogs
               </button>
@@ -448,6 +453,7 @@ export default function App() {
       {showArchive && <ReportsArchive onClose={() => setShowArchive(false)} />}
       {showBilling && <BillingSettingsCard onClose={() => setShowBilling(false)} />}
       {showExport && <AhcaExportPage onClose={() => setShowExport(false)} />}
+      {showAttorney && <AttorneyPackagePage onClose={() => setShowAttorney(false)} generatedBy={auth.email} />}
       {showCatalogs && <CatalogPage onClose={() => setShowCatalogs(false)} />}
     </>
   );

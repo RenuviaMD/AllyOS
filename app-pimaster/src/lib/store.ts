@@ -155,6 +155,58 @@ export async function getReportHtml(id: string): Promise<string | null> {
   return (data?.report_html as string) ?? null;
 }
 
+// ---------- Attorney package ----------
+
+/** Lightweight metadata for every active report (no HTML) — used to group patient cases. */
+export async function listReportMeta(): Promise<{ id: string; mode: string; dos: string; form: Partial<VisitForm> | null }[]> {
+  const { data, error } = await supabase()
+    .from("reports")
+    .select("id, mode, dos, form_data")
+    .eq("status", "active")
+    .order("dos", { ascending: true })
+    .limit(1000);
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    id: r.id as string,
+    mode: r.mode as string,
+    dos: r.dos as string,
+    form: (r.form_data as Partial<VisitForm>) ?? null,
+  }));
+}
+
+/** Full documents for one patient's case, by report ids. */
+export async function fetchReportsByIds(
+  ids: string[],
+): Promise<{ id: string; mode: string; dos: string; html: string; cpt: string[] }[]> {
+  const { data, error } = await supabase()
+    .from("reports")
+    .select("id, mode, dos, report_html, cpt_codes")
+    .in("id", ids)
+    .order("dos", { ascending: true });
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    id: r.id as string,
+    mode: r.mode as string,
+    dos: r.dos as string,
+    html: (r.report_html as string) ?? "",
+    cpt: (r.cpt_codes as string[] | null) ?? [],
+  }));
+}
+
+/** PHI-light disclosure log for attorney releases (who, to whom, which charts). */
+export async function logDisclosure(details: object): Promise<void> {
+  try {
+    await supabase().from("audit_log").insert({
+      action: "attorney_package_disclosure",
+      entity_type: "reports",
+      details,
+      clinic_id: "wellness_hcc",
+    });
+  } catch {
+    // disclosure logging must never block the release itself
+  }
+}
+
 // ---------- Medical Director governance ----------
 
 export interface MonthChart {
