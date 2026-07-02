@@ -270,13 +270,15 @@ def main():
                 confirmed += 1
             elif status == "REFERENCE":
                 references += 1
-            elif status == "UNPARSEABLE":
-                unparseable += 1
-            else:  # FAILED — the only thing that needs a human
-                failed += 1
+            else:  # FAILED or UNPARSEABLE — both need a human (unparseable = unverifiABLE, not verified)
+                if status == "UNPARSEABLE":
+                    unparseable += 1
+                else:
+                    failed += 1
                 queue.append({"review_item_id": run_id + "-" + str(len(queue) + 1), "run_id": run_id,
                               "module": u["module"], "protocol": u["protocol"],
-                              "issue": "CITATION_UNRESOLVED", "identifier": val[:120],
+                              "issue": "CITATION_UNRESOLVED" if status == "FAILED" else "CITATION_UNPARSEABLE",
+                              "identifier": val[:120],
                               "detail": detail, "clinician_decision": "", "reviewer": "", "review_date": ""})
 
         # what's new for this protocol's agents (mapped to the protocol, not a global list)
@@ -309,12 +311,12 @@ def main():
     report["citations_failed"] = failed
     report["citations_reference_nonpubmed"] = references
     report["citations_unparseable"] = unparseable
-    report["status"] = "FAIL" if failed else "PASS"
+    report["status"] = "FAIL" if (failed or unparseable) else "PASS"
     report["review_total"] = len(queue)
     write_status(report); write_queue(queue)
     print("protocol-verify:", report["status"], "·", len(units), "published ·",
-          confirmed, "confirmed ·", failed, "failed citations")
-    return 1 if failed else 0
+          confirmed, "confirmed ·", failed, "failed ·", unparseable, "unparseable citations")
+    return 1 if (failed or unparseable) else 0
 
 def write_status(report):
     with open(os.path.join(ROOT, "allyos", "protocol-verify.json"), "w", encoding="utf-8") as f:
