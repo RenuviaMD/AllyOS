@@ -1,0 +1,30 @@
+name: AllyOS model A/B (Ally chat)
+
+# On-demand only. Runs the SAME grounded Ally prompt against Opus 4.8, Sonnet 5,
+# and Haiku 4.5 on realistic chairside questions, so we can eyeball whether the
+# live chat can move off Opus without losing guardrail discipline.
+# Uses the ANTHROPIC_API_KEY repo secret (Settings -> Secrets -> Actions).
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  model-ab:
+    name: Compare Opus / Sonnet / Haiku on the grounded Ally prompt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - name: Run the A/B (answers print in this log)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 scripts/model-ab.py | tee model-ab-output.txt
+      - name: Upload the side-by-side answers
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-ab-answers
+          path: model-ab-output.txt
