@@ -243,8 +243,11 @@ function openBilling(){
   fetch('/.netlify/functions/billing-portal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clinic_id:cid})})
     .then(function(r){return r.json();})
     .then(function(d){
-      if(d&&d.url){location.href=d.url;}                         // existing customer → manage
-      else if(d&&d.error==='no_customer'){addLinePrompt();}      // first time → show the info card (never jump to Stripe cold)
+      if(d&&d.url){location.href=d.url;}                         // active subscription → manage in the portal
+      else if(d&&(d.needs_checkout||d.error==='no_customer')){   // no subscription yet → subscribe
+        if(firstLockedLine()){addLinePrompt();}                  //   locked line to add → info card first
+        else{startCheckout();}                                   //   all lines active but unpaid → checkout for current lines
+      }
       else {alert(d&&d.error==='not_configured'?'Billing isn’t switched on yet (Stripe key not set).':'Billing unavailable right now.');}
     })
     .catch(function(){alert('Could not reach billing right now.');});
