@@ -419,7 +419,8 @@ function renderCs(){
     if(o.status==='pending'||!o.date){el.innerHTML='<div style="color:var(--muted);font-size:.82rem">Awaiting first run — runs daily (04:00 UTC) and on-demand. Deterministic: it reports only retractions, halted trials, and FDA label changes for our agents, each with a source link. No API key needed.</div>';return;}
     var dec=csDec();var lines=o.lines||{};var total=o.changes_total||0;
     bumpAudit('cs',total);
-    var head='<div style="font-size:.72rem;color:'+(total?'var(--gold)':'var(--green)')+';margin-bottom:10px">'+(total?('⚠ '+total+' decision-affecting change(s) — read the source, then Approve or Reject.'):'✓ Library current — no decision-affecting changes this run.')+' <span style="color:var(--muted)">Checked '+esc((''+o.date).slice(0,10))+'.</span></div>';
+    var unverifiedRun=!total&&(o.status==='UNVERIFIED'||(o.unverified_total||0)>0);
+    var head='<div style="font-size:.72rem;color:'+(total?'var(--gold)':(unverifiedRun?'var(--gold)':'var(--green)'))+';margin-bottom:10px">'+(total?('⚠ '+total+' decision-affecting change(s) — read the source, then Approve or Reject.'):(unverifiedRun?('⚠ UNVERIFIED — '+(o.unverified_total||'some')+' source(s) could not be reached this run, so "no changes" is NOT confirmed. Re-run when the network is back.'):'✓ Library current — every watched source checked, no decision-affecting changes.'))+' <span style="color:var(--muted)">Checked '+esc((''+o.date).slice(0,10))+'.</span></div>';
     var body='';
     ['IV','Peptides','HRT'].forEach(function(ln){
       var L=lines[ln]||{};var ch=(L.changes||[]);var w=L.watched||{};

@@ -164,7 +164,7 @@ def main():
     report = {"date": datetime.datetime.utcnow().isoformat() + "Z", "agent": "change-sentinel",
               "mode": "deterministic — no LLM; facts + links only; fail-closed", "lines": {}}
     queue, run_id = [], "cs-" + datetime.datetime.utcnow().strftime("%Y%m%dT%H%M")
-    total_changes = 0
+    total_changes = total_unverified = total_watched = 0
     pmid_cache = {}
 
     for line in ("IV", "Peptides", "HRT"):
@@ -214,10 +214,22 @@ def main():
                           "agent": ch["agent"], "change_type": ch["type"], "fact": ch["fact"],
                           "source_url": ch["source_url"], "decision": "", "reviewer": "", "review_date": ""})
         report["lines"][line] = {"changes": changes, "unverified": unverified, "watched": watched}
+        total_unverified += len(unverified)
+        total_watched += watched["pmids"] + watched["ncts"] + watched["labels"]
         print(line, "->", len(changes), "change(s),", watched, ",", len(unverified), "unverified")
 
-    report["status"] = "CHANGES" if total_changes else "CLEAR"
+    # Fail-closed at the TOP level too: CLEAR must mean "every watched source was actually
+    # checked and none changed." If sources couldn't be reached (or nothing was checked at
+    # all — e.g. a network outage), that is UNVERIFIED, never CLEAR.
+    if total_changes:
+        report["status"] = "CHANGES"
+    elif total_unverified or total_watched == 0:
+        report["status"] = "UNVERIFIED"
+    else:
+        report["status"] = "CLEAR"
     report["changes_total"] = total_changes
+    report["unverified_total"] = total_unverified
+    report["watched_total"] = total_watched
     with open(os.path.join(ROOT, "allyos", "change-sentinel.json"), "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2)
     state["label_baselines"] = baselines

@@ -19,10 +19,12 @@ function form(obj, prefix) {
   });
   return parts.filter(Boolean).join("&");
 }
-async function stripe(path, params, secret) {
+async function stripe(path, params, secret, idemKey) {
+  const headers = { Authorization: "Bearer " + secret, "Content-Type": "application/x-www-form-urlencoded", "Stripe-Version": STRIPE_VERSION };
+  if (idemKey) headers["Idempotency-Key"] = idemKey;
   const res = await fetch("https://api.stripe.com/v1/" + path, {
     method: "POST",
-    headers: { Authorization: "Bearer " + secret, "Content-Type": "application/x-www-form-urlencoded", "Stripe-Version": STRIPE_VERSION },
+    headers: headers,
     body: form(params),
   });
   const data = await res.json();
@@ -61,11 +63,18 @@ exports.handler = async (event) => {
     // Start auto-pay: needs a fee set by the owner first.
     if (!(fee > 0)) return json(200, Object.assign({ ok: false, no_fee: true }, quote));
 
+    // Already on auto-pay -> never create a SECOND subscription (double-charges the clinic).
+    if (clinic.md_subscription_id && ["active", "trialing", "past_due"].indexOf(clinic.md_subscription_status || "") >= 0) {
+      return json(200, Object.assign({ ok: false, already_active: true }, quote));
+    }
+
     let customer = clinic.stripe_customer_id;
     if (!customer) {
-      const c = await stripe("customers", { name: clinic.name || "AllyOS clinic", metadata: { clinic_id: clinicId } }, key);
+      // clinic_id-derived idempotency key + null-guarded write: concurrent requests converge
+      // on ONE Stripe customer instead of clobbering each other's id.
+      const c = await stripe("customers", { name: clinic.name || "AllyOS clinic", metadata: { clinic_id: clinicId } }, key, "cust-" + clinicId);
       customer = c.id;
-      await sbPatch("clinics?id=eq." + encodeURIComponent(clinicId), { stripe_customer_id: customer });
+      await sbPatch("clinics?id=eq." + encodeURIComponent(clinicId) + "&stripe_customer_id=is.null", { stripe_customer_id: customer });
     }
 
     const site = siteOf(event);

@@ -64,7 +64,13 @@ exports.handler = async (event) => {
 
   let body;
   try { body = JSON.parse(event.body || "{}"); } catch (e) { return json(400, { error: "Invalid JSON" }); }
-  const messages = Array.isArray(body.messages) ? body.messages.slice(-8) : [];
+  // Keep only well-formed {role, content:string} turns and cap each turn's length —
+  // oversized or non-string content otherwise reaches the API (upstream 400 surfaced
+  // as a 502, and an unbounded token-cost lever).
+  const messages = (Array.isArray(body.messages) ? body.messages : [])
+    .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim())
+    .slice(-8)
+    .map((m) => ({ role: m.role, content: m.content.slice(0, 8000) }));
   if (!messages.length) return json(400, { error: "Empty messages" });
 
   // Module routing — load ONLY the care line the question is about. Falls back to

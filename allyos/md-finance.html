@@ -137,8 +137,9 @@ function saveFee(){var m=document.getElementById('feeMsg');m.textContent='Saving
 }
 
 // ---- bill ----
-var billId=null;
-function openBill(id){billId=id;var c=byId(id);document.getElementById('billName').textContent=c.name||'';document.getElementById('billMsg').textContent='';
+var billId=null,billKey=null;
+function newBillKey(){try{return crypto.randomUUID();}catch(e){return 'bk'+Date.now()+Math.random().toString(36).slice(2,10);}}
+function openBill(id){billId=id;billKey=newBillKey();var c=byId(id);document.getElementById('billName').textContent=c.name||'';document.getElementById('billMsg').textContent='';
   document.getElementById('lines').innerHTML='';
   var month=new Date().toLocaleString(undefined,{month:'long'});
   addLine('Medical Director — '+month, c.md_fee!=null?c.md_fee:'');
@@ -157,11 +158,11 @@ function sendBill(){
   if(!items.length){document.getElementById('billMsg').textContent='Add at least one amount.';document.getElementById('billMsg').style.color='var(--red)';return;}
   var m=document.getElementById('billMsg');m.style.color='var(--green)';m.textContent='Sending…';
   var feeOn=document.getElementById('bFee');
-  api({action:'bill',clinic_id:billId,items:items,processing_fee:(feeOn&&feeOn.checked)?5:0,due_days:Number(document.getElementById('bDue').value)||15})
+  api({action:'bill',clinic_id:billId,items:items,processing_fee:(feeOn&&feeOn.checked)?5:0,due_days:Number(document.getElementById('bDue').value)||15,bill_key:billKey})
    .then(function(d){
      if(d&&d.ok){m.textContent='✓ Bill '+(d.number||'')+' sent to '+(d.email||'the clinic')+' — '+money(d.amount_due);setTimeout(function(){closeBill();load();},1500);}
-     else{m.style.color='var(--red)';m.textContent=(d&&d.hint)||'Could not send — try again.';}
-   }).catch(function(){m.style.color='var(--red)';m.textContent='Could not reach billing.';});
+     else{m.style.color='var(--red)';m.textContent=(d&&d.hint)||'Could not send — try again.';billKey=newBillKey();/* clean failure: fresh key so the retry is a new bill */}
+   }).catch(function(){m.style.color='var(--red)';m.textContent='Could not reach billing.';/* network unknown: KEEP the key so a retry can't double-bill */});
 }
 document.querySelectorAll('.mback').forEach(function(b){b.addEventListener('click',function(e){if(e.target===this)this.classList.remove('on');});});
 load();

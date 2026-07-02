@@ -28,16 +28,29 @@ PEPTIDE_SEED = ["BPC-157", "TB-500", "KPV", "MOTS-c", "Epitalon", "Semax", "Sela
                 "Kisspeptin", "retatrutide", "semaglutide", "tirzepatide", "SS-31", "elamipretide", "Emideltide"]
 
 def library_agents():
+    """Seed list + the ACTUAL agent/ingredient names found in the locked peptide modules,
+    so a library-only peptide (not in the static seed) still gets the info tag."""
     agents = set(a.lower() for a in PEPTIDE_SEED)
+    NAME_KEYS = ("name", "agent", "ingredient", "peptide")
+
+    def collect(node):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                if k in NAME_KEYS and isinstance(v, str):
+                    n = re.sub(r"\(.*?\)|[®™]", "", v).strip().lower()
+                    if 3 <= len(n) <= 40:
+                        agents.add(n)
+                collect(v)
+        elif isinstance(node, list):
+            for v in node:
+                collect(v)
+
     for mod in ("peptide-module", "peptide-stack-families", "peptide-iv-support"):
         p = os.path.join(ROOT, "protocols", mod + ".json")
         try:
-            blob = open(p, encoding="utf-8").read().lower()
+            collect(json.load(open(p, encoding="utf-8")))
         except Exception:
             continue
-        for a in list(agents):
-            if a in blob:
-                agents.add(a)
     return agents
 
 def _get(url, timeout=30):
