@@ -58,9 +58,14 @@ async function ensureCustomer(clinic, key) {
     if (clinic.md_billing_email) { try { await stripePost("customers/" + encodeURIComponent(clinic.stripe_customer_id), { email: clinic.md_billing_email }, key); } catch (e) {} }
     return clinic.stripe_customer_id;
   }
-  const c = await stripePost("customers", { name: clinic.name || "Clinic", email: clinic.md_billing_email || undefined, metadata: { clinic_id: clinic.id } }, key);
-  await sbPatch("clinics?id=eq." + encodeURIComponent(clinic.id), { stripe_customer_id: c.id });
-  return c.id;
+  // Idempotency key from clinic_id: two concurrent creates return the SAME Stripe customer,
+  // so the PATCH below can't clobber a different id written by a racing request.
+  const c = await stripePost("customers", { name: clinic.name || "Clinic", email: clinic.md_billing_email || undefined, metadata: { clinic_id: clinic.id } }, key, "cust-" + clinic.id);
+  // Write only if still null, then trust the DB: if a racing request won, bill THEIR customer —
+  // the one the statement page reads — never a duplicate that invoicesFor would miss.
+  await sbPatch("clinics?id=eq." + encodeURIComponent(clinic.id) + "&stripe_customer_id=is.null", { stripe_customer_id: c.id });
+  const rows = await sbGet("clinics?id=eq." + encodeURIComponent(clinic.id) + "&select=stripe_customer_id");
+  return (rows[0] && rows[0].stripe_customer_id) || c.id;
 }
 async function invoicesFor(customer, key) {
   if (!customer) return [];

@@ -198,6 +198,10 @@ def resolve_citation(text):
     if ay:
         author, year, rest = ay.group(1), ay.group(2), ay.group(3)
         journal = re.split(r'[\d:;,]', rest)[0].strip()
+        # Author+year ALONE is too weak to auto-confirm (any author namesake published that
+        # year matches). Require a real journal token, else send to human review.
+        if len(re.sub(r'[^A-Za-z]', '', journal)) < 3:
+            return "UNPARSEABLE", "article", "author+year only (no journal) — needs human review: " + t[:80]
         ok, d = pubmed_citation(author, year, journal); return ("CONFIRMED" if ok else "FAILED"), "article", d
     if NONPUBMED.search(t):
         return "REFERENCE", "non_pubmed", t[:90]   # FDA/USP/guideline — not auto-verifiable, not a defect
@@ -233,14 +237,16 @@ def main():
     queue = []
     run_id = "pv-" + datetime.datetime.utcnow().strftime("%Y%m%dT%H%M")
 
-    units = []
+    units, module_errors = [], []
     for m in MODULES:
         p = os.path.join(ROOT, "protocols", m + ".json")
         if not os.path.exists(p):
+            module_errors.append(m + ": file missing")
             continue
         try:
             units += protocol_units(m, json.load(open(p, encoding="utf-8")))
         except Exception as e:
+            module_errors.append(m + ": " + str(e)[:80])
             print("parse error", m, e)
 
     references = unparseable = 0
@@ -311,12 +317,19 @@ def main():
     report["citations_failed"] = failed
     report["citations_reference_nonpubmed"] = references
     report["citations_unparseable"] = unparseable
-    report["status"] = "FAIL" if (failed or unparseable) else "PASS"
+    report["module_errors"] = module_errors
+    # A PASS must mean "real modules were checked and everything resolved" — a run where
+    # modules failed to load, or that discovered ZERO published units, is an ERROR, never PASS.
+    if module_errors or not units:
+        report["status"] = "ERROR"
+    else:
+        report["status"] = "FAIL" if (failed or unparseable) else "PASS"
     report["review_total"] = len(queue)
     write_status(report); write_queue(queue)
     print("protocol-verify:", report["status"], "·", len(units), "published ·",
-          confirmed, "confirmed ·", failed, "failed ·", unparseable, "unparseable citations")
-    return 1 if (failed or unparseable) else 0
+          confirmed, "confirmed ·", failed, "failed ·", unparseable, "unparseable ·",
+          len(module_errors), "module error(s)")
+    return 0 if report["status"] == "PASS" else 1
 
 def write_status(report):
     with open(os.path.join(ROOT, "allyos", "protocol-verify.json"), "w", encoding="utf-8") as f:
