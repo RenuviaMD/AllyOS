@@ -32,6 +32,17 @@ async function applySub(clinicId, sub) {
   if (!clinicId || !sub) return;
   const item = (sub.items && sub.items.data && sub.items.data[0]) || {};
   const cpe = sub.current_period_end || item.current_period_end || null;
+  // The Medical-Director-of-record fee is a SEPARATE product/lane — route it to md_* fields
+  // so it never overwrites the AllyOS line subscription (a customer can hold both).
+  if (sub.metadata && sub.metadata.type === "md_of_record") {
+    await sbPatch("clinics?id=eq." + encodeURIComponent(clinicId), {
+      md_subscription_id: sub.id,
+      md_subscription_status: sub.status || "none",
+      stripe_customer_id: sub.customer,
+      billing_updated_at: new Date().toISOString(),
+    });
+    return;
+  }
   await sbPatch("clinics?id=eq." + encodeURIComponent(clinicId), {
     stripe_subscription_id: sub.id,
     stripe_customer_id: sub.customer,
