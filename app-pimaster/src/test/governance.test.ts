@@ -3,15 +3,9 @@ import {
   AUDIT_POINTS,
   autoEvaluate,
   buildEncountersCsv,
-  buildGovernanceReportHtml,
   chartScore,
   failedPoints,
-  MAX_CHARTS,
-  MIN_CHARTS,
-  sampleCharts,
   statusFor,
-  worstStatus,
-  type ChartReviewItem,
   type EncounterExport,
 } from "../lib/governance";
 import { withEncounter } from "../lib/icd10";
@@ -128,6 +122,7 @@ describe("AHCA Pro encounter export", () => {
     expect(lines[1]).toContain("CORRECTIVE");
     // multi-code cells are space-joined, so no stray commas split the row
     expect(lines[1].split(",").length).toBe(12);
+    expect(AUDIT_POINTS.length).toBe(10);
   });
 });
 
@@ -144,50 +139,5 @@ describe("scoring and status ladder", () => {
     expect(statusFor(85)).toBe("MONITOR");
     expect(statusFor(70)).toBe("CORRECTIVE");
     expect(statusFor(40)).toBe("ESCALATION");
-  });
-
-  it("overall status is the worst chart status", () => {
-    expect(worstStatus(["PASS", "MONITOR", "CORRECTIVE"])).toBe("CORRECTIVE");
-    expect(worstStatus(["PASS", "PASS"])).toBe("PASS");
-  });
-});
-
-describe("binder report", () => {
-  it("enforces the 5–10 range constants and sampling bounds", () => {
-    expect(MIN_CHARTS).toBe(5);
-    expect(MAX_CHARTS).toBe(10);
-    expect(sampleCharts([1, 2, 3], 10)).toHaveLength(3);
-  });
-
-  it("includes statute, KPIs, matrix, and MD override markers", () => {
-    const item: ChartReviewItem = {
-      reportId: "r1c4f2a9b",
-      patientInitials: "T.P.",
-      dos: "2026-05-04",
-      mode: "initial",
-      telehealth: false,
-      evaluation: autoEvaluate(completedForm(), ["99204"], ["S13.4XXA"]),
-      mdOverrides: ["authority"],
-      comments: "License verified on DOH.",
-    };
-    const html = buildGovernanceReportHtml({
-      periodStart: "2026-05-13",
-      periodEnd: "2026-06-11",
-      targetCount: 5,
-      totalChartsInPeriod: 3,
-      items: [item],
-      reviewer: "Dr. Armando Falcon, MD",
-      followUp: "Re-train staff on consent capture.",
-    });
-    expect(html).toContain("400.9935");
-    expect(html).toContain("MEDICAL DIRECTOR CHART AUDIT REPORT");
-    expect(html).toContain("Total encounters");
-    expect(html).toContain("2026-05-13 → 2026-06-11");
-    expect(html).toContain("T.P.");
-    expect(html).not.toContain("Test Patient"); // no PHI in the admin report
-    expect(html).toContain("protected health information");
-    expect(html).toContain("all available charts were reviewed");
-    expect(html).toContain("Re-train staff on consent capture.");
-    expect(AUDIT_POINTS.length).toBe(10);
   });
 });

@@ -1,10 +1,10 @@
-import { CLINIC } from "./clinic";
 import type { VisitForm } from "./types";
 
 /**
- * Inspection-point model adapted from the AHCA Pro platform's chart-review
- * system: Y/N/NA per point, per-chart score, PASS/MONITOR/CORRECTIVE/ESCALATION
- * status ladder, MD overrides, and an AHCA-binder QA report.
+ * Encounter risk triage for the 30-day Encounter Export. PI Master handles
+ * clinical operations only — the Medical Director's audit itself is completed
+ * in the external governance system. Each encounter is pre-scored (Y/N/NA per
+ * inspection point) so high-risk charts are easy to select for export.
  */
 
 export type PointValue = "Y" | "N" | "NA";
@@ -102,12 +102,32 @@ export function autoEvaluate(form: VisitForm, savedCpt: string[], savedIcd: stri
   return ev;
 }
 
+export function chartScore(ev: ChartEvaluation): { yes: number; no: number; pct: number | null } {
+  let yes = 0;
+  let no = 0;
+  for (const p of AUDIT_POINTS) {
+    const v = ev[p.id]?.value;
+    if (v === "Y") yes++;
+    if (v === "N") no++;
+  }
+  const denom = yes + no;
+  return { yes, no, pct: denom === 0 ? null : Math.round((yes / denom) * 100) };
+}
+
+/** Risk-status ladder used for triage ordering in the export. */
+export function statusFor(pct: number | null): ChartStatus {
+  if (pct === null || pct === 100) return "PASS";
+  if (pct >= 80) return "MONITOR";
+  if (pct >= 60) return "CORRECTIVE";
+  return "ESCALATION";
+}
+
 /** Inspection-point ids that came back as deficiencies (value "N"). */
 export function failedPoints(ev: ChartEvaluation): string[] {
   return AUDIT_POINTS.filter((p) => ev[p.id]?.value === "N").map((p) => p.id);
 }
 
-/** One row of the 30-day encounter spreadsheet fed to AHCA Pro. */
+/** One row of the 30-day encounter spreadsheet. */
 export interface EncounterExport {
   chartId: string;
   dos: string;
@@ -127,7 +147,7 @@ function csvCell(v: string): string {
   return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
 }
 
-/** Build the last-30-days encounter CSV for risk triage / AHCA Pro upload. */
+/** Build the last-30-days encounter CSV for risk triage / external audit upload. */
 export function buildEncountersCsv(rows: EncounterExport[]): string {
   const header = [
     "Chart ID",
@@ -162,162 +182,4 @@ export function buildEncountersCsv(rows: EncounterExport[]): string {
       .join(","),
   );
   return [header.join(","), ...lines].join("\r\n");
-}
-
-export function chartScore(ev: ChartEvaluation): { yes: number; no: number; pct: number | null } {
-  let yes = 0;
-  let no = 0;
-  for (const p of AUDIT_POINTS) {
-    const v = ev[p.id]?.value;
-    if (v === "Y") yes++;
-    if (v === "N") no++;
-  }
-  const denom = yes + no;
-  return { yes, no, pct: denom === 0 ? null : Math.round((yes / denom) * 100) };
-}
-
-/** Status ladder mirroring AHCA Pro's PASS/MONITOR/CORRECTIVE/ESCALATION levels. */
-export function statusFor(pct: number | null): ChartStatus {
-  if (pct === null || pct === 100) return "PASS";
-  if (pct >= 80) return "MONITOR";
-  if (pct >= 60) return "CORRECTIVE";
-  return "ESCALATION";
-}
-
-export function worstStatus(statuses: ChartStatus[]): ChartStatus {
-  const order: ChartStatus[] = ["PASS", "MONITOR", "CORRECTIVE", "ESCALATION"];
-  return statuses.reduce<ChartStatus>((acc, s) => (order.indexOf(s) > order.indexOf(acc) ? s : acc), "PASS");
-}
-
-export interface ChartReviewItem {
-  reportId: string;
-  /** initials only — the governance layer stores no PHI (AHCA Pro pattern) */
-  patientInitials: string;
-  dos: string;
-  mode: string;
-  telehealth: boolean;
-  evaluation: ChartEvaluation;
-  /** point ids the MD changed from the auto evaluation (AHCA Pro md_overrides) */
-  mdOverrides: string[];
-  comments: string;
-}
-
-export const MIN_CHARTS = 5;
-export const MAX_CHARTS = 10;
-
-export function itemComplete(i: ChartReviewItem): boolean {
-  // every manual point must be resolved (not left NA by default is allowed only for true NA;
-  // we require the MD to have touched authority + incident or left an explicit comment)
-  return AUDIT_POINTS.every((p) => i.evaluation[p.id] !== undefined);
-}
-
-/** Random sample without replacement. */
-export function sampleCharts<T>(pool: T[], n: number): T[] {
-  const copy = [...pool];
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy.slice(0, Math.min(n, copy.length));
-}
-
-function esc(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-const STATUS_COLOR: Record<ChartStatus, string> = {
-  PASS: "#27ae60",
-  MONITOR: "#f39c12",
-  CORRECTIVE: "#e67e22",
-  ESCALATION: "#e74c3c",
-};
-
-/** AHCA-style Medical Director audit report for the compliance binder. */
-export function buildGovernanceReportHtml(args: {
-  periodStart: string;
-  periodEnd: string;
-  targetCount: number;
-  totalChartsInPeriod: number;
-  items: ChartReviewItem[];
-  reviewer: string;
-  followUp: string;
-}): string {
-  const { items } = args;
-  const period = `${args.periodStart} → ${args.periodEnd}`;
-  const perChart = items.map((i) => {
-    const s = chartScore(i.evaluation);
-    return { item: i, score: s, status: statusFor(s.pct) };
-  });
-  const deficiencies = perChart.reduce((acc, c) => acc + c.score.no, 0);
-  const overall = worstStatus(perChart.map((c) => c.status));
-  const agg = (() => {
-    const yes = perChart.reduce((a, c) => a + c.score.yes, 0);
-    const no = deficiencies;
-    return yes + no === 0 ? null : Math.round((yes / (yes + no)) * 100);
-  })();
-
-  const matrix = perChart
-    .map(({ item, score, status }, n) => {
-      const cells = AUDIT_POINTS.map((p) => {
-        const r = item.evaluation[p.id];
-        const overridden = item.mdOverrides.includes(p.id) ? "*" : "";
-        return `<td style="text-align:center">${r ? r.value : ""}${overridden}</td>`;
-      }).join("");
-      return `<tr><td>${n + 1}</td><td>${esc(item.patientInitials)} <span style="color:#888">[${esc(item.reportId.slice(0, 8))}]</span></td><td>${esc(item.dos)}</td><td>${esc(item.mode)}${item.telehealth ? " (TH)" : ""}</td>${cells}
-        <td>${score.pct === null ? "—" : `${score.pct}%`}</td>
-        <td style="color:${STATUS_COLOR[status]}; font-weight:bold">${status}</td>
-        <td>${esc(item.comments)}</td></tr>`;
-    })
-    .join("");
-  const pointHeaders = AUDIT_POINTS.map((_, i) => `<th>P${i + 1}</th>`).join("");
-  const legend = AUDIT_POINTS.map((p, i) => `<tr><td><strong>P${i + 1}</strong></td><td>${esc(p.label)}</td></tr>`).join("");
-  const shortSample =
-    args.totalChartsInPeriod < args.targetCount
-      ? `<p>Note: only ${args.totalChartsInPeriod} chart(s) were generated during this period; all available charts were reviewed.</p>`
-      : "";
-
-  return `<!doctype html><html><head><meta charset="utf-8"><title>MD Audit — ${esc(period)}</title>
-  <style>
-    body { font-family: Georgia, serif; color: #1a252f; margin: 36px; font-size: 12px; }
-    .letterhead { text-align: center; border-bottom: 3px double #16a085; padding-bottom: 10px; margin-bottom: 16px; }
-    .lh-name { font-size: 18px; font-weight: bold; color: #2c3e50; letter-spacing: 1px; }
-    h1 { font-size: 15px; color: #2c3e50; border-bottom: 2px solid #f39c12; padding-bottom: 4px; }
-    h2 { font-size: 12px; color: #16a085; text-transform: uppercase; margin: 14px 0 6px; }
-    table { border-collapse: collapse; width: 100%; margin: 6px 0; font-size: 10px; }
-    td, th { border: 1px solid #b0bec5; padding: 3px 5px; text-align: left; vertical-align: top; }
-    th { background: #eef5f4; }
-    .kpi { display: inline-block; margin-right: 24px; font-size: 12px; }
-    .kpi b { font-size: 16px; }
-    .sig { margin-top: 40px; } .sig-line { border-top: 1px solid #1a252f; width: 320px; padding-top: 4px; }
-    @media print { body { margin: 14px; } }
-  </style></head><body>
-  <div class="letterhead"><div class="lh-name">${esc(CLINIC.name)}</div><div>${esc(CLINIC.address)}</div>
-  <div>Phone: ${esc(CLINIC.phone)} | Fax: ${esc(CLINIC.fax)}</div></div>
-  <h1>MEDICAL DIRECTOR CHART AUDIT REPORT — AHCA COMPLIANCE BINDER</h1>
-  <p>
-    <span class="kpi">Review period (30 days)<br><b>${esc(period)}</b></span>
-    <span class="kpi">Total encounters<br><b>${args.totalChartsInPeriod}</b></span>
-    <span class="kpi">Charts reviewed<br><b>${items.length}</b></span>
-    <span class="kpi">Deficiencies<br><b>${deficiencies}</b></span>
-    <span class="kpi">Aggregate score<br><b>${agg === null ? "—" : `${agg}%`}</b></span>
-    <span class="kpi">Overall status<br><b style="color:${STATUS_COLOR[overall]}">${overall}</b></span>
-  </p>
-  <p>This audit was conducted pursuant to the Medical Director's responsibilities under the Florida Health Care Clinic Act,
-  § 400.9935, Florida Statutes, including the systematic review of clinic billings against the clinical record to ensure
-  billings are not fraudulent or unlawful, verification of provider authority, and review of documentation standards.
-  Each chart was evaluated against the inspection points below (Y = met, N = deficiency, NA = not applicable;
-  * = Medical Director override of the system's pre-evaluation).
-  Patient identifiers are limited to initials and chart reference IDs — this administrative report contains no
-  protected health information; the full clinical records are retained in the clinic's medical record system.</p>
-  ${shortSample}
-  <h2>Chart Matrix</h2>
-  <table><tr><th>#</th><th>Patient</th><th>DOS</th><th>Type</th>${pointHeaders}<th>Score</th><th>Status</th><th>Comments / Corrective Action</th></tr>${matrix}</table>
-  <h2>Inspection Points</h2>
-  <table>${legend}</table>
-  <h2>Follow-Up / Corrective Action Plan</h2>
-  <p>${esc(args.followUp || "None required. Routine monitoring continues.")}</p>
-  <p>I certify that I personally reviewed the charts listed above, that billings were matched against the clinical record,
-  and that the findings recorded are true and correct to the best of my medical judgment.</p>
-  <div class="sig"><div class="sig-line">${esc(args.reviewer || CLINIC.provider)} — Medical Director<br>License ${esc(CLINIC.license)} | NPI ${esc(CLINIC.npi)}<br>Date: ${new Date().toISOString().slice(0, 10)}</div></div>
-  </body></html>`;
 }

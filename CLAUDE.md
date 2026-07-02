@@ -13,8 +13,8 @@
 4. **Billing identity**: the clinic bills under the clinic (group) NPI → CMS-1500 Box 33a; the doctor's individual NPI is the rendering provider → Box 24J. POS 11 in person; POS 02 + modifier 95 for telehealth (never POS 10 — patient is never at home).
 5. **AHCA Pro ≠ AllyOS**: AHCA Pro serves AHCA-licensed clinics (PIP clinics must be licensed, F.S. 400.990+). AllyOS serves non-AHCA cash-pay facilities. Never mix their audit content (no GFE/infusion checkpoints in PI/PIP audits).
 6. **Admin layers are PHI-free**: AHCA Pro and every compliance/export surface in PI Master store patient initials + chart reference IDs only — never names/DOB.
-7. **MD audit flow**: PI Master does NOT run the audit. It exports the rolling LAST-30-DAYS encounter spreadsheet (risk-scored, highest first); the MD picks ~5 high-risk charts, pulls each Report + Superbill, and completes the audit in AHCA Pro.
-8. **Auth model**: one login screen for everyone; individual user accounts; roles are ASSIGNED BY THE ADMIN via `app_users.roles` (admin/physician/staff/pt). MD-governance/facility modules are optional per clinic.
+7. **Scope: clinical operations ONLY.** No governance/compliance modules in this platform — governance is handled separately (outside this codebase). The only touchpoint is the Encounter Export: rolling LAST-30-DAYS spreadsheet (risk-scored, highest first) + per-chart Report/Superbill that the MD takes to the external system. Do not (re)build facility registries, binder reports, or audit workflows here.
+8. **Auth model**: one login screen for everyone; individual user accounts; roles are ASSIGNED BY THE ADMIN via `app_users.roles` (admin/physician/staff/pt).
 9. **Clone guard**: ≤20% narrative similarity between same-accident patients; differentiation must come from real documented findings — never generate artificial variation to pass the check.
 10. **7th character**: injury (S/T) ICD-10 codes bill A on initial, D on follow-up/final; sequela (S) is a physician decision, never automatic.
 
@@ -23,4 +23,4 @@
 - He prefers autonomous batch execution: on "go" / "continue" / "one shot", complete the whole scoped item (build → verify → commit → push) without mid-course questions. Propose-first only when he says "tell me" / "advice" / "proposal first".
 - Session repo scope is `armandofalcon66/renuviamd-site` only. RenuviaMD-org repos (e.g. `PIP-notes-`) are not readable from here — research them via their Supabase data instead, read-only.
 - Deliverables he opens are files: send status reports/presentations as self-contained HTML via SendUserFile.
-- Known pending user inputs: EIN + fee schedule (Billing Settings), AHCA license number (Facility panel), Supabase BAA, Netlify deploy approval.
+- Known pending user inputs: EIN + fee schedule (Billing Settings), Supabase BAA, Netlify deploy approval.

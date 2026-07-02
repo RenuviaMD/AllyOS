@@ -211,53 +211,6 @@ export function windowStart(endDate: string, days = 30): string {
   return start.toISOString().slice(0, 10);
 }
 
-export async function saveGovernanceReview(args: {
-  month: string;
-  targetCount: number;
-  reviewer: string;
-  items: object[];
-  html: string;
-}): Promise<{ ok: boolean; error?: string }> {
-  try {
-    const { error } = await supabase().from("governance_reviews").insert({
-      review_month: args.month,
-      target_count: args.targetCount,
-      reviewer: args.reviewer,
-      items: args.items,
-      report_html: args.html,
-      clinic_id: "wellness_hcc",
-    });
-    if (error) throw error;
-    return { ok: true };
-  } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : String(e) };
-  }
-}
-
-export interface GovernanceReviewRow {
-  id: string;
-  review_month: string;
-  target_count: number;
-  reviewer: string | null;
-  created_at: string;
-}
-
-export async function listGovernanceReviews(): Promise<GovernanceReviewRow[]> {
-  const { data, error } = await supabase()
-    .from("governance_reviews")
-    .select("id, review_month, target_count, reviewer, created_at")
-    .order("created_at", { ascending: false })
-    .limit(48);
-  if (error) throw error;
-  return (data ?? []) as GovernanceReviewRow[];
-}
-
-export async function getGovernanceReviewHtml(id: string): Promise<string | null> {
-  const { data, error } = await supabase().from("governance_reviews").select("report_html").eq("id", id).single();
-  if (error) return null;
-  return (data?.report_html as string) ?? null;
-}
-
 // ---------- Clinic catalogs & billing identity (cloud) ----------
 
 export interface DxCatalogRow {
@@ -331,60 +284,6 @@ export interface ClinicBillingIdentity {
   ein: string;
   billing_npi: string;
   rendering_npi: string;
-}
-
-// ---------- Facility compliance registries (PHI-free) ----------
-
-export async function listFacilityRows(table: string): Promise<Array<Record<string, unknown> & { id: string }>> {
-  const { data, error } = await supabase().from(table).select("*").order("created_at", { ascending: true });
-  if (error) throw error;
-  return (data ?? []) as Array<Record<string, unknown> & { id: string }>;
-}
-
-export async function upsertFacilityRow(table: string, row: Record<string, unknown>): Promise<{ ok: boolean; error?: string }> {
-  try {
-    const clean = Object.fromEntries(Object.entries(row).filter(([, v]) => v !== undefined && v !== ""));
-    const { error } = await supabase().from(table).upsert({ ...clean, clinic_id: "wellness_hcc" });
-    if (error) throw error;
-    return { ok: true };
-  } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : String(e) };
-  }
-}
-
-export interface AhcaLicenseInfo {
-  ahca_license_number: string;
-  ahca_license_expiration: string;
-}
-
-export async function loadAhcaLicense(): Promise<AhcaLicenseInfo> {
-  try {
-    const { data } = await supabase()
-      .from("clinic_settings")
-      .select("ahca_license_number, ahca_license_expiration")
-      .eq("clinic_id", "wellness_hcc")
-      .maybeSingle();
-    return {
-      ahca_license_number: data?.ahca_license_number ?? "",
-      ahca_license_expiration: data?.ahca_license_expiration ?? "",
-    };
-  } catch {
-    return { ahca_license_number: "", ahca_license_expiration: "" };
-  }
-}
-
-export async function saveAhcaLicense(info: AhcaLicenseInfo): Promise<void> {
-  await supabase()
-    .from("clinic_settings")
-    .upsert(
-      {
-        clinic_id: "wellness_hcc",
-        ahca_license_number: info.ahca_license_number || null,
-        ahca_license_expiration: info.ahca_license_expiration || null,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "clinic_id" },
-    );
 }
 
 export async function loadClinicBilling(): Promise<ClinicBillingIdentity | null> {

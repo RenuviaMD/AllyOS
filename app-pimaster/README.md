@@ -32,6 +32,10 @@ Every visit carries a modality toggle next to the visit-type toggle. Telehealth 
 
 A pre-generation audit (`src/lib/audit.ts`) blocks notes with missing identity/accident data, missing medical-necessity rationale, missing telehealth consent, hands-on findings on telehealth visits, or a final visit without an outcome.
 
+## Scope
+
+PI Master handles **clinical operations only** — documentation, orders, and billing documents. Medical-director governance and facility compliance are handled in a separate external system; PI Master's only governance touchpoint is the **Encounter Export** (last-30-days risk-scored CSV plus per-chart Report/Superbill).
+
 ## PI/PIP documentation & billing
 
 - **EMC determination** is a required field on every initial visit (FL PIP § 627.736 — $10,000 vs $2,500 benefit). When YES, the app generates the clinic's **Certification of Emergency Medical Condition** (statutory definition, auto-checked body regions, paired sprain/strain/pain ICD-10 codes, physician certification language) replicating the existing paper form.
@@ -53,7 +57,7 @@ A pre-generation audit (`src/lib/audit.ts`) blocks notes with missing identity/a
 
 ## Authentication & access
 
-Sign-in is required (Supabase Auth). Roles come from the `app_users` table — staff / physician / pt, with `admin` unlocking all views — and Row Level Security enforces them server-side: clinical records require an active account; catalogs, governance, billing settings, and facility registries are writable only by physician/admin. Accounts are provisioned by the administrator (no open signup).
+Sign-in is required (Supabase Auth). Roles come from the `app_users` table — staff / physician / pt, with `admin` unlocking all views — and Row Level Security enforces them server-side: clinical records require an active account; catalogs, billing settings, and the encounter export are restricted to physician/admin. Accounts are provisioned by the administrator (no open signup).
 
 ## Important compliance notes
 

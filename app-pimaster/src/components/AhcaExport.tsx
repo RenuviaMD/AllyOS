@@ -82,7 +82,7 @@ export function AhcaExportPage(props: { onClose: () => void }) {
     const subset = onlySelected ? rows.filter((r) => selected.has(r.chart.id)) : rows;
     const csv = buildEncountersCsv(subset);
     const tag = onlySelected ? "selected" : "30day";
-    downloadFile(`ahca-encounters-${tag}-${reviewDate}.csv`, csv);
+    downloadFile(`encounters-${tag}-${reviewDate}.csv`, csv);
     setStatus(`Exported ${subset.length} encounter(s) to CSV.`);
   }
 
@@ -102,14 +102,14 @@ export function AhcaExportPage(props: { onClose: () => void }) {
     <div className="modal-back" onClick={props.onClose}>
       <div className="modal" style={{ width: "min(1040px, 97vw)" }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8, flexWrap: "wrap" }}>
-          <h2 style={{ margin: 0, color: "var(--gold)" }}>AHCA Pro Export — Encounter Triage</h2>
+          <h2 style={{ margin: 0, color: "var(--gold)" }}>Encounter Export — Last 30 Days</h2>
           <button className="btn ghost" style={{ marginLeft: "auto" }} onClick={props.onClose}>Close</button>
         </div>
         <p className="status">
           Last-30-day encounter spreadsheet for the Medical Director's risk review. Export the CSV, identify the
-          higher-risk encounters, then pull each selected chart's Report + Superbill to inject into AHCA Pro — the
-          audit itself is completed in AHCA Pro. Risk = count of auto-detected deficiencies (billing-vs-note,
-          coding, medical necessity, EMC, encounter character, telehealth) per chart.
+          higher-risk encounters, then pull each selected chart's Report + Superbill for the external governance
+          system — the audit itself is completed outside this platform. Risk = count of auto-detected deficiencies
+          (billing-vs-note, coding, medical necessity, EMC, encounter character, telehealth) per chart.
         </p>
 
         <div className="grid" style={{ marginBottom: 10 }}>
@@ -164,7 +164,7 @@ export function AhcaExportPage(props: { onClose: () => void }) {
               </tbody>
             </table>
             <p className="status">
-              Tip: open the Report and Superbill for each higher-risk chart and save/print to inject into AHCA Pro.
+              Tip: open the Report and Superbill for each higher-risk chart and save/print for the external audit.
               This export is PHI-limited to initials + chart IDs in the spreadsheet; the per-chart documents are the
               full clinical record for the audit.
             </p>

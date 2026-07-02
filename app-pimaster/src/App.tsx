@@ -6,7 +6,6 @@ import { Section11PtDaily, Section12PtWeekly } from "./components/SectionsPt";
 import { Section6Assessment, Section7Plan, Section8ImageOrders, Section9ImagingReview } from "./components/SectionsPlan";
 import { BillingSettingsCard } from "./components/BillingSettings";
 import { CatalogPage } from "./components/CatalogPage";
-import { FacilityPanel } from "./components/FacilityPanel";
 import { AhcaExportPage } from "./components/AhcaExport";
 import { SignInScreen } from "./components/SignIn";
 import { allowedViews, changePassword, fetchAuthState, onAuthChange, signOut, type AuthState } from "./lib/auth";
@@ -52,7 +51,6 @@ export default function App() {
   const [showBilling, setShowBilling] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showCatalogs, setShowCatalogs] = useState(false);
-  const [showFacility, setShowFacility] = useState(false);
   const loaded = useRef(false);
 
   useEffect(() => {
@@ -388,13 +386,10 @@ export default function App() {
           {role === "physician" && (
             <>
               <button className="btn ghost" onClick={() => setShowExport(true)}>
-                AHCA Export
+                Encounter Export
               </button>
               <button className="btn ghost" onClick={() => setShowCatalogs(true)}>
                 Catalogs
-              </button>
-              <button className="btn ghost" onClick={() => setShowFacility(true)}>
-                Facility
               </button>
             </>
           )}
@@ -412,7 +407,6 @@ export default function App() {
       {showBilling && <BillingSettingsCard onClose={() => setShowBilling(false)} />}
       {showExport && <AhcaExportPage onClose={() => setShowExport(false)} />}
       {showCatalogs && <CatalogPage onClose={() => setShowCatalogs(false)} />}
-      {showFacility && <FacilityPanel onClose={() => setShowFacility(false)} />}
     </>
   );
 }
