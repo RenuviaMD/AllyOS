@@ -205,7 +205,7 @@ function applyLinesRemote(newLines){
   var cid=billClinicId();
   var applyLocal=function(){var set={};VALID_LINES.forEach(function(k){set[k]=newLines.indexOf(k)>=0;});try{localStorage.setItem(LKEY,JSON.stringify(set));}catch(e){}closeOv();render();};
   if(isDemo()||!cid){applyLocal();return;}
-  fetch('/.netlify/functions/billing-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clinic_id:cid,lines:newLines})})
+  AllyOSCloud.postAuthed('/.netlify/functions/billing-update',{clinic_id:cid,lines:newLines})
     .then(function(r){return r.json();})
     .then(function(d){
       if(d&&d.error==='not_configured'){applyLocal();return;}           // billing not switched on → local only
@@ -223,7 +223,7 @@ function startCheckout(k){
   if(k)setLine(k,true);                       // reflect the line you're adding
   var n=Math.max(1,Math.min(3,activeCount()));
   closeOv();
-  fetch('/.netlify/functions/billing-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clinic_id:cid,quantity:n})})
+  AllyOSCloud.postAuthed('/.netlify/functions/billing-checkout',{clinic_id:cid,quantity:n})
     .then(function(r){return r.json();})
     .then(function(d){ if(d&&d.url){location.href=d.url;} else {alert(d&&d.error==='not_configured'?'Billing isn’t switched on yet (Stripe key not set).':'Could not start checkout — try again.');} })
     .catch(function(){alert('Could not reach billing right now.');});
@@ -231,7 +231,7 @@ function startCheckout(k){
 function openPortal(){
   var cid=billClinicId();
   if(!cid){alert('Sign in to your clinic first.');return;}
-  fetch('/.netlify/functions/billing-portal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clinic_id:cid})})
+  AllyOSCloud.postAuthed('/.netlify/functions/billing-portal',{clinic_id:cid})
     .then(function(r){return r.json();})
     .then(function(d){ if(d&&d.url){location.href=d.url;} else if(d&&d.error==='no_customer'){alert('No subscription yet — open a line to start one.');} else {alert(d&&d.error==='not_configured'?'Billing isn’t switched on yet.':'Billing portal unavailable.');} })
     .catch(function(){alert('Could not reach billing right now.');});
@@ -240,7 +240,7 @@ function openPortal(){
 function openBilling(){
   var cid=billClinicId();
   if(!cid){alert('Sign in to your clinic first.');return;}
-  fetch('/.netlify/functions/billing-portal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clinic_id:cid})})
+  AllyOSCloud.postAuthed('/.netlify/functions/billing-portal',{clinic_id:cid})
     .then(function(r){return r.json();})
     .then(function(d){
       if(d&&d.url){location.href=d.url;}                         // active subscription → manage in the portal

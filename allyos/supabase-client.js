@@ -76,6 +76,23 @@
     if (!guard()) return Promise.resolve(null);
     return Cloud._sb.auth.getSession().then(function (r) { return r.data && r.data.session; });
   };
+  // Bearer header for calling our own serverless billing functions (they verify this JWT
+  // server-side). Waits for the cloud client to finish loading; {} if not signed in.
+  Cloud.authHeader = function () {
+    return Cloud.ready.then(function () {
+      if (!guard()) return {};
+      return Cloud._sb.auth.getSession().then(function (r) {
+        var t = r && r.data && r.data.session && r.data.session.access_token;
+        return t ? { Authorization: "Bearer " + t } : {};
+      });
+    }).catch(function () { return {}; });
+  };
+  // POST JSON to one of our functions WITH the caller's Bearer token attached. Returns fetch promise.
+  Cloud.postAuthed = function (path, payload) {
+    return Cloud.authHeader().then(function (h) {
+      return fetch(path, { method: "POST", headers: Object.assign({ "Content-Type": "application/json" }, h), body: JSON.stringify(payload || {}) });
+    });
+  };
   Cloud.user = function () {
     if (!guard()) return Promise.resolve(null);
     return Cloud._sb.auth.getUser().then(function (r) { return r.data && r.data.user; }).catch(function () { return null; });

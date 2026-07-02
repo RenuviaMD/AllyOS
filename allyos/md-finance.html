@@ -4,6 +4,7 @@
 <link rel="icon" type="image/png" href="ally-avatar-64.png">
 <link rel="stylesheet" href="allyos-theme.css">
 <script src="allyos-auth.js"></script>
+<script src="supabase-client.js"></script>
 <style>
 .wrap{max-width:1080px;margin:0 auto;padding:22px}
 .top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:18px}
@@ -101,7 +102,7 @@ if(window.AllyOSAuth){AllyOSAuth.guard(['admin','provider']);ses=AllyOSAuth.sess
 }
 function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function money(n){return '$'+(Number(n)||0).toLocaleString(undefined,{maximumFractionDigits:0});}
-function api(payload){return fetch('/.netlify/functions/md-billing',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(function(r){return r.json();});}
+function api(payload){return AllyOSCloud.postAuthed('/.netlify/functions/md-billing',payload).then(function(r){return r.json();});}
 var CLINICS=[];
 function load(){
   api({action:'roster'}).then(function(d){

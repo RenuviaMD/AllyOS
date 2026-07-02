@@ -4,6 +4,7 @@
 // Secrets (Netlify env): STRIPE_SECRET_KEY, STRIPE_PRICE_PLATFORM, SUPABASE_URL,
 // SUPABASE_SERVICE_ROLE_KEY. Optional: SITE_URL. (Self-contained — no shared module.)
 
+const { requireClinic } = require("./lib/auth");
 const STRIPE_VERSION = "2024-06-20";
 function form(obj, prefix) {
   const parts = [];
@@ -42,6 +43,7 @@ exports.handler = async (event) => {
   const body = parseBody(event);
   const clinicId = body.clinic_id;
   if (!clinicId) return json(400, { error: "clinic_id required" });
+  const gate = await requireClinic(event, clinicId); if (gate.error) return gate.error;
   let qty = parseInt(body.quantity, 10);
 
   try {

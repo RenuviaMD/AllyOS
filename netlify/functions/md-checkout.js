@@ -6,6 +6,7 @@
 // The per-clinic amount comes from clinics.md_fee (the owner sets it in the cockpit).
 // Secrets (Netlify env): STRIPE_SECRET_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY. Optional: SITE_URL.
 
+const { requireClinic } = require("./lib/auth");
 const STRIPE_VERSION = "2024-06-20";
 function form(obj, prefix) {
   const parts = [];
@@ -44,6 +45,7 @@ exports.handler = async (event) => {
   const body = parseBody(event);
   const clinicId = body.clinic_id;
   if (!clinicId) return json(400, { error: "clinic_id required" });
+  const gate = await requireClinic(event, clinicId); if (gate.error) return gate.error;
 
   try {
     const rows = await sbGet("clinics?id=eq." + encodeURIComponent(clinicId) + "&select=id,name,stripe_customer_id,md_fee,md_subscription_id,md_subscription_status");

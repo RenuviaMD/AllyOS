@@ -12,6 +12,7 @@
 // NOTE: caller auth is not yet server-enforced (matches the other billing functions); the owner
 // actions must be locked down before real production use.
 
+const { requireOwner, requireClinic } = require("./lib/auth");
 const STRIPE_VERSION = "2024-06-20";
 function form(obj, prefix) {
   const parts = [];
@@ -79,6 +80,7 @@ exports.handler = async (event) => {
 
   try {
     if (action === "roster") {
+      const g = await requireOwner(event); if (g.error) return g.error;
       const rows = await sbGet("clinics?select=id,name,governance_type,md_fee,md_subscription_status,md_billing_email,stripe_customer_id,status&order=name.asc");
       const clinics = (rows || []).map(function (c) {
         return { id: c.id, name: c.name, governance_type: c.governance_type || null, md_fee: (c.md_fee != null ? Number(c.md_fee) : null), status: c.md_subscription_status || "none", email: c.md_billing_email || null, on_stripe: !!c.stripe_customer_id };
@@ -94,6 +96,7 @@ exports.handler = async (event) => {
     if (!clinic) return json(404, { error: "clinic_not_found" });
 
     if (action === "set_fee") {
+      const g = await requireOwner(event); if (g.error) return g.error;
       const patch = {};
       if (body.md_fee !== undefined) patch.md_fee = (body.md_fee === null || body.md_fee === "") ? null : Number(body.md_fee);
       if (body.governance_type !== undefined) patch.governance_type = body.governance_type || null;
@@ -104,6 +107,7 @@ exports.handler = async (event) => {
     }
 
     if (action === "bill") {
+      const g = await requireOwner(event); if (g.error) return g.error;
       const raw = Array.isArray(body.items) ? body.items : [];
       const items = raw.map(function (it) { return { description: (it.description || "Charge").toString().slice(0, 120), cents: Math.round(Number(it.amount) * 100) }; }).filter(function (it) { return it.cents > 0; });
       if (!items.length) return json(400, { error: "no_items", hint: "Add at least one line with an amount." });
@@ -135,7 +139,8 @@ exports.handler = async (event) => {
       return json(200, { ok: true, number: sent.number, amount_due: money(sent.amount_due), status: sent.status, url: sent.hosted_invoice_url || null, email: clinic.md_billing_email });
     }
 
-    // default: clinic statement (used by the clinic pay page + owner drill-in)
+    // default: clinic statement (clinic pay page + owner drill-in) — owner OR that clinic's member
+    const g = await requireClinic(event, clinicId); if (g.error) return g.error;
     const invoices = await invoicesFor(clinic.stripe_customer_id, key);
     const outstanding = invoices.filter(function (v) { return v.status === "open" || v.status === "uncollectible"; }).reduce(function (a, v) { return a + v.amount_due; }, 0);
     return json(200, {
