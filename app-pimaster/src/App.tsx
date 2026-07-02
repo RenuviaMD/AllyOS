@@ -8,6 +8,7 @@ import { BillingSettingsCard } from "./components/BillingSettings";
 import { CatalogPage } from "./components/CatalogPage";
 import { AhcaExportPage } from "./components/AhcaExport";
 import { AttorneyPackagePage } from "./components/AttorneyPackage";
+import { UsersPanel } from "./components/UsersPanel";
 import { SignInScreen } from "./components/SignIn";
 import { allowedViews, changePassword, fetchAuthState, onAuthChange, signOut, type AuthState } from "./lib/auth";
 import { auditNote } from "./lib/audit";
@@ -52,6 +53,7 @@ export default function App() {
   const [showBilling, setShowBilling] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showAttorney, setShowAttorney] = useState(false);
+  const [showUsers, setShowUsers] = useState(false);
   const [showCatalogs, setShowCatalogs] = useState(false);
   const loaded = useRef(false);
 
@@ -346,6 +348,11 @@ export default function App() {
           {saveState === "local" && "Saved locally (offline)"}
         </span>
         <span className="status">{auth.email}</span>
+        {auth.roles.includes("admin") && (
+          <button className="btn ghost" onClick={() => setShowUsers(true)}>
+            Users
+          </button>
+        )}
         <button className="btn ghost" onClick={doChangePassword} title="Change password">
           Password
         </button>
@@ -454,6 +461,7 @@ export default function App() {
       {showBilling && <BillingSettingsCard onClose={() => setShowBilling(false)} />}
       {showExport && <AhcaExportPage onClose={() => setShowExport(false)} />}
       {showAttorney && <AttorneyPackagePage onClose={() => setShowAttorney(false)} generatedBy={auth.email} />}
+      {showUsers && <UsersPanel onClose={() => setShowUsers(false)} selfId={auth.userId} />}
       {showCatalogs && <CatalogPage onClose={() => setShowCatalogs(false)} />}
     </>
   );

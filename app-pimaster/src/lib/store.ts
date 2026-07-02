@@ -155,6 +155,34 @@ export async function getReportHtml(id: string): Promise<string | null> {
   return (data?.report_html as string) ?? null;
 }
 
+// ---------- User administration (admin role only, enforced by RLS) ----------
+
+export interface AppUserRow {
+  user_id: string;
+  email: string;
+  roles: string[];
+  active: boolean;
+}
+
+export async function listAppUsers(): Promise<AppUserRow[]> {
+  const { data, error } = await supabase()
+    .from("app_users")
+    .select("user_id, email, roles, active")
+    .order("email");
+  if (error) throw error;
+  return (data ?? []) as AppUserRow[];
+}
+
+export async function updateAppUser(userId: string, partial: { roles?: string[]; active?: boolean }): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const { error } = await supabase().from("app_users").update(partial).eq("user_id", userId);
+    if (error) throw error;
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
 // ---------- Attorney package ----------
 
 /** Lightweight metadata for every active report (no HTML) — used to group patient cases. */

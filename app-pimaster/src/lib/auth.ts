@@ -29,6 +29,12 @@ export async function signIn(email: string, password: string): Promise<string | 
   return error ? error.message : null;
 }
 
+/** Self-service account creation; the account has NO role (no access) until the admin assigns one. */
+export async function signUp(email: string, password: string): Promise<string | null> {
+  const { error } = await supabase().auth.signUp({ email, password });
+  return error ? error.message : null;
+}
+
 export async function signOut(): Promise<void> {
   await supabase().auth.signOut();
 }
