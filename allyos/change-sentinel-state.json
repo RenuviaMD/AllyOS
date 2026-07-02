@@ -1,0 +1,22 @@
+{
+  "label_baselines": {
+    "ZOFRAN": null,
+    "TORADOL": null,
+    "PEPCID": "20241111",
+    "VYLEESI": "20250110",
+    "EGRIFTA": "20251223",
+    "WEGOVY": "20260618",
+    "ZEPBOUND": "20260422",
+    "SAXENDA": "20260225",
+    "VEOZAH": "20260226",
+    "ESTRADIOL": "20250408",
+    "PROMETRIUM": "20260106",
+    "OSPHENA": "20250214",
+    "ANDROGEL": "20251022",
+    "DEPO-TESTOSTERONE": "20250827",
+    "XYOSTED": "20250701",
+    "TESTOPEL": "20250717",
+    "KYZATREX": "20251015"
+  },
+  "last_run": "2026-07-02T07:39:22.264214Z"
+}

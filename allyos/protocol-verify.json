@@ -1,14 +1,1462 @@
 {
-  "date": null,
+  "date": "2026-07-02T07:39:22.209213Z",
   "agent": "protocol-verify",
   "scope": "published_only (in_primary_library:true, not pending/draft)",
-  "status": "pending",
-  "published_protocols": 0,
-  "citations_checked": 0,
-  "citations_confirmed": 0,
-  "citations_failed": 0,
-  "citations_reference_nonpubmed": 0,
-  "citations_unparseable": 0,
-  "review_total": 0,
-  "protocols": []
+  "protocols": [
+    {
+      "module": "iv-module",
+      "protocol": "0.9% Normal Saline (default base fluid)",
+      "agents": [
+        "0.9% Normal Saline"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a71",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a71"
+        }
+      ],
+      "whats_new": {
+        "papers": 0,
+        "trials": 420,
+        "pmids": []
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Lactated Ringer's (alternate base)",
+      "agents": [
+        "Lactated Ringer's"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a71",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a71"
+        }
+      ],
+      "whats_new": {
+        "papers": 30,
+        "trials": 37,
+        "pmids": [
+          "42381258",
+          "42350181",
+          "42336183"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Vita Complex (B-Complex injection)",
+      "agents": [
+        "Vita Complex"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a72.1",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a72.1"
+        }
+      ],
+      "whats_new": {
+        "papers": 64,
+        "trials": 8,
+        "pmids": [
+          "42385762",
+          "42380097",
+          "42379453"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Methylcobalamin (Methyl B12) \u2014 packet standard",
+      "agents": [
+        "Methylcobalamin"
+      ],
+      "citations": [
+        {
+          "cite": "Carmel R (2008) Blood 112(6):2214",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 7 hit(s) PMID 18809092"
+        },
+        {
+          "cite": "MASTER-MENU \u00a72.2",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a72.2"
+        }
+      ],
+      "whats_new": {
+        "papers": 27,
+        "trials": 74,
+        "pmids": [
+          "42365273",
+          "42359193",
+          "42338379"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Ascorbic Acid (Vitamin C) \u2014 preservative-free",
+      "agents": [
+        "Ascorbic Acid"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a72.3",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a72.3"
+        },
+        {
+          "cite": "Padayatty SJ et al. (2010) PLoS ONE 5(7):e11414; (2006) CMAJ 174(7):937",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 1 hit(s) PMID 20628650"
+        }
+      ],
+      "whats_new": {
+        "papers": 394,
+        "trials": 105,
+        "pmids": [
+          "42387095",
+          "42384809",
+          "42384633"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Biotin",
+      "agents": [
+        "Biotin"
+      ],
+      "citations": [
+        {
+          "cite": "FDA Safety Communication (Nov 28, 2017)",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "FDA Safety Communication (Nov 28, 2017)"
+        },
+        {
+          "cite": "MASTER-MENU \u00a72.6",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a72.6"
+        }
+      ],
+      "whats_new": {
+        "papers": 170,
+        "trials": 20,
+        "pmids": [
+          "42386053",
+          "42378112",
+          "42376826"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Magnesium Chloride",
+      "agents": [
+        "Magnesium Chloride"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a73.1",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a73.1"
+        }
+      ],
+      "whats_new": {
+        "papers": 53,
+        "trials": 51,
+        "pmids": [
+          "42362664",
+          "42355253",
+          "42353503"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Calcium Gluconate \u2014 preservative-free",
+      "agents": [
+        "Calcium Gluconate"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a73.2",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a73.2"
+        }
+      ],
+      "whats_new": {
+        "papers": 12,
+        "trials": 760,
+        "pmids": [
+          "42357272",
+          "42318567",
+          "42314343"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Zinc Sulfate",
+      "agents": [
+        "Zinc Sulfate"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a73.3",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a73.3"
+        }
+      ],
+      "whats_new": {
+        "papers": 52,
+        "trials": 11,
+        "pmids": [
+          "42378841",
+          "42369001",
+          "42368083"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Selenium (Sodium Selenite / Selenious Acid)",
+      "agents": [
+        "Selenium"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a73.3",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a73.3"
+        }
+      ],
+      "whats_new": {
+        "papers": 558,
+        "trials": 24,
+        "pmids": [
+          "42386822",
+          "42385318",
+          "42384278"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Trace Mineral Injection (Zn + Cu + Mn + Se)",
+      "agents": [
+        "Trace Mineral Injection"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a73.3",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a73.3"
+        }
+      ],
+      "whats_new": {
+        "papers": 43,
+        "trials": 4,
+        "pmids": [
+          "42371920",
+          "42343840",
+          "42324778"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "L-Lysine",
+      "agents": [
+        "L-Lysine"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a74",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a74"
+        }
+      ],
+      "whats_new": {
+        "papers": 980,
+        "trials": 35,
+        "pmids": [
+          "42387065",
+          "42387055",
+          "42386776"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "L-Taurine",
+      "agents": [
+        "L-Taurine"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a74",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a74"
+        },
+        {
+          "cite": "Schaffer S, Kim HW (2018) Biomol Ther 26(3):225",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 1 hit(s) PMID 29631391"
+        }
+      ],
+      "whats_new": {
+        "papers": 0,
+        "trials": 2,
+        "pmids": []
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "L-Carnitine",
+      "agents": [
+        "L-Carnitine"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a74",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a74"
+        },
+        {
+          "cite": "Pekala J et al. (2011) Curr Drug Metab 12(7):667",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 1 hit(s) PMID 21561431"
+        }
+      ],
+      "whats_new": {
+        "papers": 205,
+        "trials": 21,
+        "pmids": [
+          "42386920",
+          "42385929",
+          "42387117"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "L-Glutamine",
+      "agents": [
+        "L-Glutamine"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a74",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a74"
+        },
+        {
+          "cite": "Wischmeyer PE (2003) Nutr Clin Pract 18(5):377",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 1 hit(s) PMID 16215069"
+        }
+      ],
+      "whats_new": {
+        "papers": 459,
+        "trials": 36,
+        "pmids": [
+          "42386650",
+          "42385493",
+          "42384665"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Amino Blend (Proline + Arginine + Lysine + Citrulline)",
+      "agents": [
+        "Amino Blend"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a74",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a74"
+        }
+      ],
+      "whats_new": {
+        "papers": 14,
+        "trials": 10,
+        "pmids": [
+          "42382802",
+          "42365622",
+          "42355284"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Glutathione (reduced) \u2014 preservative-free",
+      "agents": [
+        "Glutathione"
+      ],
+      "citations": [
+        {
+          "cite": "Hauser RA et al. (2009) Mov Disord 24(7):979; FDA 2015 IV Glutathione Aesthetic Alert",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 5 hit(s) PMID 19908302"
+        },
+        {
+          "cite": "MASTER-MENU \u00a75",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a75"
+        }
+      ],
+      "whats_new": {
+        "papers": 2147,
+        "trials": 83,
+        "pmids": [
+          "42386121",
+          "42385856",
+          "42385389"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "NAD+ \u2014 ready-to-use",
+      "agents": [
+        "NAD+"
+      ],
+      "citations": [
+        {
+          "cite": "Grant R et al. (2019) Front Aging Neurosci 11:257; Brakedal B et al. (2022) Cell Metab 34(3):396",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 1 hit(s) PMID 31572171"
+        },
+        {
+          "cite": "MASTER-MENU \u00a76",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a76"
+        }
+      ],
+      "whats_new": {
+        "papers": 566,
+        "trials": 77,
+        "pmids": [
+          "42385930",
+          "42385907",
+          "42385602"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Niagen\u00ae / Nicotinamide Riboside Chloride (NR) \u2014 NAD+ precursor",
+      "agents": [
+        "Niagen"
+      ],
+      "citations": [
+        {
+          "cite": "Reyna et al. (2026) Front Aging fragi.2026.1652582 (PMC12907335; n=14, 500 mg NAD+/NR IV \u00d74d); Hawkins et al. (2024) med",
+          "type": "doi",
+          "status": "CONFIRMED",
+          "detail": "Crossref: Intravenous infusion of nicotinamide adenine dinucleotide (NAD+) versus nicotinamide riboside (NR): a retrospective tolerability pilot study in a real"
+        },
+        {
+          "cite": "niagen-nr-iv-standing-order.md v0.1 (citations AllyOS-verified 2026-06-24); promoted to primary library on MD sign-off 2",
+          "type": "unknown",
+          "status": "UNPARSEABLE",
+          "detail": "niagen-nr-iv-standing-order.md v0.1 (citations AllyOS-verified 2026-06-24); promoted to pr"
+        }
+      ],
+      "whats_new": {
+        "papers": 8,
+        "trials": 6,
+        "pmids": [
+          "42343809",
+          "42328457",
+          "42323895"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Lipotropic IM (Methionine + Inositol + Choline + Methylcobalamin, methyl-only)",
+      "agents": [
+        "Lipotropic IM"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a76",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a76"
+        }
+      ],
+      "whats_new": {
+        "papers": 2,
+        "trials": 0,
+        "pmids": [
+          "42001815",
+          "41997160"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "N-Acetyl Cysteine (NAC) \u2014 IM only at wellness dose",
+      "agents": [
+        "N-Acetyl Cysteine"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a76",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a76"
+        }
+      ],
+      "whats_new": {
+        "papers": 254,
+        "trials": 46,
+        "pmids": [
+          "42385796",
+          "42385216",
+          "42384704"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Coenzyme Q10 (Ubidecarenone) \u2014 IM only",
+      "agents": [
+        "Coenzyme Q10"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a75",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a75"
+        }
+      ],
+      "whats_new": {
+        "papers": 143,
+        "trials": 21,
+        "pmids": [
+          "42385949",
+          "42383741",
+          "42377452"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Pyridoxine (Vitamin B6) \u2014 standalone",
+      "agents": [
+        "Pyridoxine"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a76",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a76"
+        }
+      ],
+      "whats_new": {
+        "papers": 23,
+        "trials": 30,
+        "pmids": [
+          "42369803",
+          "42362641",
+          "42338942"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Vitamin D3 (Cholecalciferol) \u2014 IM only",
+      "agents": [
+        "Vitamin D3"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a76",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a76"
+        }
+      ],
+      "whats_new": {
+        "papers": 164,
+        "trials": 239,
+        "pmids": [
+          "42380362",
+          "42375778",
+          "42367775"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Ondansetron (Zofran) \u2014 anti-nausea adjunct",
+      "agents": [
+        "Ondansetron"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU \u00a77",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU \u00a77"
+        }
+      ],
+      "whats_new": {
+        "papers": 45,
+        "trials": 49,
+        "pmids": [
+          "42378461",
+          "42374209",
+          "42349797"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "IV-01",
+      "agents": [
+        "Magnesium Chloride",
+        "Methylcobalamin",
+        "Vita Complex",
+        "Vitamin C",
+        "Zinc Sulfate"
+      ],
+      "citations": [
+        {
+          "cite": "Berger MM ESPEN",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "Berger MM ESPEN"
+        },
+        {
+          "cite": "Carmel R (2008) Blood",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 7 hit(s) PMID 18809092"
+        },
+        {
+          "cite": "Padayatty SJ et al. (2010) PLoS ONE",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 1 hit(s) PMID 20628650"
+        },
+        {
+          "cite": "USP <797> Immediate-Use",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "USP <797> Immediate-Use"
+        }
+      ],
+      "whats_new": {
+        "papers": 719,
+        "trials": 359,
+        "pmids": [
+          "42362664",
+          "42355253",
+          "42353503",
+          "42365273",
+          "42359193",
+          "42338379",
+          "42385762",
+          "42380097",
+          "42379453",
+          "42387095",
+          "42384809",
+          "42384633"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "IV-03",
+      "agents": [
+        "Methylcobalamin",
+        "NAD+"
+      ],
+      "citations": [
+        {
+          "cite": "Brakedal B et al. (2022) Cell Metab 34(3):396",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 1 hit(s) PMID 35235774"
+        },
+        {
+          "cite": "FDA 2015 IV Glutathione aesthetic alert",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "FDA 2015 IV Glutathione aesthetic alert"
+        },
+        {
+          "cite": "Grant R et al. (2019) Front Aging Neurosci 11:257",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 1 hit(s) PMID 31572171"
+        },
+        {
+          "cite": "Hauser RA et al. (2009) Mov Disord",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 5 hit(s) PMID 19908302"
+        },
+        {
+          "cite": "Mestayer P (Springfield Wellness)",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "Mestayer P (Springfield Wellness)"
+        }
+      ],
+      "whats_new": {
+        "papers": 593,
+        "trials": 151,
+        "pmids": [
+          "42365273",
+          "42359193",
+          "42338379",
+          "42385930",
+          "42385907",
+          "42385602"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "IV-04",
+      "agents": [
+        "Biotin",
+        "Methylcobalamin",
+        "Vitamin C"
+      ],
+      "citations": [
+        {
+          "cite": "FDA 2015 IV Glutathione aesthetic alert",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "FDA 2015 IV Glutathione aesthetic alert"
+        },
+        {
+          "cite": "FDA 2017 Biotin alert",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "FDA 2017 Biotin alert"
+        },
+        {
+          "cite": "Padayatty SJ et al. (2010) PLoS ONE",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 1 hit(s) PMID 20628650"
+        }
+      ],
+      "whats_new": {
+        "papers": 772,
+        "trials": 320,
+        "pmids": [
+          "42386053",
+          "42378112",
+          "42376826",
+          "42365273",
+          "42359193",
+          "42338379",
+          "42387095",
+          "42384809",
+          "42384633"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "IV-05",
+      "agents": [
+        "Vitamin C",
+        "Zinc Sulfate"
+      ],
+      "citations": [
+        {
+          "cite": "Hauser RA et al. (2009) Mov Disord",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 5 hit(s) PMID 19908302"
+        },
+        {
+          "cite": "Padayatty SJ et al. (2010) PLoS ONE",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 1 hit(s) PMID 20628650"
+        }
+      ],
+      "whats_new": {
+        "papers": 627,
+        "trials": 237,
+        "pmids": [
+          "42387095",
+          "42384809",
+          "42384633",
+          "42378841",
+          "42369001",
+          "42368083"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "IV-06",
+      "agents": [
+        "Amino Blend",
+        "L-Carnitine",
+        "L-Taurine",
+        "Magnesium Chloride",
+        "Methylcobalamin",
+        "Vita Complex",
+        "Vitamin C"
+      ],
+      "citations": [
+        {
+          "cite": "Mah E et al. (2018) Nutrients",
+          "type": "article",
+          "status": "FAILED",
+          "detail": "PubMed match: 0 hit(s)"
+        },
+        {
+          "cite": "Pekala J et al. (2011) Curr Drug Metab",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 1 hit(s) PMID 21561431"
+        }
+      ],
+      "whats_new": {
+        "papers": 272,
+        "trials": 84,
+        "pmids": [
+          "42382802",
+          "42365622",
+          "42355284",
+          "42386920",
+          "42385929",
+          "42387117",
+          "42362664",
+          "42355253",
+          "42353503"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "IV-07",
+      "agents": [
+        "L-Carnitine",
+        "L-Taurine",
+        "Magnesium Chloride",
+        "Methylcobalamin",
+        "Vitamin C"
+      ],
+      "citations": [
+        {
+          "cite": "MASTER-MENU-01 v3.3",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "MASTER-MENU-01 v3.3"
+        }
+      ],
+      "whats_new": {
+        "papers": 285,
+        "trials": 148,
+        "pmids": [
+          "42386920",
+          "42385929",
+          "42387117",
+          "42362664",
+          "42355253",
+          "42353503",
+          "42365273",
+          "42359193",
+          "42338379"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "IV-08",
+      "agents": [
+        "L-Carnitine",
+        "L-Taurine",
+        "Magnesium Chloride",
+        "Methylcobalamin",
+        "Vita Complex",
+        "Vitamin C"
+      ],
+      "citations": [
+        {
+          "cite": "Pooyandjoo M et al. (2016) Obes Rev",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 1 hit(s) PMID 27335245"
+        }
+      ],
+      "whats_new": {
+        "papers": 285,
+        "trials": 148,
+        "pmids": [
+          "42386920",
+          "42385929",
+          "42387117",
+          "42362664",
+          "42355253",
+          "42353503",
+          "42365273",
+          "42359193",
+          "42338379"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "IV-09",
+      "agents": [
+        "L-Carnitine",
+        "L-Taurine",
+        "Magnesium Chloride",
+        "Methylcobalamin",
+        "Vita Complex",
+        "Vitamin C"
+      ],
+      "citations": [
+        {
+          "cite": "FDA 2015 IV Glutathione aesthetic alert",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "FDA 2015 IV Glutathione aesthetic alert"
+        },
+        {
+          "cite": "Hauser RA et al. (2009) Mov Disord",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 5 hit(s) PMID 19908302"
+        }
+      ],
+      "whats_new": {
+        "papers": 285,
+        "trials": 148,
+        "pmids": [
+          "42386920",
+          "42385929",
+          "42387117",
+          "42362664",
+          "42355253",
+          "42353503",
+          "42365273",
+          "42359193",
+          "42338379"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "IV-11",
+      "agents": [
+        "Magnesium Chloride",
+        "Methylcobalamin",
+        "Trace Mineral Injection"
+      ],
+      "citations": [
+        {
+          "cite": "Berger MM ESPEN trace element guidelines",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "Berger MM ESPEN trace element guidelines"
+        }
+      ],
+      "whats_new": {
+        "papers": 123,
+        "trials": 129,
+        "pmids": [
+          "42362664",
+          "42355253",
+          "42353503",
+          "42365273",
+          "42359193",
+          "42338379",
+          "42371920",
+          "42343840",
+          "42324778"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "WEL-06",
+      "agents": [
+        "NAD+"
+      ],
+      "citations": [
+        {
+          "cite": "Brakedal B et al. (2022) Cell Metab 34(3):396",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 1 hit(s) PMID 35235774"
+        },
+        {
+          "cite": "Grant R et al. (2019) Front Aging Neurosci 11:257",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 1 hit(s) PMID 31572171"
+        },
+        {
+          "cite": "Mestayer P (Springfield Wellness)",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "Mestayer P (Springfield Wellness)"
+        }
+      ],
+      "whats_new": {
+        "papers": 566,
+        "trials": 77,
+        "pmids": [
+          "42385930",
+          "42385907",
+          "42385602"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "WEL-16",
+      "agents": [
+        "Niagen"
+      ],
+      "citations": [
+        {
+          "cite": "Conze et al. (2019) Sci Rep (oral NR \u2014 background)",
+          "type": "article",
+          "status": "FAILED",
+          "detail": "PubMed match: 0 hit(s)"
+        },
+        {
+          "cite": "Hawkins et al. (2024) medRxiv preprint",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 1 hit(s) PMID 38562872"
+        },
+        {
+          "cite": "Reyna et al. (2026) Front Aging fragi.2026.1652582 (PMC12907335)",
+          "type": "doi",
+          "status": "CONFIRMED",
+          "detail": "Crossref: Intravenous infusion of nicotinamide adenine dinucleotide (NAD+) versus nicotinamide riboside (NR): a retrospective tolerability pilot study in a real"
+        }
+      ],
+      "whats_new": {
+        "papers": 8,
+        "trials": 6,
+        "pmids": [
+          "42343809",
+          "42328457",
+          "42323895"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "WEL-15",
+      "agents": [
+        "Amino Blend",
+        "L-Carnitine",
+        "L-Glutamine",
+        "L-Taurine"
+      ],
+      "citations": [
+        {
+          "cite": "Standard amino-acid IV nutrition references",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "Standard amino-acid IV nutrition references"
+        }
+      ],
+      "whats_new": {
+        "papers": 678,
+        "trials": 69,
+        "pmids": [
+          "42382802",
+          "42365622",
+          "42355284",
+          "42386920",
+          "42385929",
+          "42387117",
+          "42386650",
+          "42385493",
+          "42384665"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "ADDON-01",
+      "agents": [
+        "Glutathione push"
+      ],
+      "citations": [
+        {
+          "cite": "FDA 2015 IV Glutathione aesthetic alert",
+          "type": "non_pubmed",
+          "status": "REFERENCE",
+          "detail": "FDA 2015 IV Glutathione aesthetic alert"
+        },
+        {
+          "cite": "Hauser RA et al. (2009) Mov Disord",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 5 hit(s) PMID 19908302"
+        }
+      ],
+      "whats_new": {
+        "papers": 1,
+        "trials": 1,
+        "pmids": [
+          "41820072"
+        ]
+      }
+    },
+    {
+      "module": "iv-module",
+      "protocol": "Vitamin C Verbal Screen (CARD-VC v2.0) \u2014 chairside dose-tiered gate",
+      "agents": [
+        "Vitamin C Verbal Screen"
+      ],
+      "citations": [
+        {
+          "cite": "AANP IV Nutrient Therapy Position Paper",
+          "type": "unknown",
+          "status": "UNPARSEABLE",
+          "detail": "AANP IV Nutrient Therapy Position Paper"
+        },
+        {
+          "cite": "Padayatty SJ et al. (2010) PLoS ONE",
+          "type": "article",
+          "status": "CONFIRMED",
+          "detail": "PubMed match: 1 hit(s) PMID 20628650"
+        }
+      ],
+      "whats_new": {
+        "papers": 0,
+        "trials": 1,
+        "pmids": []
+      }
+    },
+    {
+      "module": "peptide-module",
+      "protocol": "AllyOS Peptides \u2014 Provider CDS Operating Module",
+      "agents": [
+        "AllyOS Peptides"
+      ],
+      "citations": [
+        {
+          "cite": "Consolidated from the AllyOS locked peptide data layer: peptide-packs.json (grade->tier + consent), contraindications.js",
+          "type": "unknown",
+          "status": "UNPARSEABLE",
+          "detail": "Consolidated from the AllyOS locked peptide data layer: peptide-packs.json (grade->tier + "
+        }
+      ],
+      "whats_new": {
+        "papers": 14515,
+        "trials": 0,
+        "pmids": [
+          "42387250",
+          "42387223",
+          "42387035"
+        ]
+      }
+    },
+    {
+      "module": "bhrt-module",
+      "protocol": "AllyOS BHRT / Women's Hormone Wellness \u2014 Provider CDS Module",
+      "agents": [
+        "AllyOS BHRT"
+      ],
+      "citations": [
+        {
+          "cite": "Ally BHRT / Women's Wellness Provider Decision Support Engine v1.5 (MD Governance + APP Audit). Transcribed to the AllyO",
+          "type": "unknown",
+          "status": "UNPARSEABLE",
+          "detail": "Ally BHRT / Women's Wellness Provider Decision Support Engine v1.5 (MD Governance + APP Au"
+        }
+      ],
+      "whats_new": {
+        "papers": 0,
+        "trials": 0,
+        "pmids": []
+      }
+    },
+    {
+      "module": "peptide-stack-families",
+      "protocol": "AllyOS Peptide Stack Family Master Selector \u2014 v1",
+      "agents": [
+        "AllyOS Peptide Stack Family Master Selector"
+      ],
+      "citations": [
+        {
+          "cite": "peptide_stack_family_master_v1 (physician-authored). Canonical top-level selector for the peptides line. Full source in ",
+          "type": "unknown",
+          "status": "UNPARSEABLE",
+          "detail": "peptide_stack_family_master_v1 (physician-authored). Canonical top-level selector for the "
+        }
+      ],
+      "whats_new": {
+        "papers": 0,
+        "trials": 0,
+        "pmids": []
+      }
+    },
+    {
+      "module": "peptide-iv-support",
+      "protocol": "AllyOS Peptide \u2194 IV Support \u2014 wellness-elective matching + claim discipline (DRAFT)",
+      "agents": [
+        "AllyOS Peptide \u2194 IV Support"
+      ],
+      "citations": [
+        {
+          "cite": "Consolidated from two provider-supplied packages: stack-level recommender v0.4 + ingredient-level match matrix v0.1 (see",
+          "type": "unknown",
+          "status": "UNPARSEABLE",
+          "detail": "Consolidated from two provider-supplied packages: stack-level recommender v0.4 + ingredien"
+        }
+      ],
+      "whats_new": {
+        "papers": 69,
+        "trials": 0,
+        "pmids": [
+          "42387024",
+          "42376607",
+          "42362204"
+        ]
+      }
+    },
+    {
+      "module": "peptide-iv-support",
+      "protocol": "Metabolic Stack",
+      "agents": [
+        "1\u20133 cyclable adjuncts",
+        "\u22641 GLP-1 backbone"
+      ],
+      "citations": [],
+      "whats_new": {
+        "papers": 20,
+        "trials": 0,
+        "pmids": [
+          "42381999",
+          "42348793",
+          "42315695"
+        ]
+      }
+    },
+    {
+      "module": "peptide-iv-support",
+      "protocol": "Recovery Stack",
+      "agents": [
+        "AOD-9604",
+        "CJC-1295",
+        "MOTS-c",
+        "Tesamorelin"
+      ],
+      "citations": [],
+      "whats_new": {
+        "papers": 20,
+        "trials": 4,
+        "pmids": [
+          "42160466",
+          "41880199",
+          "42349896",
+          "42324588",
+          "42321010",
+          "42382101",
+          "42160466",
+          "42139091"
+        ]
+      }
+    },
+    {
+      "module": "peptide-iv-support",
+      "protocol": "Growth Stack",
+      "agents": [
+        "Ipamorelin",
+        "Sermorelin"
+      ],
+      "citations": [],
+      "whats_new": {
+        "papers": 3,
+        "trials": 3,
+        "pmids": [
+          "42160466",
+          "41880199",
+          "41880199"
+        ]
+      }
+    },
+    {
+      "module": "peptide-iv-support",
+      "protocol": "Repair Stack",
+      "agents": [
+        "BPC-157",
+        "GHK-Cu",
+        "TB-500"
+      ],
+      "citations": [],
+      "whats_new": {
+        "papers": 9,
+        "trials": 0,
+        "pmids": [
+          "42356491",
+          "42328738",
+          "42278509",
+          "42320090",
+          "42245779",
+          "42084774"
+        ]
+      }
+    },
+    {
+      "module": "peptide-iv-support",
+      "protocol": "Longevity Stack",
+      "agents": [
+        "Epitalon",
+        "MOTS-c",
+        "SS-31"
+      ],
+      "citations": [],
+      "whats_new": {
+        "papers": 25,
+        "trials": 2,
+        "pmids": [
+          "42209466",
+          "42349896",
+          "42324588",
+          "42321010",
+          "42357949",
+          "42324025",
+          "42290373"
+        ]
+      }
+    },
+    {
+      "module": "peptide-iv-support",
+      "protocol": "Cognition Stack",
+      "agents": [
+        "Cerebrolysin",
+        "DSIP",
+        "Selank",
+        "Semax"
+      ],
+      "citations": [],
+      "whats_new": {
+        "papers": 5,
+        "trials": 1,
+        "pmids": [
+          "42193943",
+          "42143192",
+          "42110924",
+          "42195624"
+        ]
+      }
+    },
+    {
+      "module": "peptide-iv-support",
+      "protocol": "Immunity Stack",
+      "agents": [
+        "KPV",
+        "Thymosin Alpha-1"
+      ],
+      "citations": [],
+      "whats_new": {
+        "papers": 7,
+        "trials": 5,
+        "pmids": [
+          "42309223",
+          "42190786",
+          "42064835",
+          "42345155",
+          "42295795",
+          "42292432"
+        ]
+      }
+    },
+    {
+      "module": "peptide-iv-support",
+      "protocol": "Vitality Stack",
+      "agents": [
+        "Kisspeptin-10",
+        "PT-141"
+      ],
+      "citations": [],
+      "whats_new": {
+        "papers": 11,
+        "trials": 0,
+        "pmids": [
+          "42379494",
+          "42364891",
+          "42328738",
+          "42340853",
+          "42254382"
+        ]
+      }
+    },
+    {
+      "module": "wellness-iv-hard-stop",
+      "protocol": "WIHS_RED_UNIVERSAL",
+      "agents": [],
+      "citations": [
+        {
+          "cite": "DELEGATED to the locked iv-module IVIM_GATE_VITALS. Reproduced below as a non-authoritative pointer only \u2014 the locked te",
+          "type": "unknown",
+          "status": "UNPARSEABLE",
+          "detail": "DELEGATED to the locked iv-module IVIM_GATE_VITALS. Reproduced below as a non-authoritativ"
+        }
+      ],
+      "whats_new": {
+        "papers": 0,
+        "trials": 0,
+        "pmids": []
+      }
+    }
+  ],
+  "published_protocols": 52,
+  "citations_checked": 71,
+  "citations_confirmed": 25,
+  "citations_failed": 2,
+  "citations_reference_nonpubmed": 37,
+  "citations_unparseable": 7,
+  "status": "FAIL",
+  "review_total": 2
 }
