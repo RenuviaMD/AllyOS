@@ -23,7 +23,7 @@ export interface AccidentInfo {
   accidentDate: string;
   accidentType: "" | "MVA" | "Work" | "Fall" | "Sports" | "Other";
   ticketed: YesNo;
-  role: "" | "Driver" | "Passenger" | "Pedestrian" | "Other";
+  role: "" | "Driver" | "Front Passenger" | "Rear Passenger" | "Passenger" | "Pedestrian" | "Other";
   seatbelt: YesNo;
   airbag: YesNo;
   vehicleDrivable: YesNo;

@@ -80,6 +80,56 @@ export interface SimilarityHit {
 
 export const TEXT_SIMILARITY_LIMIT = 0.2;
 export const FINDINGS_SIMILARITY_WARN = 0.9;
+/** With this many same-accident patients sharing a near-identical exam, warning escalates to block. */
+export const COHORT_CARBON_COPY_BLOCK = 2;
+
+/** One same-accident patient, aggregated across all of their notes. */
+export interface CohortPeer {
+  patient: string;
+  role: string;
+  maxTextSimilarity: number;
+  maxFindingsSimilarity: number;
+}
+
+/**
+ * Multi-occupant (3+ people in one accident) rules, applied on top of the
+ * pairwise checks. Every new note is compared against EVERY other patient
+ * from the accident — the guard scales with the cohort, it never samples.
+ */
+export function evaluateCohort(myRole: string, peers: CohortPeer[]): { blockers: string[]; warnings: string[] } {
+  const blockers: string[] = [];
+  const warnings: string[] = [];
+  if (peers.length === 0) return { blockers, warnings };
+
+  warnings.push(
+    `Same-accident cohort: ${peers.length} other patient(s) on file (${peers.map((p) => p.patient).join(", ")}) — this note was checked against all of them.`,
+  );
+
+  // One vehicle has exactly one driver. Same-date accidents can involve two
+  // vehicles, so this is a verify-warning, not a block.
+  if (myRole === "Driver") {
+    const otherDrivers = peers.filter((p) => p.role === "Driver");
+    if (otherDrivers.length > 0) {
+      warnings.push(
+        `${otherDrivers.map((p) => p.patient).join(", ")} from the same accident is also documented as Driver. One vehicle has one driver — verify roles/seat positions in Section 2 (use Front/Rear Passenger), or confirm this was a separate vehicle.`,
+      );
+    }
+  }
+
+  // Two identical exams is a warning (pairwise); an entire cohort with
+  // near-identical exams blocks until each patient's real distinguishing
+  // findings are documented — never fabricate differences.
+  const carbonCopies = peers.filter((p) => p.maxFindingsSimilarity > FINDINGS_SIMILARITY_WARN);
+  if (carbonCopies.length >= COHORT_CARBON_COPY_BLOCK) {
+    blockers.push(
+      `Exam findings are nearly identical to ${carbonCopies.length} other patients from this accident (${carbonCopies
+        .map((p) => p.patient)
+        .join(", ")}). Three or more matching exams will not pass review — re-examine and document each patient's real distinguishing findings (seat position, impact side, individual complaints). Do not fabricate differences.`,
+    );
+  }
+
+  return { blockers, warnings };
+}
 
 export interface PeerNote {
   patientLabel: string;

@@ -27,10 +27,12 @@ import {
 } from "./lib/report";
 import {
   compareToPeers,
+  evaluateCohort,
   findingsSet,
   FINDINGS_SIMILARITY_WARN,
   narrativeFingerprint,
   TEXT_SIMILARITY_LIMIT,
+  type CohortPeer,
   type PeerNote,
   type SimilarityHit,
 } from "./lib/similarity";
@@ -150,13 +152,16 @@ export default function App() {
       `${form.patient.firstName} ${form.patient.lastName}`,
     );
     const peerNotes: PeerNote[] = [];
+    const peerRoles = new Map<string, string>();
     for (const p of peers) {
       try {
+        const label = `${p.patient.firstName} ${p.patient.lastName}`;
         peerNotes.push({
-          patientLabel: `${p.patient.firstName} ${p.patient.lastName}`,
+          patientLabel: label,
           narrative: narrativeFingerprint(p),
           findings: findingsSet({ romExam: p.romExam ?? {}, spineExam: p.spineExam, jointTenderness: p.jointTenderness ?? {} }),
         });
+        if (p.accident?.role) peerRoles.set(label, p.accident.role);
       } catch {
         // older-format report — skip
       }
@@ -178,6 +183,23 @@ export default function App() {
         );
       }
     }
+    // Cohort rules for 3+ occupants: aggregate per patient across all their notes
+    const perPatient = new Map<string, CohortPeer>();
+    for (const h of hits) {
+      const cur = perPatient.get(h.otherPatient) ?? {
+        patient: h.otherPatient,
+        role: peerRoles.get(h.otherPatient) ?? "",
+        maxTextSimilarity: 0,
+        maxFindingsSimilarity: 0,
+      };
+      cur.maxTextSimilarity = Math.max(cur.maxTextSimilarity, h.textSimilarity);
+      cur.maxFindingsSimilarity = Math.max(cur.maxFindingsSimilarity, h.findingsSimilarity);
+      perPatient.set(h.otherPatient, cur);
+    }
+    const cohort = evaluateCohort(form.accident.role, [...perPatient.values()]);
+    blockers.push(...cohort.blockers);
+    warnings.push(...cohort.warnings);
+
     return { blockers, warnings, hits };
   }
 

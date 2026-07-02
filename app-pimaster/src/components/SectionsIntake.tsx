@@ -89,7 +89,7 @@ export function Section2Injury({ form, patch, readOnly }: SectionProps) {
           label="Role"
           value={a.role}
           onChange={(v) => patch("accident", { role: v as VisitForm["accident"]["role"] })}
-          options={["Driver", "Passenger", "Pedestrian", "Other"]}
+          options={["Driver", "Front Passenger", "Rear Passenger", "Pedestrian", "Other"]}
         />
         <YesNoField label="Seatbelt" value={a.seatbelt} onChange={(v) => patch("accident", { seatbelt: v })} />
         <YesNoField label="Airbag" value={a.airbag} onChange={(v) => patch("accident", { airbag: v })} />

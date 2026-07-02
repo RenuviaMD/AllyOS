@@ -15,7 +15,7 @@
 6. **Admin layers are PHI-free**: AHCA Pro and every compliance/export surface in PI Master store patient initials + chart reference IDs only — never names/DOB.
 7. **Scope: clinical operations ONLY.** No governance/compliance modules in this platform — governance is handled separately (outside this codebase). The only touchpoint is the Encounter Export: rolling LAST-30-DAYS spreadsheet (risk-scored, highest first) + per-chart Report/Superbill that the MD takes to the external system. Do not (re)build facility registries, binder reports, or audit workflows here.
 8. **Auth model**: one login screen for everyone; individual user accounts; roles are ASSIGNED BY THE ADMIN via `app_users.roles` (admin/physician/staff/pt).
-9. **Clone guard**: ≤20% narrative similarity between same-accident patients; differentiation must come from real documented findings — never generate artificial variation to pass the check.
+9. **Clone guard**: ≤20% similarity on PHYSICIAN-AUTHORED text between same-accident patients (auto-generated narrative and unedited templates are excluded from comparison); differentiation must come from real documented findings — never generate artificial variation to pass the check. Multi-occupant (3+) rules: every note is checked against ALL same-accident patients; seat positions are distinct (Driver / Front Passenger / Rear Passenger); two Drivers on one accident date raises a verify warning; exams nearly identical to 2+ other occupants BLOCK until each patient's real distinguishing findings are documented.
 10. **7th character**: injury (S/T) ICD-10 codes bill A on initial, D on follow-up/final; sequela (S) is a physician decision, never automatic.
 
 ## User & workflow

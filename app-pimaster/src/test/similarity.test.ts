@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compareToPeers, findingsSet, ngramJaccard, setJaccard, TEXT_SIMILARITY_LIMIT } from "../lib/similarity";
+import { compareToPeers, evaluateCohort, findingsSet, ngramJaccard, setJaccard, TEXT_SIMILARITY_LIMIT, type CohortPeer } from "../lib/similarity";
 import { emptySpineExam } from "../lib/rom";
 
 describe("ngramJaccard", () => {
@@ -43,5 +43,40 @@ describe("compareToPeers", () => {
     expect(hits).toHaveLength(2);
     expect(hits[0].textSimilarity).toBe(1);
     expect(hits[1].findingsSimilarity).toBe(0);
+  });
+});
+
+describe("multi-occupant cohort rules (3+ in one accident)", () => {
+  const peer = (patient: string, role: string, findings = 0): CohortPeer => ({
+    patient,
+    role,
+    maxTextSimilarity: 0,
+    maxFindingsSimilarity: findings,
+  });
+
+  it("announces the cohort so the physician knows every occupant was checked", () => {
+    const { warnings, blockers } = evaluateCohort("Driver", [peer("A. B.", "Front Passenger"), peer("C. D.", "Rear Passenger")]);
+    expect(warnings.some((w) => w.includes("2 other patient(s)"))).toBe(true);
+    expect(blockers).toEqual([]);
+  });
+
+  it("warns when two same-accident patients are both documented as Driver", () => {
+    const { warnings } = evaluateCohort("Driver", [peer("A. B.", "Driver")]);
+    expect(warnings.some((w) => w.includes("also documented as Driver"))).toBe(true);
+  });
+
+  it("does not raise the driver warning for distinct seat positions", () => {
+    const { warnings } = evaluateCohort("Driver", [peer("A. B.", "Front Passenger"), peer("C. D.", "Rear Passenger")]);
+    expect(warnings.some((w) => w.includes("also documented as Driver"))).toBe(false);
+  });
+
+  it("escalates to a BLOCK when the exam matches 2+ other occupants (cohort carbon copy)", () => {
+    const { blockers } = evaluateCohort("Driver", [peer("A. B.", "Front Passenger", 0.95), peer("C. D.", "Rear Passenger", 0.95)]);
+    expect(blockers.some((b) => b.includes("re-examine") || b.includes("Re-examine") || b.includes("distinguishing findings"))).toBe(true);
+  });
+
+  it("one identical exam stays a pairwise warning, not a cohort block", () => {
+    const { blockers } = evaluateCohort("Driver", [peer("A. B.", "Front Passenger", 0.95), peer("C. D.", "Rear Passenger", 0.1)]);
+    expect(blockers).toEqual([]);
   });
 });
