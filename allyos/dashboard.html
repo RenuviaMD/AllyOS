@@ -6,9 +6,15 @@
 <script src="allyos-auth.js"></script>
 <style>
 .wrap{max-width:1080px;margin:0 auto;padding:22px}
-.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px}
-.top h1{font-family:var(--fdisp);font-size:1.4rem}.top h1 b{color:var(--gold)}
-.top .r{display:flex;gap:14px;align-items:center;font-size:.82rem;color:var(--muted)}.top .r a{color:var(--teal);text-decoration:none}
+.top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+.top .crumb{display:inline-block;font-size:.72rem;color:var(--teal);text-decoration:none;margin-bottom:7px}
+.top h1{font-family:var(--fdisp);font-size:1.4rem;line-height:1.15}.top h1 b{color:var(--gold)}
+.top .brand{color:var(--gold)}.top .cname{color:var(--ink)}
+.top .caddr{font-size:.82rem;color:var(--muted);margin-top:4px}
+.top .r{display:flex;flex-direction:column;align-items:flex-end;gap:3px;font-size:.82rem;color:var(--muted);text-align:right}
+.top .r .rrow{display:flex;gap:14px;align-items:center}
+.top .r a{color:var(--teal);text-decoration:none}
+.top .r .cloudline{font-size:.68rem;color:var(--muted)}.top .r .cloudline a{color:var(--muted)}
 .sub{color:var(--muted);font-size:.84rem;margin-bottom:18px}
 .sec{font-family:var(--fdisp);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin:18px 0 10px}
 .lines{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
@@ -44,10 +50,16 @@
 </style></head>
 <body class="allyos"><div class="wrap">
   <div class="top">
-    <h1>Practice Dashboard · <b>AllyOS</b></h1>
-    <div class="r"><a id="netLink" href="clinic-network.html" style="display:none;margin-right:10px;color:var(--teal);text-decoration:none;font-size:.82rem">← Clinic Network</a><span id="cloud" style="font-size:.72rem;margin-right:10px"></span><span id="who"></span><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
+    <div class="hleft">
+      <a id="netLink" href="clinic-network.html" class="crumb" style="display:none">← Clinic Network</a>
+      <h1><span class="brand">AllyOS</span> · <span class="cname" id="clinicName">Your clinic</span></h1>
+      <div class="caddr" id="clinicAddr"></div>
+    </div>
+    <div class="r">
+      <div class="rrow"><span id="who"></span><a href="#" onclick="AllyOSAuth.signOut();return false">Logout</a></div>
+      <span id="cloud" class="cloudline"></span>
+    </div>
   </div>
-  <div class="sub" id="clinicLine">Your clinic's lines of care. Active lines open their station; locked lines can be added any time.</div>
 
   <div id="bulletin"></div>
 
@@ -80,8 +92,11 @@
 document.getElementById('yr').textContent=new Date().getFullYear();
 var ses=null;
 if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin','nurse']);ses=AllyOSAuth.session();
-  if(ses){document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+(ses.clinic||'');
-    document.getElementById('clinicLine').innerHTML='<b style="color:var(--ink)">'+esc(ses.clinic||'Your clinic')+'</b> — active lines open their station; locked lines can be added any time.';
+  if(ses){document.getElementById('who').textContent=AllyOSAuth.greeting();
+    document.getElementById('clinicName').textContent=ses.clinic||'Your clinic';
+    var cfg={};try{cfg=JSON.parse(localStorage.getItem('allyos_clinic_config_v1')||'{}');}catch(e){}
+    var addr=[cfg.addr,cfg.city].filter(Boolean).join(' · ');
+    var al=document.getElementById('clinicAddr');if(al)al.textContent=addr;
     if(ses.mdAudit){var nl=document.getElementById('netLink');if(nl)nl.style.display='';}}}
 function role(){return ses?ses.role:'nurse';}
 
