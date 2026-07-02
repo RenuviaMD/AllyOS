@@ -4,6 +4,7 @@
 <link rel="icon" type="image/png" href="ally-avatar-64.png">
 <link rel="stylesheet" href="allyos-theme.css">
 <script src="allyos-auth.js"></script>
+<script src="supabase-client.js"></script>
 <style>
 .wrap{max-width:560px;margin:0 auto;padding:26px 20px}
 .brand{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:6px}
@@ -51,7 +52,7 @@ function stClass(s){return s==='paid'?'paid':(s==='open'?'open':'other');}
 function load(){
   var cid=ses&&ses.clinicId;
   if(!cid){document.getElementById('body').innerHTML='<div class="card" style="text-align:center;color:var(--muted)">Sign in with your clinic account to see your statement.</div>';return;}
-  fetch('/.netlify/functions/md-billing',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'clinic',clinic_id:cid})})
+  AllyOSCloud.postAuthed('/.netlify/functions/md-billing',{action:'clinic',clinic_id:cid})
     .then(function(r){return r.json();}).then(render).catch(function(){document.getElementById('body').innerHTML='<div class="card" style="text-align:center;color:var(--muted)">Could not reach billing right now.</div>';});
 }
 function render(d){

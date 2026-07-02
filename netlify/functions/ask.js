@@ -77,10 +77,20 @@ exports.handler = async (event) => {
   const rIV = /\b(iv|im|infus|drip|bag|push|myers|hydrat|glutathione|nad|niagen|nicotinamide riboside|nr|vitamin ?c|vit ?c|ascorb|magnesium|b12|b-?complex|amino|taurine|carnitine|arginine|zinc|lipotropic|lipo|coq10|nac|ala|alpha[- ]lipoic|calcium|biotin|tri-?immune|gfe|chairside|anaphylaxis|vasovagal)\b/;
   const rBHRT = /\b(bhrt|hormone|estrogen|estradiol|progesterone|testosterone|menopaus|perimenopaus|hsdd|vms|hot flash|vasomotor|gsm|libido|vaginal|dhea|hrt|fezolinetant|veozah|paroxetine|women|female)\b/;
   const rPEP = /\b(peptide|semaglutide|tirzepatide|glp|incretin|retatrutide|sermorelin|ipamorelin|cjc|bpc|tb-?500|mots|ss-?31|pt-?141|bremelanotide|kisspeptin|gonadorelin|aod|tesamorelin|epitalon|selank|semax|dsip|ghk|stack|weight ?loss|fat ?loss)\b/;
+  // Cross-lane overlap tokens: symptoms/goals that legitimately live in MORE than one
+  // care line (e.g. "libido" -> BHRT HSDD *and* peptide PT-141; weight/fat-loss,
+  // "estrogen"/"testosterone"/"glp" straddle BHRT<->peptides). A single-lane regex hit
+  // on one of these can silently drop the OTHER lane's hard-stop (e.g. the PT-141
+  // cardiovascular stop). When any appears, load every module so no gate is dropped.
+  const rOVERLAP = /\b(libido|sexual|desire|estrogen|estradiol|testosterone|weight ?loss|fat ?loss|glp)\b/;
   var incIV = rIV.test(qtext), incBHRT = rBHRT.test(qtext), incPEP = rPEP.test(qtext);
-  if (((incIV ? 1 : 0) + (incBHRT ? 1 : 0) + (incPEP ? 1 : 0)) !== 1) { incIV = incBHRT = incPEP = true; } // ambiguous / cross-line / none -> load everything
+  if (rOVERLAP.test(qtext) || ((incIV ? 1 : 0) + (incBHRT ? 1 : 0) + (incPEP ? 1 : 0)) !== 1) { incIV = incBHRT = incPEP = true; } // ambiguous / cross-line / overlap token / none -> load everything
   var OMIT = "(omitted for this query — not the care line detected in the question, so not loaded to save tokens. If the question is actually about this line, rephrase to name it and it will load.)";
-  var ivBody = incIV ? IV : OMIT, scrBody = incIV ? SCREEN : OMIT, refBody = incIV ? REF : OMIT, drfBody = incIV ? DRAFTS : OMIT;
+  // Emergency response is NEVER routed away: the chairside emergency cards (CARD-A
+  // anaphylaxis = epinephrine 0.3 mg IM first, CARD-V vasovagal, emergency cart) must
+  // ground EVERY answer regardless of the detected care line — an anaphylaxis question
+  // that happens to name a peptide or hormone must still get the epinephrine-first card.
+  var ivBody = incIV ? IV : OMIT, scrBody = incIV ? SCREEN : OMIT, refBody = REF, drfBody = incIV ? DRAFTS : OMIT;
   var bhrtBody = incBHRT ? BHRT : OMIT;
   var pepBody = incPEP ? PEPTIDES : OMIT, famBody = incPEP ? PEPFAM : OMIT, hsBody = incPEP ? PEPHARDSTOP : OMIT, ivsBody = incPEP ? PEPIVSUP : OMIT;
 

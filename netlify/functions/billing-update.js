@@ -6,6 +6,7 @@
 // Secrets (Netlify env): STRIPE_SECRET_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY.
 // (Self-contained — no shared module. Mirrors billing-checkout's patterns.)
 
+const { requireClinic } = require("./lib/auth");
 const STRIPE_VERSION = "2024-06-20";
 const BUNDLE = { 0: 0, 1: 199, 2: 349, 3: 499 };
 const VALID_LINES = ["iv", "peptides", "bhrt"];
@@ -52,6 +53,7 @@ exports.handler = async (event) => {
   const body = parseBody(event);
   const clinicId = body.clinic_id;
   if (!clinicId) return json(400, { error: "clinic_id required" });
+  const gate = await requireClinic(event, clinicId); if (gate.error) return gate.error;
 
   // Normalize the requested active-line set (de-dupe, validate, order).
   const requested = Array.isArray(body.lines) ? body.lines : [];
