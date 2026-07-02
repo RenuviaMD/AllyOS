@@ -1,3 +1,4 @@
+import { medicalNecessityTemplate } from "./narratives";
 import { EXAM_REGIONS, SPINE_REGION_IDS } from "./rom";
 import type { VisitForm } from "./types";
 
@@ -28,12 +29,18 @@ export function ngramJaccard(a: string, b: string, n = 5): number {
 }
 
 /**
- * The narrative text compared between same-accident patients.
- * Only patient-specific narrative content — no letterhead, statutory, or
- * certification boilerplate (those are legitimately identical on every note).
+ * The narrative text compared between same-accident patients — ONLY
+ * physician-authored free text. The auto-generated HPI (injuryNarrative) is
+ * deterministic template text driven by structured dropdowns, so two occupants
+ * of the same crash produce near-identical HPIs by construction; including it
+ * would hard-block legitimate co-occupant notes. The seeded medical-necessity
+ * template prefix is also stripped so an un-edited template contributes nothing.
  */
-export function narrativeFingerprint(form: Pick<VisitForm, "plan">, hpi: string): string {
-  return [hpi, form.plan.medicalNecessity].filter(Boolean).join(" ");
+export function narrativeFingerprint(form: Pick<VisitForm, "plan" | "visitType">): string {
+  const nec = form.plan.medicalNecessity ?? "";
+  const tmpl = medicalNecessityTemplate(form.visitType);
+  const authored = nec.startsWith(tmpl) ? nec.slice(tmpl.length) : nec;
+  return authored.trim();
 }
 
 /** Set of documented exam findings, for detecting carbon-copy examinations. */

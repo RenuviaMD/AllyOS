@@ -36,6 +36,12 @@ export async function signUp(email: string, password: string): Promise<string | 
 }
 
 export async function signOut(): Promise<void> {
+  // Clear the local draft so a signed-out shared workstation retains no PHI
+  try {
+    localStorage.removeItem("pimaster-draft");
+  } catch {
+    // ignore
+  }
   await supabase().auth.signOut();
 }
 

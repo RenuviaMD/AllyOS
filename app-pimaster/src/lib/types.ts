@@ -87,6 +87,8 @@ export interface DxCode {
 export interface Assessment {
   /** auto-populated from ROM; physician may remove */
   autoCodes: DxCode[];
+  /** codes the physician explicitly removed — never re-added by auto-derivation */
+  suppressedCodes: string[];
   /** physician-selected additions from the clinic dx catalog */
   extraCodes: DxCode[];
   /** F43.10 / F41.1 / F32.9 */
@@ -247,7 +249,7 @@ export function emptyForm(): VisitForm {
       lumbar: { tenderness: "", spasm: "", rom: "" },
     },
     jointTenderness: {},
-    assessment: { autoCodes: [], extraCodes: [], psych: [], manual: "" },
+    assessment: { autoCodes: [], suppressedCodes: [], extraCodes: [], psych: [], manual: "" },
     plan: {
       emLevel: "",
       medicalNecessity: "",

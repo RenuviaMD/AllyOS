@@ -66,7 +66,7 @@ export function buildServiceLines(form: VisitForm, settings: BillingSettings, en
         modifier,
         pos,
         units: 1,
-        charge: settings.fees[form.plan.emLevel] ?? "",
+        charge: normalizeMoney(settings.fees[form.plan.emLevel] ?? ""),
       });
     }
   } else {
@@ -79,19 +79,32 @@ export function buildServiceLines(form: VisitForm, settings: BillingSettings, en
         modifier: "",
         pos: "11",
         units: 1,
-        charge: settings.fees[cpt] ?? "",
+        charge: normalizeMoney(settings.fees[cpt] ?? ""),
       });
     }
   }
   return lines;
 }
 
+/** Parse a fee that may contain a leading $ or thousands commas. Returns null if not a clean amount. */
+export function parseMoney(raw: string): number | null {
+  const cleaned = (raw ?? "").trim().replace(/^\$/, "").replace(/,/g, "");
+  if (!/^\d+(\.\d{1,2})?$/.test(cleaned)) return null;
+  return parseFloat(cleaned);
+}
+
+/** Normalized charge string ("" if the entry is not a clean amount) — keeps line charges and the total in agreement. */
+export function normalizeMoney(raw: string): string {
+  const v = parseMoney(raw);
+  return v === null ? "" : v.toFixed(2);
+}
+
 export function totalCharges(lines: ServiceLine[]): string {
   let total = 0;
   let any = false;
   for (const l of lines) {
-    const v = parseFloat(l.charge);
-    if (!Number.isNaN(v)) {
+    const v = parseMoney(l.charge);
+    if (v !== null) {
       total += v * l.units;
       any = true;
     }

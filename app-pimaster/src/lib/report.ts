@@ -21,7 +21,9 @@ function esc(s: string): string {
 }
 
 export function allDiagnosisCodes(form: VisitForm): DxCode[] {
-  const auto = form.assessment.autoCodes.length ? form.assessment.autoCodes : deriveIcd10(form);
+  const suppressed = form.assessment.suppressedCodes ?? [];
+  const derived = deriveIcd10(form).filter((d) => !suppressed.includes(d.code));
+  const auto = form.assessment.autoCodes.length ? form.assessment.autoCodes : derived;
   const extra = form.assessment.extraCodes ?? [];
   const psych = PSYCH_CODES.filter((p) => form.assessment.psych.includes(p.code));
   const manual = parseManualCodes(form.assessment.manual);
@@ -31,7 +33,11 @@ export function allDiagnosisCodes(form: VisitForm): DxCode[] {
     .filter((d) => (seen.has(d.code) ? false : (seen.add(d.code), true)));
 }
 
-export function allCptCodes(form: VisitForm): string[] {
+/** CPT codes actually billed for a chart. PT charts bill the treatments provided,
+ * not the physician's planned modalities. */
+export function allCptCodes(form: VisitForm, mode?: string): string[] {
+  if (mode === "ptdaily") return [...new Set(form.ptDaily?.treatments ?? [])];
+  if (mode === "ptprogress") return [];
   const out: string[] = [];
   if (form.plan.emLevel) out.push(form.plan.emLevel);
   out.push(...form.plan.modalities);
@@ -397,11 +403,23 @@ export function buildPtReportHtml(form: VisitForm, kind: "ptdaily" | "ptprogress
   return wrap(`PT Note — ${form.patient.lastName}`, b + signature());
 }
 
+/** Strip active content from HTML before rendering. Our own builders escape all
+ * interpolation, but stored report_html can include legacy rows written by the
+ * previous app — neutralize scripts/handlers to prevent stored-XSS. */
+export function sanitizeHtml(html: string): string {
+  return html
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<\/?(?:iframe|object|embed|link|meta|base)\b[^>]*>/gi, "")
+    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+    .replace(/(href|src)\s*=\s*("javascript:[^"]*"|'javascript:[^']*'|javascript:[^\s>]+)/gi, '$1="#"');
+}
+
 /** Open a print window for the generated HTML (print → Save as PDF).
  * Popup blockers (default on iPad Safari) silently kill window.open —
  * surface that instead of failing quietly. Returns false when blocked. */
-export function printHtml(html: string): boolean {
-  const w = window.open("", "_blank");
+export function printHtml(rawHtml: string): boolean {
+  const html = sanitizeHtml(rawHtml);
+  const w = window.open("", "_blank", "noopener=no");
   if (!w) {
     const note = document.createElement("div");
     note.className = "popup-note";

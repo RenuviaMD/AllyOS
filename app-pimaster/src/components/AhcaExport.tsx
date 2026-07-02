@@ -41,7 +41,7 @@ export function AhcaExportPage(props: { onClose: () => void }) {
       const built: Row[] = charts.map((c) => {
         const ev = autoEvaluate(c.form, c.cpt_codes, c.icd_codes);
         const score = chartScore(ev);
-        const type = c.form?.plan?.emLevel ? "md" : "pt";
+        const type = c.mode.startsWith("pt") ? "pt" : "md";
         const charge = totalCharges(buildServiceLines(c.form, settings, type));
         return {
           chart: c,
@@ -93,7 +93,7 @@ export function AhcaExportPage(props: { onClose: () => void }) {
 
   function openSuperbill(c: MonthChart) {
     const settings = loadBillingSettings();
-    const type = c.form?.plan?.emLevel ? "md" : "pt";
+    const type = c.mode.startsWith("pt") ? "pt" : "md";
     const lines = buildServiceLines(c.form, settings, type);
     printHtml(buildSuperbillHtml(c.form, lines, settings, type));
   }

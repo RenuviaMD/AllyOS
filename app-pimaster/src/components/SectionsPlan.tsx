@@ -7,17 +7,18 @@ import { Area, CheckGroup, Section, Select, YesNoField } from "./fields";
 import type { SectionProps } from "./SectionsIntake";
 
 export function Section6Assessment({ form, patch }: SectionProps) {
-  const derived = deriveIcd10(form);
-  // Auto-populate from ROM whenever the derived set changes, preserving physician removals
-  const lastDerived = useRef<string>("");
+  const suppressed = form.assessment.suppressedCodes ?? [];
+  // Derived codes minus the ones the physician explicitly removed (removals persist in form state)
+  const visible = deriveIcd10(form).filter((d) => !suppressed.includes(d.code));
+  const lastKey = useRef<string>("");
+  const visKey = visible.map((d) => d.code).join(",");
   useEffect(() => {
-    const key = derived.map((d) => d.code).join(",");
-    if (key !== lastDerived.current) {
-      lastDerived.current = key;
-      patch("assessment", { autoCodes: derived });
+    if (visKey !== lastKey.current) {
+      lastKey.current = visKey;
+      patch("assessment", { autoCodes: visible });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [derived.map((d) => d.code).join(",")]);
+  }, [visKey]);
 
   const codes = form.assessment.autoCodes;
   return (
@@ -32,14 +33,22 @@ export function Section6Assessment({ form, patch }: SectionProps) {
             <button
               type="button"
               className="dx-remove"
-              title="Remove"
-              onClick={() => patch("assessment", { autoCodes: codes.filter((c) => c.code !== d.code) })}
+              title="Remove — this code will not be re-added automatically"
+              onClick={() => patch("assessment", { suppressedCodes: [...suppressed, d.code] })}
             >
               ✕
             </button>
           </li>
         ))}
       </ul>
+      {suppressed.length > 0 && (
+        <p className="status">
+          Removed: {suppressed.join(", ")}{" "}
+          <button type="button" className="btn ghost" style={{ padding: "1px 8px" }} onClick={() => patch("assessment", { suppressedCodes: [] })}>
+            restore all
+          </button>
+        </p>
+      )}
       <CatalogQuickPicks form={form} patch={patch} />
       <div style={{ marginTop: 12 }}>
         <label className="status">Optional psychological diagnoses</label>

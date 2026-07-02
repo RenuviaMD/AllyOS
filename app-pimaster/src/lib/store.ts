@@ -110,8 +110,9 @@ export async function fetchSameAccidentForms(accidentDate: string, excludePatien
       .select("form_data")
       .in("mode", ["initial", "followup", "final"])
       .eq("status", "active")
+      .eq("form_data->accident->>accidentDate", accidentDate)
       .order("created_at", { ascending: false })
-      .limit(200);
+      .limit(500);
     if (error) throw error;
     const me = excludePatient.trim().toLowerCase();
     const out: VisitForm[] = [];
@@ -381,9 +382,10 @@ export async function loadClinicBilling(): Promise<ClinicBillingIdentity | null>
 }
 
 export async function saveClinicBilling(b: ClinicBillingIdentity): Promise<void> {
-  await supabase()
+  const { error } = await supabase()
     .from("clinic_settings")
     .upsert({ clinic_id: "wellness_hcc", ...b, updated_at: new Date().toISOString() }, { onConflict: "clinic_id" });
+  if (error) throw error;
 }
 
 /** Pull cloud billing identity + service charges into the local cache used by the document builders. */
@@ -391,8 +393,9 @@ export async function syncBillingFromCloud(): Promise<void> {
   const local = loadBillingSettings();
   const [identity, services] = await Promise.all([loadClinicBilling(), listServiceCatalog().catch(() => [] as ServiceCatalogRow[])]);
   const fees = { ...local.fees };
-  for (const s of services) {
-    if (s.charge) fees[s.cpt] = s.charge;
+  for (const row of services) {
+    if (row.active && row.charge) fees[row.cpt] = row.charge;
+    else delete fees[row.cpt];
   }
   saveBillingSettings({
     ein: identity?.ein || local.ein,
@@ -426,7 +429,7 @@ export async function loadImagingConfigCloud(): Promise<ImagingConfig | null> {
 
 export async function saveImagingConfigCloud(c: ImagingConfig): Promise<void> {
   saveImagingConfig(c);
-  await supabase()
+  const { error } = await supabase()
     .from("clinic_settings")
     .upsert(
       {
@@ -440,6 +443,7 @@ export async function saveImagingConfigCloud(c: ImagingConfig): Promise<void> {
       },
       { onConflict: "clinic_id" },
     );
+  if (error) throw error;
 }
 
 async function syncImagingFromCloud(): Promise<void> {

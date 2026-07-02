@@ -11,6 +11,7 @@ export function BillingSettingsCard(props: { onClose: () => void }) {
   useEffect(() => {
     syncBillingFromCloud()
       .then(() => {
+        if (dirty.current) return; // don't overwrite edits the user made while the sync was in flight
         setS(loadBillingSettings());
         setImg(loadImagingConfig());
       })
@@ -19,18 +20,21 @@ export function BillingSettingsCard(props: { onClose: () => void }) {
 
   // One cloud write per pause in typing, not per keystroke
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const dirty = useRef(false);
   function debounced(key: string, fn: () => void, ms = 700) {
     clearTimeout(timers.current[key]);
     timers.current[key] = setTimeout(fn, ms);
   }
 
   function updateImg(partial: Partial<ImagingConfig>) {
+    dirty.current = true;
     const next = { ...img, ...partial };
     setImg(next);
     debounced("imaging", () => saveImagingConfigCloud(next).catch(() => {}));
   }
 
   function update(partial: Partial<BillingSettings>) {
+    dirty.current = true;
     const next = { ...s, ...partial };
     setS(next);
     saveBillingSettings(next);
@@ -38,6 +42,7 @@ export function BillingSettingsCard(props: { onClose: () => void }) {
   }
 
   function setFee(cpt: string, charge: string) {
+    dirty.current = true;
     const next = { ...s, fees: { ...s.fees, [cpt]: charge } };
     setS(next);
     saveBillingSettings(next);

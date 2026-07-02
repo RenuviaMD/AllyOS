@@ -14,7 +14,6 @@ import { allowedViews, changePassword, fetchAuthState, onAuthChange, signOut, ty
 import { auditNote } from "./lib/audit";
 import { buildServiceLines, loadBillingSettings } from "./lib/billing";
 import { CLINIC } from "./lib/clinic";
-import { injuryNarrative } from "./lib/narratives";
 import {
   allCptCodes,
   allDiagnosisCodes,
@@ -56,6 +55,7 @@ export default function App() {
   const [showUsers, setShowUsers] = useState(false);
   const [showCatalogs, setShowCatalogs] = useState(false);
   const loaded = useRef(false);
+  const dirty = useRef(false);
 
   useEffect(() => {
     const refresh = () => fetchAuthState().then(setAuth);
@@ -66,7 +66,7 @@ export default function App() {
   useEffect(() => {
     if (!auth) return;
     loadDraft().then((d) => {
-      if (d) setForm({ ...emptyForm(), ...d });
+      if (d && !dirty.current) setForm({ ...emptyForm(), ...d });
       loaded.current = true;
     });
     syncBillingFromCloud().catch(() => {});
@@ -84,6 +84,7 @@ export default function App() {
   }, [form]);
 
   function patch<S extends keyof VisitForm>(section: S, partial: Partial<VisitForm[S]>) {
+    dirty.current = true;
     setForm((f) => ({ ...f, [section]: { ...(f[section] as object), ...partial } as VisitForm[S] }));
   }
 
@@ -116,8 +117,12 @@ export default function App() {
   }
 
   async function doChangePassword() {
-    const pw = prompt("New password (min 8 characters):");
+    const pw = prompt("New password (min 8 characters):")?.trim();
     if (!pw) return;
+    if (pw.length < 8) {
+      alert("Password must be at least 8 characters.");
+      return;
+    }
     const err = await changePassword(pw);
     alert(err ? `Could not change password: ${err}` : "Password updated.");
   }
@@ -149,14 +154,14 @@ export default function App() {
       try {
         peerNotes.push({
           patientLabel: `${p.patient.firstName} ${p.patient.lastName}`,
-          narrative: narrativeFingerprint(p, injuryNarrative(p.patient, p.accident)),
+          narrative: narrativeFingerprint(p),
           findings: findingsSet({ romExam: p.romExam ?? {}, spineExam: p.spineExam, jointTenderness: p.jointTenderness ?? {} }),
         });
       } catch {
         // older-format report — skip
       }
     }
-    const mine = narrativeFingerprint(form, injuryNarrative(form.patient, form.accident));
+    const mine = narrativeFingerprint(form);
     const hits = compareToPeers(mine, findingsSet(form), peerNotes);
     const blockers: string[] = [];
     const warnings: string[] = [];
@@ -245,7 +250,7 @@ export default function App() {
       form,
       html,
       icdCodes: allDiagnosisCodes(form).map((d) => d.code),
-      cptCodes: allCptCodes(form),
+      cptCodes: allCptCodes(form, mode),
       auditTrail:
         kind === "note"
           ? {

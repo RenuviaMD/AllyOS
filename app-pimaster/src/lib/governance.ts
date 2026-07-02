@@ -40,7 +40,7 @@ export type ChartEvaluation = Record<string, PointResult>;
 /** Pre-evaluate every auto point from the chart's saved form data. Manual points start NA. */
 export function autoEvaluate(form: VisitForm, savedCpt: string[], savedIcd: string[]): ChartEvaluation {
   const ev: ChartEvaluation = {};
-  const p = form.patient;
+  const p = form.patient ?? ({} as VisitForm["patient"]);
 
   ev.intake = p.firstName && p.lastName && p.dob && p.insuranceCarrier
     ? { value: "Y", reason: "Identity and insurance captured." }
@@ -144,7 +144,9 @@ export interface EncounterExport {
 }
 
 function csvCell(v: string): string {
-  return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+  // Neutralize spreadsheet formula injection from any user-entered code/text
+  const safe = /^[=+\-@\t\r]/.test(v) ? `'${v}` : v;
+  return /[",\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
 
 /** Build the last-30-days encounter CSV for risk triage / external audit upload. */

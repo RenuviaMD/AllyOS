@@ -18,7 +18,7 @@ describe("buildServiceLines", () => {
     f.visitMode = "telehealth";
     const lines = buildServiceLines(f, settings, "md");
     expect(lines).toHaveLength(1);
-    expect(lines[0]).toMatchObject({ cpt: "99204", modifier: "95", pos: "02", units: 1, charge: "300" });
+    expect(lines[0]).toMatchObject({ cpt: "99204", modifier: "95", pos: "02", units: 1, charge: "300.00" });
   });
 
   it("builds PT treatment lines, always in person, blank charge when unpriced", () => {
@@ -26,7 +26,7 @@ describe("buildServiceLines", () => {
     f.ptDaily.treatments = ["97110", "97140"];
     const lines = buildServiceLines(f, settings, "pt");
     expect(lines).toHaveLength(2);
-    expect(lines[0]).toMatchObject({ cpt: "97110", pos: "11", modifier: "", charge: "55" });
+    expect(lines[0]).toMatchObject({ cpt: "97110", pos: "11", modifier: "", charge: "55.00" });
     expect(lines[1].charge).toBe("");
   });
 });
