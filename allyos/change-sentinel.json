@@ -1,17 +1,16 @@
 {
-  "date": "2026-07-01T08:13:36.857465Z",
+  "date": "2026-07-02T07:32:26.298664Z",
   "agent": "change-sentinel",
   "mode": "deterministic \u2014 no LLM; facts + links only; fail-closed",
   "lines": {
     "IV": {
       "changes": [],
       "unverified": [
-        "PMID 16215069: lookup error: HTTP Error 429: Too Many Requests",
         "ZOFRAN: lookup error: HTTP Error 404: Not Found",
         "TORADOL: lookup error: HTTP Error 404: Not Found"
       ],
       "watched": {
-        "pmids": 8,
+        "pmids": 10,
         "ncts": 0,
         "labels": 3
       }
