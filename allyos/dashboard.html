@@ -74,7 +74,8 @@
       <div style="color:var(--ink);font-weight:700;margin-bottom:5px">AllyOS lines — add any time, pay only for what you run</div>
       <div>💧 IV / IM · 🧬 Peptides · ⚕️ Hormone (women &amp; men)</div>
       <div style="color:var(--gold);margin-top:5px;font-size:.9rem">1 line <b>$199</b> · 2 lines <b>$349</b> <span style="color:var(--muted)">(save $49)</span> · 3 lines <b>$499</b> <span style="color:var(--muted)">(save $98)</span> /mo</div>
-      <div style="margin-top:4px"><a class="tool" style="padding:7px 12px;font-size:.78rem;display:inline-flex" href="#" onclick="openBilling();return false">➕ Add a line / manage plan</a></div>
+      <div style="margin-top:4px"><a class="tool" style="padding:7px 12px;font-size:.78rem;display:inline-flex" href="#" onclick="openBilling();return false">💳 Manage plan / add a line</a></div>
+      <div style="margin-top:5px;font-size:.72rem;color:var(--muted)">Adding a line? Tap a <b style="color:var(--gold)">locked line</b> above — you'll see what it does and the exact new monthly price before any checkout.</div>
     </div>
     <div style="font-size:.82rem;color:var(--muted)">
       <div style="color:var(--ink);font-weight:700;margin-bottom:5px">Questions? Talk to the Medical Director</div>
@@ -129,7 +130,7 @@ function render(){
                    :'<span class="chip locked">Locked</span>';
     return '<div class="line '+(active?'active':'locked')+'" onclick="lineClick(\''+L.k+'\')">'+chip+
       '<div class="ic">'+L.ic+'</div><h3>'+esc(L.name)+'</h3><p>'+esc(L.short)+'</p>'+
-      (active?'':'<div class="lockrow">🔒 Add this line</div>')+'</div>';
+      (active?'':'<div class="lockrow">🔒 Add this line · <b>+$'+(planTotal(Math.min(3,activeCount()+1))-planTotal(activeCount()))+'/mo</b></div>')+'</div>';
   }).join('');
   // Lean clinic toolset. AllyOS = decision-support (+ real-time IV charting), NOT practice management.
   // Drip is auto-calculated and inventory is a stock-confirm gate INSIDE the nursing station — no tiles.
@@ -157,9 +158,11 @@ function popup(k,active){var L=byKey(k);
     '<p>'+esc(L.what)+'</p><div class="ev">Evidence-graded · independent · PHI-free. The provider owns the decision.</div>'+
     (active
       ? '<a class="btn go" href="'+L.tool+'">Open '+esc(L.name)+'</a>'
-      : '<div class="price">Per clinic · bundle 1/2/3 lines $199 / $349 / $499 per mo</div>'+
-        '<button class="btn go" onclick="startCheckout(\''+k+'\')">➕ Add this line →</button>'+
-        (isDemo()?'<button class="btn ghost" onclick="setLine(\''+k+'\',true);closeOv()">Activate in this demo</button>':''))+
+      : (function(){var n=activeCount();var m=Math.min(3,n+1);var tot=planTotal(m);var add=planTotal(m)-planTotal(n);
+          return '<div class="price">You run <b>'+n+'</b> line'+(n===1?'':'s')+' now. Adding '+esc(L.name)+' → <b>'+m+' line'+(m===1?'':'s')+' = $'+tot+'/mo</b>'+(n>0?' (＋$'+add+'/mo)':'')+'</div>'+
+            '<div class="ev" style="margin-top:2px">Billed per clinic · unlimited staff seats · cancel anytime</div>'+
+            '<button class="btn go" onclick="startCheckout(\''+k+'\')">Continue to secure checkout →</button>'+
+            (isDemo()?'<button class="btn ghost" onclick="setLine(\''+k+'\',true);closeOv()">Activate in this demo</button>':'');})())+
     '<button class="btn ghost" onclick="closeOv()">Close</button>';
   document.getElementById('ov').classList.add('show');
 }
@@ -170,6 +173,13 @@ document.getElementById('ov').addEventListener('click',function(e){if(e.target==
 function billClinicId(){return (ses&&ses.clinicId)||null;}
 function isDemo(){return !!(ses&&(ses.demo||ses.sandbox));}
 function activeCount(){var l=lines();return ['iv','peptides','bhrt'].filter(function(k){return l[k];}).length;}
+// Per-clinic bundle pricing (matches the pricing page). Adding a line shows the honest
+// marginal cost (+$199 first line, +$150 each additional) and the new monthly total.
+var BUNDLE={0:0,1:199,2:349,3:499};
+function planTotal(n){n=Math.max(0,Math.min(3,n));return BUNDLE[n];}
+function marginalAdd(){var n=activeCount();return planTotal(Math.min(3,n+1))-planTotal(n);}
+function firstLockedLine(){var on=lines();for(var i=0;i<LINES.length;i++){if(!on[LINES[i].k])return LINES[i].k;}return null;}
+function addLinePrompt(){var k=firstLockedLine();if(k){popup(k,false);}else{alert('All three lines are already active. Use Manage plan to review your billing.');}}
 function startCheckout(k){
   var cid=billClinicId();
   if(!cid){alert('Sign in to your clinic to subscribe.');return;}
@@ -197,7 +207,7 @@ function openBilling(){
     .then(function(r){return r.json();})
     .then(function(d){
       if(d&&d.url){location.href=d.url;}                         // existing customer → manage
-      else if(d&&d.error==='no_customer'){startCheckout();}      // first time → subscribe (current line count)
+      else if(d&&d.error==='no_customer'){addLinePrompt();}      // first time → show the info card (never jump to Stripe cold)
       else {alert(d&&d.error==='not_configured'?'Billing isn’t switched on yet (Stripe key not set).':'Billing unavailable right now.');}
     })
     .catch(function(){alert('Could not reach billing right now.');});
