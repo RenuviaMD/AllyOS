@@ -469,6 +469,39 @@ export async function upsertServiceCatalog(row: Omit<ServiceCatalogRow, "id"> & 
   }
 }
 
+export interface CarrierRow {
+  id: string;
+  name: string;
+  payer_id: string | null;
+  claims_address: string | null;
+  billing_contact: string | null;
+  claims_phone: string | null;
+  notes: string | null;
+  active: boolean;
+}
+
+export async function listCarriers(): Promise<CarrierRow[]> {
+  const { data, error } = await supabase()
+    .from("clinic_insurance_carriers")
+    .select("id, name, payer_id, claims_address, billing_contact, claims_phone, notes, active")
+    .eq("clinic_id", activeClinicId())
+    .order("name");
+  if (error) throw error;
+  return (data ?? []) as CarrierRow[];
+}
+
+export async function upsertCarrier(row: Omit<CarrierRow, "id"> & { id?: string }): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const { error } = await supabase()
+      .from("clinic_insurance_carriers")
+      .upsert({ ...row, clinic_id: activeClinicId() }, { onConflict: "clinic_id,name" });
+    if (error) throw error;
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
 export interface ClinicBillingIdentity {
   ein: string;
   billing_npi: string;

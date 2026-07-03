@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import {
+  listCarriers,
   listDxCatalog,
   listServiceCatalog,
+  upsertCarrier,
   upsertDxCatalog,
   upsertServiceCatalog,
+  type CarrierRow,
   type DxCatalogRow,
   type ServiceCatalogRow,
 } from "../lib/store";
@@ -19,19 +22,50 @@ export function looksLikeCpt(code: string): boolean {
   return /^[0-9]{4}[0-9A-Z]$/.test(code);
 }
 
+const EMPTY_CARRIER = { name: "", payer_id: "", claims_address: "", billing_contact: "", claims_phone: "", notes: "" };
+
 export function CatalogPage(props: { onClose: () => void }) {
-  const [tab, setTab] = useState<"dx" | "cpt">("dx");
+  const [tab, setTab] = useState<"dx" | "cpt" | "carriers">("dx");
   const [dx, setDx] = useState<DxCatalogRow[]>([]);
   const [services, setServices] = useState<ServiceCatalogRow[]>([]);
+  const [carriers, setCarriers] = useState<CarrierRow[]>([]);
   const [status, setStatus] = useState("");
   const [newDx, setNewDx] = useState({ code: "", description: "", region: "", kind: "other" });
   const [newCpt, setNewCpt] = useState({ cpt: "", name: "", category: "other", charge: "" });
+  const [newCarrier, setNewCarrier] = useState({ ...EMPTY_CARRIER });
 
   function refresh() {
     listDxCatalog().then(setDx).catch((e) => setStatus(`Load failed: ${e.message}`));
     listServiceCatalog().then(setServices).catch((e) => setStatus(`Load failed: ${e.message}`));
+    listCarriers().then(setCarriers).catch(() => {});
   }
   useEffect(refresh, []);
+
+  async function addCarrier() {
+    if (!newCarrier.name.trim()) {
+      setStatus("Carrier name is required.");
+      return;
+    }
+    const res = await upsertCarrier({
+      name: newCarrier.name.trim(),
+      payer_id: newCarrier.payer_id.trim() || null,
+      claims_address: newCarrier.claims_address.trim() || null,
+      billing_contact: newCarrier.billing_contact.trim() || null,
+      claims_phone: newCarrier.claims_phone.trim() || null,
+      notes: newCarrier.notes.trim() || null,
+      active: true,
+    });
+    setStatus(res.ok ? `${newCarrier.name} saved.` : `Save failed: ${res.error}`);
+    if (res.ok) {
+      setNewCarrier({ ...EMPTY_CARRIER });
+      refresh();
+    }
+  }
+
+  async function toggleCarrierActive(row: CarrierRow) {
+    await upsertCarrier({ ...row, active: !row.active });
+    refresh();
+  }
 
   async function addDx() {
     const code = newDx.code.trim().toUpperCase();
@@ -113,6 +147,9 @@ export function CatalogPage(props: { onClose: () => void }) {
             <button className={tab === "cpt" ? "active" : ""} onClick={() => setTab("cpt")}>
               CPT Services
             </button>
+            <button className={tab === "carriers" ? "active" : ""} onClick={() => setTab("carriers")}>
+              Insurance Carriers
+            </button>
           </div>
           <button className="btn ghost" style={{ marginLeft: "auto" }} onClick={props.onClose}>
             Close
@@ -172,6 +209,40 @@ export function CatalogPage(props: { onClose: () => void }) {
                     <td>{r.category}</td>
                     <td>{r.charge ? `$${r.charge}` : "—"}</td>
                     <td><button className="btn ghost" onClick={() => toggleCptActive(r)}>{r.active ? "Deactivate" : "Activate"}</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
+
+        {tab === "carriers" && (
+          <>
+            <p className="status">
+              Staff pick a carrier by name at check-in; its claims address, phone, and payer ID populate the CMS-1500 and
+              give the front desk the billing contacts. Values shown as "not verified" must be confirmed with the adjuster
+              before mailing — nothing here is invented.
+            </p>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
+              {input(newCarrier.name, (v) => setNewCarrier({ ...newCarrier, name: v }), "Carrier name", 180)}
+              {input(newCarrier.payer_id, (v) => setNewCarrier({ ...newCarrier, payer_id: v }), "Payer ID", 110)}
+              {input(newCarrier.claims_address, (v) => setNewCarrier({ ...newCarrier, claims_address: v }), "Claims / billing address", 300)}
+              {input(newCarrier.claims_phone, (v) => setNewCarrier({ ...newCarrier, claims_phone: v }), "Claims phone", 160)}
+              {input(newCarrier.billing_contact, (v) => setNewCarrier({ ...newCarrier, billing_contact: v }), "Billing contact (email/fax)", 220)}
+              {input(newCarrier.notes, (v) => setNewCarrier({ ...newCarrier, notes: v }), "Verification notes", 260)}
+              <button className="btn" onClick={addCarrier}>Save carrier</button>
+            </div>
+            <table className="rom-table">
+              <thead><tr><th>Carrier</th><th>Payer ID</th><th>Claims address</th><th>Phone</th><th>Notes</th><th>Active</th></tr></thead>
+              <tbody>
+                {carriers.map((r) => (
+                  <tr key={r.id} style={{ opacity: r.active ? 1 : 0.45 }}>
+                    <td style={{ color: "var(--gold)", fontWeight: 600 }}>{r.name}</td>
+                    <td>{r.payer_id}</td>
+                    <td>{r.claims_address}</td>
+                    <td>{r.claims_phone}</td>
+                    <td className="status">{r.notes}</td>
+                    <td><button className="btn ghost" onClick={() => toggleCarrierActive(r)}>{r.active ? "Deactivate" : "Activate"}</button></td>
                   </tr>
                 ))}
               </tbody>

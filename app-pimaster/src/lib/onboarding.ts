@@ -1,3 +1,4 @@
+import { CARRIER_SEED } from "./carriers";
 import { ADVANCED_IMAGING, PROCEDURES, xrayFeeItems } from "./cpt";
 import { supabase } from "./store";
 
@@ -146,6 +147,22 @@ export async function createClinic(input: NewClinicInput): Promise<{ ok: boolean
       .from("clinic_service_catalog")
       .insert(SERVICE_SEED.map((r) => ({ ...r, default_units: 1, active: true, clinic_id: id })));
     if (vErr) throw vErr;
+
+    const { error: carErr } = await supabase()
+      .from("clinic_insurance_carriers")
+      .insert(
+        CARRIER_SEED.map((c) => ({
+          clinic_id: id,
+          name: c.name,
+          payer_id: c.payerId,
+          claims_address: c.claimsAddress,
+          billing_contact: c.billingContact,
+          claims_phone: c.claimsPhone,
+          notes: c.notes,
+          active: true,
+        })),
+      );
+    if (carErr) throw carErr;
 
     return { ok: true, id };
   } catch (e) {

@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import type { VisitForm } from "../lib/types";
 import { injuryNarrative } from "../lib/narratives";
+import { listCarriers, type CarrierRow } from "../lib/store";
 import { Section, Select, Text, YesNoField } from "./fields";
 
 export interface SectionProps {
@@ -10,6 +12,27 @@ export interface SectionProps {
 
 export function Section1CheckIn({ form, patch }: SectionProps) {
   const p = form.patient;
+  const [carriers, setCarriers] = useState<CarrierRow[]>([]);
+  useEffect(() => {
+    listCarriers()
+      .then((rows) => setCarriers(rows.filter((c) => c.active)))
+      .catch(() => setCarriers([]));
+  }, []);
+
+  const match = carriers.find((c) => c.name.toLowerCase() === p.insuranceCarrier.trim().toLowerCase());
+
+  function chooseCarrier(name: string) {
+    const c = carriers.find((x) => x.name.toLowerCase() === name.trim().toLowerCase());
+    // Picking a known carrier snapshots its claims data onto the form (editable
+    // below, and used on the CMS-1500). Free text just sets the name.
+    patch("patient", {
+      insuranceCarrier: name,
+      ...(c
+        ? { insurerAddress: c.claims_address ?? "", insurerPhone: c.claims_phone ?? "", insurerPayerId: c.payer_id ?? "" }
+        : {}),
+    });
+  }
+
   return (
     <Section num={1} title="Staff Check-In" tag="All visit types">
       <div className="grid">
@@ -23,7 +46,20 @@ export function Section1CheckIn({ form, patch }: SectionProps) {
           options={["male", "female", "other"]}
           labels={["Male", "Female", "Other"]}
         />
-        <Text label="Insurance Carrier" value={p.insuranceCarrier} onChange={(v) => patch("patient", { insuranceCarrier: v })} />
+        <div className="field">
+          <label>Insurance Carrier (auto/PIP)</label>
+          <input
+            list="carrier-list"
+            value={p.insuranceCarrier}
+            placeholder={carriers.length ? "Type or pick a carrier…" : "Insurance carrier"}
+            onChange={(e) => chooseCarrier(e.target.value)}
+          />
+          <datalist id="carrier-list">
+            {carriers.map((c) => (
+              <option key={c.id} value={c.name} />
+            ))}
+          </datalist>
+        </div>
         <Text label="Policy Number" value={p.policyNumber} onChange={(v) => patch("patient", { policyNumber: v })} />
         <Text label="Address" value={p.address} onChange={(v) => patch("patient", { address: v })} />
         <Text label="City" value={p.city} onChange={(v) => patch("patient", { city: v })} />
@@ -31,6 +67,26 @@ export function Section1CheckIn({ form, patch }: SectionProps) {
         <Text label="ZIP" value={p.zip} onChange={(v) => patch("patient", { zip: v })} />
         <Text label="Phone" value={p.phone} onChange={(v) => patch("patient", { phone: v })} />
       </div>
+
+      {p.insuranceCarrier.trim() !== "" && (
+        <div className="narr" style={{ marginTop: 10 }}>
+          <div className="status" style={{ marginBottom: 6 }}>
+            Claims routing — prints on the CMS-1500. Editable per claim; blank prints blank.
+          </div>
+          <div className="grid">
+            <Text
+              label="Claims / billing address (CMS-1500)"
+              value={p.insurerAddress ?? ""}
+              onChange={(v) => patch("patient", { insurerAddress: v })}
+              wide
+            />
+            <Text label="Claims phone" value={p.insurerPhone ?? ""} onChange={(v) => patch("patient", { insurerPhone: v })} />
+            <Text label="Payer ID (EDI)" value={p.insurerPayerId ?? ""} onChange={(v) => patch("patient", { insurerPayerId: v })} />
+          </div>
+          {match?.billing_contact && <p className="status">Provider billing contact: {match.billing_contact}</p>}
+          {match?.notes && <p className="status warn">⚠ {match.notes}</p>}
+        </div>
+      )}
     </Section>
   );
 }
