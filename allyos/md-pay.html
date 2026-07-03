@@ -67,7 +67,7 @@ function render(d){
     html+='<div class="hero"><div class="lab">Amount due</div><div class="amt due">'+money(out)+'</div>'+
       '<div class="note">'+(openInv&&openInv.due?('Due '+dt(openInv.due)):'Payable now')+' · pay from your bank account</div>'+
       (openInv&&openInv.url?'<a class="btn go" href="'+esc(openInv.url)+'" target="_blank" rel="noopener">Make a payment →</a>':'')+
-      '</div><div class="pay-note">One tap → pay by bank (ACH) or card on Stripe’s secure page.</div>';
+      '</div><div class="pay-note">One tap → pay from your bank account (ACH) on Stripe’s secure page. No card fees.</div>';
   }else{
     html+='<div class="hero"><div class="lab">Balance</div><div class="amt clear">$0.00</div>'+
       '<div class="note">You’re all caught up — thank you. 🎉</div></div>';
