@@ -3,10 +3,12 @@ import { aggravationNarrative, injuryNarrative, imagingReviewNarrative } from ".
 import { emptyForm } from "../lib/types";
 
 describe("injuryNarrative", () => {
-  it("builds a narrative from accident answers", () => {
+  it("writes a clinical HPI — age/sex descriptor, never the patient's name", () => {
     const f = emptyForm();
     f.patient.firstName = "Test";
     f.patient.lastName = "Patient";
+    f.patient.dob = "1966-05-07";
+    f.patient.sex = "male";
     f.accident = {
       accidentDate: "2026-06-01",
       accidentType: "MVA",
@@ -17,12 +19,31 @@ describe("injuryNarrative", () => {
       vehicleDrivable: "no",
       priorMedical: "no",
     };
-    const n = injuryNarrative(f.patient, f.accident);
-    expect(n).toContain("motor vehicle accident");
-    expect(n).toContain("2026-06-01");
-    expect(n).toContain("driver");
-    expect(n).toContain("seatbelt");
-    expect(n).toContain("not drivable");
+    const n = injuryNarrative(f.patient, f.accident, { visitDate: "2026-06-03", visitType: "initial" });
+    expect(n).toContain("The patient is a 60-year-old male who presents for initial evaluation");
+    expect(n).not.toContain("Test");
+    expect(n).not.toContain("Patient Patient");
+    expect(n).toContain("motor vehicle collision");
+    expect(n).toContain("06/01/2026"); // dates in US clinical format
+    expect(n).toContain("he was the driver of the vehicle");
+    expect(n).toContain("restrained by a seatbelt");
+    expect(n).toContain("airbags deployed");
+    expect(n).toContain("disabled and could not be driven");
+    expect(n).toContain("No citation was issued");
+    expect(n).toContain("has not received medical evaluation or treatment");
+  });
+
+  it("degrades gracefully without DOB/sex and never invents them", () => {
+    const f = emptyForm();
+    f.accident.accidentDate = "2026-06-01";
+    f.accident.accidentType = "Fall";
+    const n = injuryNarrative(f.patient, f.accident, { visitDate: "2026-06-03", visitType: "initial" });
+    expect(n).toContain("The patient presents for initial evaluation");
+    expect(n).toContain("a fall");
+    expect(n).not.toContain("year-old");
+    // no mechanism details entered → no fabricated sentences
+    expect(n).not.toContain("seatbelt");
+    expect(n).not.toContain("citation");
   });
 
   it("is empty when nothing entered", () => {

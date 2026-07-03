@@ -7,36 +7,89 @@ function yn(v: string, yes: string, no: string): string {
   return "";
 }
 
-/** Auto-generated injury narrative from Section 2 answers. */
-export function injuryNarrative(patient: PatientInfo, a: AccidentInfo): string {
+/** 2026-06-20 → 06/20/2026 for clinical prose; leaves anything else as entered. */
+function usDate(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  return m ? `${m[2]}/${m[3]}/${m[1]}` : iso;
+}
+
+function ageOn(dob: string, onDate: string): number | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dob)) return null;
+  const ref = /^\d{4}-\d{2}-\d{2}$/.test(onDate) ? new Date(onDate + "T00:00:00Z") : new Date();
+  const b = new Date(dob + "T00:00:00Z");
+  let age = ref.getUTCFullYear() - b.getUTCFullYear();
+  if (ref.getUTCMonth() < b.getUTCMonth() || (ref.getUTCMonth() === b.getUTCMonth() && ref.getUTCDate() < b.getUTCDate())) age--;
+  return age >= 0 && age < 130 ? age : null;
+}
+
+/**
+ * Auto-generated HPI from Section 2 answers, in standard clinical style:
+ * the patient is identified by age/sex descriptor — never by name — and the
+ * mechanism reads as connected prose. Every sentence maps to an entered
+ * field; blank fields contribute nothing.
+ */
+export function injuryNarrative(
+  patient: PatientInfo,
+  a: AccidentInfo,
+  opts?: { visitDate?: string; visitType?: VisitType },
+): string {
   if (!a.accidentDate && !a.accidentType) return "";
-  const name = [patient.firstName, patient.lastName].filter(Boolean).join(" ") || "The patient";
-  const parts: string[] = [];
+
+  const age = ageOn(patient.dob, opts?.visitDate ?? "");
+  const sexWord = patient.sex === "male" ? "male" : patient.sex === "female" ? "female" : "";
+  const he = patient.sex === "male" ? "he" : patient.sex === "female" ? "she" : "the patient";
+  const He = he[0].toUpperCase() + he.slice(1);
+
+  const descriptor = [age !== null ? `${age}-year-old` : "", sexWord].filter(Boolean).join(" ");
+  const opening = descriptor ? `The patient is a ${descriptor} who presents` : "The patient presents";
+  const purpose = { initial: " for initial evaluation of injuries sustained in", followup: " for follow-up evaluation of injuries sustained in", final: " for final evaluation of injuries sustained in" }[
+    opts?.visitType ?? "initial"
+  ];
+
   const typeText: Record<string, string> = {
-    MVA: "a motor vehicle accident",
+    MVA: "a motor vehicle collision",
     Work: "a work-related accident",
     Fall: "a fall",
     Sports: "a sports-related injury",
     Other: "an accident",
   };
-  let s1 = `${name} presents following ${typeText[a.accidentType] || "an accident"}`;
-  if (a.accidentDate) s1 += ` that occurred on ${a.accidentDate}`;
-  if (a.role) s1 += `, in which the patient was the ${a.role.toLowerCase()}`;
+  const parts: string[] = [];
+  let s1 = `${opening}${purpose} ${typeText[a.accidentType] || "an accident"}`;
+  if (a.accidentDate) s1 += ` that occurred on ${usDate(a.accidentDate)}`;
   parts.push(s1 + ".");
-  const details: string[] = [];
-  const seatbelt = yn(a.seatbelt, "was wearing a seatbelt", "was not wearing a seatbelt");
-  if (seatbelt) details.push(seatbelt);
-  const airbag = yn(a.airbag, "airbags deployed", "airbags did not deploy");
-  if (airbag) details.push(airbag);
-  const drivable = yn(a.vehicleDrivable, "the vehicle remained drivable", "the vehicle was not drivable");
-  if (drivable) details.push(drivable);
-  if (details.length) parts.push(`The patient ${details.join("; ")}.`);
-  const ticketed = yn(a.ticketed, "The patient was ticketed at the scene.", "No ticket was issued to the patient.");
+
+  if (a.role) {
+    const roleText: Record<string, string> = {
+      Driver: `${he} was the driver of the vehicle`,
+      "Front Passenger": `${he} was the front-seat passenger of the vehicle`,
+      "Rear Passenger": `${he} was a rear-seat passenger of the vehicle`,
+      Passenger: `${he} was a passenger in the vehicle`,
+      Pedestrian: `${he} was struck as a pedestrian`,
+      Other: "",
+    };
+    const rt = roleText[a.role] ?? "";
+    if (rt) parts.push(`At the time of the collision, ${rt}.`);
+  }
+
+  const restraint: string[] = [];
+  const seatbelt = yn(a.seatbelt, `${he} was restrained by a seatbelt`, `${he} was not wearing a seatbelt`);
+  if (seatbelt) restraint.push(seatbelt);
+  const airbag = yn(a.airbag, "the airbags deployed on impact", "the airbags did not deploy");
+  if (airbag) restraint.push(airbag);
+  if (restraint.length) {
+    const joined = restraint.join(", and ");
+    parts.push(joined[0].toUpperCase() + joined.slice(1) + ".");
+  }
+  const drivable = yn(a.vehicleDrivable, "The vehicle remained drivable following the impact.", "The vehicle was disabled and could not be driven from the scene.");
+  if (drivable) parts.push(drivable);
+
+  const ticketed = yn(a.ticketed, "The patient was cited at the scene.", "No citation was issued to the patient.");
   if (ticketed) parts.push(ticketed);
+
   const prior = yn(
     a.priorMedical,
-    "The patient was previously evaluated by a medical professional for this injury.",
-    "The patient has not seen a medical professional for this injury prior to today's visit.",
+    `${He} received medical evaluation for these injuries prior to presenting to this office.`,
+    `${He} has not received medical evaluation or treatment for these injuries prior to today's visit.`,
   );
   if (prior) parts.push(prior);
   return parts.join(" ");
