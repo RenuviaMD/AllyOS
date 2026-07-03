@@ -148,6 +148,22 @@ exports.handler = async (event) => {
       return json(200, { count: Array.isArray(gfes) ? gfes.length : 0, rate: rate, falcon_signs: true, since: since });
     }
 
+    // Save the clinic's care model + active lines (owner only) via the SERVICE ROLE, so the write
+    // can't silently no-op the way a browser RLS UPDATE does when the session isn't recognized.
+    if (action === "save_config") {
+      const g = await requireOwner(event); if (g.error) return g.error;
+      const patch = {};
+      if (Array.isArray(body.lines)) patch.lines = body.lines.filter(function (k) { return ["iv", "peptides", "bhrt"].indexOf(k) >= 0; });
+      if (body.falconIsMd !== undefined) { patch.md_of_record = !!body.falconIsMd; patch.md_arrangement = body.falconIsMd ? "renuviamd" : "own"; }
+      if (body.rnIvModel !== undefined) patch.rn_iv_model = !!body.rnIvModel;
+      if (body.name) patch.name = body.name;
+      if (body.city !== undefined) patch.city_state = body.city || null;
+      if (!Object.keys(patch).length) return json(400, { error: "nothing_to_save" });
+      const ok = await sbPatch("clinics?id=eq." + encodeURIComponent(clinicId), patch);
+      if (!ok) return json(502, { error: "save_failed", hint: "Could not save the clinic configuration." });
+      return json(200, { ok: true });
+    }
+
     // Remove a clinic from the roster (owner only). Refuses while any subscription is live —
     // cancel in Stripe first so nothing keeps charging a deleted clinic. FKs cascade in the DB;
     // Stripe's own records (customers/invoices) are never touched.
