@@ -1,0 +1,149 @@
+import { Fragment, useEffect, useRef, useState } from "react";
+import { billableCpts, cptCategory, loadBillingSettings, saveBillingSettings, type BillingSettings } from "../lib/billing";
+import { loadImagingConfig, type ImagingConfig, type ImagingMode } from "../lib/imaging";
+import { saveClinicBilling, saveImagingConfigCloud, syncBillingFromCloud, upsertServiceCatalog } from "../lib/store";
+import { Section, Text } from "./fields";
+
+export function BillingSettingsCard(props: { onClose: () => void }) {
+  const [s, setS] = useState<BillingSettings>(loadBillingSettings);
+  const [img, setImg] = useState<ImagingConfig>(loadImagingConfig);
+
+  useEffect(() => {
+    syncBillingFromCloud()
+      .then(() => {
+        if (dirty.current) return; // don't overwrite edits the user made while the sync was in flight
+        setS(loadBillingSettings());
+        setImg(loadImagingConfig());
+      })
+      .catch(() => {});
+  }, []);
+
+  // One cloud write per pause in typing, not per keystroke
+  const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const dirty = useRef(false);
+  function debounced(key: string, fn: () => void, ms = 700) {
+    clearTimeout(timers.current[key]);
+    timers.current[key] = setTimeout(fn, ms);
+  }
+
+  function updateImg(partial: Partial<ImagingConfig>) {
+    dirty.current = true;
+    const next = { ...img, ...partial };
+    setImg(next);
+    debounced("imaging", () => saveImagingConfigCloud(next).catch(() => {}));
+  }
+
+  function update(partial: Partial<BillingSettings>) {
+    dirty.current = true;
+    const next = { ...s, ...partial };
+    setS(next);
+    saveBillingSettings(next);
+    debounced("identity", () => saveClinicBilling({ ein: next.ein, billing_npi: next.billingNpi, rendering_npi: next.renderingNpi }).catch(() => {}));
+  }
+
+  function setFee(cpt: string, charge: string) {
+    dirty.current = true;
+    const next = { ...s, fees: { ...s.fees, [cpt]: charge } };
+    setS(next);
+    saveBillingSettings(next);
+    const item = billableCpts().find((c) => c.cpt === cpt);
+    debounced(`fee-${cpt}`, () =>
+      upsertServiceCatalog({
+        cpt,
+        name: item?.name ?? cpt,
+        category: cptCategory(cpt),
+        default_units: 1,
+        charge: charge || null,
+        active: true,
+      }).catch(() => {}),
+    );
+  }
+
+  return (
+    <div className="modal-back">
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <Section num={0} title="Billing Settings" tag="Used by Superbill & CMS-1500">
+          <p className="status">
+            Synced to the clinic record (with a local cache for offline use). Charges left blank print blank — they are
+            never estimated or invented.
+          </p>
+          <div className="grid">
+            <Text label="Federal Tax ID (EIN) — Box 25" value={s.ein} onChange={(v) => update({ ein: v })} />
+            <Text label="Billing NPI (group) — Box 33a" value={s.billingNpi} onChange={(v) => update({ billingNpi: v })} />
+            <Text label="Rendering NPI — Box 24J" value={s.renderingNpi} onChange={(v) => update({ renderingNpi: v })} />
+          </div>
+
+          <h3 className="exam-h">Imaging / Diagnostics</h3>
+          <p className="status">How this clinic handles imaging — drives the diagnostic imaging order.</p>
+          <div className="seg" style={{ marginBottom: 10 }}>
+            {(["third_party", "onsite"] as ImagingMode[]).map((m) => (
+              <button key={m} className={img.mode === m ? "active" : ""} onClick={() => updateImg({ mode: m })}>
+                {m === "third_party" ? "Third-party center" : "On-site imaging"}
+              </button>
+            ))}
+          </div>
+          {img.mode === "third_party" ? (
+            <div className="grid">
+              <Text label="Diagnostic Center Name" value={img.centerName} onChange={(v) => updateImg({ centerName: v })} />
+              <Text label="Center Address" value={img.centerAddress} onChange={(v) => updateImg({ centerAddress: v })} />
+              <Text label="Center Phone" value={img.centerPhone} onChange={(v) => updateImg({ centerPhone: v })} />
+              <Text label="Center Fax" value={img.centerFax} onChange={(v) => updateImg({ centerFax: v })} />
+            </div>
+          ) : (
+            <p className="status">Imaging is performed on-site; orders print under the clinic's own letterhead.</p>
+          )}
+
+          <h3 className="exam-h">Fee Schedule (per CPT)</h3>
+          <p className="status">
+            Imaging fees apply when the clinic performs imaging on-site and bills it; with a third-party center the
+            center bills its own studies — leave those blank.
+          </p>
+          <table className="rom-table">
+            <thead>
+              <tr>
+                <th>CPT</th>
+                <th>Service</th>
+                <th>Charge ($)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {billableCpts().map((c, i, all) => (
+                <Fragment key={c.cpt}>
+                  {(i === 0 || all[i - 1].group !== c.group) && (
+                    <tr>
+                      <td colSpan={3} style={{ color: "var(--gold)", fontWeight: 600, paddingTop: 10 }}>{c.group}</td>
+                    </tr>
+                  )}
+                  <tr>
+                    <td>{c.cpt}</td>
+                    <td>{c.name}</td>
+                    <td>
+                      <input
+                        value={s.fees[c.cpt] ?? ""}
+                        onChange={(e) => setFee(c.cpt, e.target.value)}
+                        placeholder="—"
+                        style={{
+                          background: "var(--hover)",
+                          border: "1px solid #46627f",
+                          color: "var(--text)",
+                          borderRadius: 4,
+                          padding: "4px 8px",
+                          width: 110,
+                        }}
+                      />
+                    </td>
+                  </tr>
+                </Fragment>
+              ))}
+            </tbody>
+          </table>
+          <div className="toolbar" style={{ margin: "14px 0 0" }}>
+            <button className="btn" onClick={props.onClose}>
+              Done
+            </button>
+          </div>
+        </Section>
+      </div>
+    </div>
+  );
+}

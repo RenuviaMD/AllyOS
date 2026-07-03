@@ -1,0 +1,36 @@
+name: PI Master CI
+
+on:
+  pull_request:
+    paths:
+      - "app-pimaster/**"
+      - ".github/workflows/pimaster-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "app-pimaster/**"
+
+defaults:
+  run:
+    working-directory: app-pimaster
+
+jobs:
+  quality-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app-pimaster/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build (includes typecheck)
+        run: npm run build
