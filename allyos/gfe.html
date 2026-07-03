@@ -82,7 +82,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
     <h1>GFE Dashboard · <b>AllyOS</b></h1>
     <div class="noprint"><a href="chairside.html">← Nursing station</a> &nbsp; <span class="muted" id="who" style="font-size:.78rem"></span></div>
   </div>
-  <div class="sub">The <b>Good Faith Exam</b> worklist for <b id="subClinic">this clinic</b> — the clinic signed in on this device. It lists that clinic's patients who need a GFE before treatment; the provider of record (you when RenuviaMD is MD-of-record, otherwise the clinic's MD/APP) performs and signs each one here. One clinic per device — sign into another clinic's account to see its worklist. Signing a GFE feeds the patient's card and the chairside report. <b>Adults ≥ 18 · wellness scope only · PHI stays on this device.</b><br><span style="color:var(--gold)">GFE billable</span> counts the GFEs <b>you</b> signed this month × the per-GFE fee — the amount to add to that clinic's monthly retainer. Only meaningful where RenuviaMD is the MD-of-record.</div>
+  <div class="sub">The <b>Good Faith Exam</b> worklist for <b id="subClinic">this clinic</b> — the clinic signed in on this device. It lists that clinic's patients who need a GFE before treatment; the provider of record (you when RenuviaMD is MD-of-record, otherwise the clinic's MD/APP) performs and signs each one here. One clinic per device — sign into another clinic's account to see its worklist. Signing a GFE feeds the patient's card and the chairside report. <b>Adults ≥ 18 · wellness scope only · PHI stays on this device.</b><br><span style="color:var(--gold)">GFE billable</span> appears <b>only where RenuviaMD signs the GFEs</b> (the RN-run model) — signed GFEs this month × the per-GFE fee, the amount added to that clinic's monthly retainer. Where the clinic's own provider performs the GFE, it isn't billable to you and the card is hidden.</div>
 
   <div id="dashview">
   <div class="stats" id="stats"></div>
@@ -133,7 +133,7 @@ var _pidSeq=0;function pid(){return 'g'+(++_pidSeq)+'x'+Math.floor(Math.random()
 // load protocol titles for context (optional — page still works if it fails)
 fetch('../protocols/iv-module.json').then(function(r){return r.json();}).then(function(d){
   (d.stacks||[]).forEach(function(s){STACKS[s.code]={code:s.code,title:s.title,indication:s.indication};});
-}).catch(function(){}).then(function(){render();deepLink();});
+}).catch(function(){}).then(function(){render();deepLink();loadGfeBill();});
 
 // deep-link from the cockpit: ?filter=pending pre-filters; ?enc=JX-4821 (or ?open=<id>) opens that GFE form
 function deepLink(){
@@ -155,13 +155,13 @@ function render(){
     if(q&&(dispName(o.p)+' '+(o.p.name||'')).toLowerCase().indexOf(q)<0)return false;return true;});
   // stats over the whole queue
   var pend=0,cur=0,exp=0;queue.forEach(function(p){var k=gfeState(p).k;if(k==='pending')pend++;else if(k==='expired')exp++;else cur++;});
-  // Billable GFEs: each signed/current GFE is worth the per-GFE fee (default $30). This is the
-  // value you add to the clinic's monthly retainer when RenuviaMD is MD-of-record and you sign
-  // the GFE. Tap the card to change the rate for this clinic.
-  var rate=gfeRate(),bill=cur*rate;
-  document.getElementById('stats').innerHTML=
-    stat('teal','In roster',queue.length)+stat('red','Pending GFE',pend)+stat('amber','Expired',exp)+stat('green','Current',cur)+
-    '<div class="stat gold" style="cursor:pointer" onclick="editGfeRate()" title="Click to change the per-GFE rate"><div class="lbl">GFE billable · $'+rate+' ea</div><div class="num">$'+bill.toLocaleString()+'</div></div>';
+  var statsHtml=stat('teal','In roster',queue.length)+stat('red','Pending GFE',pend)+stat('amber','Expired',exp)+stat('green','Current',cur);
+  // Billable GFEs — shown ONLY where RenuviaMD signs the exams (the RN-run model). Where the
+  // clinic's own provider performs the GFE (e.g. Lemus), it is NOT billable to you, so the card
+  // is hidden. Figures come from the server (signed GFEs this month × the clinic's per-GFE fee).
+  if(GFEBILL&&GFEBILL.falcon_signs){var bill=(GFEBILL.count||0)*(GFEBILL.rate||0);
+    statsHtml+='<div class="stat gold" title="Signed GFEs this month × the per-GFE fee (set in Governance billing)"><div class="lbl">GFE billable · $'+GFEBILL.rate+' ea</div><div class="num">$'+bill.toLocaleString()+'</div></div>';}
+  document.getElementById('stats').innerHTML=statsHtml;
   var th='<tr><th>Patient</th><th>Age/Sex</th><th>Today\'s plan</th><th>GFE status</th><th>Last GFE</th><th></th></tr>';
   var body=rows.length?rows.map(function(o){var p=o.p,st=gfeState(p),s=stackByCode(p.proto);
     var act=st.k==='current'?'<button class="btn-s" onclick="viewReport('+o.i+')">View report</button> <button class="btn-s" onclick="openForm('+o.i+')">Re-do</button>':
@@ -173,10 +173,15 @@ function render(){
   document.getElementById('tbl').innerHTML=th+body;
 }
 function stat(cls,lbl,n){return '<div class="stat '+cls+'"><div class="lbl">'+lbl+'</div><div class="num">'+n+'</div></div>';}
-// Per-GFE fee for this clinic (what each signed GFE adds to the monthly retainer). Default $30.
-var GFE_RATE_KEY='allyos_gfe_rate_v1';
-function gfeRate(){try{var v=Number(localStorage.getItem(GFE_RATE_KEY));return v>0?v:30;}catch(e){return 30;}}
-function editGfeRate(){var cur=gfeRate();var v=prompt('Per-GFE fee for this clinic ($) — added to the monthly retainer for each signed GFE:',cur);if(v===null)return;v=Number(v);if(!(v>=0)){alert('Enter a dollar amount.');return;}try{localStorage.setItem(GFE_RATE_KEY,String(v));}catch(e){}render();}
+// Server-authoritative GFE billing status for THIS clinic: whether RenuviaMD signs the GFEs
+// (falcon_signs), the signed count this month, and the per-GFE rate. Null until fetched.
+var GFEBILL=null;
+function loadGfeBill(){
+  var cid=(typeof ses!=='undefined'&&ses&&ses.clinicId)||null;
+  if(!cid||!window.AllyOSCloud||!AllyOSCloud.postAuthed)return;
+  AllyOSCloud.postAuthed('/.netlify/functions/md-billing',{action:'gfe_count',clinic_id:cid})
+    .then(function(r){return r.json();}).then(function(d){if(d&&!d.error){GFEBILL=d;render();}}).catch(function(){});
+}
 
 // ---- add a patient (work ahead of the visit) ----
 function openAdd(){
