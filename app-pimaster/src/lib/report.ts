@@ -81,7 +81,7 @@ function patientBlock(form: VisitForm): string {
   return `<table>
     <tr><th>Patient</th><td>${esc(p.firstName)} ${esc(p.lastName)}</td><th>DOB</th><td>${esc(p.dob)}</td></tr>
     <tr><th>Sex</th><td>${esc(p.sex)}</td><th>Visit Date</th><td>${esc(form.visitDate)}</td></tr>
-    <tr><th>Insurance</th><td>${esc(p.insuranceCarrier)}</td><th>Policy #</th><td>${esc(p.policyNumber)}</td></tr>
+    <tr><th>Insurance</th><td>${esc(p.insuranceCarrier)}</td><th>Policy # / Claim #</th><td>${esc(p.policyNumber)}${p.claimNumber ? ` / ${esc(p.claimNumber)}` : ""}</td></tr>
     <tr><th>Accident Date</th><td>${esc(form.accident.accidentDate)}</td><th>Visit Type</th><td>${esc(form.visitType.toUpperCase())} — ${form.visitMode === "telehealth" ? "TELEHEALTH (facility-originated)" : "IN PERSON"}</td></tr>
   </table>`;
 }
@@ -330,7 +330,7 @@ export function buildCms1500Html(form: VisitForm, lines: ServiceLine[], settings
       <tr><th>2. Patient's Name</th><td>${esc(p.lastName)}, ${esc(p.firstName)}</td><th>3. DOB / Sex</th><td>${esc(p.dob)} — ${sexBox}</td></tr>
       <tr><th>4. Insured's Name</th><td>${esc(p.lastName)}, ${esc(p.firstName)} (Self)</td><th>6. Relationship</th><td>Self [X]</td></tr>
       <tr><th>5. Patient's Address</th><td colspan="3">${esc(p.address)}, ${esc(p.city)}, ${esc(p.state)} ${esc(p.zip)} — Tel: ${esc(p.phone)}</td></tr>
-      <tr><th>10b. Auto Accident?</th><td>YES [X] — PLACE (State): FL</td><th>11. Insurance Plan / Payer ID</th><td>${esc(p.insuranceCarrier)}${p.insurerPayerId ? ` — ${esc(p.insurerPayerId)}` : ""}</td></tr>
+      <tr><th>10b. Auto Accident?</th><td>YES [X] — PLACE (State): FL</td><th>11. Insurance Plan / Payer ID</th><td>${esc(p.insuranceCarrier)}${p.insurerPayerId ? ` — ${esc(p.insurerPayerId)}` : ""}${p.claimNumber ? ` — Claim #: ${esc(p.claimNumber)}` : ""}</td></tr>
       <tr><th>14. Date of Current Illness/Injury (Qual. 439)</th><td>${esc(form.accident.accidentDate)}</td><th>21. ICD Ind.</th><td>0 (ICD-10-CM)</td></tr>
     </table>
     <h2>21. Diagnosis Codes</h2>

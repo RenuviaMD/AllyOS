@@ -12,7 +12,9 @@ export interface PatientInfo {
   sex: "" | "male" | "female" | "other";
   insuranceCarrier: string;
   policyNumber: string;
-  /** carrier claims/billing snapshot (from the carrier reference; editable per claim) */
+  /** PIP claim number assigned by the carrier — prints on note, superbill, CMS-1500 */
+  claimNumber?: string;
+  /** carrier claims-routing snapshot (from the admin carrier reference; used on the CMS-1500) */
   insurerAddress?: string;
   insurerPhone?: string;
   insurerPayerId?: string;
@@ -208,6 +210,7 @@ export function emptyForm(): VisitForm {
       sex: "",
       insuranceCarrier: "",
       policyNumber: "",
+      claimNumber: "",
       address: "",
       city: "",
       state: "FL",

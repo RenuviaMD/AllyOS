@@ -30,10 +30,12 @@ describe("carrier data flows onto the claim", () => {
     f.patient.insurerAddress = "State Farm Claims, P.O. Box 106134, Atlanta, GA 30348-6134";
     f.patient.insurerPhone = "800-782-8332";
     f.patient.insurerPayerId = "SF123";
+    f.patient.claimNumber = "55-C77-889";
     const html = buildCms1500Html(f, [], settings);
     expect(html).toContain("Submit claim to");
     expect(html).toContain("P.O. Box 106134");
     expect(html).toContain("SF123");
+    expect(html).toContain("Claim #: 55-C77-889");
   });
 
   it("omits the carrier line entirely when no carrier data is present (blank stays blank)", () => {
