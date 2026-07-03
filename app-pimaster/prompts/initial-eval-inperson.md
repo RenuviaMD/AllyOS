@@ -82,3 +82,14 @@ skeleton (letterhead / title band / body / confidentiality footer + "Page X of Y
 ## STYLE
 Zero grammar errors; professional medical-business tone; grayscale skeleton (GRID #9a9a9a, HDR #ededed,
 RULE #7d7d7d, footer #333333); tables for Dx/imaging/PT/exam; no invented content or measurements.
+
+---
+
+## PHYSICIAN CORRECTIONS (2026-07-03, Dr. Falcon — supersede any conflicting text above)
+1. **Examination scale**: the physical examination uses the clinic's 3-point FUNCTIONAL scale
+   (WNL / Limited / Cannot perform) in BOTH modalities. Only the narrative framing changes between
+   telehealth (patient-performed on camera) and in-person (physician-directed, hands-on palpation
+   findings allowed). NEVER measured/graded ROM degrees, percentages, or 0-5 motor grades.
+2. **Imaging CPT map confirmed: the 72052-family** (72052 cervical complete, 72072 thoracic,
+   72100 lumbar, 73030 shoulder, 73070 elbow, 73110 wrist, 73562 knee 3 views, 73610 ankle).
+   The app's order catalog and fee schedule are aligned to this map.
