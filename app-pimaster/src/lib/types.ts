@@ -12,6 +12,10 @@ export interface PatientInfo {
   sex: "" | "male" | "female" | "other";
   insuranceCarrier: string;
   policyNumber: string;
+  /** carrier claims/billing snapshot (from the carrier reference; editable per claim) */
+  insurerAddress?: string;
+  insurerPhone?: string;
+  insurerPayerId?: string;
   address: string;
   city: string;
   state: string;

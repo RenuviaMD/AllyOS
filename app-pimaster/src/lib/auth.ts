@@ -14,11 +14,21 @@ export async function fetchAuthState(): Promise<AuthState | null> {
   const { data } = await supabase().auth.getSession();
   const session = data.session;
   if (!session) return null;
-  const { data: row } = await supabase()
-    .from("app_users")
-    .select("roles, active, clinic_id")
-    .eq("user_id", session.user.id)
-    .maybeSingle();
+  // Don't let a slow/failed profile lookup wedge the app on "Loading…" — the
+  // session is valid, so fall back to a no-role state (they can still sign in
+  // fresh) rather than hanging or throwing to the caller.
+  type UserRow = { roles?: string[]; active?: boolean; clinic_id?: string | null };
+  let row: UserRow | null = null;
+  try {
+    const res = await supabase()
+      .from("app_users")
+      .select("roles, active, clinic_id")
+      .eq("user_id", session.user.id)
+      .maybeSingle();
+    row = (res.data as unknown as UserRow) ?? null;
+  } catch {
+    row = null;
+  }
   const roles = row && row.active ? (row.roles as string[]) : [];
   const clinicId = (row?.clinic_id as string | null) ?? null;
   const isPlatform = roles.includes("platform");

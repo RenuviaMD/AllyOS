@@ -287,8 +287,10 @@ export function buildSuperbillHtml(form: VisitForm, lines: ServiceLine[], settin
     )
     .join("");
   const total = totalCharges(lines);
+  const carrierLine = [form.patient.insuranceCarrier, form.patient.insurerAddress, form.patient.insurerPhone ? `Tel: ${form.patient.insurerPhone}` : ""].filter((s): s is string => !!s).map(esc).join(" — ");
   const b = `<h1>${encounter === "md" ? "ENCOUNTER SUPERBILL" : "PHYSICAL THERAPY SUPERBILL"}</h1>
     ${patientBlock(form)}
+    ${carrierLine ? `<table><tr><th>Submit claim to</th><td>${carrierLine}</td></tr></table>` : ""}
     <h2>Diagnoses (ICD-10)</h2>
     <table><tr><th>Ref</th><th>Code</th><th>Description</th></tr>${dxRows}</table>
     <h2>Services</h2>
@@ -319,14 +321,16 @@ export function buildCms1500Html(form: VisitForm, lines: ServiceLine[], settings
     .join("");
   const total = totalCharges(lines);
   const sexBox = p.sex === "male" ? "M [X]  F [ ]" : p.sex === "female" ? "M [ ]  F [X]" : "M [ ]  F [ ]";
+  const carrierLine = [p.insuranceCarrier, p.insurerAddress, p.insurerPhone ? `Tel: ${p.insurerPhone}` : ""].filter((s): s is string => !!s).map(esc).join(" — ");
   const b = `<h1>HEALTH INSURANCE CLAIM FORM — CMS-1500 (02/12) DATA</h1>
     <p class="status" style="color:#555">Print replica for review/fax. For payer submission on preprinted red OCR forms, transfer values by box number.</p>
+    ${carrierLine ? `<table><tr><th>Submit claim to (carrier)</th><td colspan="3">${carrierLine}</td></tr></table>` : ""}
     <table>
       <tr><th>1. Type</th><td>OTHER [X] (Auto/PIP)</td><th>1a. Insured's ID / Policy</th><td>${esc(p.policyNumber)}</td></tr>
       <tr><th>2. Patient's Name</th><td>${esc(p.lastName)}, ${esc(p.firstName)}</td><th>3. DOB / Sex</th><td>${esc(p.dob)} — ${sexBox}</td></tr>
       <tr><th>4. Insured's Name</th><td>${esc(p.lastName)}, ${esc(p.firstName)} (Self)</td><th>6. Relationship</th><td>Self [X]</td></tr>
       <tr><th>5. Patient's Address</th><td colspan="3">${esc(p.address)}, ${esc(p.city)}, ${esc(p.state)} ${esc(p.zip)} — Tel: ${esc(p.phone)}</td></tr>
-      <tr><th>10b. Auto Accident?</th><td>YES [X] — PLACE (State): FL</td><th>11. Insurance Plan</th><td>${esc(p.insuranceCarrier)}</td></tr>
+      <tr><th>10b. Auto Accident?</th><td>YES [X] — PLACE (State): FL</td><th>11. Insurance Plan / Payer ID</th><td>${esc(p.insuranceCarrier)}${p.insurerPayerId ? ` — ${esc(p.insurerPayerId)}` : ""}</td></tr>
       <tr><th>14. Date of Current Illness/Injury (Qual. 439)</th><td>${esc(form.accident.accidentDate)}</td><th>21. ICD Ind.</th><td>0 (ICD-10-CM)</td></tr>
     </table>
     <h2>21. Diagnosis Codes</h2>

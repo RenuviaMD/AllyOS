@@ -66,7 +66,9 @@ export default function App() {
   const dirty = useRef(false);
 
   useEffect(() => {
-    const refresh = () => fetchAuthState().then(setAuth);
+    // A rejected auth fetch must resolve the loading state to the sign-in
+    // screen, never leave the app wedged on "Loading…".
+    const refresh = () => fetchAuthState().then(setAuth).catch(() => setAuth(null));
     refresh();
     return onAuthChange(refresh);
   }, []);
