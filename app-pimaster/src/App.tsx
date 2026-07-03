@@ -105,6 +105,27 @@ export default function App() {
     syncBillingFromCloud().catch(() => {});
   }, [auth?.userId]);
 
+  // Multi-tab safety: when the user returns to this tab and hasn't edited in
+  // it, refresh the form from the cloud draft — otherwise a stale tab shows
+  // (and could later save) an old copy over work done in another tab.
+  useEffect(() => {
+    if (!auth) return;
+    const refreshIfClean = () => {
+      if (document.visibilityState !== "visible" || dirty.current || !loaded.current) return;
+      loadDraft()
+        .then((d) => {
+          if (d && !dirty.current) setForm({ ...emptyForm(), ...d });
+        })
+        .catch(() => {});
+    };
+    document.addEventListener("visibilitychange", refreshIfClean);
+    window.addEventListener("focus", refreshIfClean);
+    return () => {
+      document.removeEventListener("visibilitychange", refreshIfClean);
+      window.removeEventListener("focus", refreshIfClean);
+    };
+  }, [auth?.userId]);
+
   function switchClinic(id: string) {
     setActiveClinicId(id);
     setClinicId(id);
@@ -122,12 +143,16 @@ export default function App() {
     });
   }
 
-  // Debounced autosave
+  // Debounced autosave — only when THIS tab has user edits. A tab that merely
+  // loaded a draft must never re-save it: with several tabs open, a stale
+  // tab's whole-form save would silently overwrite work done in another tab.
   useEffect(() => {
-    if (!loaded.current) return;
+    if (!loaded.current || !dirty.current) return;
     setSaveState("saving");
     const t = setTimeout(async () => {
       const where = await saveDraft(form);
+      // Cloud save succeeded → this tab is in sync; allow focus-refresh again.
+      if (where === "cloud") dirty.current = false;
       setSaveState(where);
     }, 800);
     return () => clearTimeout(t);
@@ -139,10 +164,12 @@ export default function App() {
   }
 
   function setVisitType(v: VisitType) {
+    dirty.current = true;
     setForm((f) => ({ ...f, visitType: v }));
   }
 
   function setVisitMode(v: VisitMode) {
+    dirty.current = true;
     setForm((f) => ({ ...f, visitMode: v }));
   }
 
@@ -340,6 +367,7 @@ export default function App() {
   function newVisit() {
     const who = `${form.patient.firstName} ${form.patient.lastName}`.trim();
     if (!confirm(`Start a new blank visit?${who ? ` The unsaved draft for ${who} will be replaced.` : " The current draft will be replaced."}`)) return;
+    dirty.current = true; // user action — the blank form must win over the cloud draft
     setForm(emptyForm());
   }
 
@@ -405,7 +433,10 @@ export default function App() {
           <input
             type="date"
             value={form.visitDate}
-            onChange={(e) => setForm((f) => ({ ...f, visitDate: e.target.value }))}
+            onChange={(e) => {
+              dirty.current = true;
+              setForm((f) => ({ ...f, visitDate: e.target.value }));
+            }}
           />
           {form.visitDate !== new Date().toISOString().slice(0, 10) && (
             <>
@@ -413,7 +444,10 @@ export default function App() {
               <button
                 className="btn ghost"
                 style={{ padding: "2px 8px" }}
-                onClick={() => setForm((f) => ({ ...f, visitDate: new Date().toISOString().slice(0, 10) }))}
+                onClick={() => {
+                  dirty.current = true;
+                  setForm((f) => ({ ...f, visitDate: new Date().toISOString().slice(0, 10) }));
+                }}
               >
                 Set today
               </button>
