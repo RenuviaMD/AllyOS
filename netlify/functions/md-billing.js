@@ -99,9 +99,9 @@ exports.handler = async (event) => {
   try {
     if (action === "roster") {
       const g = await requireOwner(event); if (g.error) return g.error;
-      const rows = await sbGet("clinics?select=id,name,governance_type,md_fee,md_subscription_status,md_billing_email,stripe_customer_id,status&order=name.asc");
+      const rows = await sbGet("clinics?select=id,name,governance_type,md_fee,md_gfe_fee,md_subscription_status,md_billing_email,stripe_customer_id,status&order=name.asc");
       const clinics = (rows || []).map(function (c) {
-        return { id: c.id, name: c.name, governance_type: c.governance_type || null, md_fee: (c.md_fee != null ? Number(c.md_fee) : null), status: c.md_subscription_status || "none", email: c.md_billing_email || null, on_stripe: !!c.stripe_customer_id };
+        return { id: c.id, name: c.name, governance_type: c.governance_type || null, md_fee: (c.md_fee != null ? Number(c.md_fee) : null), gfe_fee: (c.md_gfe_fee != null ? Number(c.md_gfe_fee) : null), status: c.md_subscription_status || "none", email: c.md_billing_email || null, on_stripe: !!c.stripe_customer_id };
       });
       const recurring = clinics.reduce(function (a, c) { return a + (c.md_fee || 0); }, 0);
       return json(200, { clinics: clinics, count: clinics.length, monthly_recurring: recurring });
@@ -128,9 +128,20 @@ exports.handler = async (event) => {
 
     const clinicId = body.clinic_id;
     if (!clinicId) return json(400, { error: "clinic_id required" });
-    const rows = await sbGet("clinics?id=eq." + encodeURIComponent(clinicId) + "&select=id,name,governance_type,md_fee,md_billing_email,stripe_customer_id,md_subscription_status,subscription_status");
+    const rows = await sbGet("clinics?id=eq." + encodeURIComponent(clinicId) + "&select=id,name,governance_type,md_fee,md_gfe_fee,md_billing_email,stripe_customer_id,md_subscription_status,subscription_status");
     const clinic = rows[0];
     if (!clinic) return json(404, { error: "clinic_not_found" });
+
+    // Count this clinic's SIGNED GFEs since a given date (default: first of the current UTC month).
+    // Used to bill "GFE reviews (N x rate)" when RenuviaMD is MD-of-record and signs the exams.
+    if (action === "gfe_count") {
+      const g = await requireClinic(event, clinicId); if (g.error) return g.error;
+      const now = new Date();
+      const since = body.since || new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+      const gfes = await sbGet("gfe_requests?clinic_id=eq." + encodeURIComponent(clinicId) + "&status=eq.signed&signed_at=gte." + encodeURIComponent(since) + "&select=id");
+      const rate = clinic.md_gfe_fee != null ? Number(clinic.md_gfe_fee) : 30;
+      return json(200, { count: Array.isArray(gfes) ? gfes.length : 0, rate: rate, since: since });
+    }
 
     // Remove a clinic from the roster (owner only). Refuses while any subscription is live —
     // cancel in Stripe first so nothing keeps charging a deleted clinic. FKs cascade in the DB;
@@ -150,6 +161,7 @@ exports.handler = async (event) => {
       const g = await requireOwner(event); if (g.error) return g.error;
       const patch = {};
       if (body.md_fee !== undefined) patch.md_fee = (body.md_fee === null || body.md_fee === "") ? null : Number(body.md_fee);
+      if (body.md_gfe_fee !== undefined) patch.md_gfe_fee = (body.md_gfe_fee === null || body.md_gfe_fee === "") ? null : Number(body.md_gfe_fee);
       if (body.governance_type !== undefined) patch.governance_type = body.governance_type || null;
       if (body.md_billing_email !== undefined) patch.md_billing_email = body.md_billing_email || null;
       if (body.name) patch.name = body.name;
@@ -214,6 +226,7 @@ exports.handler = async (event) => {
     return json(200, {
       name: clinic.name, governance_type: clinic.governance_type || null,
       md_fee: (clinic.md_fee != null ? Number(clinic.md_fee) : null),
+      gfe_fee: (clinic.md_gfe_fee != null ? Number(clinic.md_gfe_fee) : null),
       email: clinic.md_billing_email || null, status: clinic.md_subscription_status || "none",
       outstanding: outstanding, invoices: invoices,
     });

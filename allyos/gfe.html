@@ -82,7 +82,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
     <h1>GFE Dashboard · <b>AllyOS</b></h1>
     <div class="noprint"><a href="chairside.html">← Nursing station</a> &nbsp; <span class="muted" id="who" style="font-size:.78rem"></span></div>
   </div>
-  <div class="sub">Provider worklist for the <b>Good Faith Exam</b> (FORM-INTAKE-GFE-01). Performed &amp; signed by <b>MD / DO / NP / PA</b> — independent of the nursing station. Clearing a GFE here feeds the patient's card and the read-only report popup at chairside. <b>Adults ≥ 18 · wellness scope only.</b></div>
+  <div class="sub">The <b>Good Faith Exam</b> worklist for <b id="subClinic">this clinic</b> — the clinic signed in on this device. It lists that clinic's patients who need a GFE before treatment; the provider of record (you when RenuviaMD is MD-of-record, otherwise the clinic's MD/APP) performs and signs each one here. One clinic per device — sign into another clinic's account to see its worklist. Signing a GFE feeds the patient's card and the chairside report. <b>Adults ≥ 18 · wellness scope only · PHI stays on this device.</b><br><span style="color:var(--gold)">GFE billable</span> counts the GFEs <b>you</b> signed this month × the per-GFE fee — the amount to add to that clinic's monthly retainer. Only meaningful where RenuviaMD is the MD-of-record.</div>
 
   <div id="dashview">
   <div class="stats" id="stats"></div>
@@ -104,7 +104,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
 <div class="overlay" id="ov"><div class="modal" id="md"></div></div>
 <script>
 document.getElementById('yr').textContent=new Date().getFullYear();
-if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin']);var ses=AllyOSAuth.session();if(ses)document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+(ses.clinic||'');}
+if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin']);var ses=AllyOSAuth.session();if(ses){document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+(ses.clinic||'');var sc=document.getElementById('subClinic');if(sc&&ses.clinic)sc.textContent=ses.clinic;}}
 var KEY='allyos_chairside_v1', STACKS={};
 // shared roster (same store chairside uses) — preserves chairs/ally on write
 function loadState(){try{return JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){return {};}}
@@ -155,8 +155,13 @@ function render(){
     if(q&&(dispName(o.p)+' '+(o.p.name||'')).toLowerCase().indexOf(q)<0)return false;return true;});
   // stats over the whole queue
   var pend=0,cur=0,exp=0;queue.forEach(function(p){var k=gfeState(p).k;if(k==='pending')pend++;else if(k==='expired')exp++;else cur++;});
+  // Billable GFEs: each signed/current GFE is worth the per-GFE fee (default $30). This is the
+  // value you add to the clinic's monthly retainer when RenuviaMD is MD-of-record and you sign
+  // the GFE. Tap the card to change the rate for this clinic.
+  var rate=gfeRate(),bill=cur*rate;
   document.getElementById('stats').innerHTML=
-    stat('teal','In roster',queue.length)+stat('red','Pending GFE',pend)+stat('amber','Expired',exp)+stat('green','Current',cur);
+    stat('teal','In roster',queue.length)+stat('red','Pending GFE',pend)+stat('amber','Expired',exp)+stat('green','Current',cur)+
+    '<div class="stat gold" style="cursor:pointer" onclick="editGfeRate()" title="Click to change the per-GFE rate"><div class="lbl">GFE billable · $'+rate+' ea</div><div class="num">$'+bill.toLocaleString()+'</div></div>';
   var th='<tr><th>Patient</th><th>Age/Sex</th><th>Today\'s plan</th><th>GFE status</th><th>Last GFE</th><th></th></tr>';
   var body=rows.length?rows.map(function(o){var p=o.p,st=gfeState(p),s=stackByCode(p.proto);
     var act=st.k==='current'?'<button class="btn-s" onclick="viewReport('+o.i+')">View report</button> <button class="btn-s" onclick="openForm('+o.i+')">Re-do</button>':
@@ -168,6 +173,10 @@ function render(){
   document.getElementById('tbl').innerHTML=th+body;
 }
 function stat(cls,lbl,n){return '<div class="stat '+cls+'"><div class="lbl">'+lbl+'</div><div class="num">'+n+'</div></div>';}
+// Per-GFE fee for this clinic (what each signed GFE adds to the monthly retainer). Default $30.
+var GFE_RATE_KEY='allyos_gfe_rate_v1';
+function gfeRate(){try{var v=Number(localStorage.getItem(GFE_RATE_KEY));return v>0?v:30;}catch(e){return 30;}}
+function editGfeRate(){var cur=gfeRate();var v=prompt('Per-GFE fee for this clinic ($) — added to the monthly retainer for each signed GFE:',cur);if(v===null)return;v=Number(v);if(!(v>=0)){alert('Enter a dollar amount.');return;}try{localStorage.setItem(GFE_RATE_KEY,String(v));}catch(e){}render();}
 
 // ---- add a patient (work ahead of the visit) ----
 function openAdd(){

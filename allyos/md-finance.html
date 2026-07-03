@@ -76,6 +76,7 @@ h1{font-family:var(--fdisp);font-size:1.6rem;margin-top:2px}
   <div class="fld"><label>Governance type</label>
     <select id="fType"><option value="">— none —</option><option value="acha">ACHA (medical director of record)</option><option value="pi">Personal injury</option><option value="np">NP / PA supervision</option><option value="ally">AllyOS clinic</option></select></div>
   <div class="fld"><label>Base monthly fee ($)</label><input id="fFee" type="number" min="0" step="1" placeholder="1850"></div>
+  <div class="fld"><label>Per-GFE fee ($) — added per signed GFE when you're MD-of-record</label><input id="fGfe" type="number" min="0" step="1" placeholder="30"></div>
   <div class="fld"><label>Billing email (where the statement goes)</label><input id="fEmail" type="email" placeholder="billing@clinic.com"></div>
   <div class="mrow"><span class="msg" id="feeMsg"></span><div><button class="btn ghost" id="fDel" style="display:none;border-color:#6a2020;color:#f0a59d" onclick="deleteClinic()">Delete</button> <button class="btn ghost" onclick="closeFee()">Cancel</button> <button class="btn go" onclick="saveFee()">Save</button></div></div>
 </div></div>
@@ -122,9 +123,10 @@ function card(c){
   return '<div class="card"><div class="crow">'+
     '<div><div class="cname">'+esc(c.name||'Clinic')+' '+tagChip(c.governance_type)+'</div>'+
       '<div style="font-size:.8rem;color:var(--muted);margin-top:3px">'+feeTxt+' &nbsp;·&nbsp; '+bank+(c.email?' &nbsp;·&nbsp; '+esc(c.email):' &nbsp;·&nbsp; <span style="color:var(--gold)">no billing email</span>')+'</div></div>'+
-    '<div class="actions"><button class="btn ghost" onclick="openFee(\''+c.id+'\')">⚙ Fee</button>'+
+    '<div class="actions"><button class="btn ghost" onclick="openStatement(\''+c.id+'\')">📄 Statement</button>'+
+      '<button class="btn ghost" onclick="openFee(\''+c.id+'\')">⚙ Fee</button>'+
       '<button class="btn gold" onclick="openBill(\''+c.id+'\')">Bill →</button></div>'+
-    '</div><div id="inv-'+c.id+'"></div></div>';
+    '</div><div id="inv-'+c.id+'" style="margin-top:10px"></div></div>';
 }
 function byId(id){for(var i=0;i<CLINICS.length;i++)if(CLINICS[i].id===id)return CLINICS[i];return null;}
 
@@ -136,6 +138,7 @@ function openFee(id){feeId=id;var c=id?byId(id):null;
   document.getElementById('fName').value=c?(c.name||''):'';
   document.getElementById('fType').value=c?(c.governance_type||''):'';
   document.getElementById('fFee').value=(c&&c.md_fee!=null)?c.md_fee:'';
+  document.getElementById('fGfe').value=(c&&c.gfe_fee!=null)?c.gfe_fee:'';
   document.getElementById('fEmail').value=c?(c.email||''):'';
   var m=document.getElementById('feeMsg');m.textContent='';m.style.color='var(--green)';
   document.getElementById('fDel').style.display=c?'':'none';
@@ -154,7 +157,7 @@ function deleteClinic(){
 }
 function closeFee(){document.getElementById('feeBack').classList.remove('on');}
 function saveFee(){var m=document.getElementById('feeMsg');
-  var payload={name:document.getElementById('fName').value.trim(),governance_type:document.getElementById('fType').value,md_fee:document.getElementById('fFee').value,md_billing_email:document.getElementById('fEmail').value.trim()};
+  var payload={name:document.getElementById('fName').value.trim(),governance_type:document.getElementById('fType').value,md_fee:document.getElementById('fFee').value,md_gfe_fee:document.getElementById('fGfe').value,md_billing_email:document.getElementById('fEmail').value.trim()};
   if(!feeId&&!payload.name){m.textContent='Clinic name is required.';m.style.color='var(--red)';return;}
   if(feeId){payload.action='set_fee';payload.clinic_id=feeId;}else{payload.action='add_clinic';}
   m.style.color='var(--green)';m.textContent='Saving…';
@@ -171,6 +174,24 @@ function openBill(id){billId=id;billKey=newBillKey();var c=byId(id);document.get
   var month=new Date().toLocaleString(undefined,{month:'long'});
   addLine('Medical Director — '+month, c.md_fee!=null?c.md_fee:'');
   document.getElementById('billBack').classList.add('on');recalc();
+  // Auto-add this month's signed GFEs × the per-GFE fee (from the database) as a line.
+  api({action:'gfe_count',clinic_id:id}).then(function(d){
+    if(d&&d.count>0&&d.rate>0){addLine('GFE reviews — '+month+' ('+d.count+' × $'+d.rate+')', d.count*d.rate);}
+  }).catch(function(){});
+}
+// Inline statement: the clinic's invoices (paid / open / receipts) under its card.
+function openStatement(id){
+  var el=document.getElementById('inv-'+id);if(!el)return;
+  if(el.getAttribute('data-open')==='1'){el.innerHTML='';el.removeAttribute('data-open');return;}
+  el.setAttribute('data-open','1');el.innerHTML='<div style="color:var(--muted);font-size:.8rem">Loading statement…</div>';
+  api({action:'clinic',clinic_id:id}).then(function(d){
+    if(!d||d.error){el.innerHTML='<div style="color:var(--muted);font-size:.8rem">Could not load the statement.</div>';return;}
+    var inv=d.invoices||[];
+    var gfe=d.gfe_fee!=null?'<div style="font-size:.72rem;color:var(--muted);margin-bottom:6px">Per-GFE fee: <b style="color:var(--gold)">'+money(d.gfe_fee)+'</b></div>':'';
+    var out=d.outstanding>0?'<div style="font-size:.8rem;margin-bottom:8px">Outstanding: <b style="color:var(--gold)">'+money(d.outstanding)+'</b></div>':'<div style="font-size:.8rem;margin-bottom:8px;color:var(--green)">All caught up.</div>';
+    var rows=inv.length?inv.map(function(v){return '<div class="inv"><span>'+money(v.amount_due||v.amount_paid)+' <span class="st '+(v.status==='paid'?'paid':(v.status==='open'?'open':'other'))+'">'+esc(v.status)+'</span></span><span>'+(v.number?esc(v.number)+' · ':'')+(v.url?'<a href="'+esc(v.url)+'" target="_blank" rel="noopener" style="color:var(--teal)">open ↗</a>':'')+'</span></div>';}).join(''):'<div style="color:var(--muted);font-size:.8rem">No statements yet.</div>';
+    el.innerHTML=gfe+out+rows;
+  }).catch(function(){el.innerHTML='<div style="color:var(--muted);font-size:.8rem">Could not reach billing.</div>';});
 }
 function closeBill(){document.getElementById('billBack').classList.remove('on');}
 function addLine(desc,amt){var d=document.createElement('div');d.className='lineitem';
