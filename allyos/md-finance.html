@@ -54,7 +54,8 @@ h1{font-family:var(--fdisp);font-size:1.6rem;margin-top:2px}
       <h1>Governance billing</h1>
       <div class="who" id="who">Every clinic you supervise — one place to bill and track. Billed by bank/ACH, separate from AllyOS.</div>
     </div>
-    <div class="r"><div id="whoR" style="color:var(--ink)"></div><div style="margin-top:4px"><a href="clinic-network.html">← Cockpit</a> &nbsp;·&nbsp; <a href="#" onclick="if(window.AllyOSAuth)AllyOSAuth.signOut();return false" style="color:var(--muted)">Logout</a></div></div>
+    <div class="r"><div id="whoR" style="color:var(--ink)"></div><div style="margin-top:4px"><a href="clinic-network.html">← Cockpit</a> &nbsp;·&nbsp; <a href="#" onclick="if(window.AllyOSAuth)AllyOSAuth.signOut();return false" style="color:var(--muted)">Logout</a></div>
+      <div style="margin-top:10px"><button class="btn go" onclick="openFee(null)">+ Add clinic</button></div></div>
   </div>
 
   <div class="kpis">
@@ -70,7 +71,7 @@ h1{font-family:var(--fdisp);font-size:1.6rem;margin-top:2px}
 
 <!-- Set fee modal -->
 <div class="mback" id="feeBack"><div class="msheet">
-  <h2>Set clinic fee</h2><div class="sub" id="feeName"></div>
+  <h2 id="feeTitle">Set clinic fee</h2><div class="sub" id="feeName"></div>
   <div class="fld"><label>Clinic name</label><input id="fName"></div>
   <div class="fld"><label>Governance type</label>
     <select id="fType"><option value="">— none —</option><option value="acha">ACHA (medical director of record)</option><option value="pi">Personal injury</option><option value="np">NP / PA supervision</option><option value="ally">AllyOS clinic</option></select></div>
@@ -127,13 +128,28 @@ function card(c){
 }
 function byId(id){for(var i=0;i<CLINICS.length;i++)if(CLINICS[i].id===id)return CLINICS[i];return null;}
 
-// ---- set fee ----
+// ---- set fee / add clinic (same modal: feeId=null means onboarding a NEW clinic) ----
 var feeId=null;
-function openFee(id){feeId=id;var c=byId(id);document.getElementById('feeName').textContent=c.name||'';document.getElementById('fName').value=c.name||'';document.getElementById('fType').value=c.governance_type||'';document.getElementById('fFee').value=c.md_fee!=null?c.md_fee:'';document.getElementById('fEmail').value=c.email||'';document.getElementById('feeMsg').textContent='';document.getElementById('feeBack').classList.add('on');}
+function openFee(id){feeId=id;var c=id?byId(id):null;
+  document.getElementById('feeTitle').textContent=c?'Set clinic fee':'Add a clinic';
+  document.getElementById('feeName').textContent=c?(c.name||''):'It appears on this roster immediately — set the fee and billing email now, and you can bill it right away.';
+  document.getElementById('fName').value=c?(c.name||''):'';
+  document.getElementById('fType').value=c?(c.governance_type||''):'';
+  document.getElementById('fFee').value=(c&&c.md_fee!=null)?c.md_fee:'';
+  document.getElementById('fEmail').value=c?(c.email||''):'';
+  var m=document.getElementById('feeMsg');m.textContent='';m.style.color='var(--green)';
+  document.getElementById('feeBack').classList.add('on');
+  if(!c)document.getElementById('fName').focus();
+}
 function closeFee(){document.getElementById('feeBack').classList.remove('on');}
-function saveFee(){var m=document.getElementById('feeMsg');m.textContent='Saving…';
-  api({action:'set_fee',clinic_id:feeId,name:document.getElementById('fName').value.trim(),governance_type:document.getElementById('fType').value,md_fee:document.getElementById('fFee').value,md_billing_email:document.getElementById('fEmail').value.trim()})
-   .then(function(d){if(d&&d.ok){m.textContent='Saved';setTimeout(function(){closeFee();load();},500);}else{m.textContent='Could not save';m.style.color='var(--red)';}});
+function saveFee(){var m=document.getElementById('feeMsg');
+  var payload={name:document.getElementById('fName').value.trim(),governance_type:document.getElementById('fType').value,md_fee:document.getElementById('fFee').value,md_billing_email:document.getElementById('fEmail').value.trim()};
+  if(!feeId&&!payload.name){m.textContent='Clinic name is required.';m.style.color='var(--red)';return;}
+  if(feeId){payload.action='set_fee';payload.clinic_id=feeId;}else{payload.action='add_clinic';}
+  m.style.color='var(--green)';m.textContent='Saving…';
+  api(payload)
+   .then(function(d){if(d&&d.ok){m.textContent=feeId?'Saved':'✓ Clinic added';setTimeout(function(){closeFee();load();},600);}else{m.textContent=(d&&d.hint)||'Could not save';m.style.color='var(--red)';}})
+   .catch(function(){m.textContent='Could not reach billing.';m.style.color='var(--red)';});
 }
 
 // ---- bill ----
