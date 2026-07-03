@@ -13,23 +13,32 @@ export interface SectionProps {
 export function Section1CheckIn({ form, patch }: SectionProps) {
   const p = form.patient;
   const [carriers, setCarriers] = useState<CarrierRow[]>([]);
+  const [customCarrier, setCustomCarrier] = useState(false);
   useEffect(() => {
     listCarriers()
       .then((rows) => setCarriers(rows.filter((c) => c.active)))
       .catch(() => setCarriers([]));
   }, []);
 
-  const match = carriers.find((c) => c.name.toLowerCase() === p.insuranceCarrier.trim().toLowerCase());
+  const listed = carriers.find((c) => c.name === p.insuranceCarrier);
+  const showCustom = carriers.length === 0 || customCarrier || (!listed && p.insuranceCarrier.trim() !== "");
 
-  function chooseCarrier(name: string) {
-    const c = carriers.find((x) => x.name.toLowerCase() === name.trim().toLowerCase());
-    // Picking a known carrier snapshots its claims data onto the form (editable
-    // below, and used on the CMS-1500). Free text just sets the name.
+  // Picking a carrier silently snapshots its claims routing (address/payer id)
+  // onto the visit for the CMS-1500 — the routing itself is managed by the
+  // admin in Catalogs → Insurance Carriers, not shown at intake.
+  function chooseCarrier(v: string) {
+    if (v === "__other") {
+      setCustomCarrier(true);
+      patch("patient", { insuranceCarrier: "", insurerAddress: "", insurerPhone: "", insurerPayerId: "" });
+      return;
+    }
+    setCustomCarrier(false);
+    const c = carriers.find((x) => x.name === v);
     patch("patient", {
-      insuranceCarrier: name,
-      ...(c
-        ? { insurerAddress: c.claims_address ?? "", insurerPhone: c.claims_phone ?? "", insurerPayerId: c.payer_id ?? "" }
-        : {}),
+      insuranceCarrier: v,
+      insurerAddress: c?.claims_address ?? "",
+      insurerPhone: c?.claims_phone ?? "",
+      insurerPayerId: c?.payer_id ?? "",
     });
   }
 
@@ -46,46 +55,35 @@ export function Section1CheckIn({ form, patch }: SectionProps) {
           options={["male", "female", "other"]}
           labels={["Male", "Female", "Other"]}
         />
-        <div className="field">
-          <label>Insurance Carrier (auto/PIP)</label>
-          <input
-            list="carrier-list"
-            value={p.insuranceCarrier}
-            placeholder={carriers.length ? "Type or pick a carrier…" : "Insurance carrier"}
-            onChange={(e) => chooseCarrier(e.target.value)}
-          />
-          <datalist id="carrier-list">
-            {carriers.map((c) => (
-              <option key={c.id} value={c.name} />
-            ))}
-          </datalist>
-        </div>
+        {carriers.length > 0 && (
+          <div className="field">
+            <label>Insurance Carrier (auto/PIP)</label>
+            <select value={listed ? p.insuranceCarrier : showCustom ? "__other" : ""} onChange={(e) => chooseCarrier(e.target.value)}>
+              <option value="">— select carrier —</option>
+              {carriers.map((c) => (
+                <option key={c.id} value={c.name}>
+                  {c.name}
+                </option>
+              ))}
+              <option value="__other">Other — not in the list</option>
+            </select>
+          </div>
+        )}
+        {showCustom && (
+          <Text label="Carrier name (not in list)" value={p.insuranceCarrier} onChange={(v) => patch("patient", { insuranceCarrier: v })} />
+        )}
         <Text label="Policy Number" value={p.policyNumber} onChange={(v) => patch("patient", { policyNumber: v })} />
+        <Text label="Claim Number" value={p.claimNumber ?? ""} onChange={(v) => patch("patient", { claimNumber: v })} />
         <Text label="Address" value={p.address} onChange={(v) => patch("patient", { address: v })} />
         <Text label="City" value={p.city} onChange={(v) => patch("patient", { city: v })} />
         <Text label="State" value={p.state} onChange={(v) => patch("patient", { state: v })} />
         <Text label="ZIP" value={p.zip} onChange={(v) => patch("patient", { zip: v })} />
         <Text label="Phone" value={p.phone} onChange={(v) => patch("patient", { phone: v })} />
       </div>
-
-      {p.insuranceCarrier.trim() !== "" && (
-        <div className="narr" style={{ marginTop: 10 }}>
-          <div className="status" style={{ marginBottom: 6 }}>
-            Claims routing — prints on the CMS-1500. Editable per claim; blank prints blank.
-          </div>
-          <div className="grid">
-            <Text
-              label="Claims / billing address (CMS-1500)"
-              value={p.insurerAddress ?? ""}
-              onChange={(v) => patch("patient", { insurerAddress: v })}
-              wide
-            />
-            <Text label="Claims phone" value={p.insurerPhone ?? ""} onChange={(v) => patch("patient", { insurerPhone: v })} />
-            <Text label="Payer ID (EDI)" value={p.insurerPayerId ?? ""} onChange={(v) => patch("patient", { insurerPayerId: v })} />
-          </div>
-          {match?.billing_contact && <p className="status">Provider billing contact: {match.billing_contact}</p>}
-          {match?.notes && <p className="status warn">⚠ {match.notes}</p>}
-        </div>
+      {listed?.claims_phone && (
+        <p className="status" style={{ marginTop: 8 }}>
+          Carrier claims phone: {listed.claims_phone}
+        </p>
       )}
     </Section>
   );
