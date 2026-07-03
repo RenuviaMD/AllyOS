@@ -79,6 +79,26 @@ describe("auditNote — telehealth", () => {
   });
 });
 
+describe("auditNote — in-office procedures", () => {
+  it("requires procedure details when a procedure is documented", () => {
+    const f = completedForm();
+    f.plan.procedures = ["20552"];
+    expect(auditNote(f).errors.some((e) => e.includes("Procedure details"))).toBe(true);
+    f.plan.procedureNote = "Bilateral trapezius; lidocaine 1% 2 mL per site; tolerated well.";
+    expect(auditNote(f).errors).toEqual([]);
+  });
+
+  it("blocks procedures on a telehealth visit", () => {
+    const f = completedForm();
+    f.visitMode = "telehealth";
+    f.telehealth.consentObtained = true;
+    f.telehealth.overrideReason = "Provider out of state; staff-assisted facility visit.";
+    f.plan.procedures = ["20553"];
+    f.plan.procedureNote = "3+ muscle groups injected.";
+    expect(auditNote(f).errors.some((e) => e.includes("hands-on") && e.includes("telehealth"))).toBe(true);
+  });
+});
+
 describe("auditNote — final visit", () => {
   it("requires a discharge outcome", () => {
     const f = completedForm();

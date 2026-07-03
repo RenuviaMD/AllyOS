@@ -109,6 +109,10 @@ export interface TreatmentPlan {
   /** physician's causation opinion — drives the Causation Statement */
   causation: "" | "related" | "not-related" | "undetermined";
   prognosis: "" | "Excellent" | "Good" | "Fair" | "Guarded" | "Poor";
+  /** In-office procedures PERFORMED this visit (CPT, e.g. 20552/20553) — MD, in person only */
+  procedures: string[];
+  /** Required when a procedure is selected: muscles injected, medication/dose, tolerance */
+  procedureNote: string;
 }
 
 export interface ImageOrders {
@@ -260,6 +264,8 @@ export function emptyForm(): VisitForm {
       emc: "",
       causation: "",
       prognosis: "",
+      procedures: [],
+      procedureNote: "",
     },
     imaging: { selected: [], mriRegion: "", ctRegion: "", usRegion: "" },
     imagingReview: { images: [], findings: "", discussed: "" },

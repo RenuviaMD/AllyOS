@@ -82,6 +82,19 @@ export function buildServiceLines(form: VisitForm, settings: BillingSettings, en
         charge: normalizeMoney(settings.fees[form.plan.emLevel] ?? ""),
       });
     }
+    // Procedures performed this visit — hands-on, always in person (the audit
+    // blocks a telehealth note that carries a procedure).
+    for (const cpt of form.plan.procedures ?? []) {
+      const proc = PROCEDURES.find((p) => p.cpt === cpt);
+      lines.push({
+        cpt,
+        description: proc?.name ?? cpt,
+        modifier: "",
+        pos: "11",
+        units: 1,
+        charge: normalizeMoney(settings.fees[cpt] ?? ""),
+      });
+    }
   } else {
     for (const cpt of form.ptDaily.treatments) {
       const mod = PT_MODALITIES.find((m) => m.cpt === cpt);

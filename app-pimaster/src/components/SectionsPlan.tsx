@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { EM_LEVELS, FOLLOW_UPS, IMAGING_GROUPS, OTHER_IMAGING_REGIONS, PT_DURATIONS, PT_FREQUENCIES, PT_MODALITIES } from "../lib/cpt";
+import { EM_LEVELS, FOLLOW_UPS, IMAGING_GROUPS, OTHER_IMAGING_REGIONS, PROCEDURES, PT_DURATIONS, PT_FREQUENCIES, PT_MODALITIES } from "../lib/cpt";
 import { deriveIcd10, PSYCH_CODES } from "../lib/icd10";
 import { listDxCatalog, type DxCatalogRow } from "../lib/store";
 import { imagingReviewNarrative, medicalNecessityTemplate } from "../lib/narratives";
@@ -168,6 +168,39 @@ export function Section7Plan({ form, patch }: SectionProps) {
           onChange={(sel) => patch("plan", { modalities: sel })}
         />
       </div>
+      {form.visitMode === "telehealth" ? (
+        (p.procedures ?? []).length > 0 && (
+          <p className="status warn" style={{ marginTop: 12 }}>
+            In-office procedures are recorded on this visit but procedures are hands-on and cannot be performed via
+            telehealth — remove them or change the visit to In-Person.
+          </p>
+        )
+      ) : (
+        <div style={{ marginTop: 12 }}>
+          <label className="status">In-Office Procedures — PERFORMED this visit (bills with the fee schedule)</label>
+          <CheckGroup
+            items={PROCEDURES.map((pr) => ({
+              key: pr.cpt,
+              label: (
+                <span>
+                  <span className="cpt">{pr.cpt}</span> {pr.name}
+                </span>
+              ),
+            }))}
+            selected={p.procedures ?? []}
+            onChange={(sel) => patch("plan", { procedures: sel })}
+          />
+          {(p.procedures ?? []).length > 0 && (
+            <div className="grid" style={{ marginTop: 8 }}>
+              <Area
+                label="Procedure details — REQUIRED — muscles injected, medication & dose, patient tolerance"
+                value={p.procedureNote ?? ""}
+                onChange={(v) => patch("plan", { procedureNote: v })}
+              />
+            </div>
+          )}
+        </div>
+      )}
     </Section>
   );
 }

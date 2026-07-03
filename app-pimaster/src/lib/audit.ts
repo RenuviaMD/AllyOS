@@ -62,6 +62,19 @@ export function auditNote(form: VisitForm): AuditResult {
     }
   }
 
+  // In-office procedures: hands-on (never telehealth) and never billed without documentation.
+  const procedures = form.plan.procedures ?? [];
+  if (procedures.length > 0) {
+    if (form.visitMode === "telehealth") {
+      errors.push(
+        "In-office procedures (trigger point injections) are hands-on and cannot be performed on a telehealth visit. Remove them or change the visit to In-Person.",
+      );
+    }
+    if (!(form.plan.procedureNote ?? "").trim()) {
+      errors.push("Procedure details (muscles injected, medication & dose, tolerance) are required when a procedure is documented (Section 7).");
+    }
+  }
+
   if (form.visitType === "final" && !form.discharge.outcome) {
     errors.push("Final visit requires an overall outcome (Section 10).");
   }

@@ -1,7 +1,7 @@
 import { totalCharges, type BillingSettings, type ServiceLine } from "./billing";
 import { CLINIC } from "./clinic";
 import { imagingDestination, loadImagingConfig } from "./imaging";
-import { EM_LEVELS, PT_MODALITIES, resolveImagingSelection } from "./cpt";
+import { EM_LEVELS, PROCEDURES, PT_MODALITIES, resolveImagingSelection } from "./cpt";
 import { deriveIcd10, parseManualCodes, PSYCH_CODES, withEncounter } from "./icd10";
 import {
   aggravationNarrative,
@@ -40,6 +40,7 @@ export function allCptCodes(form: VisitForm, mode?: string): string[] {
   if (mode === "ptprogress") return [];
   const out: string[] = [];
   if (form.plan.emLevel) out.push(form.plan.emLevel);
+  out.push(...(form.plan.procedures ?? []));
   out.push(...form.plan.modalities);
   for (const sel of form.imaging.selected) {
     const r = resolveImagingSelection(sel);
@@ -171,11 +172,19 @@ export function buildClinicalNoteHtml(form: VisitForm): string {
   }
 
   const pl = form.plan;
-  if (pl.emLevel || pl.medicalNecessity || pl.modalities.length) {
+  const procedures = pl.procedures ?? [];
+  if (pl.emLevel || pl.medicalNecessity || pl.modalities.length || procedures.length) {
     const em = EM_LEVELS.find((e) => e.code === pl.emLevel)?.label ?? pl.emLevel;
     b += `<h2>Plan of Treatment</h2>`;
     if (em) b += `<p><strong>E/M Level:</strong> ${esc(em)}</p>`;
     if (pl.medicalNecessity) b += `<p><strong>Medical Necessity:</strong> ${esc(pl.medicalNecessity)}</p>`;
+    if (procedures.length) {
+      const procs = PROCEDURES.filter((p) => procedures.includes(p.cpt));
+      b += `<p><strong>Procedures performed this visit:</strong></p><table><tr><th>CPT</th><th>Procedure</th></tr>${procs
+        .map((p) => `<tr><td>${p.cpt}</td><td>${esc(p.name)}</td></tr>`)
+        .join("")}</table>`;
+      if (pl.procedureNote) b += `<p class="narrative">${esc(pl.procedureNote)}</p>`;
+    }
     if (pl.modalities.length) {
       const mods = PT_MODALITIES.filter((m) => pl.modalities.includes(m.cpt));
       b += `<p><strong>PT:</strong> ${esc(pl.ptFrequency)} for ${esc(pl.ptDuration)}.</p><table><tr><th>CPT</th><th>Modality</th></tr>${mods

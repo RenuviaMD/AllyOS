@@ -21,6 +21,24 @@ describe("buildServiceLines", () => {
     expect(lines[0]).toMatchObject({ cpt: "99204", modifier: "95", pos: "02", units: 1, charge: "300.00" });
   });
 
+  it("adds procedure lines (trigger points) to the MD encounter, always POS 11, priced from the fee schedule", () => {
+    const f = emptyForm();
+    f.plan.emLevel = "99204";
+    f.plan.procedures = ["20552"];
+    const lines = buildServiceLines(f, { ...settings, fees: { ...settings.fees, "20552": "118.87" } }, "md");
+    expect(lines).toHaveLength(2);
+    expect(lines[1]).toMatchObject({ cpt: "20552", pos: "11", modifier: "", units: 1, charge: "118.87" });
+  });
+
+  it("tolerates drafts saved before the procedures field existed", () => {
+    const f = emptyForm();
+    f.plan.emLevel = "99204";
+    // simulate an old draft: plan without the new fields
+    delete (f.plan as Partial<typeof f.plan>).procedures;
+    delete (f.plan as Partial<typeof f.plan>).procedureNote;
+    expect(buildServiceLines(f, settings, "md")).toHaveLength(1);
+  });
+
   it("builds PT treatment lines, always in person, blank charge when unpriced", () => {
     const f = emptyForm();
     f.ptDaily.treatments = ["97110", "97140"];
