@@ -330,36 +330,33 @@ function saveCfg(){
   if(c){Object.assign(c,cfg);}
   else{c=Object.assign({id:'local-'+Date.now(),status:'active',device:false},cfg);CLINICS.push(c);}
   saveClinics(CLINICS);
-  // if this is the device clinic, mirror to the local config the Clinic Card reads (read-only there)
-  if(c.device){try{
+  render();
+  var msg=document.getElementById('cfgMsg');msg.textContent='Saving…';
+  // owner write goes through the SERVICE-ROLE server endpoint (guaranteed to persist), not the
+  // browser RLS path which can silently match 0 rows and report a false success.
+  var cloudId=(c.id&&c.id.indexOf('local-')!==0)?c.id:null;
+  var syncLocal=function(){if(c.device){try{
     localStorage.setItem('allyos_clinic_config_v1',JSON.stringify({name:c.name,city:c.city,falconIsMd:c.falconIsMd,rnIvModel:c.rnIvModel}));
     localStorage.setItem('allyos_clinic_lines_v1',JSON.stringify(c.lines));
-  }catch(e){}}
-  render();
-  var msg=document.getElementById('cfgMsg');msg.textContent='Saved locally';
-  // owner-only write to the clinic record (RLS: only app_admin may UPDATE clinics)
-  var cloudId=(c.id&&c.id.indexOf('local-')!==0)?c.id:null;
-  if(cloudId&&window.AllyOSCloud){
-    AllyOSCloud.saveClinicConfig(cloudId,cfg).then(function(r){
-      msg.textContent=r&&r.ok?'Saved · synced to clinic record':'Saved locally (cloud write deferred)';
-    }).catch(function(){msg.textContent='Saved locally (offline)';});
-    setTimeout(closeCfg,900);
-  }else if(!cloudId&&window.AllyOSCloud&&AllyOSCloud.postAuthed){
-    // NEW clinic: create the REAL record (same owner-gated endpoint as the finance console),
-    // then sync the care model + lines onto it — no more device-only phantom clinics.
+  }catch(e){}}};
+  if(!window.AllyOSCloud||!AllyOSCloud.postAuthed){syncLocal();msg.textContent='Saved locally';setTimeout(closeCfg,900);return;}
+  var linesArr=['iv','peptides','bhrt'].filter(function(k){return cfg.lines[k];});
+  if(cloudId){
+    AllyOSCloud.postAuthed('/.netlify/functions/md-billing',{action:'save_config',clinic_id:cloudId,lines:linesArr,falconIsMd:cfg.falconIsMd,rnIvModel:cfg.rnIvModel,name:cfg.name,city:cfg.city})
+      .then(function(r){return r.json();})
+      .then(function(d){if(d&&d.ok){syncLocal();msg.textContent='✓ Saved to clinic record';setTimeout(closeCfg,900);}else{msg.textContent=(d&&d.hint)||'Could not save.';msg.style.color='var(--red)';}})
+      .catch(function(){msg.textContent='Could not reach the server.';msg.style.color='var(--red)';});
+  }else{
+    // NEW clinic: create the real record, then save its config onto it.
     msg.textContent='Creating clinic record…';
     AllyOSCloud.postAuthed('/.netlify/functions/md-billing',{action:'add_clinic',name:cfg.name})
       .then(function(r){return r.json();})
       .then(function(d){
-        if(!(d&&d.ok&&d.id)){msg.textContent=(d&&d.hint)||'Saved locally — could not create the clinic record';setTimeout(closeCfg,1400);return;}
+        if(!(d&&d.ok&&d.id)){msg.textContent=(d&&d.hint)||'Could not create the clinic record';msg.style.color='var(--red)';return;}
         c.id=d.id;saveClinics(CLINICS);
-        return AllyOSCloud.saveClinicConfig(d.id,cfg).then(function(){
-          msg.textContent='✓ Clinic created · set its fee in Governance billing';render();setTimeout(closeCfg,1200);
-        });
-      }).catch(function(){msg.textContent='Saved locally (offline)';setTimeout(closeCfg,1400);});
-  }else{
-    msg.textContent='Saved locally — provision a clinic record to sync';
-    setTimeout(closeCfg,900);
+        return AllyOSCloud.postAuthed('/.netlify/functions/md-billing',{action:'save_config',clinic_id:d.id,lines:linesArr,falconIsMd:cfg.falconIsMd,rnIvModel:cfg.rnIvModel,name:cfg.name,city:cfg.city})
+          .then(function(){syncLocal();msg.textContent='✓ Clinic created · set its fee in Governance billing';render();setTimeout(closeCfg,1200);});
+      }).catch(function(){msg.textContent='Could not reach the server.';msg.style.color='var(--red)';});
   }
 }
 
