@@ -127,7 +127,7 @@ export function TelehealthConsent({ form, patch }: SectionProps) {
 
 export function Section2Injury({ form, patch, readOnly }: SectionProps) {
   const a = form.accident;
-  const narrative = injuryNarrative(form.patient, a);
+  const narrative = injuryNarrative(form.patient, a, { visitDate: form.visitDate, visitType: form.visitType });
   return (
     <Section num={2} title="Injury Details" tag="All visit types" readOnly={readOnly}>
       <div className="grid">
