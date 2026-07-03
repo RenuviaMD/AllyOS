@@ -2,6 +2,10 @@
   base = "app-pimaster"
   command = "npm run build"
   publish = "dist"
+  # Skip a PI Master rebuild when nothing under app-pimaster/ changed since the
+  # last deploy — so AllyOS pushes in the shared repo don't rebuild this site.
+  # (Exit 0 = ignore/skip build; non-zero = build.)
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ."
 
 [[redirects]]
   from = "/*"
