@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { applicableDocs, combineDocsHtml, packageReadiness, type PackageDocDef } from "../lib/packageDocs";
 import { printHtml } from "../lib/report";
-import { listPatientDocKinds, saveReport, type ReportMode } from "../lib/store";
+import { getReportHtml, listPatientDocKinds, saveReport, type ReportMode } from "../lib/store";
 import type { VisitForm } from "../lib/types";
 
 /**
@@ -13,7 +13,7 @@ import type { VisitForm } from "../lib/types";
  */
 export function PackagePanel(props: { form: VisitForm; role: string; onClose: () => void }) {
   const { form, role } = props;
-  const [existing, setExisting] = useState<Record<string, string>>({});
+  const [existing, setExisting] = useState<Record<string, { dos: string; id: string }>>({});
   const [status, setStatus] = useState("");
 
   const missing = packageReadiness(form);
@@ -57,6 +57,19 @@ export function PackagePanel(props: { form: VisitForm; role: string; onClose: ()
     refresh();
   }
 
+  /** Print an exact copy of the already-signed document from the archive. */
+  async function reprint(d: PackageDocDef) {
+    const saved = existing[d.kind];
+    if (!saved) return;
+    const html = await getReportHtml(saved.id);
+    if (!html) {
+      setStatus("Could not load the saved copy — check the Reports Archive.");
+      return;
+    }
+    if (!printHtml(html)) setStatus("Print window was blocked — allow pop-ups and try again.");
+    else setStatus(`${d.title}: copy reprinted from the archive (original of ${saved.dos}).`);
+  }
+
   const staffDocs = docs.filter((d) => d.producer === "staff");
   const mdDocs = docs.filter((d) => d.producer === "physician");
 
@@ -83,14 +96,19 @@ export function PackagePanel(props: { form: VisitForm; role: string; onClose: ()
               <tr key={d.kind} style={{ opacity: alreadyDone(d) ? 0.6 : 1 }}>
                 <td>{d.title}{d.oncePerPatient && <div className="status">once per patient — first visit</div>}</td>
                 <td>{d.signer}</td>
-                <td>{existing[d.kind] ? `✓ ${existing[d.kind]}` : "—"}</td>
+                <td>{existing[d.kind] ? `✓ ${existing[d.kind].dos}` : "—"}</td>
                 <td>
                   {canProduce(d) && !alreadyDone(d) && (
                     <button className="btn ghost" disabled={missing.length > 0} onClick={() => produce([d])}>
                       Print &amp; Save
                     </button>
                   )}
-                  {!canProduce(d) && <span className="status">physician</span>}
+                  {existing[d.kind] && (
+                    <button className="btn ghost" onClick={() => reprint(d)}>
+                      Reprint copy
+                    </button>
+                  )}
+                  {!canProduce(d) && !existing[d.kind] && <span className="status">physician</span>}
                 </td>
               </tr>
             ))}
