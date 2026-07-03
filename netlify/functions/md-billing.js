@@ -195,10 +195,11 @@ exports.handler = async (event) => {
       const raw = Array.isArray(body.items) ? body.items : [];
       const items = raw.map(function (it) { return { description: (it.description || "Charge").toString().slice(0, 120), cents: Math.round(Number(it.amount) * 100) }; }).filter(function (it) { return it.cents > 0; });
       if (!items.length) return json(400, { error: "no_items", hint: "Add at least one line with an amount." });
-      // Default $5 processing fee on EVERY bill (pass-through of the capped bank/ACH cost).
-      // Owner can override per bill: processing_fee:0 removes it, or any other amount.
-      const feeDollars = (body.processing_fee === undefined || body.processing_fee === null) ? 5 : Number(body.processing_fee);
-      if (feeDollars > 0) items.push({ description: "Processing fee", cents: Math.round(feeDollars * 100) });
+      // $5 processing fee on EVERY bill — mandatory (covers the capped bank/ACH cost). A caller
+      // may raise it, but never below $5: the fee always applies to any payment.
+      var feeReq = Number(body.processing_fee);
+      const feeDollars = (isFinite(feeReq) && feeReq > 5) ? feeReq : 5;
+      items.push({ description: "Processing fee", cents: Math.round(feeDollars * 100) });
       if (!clinic.md_billing_email) return json(400, { error: "no_email", hint: "Set the clinic's billing email first so Stripe can send the bill." });
 
       const customer = await ensureCustomer(clinic, key);
