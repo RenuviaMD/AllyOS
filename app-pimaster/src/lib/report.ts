@@ -130,26 +130,31 @@ function signature(): string {
 
 const GRADE_PROSE: Record<string, string> = { wnl: "within normal limits", limited: "limited", cannot: "cannot be performed" };
 
+/** Standard EMR register — NKDA, PMH/PSH, denies tobacco/EtOH/illicit drugs. */
 function pmhNarrative(form: VisitForm): string {
   const m = form.pmh;
   const s: string[] = [];
-  const conditions = [m.hypertension === "yes" ? "hypertension" : "", m.diabetes === "yes" ? "diabetes" : "", m.heartDisease === "yes" ? "heart disease" : ""].filter(Boolean);
-  const denied = [m.hypertension === "no" ? "hypertension" : "", m.diabetes === "no" ? "diabetes" : "", m.heartDisease === "no" ? "heart disease" : ""].filter(Boolean);
-  if (conditions.length) s.push(`Past medical history is notable for ${conditions.join(", ")}.`);
-  if (denied.length) s.push(`The patient denies ${denied.join(", ")}.`);
-  if (m.medications === "yes") s.push("The patient reports current medication use.");
-  if (m.medications === "no") s.push("The patient takes no medications.");
-  if (m.allergies === "yes") s.push("Allergies are reported.");
-  if (m.allergies === "no") s.push("No known allergies.");
-  if (m.surgeries === "yes") s.push("There is a history of prior surgery.");
-  if (m.surgeries === "no") s.push("No prior surgical history.");
-  if (m.previousAccidents === "yes") s.push("The patient reports prior accidents.");
-  if (m.previousAccidents === "no") s.push("No prior accidents are reported.");
-  const social = [m.smoking === "no" ? "tobacco" : "", m.alcohol === "no" ? "alcohol" : "", m.drugs === "no" ? "recreational drug use" : ""].filter(Boolean);
-  const socialYes = [m.smoking === "yes" ? "tobacco use" : "", m.alcohol === "yes" ? "alcohol use" : "", m.drugs === "yes" ? "recreational drug use" : ""].filter(Boolean);
-  if (socialYes.length) s.push(`Social history is positive for ${socialYes.join(", ")}.`);
-  if (social.length) s.push(`The patient denies ${social.join(", ")}.`);
-  if (m.pregnant === "yes") s.push(`The patient is pregnant${m.lmp ? ` (LMP ${m.lmp})` : ""}.`);
+  const conditions = [m.hypertension === "yes" ? "hypertension" : "", m.diabetes === "yes" ? "diabetes mellitus" : "", m.heartDisease === "yes" ? "cardiac disease" : ""].filter(Boolean);
+  const denied = [m.hypertension === "no" ? "hypertension" : "", m.diabetes === "no" ? "diabetes mellitus" : "", m.heartDisease === "no" ? "cardiac disease" : ""].filter(Boolean);
+  if (conditions.length) s.push(`PMH: significant for ${conditions.join(", ")}${denied.length ? `; denies ${denied.join(", ")}` : ""}.`);
+  else if (denied.length === 3) s.push("PMH: unremarkable.");
+  else if (denied.length) s.push(`PMH: denies ${denied.join(", ")}.`);
+  if (m.surgeries === "yes") s.push("PSH: positive — see history.");
+  if (m.surgeries === "no") s.push("PSH: none.");
+  if (m.medications === "yes") s.push("Medications: current medications reported.");
+  if (m.medications === "no") s.push("Medications: none.");
+  if (m.allergies === "yes") s.push("Allergies: reported — see chart.");
+  if (m.allergies === "no") s.push("Allergies: NKDA.");
+  if (m.previousAccidents === "yes") s.push("Prior accidents: reported.");
+  if (m.previousAccidents === "no") s.push("Prior accidents: none reported.");
+  const socialNo = [m.smoking === "no" ? "tobacco" : "", m.alcohol === "no" ? "EtOH" : "", m.drugs === "no" ? "illicit drug use" : ""].filter(Boolean);
+  const socialYes = [m.smoking === "yes" ? "tobacco use" : "", m.alcohol === "yes" ? "EtOH use" : "", m.drugs === "yes" ? "illicit drug use" : ""].filter(Boolean);
+  if (socialYes.length || socialNo.length) {
+    const pos = socialYes.length ? `positive for ${socialYes.join(", ")}` : "";
+    const neg = socialNo.length ? `denies ${socialNo.join(", ")}` : "";
+    s.push(`Social history: ${[pos, neg].filter(Boolean).join("; ")}.`);
+  }
+  if (m.pregnant === "yes") s.push(`OB: currently pregnant${m.lmp ? ` — LMP ${m.lmp}` : ""}.`);
   if (m.pregnant === "no" && m.lmp) s.push(`LMP: ${m.lmp}.`);
   return s.join(" ");
 }
