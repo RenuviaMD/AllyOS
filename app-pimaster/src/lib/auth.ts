@@ -10,9 +10,24 @@ export interface AuthState {
   isPlatform: boolean;
 }
 
+/** Reject a hung promise after `ms` so a stalled network call can't wedge the UI. */
+function withTimeout<T>(p: PromiseLike<T>, ms: number): Promise<T> {
+  return Promise.race([
+    p as Promise<T>,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error("timeout")), ms)),
+  ]);
+}
+
 export async function fetchAuthState(): Promise<AuthState | null> {
-  const { data } = await supabase().auth.getSession();
-  const session = data.session;
+  // getSession() can silently hang while refreshing a stale token — bound it so
+  // the app falls through to the sign-in screen instead of "Loading…" forever.
+  let session;
+  try {
+    const { data } = await withTimeout(supabase().auth.getSession(), 6000);
+    session = data.session;
+  } catch {
+    return null;
+  }
   if (!session) return null;
   // Don't let a slow/failed profile lookup wedge the app on "Loading…" — the
   // session is valid, so fall back to a no-role state (they can still sign in
@@ -20,11 +35,10 @@ export async function fetchAuthState(): Promise<AuthState | null> {
   type UserRow = { roles?: string[]; active?: boolean; clinic_id?: string | null };
   let row: UserRow | null = null;
   try {
-    const res = await supabase()
-      .from("app_users")
-      .select("roles, active, clinic_id")
-      .eq("user_id", session.user.id)
-      .maybeSingle();
+    const res = await withTimeout(
+      supabase().from("app_users").select("roles, active, clinic_id").eq("user_id", session.user.id).maybeSingle(),
+      6000,
+    );
     row = (res.data as unknown as UserRow) ?? null;
   } catch {
     row = null;
