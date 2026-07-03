@@ -100,7 +100,10 @@ export function groupPatients(
 export function extractBody(html: string): string {
   const styles = (html.match(/<style[\s\S]*?<\/style>/gi) ?? []).join("\n");
   const body = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-  return `${styles}\n${body ? body[1] : html}`;
+  // Strip each document's fixed running footer — stacked fixed elements from
+  // many embedded documents would overprint each other in the package.
+  const content = (body ? body[1] : html).replace(/<div class="doc-footer">[\s\S]*?<\/div>/g, "");
+  return `${styles}\n${content}`;
 }
 
 function esc(s: string): string {

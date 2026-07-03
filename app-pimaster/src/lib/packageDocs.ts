@@ -90,12 +90,17 @@ export function packageReadiness(form: VisitForm): string[] {
   return missing;
 }
 
-/** Combine several generated documents into one print job, one per page. */
+/** Combine several generated documents into one print job, one per page.
+ * Each document carries its own fixed running footer; keep exactly one
+ * (they are identical branding + same patient) so print doesn't stack them. */
 export function combineDocsHtml(htmls: string[]): string {
   if (htmls.length === 0) return "";
   if (htmls.length === 1) return htmls[0];
+  const FOOTER = /<div class="doc-footer">[\s\S]*?<\/div>/;
   const bodyOf = (h: string) => /<body>([\s\S]*)<\/body>/.exec(h)?.[1] ?? h;
   const head = /^([\s\S]*?<body>)/.exec(htmls[0])?.[1] ?? "<!doctype html><html><body>";
-  const parts = htmls.map(bodyOf).join('<div style="page-break-after: always"></div>');
-  return `${head}${parts}</body></html>`;
+  const bodies = htmls.map(bodyOf);
+  const footer = FOOTER.exec(bodies[0])?.[0] ?? "";
+  const parts = bodies.map((b) => b.replace(FOOTER, "")).join('<div style="page-break-after: always"></div>');
+  return `${head}${parts}${footer}</body></html>`;
 }
