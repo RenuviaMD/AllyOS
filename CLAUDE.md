@@ -25,4 +25,6 @@
 - He prefers autonomous batch execution: on "go" / "continue" / "one shot", complete the whole scoped item (build → verify → commit → push) without mid-course questions. Propose-first only when he says "tell me" / "advice" / "proposal first".
 - Session repo scope is `armandofalcon66/renuviamd-site` only. RenuviaMD-org repos (e.g. `PIP-notes-`) are not readable from here — research them via their Supabase data instead, read-only.
 - Deliverables he opens are files: send status reports/presentations as self-contained HTML via SendUserFile.
-- Known pending user inputs: EIN + fee schedule (Billing Settings), Supabase BAA, Netlify deploy approval.
+- Known pending user inputs: first sign-ins/password changes, Netlify deploy approval (+ GitHub account decision below), Supabase BAA. EIN (81-1815031) and the 220%-Medicare fee schedule are LOADED — done.
+- GitHub identities: his main account is RenuviaMD (drfalcon@renuviamd.com); `armandofalcon66/renuviamd-site` (this repo) is the only one connected to Claude sessions. He may consolidate under RenuviaMD later — repo transfer preserves everything, but the Claude GitHub app and Netlify must be re-authorized on the new owner.
+- Backend future: he plans to migrate off Supabase to a DigitalOcean-hosted database ("ocean digital") later. Nothing to change now — keep all data access centralized in store.ts so the swap stays feasible. VERIFY BAA/HIPAA support before any migration; do not start it without his explicit go.
