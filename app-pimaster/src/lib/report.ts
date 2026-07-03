@@ -209,11 +209,32 @@ function examNarrative(form: VisitForm): string {
   return paras.join("");
 }
 
+/** Substitute the AI report's PHI placeholders with the real identifiers at
+ * print time (they never travel to the model), and strip the review-only
+ * missing-items block from the printed document. */
+export function finalizeAiReport(html: string, form: VisitForm): string {
+  const name = `${form.patient.firstName} ${form.patient.lastName}`.trim();
+  return html
+    .replace(/\[PATIENT_NAME\]/g, esc(name))
+    .replace(/\[PATIENT_DOB\]/g, esc(form.patient.dob))
+    .replace(/<div class="draft-gaps">[\s\S]*?<\/div>/g, "");
+}
+
 /** Full clinical note (physician visit) — narrative MD format: prose sections,
  * numbered diagnoses and plan. Billing detail (E/M level, CPT tables) lives on
  * the superbill/CMS-1500, and the EMC certification is its own document — the
- * note carries only the physician's one-line determination. */
+ * note carries only the physician's one-line determination.
+ * When the physician has generated and approved an AI Initial Evaluation
+ * Report (per the locked generation specs), that reviewed document IS the
+ * note — it prints inside the clinic skeleton with its own required sections
+ * (including the certification/signature block per the spec). */
 export function buildClinicalNoteHtml(form: VisitForm): string {
+  const reportDraft = (form.ai?.reportDraft ?? "").trim();
+  if (reportDraft) {
+    const body = sanitizeHtml(finalizeAiReport(reportDraft, form));
+    return wrap(`Clinical Note — ${form.patient.lastName}`, body + signature(), footerCtx(form));
+  }
+
   const titles = { initial: "INITIAL EVALUATION", followup: "FOLLOW-UP EVALUATION", final: "FINAL EVALUATION / DISCHARGE" };
   let b = `<h1>${titles[form.visitType]}</h1>${patientBlock(form)}`;
 

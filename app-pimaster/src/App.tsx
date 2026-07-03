@@ -9,6 +9,7 @@ import { CatalogPage } from "./components/CatalogPage";
 import { AhcaExportPage } from "./components/AhcaExport";
 import { AttorneyPackagePage } from "./components/AttorneyPackage";
 import { UsersPanel } from "./components/UsersPanel";
+import { AiReportPanel } from "./components/AiReportPanel";
 import { PackagePanel } from "./components/PackagePanel";
 import { OnboardingWizard } from "./components/OnboardingWizard";
 import { SignInScreen } from "./components/SignIn";
@@ -58,6 +59,7 @@ export default function App() {
   const [showAttorney, setShowAttorney] = useState(false);
   const [showUsers, setShowUsers] = useState(false);
   const [showPackage, setShowPackage] = useState(false);
+  const [showAiReport, setShowAiReport] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [clinics, setClinics] = useState<ClinicRow[]>([]);
   const [clinicId, setClinicId] = useState<string>(activeClinicId());
@@ -511,6 +513,11 @@ export default function App() {
                 Generate Clinical Note {vt === "final" ? "+ Close Case" : ""}
               </button>
               {vt === "initial" && (
+                <button className="btn gold" onClick={() => setShowAiReport(true)}>
+                  AI Initial Report
+                </button>
+              )}
+              {vt === "initial" && (
                 <button className="btn gold" onClick={() => generate("xray")}>
                   Imaging Order
                 </button>
@@ -594,6 +601,7 @@ export default function App() {
       {showAttorney && <AttorneyPackagePage onClose={() => setShowAttorney(false)} generatedBy={auth.email} />}
       {showUsers && <UsersPanel onClose={() => setShowUsers(false)} selfId={auth.userId} isPlatform={auth.isPlatform} />}
       {showPackage && <PackagePanel form={form} role={role} onClose={() => setShowPackage(false)} />}
+      {showAiReport && <AiReportPanel form={form} patch={patch} onClose={() => setShowAiReport(false)} />}
       {showOnboarding && (
         <OnboardingWizard
           onClose={() => setShowOnboarding(false)}

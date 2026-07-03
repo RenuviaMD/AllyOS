@@ -180,6 +180,9 @@ export interface AiAssist {
   hpiNotes: string;
   /** AI-drafted HPI, reviewed/edited by the physician; when present it replaces the rule-based narrative on the note */
   hpiDraft: string;
+  /** AI-drafted full Initial Medical Evaluation Report (per the locked generation specs);
+   * physician-reviewed HTML; when present it replaces the composed note entirely */
+  reportDraft?: string;
 }
 
 export interface VisitForm {
