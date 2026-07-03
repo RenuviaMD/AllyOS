@@ -207,7 +207,12 @@ function sendBill(){
   // $5 processing fee is mandatory — the server always applies it; sending 5 keeps totals in sync.
   api({action:'bill',clinic_id:billId,items:items,processing_fee:5,due_days:Number(document.getElementById('bDue').value)||15,bill_key:billKey})
    .then(function(d){
-     if(d&&d.ok){m.textContent='✓ Bill '+(d.number||'')+' sent to '+(d.email||'the clinic')+' — '+money(d.amount_due);setTimeout(function(){closeBill();load();},1500);}
+     if(d&&d.ok){
+       var link=d.url?' &nbsp;<a href="'+esc(d.url)+'" target="_blank" rel="noopener" style="color:var(--teal);font-weight:600">open pay link ↗</a>':'';
+       if(d.emailed){m.style.color='var(--green)';m.innerHTML='✓ Bill '+esc(d.number||'')+' emailed to '+esc(d.email||'the clinic')+' — '+money(d.amount_due)+link;}
+       else{m.style.color='var(--gold)';m.innerHTML='✓ Bill '+esc(d.number||'')+' created ('+money(d.amount_due)+') but the email didn’t send — enable customer emails in Stripe, or use this'+link;}
+       setTimeout(function(){load();},1500);
+     }
      else{m.style.color='var(--red)';m.textContent=(d&&d.hint)||'Could not send — try again.';billKey=newBillKey();/* clean failure: fresh key so the retry is a new bill */}
    }).catch(function(){m.style.color='var(--red)';m.textContent='Could not reach billing.';/* network unknown: KEEP the key so a retry can't double-bill */});
 }
