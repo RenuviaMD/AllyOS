@@ -46,6 +46,12 @@ async function stripeGet(path, secret) {
 function sbHeaders() { const k = process.env.SUPABASE_SERVICE_ROLE_KEY; return { apikey: k, Authorization: "Bearer " + k, "Content-Type": "application/json" }; }
 function sbUrl() { return (process.env.SUPABASE_URL || "").replace(/\/$/, ""); }
 async function sbGet(query) { const res = await fetch(sbUrl() + "/rest/v1/" + query, { headers: sbHeaders() }); return res.ok ? res.json() : []; }
+async function sbPost(table, row) {
+  const res = await fetch(sbUrl() + "/rest/v1/" + table, { method: "POST", headers: Object.assign(sbHeaders(), { Prefer: "return=representation" }), body: JSON.stringify(row) });
+  if (!res.ok) return null;
+  const rows = await res.json();
+  return (Array.isArray(rows) && rows[0]) || null;
+}
 async function sbPatch(query, body) { const res = await fetch(sbUrl() + "/rest/v1/" + query, { method: "PATCH", headers: Object.assign(sbHeaders(), { Prefer: "return=minimal" }), body: JSON.stringify(body) }); return res.ok; }
 function parseBody(event) { try { return JSON.parse((event && event.body) || "{}"); } catch (e) { return {}; } }
 function siteOf(event) { if (process.env.SITE_URL) return process.env.SITE_URL.replace(/\/$/, ""); const h = (event && event.headers) || {}; if (h.origin) return h.origin; if (h.host) return "https://" + h.host; return ""; }
@@ -98,6 +104,25 @@ exports.handler = async (event) => {
       });
       const recurring = clinics.reduce(function (a, c) { return a + (c.md_fee || 0); }, 0);
       return json(200, { clinics: clinics, count: clinics.length, monthly_recurring: recurring });
+    }
+
+    // Onboard a new governed clinic straight onto the roster (name is the only required field;
+    // fee/type/email can be set now or later). Owner only.
+    if (action === "add_clinic") {
+      const g = await requireOwner(event); if (g.error) return g.error;
+      const name = (body.name || "").toString().trim().slice(0, 120);
+      if (!name) return json(400, { error: "name_required", hint: "Give the clinic a name." });
+      const row = {
+        name: name,
+        governance_type: body.governance_type || null,
+        md_fee: (body.md_fee === undefined || body.md_fee === null || body.md_fee === "") ? null : Number(body.md_fee),
+        md_billing_email: body.md_billing_email || null,
+        md_of_record: !!body.governance_type,
+        status: "active",
+      };
+      const created = await sbPost("clinics", row);
+      if (!created || !created.id) return json(502, { error: "insert_failed", hint: "Could not create the clinic record." });
+      return json(200, { ok: true, id: created.id });
     }
 
     const clinicId = body.clinic_id;
