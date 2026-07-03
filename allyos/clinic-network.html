@@ -112,8 +112,6 @@
       <div style="margin-top:3px;font-size:.82rem"><a href="md-audit.html" style="color:var(--teal);text-decoration:none">AllyAuditPro →</a> &nbsp;·&nbsp; <a href="#" onclick="if(window.AllyOSAuth)AllyOSAuth.signOut();return false" style="color:var(--muted);text-decoration:none">Logout</a></div>
     </div>
   </div>
-  <div class="sub">Every wellness clinic you run on AllyOS, in one place — care model, active lines, today's GFEs, and recurring revenue. <b>PHI-free</b>: counts and Encounter IDs only; patient identity stays on each clinic's device.</div>
-
   <div class="kpis" id="kpis"></div>
   <div id="cloudreq"></div>
   <div id="incidents"></div>
@@ -230,10 +228,9 @@ function cardHTML(c){
     '</div>'+
     pendingPanel(c)+
     '<div class="crow2"><span style="font-size:.72rem;color:var(--muted)">'+keys.length+' line'+(keys.length===1?'':'s')+' · '+(c.falconIsMd?'you carry the GFE + oversight':'clinic owns the GFE')+'</span>'+
-      // "Open" only exists for THIS device's clinic (the operational tools run in the signed-in
-      // clinic's context). Other governed clinics route to Governance billing — configure + bill
-      // is what the MD does with them from the cockpit until they have their own AllyOS logins.
-      '<span style="display:flex;gap:10px;align-items:center"><button class="cfgbtn" onclick="openCfg('+"'"+esc(c.id)+"'"+')">⚙ Configure</button><a class="open" href="'+(c.device?'dashboard.html':'md-finance.html')+'">'+(c.device?'Open →':'💳 Billing →')+'</a></span></div></div>';
+      // Every clinic gets "Billing →" (Governance billing console). "Open →" additionally exists
+      // only for THIS device's clinic — the operational tools run in the signed-in clinic's context.
+      '<span style="display:flex;gap:10px;align-items:center"><button class="cfgbtn" onclick="openCfg('+"'"+esc(c.id)+"'"+')">⚙ Configure</button><a class="open" href="md-finance.html">💳 Billing →</a>'+(c.device?'<a class="open" href="dashboard.html">Open →</a>':'')+'</span></div></div>';
 }
 function pendingPanel(c){
   if(!c.device)return '';
