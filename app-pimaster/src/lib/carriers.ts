@@ -21,10 +21,10 @@ export const CARRIER_SEED: CarrierSeed[] = [
   {
     name: "Progressive",
     payerId: "24260 / J1748",
-    claimsAddress: "Not publicly verified for paper PIP bills — use the claim-specific address from the adjuster.",
+    claimsAddress: "",
     billingContact: "MedEDI@progressive.com; attachments fax 877-213-7258; eBill AccidentEDI 800-297-6909",
     claimsPhone: "Claims 800-776-4737; service 888-671-4405",
-    notes: "Progressive publishes medical eBill info, not a clear FL paper PIP address. Verify before mailing.",
+    notes: "No verified FL paper PIP address — use the claim-specific address from the adjuster. Progressive publishes medical eBill info (payer ID 24260/J1748), not a paper address.",
   },
   {
     name: "State Farm",
@@ -37,18 +37,18 @@ export const CARRIER_SEED: CarrierSeed[] = [
   {
     name: "Allstate",
     payerId: null,
-    claimsAddress: "Not publicly verified for FL paper PIP bills — use the claim-specific address from the adjuster/MyClaim.",
-    billingContact: "Allstate vendor/third-party carrier portal; no FL PIP paper-bill address verified publicly.",
+    claimsAddress: "",
+    billingContact: "Allstate vendor/third-party carrier portal",
     claimsPhone: "800-255-7828 (800-ALLSTATE)",
-    notes: "Do NOT use the NJ Medlogix address for Florida — that is NJ-specific.",
+    notes: "No FL PIP paper-bill address verified publicly — use the claim-specific address from the adjuster/MyClaim. Do NOT use the NJ Medlogix address for Florida.",
   },
   {
     name: "GEICO / Berkshire Hathaway",
     payerId: null,
-    claimsAddress: "Not publicly verified from GEICO official FL PIP page — use the claim-specific Auto-PIP address from the adjuster/portal.",
+    claimsAddress: "",
     billingContact: "GEICO Medical Provider Claim Tracking portal",
     claimsPhone: "800-841-3000",
-    notes: "A FL attorney site lists P.O. Box 9091, Macon, GA 31208 for FL injury/PIP; verify before use (not the primary official source).",
+    notes: "No verified FL PIP address from GEICO — use the claim-specific Auto-PIP address from the adjuster/portal. (A FL attorney site lists P.O. Box 9091, Macon, GA 31208; verify before use.)",
   },
   {
     name: "USAA",
@@ -61,18 +61,18 @@ export const CARRIER_SEED: CarrierSeed[] = [
   {
     name: "Travelers",
     payerId: null,
-    claimsAddress: "Not publicly verified for FL PIP medical bills — use the claim-specific address/upload portal.",
+    claimsAddress: "",
     billingContact: "Travelers Claim Center — file upload & claim-status tools",
     claimsPhone: "888-564-5043; directory 800-328-2189",
-    notes: "Public site emphasizes claim portal/upload, not a general FL PIP paper-billing address.",
+    notes: "No verified FL PIP paper address — use the claim-specific address/upload portal (Travelers Claim Center).",
   },
   {
     name: "Auto-Owners",
     payerId: null,
-    claimsAddress: "Not publicly verified for FL PIP paper bills — use the local agent/claim branch or claim-specific address.",
+    claimsAddress: "",
     billingContact: "Medical provider billing inquiry 833-255-9863 option 3",
     claimsPhone: "888-252-4626",
-    notes: "Routes heavily through independent agents/claim offices; verify the case-specific address.",
+    notes: "No verified FL PIP paper address — use the local agent/claim branch or claim-specific address. Routes through independent agents/claim offices.",
   },
   {
     name: "Kemper / Infinity",
@@ -101,9 +101,9 @@ export const CARRIER_SEED: CarrierSeed[] = [
   {
     name: "Sentry / Dairyland",
     payerId: null,
-    claimsAddress: "Not publicly verified for FL PIP medical bills. Corporate ref: Sentry Insurance, 1800 North Point Drive, Stevens Point, WI 54481.",
+    claimsAddress: "",
     billingContact: "Sentry medical provider support 800-473-6879; Dairyland auto claims 800-334-0090",
     claimsPhone: "Dairyland 800-334-0090",
-    notes: "Use the claim-specific address before paper billing. Dairyland is within the Sentry group.",
+    notes: "No verified FL PIP billing address — use the claim-specific address before paper billing. Corporate ref: Sentry Insurance, 1800 North Point Drive, Stevens Point, WI 54481. Dairyland is within the Sentry group.",
   },
 ];
