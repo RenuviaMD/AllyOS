@@ -12,10 +12,13 @@ describe("carrier reference seed", () => {
     expect(new Set(CARRIER_SEED.map((c) => c.name)).size).toBe(CARRIER_SEED.length);
     const stateFarm = CARRIER_SEED.find((c) => c.name === "State Farm");
     expect(stateFarm?.claimsAddress).toContain("P.O. Box 106134");
-    // unverified carriers keep their caution note, never a fabricated address
+    // unverified carriers have a BLANK address (staff fills the claim-specific
+    // one) with the caution moved to the note — never a fabricated address.
     const allstate = CARRIER_SEED.find((c) => c.name === "Allstate");
-    expect(allstate?.claimsAddress.toLowerCase()).toContain("not publicly verified");
+    expect(allstate?.claimsAddress).toBe("");
     expect(allstate?.notes.toLowerCase()).toContain("nj");
+    // carriers with a real verified address keep it
+    expect(CARRIER_SEED.find((c) => c.name === "USAA")?.claimsAddress).toContain("Pensacola");
   });
 });
 
