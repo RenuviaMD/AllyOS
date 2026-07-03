@@ -234,7 +234,10 @@ function cardHTML(c){
     '</div>'+
     pendingPanel(c)+
     '<div class="crow2"><span style="font-size:.72rem;color:var(--muted)">'+keys.length+' line'+(keys.length===1?'':'s')+' · '+(c.falconIsMd?'you carry the GFE + oversight':'clinic owns the GFE')+'</span>'+
-      '<span style="display:flex;gap:10px;align-items:center"><button class="cfgbtn" onclick="openCfg('+"'"+esc(c.id)+"'"+')">⚙ Configure</button><a class="open" href="'+(c.device?'dashboard.html':'clinic-card.html')+'">Open →</a></span></div></div>';
+      // "Open" only exists for THIS device's clinic (the operational tools run in the signed-in
+      // clinic's context). Other governed clinics route to Governance billing — configure + bill
+      // is what the MD does with them from the cockpit until they have their own AllyOS logins.
+      '<span style="display:flex;gap:10px;align-items:center"><button class="cfgbtn" onclick="openCfg('+"'"+esc(c.id)+"'"+')">⚙ Configure</button><a class="open" href="'+(c.device?'dashboard.html':'md-finance.html')+'">'+(c.device?'Open →':'💳 Billing →')+'</a></span></div></div>';
 }
 function pendingPanel(c){
   if(!c.device)return '';
@@ -321,10 +324,24 @@ function saveCfg(){
     AllyOSCloud.saveClinicConfig(cloudId,cfg).then(function(r){
       msg.textContent=r&&r.ok?'Saved · synced to clinic record':'Saved locally (cloud write deferred)';
     }).catch(function(){msg.textContent='Saved locally (offline)';});
-  }else if(!cloudId){
+    setTimeout(closeCfg,900);
+  }else if(!cloudId&&window.AllyOSCloud&&AllyOSCloud.postAuthed){
+    // NEW clinic: create the REAL record (same owner-gated endpoint as the finance console),
+    // then sync the care model + lines onto it — no more device-only phantom clinics.
+    msg.textContent='Creating clinic record…';
+    AllyOSCloud.postAuthed('/.netlify/functions/md-billing',{action:'add_clinic',name:cfg.name})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(!(d&&d.ok&&d.id)){msg.textContent=(d&&d.hint)||'Saved locally — could not create the clinic record';setTimeout(closeCfg,1400);return;}
+        c.id=d.id;saveClinics(CLINICS);
+        return AllyOSCloud.saveClinicConfig(d.id,cfg).then(function(){
+          msg.textContent='✓ Clinic created · set its fee in Governance billing';render();setTimeout(closeCfg,1200);
+        });
+      }).catch(function(){msg.textContent='Saved locally (offline)';setTimeout(closeCfg,1400);});
+  }else{
     msg.textContent='Saved locally — provision a clinic record to sync';
+    setTimeout(closeCfg,900);
   }
-  setTimeout(closeCfg,900);
 }
 
 // System audit + content-update agents (reads the daily-audit status; Run-now triggers the workflow).
