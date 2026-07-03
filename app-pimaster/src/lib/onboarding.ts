@@ -1,4 +1,4 @@
-import { ADVANCED_IMAGING, xrayFeeItems } from "./cpt";
+import { ADVANCED_IMAGING, PROCEDURES, xrayFeeItems } from "./cpt";
 import { supabase } from "./store";
 
 /**
@@ -90,6 +90,8 @@ export const SERVICE_SEED: { cpt: string; name: string; category: string }[] = [
   { cpt: "97032", name: "E-Stim Attended", category: "pt" },
   { cpt: "97112", name: "Neuromuscular Re-education", category: "pt" },
   { cpt: "97116", name: "Gait Training", category: "pt" },
+  // MD-performed in-office procedures.
+  ...PROCEDURES.map((p) => ({ cpt: p.cpt, name: p.name, category: "other" })),
   // Imaging — priced only by clinics that perform imaging on-site; third-party centers bill their own studies.
   ...xrayFeeItems().map((x) => ({ cpt: x.cpt, name: x.name, category: "imaging" })),
   ...ADVANCED_IMAGING.map((a) => ({ cpt: a.cpt, name: a.name, category: "imaging" })),

@@ -101,6 +101,12 @@ export const IMAGING_GROUPS: ImagingGroup[] = [
   },
 ];
 
+/** In-office procedures (MD-performed) for the fee schedule. */
+export const PROCEDURES: CptItem[] = [
+  { cpt: "20552", name: "Trigger point injection, 1 or 2 muscles" },
+  { cpt: "20553", name: "Trigger point injection, 3 or more muscles" },
+];
+
 /** Advanced imaging (MRI / CT / US) — standard w/o-contrast codes for the fee schedule. */
 export const ADVANCED_IMAGING: CptItem[] = [
   { cpt: "70551", name: "MRI Brain (w/o contrast)" },
