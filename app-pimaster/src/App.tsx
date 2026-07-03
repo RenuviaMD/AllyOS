@@ -9,6 +9,7 @@ import { CatalogPage } from "./components/CatalogPage";
 import { AhcaExportPage } from "./components/AhcaExport";
 import { AttorneyPackagePage } from "./components/AttorneyPackage";
 import { UsersPanel } from "./components/UsersPanel";
+import { PackagePanel } from "./components/PackagePanel";
 import { OnboardingWizard } from "./components/OnboardingWizard";
 import { SignInScreen } from "./components/SignIn";
 import { allowedViews, changePassword, fetchAuthState, onAuthChange, signOut, type AuthState } from "./lib/auth";
@@ -56,6 +57,7 @@ export default function App() {
   const [showExport, setShowExport] = useState(false);
   const [showAttorney, setShowAttorney] = useState(false);
   const [showUsers, setShowUsers] = useState(false);
+  const [showPackage, setShowPackage] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [clinics, setClinics] = useState<ClinicRow[]>([]);
   const [clinicId, setClinicId] = useState<string>(activeClinicId());
@@ -500,6 +502,9 @@ export default function App() {
               </button>
             </>
           )}
+          <button className="btn ghost" onClick={() => setShowPackage(true)}>
+            Visit Documents
+          </button>
           <button className="btn ghost" onClick={() => setShowArchive(true)}>
             Reports Archive
           </button>
@@ -532,6 +537,7 @@ export default function App() {
       {showExport && <AhcaExportPage onClose={() => setShowExport(false)} />}
       {showAttorney && <AttorneyPackagePage onClose={() => setShowAttorney(false)} generatedBy={auth.email} />}
       {showUsers && <UsersPanel onClose={() => setShowUsers(false)} selfId={auth.userId} isPlatform={auth.isPlatform} />}
+      {showPackage && <PackagePanel form={form} role={role} onClose={() => setShowPackage(false)} />}
       {showOnboarding && (
         <OnboardingWizard
           onClose={() => setShowOnboarding(false)}

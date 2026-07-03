@@ -36,10 +36,27 @@ export const MODE_LABELS: Record<string, string> = {
   final: "Final Evaluation / Discharge",
   ptdaily: "Physical Therapy Daily Note",
   ptprogress: "Physical Therapy Weekly Summary",
+  affidavit: "Sworn Affidavit of Attending Physician",
+  aob: "Assignment of Benefits",
+  records_release: "Medical Records Release (HIPAA)",
+  attestation14: "PIP 14-Day Attestation",
+  telehealth_consent: "Telehealth Informed Consent",
 };
 
-/** Order documents the way an attorney reads a demand package. */
-const MODE_ORDER: Record<string, number> = { initial: 0, followup: 1, final: 2, ptdaily: 3, ptprogress: 4 };
+/** Order documents the way an attorney reads a demand package — clinical
+ * record first, then the sworn affidavit and signed intake forms as exhibits. */
+const MODE_ORDER: Record<string, number> = {
+  initial: 0,
+  followup: 1,
+  final: 2,
+  ptdaily: 3,
+  ptprogress: 4,
+  affidavit: 5,
+  aob: 6,
+  records_release: 7,
+  attestation14: 8,
+  telehealth_consent: 9,
+};
 
 export function sortDocs<T extends { mode: string; dos: string }>(docs: T[]): T[] {
   return [...docs].sort((a, b) => {

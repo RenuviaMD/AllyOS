@@ -412,6 +412,118 @@ export function buildPtReportHtml(form: VisitForm, kind: "ptdaily" | "ptprogress
   return wrap(`PT Note — ${form.patient.lastName}`, b + signature());
 }
 
+/* ---------------------------------------------------------------------------
+ * Visit package documents. Every form prints PRE-FILLED from entered data —
+ * no handwritten patient fields. Only signatures (and the notary block on the
+ * affidavit) are completed on paper.
+ * ------------------------------------------------------------------------- */
+
+function fullName(form: VisitForm): string {
+  return `${form.patient.firstName} ${form.patient.lastName}`.trim();
+}
+
+function packageIdentityBlock(form: VisitForm): string {
+  const p = form.patient;
+  const addr = [p.address, [p.city, p.state, p.zip].filter(Boolean).join(", ")].filter(Boolean).join(", ");
+  return `<table>
+    <tr><th>Patient</th><td>${esc(fullName(form))}</td><th>Date of Birth</th><td>${esc(p.dob)}</td></tr>
+    <tr><th>Address</th><td>${esc(addr)}</td><th>Phone</th><td>${esc(p.phone)}</td></tr>
+    <tr><th>Insurance Carrier</th><td>${esc(p.insuranceCarrier)}</td><th>Policy #</th><td>${esc(p.policyNumber)}</td></tr>
+    <tr><th>Date of Accident</th><td>${esc(form.accident.accidentDate)}</td><th>Date</th><td>${esc(form.visitDate)}</td></tr>
+  </table>`;
+}
+
+function patientSignatureLines(form: VisitForm, witnessLabel = "Witness (clinic staff)"): string {
+  return `<div class="sig"><div class="sig-line">Signature of ${esc(fullName(form))} &nbsp;&nbsp;·&nbsp;&nbsp; Date</div></div>
+    <div class="sig"><div class="sig-line">${esc(witnessLabel)} &nbsp;&nbsp;·&nbsp;&nbsp; Date</div></div>`;
+}
+
+/** Assignment of Benefits — patient signs once at the first visit. */
+export function buildAobHtml(form: VisitForm): string {
+  const b = `<h1>ASSIGNMENT OF BENEFITS &amp; DIRECT PAYMENT AUTHORIZATION</h1>
+    ${packageIdentityBlock(form)}
+    <p>I, <strong>${esc(fullName(form))}</strong>, hereby assign to <strong>${esc(CLINIC.name)}</strong> all rights and
+    benefits under any policy of insurance providing coverage for the treatment of injuries I sustained in the accident
+    of <strong>${esc(form.accident.accidentDate)}</strong>, including Personal Injury Protection (PIP) benefits under
+    Florida Statute § 627.736 and any applicable medical payments coverage.</p>
+    <p>I authorize and direct my insurance carrier${form.patient.insuranceCarrier ? `, <strong>${esc(form.patient.insuranceCarrier)}</strong>,` : ""}
+    to pay ${esc(CLINIC.name)} directly for services rendered to me. I understand that I remain personally responsible
+    for any charges not covered by this assignment to the extent permitted by law. This assignment remains in effect
+    for the duration of my treatment unless revoked by me in writing.</p>
+    <p>I acknowledge receipt of the clinic's notice of privacy practices and consent to treatment.</p>
+    ${patientSignatureLines(form)}`;
+  return wrap(`Assignment of Benefits — ${form.patient.lastName}`, b);
+}
+
+/** HIPAA medical records release — patient signs once at the first visit. */
+export function buildRecordsReleaseHtml(form: VisitForm): string {
+  const b = `<h1>AUTHORIZATION FOR RELEASE OF MEDICAL RECORDS (HIPAA)</h1>
+    ${packageIdentityBlock(form)}
+    <p>I, <strong>${esc(fullName(form))}</strong>, authorize <strong>${esc(CLINIC.name)}</strong> to release my complete
+    medical records, reports, imaging results, and billing records relating to treatment of injuries sustained in the
+    accident of <strong>${esc(form.accident.accidentDate)}</strong> to: my insurance carrier and its representatives,
+    my designated attorney and their staff, and any physician or facility participating in my care.</p>
+    <p>This authorization is made pursuant to 45 CFR § 164.508. It expires one (1) year from the date signed or upon my
+    written revocation, whichever occurs first. I understand I may revoke this authorization at any time in writing,
+    except to the extent that action has already been taken in reliance on it, and that treatment is not conditioned on
+    signing this authorization. A photocopy of this authorization is as valid as the original.</p>
+    ${patientSignatureLines(form)}`;
+  return wrap(`Records Release — ${form.patient.lastName}`, b);
+}
+
+/** FL PIP 14-day initial-services attestation — patient signs once at the first visit. */
+export function buildAttestation14Html(form: VisitForm): string {
+  const b = `<h1>PIP 14-DAY INITIAL SERVICES ATTESTATION</h1>
+    ${packageIdentityBlock(form)}
+    <p>Florida Statute § 627.736(1)(a) requires that a person injured in a motor vehicle accident receive initial
+    services and care within <strong>14 days</strong> after the accident for Personal Injury Protection benefits to apply.</p>
+    <p>I, <strong>${esc(fullName(form))}</strong>, attest that I was involved in a motor vehicle accident on
+    <strong>${esc(form.accident.accidentDate)}</strong> and that I sought initial medical services and care for the
+    injuries I sustained, presenting to <strong>${esc(CLINIC.name)}</strong> on <strong>${esc(form.visitDate)}</strong>.
+    I attest that the information I have provided regarding the accident and my injuries is true and correct to the
+    best of my knowledge.</p>
+    ${patientSignatureLines(form)}`;
+  return wrap(`14-Day Attestation — ${form.patient.lastName}`, b);
+}
+
+/** Telehealth consent — signed for telehealth visits (facility-originated). */
+export function buildTelehealthConsentHtml(form: VisitForm): string {
+  const t = form.telehealth;
+  const b = `<h1>TELEHEALTH INFORMED CONSENT (FACILITY-ORIGINATED)</h1>
+    ${packageIdentityBlock(form)}
+    <p>I, <strong>${esc(fullName(form))}</strong>, consent to receive evaluation and care by telehealth. I understand:</p>
+    <table>
+      <tr><td>1</td><td>I am physically present at <strong>${esc(CLINIC.name)}, ${esc(CLINIC.address)}</strong> (the originating site), attended by clinic staff, and the provider evaluates me from a remote location by secure, real-time audio-video connection.</td></tr>
+      <tr><td>2</td><td>Vital signs and any measurements are taken by on-site clinic staff. The remote provider's examination is limited to what can be observed and directed over video; no hands-on findings are recorded.</td></tr>
+      <tr><td>3</td><td>I may decline or stop the telehealth encounter at any time and request an in-person visit without affecting my right to care.</td></tr>
+      <tr><td>4</td><td>Technical failures may interrupt the encounter; if the connection cannot be restored, the visit will be rescheduled or converted to in-person.</td></tr>
+      <tr><td>5</td><td>The encounter is documented in my medical record like any other visit and is protected by the same privacy laws.</td></tr>
+    </table>
+    ${t.consentBy ? `<p>Consent discussed and witnessed by clinic staff: <strong>${esc(t.consentBy)}</strong>.</p>` : ""}
+    ${patientSignatureLines(form, t.consentBy ? `${t.consentBy} — clinic staff (originating site)` : "Clinic staff (originating site)")}`;
+  return wrap(`Telehealth Consent — ${form.patient.lastName}`, b);
+}
+
+/** Physician sworn affidavit — generated ONCE per patient, at the first visit. */
+export function buildAffidavitHtml(form: VisitForm): string {
+  const b = `<h1>SWORN AFFIDAVIT OF ATTENDING PHYSICIAN</h1>
+    <p>STATE OF FLORIDA<br>COUNTY OF MIAMI-DADE</p>
+    <p>BEFORE ME, the undersigned authority, personally appeared <strong>${esc(CLINIC.provider)}</strong>, who after
+    being duly sworn, deposes and states:</p>
+    <table>
+      <tr><td>1</td><td>I am a physician licensed to practice in the State of Florida (License ${esc(CLINIC.license)}, NPI ${esc(CLINIC.npi)}), practicing at ${esc(CLINIC.name)}, ${esc(CLINIC.address)}.</td></tr>
+      <tr><td>2</td><td>I am the attending physician for <strong>${esc(fullName(form))}</strong> (DOB ${esc(form.patient.dob)}), who presented for evaluation and treatment of injuries sustained in a motor vehicle accident on <strong>${esc(form.accident.accidentDate)}</strong>, with care at this clinic beginning <strong>${esc(form.visitDate)}</strong>.</td></tr>
+      <tr><td>3</td><td>The evaluation, treatment, and services rendered and prescribed by me for this patient are, in my professional medical opinion, reasonable, related to the accident described, and medically necessary.</td></tr>
+      <tr><td>4</td><td>The medical records and billing records produced by this office for this patient are true and accurate records made at or near the time of the events they describe, kept in the ordinary course of the practice's regularly conducted business activity.</td></tr>
+    </table>
+    <p>FURTHER AFFIANT SAYETH NAUGHT.</p>
+    ${signature()}
+    <p style="margin-top:36px">SWORN TO AND SUBSCRIBED before me this ____ day of ______________, 20____, by
+    ${esc(CLINIC.provider)}, who is personally known to me or produced identification: ______________________.</p>
+    <div class="sig"><div class="sig-line">Notary Public, State of Florida &nbsp;&nbsp;·&nbsp;&nbsp; Commission No. / Expiration</div></div>`;
+  return wrap(`Sworn Affidavit — ${form.patient.lastName}`, b);
+}
+
 /** Strip active content from HTML before rendering. Our own builders escape all
  * interpolation, but stored report_html can include legacy rows written by the
  * previous app — neutralize scripts/handlers to prevent stored-XSS. */
