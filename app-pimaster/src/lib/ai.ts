@@ -45,11 +45,9 @@ export function narrativeFacts(form: VisitForm): Record<string, unknown> {
   };
 }
 
-export async function draftHpi(form: VisitForm): Promise<{ ok: boolean; narrative?: string; error?: string }> {
+async function invoke(mode: "hpi" | "report", facts: Record<string, unknown>): Promise<{ ok: boolean; narrative?: string; error?: string }> {
   try {
-    const { data, error } = await supabase().functions.invoke("generate-narrative", {
-      body: { facts: narrativeFacts(form) },
-    });
+    const { data, error } = await supabase().functions.invoke("generate-narrative", { body: { facts, mode } });
     if (error) return { ok: false, error: error.message };
     if (data?.error) return { ok: false, error: String(data.error) };
     const narrative = String(data?.narrative ?? "").trim();
@@ -58,4 +56,76 @@ export async function draftHpi(form: VisitForm): Promise<{ ok: boolean; narrativ
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : String(e) };
   }
+}
+
+export async function draftHpi(form: VisitForm): Promise<{ ok: boolean; narrative?: string; error?: string }> {
+  return invoke("hpi", narrativeFacts(form));
+}
+
+/**
+ * Full Initial Medical Evaluation Report facts (Dr. Falcon's locked specs).
+ * Same PHI contract: no names/DOB/address/phone/policy/claim — the model
+ * writes [PATIENT_NAME]/[PATIENT_DOB] placeholders substituted at print time.
+ */
+export function reportFacts(form: VisitForm): Record<string, unknown> {
+  const base = narrativeFacts(form);
+  const grades: Record<string, string> = { wnl: "within normal limits", limited: "limited", cannot: "cannot perform" };
+  const spine: Record<string, unknown> = {};
+  for (const [region, row] of Object.entries(form.spineExam)) {
+    if (row && (row.tenderness || row.spasm || row.rom))
+      spine[region] = { tenderness: row.tenderness || undefined, spasm: row.spasm || undefined, rom: row.rom ? grades[row.rom] ?? row.rom : undefined };
+  }
+  const functional: Record<string, string> = {};
+  for (const [maneuver, grade] of Object.entries(form.romExam)) {
+    if (grade) functional[maneuver] = grades[grade] ?? grade;
+  }
+  const joints: Record<string, unknown> = {};
+  for (const [joint, t] of Object.entries(form.jointTenderness)) {
+    if (t && (t.R || t.L)) joints[joint] = { right: t.R || undefined, left: t.L || undefined };
+  }
+  const g = form.gen;
+  return {
+    ...base,
+    encounterMode: form.visitMode,
+    dateOfService: form.visitDate,
+    insuranceCarrier: form.patient.insuranceCarrier || "Pending",
+    telehealthConsent: form.visitMode === "telehealth" ? { obtained: form.telehealth.consentObtained, witnessedBy: form.telehealth.consentBy || undefined } : undefined,
+    vitals: { bp: g.bp || undefined, pulse: g.pulse || undefined, resp: g.resp || undefined, temp: g.temp || undefined },
+    generalAppearance: [g.appearance, g.posture, g.mood, g.cognition].filter(Boolean).join("; ") || undefined,
+    pmh: {
+      hypertension: form.pmh.hypertension || undefined,
+      diabetes: form.pmh.diabetes || undefined,
+      heartDisease: form.pmh.heartDisease || undefined,
+      medications: form.pmh.medications || undefined,
+      allergies: form.pmh.allergies || undefined,
+      surgeries: form.pmh.surgeries || undefined,
+      priorAccidents: form.pmh.previousAccidents || undefined,
+      smoking: form.pmh.smoking || undefined,
+      alcohol: form.pmh.alcohol || undefined,
+      drugs: form.pmh.drugs || undefined,
+      pregnant: form.pmh.pregnant || undefined,
+      lmp: form.pmh.lmp || undefined,
+      aggravatedPreexisting: form.pmh.aggravatedPrevious === "yes" ? form.pmh.previousConditionDx || "yes" : undefined,
+    },
+    exam: { spine, functional, joints },
+    plan: {
+      emLevel: form.plan.emLevel || undefined,
+      ptFrequency: form.plan.ptFrequency || undefined,
+      ptDuration: form.plan.ptDuration || undefined,
+      modalities: form.plan.modalities,
+      proceduresPerformed: form.plan.procedures ?? [],
+      procedureNote: (form.plan.procedureNote ?? "").trim() || undefined,
+      followUp: form.plan.followUp || undefined,
+      emcDetermination: form.plan.emc || undefined,
+      causationOpinion: form.plan.causation || undefined,
+      prognosis: form.plan.prognosis || undefined,
+      medicalNecessity: form.plan.medicalNecessity.trim() || undefined,
+    },
+    imagingOrdered: form.imaging.selected,
+    otherImaging: { mri: form.imaging.mriRegion || undefined, ct: form.imaging.ctRegion || undefined, us: form.imaging.usRegion || undefined },
+  };
+}
+
+export async function draftInitialReport(form: VisitForm): Promise<{ ok: boolean; narrative?: string; error?: string }> {
+  return invoke("report", reportFacts(form));
 }

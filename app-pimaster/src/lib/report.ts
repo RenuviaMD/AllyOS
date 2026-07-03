@@ -1,7 +1,7 @@
 import { totalCharges, type BillingSettings, type ServiceLine } from "./billing";
 import { CLINIC } from "./clinic";
 import { imagingDestination, loadImagingConfig } from "./imaging";
-import { EM_LEVELS, PROCEDURES, PT_MODALITIES, resolveImagingSelection } from "./cpt";
+import { PROCEDURES, PT_MODALITIES, resolveImagingSelection } from "./cpt";
 import { deriveIcd10, parseManualCodes, PSYCH_CODES, withEncounter } from "./icd10";
 import {
   aggravationNarrative,
@@ -12,7 +12,7 @@ import {
   prognosisStatement,
   telehealthStatement,
 } from "./narratives";
-import { EXAM_REGIONS, GRADE_LABELS, impairedSides, JOINT_REGIONS, SPINE_REGION_IDS, SPINE_REGION_LABELS } from "./rom";
+import { EXAM_REGIONS, impairedSides, JOINT_REGIONS, SPINE_REGION_IDS, SPINE_REGION_LABELS } from "./rom";
 import type { DxCode, VisitForm } from "./types";
 import { daysSinceAccident, weekBounds, weekNumber } from "./weeks";
 
@@ -74,6 +74,8 @@ const REPORT_CSS = `
   td, th { border: 1px solid #ccd6dd; padding: 5px 9px; text-align: left; vertical-align: top; }
   th { background: #f2f5f7; font-weight: 700; color: #33424f; font-size: 10.5px; letter-spacing: .5px; text-transform: uppercase; }
   .narrative { font-style: italic; color: #24313d; }
+  ol.num-list { margin: 6px 0 10px 22px; padding: 0; }
+  ol.num-list li { margin: 4px 0; }
   .sig { margin-top: 42px; }
   .sig-line { border-top: 1px solid #1c2833; width: 330px; padding-top: 5px; font-size: 11.5px; }
   .status { color: #667; }
@@ -124,8 +126,115 @@ function signature(): string {
   return `<div class="sig"><div class="sig-line">${esc(CLINIC.provider)}<br>License ${esc(CLINIC.license)} | NPI ${esc(CLINIC.npi)}</div></div>`;
 }
 
-/** Full clinical note (physician visit). */
+/* ---- narrative helpers for the clinical note (MD notes are prose, not tables) ---- */
+
+const GRADE_PROSE: Record<string, string> = { wnl: "within normal limits", limited: "limited", cannot: "cannot be performed" };
+
+function pmhNarrative(form: VisitForm): string {
+  const m = form.pmh;
+  const s: string[] = [];
+  const conditions = [m.hypertension === "yes" ? "hypertension" : "", m.diabetes === "yes" ? "diabetes" : "", m.heartDisease === "yes" ? "heart disease" : ""].filter(Boolean);
+  const denied = [m.hypertension === "no" ? "hypertension" : "", m.diabetes === "no" ? "diabetes" : "", m.heartDisease === "no" ? "heart disease" : ""].filter(Boolean);
+  if (conditions.length) s.push(`Past medical history is notable for ${conditions.join(", ")}.`);
+  if (denied.length) s.push(`The patient denies ${denied.join(", ")}.`);
+  if (m.medications === "yes") s.push("The patient reports current medication use.");
+  if (m.medications === "no") s.push("The patient takes no medications.");
+  if (m.allergies === "yes") s.push("Allergies are reported.");
+  if (m.allergies === "no") s.push("No known allergies.");
+  if (m.surgeries === "yes") s.push("There is a history of prior surgery.");
+  if (m.surgeries === "no") s.push("No prior surgical history.");
+  if (m.previousAccidents === "yes") s.push("The patient reports prior accidents.");
+  if (m.previousAccidents === "no") s.push("No prior accidents are reported.");
+  const social = [m.smoking === "no" ? "tobacco" : "", m.alcohol === "no" ? "alcohol" : "", m.drugs === "no" ? "recreational drug use" : ""].filter(Boolean);
+  const socialYes = [m.smoking === "yes" ? "tobacco use" : "", m.alcohol === "yes" ? "alcohol use" : "", m.drugs === "yes" ? "recreational drug use" : ""].filter(Boolean);
+  if (socialYes.length) s.push(`Social history is positive for ${socialYes.join(", ")}.`);
+  if (social.length) s.push(`The patient denies ${social.join(", ")}.`);
+  if (m.pregnant === "yes") s.push(`The patient is pregnant${m.lmp ? ` (LMP ${m.lmp})` : ""}.`);
+  if (m.pregnant === "no" && m.lmp) s.push(`LMP: ${m.lmp}.`);
+  return s.join(" ");
+}
+
+function examNarrative(form: VisitForm): string {
+  const inPerson = form.visitMode === "inPerson";
+  const g = form.gen;
+  const paras: string[] = [];
+
+  const vit = [g.bp ? `BP ${g.bp}` : "", g.pulse ? `pulse ${g.pulse}` : "", g.resp ? `respirations ${g.resp}` : "", g.temp ? `temperature ${g.temp}` : ""].filter(Boolean);
+  if (vit.length) {
+    const by = form.visitMode === "telehealth" ? " (obtained by on-site clinic staff)" : "";
+    paras.push(`<p><strong>Vital signs${by}:</strong> ${esc(vit.join(", "))}.</p>`);
+  }
+  const gen = [g.appearance ? `${g.appearance}` : "", g.posture ? `Posture: ${g.posture.toLowerCase()}` : "", g.mood ? `Mood/affect: ${g.mood.toLowerCase()}` : "", g.cognition ? `Cognition: ${g.cognition.toLowerCase()}` : ""].filter(Boolean);
+  if (gen.length) paras.push(`<p><strong>General:</strong> ${esc(gen.join(". "))}.</p>`);
+
+  for (const id of SPINE_REGION_IDS) {
+    const row = form.spineExam[id];
+    if (!row || (!row.tenderness && !row.spasm && !row.rom)) continue;
+    const bits: string[] = [];
+    if (inPerson) {
+      if (row.tenderness) bits.push(`tenderness to palpation ${row.tenderness === "yes" ? "present" : "absent"}`);
+      if (row.spasm) bits.push(`paravertebral muscle spasm ${row.spasm === "yes" ? "present" : "absent"}`);
+    }
+    if (row.rom) bits.push(`range of motion ${GRADE_PROSE[row.rom] ?? row.rom}`);
+    if (!inPerson) bits.push("hands-on palpation not performed (telehealth encounter)");
+    if (bits.length) paras.push(`<p><strong>${SPINE_REGION_LABELS[id]} spine:</strong> ${esc(bits.join("; "))}.</p>`);
+  }
+
+  // Functional maneuvers as prose per region — normal values are reference
+  // ranges only, cited parenthetically for impaired maneuvers.
+  for (const region of EXAM_REGIONS) {
+    const phrases: string[] = [];
+    for (const mv of region.maneuvers) {
+      const grade = form.romExam[mv.id];
+      if (!grade) continue;
+      const ref = grade !== "wnl" ? ` (normal ${mv.normalLabel})` : "";
+      phrases.push(`${mv.label.toLowerCase()} ${GRADE_PROSE[grade] ?? grade}${ref}`);
+    }
+    if (phrases.length) {
+      const observed = form.visitMode === "telehealth" ? " (observed via synchronous audio-video)" : "";
+      paras.push(`<p><strong>${esc(region.label)} — functional examination${observed}:</strong> ${esc(phrases.join("; "))}.</p>`);
+    }
+  }
+
+  if (inPerson) {
+    const joints: string[] = [];
+    for (const r of JOINT_REGIONS) {
+      const t = form.jointTenderness[r.id];
+      if (!t || (!t.R && !t.L)) continue;
+      const sides = [t.R ? `right ${t.R === "yes" ? "tender" : "non-tender"}` : "", t.L ? `left ${t.L === "yes" ? "tender" : "non-tender"}` : ""].filter(Boolean);
+      joints.push(`${r.label.toLowerCase()} ${sides.join(", ")}`);
+    }
+    if (joints.length) paras.push(`<p><strong>Joint examination:</strong> ${esc(joints.join("; "))}.</p>`);
+  }
+  return paras.join("");
+}
+
+/** Substitute the AI report's PHI placeholders with the real identifiers at
+ * print time (they never travel to the model), and strip the review-only
+ * missing-items block from the printed document. */
+export function finalizeAiReport(html: string, form: VisitForm): string {
+  const name = `${form.patient.firstName} ${form.patient.lastName}`.trim();
+  return html
+    .replace(/\[PATIENT_NAME\]/g, esc(name))
+    .replace(/\[PATIENT_DOB\]/g, esc(form.patient.dob))
+    .replace(/<div class="draft-gaps">[\s\S]*?<\/div>/g, "");
+}
+
+/** Full clinical note (physician visit) — narrative MD format: prose sections,
+ * numbered diagnoses and plan. Billing detail (E/M level, CPT tables) lives on
+ * the superbill/CMS-1500, and the EMC certification is its own document — the
+ * note carries only the physician's one-line determination.
+ * When the physician has generated and approved an AI Initial Evaluation
+ * Report (per the locked generation specs), that reviewed document IS the
+ * note — it prints inside the clinic skeleton with its own required sections
+ * (including the certification/signature block per the spec). */
 export function buildClinicalNoteHtml(form: VisitForm): string {
+  const reportDraft = (form.ai?.reportDraft ?? "").trim();
+  if (reportDraft) {
+    const body = sanitizeHtml(finalizeAiReport(reportDraft, form));
+    return wrap(`Clinical Note — ${form.patient.lastName}`, body + signature(), footerCtx(form));
+  }
+
   const titles = { initial: "INITIAL EVALUATION", followup: "FOLLOW-UP EVALUATION", final: "FINAL EVALUATION / DISCHARGE" };
   let b = `<h1>${titles[form.visitType]}</h1>${patientBlock(form)}`;
 
@@ -136,102 +245,66 @@ export function buildClinicalNoteHtml(form: VisitForm): string {
   // Physician-reviewed AI draft takes precedence over the rule-based narrative.
   const narr = (form.ai?.hpiDraft ?? "").trim() || injuryNarrative(form.patient, form.accident, { visitDate: form.visitDate, visitType: form.visitType });
   if (narr) b += `<h2>History of Present Illness</h2><p class="narrative">${esc(narr)}</p>`;
+
+  const pmh = pmhNarrative(form);
   const agg = aggravationNarrative(form.pmh, form.accident.accidentType);
-  if (agg) b += `<p class="narrative">${esc(agg)}</p>`;
-
-  const g = form.gen;
-  if (g.bp || g.pulse || g.resp || g.temp) {
-    const vitalsBy = form.visitMode === "telehealth" ? " (measured by on-site clinic staff)" : "";
-    b += `<h2>Vitals${vitalsBy}</h2><table><tr><th>BP</th><td>${esc(g.bp)}</td><th>Pulse</th><td>${esc(g.pulse)}</td><th>Resp</th><td>${esc(g.resp)}</td><th>Temp</th><td>${esc(g.temp)}</td></tr></table>`;
-  }
-  const exam: string[] = [];
-  if (g.appearance) exam.push(`Appearance: ${g.appearance}.`);
-  if (g.posture) exam.push(`Posture: ${g.posture}.`);
-  if (g.mood) exam.push(`Mood/Affect: ${g.mood}.`);
-  if (g.cognition) exam.push(`Cognition: ${g.cognition}.`);
-  if (exam.length) b += `<h2>General Examination</h2><p>${esc(exam.join(" "))}</p>`;
-
-  // Spine table — tenderness/spasm are hands-on findings, reported in person only
-  const inPerson = form.visitMode === "inPerson";
-  const spineRows = SPINE_REGION_IDS.map((id) => {
-    const row = form.spineExam[id];
-    if (!row || (!row.tenderness && !row.spasm && !row.rom)) return "";
-    const yn = (v: string) => (v === "yes" ? "Present" : v === "no" ? "Absent" : "—");
-    const handsOn = inPerson
-      ? `<td>${yn(row.tenderness)}</td><td>${yn(row.spasm)}</td>`
-      : `<td>Not assessed (telehealth)</td><td>Not assessed (telehealth)</td>`;
-    return `<tr><td>${SPINE_REGION_LABELS[id]}</td>${handsOn}<td>${row.rom ? GRADE_LABELS[row.rom] : "—"}</td></tr>`;
-  }).filter(Boolean);
-  if (spineRows.length) {
-    b += `<h2>Spine Examination</h2><table><tr><th>Region</th><th>Tenderness</th><th>Spasm</th><th>ROM</th></tr>${spineRows.join("")}</table>`;
+  if (pmh || agg) {
+    b += `<h2>Past Medical History</h2>`;
+    if (pmh) b += `<p>${esc(pmh)}</p>`;
+    if (agg) b += `<p class="narrative">${esc(agg)}</p>`;
   }
 
-  // Functional maneuvers (observed; valid for both modalities). Normal values are
-  // reference ranges only — no measured or estimated degrees are recorded.
-  const romRows: string[] = [];
-  for (const region of EXAM_REGIONS) {
-    for (const mv of region.maneuvers) {
-      const grade = form.romExam[mv.id];
-      if (!grade) continue;
-      romRows.push(
-        `<tr><td>${esc(region.label)}</td><td>${esc(mv.label)}</td><td>${GRADE_LABELS[grade]}</td><td>Normal: ${esc(mv.normalLabel)}</td></tr>`,
-      );
-    }
-  }
-  if (romRows.length) {
-    b += `<h2>Functional Examination${form.visitMode === "telehealth" ? " (observed via synchronous audio-video)" : ""}</h2><table><tr><th>Region</th><th>Maneuver</th><th>Result</th><th>Reference</th></tr>${romRows.join("")}</table>`;
-  }
-
-  if (inPerson) {
-    const tendRows = JOINT_REGIONS.map((r) => {
-      const t = form.jointTenderness[r.id];
-      if (!t || (!t.R && !t.L)) return "";
-      const yn = (v: string) => (v === "yes" ? "Present" : v === "no" ? "Absent" : "—");
-      return `<tr><td>${esc(r.label)}</td><td>${yn(t.R ?? "")}</td><td>${yn(t.L ?? "")}</td></tr>`;
-    }).filter(Boolean);
-    if (tendRows.length) {
-      b += `<h2>Joint Tenderness</h2><table><tr><th>Joint</th><th>Right</th><th>Left</th></tr>${tendRows.join("")}</table>`;
-    }
-  }
-
-  const dx = allDiagnosisCodes(form);
-  if (dx.length) {
-    b += `<h2>Assessment — ICD-10 Diagnoses</h2><table><tr><th>Code</th><th>Description</th></tr>${dx
-      .map((d) => `<tr><td>${esc(d.code)}</td><td>${esc(d.desc)}</td></tr>`)
-      .join("")}</table>`;
-  }
+  const exam = examNarrative(form);
+  if (exam) b += `<h2>Physical Examination</h2>${exam}`;
 
   if (form.visitType === "followup") {
     const rev = imagingReviewNarrative(form.imagingReview);
     if (rev) b += `<h2>Imaging Review</h2><p class="narrative">${esc(rev)}</p>`;
   }
 
-  const pl = form.plan;
-  const procedures = pl.procedures ?? [];
-  if (pl.emLevel || pl.medicalNecessity || pl.modalities.length || procedures.length) {
-    const em = EM_LEVELS.find((e) => e.code === pl.emLevel)?.label ?? pl.emLevel;
-    b += `<h2>Plan of Treatment</h2>`;
-    if (em) b += `<p><strong>E/M Level:</strong> ${esc(em)}</p>`;
-    if (pl.medicalNecessity) b += `<p><strong>Medical Necessity:</strong> ${esc(pl.medicalNecessity)}</p>`;
-    if (procedures.length) {
-      const procs = PROCEDURES.filter((p) => procedures.includes(p.cpt));
-      b += `<p><strong>Procedures performed this visit:</strong></p><table><tr><th>CPT</th><th>Procedure</th></tr>${procs
-        .map((p) => `<tr><td>${p.cpt}</td><td>${esc(p.name)}</td></tr>`)
-        .join("")}</table>`;
-      if (pl.procedureNote) b += `<p class="narrative">${esc(pl.procedureNote)}</p>`;
-    }
-    if (pl.modalities.length) {
-      const mods = PT_MODALITIES.filter((m) => pl.modalities.includes(m.cpt));
-      b += `<p><strong>PT:</strong> ${esc(pl.ptFrequency)} for ${esc(pl.ptDuration)}.</p><table><tr><th>CPT</th><th>Modality</th></tr>${mods
-        .map((m) => `<tr><td>${m.cpt}</td><td>${esc(m.name)}</td></tr>`)
-        .join("")}</table>`;
-    }
-    if (pl.followUp) b += `<p><strong>Follow-up:</strong> ${esc(pl.followUp)}</p>`;
+  const dx = allDiagnosisCodes(form);
+  if (dx.length) {
+    b += `<h2>Assessment</h2><ol class="num-list">${dx.map((d) => `<li>${esc(d.desc)} (${esc(d.code)})</li>`).join("")}</ol>`;
   }
 
-  if (form.visitType === "initial" && form.plan.emc) {
-    const emcText = { yes: "YES — the patient has an Emergency Medical Condition as defined under Florida Statute § 627.736. A Certification of Emergency Medical Condition has been issued.", no: "NO — no Emergency Medical Condition was identified on today's evaluation.", deferred: "DEFERRED — determination pending further evaluation and diagnostic correlation." }[form.plan.emc];
-    b += `<h2>Emergency Medical Condition Determination</h2><p>${esc(emcText)}</p>`;
+  const pl = form.plan;
+  const procedures = pl.procedures ?? [];
+  const planItems: string[] = [];
+  if (procedures.length) {
+    const procs = PROCEDURES.filter((p) => procedures.includes(p.cpt))
+      .map((p) => `${p.name.toLowerCase()} (${p.cpt})`)
+      .join("; ");
+    planItems.push(`Performed this visit: ${procs}.${pl.procedureNote ? ` ${pl.procedureNote}` : ""}`);
+  }
+  if (pl.modalities.length) {
+    const mods = PT_MODALITIES.filter((m) => pl.modalities.includes(m.cpt))
+      .map((m) => `${m.name.toLowerCase()} (${m.cpt})`)
+      .join(", ");
+    planItems.push(`Physical therapy ${pl.ptFrequency} for ${pl.ptDuration}: ${mods}.`);
+  }
+  const imagingOrdered: string[] = form.imaging.selected
+    .map((sel) => {
+      const r = resolveImagingSelection(sel);
+      return r ? `${r.item.label}${r.side ? ` (${r.side === "R" ? "right" : "left"})` : ""}` : "";
+    })
+    .filter(Boolean);
+  if (form.imaging.mriRegion) imagingOrdered.push(`MRI ${form.imaging.mriRegion}`);
+  if (form.imaging.ctRegion) imagingOrdered.push(`CT ${form.imaging.ctRegion}`);
+  if (form.imaging.usRegion) imagingOrdered.push(`ultrasound ${form.imaging.usRegion}`);
+  if (imagingOrdered.length) planItems.push(`Diagnostic imaging ordered: ${imagingOrdered.join(", ")}.`);
+  if (pl.followUp) planItems.push(`Follow-up evaluation in ${pl.followUp}.`);
+  if (form.visitType === "initial" && pl.emc) {
+    const emcLine = {
+      yes: "The patient has an Emergency Medical Condition as defined under Fla. Stat. § 627.736; a separate Certification of Emergency Medical Condition has been issued.",
+      no: "No Emergency Medical Condition was identified on today's evaluation.",
+      deferred: "Emergency Medical Condition determination is deferred pending further evaluation and diagnostic correlation.",
+    }[pl.emc];
+    planItems.push(emcLine);
+  }
+  if (planItems.length || pl.medicalNecessity) {
+    b += `<h2>Plan</h2>`;
+    if (planItems.length) b += `<ol class="num-list">${planItems.map((i) => `<li>${esc(i)}</li>`).join("")}</ol>`;
+    if (pl.medicalNecessity) b += `<p class="narrative">${esc(pl.medicalNecessity)}</p>`;
   }
 
   const caus = causationStatement(form.plan.causation, form.accident.accidentDate, form.accident.accidentType);
@@ -241,14 +314,15 @@ export function buildClinicalNoteHtml(form: VisitForm): string {
 
   if (form.visitType === "final") {
     const d = form.discharge;
-    b += `<h2>Discharge Summary</h2><table>
-      <tr><th>Overall Outcome</th><td>${esc(d.outcome)}</td></tr>
-      <tr><th>Return to Work</th><td>${esc(d.returnToWork)}</td></tr>
-      <tr><th>Return to Activities</th><td>${esc(d.returnToActivities)}</td></tr>
-      <tr><th>Residual Issues</th><td>${d.residualIssues === "yes" ? esc(d.residualNote) : "None"}</td></tr>
-      <tr><th>Apparent Sequelae</th><td>${esc(d.sequelae || "None")}</td></tr>
-      <tr><th>Continued Care</th><td>${d.continuedCare === "yes" ? esc(d.continuedCareNote) : "Not required"}</td></tr>
-    </table><p><strong>Case status: CLOSED.</strong></p>`;
+    const parts = [
+      d.outcome ? `The patient is discharged with ${d.outcome.toLowerCase()} overall outcome.` : "",
+      d.returnToWork ? `Return to work: ${d.returnToWork.toLowerCase()}.` : "",
+      d.returnToActivities ? `Return to activities: ${d.returnToActivities.toLowerCase()}.` : "",
+      d.residualIssues === "yes" ? `Residual issues: ${d.residualNote}.` : d.residualIssues === "no" ? "No residual issues are documented." : "",
+      d.sequelae ? `Apparent sequelae: ${d.sequelae}.` : "",
+      d.continuedCare === "yes" ? `Continued care: ${d.continuedCareNote}.` : d.continuedCare === "no" ? "No continued care is required." : "",
+    ].filter(Boolean);
+    b += `<h2>Discharge Summary</h2><p>${esc(parts.join(" "))}</p><p><strong>Case status: CLOSED.</strong></p>`;
   }
 
   b += `<h2>Physician Certification</h2><p>${esc(certificationStatement())}</p>`;

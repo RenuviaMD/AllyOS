@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { narrativeFacts } from "../lib/ai";
-import { buildClinicalNoteHtml } from "../lib/report";
+import { narrativeFacts, reportFacts } from "../lib/ai";
+import { buildClinicalNoteHtml, finalizeAiReport } from "../lib/report";
 import { emptyForm } from "../lib/types";
 
 function filledForm() {
@@ -43,6 +43,48 @@ describe("narrativeFacts — PHI minimization contract", () => {
     expect(facts.age).toBeUndefined();
     expect(facts.sex).toBeUndefined();
     expect(facts.physicianNotes).toBeUndefined();
+  });
+});
+
+describe("reportFacts — full-report PHI contract", () => {
+  it("carries the whole clinical picture but no identifiers", () => {
+    const f = filledForm();
+    f.patient.insuranceCarrier = "State Farm";
+    f.spineExam.cervical = { tenderness: "yes", spasm: "yes", rom: "limited" };
+    f.plan.modalities = ["97110"];
+    const json = JSON.stringify(reportFacts(f));
+    expect(json).toContain("cervical");
+    expect(json).toContain("telehealth" === f.visitMode ? "telehealth" : "inPerson");
+    expect(json).toContain("State Farm"); // carrier is claim context, not an identifier
+    expect(json).not.toContain("Armando");
+    expect(json).not.toContain("Falcon");
+    expect(json).not.toContain("1966-05-07");
+    expect(json).not.toContain("Leffingwell");
+    expect(json).not.toContain("111111111111");
+    expect(json).not.toContain("CL-999");
+  });
+});
+
+describe("finalizeAiReport", () => {
+  it("substitutes placeholders and strips the missing-items block at print time", () => {
+    const f = filledForm();
+    const draft = `<h1>INITIAL MEDICAL EVALUATION REPORT</h1><p>Name: [PATIENT_NAME], DOB [PATIENT_DOB].</p><div class="draft-gaps"><h2>DRAFT REVIEW — MISSING ITEMS</h2><ul><li>pain scores</li></ul></div>`;
+    const out = finalizeAiReport(draft, f);
+    expect(out).toContain("Armando Falcon");
+    expect(out).toContain("1966-05-07");
+    expect(out).not.toContain("PATIENT_NAME");
+    expect(out).not.toContain("draft-gaps");
+    expect(out).not.toContain("pain scores");
+  });
+
+  it("the approved report becomes the printed note, inside the clinic skeleton", () => {
+    const f = filledForm();
+    f.ai!.reportDraft = `<h1>INITIAL MEDICAL EVALUATION REPORT — FLORIDA PIP</h1><p>[PATIENT_NAME] presents…</p>`;
+    const html = buildClinicalNoteHtml(f);
+    expect(html).toContain("INITIAL MEDICAL EVALUATION REPORT — FLORIDA PIP");
+    expect(html).toContain("Armando Falcon presents");
+    expect(html).toContain("Powered by RenuviaMD® Network"); // skeleton footer applied
+    expect(html).not.toContain("History of Present Illness</h2>"); // composed format suppressed
   });
 });
 
