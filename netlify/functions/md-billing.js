@@ -128,19 +128,24 @@ exports.handler = async (event) => {
 
     const clinicId = body.clinic_id;
     if (!clinicId) return json(400, { error: "clinic_id required" });
-    const rows = await sbGet("clinics?id=eq." + encodeURIComponent(clinicId) + "&select=id,name,governance_type,md_fee,md_gfe_fee,md_billing_email,stripe_customer_id,md_subscription_status,subscription_status");
+    const rows = await sbGet("clinics?id=eq." + encodeURIComponent(clinicId) + "&select=id,name,governance_type,md_fee,md_gfe_fee,md_billing_email,stripe_customer_id,md_subscription_status,subscription_status,md_of_record,rn_iv_model");
     const clinic = rows[0];
     if (!clinic) return json(404, { error: "clinic_not_found" });
 
+    // Per-GFE billing applies ONLY where RenuviaMD signs the exams — the "RN-run IV" model
+    // (md_of_record AND rn_iv_model). When the clinic's own provider performs the GFE (e.g.
+    // Lemus, where the clinic APRN signs), the GFEs are NOT billable to RenuviaMD.
+    const falconSignsGfe = !!clinic.md_of_record && !!clinic.rn_iv_model;
+
     // Count this clinic's SIGNED GFEs since a given date (default: first of the current UTC month).
-    // Used to bill "GFE reviews (N x rate)" when RenuviaMD is MD-of-record and signs the exams.
     if (action === "gfe_count") {
       const g = await requireClinic(event, clinicId); if (g.error) return g.error;
+      const rate = clinic.md_gfe_fee != null ? Number(clinic.md_gfe_fee) : 30;
+      if (!falconSignsGfe) return json(200, { count: 0, rate: rate, falcon_signs: false });
       const now = new Date();
       const since = body.since || new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
       const gfes = await sbGet("gfe_requests?clinic_id=eq." + encodeURIComponent(clinicId) + "&status=eq.signed&signed_at=gte." + encodeURIComponent(since) + "&select=id");
-      const rate = clinic.md_gfe_fee != null ? Number(clinic.md_gfe_fee) : 30;
-      return json(200, { count: Array.isArray(gfes) ? gfes.length : 0, rate: rate, since: since });
+      return json(200, { count: Array.isArray(gfes) ? gfes.length : 0, rate: rate, falcon_signs: true, since: since });
     }
 
     // Remove a clinic from the roster (owner only). Refuses while any subscription is live —
