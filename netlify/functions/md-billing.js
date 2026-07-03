@@ -240,8 +240,17 @@ exports.handler = async (event) => {
         sent = await stripeGet("invoices/" + encodeURIComponent(inv.id), key);
         if (sent.status === "draft") throw e;
       }
-      try { sent = await stripePost("invoices/" + encodeURIComponent(inv.id) + "/send", {}, key); } catch (e) {}
-      return json(200, { ok: true, number: sent.number, amount_due: money(sent.amount_due), status: sent.status, url: sent.hosted_invoice_url || null, email: clinic.md_billing_email });
+      // Explicitly send (emails the hosted invoice). Track whether it actually went out so the
+      // UI can tell "emailed" from "created but not emailed" (e.g. Stripe test-mode emails off)
+      // and always fall back to the hosted pay link.
+      var emailed = false, sendErr = null;
+      try { var s = await stripePost("invoices/" + encodeURIComponent(inv.id) + "/send", {}, key); if (s && s.id) { sent = s; emailed = true; } }
+      catch (e) { sendErr = String(e).slice(0, 160); }
+      return json(200, {
+        ok: true, number: sent.number, amount_due: money(sent.amount_due), status: sent.status,
+        url: sent.hosted_invoice_url || null, email: clinic.md_billing_email,
+        emailed: emailed, send_error: sendErr,
+      });
     }
 
     // default: clinic statement (clinic pay page + owner drill-in) — owner OR that clinic's member
