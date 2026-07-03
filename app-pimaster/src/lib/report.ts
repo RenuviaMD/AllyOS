@@ -52,28 +52,62 @@ export function allCptCodes(form: VisitForm, mode?: string): string[] {
 const LETTERHEAD = `
   <div class="letterhead">
     <div class="lh-name">${esc(CLINIC.name)}</div>
-    <div>${esc(CLINIC.address)}</div>
-    <div>Phone: ${esc(CLINIC.phone)} | Fax: ${esc(CLINIC.fax)}</div>
-    <div>${esc(CLINIC.provider)} — License ${esc(CLINIC.license)} — NPI ${esc(CLINIC.npi)}</div>
+    <div class="lh-line">${esc(CLINIC.address)}</div>
+    <div class="lh-line">Phone: ${esc(CLINIC.phone)} &nbsp;·&nbsp; Fax: ${esc(CLINIC.fax)}</div>
+    <div class="lh-line lh-provider">${esc(CLINIC.provider)} &nbsp;—&nbsp; License ${esc(CLINIC.license)} &nbsp;—&nbsp; NPI ${esc(CLINIC.npi)}</div>
   </div>`;
 
 const REPORT_CSS = `
-  body { font-family: Georgia, "Times New Roman", serif; color: #1a252f; margin: 40px; font-size: 13px; }
-  .letterhead { text-align: center; border-bottom: 3px double #16a085; padding-bottom: 10px; margin-bottom: 18px; }
-  .lh-name { font-size: 19px; font-weight: bold; color: #2c3e50; letter-spacing: 1px; }
-  h1 { font-size: 16px; color: #2c3e50; border-bottom: 2px solid #f39c12; padding-bottom: 4px; }
-  h2 { font-size: 13px; color: #16a085; text-transform: uppercase; letter-spacing: 1px; margin: 16px 0 6px; }
-  table { border-collapse: collapse; width: 100%; margin: 6px 0; }
-  td, th { border: 1px solid #b0bec5; padding: 4px 8px; text-align: left; vertical-align: top; }
-  th { background: #eef5f4; }
-  .sig { margin-top: 44px; }
-  .sig-line { border-top: 1px solid #1a252f; width: 320px; padding-top: 4px; }
-  .narrative { font-style: italic; }
-  @media print { body { margin: 16px; } }
+  * { box-sizing: border-box; }
+  html { background: #e8ecef; }
+  body { font-family: Georgia, "Times New Roman", serif; color: #1c2833; margin: 0; font-size: 12.5px; line-height: 1.5; }
+  .sheet { max-width: 8.5in; margin: 26px auto; background: #fff; padding: 0.65in 0.7in 0.55in; box-shadow: 0 3px 18px rgba(15,35,55,.16); }
+  .letterhead { text-align: center; padding-bottom: 12px; margin-bottom: 20px; border-bottom: 2.5px solid #16a085; }
+  .letterhead { box-shadow: 0 4px 0 -3px #b8860b; }
+  .lh-name { font-size: 21px; font-weight: 700; letter-spacing: 2.5px; color: #22313f; text-transform: uppercase; }
+  .lh-line { font-size: 11px; color: #4c5a66; letter-spacing: .4px; margin-top: 2px; }
+  .lh-provider { font-variant: small-caps; letter-spacing: 1px; }
+  h1 { font-size: 15px; letter-spacing: 1.4px; text-transform: uppercase; color: #22313f; margin: 2px 0 14px; padding: 7px 12px; background: #f2f5f7; border-left: 4px solid #b8860b; font-weight: 700; }
+  h2 { font-size: 11px; color: #10715f; text-transform: uppercase; letter-spacing: 1.6px; margin: 18px 0 6px; padding-bottom: 3px; border-bottom: 1px solid #ccd6dd; font-weight: 700; }
+  p { margin: 8px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 12px; }
+  td, th { border: 1px solid #ccd6dd; padding: 5px 9px; text-align: left; vertical-align: top; }
+  th { background: #f2f5f7; font-weight: 700; color: #33424f; font-size: 10.5px; letter-spacing: .5px; text-transform: uppercase; }
+  .narrative { font-style: italic; color: #24313d; }
+  .sig { margin-top: 42px; }
+  .sig-line { border-top: 1px solid #1c2833; width: 330px; padding-top: 5px; font-size: 11.5px; }
+  .status { color: #667; }
+  .doc-footer { text-align: center; font-family: "Segoe UI", Arial, sans-serif; font-size: 8.5pt; color: #5b6a76; border-top: 1px solid #ccd6dd; padding: 5px 0 2px; background: #fff; max-width: 8.5in; margin: 0 auto 26px; }
+  .doc-footer .ftr-brand { letter-spacing: .7px; font-weight: 600; }
+  .doc-footer .ftr-ctx { font-size: 7.8pt; color: #74828d; }
+  @media print {
+    html, body { background: #fff; }
+    .sheet { box-shadow: none; margin: 0; padding: 0 0 0.55in; max-width: none; }
+    /* fixed elements repeat on every printed page — the footer prints on each */
+    .doc-footer { position: fixed; bottom: 0; left: 0; right: 0; max-width: none; margin: 0; }
+    @page { margin: 0.5in 0.55in 0.75in; }
+  }
 `;
 
-function wrap(title: string, body: string): string {
-  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>${REPORT_CSS}</style></head><body>${LETTERHEAD}${body}</body></html>`;
+/** Repeats at the foot of every printed page: product brand + claim context. */
+function docFooter(ctx = ""): string {
+  return `<div class="doc-footer"><span class="ftr-brand">PI Master™ — PIP Documentation &amp; Compliance &nbsp;·&nbsp; Powered by RenuviaMD® Network</span>${
+    ctx ? `<br><span class="ftr-ctx">${ctx}</span>` : ""
+  }</div>`;
+}
+
+/** Patient/claim context line for the running footer — carriers want the claim number on every page. */
+function footerCtx(form: VisitForm): string {
+  const p = form.patient;
+  const name = `${p.firstName} ${p.lastName}`.trim();
+  return [name ? `Patient: ${name}` : "", p.dob ? `DOB: ${p.dob}` : "", p.claimNumber ? `Claim #: ${p.claimNumber}` : "", form.visitDate ? `DOS: ${form.visitDate}` : ""]
+    .filter(Boolean)
+    .map(esc)
+    .join(" · ");
+}
+
+function wrap(title: string, body: string, ctx = ""): string {
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>${REPORT_CSS}</style></head><body><div class="sheet">${LETTERHEAD}${body}</div>${docFooter(ctx)}</body></html>`;
 }
 
 function patientBlock(form: VisitForm): string {
@@ -219,7 +253,7 @@ export function buildClinicalNoteHtml(form: VisitForm): string {
 
   b += `<h2>Physician Certification</h2><p>${esc(certificationStatement())}</p>`;
 
-  return wrap(`Clinical Note — ${form.patient.lastName}`, b + signature());
+  return wrap(`Clinical Note — ${form.patient.lastName}`, b + signature(), footerCtx(form));
 }
 
 /** EMC region checkboxes derived from documented findings (mirrors the clinic's certification form). */
@@ -272,7 +306,7 @@ export function buildEmcCertificationHtml(form: VisitForm): string {
     ${signature()}
     <p style="font-size:10px; color:#555; margin-top:30px;">${esc(CLINIC.name)} · ${esc(CLINIC.address)} · ${esc(CLINIC.phone)} · Fax: ${esc(CLINIC.fax)}.
     This document is confidential and intended solely for the named recipient and authorized parties. Unauthorized disclosure is prohibited.</p>`;
-  return wrap(`EMC Certification — ${form.patient.lastName}`, b);
+  return wrap(`EMC Certification — ${form.patient.lastName}`, b, footerCtx(form));
 }
 
 /** Per-encounter superbill: diagnoses with pointers + priced service lines. */
@@ -304,7 +338,7 @@ export function buildSuperbillHtml(form: VisitForm, lines: ServiceLine[], settin
     </tr></table>
     ${signature()}
     <div class="sig"><div class="sig-line">Patient Signature</div></div>`;
-  return wrap(`Superbill — ${form.patient.lastName}`, b);
+  return wrap(`Superbill — ${form.patient.lastName}`, b, footerCtx(form));
 }
 
 /** CMS-1500 (02/12) print replica, auto-populated. Box numbers shown for cross-reference. */
@@ -343,7 +377,7 @@ export function buildCms1500Html(form: VisitForm, lines: ServiceLine[], settings
       <tr><th>31. Signature of Physician</th><td>${esc(CLINIC.provider)} — ${esc(form.visitDate)}</td><th>32. Service Facility</th><td>${esc(CLINIC.name)}, ${esc(CLINIC.address)}</td></tr>
       <tr><th>33. Billing Provider</th><td>${esc(CLINIC.name)}, ${esc(CLINIC.address)} — ${esc(CLINIC.phone)}</td><th>33a. NPI</th><td>${esc(settings.billingNpi || settings.renderingNpi)}</td></tr>
     </table>`;
-  return wrap(`CMS-1500 — ${form.patient.lastName}`, b);
+  return wrap(`CMS-1500 — ${form.patient.lastName}`, b, footerCtx(form));
 }
 
 /** Imaging order on clinic letterhead — addressed to the clinic's configured
@@ -374,7 +408,7 @@ export function buildXrayOrderHtml(form: VisitForm): string {
       .map((d) => `<tr><td>${esc(d.code)}</td><td>${esc(d.desc)}</td></tr>`)
       .join("")}</table>
     ${signature()}`;
-  return wrap(`X-Ray Order — ${form.patient.lastName}`, b);
+  return wrap(`X-Ray Order — ${form.patient.lastName}`, b, footerCtx(form));
 }
 
 /** PT report (daily session or weekly summary). */
@@ -414,7 +448,7 @@ export function buildPtReportHtml(form: VisitForm, kind: "ptdaily" | "ptprogress
       ${dayRows.length ? `<h2>Day-by-Day Progress</h2><table><tr><th>Date</th><th>Pain</th><th>Notes</th></tr>${dayRows.join("")}</table>` : ""}
       ${w.planNextWeek ? `<p><strong>Plan for Next Week:</strong> ${esc(w.planNextWeek)}</p>` : ""}`;
   }
-  return wrap(`PT Note — ${form.patient.lastName}`, b + signature());
+  return wrap(`PT Note — ${form.patient.lastName}`, b + signature(), footerCtx(form));
 }
 
 /* ---------------------------------------------------------------------------
@@ -457,7 +491,7 @@ export function buildAobHtml(form: VisitForm): string {
     for the duration of my treatment unless revoked by me in writing.</p>
     <p>I acknowledge receipt of the clinic's notice of privacy practices and consent to treatment.</p>
     ${patientSignatureLines(form)}`;
-  return wrap(`Assignment of Benefits — ${form.patient.lastName}`, b);
+  return wrap(`Assignment of Benefits — ${form.patient.lastName}`, b, footerCtx(form));
 }
 
 /** HIPAA medical records release — patient signs once at the first visit. */
@@ -473,7 +507,7 @@ export function buildRecordsReleaseHtml(form: VisitForm): string {
     except to the extent that action has already been taken in reliance on it, and that treatment is not conditioned on
     signing this authorization. A photocopy of this authorization is as valid as the original.</p>
     ${patientSignatureLines(form)}`;
-  return wrap(`Records Release — ${form.patient.lastName}`, b);
+  return wrap(`Records Release — ${form.patient.lastName}`, b, footerCtx(form));
 }
 
 /** FL PIP 14-day initial-services attestation — patient signs once at the first visit. */
@@ -488,7 +522,7 @@ export function buildAttestation14Html(form: VisitForm): string {
     I attest that the information I have provided regarding the accident and my injuries is true and correct to the
     best of my knowledge.</p>
     ${patientSignatureLines(form)}`;
-  return wrap(`14-Day Attestation — ${form.patient.lastName}`, b);
+  return wrap(`14-Day Attestation — ${form.patient.lastName}`, b, footerCtx(form));
 }
 
 /** Telehealth consent — signed for telehealth visits (facility-originated). */
@@ -506,7 +540,7 @@ export function buildTelehealthConsentHtml(form: VisitForm): string {
     </table>
     ${t.consentBy ? `<p>Consent discussed and witnessed by clinic staff: <strong>${esc(t.consentBy)}</strong>.</p>` : ""}
     ${patientSignatureLines(form, t.consentBy ? `${t.consentBy} — clinic staff (originating site)` : "Clinic staff (originating site)")}`;
-  return wrap(`Telehealth Consent — ${form.patient.lastName}`, b);
+  return wrap(`Telehealth Consent — ${form.patient.lastName}`, b, footerCtx(form));
 }
 
 /** Physician sworn affidavit — generated ONCE per patient, at the first visit. */
@@ -526,7 +560,7 @@ export function buildAffidavitHtml(form: VisitForm): string {
     <p style="margin-top:36px">SWORN TO AND SUBSCRIBED before me this ____ day of ______________, 20____, by
     ${esc(CLINIC.provider)}, who is personally known to me or produced identification: ______________________.</p>
     <div class="sig"><div class="sig-line">Notary Public, State of Florida &nbsp;&nbsp;·&nbsp;&nbsp; Commission No. / Expiration</div></div>`;
-  return wrap(`Sworn Affidavit — ${form.patient.lastName}`, b);
+  return wrap(`Sworn Affidavit — ${form.patient.lastName}`, b, footerCtx(form));
 }
 
 /** Strip active content from HTML before rendering. Our own builders escape all
