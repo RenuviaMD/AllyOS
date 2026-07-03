@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { billableCpts, loadBillingSettings, saveBillingSettings, type BillingSettings } from "../lib/billing";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { billableCpts, cptCategory, loadBillingSettings, saveBillingSettings, type BillingSettings } from "../lib/billing";
 import { loadImagingConfig, type ImagingConfig, type ImagingMode } from "../lib/imaging";
 import { saveClinicBilling, saveImagingConfigCloud, syncBillingFromCloud, upsertServiceCatalog } from "../lib/store";
 import { Section, Text } from "./fields";
@@ -51,7 +51,7 @@ export function BillingSettingsCard(props: { onClose: () => void }) {
       upsertServiceCatalog({
         cpt,
         name: item?.name ?? cpt,
-        category: cpt.startsWith("99") ? "em" : "pt",
+        category: cptCategory(cpt),
         default_units: 1,
         charge: charge || null,
         active: true,
@@ -94,6 +94,10 @@ export function BillingSettingsCard(props: { onClose: () => void }) {
           )}
 
           <h3 className="exam-h">Fee Schedule (per CPT)</h3>
+          <p className="status">
+            Imaging fees apply when the clinic performs imaging on-site and bills it; with a third-party center the
+            center bills its own studies — leave those blank.
+          </p>
           <table className="rom-table">
             <thead>
               <tr>
@@ -103,26 +107,33 @@ export function BillingSettingsCard(props: { onClose: () => void }) {
               </tr>
             </thead>
             <tbody>
-              {billableCpts().map((c) => (
-                <tr key={c.cpt}>
-                  <td>{c.cpt}</td>
-                  <td>{c.name}</td>
-                  <td>
-                    <input
-                      value={s.fees[c.cpt] ?? ""}
-                      onChange={(e) => setFee(c.cpt, e.target.value)}
-                      placeholder="—"
-                      style={{
-                        background: "var(--hover)",
-                        border: "1px solid #46627f",
-                        color: "var(--text)",
-                        borderRadius: 4,
-                        padding: "4px 8px",
-                        width: 110,
-                      }}
-                    />
-                  </td>
-                </tr>
+              {billableCpts().map((c, i, all) => (
+                <Fragment key={c.cpt}>
+                  {(i === 0 || all[i - 1].group !== c.group) && (
+                    <tr>
+                      <td colSpan={3} style={{ color: "var(--gold)", fontWeight: 600, paddingTop: 10 }}>{c.group}</td>
+                    </tr>
+                  )}
+                  <tr>
+                    <td>{c.cpt}</td>
+                    <td>{c.name}</td>
+                    <td>
+                      <input
+                        value={s.fees[c.cpt] ?? ""}
+                        onChange={(e) => setFee(c.cpt, e.target.value)}
+                        placeholder="—"
+                        style={{
+                          background: "var(--hover)",
+                          border: "1px solid #46627f",
+                          color: "var(--text)",
+                          borderRadius: 4,
+                          padding: "4px 8px",
+                          width: 110,
+                        }}
+                      />
+                    </td>
+                  </tr>
+                </Fragment>
               ))}
             </tbody>
           </table>

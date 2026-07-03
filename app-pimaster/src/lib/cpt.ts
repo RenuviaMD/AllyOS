@@ -101,6 +101,36 @@ export const IMAGING_GROUPS: ImagingGroup[] = [
   },
 ];
 
+/** Advanced imaging (MRI / CT / US) — standard w/o-contrast codes for the fee schedule. */
+export const ADVANCED_IMAGING: CptItem[] = [
+  { cpt: "70551", name: "MRI Brain (w/o contrast)" },
+  { cpt: "72141", name: "MRI Cervical Spine (w/o contrast)" },
+  { cpt: "72146", name: "MRI Thoracic Spine (w/o contrast)" },
+  { cpt: "72148", name: "MRI Lumbar Spine (w/o contrast)" },
+  { cpt: "73221", name: "MRI Upper Extremity Joint — Shoulder/Elbow/Wrist (w/o contrast)" },
+  { cpt: "73721", name: "MRI Lower Extremity Joint — Hip/Knee/Ankle (w/o contrast)" },
+  { cpt: "70450", name: "CT Head/Brain (w/o contrast)" },
+  { cpt: "72125", name: "CT Cervical Spine (w/o contrast)" },
+  { cpt: "72128", name: "CT Thoracic Spine (w/o contrast)" },
+  { cpt: "72131", name: "CT Lumbar Spine (w/o contrast)" },
+  { cpt: "76536", name: "Ultrasound Soft Tissue Head/Neck (diagnostic)" },
+  { cpt: "76700", name: "Ultrasound Abdomen, complete (diagnostic)" },
+  { cpt: "76881", name: "Ultrasound Extremity Joint, complete (diagnostic)" },
+];
+
+/** X-ray catalog flattened for the fee schedule — one row per CPT (Sacrum/Coccyx share 72220). */
+export function xrayFeeItems(): CptItem[] {
+  const byCpt = new Map<string, string[]>();
+  for (const g of IMAGING_GROUPS) {
+    for (const item of g.items) {
+      const labels = byCpt.get(item.cpt) ?? [];
+      if (!labels.includes(item.label)) labels.push(item.label);
+      byCpt.set(item.cpt, labels);
+    }
+  }
+  return [...byCpt.entries()].map(([cpt, labels]) => ({ cpt, name: `X-Ray — ${labels.join(" / ")}` }));
+}
+
 export const OTHER_IMAGING_REGIONS = [
   "Cervical Spine",
   "Thoracic Spine",

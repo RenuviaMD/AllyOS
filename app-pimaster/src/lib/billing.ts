@@ -1,5 +1,5 @@
 import { CLINIC } from "./clinic";
-import { EM_LEVELS, PT_MODALITIES } from "./cpt";
+import { ADVANCED_IMAGING, EM_LEVELS, PT_MODALITIES, xrayFeeItems } from "./cpt";
 import type { VisitForm } from "./types";
 
 /**
@@ -30,12 +30,23 @@ export function saveBillingSettings(s: BillingSettings): void {
   localStorage.setItem(LS_KEY, JSON.stringify(s));
 }
 
-/** All CPTs the clinic can price: E/M levels + PT modalities. */
-export function billableCpts(): { cpt: string; name: string }[] {
+export type FeeGroup = "E/M Visits" | "PT Modalities" | "X-Ray" | "MRI / CT / Ultrasound";
+
+/** All CPTs the clinic can price: E/M levels, PT modalities, and imaging (X-ray + MRI/CT/US). */
+export function billableCpts(): { cpt: string; name: string; group: FeeGroup }[] {
   return [
-    ...EM_LEVELS.map((e) => ({ cpt: e.code, name: e.label })),
-    ...PT_MODALITIES.map((m) => ({ cpt: m.cpt, name: m.name })),
+    ...EM_LEVELS.map((e) => ({ cpt: e.code, name: e.label, group: "E/M Visits" as FeeGroup })),
+    ...PT_MODALITIES.map((m) => ({ cpt: m.cpt, name: m.name, group: "PT Modalities" as FeeGroup })),
+    ...xrayFeeItems().map((x) => ({ cpt: x.cpt, name: x.name, group: "X-Ray" as FeeGroup })),
+    ...ADVANCED_IMAGING.map((a) => ({ cpt: a.cpt, name: a.name, group: "MRI / CT / Ultrasound" as FeeGroup })),
   ];
+}
+
+/** Catalog category for a CPT — matches the clinic_service_catalog category values. */
+export function cptCategory(cpt: string): "em" | "pt" | "imaging" {
+  if (cpt.startsWith("99")) return "em";
+  if (cpt.startsWith("97")) return "pt";
+  return "imaging";
 }
 
 export interface ServiceLine {
