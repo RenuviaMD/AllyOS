@@ -71,6 +71,26 @@ export default function App() {
     return onAuthChange(refresh);
   }, []);
 
+  // HIPAA posture: sign out automatically after 20 minutes without activity so
+  // PHI never stays open on an unattended screen (front desk, shared devices).
+  // signOut() also clears the local draft cache.
+  useEffect(() => {
+    if (!auth) return;
+    const IDLE_MS = 20 * 60 * 1000;
+    let t: ReturnType<typeof setTimeout>;
+    const reset = () => {
+      clearTimeout(t);
+      t = setTimeout(() => signOut().catch(() => {}), IDLE_MS);
+    };
+    const events = ["mousedown", "keydown", "touchstart", "scroll"] as const;
+    events.forEach((e) => window.addEventListener(e, reset, { passive: true }));
+    reset();
+    return () => {
+      clearTimeout(t);
+      events.forEach((e) => window.removeEventListener(e, reset));
+    };
+  }, [auth?.userId]);
+
   useEffect(() => {
     if (!auth) return;
     setClinicId(activeClinicId());
