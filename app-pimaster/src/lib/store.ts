@@ -174,24 +174,29 @@ export async function saveReport(args: {
  * mark once-per-patient documents (AOB, releases, affidavit) as done so they
  * are never regenerated on later visits.
  */
-export async function listPatientDocKinds(firstName: string, lastName: string, dob: string): Promise<Record<string, string>> {
+export async function listPatientDocKinds(
+  firstName: string,
+  lastName: string,
+  dob: string,
+): Promise<Record<string, { dos: string; id: string }>> {
   const me = `${firstName} ${lastName}`.trim().toLowerCase();
   if (!me || !dob) return {};
   try {
     const { data, error } = await supabase()
       .from("reports")
-      .select("mode, dos, form_data")
+      .select("id, mode, dos, form_data")
       .in("mode", PACKAGE_MODES)
       .eq("status", "active")
       .eq("clinic_id", activeClinicId())
       .order("created_at", { ascending: true })
       .limit(500);
     if (error) throw error;
-    const out: Record<string, string> = {};
+    const out: Record<string, { dos: string; id: string }> = {};
     for (const r of data ?? []) {
       const p = (r.form_data as VisitForm | null)?.patient;
       const name = `${p?.firstName ?? ""} ${p?.lastName ?? ""}`.trim().toLowerCase();
-      if (name === me && (p?.dob ?? "") === dob && !out[r.mode as string]) out[r.mode as string] = r.dos as string;
+      if (name === me && (p?.dob ?? "") === dob && !out[r.mode as string])
+        out[r.mode as string] = { dos: r.dos as string, id: r.id as string };
     }
     return out;
   } catch {
