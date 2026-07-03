@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import type { VisitForm } from "../lib/types";
+import { draftHpi } from "../lib/ai";
 import { injuryNarrative } from "../lib/narratives";
 import { listCarriers, type CarrierRow } from "../lib/store";
-import { Section, Select, Text, YesNoField } from "./fields";
+import { Area, Section, Select, Text, YesNoField } from "./fields";
 
 export interface SectionProps {
   form: VisitForm;
@@ -127,9 +128,26 @@ export function TelehealthConsent({ form, patch }: SectionProps) {
 
 export function Section2Injury({ form, patch, readOnly, showNarrative }: SectionProps & { showNarrative?: boolean }) {
   const a = form.accident;
+  const [busy, setBusy] = useState(false);
+  const [aiStatus, setAiStatus] = useState("");
   // HPI preview is physician-facing: staff enter the facts; the composed
   // narrative appears only in the physician view and on the signed note.
   const narrative = showNarrative ? injuryNarrative(form.patient, a, { visitDate: form.visitDate, visitType: form.visitType }) : "";
+  const hpiDraft = form.ai?.hpiDraft ?? "";
+
+  async function runDraft() {
+    setBusy(true);
+    setAiStatus("Drafting HPI…");
+    const res = await draftHpi(form);
+    setBusy(false);
+    if (res.ok && res.narrative) {
+      patch("ai", { hpiDraft: res.narrative });
+      setAiStatus("Draft ready — review and edit below before generating the note.");
+    } else {
+      setAiStatus(`Draft failed: ${res.error}`);
+    }
+  }
+
   return (
     <Section num={2} title="Injury Details" tag="All visit types" readOnly={readOnly}>
       <div className="grid">
@@ -152,7 +170,39 @@ export function Section2Injury({ form, patch, readOnly, showNarrative }: Section
         <YesNoField label="Vehicle Drivable" value={a.vehicleDrivable} onChange={(v) => patch("accident", { vehicleDrivable: v })} />
         <YesNoField label="Prior Medical Professional" value={a.priorMedical} onChange={(v) => patch("accident", { priorMedical: v })} />
       </div>
-      {narrative && <div className="narr">{narrative}</div>}
+
+      {showNarrative && (
+        <div style={{ marginTop: 12 }}>
+          {!hpiDraft && narrative && <div className="narr">{narrative}</div>}
+          <div className="grid" style={{ marginTop: 10 }}>
+            <Area
+              label="Physician HPI notes — brief bullets (onset, symptoms, radiation, severity, timeline)"
+              value={form.ai?.hpiNotes ?? ""}
+              onChange={(v) => patch("ai", { hpiNotes: v })}
+            />
+          </div>
+          <div className="toolbar" style={{ margin: "8px 0 0" }}>
+            <button className="btn gold" disabled={busy} onClick={runDraft}>
+              {busy ? "Drafting…" : hpiDraft ? "Re-draft HPI with AI" : "Draft HPI with AI"}
+            </button>
+            {hpiDraft && (
+              <button className="btn ghost" onClick={() => patch("ai", { hpiDraft: "" })}>
+                Discard draft (use auto narrative)
+              </button>
+            )}
+            <span className="status">{aiStatus}</span>
+          </div>
+          {hpiDraft && (
+            <div className="grid" style={{ marginTop: 8 }}>
+              <Area
+                label="AI-drafted HPI — YOUR reviewed text prints on the note (edit freely)"
+                value={hpiDraft}
+                onChange={(v) => patch("ai", { hpiDraft: v })}
+              />
+            </div>
+          )}
+        </div>
+      )}
     </Section>
   );
 }

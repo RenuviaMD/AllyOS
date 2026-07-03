@@ -99,7 +99,8 @@ export function buildClinicalNoteHtml(form: VisitForm): string {
     b += `<h2>Telehealth Encounter Statement</h2><p class="narrative">${esc(telehealthStatement(form.telehealth))}</p>`;
   }
 
-  const narr = injuryNarrative(form.patient, form.accident, { visitDate: form.visitDate, visitType: form.visitType });
+  // Physician-reviewed AI draft takes precedence over the rule-based narrative.
+  const narr = (form.ai?.hpiDraft ?? "").trim() || injuryNarrative(form.patient, form.accident, { visitDate: form.visitDate, visitType: form.visitType });
   if (narr) b += `<h2>History of Present Illness</h2><p class="narrative">${esc(narr)}</p>`;
   const agg = aggravationNarrative(form.pmh, form.accident.accidentType);
   if (agg) b += `<p class="narrative">${esc(agg)}</p>`;

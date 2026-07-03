@@ -175,6 +175,13 @@ export interface PtWeekly {
   dayNotes: Record<string, { pain: string; note: string }>;
 }
 
+export interface AiAssist {
+  /** physician's brief bullet notes (onset, symptoms, radiation, severity) — input to the AI draft */
+  hpiNotes: string;
+  /** AI-drafted HPI, reviewed/edited by the physician; when present it replaces the rule-based narrative on the note */
+  hpiDraft: string;
+}
+
 export interface VisitForm {
   visitType: VisitType;
   visitMode: VisitMode;
@@ -194,6 +201,8 @@ export interface VisitForm {
   discharge: Discharge;
   ptDaily: PtDaily;
   ptWeekly: PtWeekly;
+  /** optional — drafts saved before this feature existed lack it */
+  ai?: AiAssist;
 }
 
 export function emptyForm(): VisitForm {
@@ -202,6 +211,7 @@ export function emptyForm(): VisitForm {
     visitType: "initial",
     visitMode: "inPerson",
     visitDate: today,
+    ai: { hpiNotes: "", hpiDraft: "" },
     telehealth: { consentObtained: false, consentBy: "", overrideReason: "" },
     patient: {
       firstName: "",
