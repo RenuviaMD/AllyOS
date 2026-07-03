@@ -53,6 +53,7 @@ async function sbPost(table, row) {
   return (Array.isArray(rows) && rows[0]) || null;
 }
 async function sbPatch(query, body) { const res = await fetch(sbUrl() + "/rest/v1/" + query, { method: "PATCH", headers: Object.assign(sbHeaders(), { Prefer: "return=minimal" }), body: JSON.stringify(body) }); return res.ok; }
+async function sbDelete(query) { const res = await fetch(sbUrl() + "/rest/v1/" + query, { method: "DELETE", headers: sbHeaders() }); return res.ok; }
 function parseBody(event) { try { return JSON.parse((event && event.body) || "{}"); } catch (e) { return {}; } }
 function siteOf(event) { if (process.env.SITE_URL) return process.env.SITE_URL.replace(/\/$/, ""); const h = (event && event.headers) || {}; if (h.origin) return h.origin; if (h.host) return "https://" + h.host; return ""; }
 function json(code, obj) { return { statusCode: code, headers: { "content-type": "application/json" }, body: JSON.stringify(obj) }; }
@@ -127,9 +128,23 @@ exports.handler = async (event) => {
 
     const clinicId = body.clinic_id;
     if (!clinicId) return json(400, { error: "clinic_id required" });
-    const rows = await sbGet("clinics?id=eq." + encodeURIComponent(clinicId) + "&select=id,name,governance_type,md_fee,md_billing_email,stripe_customer_id,md_subscription_status");
+    const rows = await sbGet("clinics?id=eq." + encodeURIComponent(clinicId) + "&select=id,name,governance_type,md_fee,md_billing_email,stripe_customer_id,md_subscription_status,subscription_status");
     const clinic = rows[0];
     if (!clinic) return json(404, { error: "clinic_not_found" });
+
+    // Remove a clinic from the roster (owner only). Refuses while any subscription is live —
+    // cancel in Stripe first so nothing keeps charging a deleted clinic. FKs cascade in the DB;
+    // Stripe's own records (customers/invoices) are never touched.
+    if (action === "delete_clinic") {
+      const g = await requireOwner(event); if (g.error) return g.error;
+      const live = ["active", "trialing", "past_due"];
+      if (live.indexOf(clinic.md_subscription_status || "") >= 0 || live.indexOf(clinic.subscription_status || "") >= 0) {
+        return json(400, { error: "has_active_subscription", hint: "This clinic has a live subscription — cancel it in Stripe first, then delete." });
+      }
+      const ok = await sbDelete("clinics?id=eq." + encodeURIComponent(clinicId));
+      if (!ok) return json(502, { error: "delete_failed", hint: "Could not delete the clinic record." });
+      return json(200, { ok: true, deleted: clinic.name || clinicId });
+    }
 
     if (action === "set_fee") {
       const g = await requireOwner(event); if (g.error) return g.error;

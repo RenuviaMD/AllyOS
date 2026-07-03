@@ -105,7 +105,6 @@
       <div class="kick">Medical Director Network · AllyOS</div>
       <h1>Clinic Network</h1>
       <div class="who" id="who">Armando Falcon MD · FL #ME 84789 · Medical Director</div>
-      <div class="who" id="clinicAddr" style="margin-top:2px;color:var(--muted)"></div>
     </div>
     <div style="text-align:right">
       <div class="pill-status">● OPERATIONAL</div>
@@ -161,7 +160,7 @@
     </div>
   </div>
 
-  <div class="disc">Platform revenue = per clinic, by active lines: 1 line $199 · 2 lines $349 · 3 lines $499/mo (bundle &amp; save). MD-of-record is billed separately at myFloridaMedicalDirector.com and is <b>not</b> in this total; supervision-cap tracking (FL §400.9935) lives in ACHA Pro, not here. Today's GFE counts come from a clinic's own device (this one shows the active clinic); remote clinics show — until the PHI-free hub is wired. © <span id="yr"></span> RenuviaMD® PLLC.</div>
+  <div class="disc">AllyOS powered by RenuviaMD® Compliance Division. © <span id="yr"></span></div>
 </div>
 <script>
 document.getElementById('yr').textContent=new Date().getFullYear();
@@ -169,10 +168,7 @@ var ses=null;
 if(window.AllyOSAuth){AllyOSAuth.guard(['admin','provider']);ses=AllyOSAuth.session();
   if(ses&&!ses.mdAudit){document.documentElement.innerHTML='<body style="font-family:-apple-system,Segoe UI,Arial,sans-serif;background:#05080f;color:#eaf1f6;display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center;padding:24px"><div><h2>Medical-Director cockpit</h2><p style="color:#90a3b6;max-width:46ch">The Clinic Network is the Medical Director\'s multi-clinic view — not a single-clinic feature.</p><p style="margin-top:14px"><a style="color:#2ee6d6" href="dashboard.html">← Dashboard</a></p></div></body>';}
   if(ses){document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+((ses.credential==='MD'||ses.credential==='DO')?'FL #ME 84789 · ':'')+'Medical Director';
-    var wr=document.getElementById('whoR');if(wr)wr.textContent=AllyOSAuth.greeting();
-    var hcfg={};try{hcfg=JSON.parse(localStorage.getItem('allyos_clinic_config_v1')||'{}');}catch(e){}
-    var haddr=[hcfg.name,[hcfg.addr,hcfg.city].filter(Boolean).join(', ')].filter(Boolean).join(' · ');
-    var ca=document.getElementById('clinicAddr');if(ca)ca.textContent=haddr;}
+    var wr=document.getElementById('whoR');if(wr)wr.textContent=AllyOSAuth.greeting();}
 }
 var CKEY='allyos_owner_clinics_v1';
 // platform pricing: per clinic, bundle by active-line count. MD-of-record is billed externally

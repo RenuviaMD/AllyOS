@@ -77,7 +77,7 @@ h1{font-family:var(--fdisp);font-size:1.6rem;margin-top:2px}
     <select id="fType"><option value="">— none —</option><option value="acha">ACHA (medical director of record)</option><option value="pi">Personal injury</option><option value="np">NP / PA supervision</option><option value="ally">AllyOS clinic</option></select></div>
   <div class="fld"><label>Base monthly fee ($)</label><input id="fFee" type="number" min="0" step="1" placeholder="1850"></div>
   <div class="fld"><label>Billing email (where the statement goes)</label><input id="fEmail" type="email" placeholder="billing@clinic.com"></div>
-  <div class="mrow"><span class="msg" id="feeMsg"></span><div><button class="btn ghost" onclick="closeFee()">Cancel</button> <button class="btn go" onclick="saveFee()">Save</button></div></div>
+  <div class="mrow"><span class="msg" id="feeMsg"></span><div><button class="btn ghost" id="fDel" style="display:none;border-color:#6a2020;color:#f0a59d" onclick="deleteClinic()">Delete</button> <button class="btn ghost" onclick="closeFee()">Cancel</button> <button class="btn go" onclick="saveFee()">Save</button></div></div>
 </div></div>
 
 <!-- Bill modal -->
@@ -138,8 +138,19 @@ function openFee(id){feeId=id;var c=id?byId(id):null;
   document.getElementById('fFee').value=(c&&c.md_fee!=null)?c.md_fee:'';
   document.getElementById('fEmail').value=c?(c.email||''):'';
   var m=document.getElementById('feeMsg');m.textContent='';m.style.color='var(--green)';
+  document.getElementById('fDel').style.display=c?'':'none';
   document.getElementById('feeBack').classList.add('on');
   if(!c)document.getElementById('fName').focus();
+}
+function deleteClinic(){
+  var c=feeId?byId(feeId):null;if(!c)return;
+  var typed=prompt('This removes "'+(c.name||'this clinic')+'" from your roster. Its Stripe invoices are NOT touched.\n\nType the clinic name to confirm:');
+  if(typed===null)return;
+  if((typed||'').trim().toLowerCase()!==(c.name||'').trim().toLowerCase()){alert('Name didn’t match — nothing deleted.');return;}
+  var m=document.getElementById('feeMsg');m.style.color='var(--green)';m.textContent='Deleting…';
+  api({action:'delete_clinic',clinic_id:feeId})
+   .then(function(d){if(d&&d.ok){m.textContent='✓ Deleted';setTimeout(function(){closeFee();load();},600);}else{m.style.color='var(--red)';m.textContent=(d&&d.hint)||'Could not delete.';}})
+   .catch(function(){m.style.color='var(--red)';m.textContent='Could not reach billing.';});
 }
 function closeFee(){document.getElementById('feeBack').classList.remove('on');}
 function saveFee(){var m=document.getElementById('feeMsg');
