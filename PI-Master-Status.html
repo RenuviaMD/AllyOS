@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PI Master™ — Platform Status</title>
+<style>
+  :root{
+    --bg:#2c3e50; --accent:#16a085; --gold:#f39c12; --text:#ecf0f1;
+    --success:#27ae60; --warn:#e74c3c; --card:#34495e; --hover:#1a252f; --muted:#95a5a6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,-apple-system,sans-serif;line-height:1.5}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 22px 80px}
+  header.top{text-align:center;border-bottom:3px double var(--accent);padding-bottom:20px;margin-bottom:8px}
+  .brand{font-size:34px;font-weight:800;color:var(--gold);letter-spacing:1px}
+  .sub{color:var(--muted);font-size:14px;margin-top:4px}
+  .asof{color:var(--accent);font-size:13px;margin-top:8px;font-weight:600}
+  h2{color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;font-size:14px;border-bottom:1px solid #46627f;padding-bottom:6px;margin:38px 0 14px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:18px}
+  .kpi{background:var(--card);border:1px solid var(--accent);border-radius:10px;padding:16px;text-align:center}
+  .kpi b{display:block;font-size:30px;color:var(--gold);font-weight:800}
+  .kpi span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .lead{background:var(--card);border-left:4px solid var(--gold);border-radius:0 8px 8px 0;padding:16px 18px;font-size:15px}
+  .lead b{color:var(--gold)}
+  .track{margin:12px 0}
+  .track .row{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .track .name{flex:0 0 230px;font-size:14px}
+  .bar{flex:1;height:14px;background:var(--hover);border-radius:7px;overflow:hidden;border:1px solid #46627f}
+  .bar i{display:block;height:100%;border-radius:7px}
+  .pct{flex:0 0 46px;text-align:right;font-size:12px;color:var(--muted)}
+  .fill-done{background:var(--success)}
+  .fill-part{background:var(--gold)}
+  .fill-none{background:#46627f}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}.track .name{flex-basis:140px}}
+  .card{background:var(--card);border:1px solid #46627f;border-radius:10px;padding:16px 18px}
+  .card h3{margin:0 0 10px;font-size:15px;color:var(--gold)}
+  ul.clean{list-style:none;padding:0;margin:0}
+  ul.clean li{padding:5px 0 5px 24px;position:relative;font-size:13.5px;border-bottom:1px solid rgba(255,255,255,.05)}
+  ul.clean li:last-child{border-bottom:none}
+  ul.clean li::before{position:absolute;left:0;top:5px}
+  li.ok::before{content:"\2705"}
+  li.go::before{content:"\1F527"}
+  li.no::before{content:"\23F3"}
+  li.you::before{content:"\1F538"}
+  .pill{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.5px;vertical-align:middle}
+  .p-done{background:var(--success);color:#fff}
+  .p-part{background:var(--gold);color:#1a252f}
+  .p-no{background:#46627f;color:#fff}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+  td,th{border:1px solid #46627f;padding:7px 10px;text-align:left}
+  th{background:rgba(22,160,133,.15);color:var(--accent);text-transform:uppercase;font-size:11px;letter-spacing:.5px}
+  .foot{margin-top:40px;text-align:center;color:var(--muted);font-size:12px;border-top:1px solid #46627f;padding-top:16px}
+  .doc-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .doc{background:var(--hover);border:1px solid var(--accent);border-radius:6px;padding:6px 12px;font-size:12.5px}
+  .doc b{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">PI MASTER™</div>
+    <div class="sub">by RenuviaMD® Network — Clinical Documentation &amp; AHCA Compliance Platform for Personal Injury / PIP</div>
+    <div class="asof">Platform Status Report · as of June 14, 2026</div>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi"><b>10</b><span>Build commits</span></div>
+    <div class="kpi"><b>61</b><span>Tests passing</span></div>
+    <div class="kpi"><b>~5,540</b><span>Lines of code</span></div>
+    <div class="kpi"><b>16</b><span>Database tables</span></div>
+    <div class="kpi"><b>9</b><span>Generated documents</span></div>
+  </div>
+
+  <h2>Where we are</h2>
+  <div class="lead">
+    The <b>single-clinic clinical + compliance platform is operational and production-capable</b> — a physician,
+    PT, or staff member can document an entire PI case end to end, generate every required legal and billing
+    document, and run the monthly AHCA medical-director audit. Login and database security are locked down.
+    The <b>multi-clinic SaaS layer is foundation-laid</b> (auth, roles, per-clinic config tables exist; tenant
+    isolation, onboarding, and subscriptions remain). Everything is committed and tested; it has <b>not yet been
+    deployed to production</b> or pointed at <i>pimaster.renuviamd.com</i>.
+  </div>
+
+  <h2>Build tracks — completion</h2>
+  <div class="track">
+    <div class="row"><div class="name">Clinical documentation engine</div><div class="bar"><i class="fill-done" style="width:100%"></i></div><div class="pct">100%</div></div>
+    <div class="row"><div class="name">Exam (in-person + telehealth)</div><div class="bar"><i class="fill-done" style="width:100%"></i></div><div class="pct">100%</div></div>
+    <div class="row"><div class="name">PI/PIP legal documents</div><div class="bar"><i class="fill-done" style="width:100%"></i></div><div class="pct">100%</div></div>
+    <div class="row"><div class="name">ICD-10 / CPT catalogs + feeding page</div><div class="bar"><i class="fill-done" style="width:100%"></i></div><div class="pct">100%</div></div>
+    <div class="row"><div class="name">Audit gate + clone guard</div><div class="bar"><i class="fill-done" style="width:100%"></i></div><div class="pct">100%</div></div>
+    <div class="row"><div class="name">MD Governance (AHCA chart audit)</div><div class="bar"><i class="fill-done" style="width:100%"></i></div><div class="pct">100%</div></div>
+    <div class="row"><div class="name">Facility compliance registry</div><div class="bar"><i class="fill-done" style="width:100%"></i></div><div class="pct">100%</div></div>
+    <div class="row"><div class="name">Authentication + RLS security</div><div class="bar"><i class="fill-done" style="width:100%"></i></div><div class="pct">100%</div></div>
+    <div class="row"><div class="name">Imaging config (3rd-party / on-site)</div><div class="bar"><i class="fill-done" style="width:100%"></i></div><div class="pct">100%</div></div>
+    <div class="row"><div class="name">Billing (Superbill + CMS-1500)</div><div class="bar"><i class="fill-part" style="width:85%"></i></div><div class="pct">85%</div></div>
+    <div class="row"><div class="name">SaaS multi-tenant isolation</div><div class="bar"><i class="fill-part" style="width:30%"></i></div><div class="pct">30%</div></div>
+    <div class="row"><div class="name">Attorney delivery package</div><div class="bar"><i class="fill-part" style="width:15%"></i></div><div class="pct">15%</div></div>
+    <div class="row"><div class="name">AI prose narratives (LLM)</div><div class="bar"><i class="fill-part" style="width:15%"></i></div><div class="pct">15%</div></div>
+    <div class="row"><div class="name">New-clinic onboarding wizard</div><div class="bar"><i class="fill-none" style="width:5%"></i></div><div class="pct">5%</div></div>
+    <div class="row"><div class="name">Stripe subscriptions</div><div class="bar"><i class="fill-none" style="width:0%"></i></div><div class="pct">0%</div></div>
+    <div class="row"><div class="name">Production deployment</div><div class="bar"><i class="fill-none" style="width:0%"></i></div><div class="pct">0%</div></div>
+  </div>
+
+  <h2>What is built &amp; working</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>Clinical workflow</h3>
+      <ul class="clean">
+        <li class="ok">12-section visit: check-in → injury → PMH → exam → assessment → plan → orders → discharge</li>
+        <li class="ok">Your exact functional exam: spine table + maneuvers, verbal scripts, WNL/Limited/Cannot</li>
+        <li class="ok">Visit toggle (Initial/Follow-Up/Final) + Modality toggle (In-Person/Telehealth)</li>
+        <li class="ok">Florida facility-originated telehealth: consent capture + auto origination statement</li>
+        <li class="ok">ROM → ICD-10 auto-population (sprain+strain+pain, laterality, 7th-char by visit)</li>
+        <li class="ok">PT daily + weekly notes with day-by-day timeline from accident date</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Legal &amp; billing documents</h3>
+      <ul class="clean">
+        <li class="ok">Clinical note with Causation, Prognosis &amp; Physician Certification</li>
+        <li class="ok">EMC Certification (FL § 627.736) replicating the clinic's form</li>
+        <li class="ok">Imaging order — third-party center or on-site (per-clinic config)</li>
+        <li class="ok">Superbill + CMS-1500 (02/12) replica, POS/modifier by modality</li>
+        <li class="you">Needs your data: EIN + fee schedule to print dollar amounts</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Integrity &amp; AI safeguards</h3>
+      <ul class="clean">
+        <li class="ok">Pre-generation audit gate blocks incomplete / non-compliant notes</li>
+        <li class="ok">Same-accident clone guard (&le;20% narrative similarity, blocks &amp; logs)</li>
+        <li class="ok">No-hallucination rule: documents built only from entered data</li>
+        <li class="ok">Signature/encounter integrity checks in the audit</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Compliance &amp; security</h3>
+      <ul class="clean">
+        <li class="ok">MD Governance: AHCA chart audit, 5–10 charts from rolling 30 days</li>
+        <li class="ok">10 inspection points incl. billing-vs-note match, provider authority</li>
+        <li class="ok">Facility registry: licenses, BAAs, equipment, AIRS incidents, contracts</li>
+        <li class="ok">Both binder PDFs are 100% admin — zero PHI (initials + chart IDs)</li>
+        <li class="ok">Sign-in required; role-based RLS; all anon access removed</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Documents the platform generates today</h2>
+  <div class="doc-badges">
+    <div class="doc"><b>1.</b> Clinical Note (Initial / Follow-Up / Final)</div>
+    <div class="doc"><b>2.</b> EMC Certification</div>
+    <div class="doc"><b>3.</b> Imaging Order</div>
+    <div class="doc"><b>4.</b> PT Daily Note</div>
+    <div class="doc"><b>5.</b> PT Weekly Summary</div>
+    <div class="doc"><b>6.</b> Superbill</div>
+    <div class="doc"><b>7.</b> CMS-1500</div>
+    <div class="doc"><b>8.</b> MD Governance Audit (AHCA binder)</div>
+    <div class="doc"><b>9.</b> Facility Compliance Registry (AHCA binder)</div>
+  </div>
+
+  <h2>What's pending</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>Needs your input <span class="pill p-part">minutes each</span></h3>
+      <ul class="clean">
+        <li class="you">Enter EIN + fee schedule (Billing Settings)</li>
+        <li class="you">Enter AHCA license number (Facility panel)</li>
+        <li class="you">Change the two temporary passwords on first sign-in</li>
+        <li class="you">Run first governance audit on the 37 historical charts</li>
+        <li class="you">Approve merge to <i>main</i> + point Netlify → pimaster.renuviamd.com</li>
+        <li class="you">Sign Supabase BAA (Team plan) before real patient volume</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Build items, recommended order</h3>
+      <ul class="clean">
+        <li class="go">Multi-tenant isolation — add clinic_id scope to RLS <span class="pill p-part">SaaS gate</span></li>
+        <li class="go">Users admin panel — provision staff without SQL</li>
+        <li class="no">New-clinic onboarding wizard <span class="pill p-no">depends on tenancy</span></li>
+        <li class="no">Attorney delivery package <span class="pill p-no">designed; awaiting grouping key</span></li>
+        <li class="no">AI prose narratives (Edge Function + API key) <span class="pill p-no">designed</span></li>
+        <li class="no">Stripe subscriptions + self-service onboarding</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Security &amp; compliance posture</h2>
+  <table>
+    <tr><th>Item</th><th>Status</th><th>Note</th></tr>
+    <tr><td>Authentication</td><td><span class="pill p-done">Done</span></td><td>Supabase Auth; sign-in required for all access</td></tr>
+    <tr><td>Role-based access (RLS)</td><td><span class="pill p-done">Done</span></td><td>admin / physician / staff / pt enforced server-side; 0 anon policies</td></tr>
+    <tr><td>Admin layer PHI-free</td><td><span class="pill p-done">Done</span></td><td>Governance + facility binders carry initials + chart IDs only</td></tr>
+    <tr><td>Disclosure audit trail</td><td><span class="pill p-part">Partial</span></td><td>Clone-guard &amp; audit logged; attorney-release log lands with that feature</td></tr>
+    <tr><td>Supabase BAA (HIPAA)</td><td><span class="pill p-no">Pending</span></td><td>Team plan + signed BAA required before real patient volume</td></tr>
+    <tr><td>Multi-tenant data isolation</td><td><span class="pill p-no">Pending</span></td><td>Single-clinic safe today; per-clinic isolation is the SaaS gate</td></tr>
+  </table>
+
+  <h2>Recommended next step</h2>
+  <div class="lead">
+    For single-clinic go-live at Wellness: <b>complete the 6 input items, merge, and deploy</b> — the platform is
+    ready to run real cases. To move toward SaaS: the next build is <b>multi-tenant isolation + a Users admin
+    panel</b>, which together unlock onboarding clinic #2.
+  </div>
+
+  <div class="foot">
+    PI Master™ by RenuviaMD® Network · branch <code>claude/sweet-volta-9jzzv5</code> · Wellness Healthcare Clinic Corp, Doral FL<br>
+    Confidential — internal development status. Generated June 14, 2026.
+  </div>
+
+</div>
+</body>
+</html>
