@@ -67,8 +67,8 @@ describe("combineDocsHtml", () => {
     expect(combined).toContain("SWORN AFFIDAVIT");
     // still a single valid document
     expect(combined.match(/<\/html>/g)?.length).toBe(1);
-    // exactly ONE running footer survives the merge (stacked fixed footers would overprint)
-    expect(combined.match(/doc-footer/g)?.length).toBe(1);
+    // exactly ONE running footer element survives the merge (stacked fixed footers would overprint)
+    expect(combined.match(/class="doc-footer"/g)?.length).toBe(1);
   });
 
   it("every document carries the PI Master running footer with claim context", () => {
