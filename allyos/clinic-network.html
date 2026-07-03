@@ -112,8 +112,6 @@
       <div style="margin-top:3px;font-size:.82rem"><a href="md-audit.html" style="color:var(--teal);text-decoration:none">AllyAuditPro →</a> &nbsp;·&nbsp; <a href="#" onclick="if(window.AllyOSAuth)AllyOSAuth.signOut();return false" style="color:var(--muted);text-decoration:none">Logout</a></div>
     </div>
   </div>
-  <div class="sub">Every wellness clinic you run on AllyOS, in one place — care model, active lines, today's GFEs, and recurring revenue. <b>PHI-free</b>: counts and Encounter IDs only; patient identity stays on each clinic's device.</div>
-
   <div class="kpis" id="kpis"></div>
   <div id="cloudreq"></div>
   <div id="incidents"></div>
@@ -155,7 +153,7 @@
         </div>
       </div>
       <div class="mrow"><span class="msaved" id="cfgMsg"></span>
-        <div><button class="mcancel" onclick="closeCfg()">Cancel</button> <button class="msave" onclick="saveCfg()">Save</button></div>
+        <div><button class="mcancel" id="cfgDel" style="display:none;border-color:#6a2020;color:#f0a59d" onclick="removeClinic()">Remove</button> <button class="mcancel" onclick="closeCfg()">Cancel</button> <button class="msave" onclick="saveCfg()">Save</button></div>
       </div>
     </div>
   </div>
@@ -230,10 +228,9 @@ function cardHTML(c){
     '</div>'+
     pendingPanel(c)+
     '<div class="crow2"><span style="font-size:.72rem;color:var(--muted)">'+keys.length+' line'+(keys.length===1?'':'s')+' · '+(c.falconIsMd?'you carry the GFE + oversight':'clinic owns the GFE')+'</span>'+
-      // "Open" only exists for THIS device's clinic (the operational tools run in the signed-in
-      // clinic's context). Other governed clinics route to Governance billing — configure + bill
-      // is what the MD does with them from the cockpit until they have their own AllyOS logins.
-      '<span style="display:flex;gap:10px;align-items:center"><button class="cfgbtn" onclick="openCfg('+"'"+esc(c.id)+"'"+')">⚙ Configure</button><a class="open" href="'+(c.device?'dashboard.html':'md-finance.html')+'">'+(c.device?'Open →':'💳 Billing →')+'</a></span></div></div>';
+      // Every clinic gets "Billing →" (Governance billing console). "Open →" additionally exists
+      // only for THIS device's clinic — the operational tools run in the signed-in clinic's context.
+      '<span style="display:flex;gap:10px;align-items:center"><button class="cfgbtn" onclick="openCfg('+"'"+esc(c.id)+"'"+')">⚙ Configure</button><a class="open" href="md-finance.html">💳 Billing →</a>'+(c.device?'<a class="open" href="dashboard.html">Open →</a>':'')+'</span></div></div>';
 }
 function pendingPanel(c){
   if(!c.device)return '';
@@ -290,8 +287,29 @@ function openCfg(id){
   document.getElementById('cfgPep').checked=c?!!(c.lines&&c.lines.peptides):false;
   document.getElementById('cfgBhrt').checked=c?!!(c.lines&&c.lines.bhrt):false;
   document.getElementById('cfgMsg').textContent='';
+  document.getElementById('cfgDel').style.display=id?'':'none';
   refreshGfeNote();
   document.getElementById('cfgBack').classList.add('on');
+}
+// Remove a clinic: local-only phantoms are dropped from this device; real records are deleted
+// through the owner-gated md-billing delete_clinic endpoint (refuses if a subscription is live;
+// Stripe history is never touched). Type-the-name confirm so a mis-click can't remove a clinic.
+function removeClinic(){
+  var c=cfgEditingId?findClinic(cfgEditingId):null;if(!c)return;
+  if(c.device){alert('This is the clinic this device is signed into — it can’t be removed from here.');return;}
+  var typed=prompt('Remove "'+(c.name||'this clinic')+'" from your network?\n\nType the clinic name to confirm:');
+  if(typed===null)return;
+  if((typed||'').trim().toLowerCase()!==(c.name||'').trim().toLowerCase()){alert('Name didn’t match — nothing removed.');return;}
+  var msg=document.getElementById('cfgMsg');
+  var dropLocal=function(){CLINICS=CLINICS.filter(function(x){return x.id!==c.id;});saveClinics(CLINICS);render();};
+  if(c.id&&c.id.indexOf('local-')===0){dropLocal();closeCfg();return;}
+  msg.textContent='Removing…';
+  AllyOSCloud.postAuthed('/.netlify/functions/md-billing',{action:'delete_clinic',clinic_id:c.id})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d&&d.ok){dropLocal();msg.textContent='✓ Removed';setTimeout(closeCfg,700);}
+      else{msg.textContent=(d&&d.hint)||'Could not remove.';}
+    }).catch(function(){msg.textContent='Could not reach the server.';});
 }
 function closeCfg(){document.getElementById('cfgBack').classList.remove('on');}
 document.getElementById('cfgBack').addEventListener('click',function(e){if(e.target===this)closeCfg();});
