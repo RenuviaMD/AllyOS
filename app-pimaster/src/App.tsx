@@ -492,7 +492,7 @@ export default function App() {
       <main className="main">
         {form.visitMode === "telehealth" && role !== "pt" && <TelehealthConsent form={form} patch={patch} />}
         {show.s1 && <Section1CheckIn form={form} patch={patch} />}
-        {show.s2 && <Section2Injury form={form} patch={patch} />}
+        {show.s2 && <Section2Injury form={form} patch={patch} showNarrative={role === "physician"} />}
         {show.s3 && <Section3Pmh form={form} patch={patch} />}
         {show.s4 && <Section4GeneralExam form={form} patch={patch} />}
         {show.s5 && <Section5Exam form={form} patch={patch} />}
