@@ -215,7 +215,10 @@ exports.handler = async (event) => {
         days_until_due: Math.max(1, Math.min(60, parseInt(body.due_days, 10) || 15)),
         description: "RenuviaMD — Medical Director services",
         metadata: { clinic_id: clinicId, type: "md_of_record" },
-        payment_settings: { payment_method_types: ["us_bank_account", "card"] },
+        // BANK / ACH ONLY. ACH is 0.8% capped at $5 — the flat $5 fee covers it. Cards run
+        // ~2.9%+30c (would lose ~$39 on a $1,500 bill) and debit cards can't legally be
+        // surcharged, so cards are not offered on the recurring MD statement.
+        payment_settings: { payment_method_types: ["us_bank_account"] },
         auto_advance: true,
         pending_invoice_items_behavior: "exclude",
       }, key, idem(""));
