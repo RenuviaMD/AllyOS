@@ -125,9 +125,11 @@ export function TelehealthConsent({ form, patch }: SectionProps) {
   );
 }
 
-export function Section2Injury({ form, patch, readOnly }: SectionProps) {
+export function Section2Injury({ form, patch, readOnly, showNarrative }: SectionProps & { showNarrative?: boolean }) {
   const a = form.accident;
-  const narrative = injuryNarrative(form.patient, a, { visitDate: form.visitDate, visitType: form.visitType });
+  // HPI preview is physician-facing: staff enter the facts; the composed
+  // narrative appears only in the physician view and on the signed note.
+  const narrative = showNarrative ? injuryNarrative(form.patient, a, { visitDate: form.visitDate, visitType: form.visitType }) : "";
   return (
     <Section num={2} title="Injury Details" tag="All visit types" readOnly={readOnly}>
       <div className="grid">
