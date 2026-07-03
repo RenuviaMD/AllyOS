@@ -63,7 +63,7 @@ describe("billableCpts (fee schedule list)", () => {
   it("includes E/M, PT, X-ray, and MRI/CT/US codes with no duplicates", () => {
     const list = billableCpts();
     const codes = list.map((c) => c.cpt);
-    expect(codes).toEqual(expect.arrayContaining(["99204", "20552", "20553", "97110", "72040", "72100", "72141", "72148", "70450", "76881"]));
+    expect(codes).toEqual(expect.arrayContaining(["99204", "20552", "20553", "97110", "72052", "72100", "72141", "72148", "70450", "76881"]));
     expect(new Set(codes).size).toBe(codes.length);
   });
 
@@ -78,7 +78,7 @@ describe("billableCpts (fee schedule list)", () => {
   it("categorizes CPTs for the clinic catalog", () => {
     expect(cptCategory("99205")).toBe("em");
     expect(cptCategory("97110")).toBe("pt");
-    expect(cptCategory("72040")).toBe("imaging");
+    expect(cptCategory("72052")).toBe("imaging");
     expect(cptCategory("76700")).toBe("imaging");
     expect(cptCategory("20552")).toBe("other");
     expect(cptCategory("20553")).toBe("other");

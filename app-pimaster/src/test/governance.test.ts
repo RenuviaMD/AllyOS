@@ -60,7 +60,7 @@ describe("autoEvaluate inspection points", () => {
   });
 
   it("ignores imaging CPTs in the billing match (billed by the imaging center)", () => {
-    const ev = autoEvaluate(completedForm(), ["99204", "72040"], ["S13.4XXA"]);
+    const ev = autoEvaluate(completedForm(), ["99204", "72052"], ["S13.4XXA"]);
     expect(ev.billing_match.value).toBe("Y");
   });
 
