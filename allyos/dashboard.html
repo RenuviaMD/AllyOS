@@ -75,7 +75,7 @@
       <a href="mailto:drfalcon@renuviamd.com" style="color:var(--teal);text-decoration:none">drfalcon@renuviamd.com</a> ·
       <a href="tel:+13058777507" style="color:var(--teal);text-decoration:none">(305) 877-7507</a>
     </div>
-    <a class="tool" style="padding:8px 14px;font-size:.8rem;display:inline-flex" href="#" onclick="openBilling();return false">💳 Manage plan &amp; billing</a>
+    <a class="tool" id="billLink" style="padding:8px 14px;font-size:.8rem;display:inline-flex" href="#" onclick="billingClick();return false">💳 Billing</a>
   </div>
   <div class="disc" style="margin-top:14px">AllyOS is advisory decision-support; the provider owns every clinical decision and signature. <b>PHI stays on-device.</b> © <span id="yr"></span> RenuviaMD® PLLC.</div>
 </div>
@@ -101,6 +101,10 @@ function setLine(k,v){var l=lines();l[k]=v;try{localStorage.setItem(LKEY,JSON.st
 // clinic care-model config (Clinic Card). GFE tab hides ONLY when BOTH: Falcon is the MD AND RN-run IV model.
 function clinicCfg(){try{return Object.assign({falconIsMd:true,rnIvModel:true},JSON.parse(localStorage.getItem('allyos_clinic_config_v1')||'{}'));}catch(e){return {falconIsMd:true,rnIvModel:true};}}
 function gfeBlocked(){var c=clinicCfg();return !!(c.falconIsMd&&c.rnIvModel);}
+// MD-of-record relationship: RenuviaMD is the clinic's Medical Director. These clinics pay a
+// recurring MD fee on the standalone MD-payment page (ACH + $5) and the software is bundled in —
+// so no software self-checkout here. AllyOS-only clinics self-pay the SaaS subscription.
+function isMdClinic(){return !!clinicCfg().falconIsMd;}
 
 var LINES=[
  {k:'iv',ic:'💧',name:'IV & IM Infusion',tool:'nursing-station.html',status:'live',price:'$199/mo',
@@ -121,11 +125,18 @@ function render(){
     active=!!on[L.k];
     var chip=active?(L.status==='draft'?'<span class="chip draft">Draft</span>':'<span class="chip live">Active</span>')
                    :'<span class="chip locked">Locked</span>';
+    // MD-of-record clinics don't self-manage lines or self-checkout — the Medical Director sets
+    // them and the software is bundled into the MD fee. AllyOS-only clinics keep self-service.
+    var manageRow = isMdClinic()
+      ? (active
+          ? '<div style="margin-top:10px;font-size:.72rem;color:var(--dim)">Set by your Medical Director</div>'
+          : '<div class="lockrow">🔒 Ask your Medical Director to enable</div>')
+      : (active
+          ? '<div style="margin-top:10px;font-size:.74rem"><span onclick="event.stopPropagation();manageLine(\''+L.k+'\')" style="cursor:pointer;color:var(--teal)">⚙ Manage / remove line</span></div>'
+          : '<div class="lockrow">🔒 Add this line · <b>+$'+(planTotal(Math.min(3,activeCount()+1))-planTotal(activeCount()))+'/mo</b></div>');
     return '<div class="line '+(active?'active':'locked')+'" onclick="lineClick(\''+L.k+'\')">'+chip+
       '<div class="ic">'+L.ic+'</div><h3>'+esc(L.name)+'</h3><p>'+esc(L.short)+'</p>'+
-      (active
-        ?'<div style="margin-top:10px;font-size:.74rem"><span onclick="event.stopPropagation();manageLine(\''+L.k+'\')" style="cursor:pointer;color:var(--teal)">⚙ Manage / remove line</span></div>'
-        :'<div class="lockrow">🔒 Add this line · <b>+$'+(planTotal(Math.min(3,activeCount()+1))-planTotal(activeCount()))+'/mo</b></div>')+'</div>';
+      manageRow+'</div>';
   }).join('');
   // Lean clinic toolset. AllyOS = decision-support (+ real-time IV charting), NOT practice management.
   // Drip is auto-calculated and inventory is a stock-confirm gate INSIDE the nursing station — no tiles.
@@ -149,18 +160,28 @@ function lineClick(k){var on=lines();var L=byKey(k);
 }
 function byKey(k){for(var i=0;i<LINES.length;i++)if(LINES[i].k===k)return LINES[i];return null;}
 function popup(k,active){var L=byKey(k);
+  var body;
+  if(active){ body='<a class="btn go" href="'+L.tool+'">Open '+esc(L.name)+'</a>'; }
+  else if(isMdClinic()){
+    // MD-of-record: the Medical Director enables lines; no self-checkout, no price.
+    body='<div class="ev">This line is set by your Medical Director as part of your service agreement. Ask Dr. Falcon to enable it — it isn\'t self-serve here.</div>'+
+      '<a class="btn go" href="mailto:drfalcon@renuviamd.com?subject=Enable '+encodeURIComponent(L.name)+'">Request '+esc(L.name)+' →</a>';
+  } else {
+    var n=activeCount();var m=Math.min(3,n+1);var tot=planTotal(m);var add=planTotal(m)-planTotal(n);
+    body='<div class="price">You run <b>'+n+'</b> line'+(n===1?'':'s')+' now. Adding '+esc(L.name)+' → <b>'+m+' line'+(m===1?'':'s')+' = $'+tot+'/mo</b>'+(n>0?' (＋$'+add+'/mo)':'')+'</div>'+
+      '<div class="ev" style="margin-top:2px">Billed per clinic · unlimited staff seats · cancel anytime</div>'+
+      '<button class="btn go" onclick="startCheckout(\''+k+'\')">Continue to secure checkout →</button>'+
+      (isDemo()?'<button class="btn ghost" onclick="setLine(\''+k+'\',true);closeOv()">Activate in this demo</button>':'');
+  }
   document.getElementById('card').innerHTML='<div class="ic">'+L.ic+'</div><h3>'+esc(L.name)+'</h3>'+
     '<p>'+esc(L.what)+'</p><div class="ev">Evidence-graded · independent · PHI-free. The provider owns the decision.</div>'+
-    (active
-      ? '<a class="btn go" href="'+L.tool+'">Open '+esc(L.name)+'</a>'
-      : (function(){var n=activeCount();var m=Math.min(3,n+1);var tot=planTotal(m);var add=planTotal(m)-planTotal(n);
-          return '<div class="price">You run <b>'+n+'</b> line'+(n===1?'':'s')+' now. Adding '+esc(L.name)+' → <b>'+m+' line'+(m===1?'':'s')+' = $'+tot+'/mo</b>'+(n>0?' (＋$'+add+'/mo)':'')+'</div>'+
-            '<div class="ev" style="margin-top:2px">Billed per clinic · unlimited staff seats · cancel anytime</div>'+
-            '<button class="btn go" onclick="startCheckout(\''+k+'\')">Continue to secure checkout →</button>'+
-            (isDemo()?'<button class="btn ghost" onclick="setLine(\''+k+'\',true);closeOv()">Activate in this demo</button>':'');})())+
-    '<button class="btn ghost" onclick="closeOv()">Close</button>';
+    body+'<button class="btn ghost" onclick="closeOv()">Close</button>';
   document.getElementById('ov').classList.add('show');
 }
+// Billing entry adapts to the relationship: MD-of-record clinics go to their standalone
+// MD-payment page (recurring ACH + $5); AllyOS-only clinics manage the software subscription.
+function billingClick(){ if(isMdClinic()){ location.href='md-pay.html'; } else { openBilling(); } }
+function syncBillingLabel(){var el=document.getElementById('billLink');if(!el)return;el.innerHTML=isMdClinic()?'💳 Pay my Medical-Director statement':'💳 Manage plan &amp; billing';}
 function closeOv(){document.getElementById('ov').classList.remove('show');}
 document.getElementById('ov').addEventListener('click',function(e){if(e.target===this)closeOv();});
 
@@ -349,7 +370,7 @@ function importBackup(file){if(!file)return;var r=new FileReader();
     alert('Restored '+n+' item(s). Reloading.');location.reload();
   }catch(e){alert('That is not a valid AllyOS backup file.');}};
   r.readAsText(file);}
-render();
+syncBillingLabel();render();
 </script>
 <!-- Netlify Forms registration for the Get Help widget (de-identified support requests) -->
 <form name="allyos-support" data-netlify="true" netlify-honeypot="bot-field" hidden>
@@ -369,6 +390,7 @@ render();
         AllyOSCloud.myClinic().then(function(cfg){ if(!cfg)return;
           try{localStorage.setItem('allyos_clinic_config_v1',JSON.stringify({name:cfg.name,city:cfg.city,falconIsMd:cfg.falconIsMd,rnIvModel:cfg.rnIvModel}));}catch(e){}
           try{localStorage.setItem('allyos_clinic_lines_v1',JSON.stringify(cfg.lines));}catch(e){}
+          syncBillingLabel();
           render(); // re-render tools/lines from the synced config
         });
       }
