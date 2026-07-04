@@ -12,7 +12,7 @@ import type { Role } from "../lib/types";
  */
 
 export type NavAction =
-  | { view: "today" | "encounter" }
+  | { view: "today" | "encounter" | "patients" }
   | { modal: "package" | "archive" | "billing" | "export" | "attorney" | "catalogs" | "users" | "onboarding" };
 
 interface NavItem {
@@ -26,7 +26,7 @@ export function Sidebar(props: {
   roleLabel: string;
   isAdmin: boolean;
   isPlatform: boolean;
-  view: "today" | "encounter";
+  view: "today" | "encounter" | "patients";
   email: string;
   onNavigate: (a: NavAction) => void;
   onSelectPatient: (p: PatientIndexEntry) => void;
@@ -71,6 +71,7 @@ export function Sidebar(props: {
 
   const nav: NavItem[] = [
     { label: "Today's Visits", action: { view: "today" }, show: true },
+    { label: "Patients", action: { view: "patients" }, show: true },
     { label: "Open Encounter", action: { view: "encounter" }, show: true },
     { label: "Visit Documents", action: { modal: "package" }, show: true },
     { label: "Reports Archive", action: { modal: "archive" }, show: true },
