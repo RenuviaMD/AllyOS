@@ -12,11 +12,13 @@
 h1{font-family:var(--fdisp);font-size:1.6rem;margin-top:2px}
 .who{font-size:.8rem;color:var(--muted);margin-top:3px}
 .top .r{text-align:right;font-size:.82rem}.top .r a{color:var(--teal);text-decoration:none}
-.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
-@media(max-width:640px){.kpis{grid-template-columns:1fr}}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+@media(max-width:860px){.kpis{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.kpis{grid-template-columns:1fr}}
 .kpi{background:linear-gradient(180deg,#10202f,#0b1622);border:1px solid var(--line);border-radius:13px;padding:15px 16px}
 .kpi .l{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.kpi .v{font-family:var(--fdisp);font-size:1.7rem;margin-top:5px}.kpi.green .v{color:var(--green)}.kpi.gold .v{color:var(--gold)}.kpi.teal .v{color:var(--teal)}
+.kpi .v{font-family:var(--fdisp);font-size:1.7rem;margin-top:5px}.kpi.green .v{color:var(--green)}.kpi.gold .v{color:var(--gold)}.kpi.teal .v{color:var(--teal)}.kpi.red .v{color:var(--red)}
+.kpi .ksub{font-size:.64rem;color:var(--muted);margin-top:4px}
 .card{background:linear-gradient(180deg,#101f2c,#0b1521);border:1px solid var(--line2);border-radius:15px;padding:16px 18px;margin-bottom:12px}
 .crow{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .cname{font-family:var(--fdisp);font-size:1.06rem}
@@ -59,9 +61,10 @@ h1{font-family:var(--fdisp);font-size:1.6rem;margin-top:2px}
   </div>
 
   <div class="kpis">
-    <div class="kpi teal"><div class="l">🏥 Governed clinics</div><div class="v" id="kClinics">—</div></div>
-    <div class="kpi gold"><div class="l">$ Monthly recurring</div><div class="v" id="kMrr">—</div></div>
-    <div class="kpi green"><div class="l">🏦 Paid by bank</div><div class="v" id="kBank">—</div></div>
+    <div class="kpi teal"><div class="l">🏥 Active clinics</div><div class="v" id="kClinics">—</div><div class="ksub" id="kSplit"></div></div>
+    <div class="kpi gold"><div class="l">$ Monthly recurring</div><div class="v" id="kMrr">—</div><div class="ksub">retainers /mo</div></div>
+    <div class="kpi red"><div class="l">⏰ Past due</div><div class="v" id="kPastDue">—</div><div class="ksub">overdue across all clinics</div></div>
+    <div class="kpi green"><div class="l">📈 Collected YTD</div><div class="v" id="kYtd">—</div><div class="ksub" id="kYtdSub">this year</div></div>
   </div>
 
   <div id="list"><div class="card" style="color:var(--muted)">Loading clinics…</div></div>
@@ -111,8 +114,11 @@ function load(){
     if(!d||d.error){document.getElementById('list').innerHTML='<div class="card" style="color:var(--muted)">'+(d&&d.error==='not_configured'?'Billing isn’t switched on yet (Stripe key not set).':'Could not load — try again.')+'</div>';return;}
     CLINICS=d.clinics||[];
     document.getElementById('kClinics').textContent=d.count||0;
+    document.getElementById('kSplit').textContent=(d.count_acha||0)+' ACHA · '+(d.count_non_acha||0)+' non-ACHA';
     document.getElementById('kMrr').textContent=money(d.monthly_recurring||0);
-    document.getElementById('kBank').textContent=CLINICS.filter(function(c){return c.status==='active';}).length;
+    var pd=document.getElementById('kPastDue');pd.textContent=money(d.total_past_due||0);pd.style.color=(d.total_past_due>0)?'var(--red)':'var(--muted)';
+    document.getElementById('kYtd').textContent=money(d.total_ytd||0);
+    document.getElementById('kYtdSub').textContent=new Date().getFullYear()+' collected';
     document.getElementById('list').innerHTML=CLINICS.length?CLINICS.map(card).join(''):'<div class="card" style="color:var(--muted)">No clinics yet.</div>';
   }).catch(function(){document.getElementById('list').innerHTML='<div class="card" style="color:var(--muted)">Could not reach billing.</div>';});
 }
@@ -120,9 +126,11 @@ function tagChip(t){if(!t)return '';var lbl={acha:'ACHA',pi:'Personal injury',np
 function card(c){
   var feeTxt=c.md_fee!=null?'<span class="fee">'+money(c.md_fee)+'</span> /mo':'<span style="color:var(--muted)">fee not set</span>';
   var bank=c.status==='active'?'<span class="pill on">bank on file</span>':'<span class="pill off">no autopay</span>';
+  var pd=(c.past_due>0)?' &nbsp;·&nbsp; <span style="color:var(--red)">past due '+money(c.past_due)+'</span>':'';
+  var ytd=' &nbsp;·&nbsp; <span style="color:var(--green)">YTD '+money(c.ytd||0)+'</span>';
   return '<div class="card"><div class="crow">'+
     '<div><div class="cname">'+esc(c.name||'Clinic')+' '+tagChip(c.governance_type)+'</div>'+
-      '<div style="font-size:.8rem;color:var(--muted);margin-top:3px">'+feeTxt+' &nbsp;·&nbsp; '+bank+(c.email?' &nbsp;·&nbsp; '+esc(c.email):' &nbsp;·&nbsp; <span style="color:var(--gold)">no billing email</span>')+'</div></div>'+
+      '<div style="font-size:.8rem;color:var(--muted);margin-top:3px">'+feeTxt+' &nbsp;·&nbsp; '+bank+(c.email?' &nbsp;·&nbsp; '+esc(c.email):' &nbsp;·&nbsp; <span style="color:var(--gold)">no billing email</span>')+pd+ytd+'</div></div>'+
     '<div class="actions"><button class="btn ghost" onclick="openStatement(\''+c.id+'\')">📄 Statement</button>'+
       '<button class="btn ghost" onclick="openFee(\''+c.id+'\')">⚙ Fee</button>'+
       '<button class="btn gold" onclick="openBill(\''+c.id+'\')">Bill →</button></div>'+
