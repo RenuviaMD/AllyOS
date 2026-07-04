@@ -83,6 +83,7 @@ async function invoicesFor(customer, key) {
       amount_due: money(inv.amount_due), amount_paid: money(inv.amount_paid),
       created: inv.created ? new Date(inv.created * 1000).toISOString() : null,
       due: inv.due_date ? new Date(inv.due_date * 1000).toISOString() : null,
+      id: inv.id,
       url: inv.hosted_invoice_url || null, pdf: inv.invoice_pdf || null,
       paid: inv.status === "paid",
     };
@@ -162,6 +163,18 @@ exports.handler = async (event) => {
       const created = await sbPost("clinics", row);
       if (!created || !created.id) return json(502, { error: "insert_failed", hint: "Could not create the clinic record." });
       return json(200, { ok: true, id: created.id });
+    }
+
+    // Reconcile: mark an invoice PAID out-of-band (clinic paid by check / Zelle / wire / cash).
+    // Stripe flips it to paid, so it leaves Past Due and rolls into Collected YTD. Owner only.
+    if (action === "mark_paid") {
+      const g = await requireOwner(event); if (g.error) return g.error;
+      const invId = body.invoice_id;
+      if (!invId) return json(400, { error: "invoice_id required" });
+      try {
+        const inv = await stripePost("invoices/" + encodeURIComponent(invId) + "/pay", { paid_out_of_band: true }, key);
+        return json(200, { ok: true, status: inv.status });
+      } catch (e) { return json(502, { error: "mark_paid_failed", detail: String(e).slice(0, 160) }); }
     }
 
     const clinicId = body.clinic_id;

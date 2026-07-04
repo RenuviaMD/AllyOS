@@ -197,9 +197,20 @@ function openStatement(id){
     var inv=d.invoices||[];
     var gfe=d.gfe_fee!=null?'<div style="font-size:.72rem;color:var(--muted);margin-bottom:6px">Per-GFE fee: <b style="color:var(--gold)">'+money(d.gfe_fee)+'</b></div>':'';
     var out=d.outstanding>0?'<div style="font-size:.8rem;margin-bottom:8px">Outstanding: <b style="color:var(--gold)">'+money(d.outstanding)+'</b></div>':'<div style="font-size:.8rem;margin-bottom:8px;color:var(--green)">All caught up.</div>';
-    var rows=inv.length?inv.map(function(v){return '<div class="inv"><span>'+money(v.amount_due||v.amount_paid)+' <span class="st '+(v.status==='paid'?'paid':(v.status==='open'?'open':'other'))+'">'+esc(v.status)+'</span></span><span>'+(v.number?esc(v.number)+' · ':'')+(v.url?'<a href="'+esc(v.url)+'" target="_blank" rel="noopener" style="color:var(--teal)">open ↗</a>':'')+'</span></div>';}).join(''):'<div style="color:var(--muted);font-size:.8rem">No statements yet.</div>';
+    var rows=inv.length?inv.map(function(v){
+      var mark=(v.status==='open'&&v.id)?' &nbsp; <a href="#" onclick="markPaid(\''+esc(v.id)+'\',\''+id+'\');return false" style="color:var(--green)">Mark paid ✓</a>':'';
+      return '<div class="inv"><span>'+money(v.amount_due||v.amount_paid)+' <span class="st '+(v.status==='paid'?'paid':(v.status==='open'?'open':'other'))+'">'+esc(v.status)+'</span></span><span>'+(v.number?esc(v.number)+' · ':'')+(v.url?'<a href="'+esc(v.url)+'" target="_blank" rel="noopener" style="color:var(--teal)">open ↗</a>':'')+mark+'</span></div>';}).join(''):'<div style="color:var(--muted);font-size:.8rem">No statements yet.</div>';
     el.innerHTML=gfe+out+rows;
   }).catch(function(){el.innerHTML='<div style="color:var(--muted);font-size:.8rem">Could not reach billing.</div>';});
+}
+// Reconcile a payment made outside Stripe (check / Zelle / wire / cash): Stripe marks it paid,
+// so it leaves Past Due and counts toward Collected YTD.
+function markPaid(invId,clinicId){
+  if(!confirm('Mark this invoice as PAID (received outside Stripe — check, Zelle, wire, cash)? This records it as collected.'))return;
+  api({action:'mark_paid',invoice_id:invId}).then(function(d){
+    if(d&&d.ok){var el=document.getElementById('inv-'+clinicId);if(el)el.removeAttribute('data-open');openStatement(clinicId);load();}
+    else{alert((d&&d.detail)||'Could not mark paid — try again.');}
+  }).catch(function(){alert('Could not reach billing.');});
 }
 function closeBill(){document.getElementById('billBack').classList.remove('on');}
 function addLine(desc,amt){var d=document.createElement('div');d.className='lineitem';
