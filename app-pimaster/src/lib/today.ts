@@ -23,8 +23,10 @@ export const MODE_TITLES: Record<string, string> = {
   attestation14: "14-Day Attestation",
   pip_regulation: "PIP Regulation Sheet",
   excluded_services: "Excluded Services Ack.",
+  oir_disclosure: "OIR Disclosure (B1-1571)",
   telehealth_consent: "Telehealth Consent",
   affidavit: "Sworn Affidavit",
+  billing_package: "Billing Package",
 };
 
 export interface DayReportLike {

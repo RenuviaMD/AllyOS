@@ -77,7 +77,7 @@ describe("buildTodayRows (U1 landing)", () => {
 describe("packetStatus (staff landing)", () => {
   const key = patientKeyOf("Jane", "Doe", "1980-01-15");
 
-  it("lists the five once-per-patient staff forms as missing on a fresh initial visit", () => {
+  it("lists the six once-per-patient staff forms as missing on a fresh initial visit", () => {
     const form = emptyForm(); // initial, in-person
     const s = packetStatus(form, undefined, "2026-07-04");
     expect(s.done).toHaveLength(0);
@@ -85,6 +85,7 @@ describe("packetStatus (staff landing)", () => {
       "Assignment of Benefits (AOB)",
       "Medical Records Release (HIPAA)",
       "PIP 14-Day Attestation",
+      "Standard Disclosure & Acknowledgment (OIR-B1-1571) — official state form",
       "Florida PIP Regulation & Requirements",
       "Excluded Services Acknowledgment",
     ]);
@@ -97,10 +98,11 @@ describe("packetStatus (staff landing)", () => {
       report({ id: "3", mode: "attestation14", dos: "2026-06-20" }),
       report({ id: "4", mode: "pip_regulation", dos: "2026-06-20" }),
       report({ id: "5", mode: "excluded_services", dos: "2026-06-20" }),
+      report({ id: "6", mode: "oir_disclosure", dos: "2026-06-20" }),
     ]);
     const s = packetStatus(emptyForm(), docs[key], "2026-07-04");
     expect(s.missing).toHaveLength(0);
-    expect(s.done).toHaveLength(5);
+    expect(s.done).toHaveLength(6);
   });
 
   it("requires the telehealth consent to be signed for THIS date of service", () => {

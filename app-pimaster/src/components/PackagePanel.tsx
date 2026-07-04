@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { applicableDocs, combineDocsHtml, packageReadiness, type PackageDocDef } from "../lib/packageDocs";
+import { applicableDocs, combineDocsHtml, packageReadiness, pdfTrackingHtml, type PackageDocDef } from "../lib/packageDocs";
 import { printHtml } from "../lib/report";
 import { getReportHtml, listPatientDocKinds, saveReport, type ReportMode } from "../lib/store";
 import type { VisitForm } from "../lib/types";
@@ -33,22 +33,31 @@ export function PackagePanel(props: { form: VisitForm; role: string; onClose: ()
       setStatus("Nothing to generate — already signed or not applicable.");
       return;
     }
-    const htmls = todo.map((d) => d.build(form));
-    if (!printHtml(combineDocsHtml(htmls))) {
+    // Official state PDFs open as-is in their own tab; pre-filled forms print combined.
+    const pdfDocs = todo.filter((d) => d.pdfUrl);
+    const htmlDocs = todo.filter((d) => !d.pdfUrl);
+    for (const d of pdfDocs) {
+      if (!window.open(d.pdfUrl, "_blank")) {
+        setStatus("The official form window was blocked — allow pop-ups and try again.");
+        return;
+      }
+    }
+    const htmls = htmlDocs.map((d) => d.build!(form));
+    if (htmls.length > 0 && !printHtml(combineDocsHtml(htmls))) {
       setStatus("Print window was blocked — allow pop-ups and try again.");
       return;
     }
-    for (let i = 0; i < todo.length; i++) {
+    for (const d of todo) {
       const res = await saveReport({
-        mode: todo[i].kind as ReportMode,
+        mode: d.kind as ReportMode,
         dos: form.visitDate,
         form,
-        html: htmls[i],
+        html: d.pdfUrl ? pdfTrackingHtml(d, form) : d.build!(form),
         icdCodes: [],
         cptCodes: [],
       });
       if (!res.ok) {
-        setStatus(`Printed, but saving ${todo[i].title} failed: ${res.error}`);
+        setStatus(`Printed, but saving ${d.title} failed: ${res.error}`);
         refresh();
         return;
       }
@@ -57,10 +66,16 @@ export function PackagePanel(props: { form: VisitForm; role: string; onClose: ()
     refresh();
   }
 
-  /** Print an exact copy of the already-signed document from the archive. */
+  /** Print an exact copy of the already-signed document from the archive.
+   * Official state PDFs always reopen the PDF itself — never a reproduction. */
   async function reprint(d: PackageDocDef) {
     const saved = existing[d.kind];
     if (!saved) return;
+    if (d.pdfUrl) {
+      if (!window.open(d.pdfUrl, "_blank")) setStatus("The official form window was blocked — allow pop-ups and try again.");
+      else setStatus(`${d.title}: official PDF opened (signed original of ${saved.dos} is on paper).`);
+      return;
+    }
     const html = await getReportHtml(saved.id);
     if (!html) {
       setStatus("Could not load the saved copy — check the Reports Archive.");
