@@ -28,10 +28,13 @@ export type ReportMode =
   | "attestation14"
   | "pip_regulation"
   | "excluded_services"
+  | "oir_disclosure"
   | "telehealth_consent"
-  | "affidavit";
+  | "affidavit"
+  // mailed insurance billing package (cover sheet archived; status tracked in form_data)
+  | "billing_package";
 
-const PACKAGE_MODES = ["aob", "records_release", "attestation14", "pip_regulation", "excluded_services", "telehealth_consent", "affidavit"];
+const PACKAGE_MODES = ["aob", "records_release", "attestation14", "pip_regulation", "excluded_services", "oir_disclosure", "telehealth_consent", "affidavit"];
 
 // ---------- Active clinic (tenancy) ----------
 

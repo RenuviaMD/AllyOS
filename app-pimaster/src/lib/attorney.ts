@@ -37,6 +37,7 @@ export const MODE_LABELS: Record<string, string> = {
   ptdaily: "Physical Therapy Daily Note",
   ptprogress: "Physical Therapy Weekly Summary",
   affidavit: "Sworn Affidavit of Attending Physician",
+  oir_disclosure: "Standard Disclosure & Acknowledgment (OIR-B1-1571)",
   aob: "Assignment of Benefits",
   records_release: "Medical Records Release (HIPAA)",
   attestation14: "PIP 14-Day Attestation",
@@ -54,12 +55,13 @@ const MODE_ORDER: Record<string, number> = {
   ptdaily: 3,
   ptprogress: 4,
   affidavit: 5,
-  aob: 6,
-  records_release: 7,
-  attestation14: 8,
-  pip_regulation: 9,
-  excluded_services: 10,
-  telehealth_consent: 11,
+  oir_disclosure: 6,
+  aob: 7,
+  records_release: 8,
+  attestation14: 9,
+  pip_regulation: 10,
+  excluded_services: 11,
+  telehealth_consent: 12,
 };
 
 export function sortDocs<T extends { mode: string; dos: string }>(docs: T[]): T[] {
