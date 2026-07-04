@@ -4,6 +4,7 @@ import { Section10Discharge, Section3Pmh, Section4GeneralExam, Section5Exam } fr
 import { Section1CheckIn, Section2Injury, TelehealthConsent } from "./components/SectionsIntake";
 import { Section11PtDaily, Section12PtWeekly } from "./components/SectionsPt";
 import { Section6Assessment, Section7Plan, Section8ImageOrders, Section9ImagingReview } from "./components/SectionsPlan";
+import { BillingPackagesPage } from "./components/BillingPackages";
 import { BillingSettingsCard } from "./components/BillingSettings";
 import { CatalogPage } from "./components/CatalogPage";
 import { AhcaExportPage } from "./components/AhcaExport";
@@ -66,6 +67,7 @@ export default function App() {
   const [archiveQuery, setArchiveQuery] = useState("");
   const [patientsQuery, setPatientsQuery] = useState("");
   const [showBilling, setShowBilling] = useState(false);
+  const [showBillingPackages, setShowBillingPackages] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showAttorney, setShowAttorney] = useState(false);
   const [showUsers, setShowUsers] = useState(false);
@@ -437,6 +439,7 @@ export default function App() {
       setArchiveQuery("");
       setShowArchive(true);
     } else if (a.modal === "billing") setShowBilling(true);
+    else if (a.modal === "billing_packages") setShowBillingPackages(true);
     else if (a.modal === "export") setShowExport(true);
     else if (a.modal === "attorney") setShowAttorney(true);
     else if (a.modal === "catalogs") setShowCatalogs(true);
@@ -705,6 +708,7 @@ export default function App() {
 
       {showArchive && <ReportsArchive onClose={() => setShowArchive(false)} initialQuery={archiveQuery} />}
       {showBilling && <BillingSettingsCard onClose={() => setShowBilling(false)} />}
+      {showBillingPackages && <BillingPackagesPage onClose={() => setShowBillingPackages(false)} />}
       {showExport && <AhcaExportPage onClose={() => setShowExport(false)} />}
       {showAttorney && <AttorneyPackagePage onClose={() => setShowAttorney(false)} generatedBy={auth.email} />}
       {showUsers && <UsersPanel onClose={() => setShowUsers(false)} selfId={auth.userId} isPlatform={auth.isPlatform} />}

@@ -390,6 +390,125 @@ export async function fetchReportsByIds(
   }));
 }
 
+// ---------- Insurance billing packages (mailed paper claims) ----------
+
+/** Full visit rows for package assembly: archived note HTML + the form snapshot (superbill/CMS-1500 rebuild). */
+export async function fetchVisitRowsByIds(
+  ids: string[],
+): Promise<{ id: string; mode: string; dos: string; html: string; form: Partial<VisitForm> | null }[]> {
+  if (ids.length === 0) return [];
+  const { data, error } = await supabase()
+    .from("reports")
+    .select("id, mode, dos, report_html, form_data")
+    .in("id", ids)
+    .order("dos", { ascending: true });
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    id: r.id as string,
+    mode: r.mode as string,
+    dos: r.dos as string,
+    html: (r.report_html as string) ?? "",
+    form: (r.form_data as Partial<VisitForm>) ?? null,
+  }));
+}
+
+export interface BillingPackageRow {
+  id: string;
+  dos: string;
+  created_at: string;
+  caseKey: string;
+  batchIndex: number;
+  status: string;
+  visitIds: string[];
+}
+
+interface PackageMeta {
+  caseKey: string;
+  batchIndex: number;
+  status: string;
+  visitIds: string[];
+}
+
+/** All built packages for this clinic (status lives in form_data._package). */
+export async function listBillingPackages(): Promise<BillingPackageRow[]> {
+  try {
+    const { data, error } = await supabase()
+      .from("reports")
+      .select("id, dos, created_at, form_data")
+      .eq("mode", "billing_package")
+      .eq("status", "active")
+      .eq("clinic_id", activeClinicId())
+      .order("created_at", { ascending: true })
+      .limit(500);
+    if (error) throw error;
+    const out: BillingPackageRow[] = [];
+    for (const r of data ?? []) {
+      const meta = (r.form_data as { _package?: PackageMeta } | null)?._package;
+      if (!meta) continue;
+      out.push({
+        id: r.id as string,
+        dos: r.dos as string,
+        created_at: r.created_at as string,
+        caseKey: meta.caseKey,
+        batchIndex: meta.batchIndex,
+        status: meta.status,
+        visitIds: meta.visitIds ?? [],
+      });
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+/** Archive a built package (cover sheet HTML + batch metadata, status "not_sent"). */
+export async function saveBillingPackage(args: {
+  dos: string;
+  form: VisitForm;
+  coverHtml: string;
+  icdCodes: string[];
+  cptCodes: string[];
+  caseKey: string;
+  batchIndex: number;
+  visitIds: string[];
+}): Promise<{ ok: boolean; id?: string; error?: string }> {
+  try {
+    const meta: PackageMeta = { caseKey: args.caseKey, batchIndex: args.batchIndex, status: "not_sent", visitIds: args.visitIds };
+    const { data, error } = await supabase()
+      .from("reports")
+      .insert({
+        mode: "billing_package",
+        dos: args.dos,
+        report_html: args.coverHtml,
+        form_data: { ...args.form, _package: meta },
+        icd_codes: args.icdCodes,
+        cpt_codes: args.cptCodes,
+        clinic_id: activeClinicId(),
+      })
+      .select("id")
+      .single();
+    if (error) throw error;
+    return { ok: true, id: data?.id as string };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+/** Update a package's send/payment status (Not Sent → Sent → Paid/Denied). */
+export async function updateBillingPackageStatus(id: string, status: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const { data, error } = await supabase().from("reports").select("form_data").eq("id", id).single();
+    if (error) throw error;
+    const fd = (data?.form_data ?? {}) as { _package?: PackageMeta };
+    fd._package = { ...(fd._package as PackageMeta), status };
+    const { error: e2 } = await supabase().from("reports").update({ form_data: fd }).eq("id", id);
+    if (e2) throw e2;
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
 /** PHI-light disclosure log for attorney releases (who, to whom, which charts). */
 export async function logDisclosure(details: object): Promise<void> {
   try {
