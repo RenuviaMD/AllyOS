@@ -39,6 +39,79 @@ body {
 .brand-title { font-size: 18px; font-weight: 700; color: var(--gold); letter-spacing: 0.5px; }
 .brand-sub { font-size: 11px; color: var(--muted); }
 
+/* App shell: 230px global sidebar + content column (UX Blueprint U6) */
+.app-shell { display: flex; min-height: 100vh; }
+.app-content { flex: 1; min-width: 0; }
+.sidebar {
+  width: 230px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--hover);
+  border-right: 2px solid var(--accent);
+  padding: 14px 12px;
+  gap: 12px;
+}
+.sb-brand { display: flex; flex-direction: column; }
+.sb-by { font-size: 10px; color: var(--muted); letter-spacing: 0.5px; }
+.sb-title { font-size: 19px; font-weight: 700; color: var(--gold); letter-spacing: 0.5px; }
+.sb-sub { font-size: 11px; color: var(--muted); }
+.sb-search { position: relative; }
+.sb-search input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid #46627f;
+  color: var(--text);
+  border-radius: 5px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+.sb-search input:focus { outline: none; border-color: var(--accent); }
+.sb-hint { font-size: 11.5px; color: var(--gold); padding: 6px 4px 0; }
+.sb-results {
+  position: absolute; top: calc(100% + 4px); left: 0; right: -60px; z-index: 60;
+  background: var(--card); border: 1px solid var(--accent); border-radius: 6px;
+  overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,.45);
+}
+.sb-result {
+  display: flex; flex-direction: column; gap: 1px; width: 100%; text-align: left;
+  background: none; border: none; border-bottom: 1px solid #46627f;
+  color: var(--text); padding: 8px 10px; cursor: pointer; font-size: 12px;
+}
+.sb-result:last-child { border-bottom: none; }
+.sb-result:hover { background: rgba(22,160,133,.18); }
+.sb-result b { color: var(--gold); font-size: 13px; }
+.sb-result span { color: var(--muted); }
+.sb-clinic {
+  font-size: 12px; font-weight: 600; line-height: 1.4;
+  border: 1px solid #46627f; border-radius: 5px; padding: 7px 10px;
+  display: flex; flex-direction: column;
+}
+.sb-clinic span { color: var(--muted); font-weight: 400; font-size: 11px; }
+.sb-nav { display: flex; flex-direction: column; gap: 2px; }
+.sb-link {
+  background: none; border: none; text-align: left; color: var(--text);
+  padding: 9px 10px; min-height: 38px; border-radius: 5px; cursor: pointer; font-size: 13.5px;
+  border-left: 3px solid transparent;
+  transition: background 0.15s ease;
+}
+.sb-link:hover { background: rgba(22,160,133,.15); }
+.sb-link.active { background: rgba(22,160,133,.22); border-left-color: var(--accent); font-weight: 600; }
+.sb-user { margin-top: auto; display: flex; flex-direction: column; gap: 4px; border-top: 1px solid #46627f; padding-top: 10px; }
+.sb-role { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); font-weight: 700; }
+.sb-email { font-size: 12px; color: var(--muted); word-break: break-all; }
+.sb-user-actions { display: flex; gap: 6px; margin-top: 4px; }
+.sb-user-actions .btn { padding: 5px 10px; font-size: 12px; }
+@media (max-width: 860px) {
+  .app-shell { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; position: static; border-right: none; border-bottom: 2px solid var(--accent); }
+  .sb-user { margin-top: 0; }
+}
+
 .spacer { flex: 1; }
 
 .main { max-width: 1040px; margin: 0 auto; padding: 20px; }

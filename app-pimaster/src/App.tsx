@@ -12,13 +12,14 @@ import { UsersPanel } from "./components/UsersPanel";
 import { AiReportPanel } from "./components/AiReportPanel";
 import { PackagePanel } from "./components/PackagePanel";
 import { PatientBanner } from "./components/PatientBanner";
+import { Sidebar, type NavAction } from "./components/Sidebar";
 import { TodayVisits } from "./components/TodayVisits";
+import type { PatientIndexEntry } from "./lib/patients";
 import { OnboardingWizard } from "./components/OnboardingWizard";
 import { SignInScreen } from "./components/SignIn";
 import { allowedViews, changePassword, fetchAuthState, onAuthChange, signOut, type AuthState } from "./lib/auth";
 import { auditNote } from "./lib/audit";
 import { buildServiceLines, loadBillingSettings } from "./lib/billing";
-import { CLINIC } from "./lib/clinic";
 import {
   allCptCodes,
   allDiagnosisCodes,
@@ -60,6 +61,7 @@ export default function App() {
   const [genState, setGenState] = useState<string>("");
   const [auditIssues, setAuditIssues] = useState<string[]>([]);
   const [showArchive, setShowArchive] = useState(false);
+  const [archiveQuery, setArchiveQuery] = useState("");
   const [showBilling, setShowBilling] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showAttorney, setShowAttorney] = useState(false);
@@ -395,13 +397,44 @@ export default function App() {
     );
   }
 
+  function handleNav(a: NavAction) {
+    if ("view" in a) {
+      setView(a.view);
+      return;
+    }
+    if (a.modal === "package") setShowPackage(true);
+    else if (a.modal === "archive") {
+      setArchiveQuery("");
+      setShowArchive(true);
+    } else if (a.modal === "billing") setShowBilling(true);
+    else if (a.modal === "export") setShowExport(true);
+    else if (a.modal === "attorney") setShowAttorney(true);
+    else if (a.modal === "catalogs") setShowCatalogs(true);
+    else if (a.modal === "users") setShowUsers(true);
+    else if (a.modal === "onboarding") setShowOnboarding(true);
+  }
+
+  function openPatientRecord(p: PatientIndexEntry) {
+    setArchiveQuery(`${p.first} ${p.last}`.trim());
+    setShowArchive(true);
+  }
+
   return (
-    <>
+    <div className="app-shell">
+      <Sidebar
+        role={role}
+        roleLabel={ROLE_LABELS[role]}
+        isAdmin={auth.roles.includes("admin")}
+        isPlatform={auth.isPlatform}
+        view={view}
+        email={auth.email}
+        onNavigate={handleNav}
+        onSelectPatient={openPatientRecord}
+        onChangePassword={doChangePassword}
+        onSignOut={() => signOut()}
+      />
+      <div className="app-content">
       <header className="app-header">
-        <div className="brand">
-          <span className="brand-title">PI MASTER™</span>
-          <span className="brand-sub">by RenuviaMD® Network — {CLINIC.name}</span>
-        </div>
         {auth.isPlatform && clinics.length > 0 && (
           <div className="seg-wrap">
             <span className="seg-label">Clinic</span>
@@ -416,17 +449,6 @@ export default function App() {
             </select>
           </div>
         )}
-        <div className="seg-wrap">
-          <span className="seg-label">View</span>
-          <div className="seg">
-            <button className={view === "today" ? "active" : ""} onClick={() => setView("today")}>
-              Today
-            </button>
-            <button className={view === "encounter" ? "active" : ""} onClick={() => setView("encounter")}>
-              Encounter
-            </button>
-          </div>
-        </div>
         <div className="seg-wrap">
           <span className="seg-label">Visit type</span>
           <div className="seg">
@@ -490,23 +512,6 @@ export default function App() {
           {saveState === "cloud" && "✓ Saved"}
           {saveState === "local" && "Saved locally (offline)"}
         </span>
-        <span className="status">{auth.email}</span>
-        {auth.roles.includes("admin") && (
-          <button className="btn ghost" onClick={() => setShowUsers(true)}>
-            Users
-          </button>
-        )}
-        {auth.isPlatform && (
-          <button className="btn ghost" onClick={() => setShowOnboarding(true)}>
-            New Clinic
-          </button>
-        )}
-        <button className="btn ghost" onClick={doChangePassword} title="Change password">
-          Password
-        </button>
-        <button className="btn ghost" onClick={() => signOut()}>
-          Sign out
-        </button>
       </header>
 
       <PatientBanner form={form} />
@@ -621,8 +626,9 @@ export default function App() {
           </>
         )}
       </main>
+      </div>
 
-      {showArchive && <ReportsArchive onClose={() => setShowArchive(false)} />}
+      {showArchive && <ReportsArchive onClose={() => setShowArchive(false)} initialQuery={archiveQuery} />}
       {showBilling && <BillingSettingsCard onClose={() => setShowBilling(false)} />}
       {showExport && <AhcaExportPage onClose={() => setShowExport(false)} />}
       {showAttorney && <AttorneyPackagePage onClose={() => setShowAttorney(false)} generatedBy={auth.email} />}
@@ -640,6 +646,6 @@ export default function App() {
         />
       )}
       {showCatalogs && <CatalogPage onClose={() => setShowCatalogs(false)} />}
-    </>
+    </div>
   );
 }
