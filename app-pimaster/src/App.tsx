@@ -11,6 +11,7 @@ import { AttorneyPackagePage } from "./components/AttorneyPackage";
 import { UsersPanel } from "./components/UsersPanel";
 import { AiReportPanel } from "./components/AiReportPanel";
 import { PackagePanel } from "./components/PackagePanel";
+import { PatientBanner } from "./components/PatientBanner";
 import { OnboardingWizard } from "./components/OnboardingWizard";
 import { SignInScreen } from "./components/SignIn";
 import { allowedViews, changePassword, fetchAuthState, onAuthChange, signOut, type AuthState } from "./lib/auth";
@@ -490,6 +491,8 @@ export default function App() {
           Sign out
         </button>
       </header>
+
+      <PatientBanner form={form} />
 
       <main className="main">
         {form.visitMode === "telehealth" && role !== "pt" && <TelehealthConsent form={form} patch={patch} />}
