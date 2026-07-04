@@ -12,7 +12,7 @@ import { Area } from "./fields";
  * becomes the clinical note — printed via Generate Clinical Note, which runs
  * the usual audits and clone guard.
  */
-export function AiReportPanel({ form, patch, onClose }: SectionProps & { onClose: () => void }) {
+export function AiReportPanel({ form, patch, onClose, inline }: SectionProps & { onClose?: () => void; inline?: boolean }) {
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
   const [editHtml, setEditHtml] = useState(false);
@@ -39,15 +39,16 @@ export function AiReportPanel({ form, patch, onClose }: SectionProps & { onClose
         .replace(/\[PATIENT_DOB\]/g, form.patient.dob)
     : "";
 
-  return (
-    <div className="modal-back">
-      <div className="modal" style={{ width: "min(980px, 96vw)", maxHeight: "92vh", overflowY: "auto" }}>
+  const title = `AI Initial Evaluation Report — ${form.visitMode === "telehealth" ? "Telehealth (§ 456.47)" : "In-Person"}`;
+
+  const body = (
+    <>
+        {!inline && (
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-          <h2 style={{ margin: 0, color: "var(--gold)" }}>
-            AI Initial Evaluation Report — {form.visitMode === "telehealth" ? "Telehealth (§ 456.47)" : "In-Person"}
-          </h2>
+          <h2 style={{ margin: 0, color: "var(--gold)" }}>{title}</h2>
           <button className="btn ghost" style={{ marginLeft: "auto" }} onClick={onClose}>Close</button>
         </div>
+        )}
         <p className="status">
           Generated to the locked Florida-PIP specification for this visit's modality, strictly from the intake data and
           your clinical input below — nothing is invented; missing facts are listed for you instead. Names and DOB never
@@ -90,11 +91,28 @@ export function AiReportPanel({ form, patch, onClose }: SectionProps & { onClose
         )}
         {draft && (
           <p className="status" style={{ marginTop: 10 }}>
-            When it reads right: Close this panel and click <strong>Generate Clinical Note</strong> — the approved report
-            prints as the note (audits and same-accident clone guard still apply). The missing-items block never prints.
+            When it reads right: click <strong>Generate Clinical Note</strong> — the approved report prints as the note
+            (audits and same-accident clone guard still apply). The missing-items block never prints.
           </p>
         )}
+    </>
+  );
+
+  // Inline on the encounter's Sign step (U7) — the modal wrapper remains for callers that still open it as a panel.
+  if (inline) {
+    return (
+      <div className="section" style={{ borderColor: "var(--gold)" }}>
+        <div className="section-head">
+          <span className="section-title">{title}</span>
+          <span className="section-tag">AI drafting</span>
+        </div>
+        <div className="section-body">{body}</div>
       </div>
+    );
+  }
+  return (
+    <div className="modal-back">
+      <div className="modal" style={{ width: "min(980px, 96vw)", maxHeight: "92vh", overflowY: "auto" }}>{body}</div>
     </div>
   );
 }
