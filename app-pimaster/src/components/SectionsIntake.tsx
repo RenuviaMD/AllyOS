@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import type { VisitForm } from "../lib/types";
+import type { Complaint, VisitForm } from "../lib/types";
 import { draftHpi } from "../lib/ai";
+import { buildCascade, CASCADE_REGIONS } from "../lib/cascade";
 import { injuryNarrative } from "../lib/narratives";
 import { listCarriers, type CarrierRow } from "../lib/store";
 import { Area, Section, Select, Text, YesNoField } from "./fields";
@@ -126,10 +127,54 @@ export function TelehealthConsent({ form, patch }: SectionProps) {
   );
 }
 
-export function Section2Injury({ form, patch, readOnly, showNarrative }: SectionProps & { showNarrative?: boolean }) {
+export function Section2Injury({
+  form,
+  patch,
+  readOnly,
+  showNarrative,
+  apply,
+}: SectionProps & { showNarrative?: boolean; apply?: (partial: Partial<VisitForm>) => void }) {
   const a = form.accident;
   const [busy, setBusy] = useState(false);
   const [aiStatus, setAiStatus] = useState("");
+  const [cascadeStatus, setCascadeStatus] = useState("");
+  const complaints = form.complaints ?? [];
+
+  function setComplaints(next: Complaint[]) {
+    apply?.({ complaints: next });
+  }
+
+  function toggleRegion(id: string) {
+    const existing = complaints.find((c) => c.region === id);
+    if (existing) setComplaints(complaints.filter((c) => c.region !== id));
+    else {
+      const def = CASCADE_REGIONS.find((r) => r.id === id);
+      setComplaints([...complaints, { region: id, side: def?.sided ? "R" : "", pain: "", note: "" }]);
+    }
+  }
+
+  function updateComplaint(id: string, partial: Partial<Complaint>) {
+    setComplaints(complaints.map((c) => (c.region === id ? { ...c, ...partial } : c)));
+  }
+
+  function runCascade() {
+    if (!apply) return;
+    const res = buildCascade(form);
+    if (res.summary.length === 0) {
+      setCascadeStatus("Select at least one complained region first.");
+      return;
+    }
+    const ai = form.ai ?? { hpiNotes: "", hpiDraft: "" };
+    apply({
+      assessment: { ...form.assessment, extraCodes: res.extraCodes },
+      imaging: { ...form.imaging, selected: res.imagingSelected },
+      plan: { ...form.plan, modalities: res.modalities },
+      ai: { ...ai, hpiNotes: ai.hpiNotes.trim() ? ai.hpiNotes : res.hpiSeed },
+    });
+    setCascadeStatus(
+      `Built from ${res.summary.join(", ")}: ${res.extraCodes.length} ICD-10 codes, ${res.imagingSelected.length} imaging orders, PT prescription, and the AI pain profile. Review each section — remove anything you don't want.`,
+    );
+  }
   // HPI preview is physician-facing: staff enter the facts; the composed
   // narrative appears only in the physician view and on the signed note.
   const narrative = showNarrative ? injuryNarrative(form.patient, a, { visitDate: form.visitDate, visitType: form.visitType }) : "";
@@ -172,7 +217,64 @@ export function Section2Injury({ form, patch, readOnly, showNarrative }: Section
       </div>
 
       {showNarrative && (
-        <div style={{ marginTop: 12 }}>
+        <div style={{ marginTop: 14 }}>
+          <label className="status" style={{ textTransform: "uppercase", letterSpacing: 1 }}>
+            Chief Complaints — region in, everything out
+          </label>
+          <p className="status">
+            Select each complained region (+ side and pain n/10). One tap builds the whole thread: ICD-10 with
+            laterality, imaging order, PT prescription, and the AI pain profile. Regions without a complaint produce
+            nothing.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 8 }}>
+            {CASCADE_REGIONS.map((def) => {
+              const c = complaints.find((x) => x.region === def.id);
+              return (
+                <div key={def.id} style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    className={`btn ${c ? "gold" : "ghost"}`}
+                    style={{ minWidth: 150, padding: "4px 10px" }}
+                    onClick={() => toggleRegion(def.id)}
+                  >
+                    {c ? "✓ " : ""}{def.label}
+                  </button>
+                  {c && def.sided && (
+                    <div className="seg">
+                      {(["R", "L", "B"] as const).map((s) => (
+                        <button key={s} className={c.side === s ? "active" : ""} onClick={() => updateComplaint(def.id, { side: s })}>
+                          {s === "B" ? "Bilat" : s}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {c && (
+                    <>
+                      <input
+                        value={c.pain}
+                        onChange={(e) => updateComplaint(def.id, { pain: e.target.value })}
+                        placeholder="pain /10"
+                        style={{ width: 70, background: "var(--hover)", border: "1px solid #46627f", color: "var(--text)", borderRadius: 4, padding: "4px 8px" }}
+                      />
+                      <input
+                        value={c.note}
+                        onChange={(e) => updateComplaint(def.id, { note: e.target.value })}
+                        placeholder="radiation, onset, aggravating…"
+                        style={{ flex: 1, minWidth: 180, background: "var(--hover)", border: "1px solid #46627f", color: "var(--text)", borderRadius: 4, padding: "4px 8px" }}
+                      />
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="toolbar" style={{ margin: "0 0 12px" }}>
+            <button className="btn gold" onClick={runCascade}>
+              ⚡ Build encounter from complaints
+            </button>
+            <span className="status">{cascadeStatus}</span>
+          </div>
+
           {!hpiDraft && narrative && <div className="narr">{narrative}</div>}
           <div className="grid" style={{ marginTop: 10 }}>
             <Area

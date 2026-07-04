@@ -1,6 +1,7 @@
 import { totalCharges, type BillingSettings, type ServiceLine } from "./billing";
 import { CLINIC } from "./clinic";
 import { imagingDestination, loadImagingConfig } from "./imaging";
+import { CASCADE_REGIONS } from "./cascade";
 import { PROCEDURES, PT_MODALITIES, resolveImagingSelection } from "./cpt";
 import { deriveIcd10, parseManualCodes, PSYCH_CODES, withEncounter } from "./icd10";
 import {
@@ -246,6 +247,17 @@ export function buildClinicalNoteHtml(form: VisitForm): string {
   if (form.visitMode === "telehealth") {
     b += `<h2>Telehealth Encounter Statement</h2><p class="narrative">${esc(telehealthStatement(form.telehealth))}</p>`;
   }
+
+  const cc = (form.complaints ?? [])
+    .filter((c) => c.region)
+    .map((c) => {
+      const def = CASCADE_REGIONS.find((r) => r.id === c.region);
+      if (!def) return "";
+      const side = def.sided ? ({ R: "right ", L: "left ", B: "bilateral ", "": "" } as Record<string, string>)[c.side] ?? "" : "";
+      return `${side}${def.label.toLowerCase()} pain${c.pain ? ` (${c.pain}/10)` : ""}${c.note ? ` — ${c.note}` : ""}`;
+    })
+    .filter(Boolean);
+  if (cc.length) b += `<h2>Chief Complaints</h2><p>${esc(cc.join("; "))}.</p>`;
 
   // Physician-reviewed AI draft takes precedence over the rule-based narrative.
   const narr = (form.ai?.hpiDraft ?? "").trim() || injuryNarrative(form.patient, form.accident, { visitDate: form.visitDate, visitType: form.visitType });

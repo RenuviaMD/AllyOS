@@ -49,6 +49,27 @@ export function Section6Assessment({ form, patch }: SectionProps) {
           </button>
         </p>
       )}
+      {(form.assessment.extraCodes ?? []).length > 0 && (
+        <div style={{ marginTop: 10 }}>
+          <label className="status">Complaint-derived &amp; physician-selected additions</label>
+          <ul className="dx-list">
+            {(form.assessment.extraCodes ?? []).map((d) => (
+              <li key={d.code}>
+                <span className="dx-code">{d.code}</span>
+                <span>{d.desc}</span>
+                <button
+                  type="button"
+                  className="dx-remove"
+                  title="Remove this code"
+                  onClick={() => patch("assessment", { extraCodes: (form.assessment.extraCodes ?? []).filter((x) => x.code !== d.code) })}
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <CatalogQuickPicks form={form} patch={patch} />
       <div style={{ marginTop: 12 }}>
         <label className="status">Optional psychological diagnoses</label>

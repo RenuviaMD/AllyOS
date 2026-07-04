@@ -175,6 +175,18 @@ export interface PtWeekly {
   dayNotes: Record<string, { pain: string; note: string }>;
 }
 
+/** A chief complaint — the driving unit of the encounter: region in → everything out. */
+export interface Complaint {
+  /** cascade region id, e.g. "cervical", "knee" */
+  region: string;
+  /** laterality for sided regions: R / L / B(ilateral); "" for spine/head */
+  side: "" | "R" | "L" | "B";
+  /** pain n/10 as entered */
+  pain: string;
+  /** brief qualifiers: radiation, onset, aggravating factors */
+  note: string;
+}
+
 export interface AiAssist {
   /** physician's brief bullet notes (onset, symptoms, radiation, severity) — input to the AI draft */
   hpiNotes: string;
@@ -206,6 +218,8 @@ export interface VisitForm {
   ptWeekly: PtWeekly;
   /** optional — drafts saved before this feature existed lack it */
   ai?: AiAssist;
+  /** chief complaints — drive the encounter cascade (optional: legacy drafts lack it) */
+  complaints?: Complaint[];
 }
 
 export function emptyForm(): VisitForm {
@@ -215,6 +229,7 @@ export function emptyForm(): VisitForm {
     visitMode: "inPerson",
     visitDate: today,
     ai: { hpiNotes: "", hpiDraft: "" },
+    complaints: [],
     telehealth: { consentObtained: false, consentBy: "", overrideReason: "" },
     patient: {
       firstName: "",
