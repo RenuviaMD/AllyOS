@@ -4,6 +4,7 @@ import { draftHpi } from "../lib/ai";
 import { injuryNarrative } from "../lib/narratives";
 import { listCarriers, type CarrierRow } from "../lib/store";
 import { Area, Section, Select, Text, YesNoField } from "./fields";
+import { PhraseBar } from "./PhraseBar";
 
 export interface SectionProps {
   form: VisitForm;
@@ -174,6 +175,7 @@ export function Section2Injury({ form, patch, readOnly, showNarrative }: Section
       {showNarrative && (
         <div style={{ marginTop: 12 }}>
           {!hpiDraft && narrative && <div className="narr">{narrative}</div>}
+          <PhraseBar category="hpi" value={form.ai?.hpiNotes ?? ""} onInsert={(v) => patch("ai", { hpiNotes: v })} />
           <div className="grid" style={{ marginTop: 10 }}>
             <Area
               label="Physician HPI notes — brief bullets (onset, symptoms, radiation, severity, timeline)"

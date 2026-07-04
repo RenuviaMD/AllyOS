@@ -3,6 +3,7 @@ import { draftInitialReport } from "../lib/ai";
 import { sanitizeHtml } from "../lib/report";
 import type { SectionProps } from "./SectionsIntake";
 import { Area } from "./fields";
+import { PhraseBar } from "./PhraseBar";
 
 /**
  * AI Initial Medical Evaluation Report (Dr. Falcon's locked generation specs,
@@ -54,6 +55,7 @@ export function AiReportPanel({ form, patch, onClose, inline }: SectionProps & {
           your clinical input below — nothing is invented; missing facts are listed for you instead. Names and DOB never
           reach the AI (substituted locally). The approved report becomes the clinical note.
         </p>
+        <PhraseBar category="hpi" value={form.ai?.hpiNotes ?? ""} onInsert={(v) => patch("ai", { hpiNotes: v })} />
         <div className="grid">
           <Area
             label="Clinical input — complaints per region with pain n/10, onset timing, radicular sx, LOC, external trauma, meds, allergies, prior accidents (look-back), social hx (tobacco/vape, alcohol, coffee, cannabis), ROS positives; in-person: tests performed with results/degrees"

@@ -400,3 +400,23 @@ body {
   margin: 6px 0 40px; padding-top: 12px; border-top: 1px solid #46627f;
 }
 .stepper-nav .status { flex: 1; text-align: center; }
+
+/* Physician phrase library (U4) */
+.phrase-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 10px 0 2px; }
+.phrase-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-right: 4px; }
+.phrase-chip { display: inline-flex; align-items: stretch; }
+.phrase-insert {
+  background: rgba(243, 156, 18, 0.12); border: 1px solid rgba(243, 156, 18, 0.5); border-right: none;
+  color: #ffd27f; border-radius: 12px 0 0 12px; padding: 5px 10px; min-height: 30px;
+  cursor: pointer; font-size: 12px;
+}
+.phrase-insert:hover { background: rgba(243, 156, 18, 0.28); }
+.phrase-x {
+  background: rgba(243, 156, 18, 0.12); border: 1px solid rgba(243, 156, 18, 0.5); border-left: none;
+  color: var(--muted); border-radius: 0 12px 12px 0; padding: 0 8px; cursor: pointer; font-size: 12px;
+}
+.phrase-x:hover { color: var(--warning); }
+.phrase-add {
+  background: none; border: 1px dashed var(--accent); color: #2fd3b5;
+  border-radius: 12px; padding: 5px 12px; min-height: 30px; cursor: pointer; font-size: 12px;
+}
