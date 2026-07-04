@@ -232,3 +232,32 @@ body {
 .ptb-day.late { background: #46201d; color: #ff9e93; border: 1px solid #7a3a34; }
 .ptb-badge { font-size: 10.5px; font-weight: 700; letter-spacing: 1px; padding: 2px 8px; border-radius: 4px; background: #1b3245; color: #8fd3ff; border: 1px solid #2d4a63; }
 .ptb-badge.tele { background: #3a2c12; color: #ffd57a; border-color: #6a501f; }
+
+/* Today's Visits landing (UX Blueprint U1) */
+.today-head { display: flex; align-items: center; gap: 16px; margin: 6px 0 18px; }
+.today-head .btn { margin-left: auto; }
+.today-title { margin: 0 0 2px; color: var(--gold); font-size: 22px; }
+.today-empty {
+  background: var(--card); border: 1px dashed var(--accent); border-radius: 8px;
+  padding: 28px; text-align: center; font-size: 15px;
+}
+.today-row {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  background: var(--card); border: 1px solid #46627f; border-radius: 8px;
+  padding: 12px 16px; margin-bottom: 10px;
+  transition: border-color 0.15s ease;
+}
+.today-row.open-enc { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.today-who { display: flex; flex-direction: column; min-width: 220px; }
+.today-name { font-weight: 700; font-size: 16px; color: var(--gold); }
+.today-badges { display: flex; gap: 6px; }
+.today-docs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex: 1; }
+.today-doc {
+  font-size: 12px; color: #7ee2ab; background: rgba(39,174,96,.12);
+  border: 1px solid rgba(39,174,96,.5); border-radius: 10px; padding: 2px 9px;
+}
+.today-doc em { font-style: normal; color: var(--muted); }
+.today-packet { font-size: 12px; border-radius: 10px; padding: 2px 9px; font-weight: 600; }
+.today-packet.ok { color: #7ee2ab; background: rgba(39,174,96,.12); border: 1px solid rgba(39,174,96,.5); }
+.today-packet.todo { color: #ffbf69; background: rgba(243,156,18,.12); border: 1px solid rgba(243,156,18,.55); }
+.today-actions { min-width: 130px; text-align: right; }

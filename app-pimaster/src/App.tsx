@@ -12,6 +12,7 @@ import { UsersPanel } from "./components/UsersPanel";
 import { AiReportPanel } from "./components/AiReportPanel";
 import { PackagePanel } from "./components/PackagePanel";
 import { PatientBanner } from "./components/PatientBanner";
+import { TodayVisits } from "./components/TodayVisits";
 import { OnboardingWizard } from "./components/OnboardingWizard";
 import { SignInScreen } from "./components/SignIn";
 import { allowedViews, changePassword, fetchAuthState, onAuthChange, signOut, type AuthState } from "./lib/auth";
@@ -47,8 +48,12 @@ const VISIT_LABELS: Record<VisitType, string> = { initial: "Initial", followup: 
 const MODE_LABELS: Record<VisitMode, string> = { inPerson: "In-Person", telehealth: "Telehealth" };
 const ROLE_LABELS: Record<Role, string> = { staff: "Staff", physician: "Physician", pt: "Physical Therapist" };
 
+/** Top-level navigation: the schedule-first landing (U1) vs the open encounter. */
+type MainView = "today" | "encounter";
+
 export default function App() {
   const [auth, setAuth] = useState<AuthState | null | undefined>(undefined);
+  const [view, setView] = useState<MainView>("today");
   const [role, setRole] = useState<Role>(() => (localStorage.getItem("pimaster-role") as Role) || "staff");
   const [form, setForm] = useState<VisitForm>(emptyForm);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "cloud" | "local">("idle");
@@ -372,6 +377,7 @@ export default function App() {
     if (!confirm(`Start a new blank visit?${who ? ` The unsaved draft for ${who} will be replaced.` : " The current draft will be replaced."}`)) return;
     dirty.current = true; // user action — the blank form must win over the cloud draft
     setForm(emptyForm());
+    setView("encounter");
   }
 
   if (auth === undefined) {
@@ -410,6 +416,17 @@ export default function App() {
             </select>
           </div>
         )}
+        <div className="seg-wrap">
+          <span className="seg-label">View</span>
+          <div className="seg">
+            <button className={view === "today" ? "active" : ""} onClick={() => setView("today")}>
+              Today
+            </button>
+            <button className={view === "encounter" ? "active" : ""} onClick={() => setView("encounter")}>
+              Encounter
+            </button>
+          </div>
+        </div>
         <div className="seg-wrap">
           <span className="seg-label">Visit type</span>
           <div className="seg">
@@ -495,6 +512,11 @@ export default function App() {
       <PatientBanner form={form} />
 
       <main className="main">
+        {view === "today" && (
+          <TodayVisits role={role} form={form} onOpenEncounter={() => setView("encounter")} onNewVisit={newVisit} />
+        )}
+        {view === "encounter" && (
+          <>
         {form.visitMode === "telehealth" && role !== "pt" && <TelehealthConsent form={form} patch={patch} />}
         {show.s1 && <Section1CheckIn form={form} patch={patch} />}
         {show.s2 && <Section2Injury form={form} patch={patch} showNarrative={role === "physician"} />}
@@ -595,6 +617,8 @@ export default function App() {
               </ul>
             </div>
           </div>
+        )}
+          </>
         )}
       </main>
 

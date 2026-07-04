@@ -237,6 +237,58 @@ export async function fetchSameAccidentForms(accidentDate: string, excludePatien
   }
 }
 
+export interface DayReport {
+  id: string;
+  mode: ReportMode;
+  dos: string;
+  created_at: string;
+  form: Partial<VisitForm> | null;
+}
+
+/** Every active report with DOS = `dos` — feeds the Today's Visits landing (U1). */
+export async function listReportsForDay(dos: string): Promise<DayReport[]> {
+  const { data, error } = await supabase()
+    .from("reports")
+    .select("id, mode, dos, created_at, form_data")
+    .eq("status", "active")
+    .eq("clinic_id", activeClinicId())
+    .eq("dos", dos)
+    .order("created_at", { ascending: true })
+    .limit(200);
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    id: r.id as string,
+    mode: r.mode as ReportMode,
+    dos: r.dos as string,
+    created_at: r.created_at as string,
+    form: (r.form_data as Partial<VisitForm>) ?? null,
+  }));
+}
+
+/** All archived package documents (intake/legal forms) — the staff landing groups them per patient for packet status. */
+export async function listPackageDocReports(): Promise<DayReport[]> {
+  try {
+    const { data, error } = await supabase()
+      .from("reports")
+      .select("id, mode, dos, created_at, form_data")
+      .in("mode", PACKAGE_MODES)
+      .eq("status", "active")
+      .eq("clinic_id", activeClinicId())
+      .order("created_at", { ascending: true })
+      .limit(500);
+    if (error) throw error;
+    return (data ?? []).map((r) => ({
+      id: r.id as string,
+      mode: r.mode as ReportMode,
+      dos: r.dos as string,
+      created_at: r.created_at as string,
+      form: (r.form_data as Partial<VisitForm>) ?? null,
+    }));
+  } catch {
+    return []; // offline: packet status shows unknown
+  }
+}
+
 export async function listReports(limit = 50): Promise<SavedReport[]> {
   const { data, error } = await supabase()
     .from("reports")
