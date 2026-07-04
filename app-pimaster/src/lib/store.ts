@@ -348,10 +348,10 @@ export async function updateAppUser(userId: string, partial: { roles?: string[];
 // ---------- Attorney package ----------
 
 /** Lightweight metadata for every active report (no HTML) — used to group patient cases. */
-export async function listReportMeta(): Promise<{ id: string; mode: string; dos: string; form: Partial<VisitForm> | null }[]> {
+export async function listReportMeta(): Promise<{ id: string; mode: string; dos: string; created_at: string; form: Partial<VisitForm> | null }[]> {
   const { data, error } = await supabase()
     .from("reports")
-    .select("id, mode, dos, form_data")
+    .select("id, mode, dos, created_at, form_data")
     .eq("status", "active")
     .eq("clinic_id", activeClinicId())
     .order("dos", { ascending: true })
@@ -361,6 +361,7 @@ export async function listReportMeta(): Promise<{ id: string; mode: string; dos:
     id: r.id as string,
     mode: r.mode as string,
     dos: r.dos as string,
+    created_at: (r.created_at as string) ?? "",
     form: (r.form_data as Partial<VisitForm>) ?? null,
   }));
 }

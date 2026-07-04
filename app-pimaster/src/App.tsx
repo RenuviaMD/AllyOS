@@ -12,6 +12,7 @@ import { UsersPanel } from "./components/UsersPanel";
 import { AiReportPanel } from "./components/AiReportPanel";
 import { PackagePanel } from "./components/PackagePanel";
 import { PatientBanner } from "./components/PatientBanner";
+import { PatientsPage } from "./components/PatientsPage";
 import { Sidebar, type NavAction } from "./components/Sidebar";
 import { TodayVisits } from "./components/TodayVisits";
 import type { PatientIndexEntry } from "./lib/patients";
@@ -49,8 +50,8 @@ const VISIT_LABELS: Record<VisitType, string> = { initial: "Initial", followup: 
 const MODE_LABELS: Record<VisitMode, string> = { inPerson: "In-Person", telehealth: "Telehealth" };
 const ROLE_LABELS: Record<Role, string> = { staff: "Staff", physician: "Physician", pt: "Physical Therapist" };
 
-/** Top-level navigation: the schedule-first landing (U1) vs the open encounter. */
-type MainView = "today" | "encounter";
+/** Top-level navigation: the schedule-first landing (U1), the open encounter, or the patients registry. */
+type MainView = "today" | "encounter" | "patients";
 
 export default function App() {
   const [auth, setAuth] = useState<AuthState | null | undefined>(undefined);
@@ -62,6 +63,7 @@ export default function App() {
   const [auditIssues, setAuditIssues] = useState<string[]>([]);
   const [showArchive, setShowArchive] = useState(false);
   const [archiveQuery, setArchiveQuery] = useState("");
+  const [patientsQuery, setPatientsQuery] = useState("");
   const [showBilling, setShowBilling] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showAttorney, setShowAttorney] = useState(false);
@@ -415,8 +417,8 @@ export default function App() {
   }
 
   function openPatientRecord(p: PatientIndexEntry) {
-    setArchiveQuery(`${p.first} ${p.last}`.trim());
-    setShowArchive(true);
+    setPatientsQuery(p.name);
+    setView("patients");
   }
 
   return (
@@ -520,6 +522,7 @@ export default function App() {
         {view === "today" && (
           <TodayVisits role={role} form={form} onOpenEncounter={() => setView("encounter")} onNewVisit={newVisit} />
         )}
+        {view === "patients" && <PatientsPage key={patientsQuery} initialQuery={patientsQuery} />}
         {view === "encounter" && (
           <>
         {form.visitMode === "telehealth" && role !== "pt" && <TelehealthConsent form={form} patch={patch} />}
