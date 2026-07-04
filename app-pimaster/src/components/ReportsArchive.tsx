@@ -10,10 +10,10 @@ const MODE_LABELS: Record<string, string> = {
   ptprogress: "PT Weekly",
 };
 
-export function ReportsArchive(props: { onClose: () => void }) {
+export function ReportsArchive(props: { onClose: () => void; initialQuery?: string }) {
   const [reports, setReports] = useState<SavedReport[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(props.initialQuery ?? "");
 
   useEffect(() => {
     listReports()
