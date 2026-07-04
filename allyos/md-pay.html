@@ -74,6 +74,15 @@ function render(d){
   }
   // fee line
   if(d.md_fee!=null){html+='<div class="card"><h3>Your monthly fee</h3><div style="display:flex;justify-content:space-between;font-size:.9rem"><span style="color:var(--muted)">Medical Director — monthly</span><b style="font-family:var(--fdisp);color:var(--gold)">'+money(d.md_fee)+'</b></div><div style="font-size:.72rem;color:var(--muted);margin-top:6px">Complexity-based; one-off extras appear on that month’s statement.</div></div>';}
+  // autopay (optional): recurring bank auto-debit of the monthly fee + $5, so nothing is missed.
+  var apOn=(d.status==='active'||d.status==='trialing');
+  if(apOn){
+    html+='<div class="card"><h3>Autopay</h3><div style="font-size:.86rem;color:var(--green)">✓ Autopay is on — your monthly fee'+(d.md_fee!=null?' ('+money(d.md_fee)+' + $5)':'')+' is charged automatically from your bank each month.</div>'+
+      '<div style="margin-top:8px"><a href="#" onclick="cancelAutopay();return false" style="color:#f0a59d;font-size:.78rem">Turn off autopay</a></div></div>';
+  }else if(d.md_fee!=null){
+    html+='<div class="card"><h3>Autopay <span style="font-size:.6rem;color:var(--muted)">optional</span></h3><div style="font-size:.82rem;color:var(--muted);margin-bottom:10px">Set it once and your monthly fee ('+money(d.md_fee)+' + $5 bank fee) is auto-paid from your checking account — no monthly emails to act on. One-off extras are still billed separately.</div>'+
+      '<a class="btn go" href="#" onclick="startAutopay();return false" style="font-size:.9rem">Set up autopay →</a></div>';
+  }
   // history
   if(invoices.length){
     html+='<div class="card"><h3>Statements</h3>'+invoices.map(function(v){
@@ -85,6 +94,25 @@ function render(d){
   }
   document.getElementById('body').innerHTML=html;
 }
+// Autopay = a native Stripe subscription (auto ACH). Setup sends the clinic to Stripe Checkout to
+// authorize their bank once; Stripe then charges the fee + $5 monthly. Cancel ends the subscription.
+function startAutopay(){
+  var cid=ses&&ses.clinicId;if(!cid){alert('Sign in with your clinic account first.');return;}
+  AllyOSCloud.postAuthed('/.netlify/functions/md-checkout',{clinic_id:cid,start:true})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.url){location.href=d.url;}
+      else if(d&&d.no_fee){alert('Your Medical Director needs to set your monthly fee before autopay can start.');}
+      else if(d&&d.already_active){alert('Autopay is already on.');load();}
+      else{alert('Could not start autopay right now.');}
+    }).catch(function(){alert('Could not reach billing.');});
+}
+function cancelAutopay(){
+  var cid=ses&&ses.clinicId;if(!cid)return;
+  if(!confirm('Turn off autopay? You’ll go back to paying each monthly statement manually.'))return;
+  AllyOSCloud.postAuthed('/.netlify/functions/md-billing',{action:'cancel_autopay',clinic_id:cid})
+    .then(function(r){return r.json();}).then(function(d){ if(d&&d.ok){load();} else {alert('Could not turn off autopay.');} }).catch(function(){alert('Could not reach billing.');});
+}
 if(location.search.indexOf('paid=1')>=0){setTimeout(function(){alert('✓ Thank you — your payment is processing. A receipt will be emailed to you.');},250);}
+if(location.search.indexOf('autopay=1')>=0){setTimeout(function(){alert('✓ Autopay is set up — your monthly fee will now be charged automatically from your bank. Thank you!');},250);}
 load();
 </script></body></html>

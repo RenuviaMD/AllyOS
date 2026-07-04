@@ -175,6 +175,16 @@ exports.handler = async (event) => {
     // Lemus, where the clinic APRN signs), the GFEs are NOT billable to RenuviaMD.
     const falconSignsGfe = !!clinic.md_of_record && !!clinic.rn_iv_model;
 
+    // Turn OFF autopay: cancel the recurring MD subscription (owner OR that clinic's member).
+    if (action === "cancel_autopay") {
+      const g = await requireClinic(event, clinicId); if (g.error) return g.error;
+      if (clinic.md_subscription_id) {
+        try { await stripeDelete("subscriptions/" + encodeURIComponent(clinic.md_subscription_id)); } catch (e) {}
+      }
+      await sbPatch("clinics?id=eq." + encodeURIComponent(clinicId), { md_subscription_id: null, md_subscription_status: "canceled", billing_updated_at: new Date().toISOString() });
+      return json(200, { ok: true });
+    }
+
     // Count this clinic's SIGNED GFEs since a given date (default: first of the current UTC month).
     if (action === "gfe_count") {
       const g = await requireClinic(event, clinicId); if (g.error) return g.error;
