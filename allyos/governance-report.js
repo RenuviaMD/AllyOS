@@ -35,8 +35,12 @@ window.AllyOSGovReport = (function () {
     var overallColor=pl.overall==='Compliant'?GREEN:pl.overall==='Needs correction'?RED:SLATE;
     var pracRows=(pl.practitioners&&pl.practitioners.length?pl.practitioners:[['Armando A. Falcon','Medical Director','FL Medical License · ME 84789','Verify']])
       .map(function(r,i){return [String(i+1)].concat([r[0]||'—',r[1]||'—',r[2]||'—',r[3]||'—']);});
-    var chartRows=(pl.charts&&pl.charts.length?pl.charts:[['{chart 1}','{DOS}','{review type}'],['{chart 2}','{DOS}','{review type}'],['{chart 3}','{DOS}','{review type}'],['{chart 4}','{DOS}','{review type}'],['{chart 5}','{DOS}','{review type}']])
-      .map(function(r,i){return [String(i+1),r[0]||'—',r[1]||'—',r[2]||'—','Reviewed'];});
+    // charts may be objects {ref,ini,dos,line,status} (chart-review engine) or legacy [chart,dos,type].
+    var chartsSrc=(pl.charts&&pl.charts.length)?pl.charts:[{ref:'{chart 1}',dos:'{DOS}',line:'{review type}',status:'Reviewed'},{ref:'{chart 2}',dos:'{DOS}',line:'{review type}',status:'Reviewed'},{ref:'{chart 3}',dos:'{DOS}',line:'{review type}',status:'Reviewed'},{ref:'{chart 4}',dos:'{DOS}',line:'{review type}',status:'Reviewed'},{ref:'{chart 5}',dos:'{DOS}',line:'{review type}',status:'Reviewed'}];
+    var chartRows=chartsSrc.map(function(r,i){
+      var o=Array.isArray(r)?{ref:r[0],ini:'',dos:r[1],line:r[2],status:'Reviewed'}:r;
+      return [String(i+1),o.ref||'—',o.ini||'—',o.dos||'—',o.line||'—',o.status||'Reviewed'];
+    });
     var content=[
       {text:(pl.clinic||'Clinic')+(pl.program?(' · '+pl.program):''),style:'clinicName'},
       pl.address?{text:pl.address,style:'clinicAddr'}:{text:'',margin:[0,0]},
@@ -65,8 +69,8 @@ window.AllyOSGovReport = (function () {
       statusBox('Biohazardous waste plan on file; staff trained.','COMPLIANT',GREEN),
       bodyP('Biohazard vendor: '+(pl.bioVendor||'{Vendor name}')+'. Vendor active since '+(pl.bioSince||'{date}')+'. Clinic maintains vendor documentation and staff training record in the clinic binder.'),
       sec('V. Clinical Record Review / Monthly Governance Audit'),
-      bodyP('Charts/records were reviewed from the applicable monthly record source. No PHI is published in this binder copy; this is an internal governance review.'),
-      dataTable(['#','Chart / record reviewed','Date of service','Review type','Status'],chartRows,[22,'*',80,'*',60]),
+      bodyP('Charts were randomly sampled from the clinic’s monthly encounter list and reviewed against the service-line documentation parameters. No PHI is published in this binder copy — chart reference + patient initials only.'),
+      dataTable(['#','Chart ref','Initials','Date of service','Line','Result'],chartRows,[20,'*',48,72,'*',52]),
       sec('VI. Service-Line Governance Review'),
       bodyP('Only active treatment lines are shown below. Inactive service lines are omitted from this report.')
     ];
@@ -78,6 +82,10 @@ window.AllyOSGovReport = (function () {
       content.push(dataTable(['Item','Responsible party','Due date'],pl.corrections.map(function(c){return [c.label+' missing',c.resp||'—',c.due||'—'];}),['*',150,100]));
     } else {
       content.push(statusBox('Corrective action','NONE REQUIRED',GREEN));
+    }
+    if(pl.priorCorrections&&pl.priorCorrections.length){
+      content.push(bodyP('Status of prior-period corrective items:'));
+      content.push(dataTable(['Prior item','Status'],pl.priorCorrections.map(function(c){return [c.label,c.status||'Pending'];}),['*',100]));
     }
     content.push(bodyP('Compliance education: staff reminded that services may only be performed within signed protocol, active license/scope, documented consent, and clinic record requirements. The clinic EMR or paper chart remains the official medical record.'));
     content.push(sec('VIII. Medical Director Attestation'));

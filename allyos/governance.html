@@ -41,6 +41,22 @@
  .tog button.on.m{background:#2a1512;border-color:#8a322c;color:#f0b3aa}
  .tog button.on.n{background:#0e2436;border-color:#2a5a7e;color:var(--blue)}
  .gen{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a;border:none;border-radius:10px;padding:11px 18px;font-weight:800;font-size:.9rem;cursor:pointer;margin-top:16px}
+ .ccard{background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:10px}
+ .chead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+ .cref{font-family:var(--fdisp);font-weight:800;font-size:13.5px}
+ .cini{font-size:12px;color:var(--muted)}
+ .cline{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line2);border-radius:5px;padding:2px 7px;color:var(--teal)}
+ .cstat{margin-left:auto;font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px}
+ .cstat.pass{background:#0e2a1f;color:var(--green);border:1px solid #1e6e4a}
+ .cstat.fail{background:#2a1512;color:#f0b3aa;border:1px solid #8a322c}
+ .cstat.pend{background:#1a222b;color:var(--muted);border:1px solid var(--line2)}
+ .citem{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line);font-size:12.5px}
+ .citem .cl{flex:1}.citem .ev{font-size:10.5px;color:var(--dim);flex-basis:100%;margin-left:2px}
+ .cbtn{font-size:10.5px;font-weight:700;border-radius:7px;padding:4px 9px;cursor:pointer;border:1px solid var(--line2);background:#0a1422;color:var(--muted)}
+ .cbtn.on.p{background:#0e2a1f;border-color:#1e6e4a;color:var(--green)}.cbtn.on.m{background:#2a1512;border-color:#8a322c;color:#f0b3aa}.cbtn.on.n{background:#0e2436;border-color:#2a5a7e;color:var(--blue)}
+ .cparse{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line2)}
+ .cparse label{font-size:11px;color:var(--teal);cursor:pointer;border:1px solid var(--line2);border-radius:7px;padding:5px 10px}
+ .cprior{background:#12100a;border:1px solid #3a3117;border-radius:9px;padding:10px 12px;margin:10px 0}
 </style></head>
 <body class="allyos">
 <div class="top">
@@ -75,6 +91,15 @@
   <div class="lines" id="lines"></div>
   <div style="font-size:11px;color:var(--dim)">Auto-detected from the clinic's active lines — click to correct. Lines that are off do not appear in the report.</div>
 
+  <div class="grp">Chart review (Section V) — sample &amp; inspect</div>
+  <div class="note">Paste the clinic's <b>PHI-free</b> chart list — one per line: <code>chart # | initials | line | date</code> (line = iv / pep / bhrt). Then <b>pick 5 at random</b> and inspect each against the same parameters. Chart # + initials only — <b>no PHI</b>.</div>
+  <textarea id="chartPool" rows="4" placeholder="IV-2026-018 | J.D. | iv | 07/09/2026&#10;BH-2026-044 | M.R. | bhrt | 07/11/2026&#10;PEP-2026-007 | A.L. | pep | 07/14/2026" style="width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:8px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px;resize:vertical"></textarea>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px">
+    <button onclick="pickCharts()" style="background:#0a1422;border:1px solid var(--teal);border-radius:8px;color:var(--teal);font:inherit;font-size:12.5px;font-weight:700;padding:8px 13px;cursor:pointer">🎲 Pick 5 at random</button>
+    <span style="font-size:11px;color:var(--dim)" id="poolCount"></span>
+  </div>
+  <div id="chartCards" style="margin-top:12px"></div>
+
   <details class="sec"><summary>Binder detail — sections I–V <span class="cnt">optional · fills the report</span></summary><div class="body">
     <div class="fl"><label>License verification date</label><input id="dVerify" type="text" placeholder="e.g. 07/05/2026"></div>
     <div class="fl"><label>Practitioners (one per line: Name | Position | License | Expires)</label><textarea id="dPrac" rows="3">Armando A. Falcon | Medical Director | FL Medical License · ME 84789 | Verify</textarea></div>
@@ -95,6 +120,7 @@
 </div>
 
 <script src="allyos-auth.js"></script>
+<script src="supabase-client.js"></script>
 <script src="governance-report.js"></script>
 <script>
 if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin']);}
@@ -184,17 +210,90 @@ function collectPayload(){
     reportDate:document.getElementById('hMonth').value,rec:document.getElementById('hRec').value,overall:manual||(M>0?'Needs correction':(U>0?'Not reviewed':'Compliant')),
     verifyDate:document.getElementById('dVerify').value,scopeNote:document.getElementById('dScope').value,protocolStatus:document.getElementById('dProto').value,
     adverse:document.getElementById('dAdverse').value,adverseNote:document.getElementById('dAdvNote').value,bioVendor:document.getElementById('dBio').value,bioSince:document.getElementById('dBioSince').value,
-    practitioners:parseRows('dPrac'),charts:parseRows('dCharts'),lines:[],corrections:[]};
+    practitioners:parseRows('dPrac'),charts:[],lines:[],corrections:[],priorCorrections:[]};
+  // Section V — the 5 sampled charts with their pass/fail (PHI-free: chart # + initials only).
+  var rc=rev().charts||[];
+  pl.charts = rc.length ? rc.map(function(c){var sec=secByK(c.line);var st=chartStatus(c,sec);return {ref:c.ref,ini:c.ini,dos:c.dos,line:sec.title,status:st.cls==='pass'?'Pass':(st.cls==='fail'?'Fail':'Pending')};}) : parseRows('dCharts').map(function(r){return {ref:r[0],ini:'',dos:r[1],line:r[2],status:'Reviewed'};});
+  // per-chart failures -> corrective action
+  rc.forEach(function(c){var sec=secByK(c.line);sec.items.forEach(function(it,i){if(c.st[i]==='missing')pl.corrections.push({label:c.ref+' — '+it,resp:'Clinic provider',due:''});});});
+  // Section VI line-level attestation (+ its own missing items)
   visibleSections().forEach(function(sec){pl.lines.push({title:sec.title,items:sec.items.map(function(it,i){return {label:it,status:STATUS[stt()[sec.k+':'+i]]||'Not set'};})});
     sec.items.forEach(function(it,i){var id=sec.k+':'+i;if(stt()[id]==='missing'){var c=corr()[id]||{};pl.corrections.push({label:it,resp:c.resp,due:c.due});}});});
+  // carry-forward — last month's corrections + their corrected/pending status
+  (rev().prior||[]).forEach(function(p){pl.priorCorrections.push({label:p.label,status:p.status==='corrected'?'Corrected':'Pending'});});
   return pl;
 }
 function genReport(){
   if(!window.AllyOSGovReport){alert('Report module not loaded.');return;}
+  var pl=collectPayload();
   var btn=document.getElementById('genBtn');if(btn){btn.textContent='Generating…';btn.disabled=true;}
-  AllyOSGovReport.download(collectPayload()).then(function(){if(btn){btn.textContent='⬇ Download report PDF';btn.disabled=false;}})
-    .catch(function(e){if(btn){btn.textContent='⬇ Download report PDF';btn.disabled=false;}alert('Report error: '+(e&&e.message||e));});
+  AllyOSGovReport.download(pl).then(function(){
+    if(btn){btn.textContent='⬇ Download report PDF';btn.disabled=false;}
+    // this month's failures become next month's carry-forward (corrected/pending)
+    rev().prior=(pl.corrections||[]).map(function(c){return {label:c.label,status:'pending'};});
+    save(SKEY,store);renderCharts();
+  }).catch(function(e){if(btn){btn.textContent='⬇ Download report PDF';btn.disabled=false;}alert('Report error: '+(e&&e.message||e));});
 }
-renderPicker();attachListeners();loadHeaderValues();saveHeader();render();
+// ---- Chart review (Section V): sample 5 at random + inspect (+ optional AI parse) ----
+function normLine(t){t=(''+(t||'')).toLowerCase().trim();if(t.indexOf('iv')===0||t.indexOf('im')===0)return 'iv';if(t.indexOf('pep')===0)return 'pep';if(t.indexOf('bhrt')>=0||t.indexOf('hrt')>=0||t.indexOf('horm')>=0)return 'bhrt';return 'iv';}
+function secByK(k){for(var i=0;i<SECTIONS.length;i++)if(SECTIONS[i].k===k)return SECTIONS[i];return SECTIONS[0];}
+function rev(){store[cid].rev=store[cid].rev||{pool:'',charts:[],prior:[]};return store[cid].rev;}
+function chartStatus(c,sec){var miss=0,uns=0;sec.items.forEach(function(_,i){var v=c.st[i];if(v==='missing')miss++;else if(!v)uns++;});if(miss>0)return {cls:'fail',label:'FAIL · '+miss+' missing'};if(uns>0)return {cls:'pend',label:'Pending'};return {cls:'pass',label:'PASS'};}
+function pickCharts(){
+  var raw=document.getElementById('chartPool').value;rev().pool=raw;
+  var pool=raw.split(/\r?\n/).map(function(l){return l.trim();}).filter(Boolean).map(function(l){var p=l.split('|').map(function(x){return x.trim();});return {ref:p[0]||'',ini:p[1]||'',line:normLine(p[2]),dos:p[3]||''};}).filter(function(c){return c.ref;});
+  if(pool.length<1){alert('Add at least one chart (chart # | initials | line | date).');return;}
+  var idx=pool.map(function(_,i){return i;});
+  for(var i=idx.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idx[i];idx[i]=idx[j];idx[j]=t;}
+  rev().charts=idx.slice(0,Math.min(5,pool.length)).sort(function(a,b){return a-b;}).map(function(i){var c=pool[i];return {ref:c.ref,ini:c.ini,line:c.line,dos:c.dos,st:{},ev:{}};});
+  document.getElementById('poolCount').textContent=pool.length+' in pool · 5 sampled';
+  save(SKEY,store);renderCharts();render();
+}
+function setChartItem(ci,i,v){var c=rev().charts[ci];if(c.st[i]===v)delete c.st[i];else c.st[i]=v;save(SKEY,store);renderCharts();render();}
+function fileToB64(file){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result);};r.onerror=rej;r.readAsDataURL(file);});}
+function parseText(ci){var ta=document.getElementById('nt'+ci);if(!ta||!ta.value.trim()){alert('Paste the note text first.');return;}callParse(ci,{text:ta.value});}
+function parseImage(ci,input){if(!input.files||!input.files[0])return;fileToB64(input.files[0]).then(function(b64){callParse(ci,{image:b64});});}
+function callParse(ci,payload){
+  var r=rev(),c=r.charts[ci],sec=secByK(c.line),msg=document.getElementById('pmsg'+ci);
+  if(msg)msg.textContent='Reading the note…';
+  var body=Object.assign({line:sec.title,items:sec.items,clinic_id:(sess.clinicId||null)},payload);
+  var call=(window.AllyOSCloud&&AllyOSCloud.postAuthed)?AllyOSCloud.postAuthed('/.netlify/functions/governance-parse',body):fetch('/.netlify/functions/governance-parse',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+  Promise.resolve(call).then(function(rp){return rp.json();}).then(function(d){
+    if(!d||d.error){if(msg)msg.textContent=(d&&(d.hint||d.error))||'Parse failed';return;}
+    (d.results||[]).forEach(function(res,i){
+      var idx=i;for(var k=0;k<sec.items.length;k++){if(res.item&&sec.items[k].toLowerCase()===(''+res.item).toLowerCase()){idx=k;break;}}
+      if(idx<sec.items.length){c.st[idx]=res.status;if(res.evidence)c.ev[idx]=res.evidence;}
+    });
+    save(SKEY,store);renderCharts();render();
+  }).catch(function(){if(msg)msg.textContent='Could not reach the parser.';});
+}
+function renderCharts(){
+  var el=document.getElementById('chartCards');if(!el)return;var r=rev();
+  var prior=(r.prior||[]);
+  var priorHtml=prior.length?'<div class="cprior"><div style="font-size:11px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Last month’s corrections</div>'+prior.map(function(p,pi){return '<div class="citem" style="border-top:none"><span class="cl">'+esc(p.label)+'</span>'+
+    '<button class="cbtn p'+(p.status==='corrected'?' on':'')+'" onclick="setPrior('+pi+',\'corrected\')">Corrected</button>'+
+    '<button class="cbtn m'+(p.status==='pending'?' on':'')+'" onclick="setPrior('+pi+',\'pending\')">Pending</button></div>';}).join('')+'</div>':'';
+  var cardsHtml=(!r.charts||!r.charts.length)?'<div style="font-size:11.5px;color:var(--dim)">No charts selected yet — paste the list and pick 5.</div>':
+    r.charts.map(function(c,ci){
+      var sec=secByK(c.line);
+      var rows=sec.items.map(function(it,i){var v=c.st[i]||'';var ev=c.ev[i]?'<div class="ev">“'+esc(c.ev[i])+'”</div>':'';
+        return '<div class="citem"><span class="cl">'+esc(it)+'</span>'+
+          '<button class="cbtn p'+(v==='present'?' on':'')+'" onclick="setChartItem('+ci+','+i+',\'present\')">Present</button>'+
+          '<button class="cbtn m'+(v==='missing'?' on':'')+'" onclick="setChartItem('+ci+','+i+',\'missing\')">Missing</button>'+
+          '<button class="cbtn n'+(v==='na'?' on':'')+'" onclick="setChartItem('+ci+','+i+',\'na\')">N/A</button>'+ev+'</div>';}).join('');
+      var st=chartStatus(c,sec);
+      return '<div class="ccard"><div class="chead"><span class="cref">'+esc(c.ref)+'</span><span class="cini">'+esc(c.ini||'—')+'</span><span class="cline">'+esc(sec.title)+'</span>'+(c.dos?'<span class="cini">'+esc(c.dos)+'</span>':'')+'<span class="cstat '+st.cls+'">'+st.label+'</span></div>'+rows+
+        '<div class="cparse"><textarea id="nt'+ci+'" rows="2" placeholder="Paste the EMR note text (optional) — processed transiently, never stored" style="flex-basis:100%;background:#0a1422;border:1px solid var(--line2);border-radius:7px;color:var(--ink);font:inherit;font-size:12px;padding:6px 8px;resize:vertical"></textarea>'+
+        '<button class="cbtn" onclick="parseText('+ci+')">📝 Parse text (AI)</button>'+
+        '<label>📷 Photo of handwriting<input type="file" accept="image/*" style="display:none" onchange="parseImage('+ci+',this)"></label>'+
+        '<span style="font-size:10.5px;color:var(--dim)" id="pmsg'+ci+'"></span></div></div>';
+    }).join('');
+  el.innerHTML=priorHtml+cardsHtml;
+}
+function setPrior(pi,v){var p=rev().prior[pi];p.status=(p.status===v)?'':v;save(SKEY,store);renderCharts();}
+
+renderPicker();attachListeners();loadHeaderValues();saveHeader();
+if(rev().pool)document.getElementById('chartPool').value=rev().pool;
+renderCharts();render();
 </script>
 </body></html>
