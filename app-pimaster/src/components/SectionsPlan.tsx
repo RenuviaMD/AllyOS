@@ -4,6 +4,7 @@ import { deriveIcd10, PSYCH_CODES } from "../lib/icd10";
 import { listDxCatalog, type DxCatalogRow } from "../lib/store";
 import { imagingReviewNarrative, medicalNecessityTemplate } from "../lib/narratives";
 import { Area, CheckGroup, Section, Select, YesNoField } from "./fields";
+import { PhraseBar } from "./PhraseBar";
 import type { SectionProps } from "./SectionsIntake";
 
 export function Section6Assessment({ form, patch }: SectionProps) {
@@ -191,13 +192,16 @@ export function Section7Plan({ form, patch }: SectionProps) {
             onChange={(sel) => patch("plan", { procedures: sel })}
           />
           {(p.procedures ?? []).length > 0 && (
-            <div className="grid" style={{ marginTop: 8 }}>
-              <Area
-                label="Procedure details — REQUIRED — muscles injected, medication & dose, patient tolerance"
-                value={p.procedureNote ?? ""}
-                onChange={(v) => patch("plan", { procedureNote: v })}
-              />
-            </div>
+            <>
+              <PhraseBar category="procedure" value={p.procedureNote ?? ""} onInsert={(v) => patch("plan", { procedureNote: v })} />
+              <div className="grid" style={{ marginTop: 8 }}>
+                <Area
+                  label="Procedure details — REQUIRED — muscles injected, medication & dose, patient tolerance"
+                  value={p.procedureNote ?? ""}
+                  onChange={(v) => patch("plan", { procedureNote: v })}
+                />
+              </div>
+            </>
           )}
         </div>
       )}
