@@ -214,3 +214,21 @@ body {
   padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 600;
 }
 .bulk-btn:hover { background: rgba(39,174,96,.3); }
+
+/* Persistent patient banner (UX Blueprint U2) */
+.pt-banner {
+  position: sticky; top: 0; z-index: 9;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 7px 20px;
+  background: linear-gradient(180deg, #12313f, #0f2a37);
+  border-bottom: 1px solid var(--accent);
+  font-size: 13px;
+}
+.ptb-name { font-weight: 700; font-size: 15px; color: var(--gold); letter-spacing: .4px; }
+.ptb-item { color: #b8cad8; }
+.ptb-item + .ptb-item::before { content: ""; }
+.ptb-day { font-weight: 700; padding: 1px 9px; border-radius: 10px; font-size: 12px; }
+.ptb-day.ok { background: #123f31; color: #5fe3b3; border: 1px solid #1d6a52; }
+.ptb-day.late { background: #46201d; color: #ff9e93; border: 1px solid #7a3a34; }
+.ptb-badge { font-size: 10.5px; font-weight: 700; letter-spacing: 1px; padding: 2px 8px; border-radius: 4px; background: #1b3245; color: #8fd3ff; border: 1px solid #2d4a63; }
+.ptb-badge.tele { background: #3a2c12; color: #ffd57a; border-color: #6a501f; }
