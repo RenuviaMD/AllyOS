@@ -83,19 +83,31 @@ exports.handler = async (event) => {
       customer: customer,
       // BANK / ACH only — no card. Complexity-based amount priced inline per clinic.
       payment_method_types: ["us_bank_account"],
-      line_items: [{
-        price_data: {
-          currency: "usd",
-          product_data: { name: "Medical Director — Monthly (" + (clinic.name || "clinic") + ")" },
-          unit_amount: Math.round(fee * 100),
-          recurring: { interval: "month" },
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: { name: "Medical Director — Monthly (" + (clinic.name || "clinic") + ")" },
+            unit_amount: Math.round(fee * 100),
+            recurring: { interval: "month" },
+          },
+          quantity: 1,
         },
-        quantity: 1,
-      }],
+        {
+          // $5 ACH processing fee, same as a manual bill — applied to every autopay charge.
+          price_data: {
+            currency: "usd",
+            product_data: { name: "Processing fee (bank/ACH)" },
+            unit_amount: 500,
+            recurring: { interval: "month" },
+          },
+          quantity: 1,
+        },
+      ],
       client_reference_id: clinicId,
       // metadata.type routes this to the md_* fields in the webhook (NOT the AllyOS line fields).
       subscription_data: { metadata: { clinic_id: clinicId, type: "md_of_record" } },
-      success_url: site + "/allyos/md-pay.html?paid=1",
+      success_url: site + "/allyos/md-pay.html?autopay=1",
       cancel_url: site + "/allyos/md-pay.html?canceled=1",
     }, key);
     return json(200, { ok: true, url: session.url });
