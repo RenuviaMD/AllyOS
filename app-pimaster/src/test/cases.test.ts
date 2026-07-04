@@ -88,6 +88,8 @@ describe("caseActionItems (U5 pinned action chips)", () => {
       ref({ mode: "aob", dos: "2026-06-21" }),
       ref({ mode: "records_release", dos: "2026-06-21" }),
       ref({ mode: "attestation14", dos: "2026-06-21" }),
+      ref({ mode: "pip_regulation", dos: "2026-06-21" }),
+      ref({ mode: "excluded_services", dos: "2026-06-21" }),
     ]);
     expect(caseActionItems(c, docs[c.patientKey]).some((i) => i.kind === "packet")).toBe(false);
   });

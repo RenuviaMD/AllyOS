@@ -14,7 +14,7 @@ import {
 } from "./narratives";
 import { EXAM_REGIONS, impairedSides, JOINT_REGIONS, SPINE_REGION_IDS, SPINE_REGION_LABELS } from "./rom";
 import type { DxCode, VisitForm } from "./types";
-import { daysSinceAccident, weekBounds, weekNumber } from "./weeks";
+import { daysSinceAccident, parseIso, toIso, weekBounds, weekNumber } from "./weeks";
 
 function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -602,6 +602,64 @@ export function buildAttestation14Html(form: VisitForm): string {
     best of my knowledge.</p>
     ${patientSignatureLines(form)}`;
   return wrap(`14-Day Attestation — ${form.patient.lastName}`, b, footerCtx(form));
+}
+
+/** Florida PIP regulation & requirements education sheet — patient signs once at the first visit
+ * (reception packet form 5 of 6). Benefit limits, the 14-day rule with the computed deadline,
+ * covered vs excluded services, medical necessity, and financial responsibility. */
+export function buildPipRegulationHtml(form: VisitForm): string {
+  const doa = form.accident.accidentDate;
+  const deadline = /^\d{4}-\d{2}-\d{2}$/.test(doa)
+    ? toIso(new Date(parseIso(doa).getTime() + 14 * 86400000))
+    : "";
+  const b = `<h1>FLORIDA PIP INSURANCE REGULATION &amp; REQUIREMENTS</h1>
+    ${packageIdentityBlock(form)}
+    <h2>Your PIP Benefit Limit</h2>
+    <table>
+      <tr><th>$10,000</th><td>Available when a physician certifies that you sustained an <strong>Emergency Medical Condition (EMC)</strong> as defined by Florida Statute § 627.732(4). The EMC determination is made at your initial medical evaluation.</td></tr>
+      <tr><th>$2,500</th><td>The maximum PIP benefit if an Emergency Medical Condition is <strong>not</strong> certified.</td></tr>
+    </table>
+    <h2>The 14-Day Rule</h2>
+    <p>Florida Statute § 627.736(1)(a) requires you to receive initial services and care within <strong>14 days</strong>
+    of your motor vehicle accident${deadline ? ` — for your accident of <strong>${esc(doa)}</strong>, no later than <strong>${esc(deadline)}</strong>` : ""} —
+    or your PIP claim will be <strong>DENIED entirely</strong>.</p>
+    <h2>What PIP Covers</h2>
+    <p>Physician evaluation and treatment, physical therapy, diagnostic imaging and testing, and other services that are
+    <strong>medically necessary</strong> and related to the accident. PIP pays <strong>80%</strong> of reasonable medical
+    expenses and <strong>60%</strong> of lost wages, up to your benefit limit.</p>
+    <h2>What PIP Does NOT Cover</h2>
+    <p><strong>Massage therapy</strong> and <strong>acupuncture</strong> are excluded from Florida PIP reimbursement,
+    regardless of who performs them (Fla. Stat. § 627.736(1)(a)5). A separate acknowledgment of excluded services is
+    provided with this packet.</p>
+    <h2>Medical Necessity &amp; Financial Responsibility</h2>
+    <p>Only medically necessary services documented by your treating providers are billable to PIP. I understand that I
+    remain financially responsible for applicable deductibles and co-insurance, and for services not covered by PIP, to
+    the extent permitted by law, and that I will receive itemized superbills on request.</p>
+    <p>I acknowledge that this information was explained to me and that I received a copy of this sheet.</p>
+    ${patientSignatureLines(form)}`;
+  return wrap(`PIP Regulation Sheet — ${form.patient.lastName}`, b, footerCtx(form));
+}
+
+/** Excluded-services acknowledgment — patient signs once at the first visit (reception packet
+ * form 6 of 6). Massage/acupuncture PIP exclusion with the explicit out-of-pocket consent path. */
+export function buildExcludedServicesHtml(form: VisitForm): string {
+  const b = `<h1>ACKNOWLEDGMENT OF EXCLUDED SERVICES (FLORIDA PIP)</h1>
+    ${packageIdentityBlock(form)}
+    <p>I, <strong>${esc(fullName(form))}</strong>, acknowledge that under Florida Statute § 627.736(1)(a)5,
+    <strong>massage therapy</strong> and <strong>acupuncture</strong> are excluded from Personal Injury Protection (PIP)
+    reimbursement, regardless of the license held by the person providing the service. These services will never be
+    billed to my PIP insurer by ${esc(CLINIC.name)}.</p>
+    <p>If I wish to receive an excluded service, I understand the required out-of-pocket path:</p>
+    <table>
+      <tr><td>1</td><td>I must <strong>explicitly request</strong> the excluded service.</td></tr>
+      <tr><td>2</td><td>I must <strong>acknowledge in writing</strong>, before the service is provided, that it is not covered by PIP.</td></tr>
+      <tr><td>3</td><td>I must <strong>agree to pay in full</strong>, out of pocket, at the clinic's posted rate.</td></tr>
+      <tr><td>4</td><td>I will receive an <strong>itemized superbill or invoice</strong> for the service, marked as not billable to PIP.</td></tr>
+    </table>
+    <p>I agree to hold ${esc(CLINIC.name)} and my insurance carrier harmless for the non-payment of excluded services I
+    elect to receive, and I understand this acknowledgment does not obligate me to purchase any excluded service.</p>
+    ${patientSignatureLines(form)}`;
+  return wrap(`Excluded Services Acknowledgment — ${form.patient.lastName}`, b, footerCtx(form));
 }
 
 /** Telehealth consent — signed for telehealth visits (facility-originated). */

@@ -21,6 +21,8 @@ export const MODE_TITLES: Record<string, string> = {
   aob: "AOB",
   records_release: "Records Release",
   attestation14: "14-Day Attestation",
+  pip_regulation: "PIP Regulation Sheet",
+  excluded_services: "Excluded Services Ack.",
   telehealth_consent: "Telehealth Consent",
   affidavit: "Sworn Affidavit",
 };
