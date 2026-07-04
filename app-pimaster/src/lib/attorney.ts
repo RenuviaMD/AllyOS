@@ -40,6 +40,8 @@ export const MODE_LABELS: Record<string, string> = {
   aob: "Assignment of Benefits",
   records_release: "Medical Records Release (HIPAA)",
   attestation14: "PIP 14-Day Attestation",
+  pip_regulation: "Florida PIP Regulation & Requirements",
+  excluded_services: "Excluded Services Acknowledgment",
   telehealth_consent: "Telehealth Informed Consent",
 };
 
@@ -55,7 +57,9 @@ const MODE_ORDER: Record<string, number> = {
   aob: 6,
   records_release: 7,
   attestation14: 8,
-  telehealth_consent: 9,
+  pip_regulation: 9,
+  excluded_services: 10,
+  telehealth_consent: 11,
 };
 
 export function sortDocs<T extends { mode: string; dos: string }>(docs: T[]): T[] {

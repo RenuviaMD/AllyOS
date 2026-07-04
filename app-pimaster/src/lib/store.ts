@@ -26,10 +26,12 @@ export type ReportMode =
   | "aob"
   | "records_release"
   | "attestation14"
+  | "pip_regulation"
+  | "excluded_services"
   | "telehealth_consent"
   | "affidavit";
 
-const PACKAGE_MODES = ["aob", "records_release", "attestation14", "telehealth_consent", "affidavit"];
+const PACKAGE_MODES = ["aob", "records_release", "attestation14", "pip_regulation", "excluded_services", "telehealth_consent", "affidavit"];
 
 // ---------- Active clinic (tenancy) ----------
 

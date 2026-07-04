@@ -2,6 +2,8 @@ import {
   buildAffidavitHtml,
   buildAobHtml,
   buildAttestation14Html,
+  buildExcludedServicesHtml,
+  buildPipRegulationHtml,
   buildRecordsReleaseHtml,
   buildTelehealthConsentHtml,
 } from "./report";
@@ -15,7 +17,14 @@ import type { VisitForm } from "./types";
  * pick it up automatically.
  */
 
-export type PackageKind = "aob" | "records_release" | "attestation14" | "telehealth_consent" | "affidavit";
+export type PackageKind =
+  | "aob"
+  | "records_release"
+  | "attestation14"
+  | "pip_regulation"
+  | "excluded_services"
+  | "telehealth_consent"
+  | "affidavit";
 
 export interface PackageDocDef {
   kind: PackageKind;
@@ -56,6 +65,24 @@ export const PACKAGE_DOCS: PackageDocDef[] = [
     oncePerPatient: true,
     appliesTo: (f) => f.visitType === "initial",
     build: buildAttestation14Html,
+  },
+  {
+    kind: "pip_regulation",
+    title: "Florida PIP Regulation & Requirements",
+    producer: "staff",
+    signer: "Patient + staff",
+    oncePerPatient: true,
+    appliesTo: (f) => f.visitType === "initial",
+    build: buildPipRegulationHtml,
+  },
+  {
+    kind: "excluded_services",
+    title: "Excluded Services Acknowledgment",
+    producer: "staff",
+    signer: "Patient + staff",
+    oncePerPatient: true,
+    appliesTo: (f) => f.visitType === "initial",
+    build: buildExcludedServicesHtml,
   },
   {
     kind: "telehealth_consent",

@@ -13,10 +13,10 @@ function patient() {
   return f;
 }
 
-describe("package registry", () => {
-  it("initial in-person visit: AOB, release, attestation, affidavit — no telehealth consent", () => {
+describe("package registry (6-form reception packet ruling)", () => {
+  it("initial in-person visit: AOB, release, attestation, PIP regulation, excluded services, affidavit — no telehealth consent", () => {
     const kinds = applicableDocs(patient()).map((d) => d.kind);
-    expect(kinds).toEqual(["aob", "records_release", "attestation14", "affidavit"]);
+    expect(kinds).toEqual(["aob", "records_release", "attestation14", "pip_regulation", "excluded_services", "affidavit"]);
   });
 
   it("telehealth visit adds the consent; follow-up drops the one-time intake docs", () => {
@@ -28,14 +28,56 @@ describe("package registry", () => {
 
   it("one-time-per-patient documents are exactly the first-visit set; affidavit is physician-produced", () => {
     const once = PACKAGE_DOCS.filter((d) => d.oncePerPatient).map((d) => d.kind);
-    expect(once).toEqual(["aob", "records_release", "attestation14", "affidavit"]);
+    expect(once).toEqual(["aob", "records_release", "attestation14", "pip_regulation", "excluded_services", "affidavit"]);
     expect(PACKAGE_DOCS.find((d) => d.kind === "affidavit")?.producer).toBe("physician");
     expect(PACKAGE_DOCS.filter((d) => d.producer === "staff").map((d) => d.kind)).toEqual([
       "aob",
       "records_release",
       "attestation14",
+      "pip_regulation",
+      "excluded_services",
       "telehealth_consent",
     ]);
+  });
+});
+
+describe("PIP regulation sheet (form 5)", () => {
+  it("carries the benefit split, the computed 14-day deadline, and the denial warning", () => {
+    const html = PACKAGE_DOCS.find((d) => d.kind === "pip_regulation")!.build(patient());
+    expect(html).toContain("$10,000");
+    expect(html).toContain("$2,500");
+    expect(html).toContain("Emergency Medical Condition");
+    expect(html).toContain("627.732(4)"); // EMC definition — the adjudicated citation
+    expect(html).toContain("627.736(1)(a)");
+    expect(html).toContain("2026-07-04"); // accident 2026-06-20 + 14 days
+    expect(html).toContain("DENIED entirely");
+    expect(html).toContain("80%");
+    expect(html).toContain("60%");
+    expect(html).toContain("Massage therapy");
+    expect(html).not.toContain("627.409"); // fraud statute never cited in EMC context
+  });
+
+  it("leaves the deadline blank when no accident date is entered (blank stays blank)", () => {
+    const f = patient();
+    f.accident.accidentDate = "";
+    const html = PACKAGE_DOCS.find((d) => d.kind === "pip_regulation")!.build(f);
+    expect(html).toContain("14 days");
+    expect(html).not.toContain("no later than");
+  });
+});
+
+describe("excluded services acknowledgment (form 6)", () => {
+  it("carries the exclusion, the four-step out-of-pocket path, and the hold-harmless clause", () => {
+    const html = PACKAGE_DOCS.find((d) => d.kind === "excluded_services")!.build(patient());
+    expect(html).toContain("massage therapy");
+    expect(html).toContain("acupuncture");
+    expect(html).toContain("627.736(1)(a)5");
+    expect(html).toContain("explicitly request");
+    expect(html).toContain("acknowledge in writing");
+    expect(html).toContain("agree to pay in full");
+    expect(html).toContain("itemized superbill");
+    expect(html).toContain("hold");
+    expect(html).toContain("harmless");
   });
 });
 
