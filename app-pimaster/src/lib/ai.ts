@@ -88,6 +88,9 @@ export function reportFacts(form: VisitForm): Record<string, unknown> {
     ...base,
     encounterMode: form.visitMode,
     dateOfService: form.visitDate,
+    chiefComplaints: (form.complaints ?? [])
+      .filter((c) => c.region)
+      .map((c) => ({ region: c.region, side: c.side || undefined, painScale: c.pain || undefined, note: c.note || undefined })),
     insuranceCarrier: form.patient.insuranceCarrier || "Pending",
     telehealthConsent: form.visitMode === "telehealth" ? { obtained: form.telehealth.consentObtained, witnessedBy: form.telehealth.consentBy || undefined } : undefined,
     vitals: { bp: g.bp || undefined, pulse: g.pulse || undefined, resp: g.resp || undefined, temp: g.temp || undefined },

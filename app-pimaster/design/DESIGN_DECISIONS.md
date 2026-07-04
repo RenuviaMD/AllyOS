@@ -53,3 +53,15 @@ exam, POS 02/modifier 95 vs POS 11, §456.47 language), visit-type behavior
 multi-clinic RLS, fee schedule, carrier routing, document package rules, AI report
 specs. The batch restyles and rearranges the UI; it never alters clinical,
 billing, or compliance behavior.
+
+## GOVERNING WORKFLOW CONCEPT (2026-07-04, Dr. Falcon — supersedes form-first assembly)
+**The complaint IS the command: region in → everything out.** The physician enters
+the chief complaint (region + laterality + pain n/10 + brief qualifiers) and the
+platform generates the entire region thread automatically: ICD-10 with laterality
+and encounter suffix, the imaging order (72052-family), the PT prescription, the
+AI narrative/pain profile. The physician REVIEWS and prunes — never hand-assembles.
+Regions without a complaint produce nothing (locked spec rule 3). Core engine:
+src/lib/cascade.ts + the Chief Complaints picker in Section 2 (physician view).
+The batch implementation must carry this concept through the encounter stepper:
+complaints are step one of the MD visit; every later step arrives pre-built from
+them.

@@ -179,6 +179,12 @@ export default function App() {
     setForm((f) => ({ ...f, [section]: { ...(f[section] as object), ...partial } as VisitForm[S] }));
   }
 
+  /** Atomic multi-section update — used by the complaint cascade (region in → everything out). */
+  function applyToForm(partial: Partial<VisitForm>) {
+    dirty.current = true;
+    setForm((f) => ({ ...f, ...partial }));
+  }
+
   function setVisitType(v: VisitType) {
     dirty.current = true;
     setForm((f) => ({ ...f, visitType: v }));
@@ -574,7 +580,7 @@ export default function App() {
           <TelehealthConsent form={form} patch={patch} />
         )}
         {show.s1 && inPhase(1) && <Section1CheckIn form={form} patch={patch} />}
-        {show.s2 && inPhase(2) && <Section2Injury form={form} patch={patch} showNarrative={role === "physician"} />}
+        {show.s2 && inPhase(2) && <Section2Injury form={form} patch={patch} showNarrative={role === "physician"} apply={applyToForm} />}
         {show.s3 && inPhase(3) && <Section3Pmh form={form} patch={patch} />}
         {show.s4 && inPhase(4) && <Section4GeneralExam form={form} patch={patch} />}
         {show.s5 && inPhase(5) && <Section5Exam form={form} patch={patch} />}
