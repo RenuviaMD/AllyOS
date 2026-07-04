@@ -300,7 +300,7 @@ export function buildClinicalNoteHtml(form: VisitForm): string {
   if (pl.followUp) planItems.push(`Follow-up evaluation in ${pl.followUp}.`);
   if (form.visitType === "initial" && pl.emc) {
     const emcLine = {
-      yes: "The patient has an Emergency Medical Condition as defined under Fla. Stat. § 627.736; a separate Certification of Emergency Medical Condition has been issued.",
+      yes: "The patient has an Emergency Medical Condition as defined under Fla. Stat. § 627.732(4); a separate Certification of Emergency Medical Condition has been issued.",
       no: "No Emergency Medical Condition was identified on today's evaluation.",
       deferred: "Emergency Medical Condition determination is deferred pending further evaluation and diagnostic correlation.",
     }[pl.emc];
@@ -379,7 +379,7 @@ export function buildEmcCertificationHtml(form: VisitForm): string {
     <h2>Physician Certification</h2>
     <p>I, ${esc(CLINIC.provider)}, evaluated the patient on the date of service. Based on the patient's history, reported accident
     mechanism, clinical presentation, examination findings, and my medical judgment, I certify that the patient has an Emergency
-    Medical Condition as defined under Florida Statute § 627.736.</p>
+    Medical Condition as defined under Florida Statute § 627.732(4).</p>
     <p>This certification is based on clinical findings only. It is not based on reimbursement, referral source, therapy use, or case value.</p>
     <p>I certify that the above information is true and correct to the best of my medical judgment.</p>
     ${signature()}

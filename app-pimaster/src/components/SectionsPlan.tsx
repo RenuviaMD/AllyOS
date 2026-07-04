@@ -114,7 +114,7 @@ export function Section7Plan({ form, patch }: SectionProps) {
         <Select label="Follow-Up" value={p.followUp} onChange={(v) => patch("plan", { followUp: v })} options={FOLLOW_UPS} />
         {form.visitType === "initial" && (
           <Select
-            label="EMC Determination (FL PIP § 627.736) — REQUIRED"
+            label="EMC Determination (Fla. Stat. § 627.732(4)) — REQUIRED"
             value={p.emc}
             onChange={(v) => patch("plan", { emc: v as typeof p.emc })}
             options={["yes", "no", "deferred"]}
