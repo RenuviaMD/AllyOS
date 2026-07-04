@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PI Master™ Design Bible — Repository Audit for Physician Review</title>
+<style>
+  :root{
+    --ink:#1c2333; --ink2:#4a5468; --ink3:#7c8598; --paper:#ffffff; --paper2:#f6f8fb; --paper3:#eef1f6;
+    --line:#dde3ec; --blue:#2D7DD2; --blueDark:#1a5da6; --blueBg:#eaf2fb;
+    --green:#0e8a52; --greenBg:#e8f6ef; --amber:#a86a00; --amberBg:#fdf3e0;
+    --red:#c22f2f; --redBg:#fdecec; --purple:#6d45c9; --purpleBg:#f1ebfc;
+    --mono:"SF Mono",Consolas,Menlo,monospace; --serif:Georgia,"Times New Roman",serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --ink:#e6eaf2; --ink2:#aab3c5; --ink3:#7c8598; --paper:#0f1117; --paper2:#161a22; --paper3:#1d222d;
+      --line:#2a3040; --blue:#4a94e0; --blueDark:#7ab2ec; --blueBg:#14243a;
+      --green:#3ecb8a; --greenBg:#0d2b1e; --amber:#f0a832; --amberBg:#2b2410;
+      --red:#ef6c6c; --redBg:#331414; --purple:#a583ec; --purpleBg:#221836; }
+  }
+  :root[data-theme="dark"]{ --ink:#e6eaf2; --ink2:#aab3c5; --ink3:#7c8598; --paper:#0f1117; --paper2:#161a22; --paper3:#1d222d;
+      --line:#2a3040; --blue:#4a94e0; --blueDark:#7ab2ec; --blueBg:#14243a;
+      --green:#3ecb8a; --greenBg:#0d2b1e; --amber:#f0a832; --amberBg:#2b2410;
+      --red:#ef6c6c; --redBg:#331414; --purple:#a583ec; --purpleBg:#221836; }
+  :root[data-theme="light"]{ --ink:#1c2333; --ink2:#4a5468; --ink3:#7c8598; --paper:#ffffff; --paper2:#f6f8fb; --paper3:#eef1f6;
+      --line:#dde3ec; --blue:#2D7DD2; --blueDark:#1a5da6; --blueBg:#eaf2fb;
+      --green:#0e8a52; --greenBg:#e8f6ef; --amber:#a86a00; --amberBg:#fdf3e0;
+      --red:#c22f2f; --redBg:#fdecec; --purple:#6d45c9; --purpleBg:#f1ebfc; }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper2);color:var(--ink);font:15px/1.65 -apple-system,"Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:var(--blue);text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 28px 90px}
+
+  /* Cover */
+  header.cover{background:linear-gradient(160deg,#0D0F14 0%,#13223a 100%);color:#EDF0F7;padding:64px 28px 52px;border-bottom:4px solid #2D7DD2}
+  header.cover .inner{max-width:1060px;margin:0 auto}
+  .kicker{font-size:11px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#3D8FE8;margin-bottom:12px}
+  header.cover h1{font-size:42px;margin:0 0 10px;letter-spacing:-.02em;line-height:1.1;font-weight:900}
+  header.cover .sub{font-size:16px;color:#8A93B0;max-width:760px}
+  .covermeta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+  .covermeta span{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(45,125,210,.18);border:1px solid rgba(61,143,232,.4);color:#9cc6f2;border-radius:20px;padding:5px 13px}
+
+  /* TOC */
+  nav.toc{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--line);box-shadow:0 1px 6px rgba(10,20,40,.06)}
+  nav.toc .inner{max-width:1060px;margin:0 auto;display:flex;gap:2px;overflow-x:auto;padding:0 20px}
+  nav.toc a{flex-shrink:0;padding:12px 13px;font-size:12px;font-weight:700;color:var(--ink2);border-bottom:3px solid transparent;letter-spacing:.02em;white-space:nowrap}
+  nav.toc a:hover{color:var(--blue);text-decoration:none;border-bottom-color:var(--blue)}
+
+  h2{font-size:27px;letter-spacing:-.015em;margin:70px 0 6px;font-weight:850;scroll-margin-top:70px}
+  h2 .num{color:var(--blue);font-variant-numeric:tabular-nums;margin-right:10px}
+  .lede{color:var(--ink2);font-size:15.5px;margin:0 0 26px;max-width:860px}
+  h3{font-size:18px;margin:36px 0 10px;font-weight:800;scroll-margin-top:70px}
+  h4{font-size:14.5px;margin:24px 0 8px;font-weight:800}
+  p{max-width:860px}
+  ul,ol{max-width:860px;padding-left:24px}
+  li{margin:3px 0}
+
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:20px 24px;margin:16px 0;box-shadow:0 1px 3px rgba(15,25,45,.04)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  @media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  table{border-collapse:collapse;width:100%;font-size:13.5px;background:var(--paper)}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;margin:14px 0}
+  th{background:var(--paper3);text-align:left;padding:9px 12px;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2);border-bottom:2px solid var(--line);white-space:nowrap}
+  td{padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td.code,span.code{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--blueDark);white-space:nowrap}
+
+  .chip{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;border-radius:12px;padding:2px 10px;border:1px solid transparent;white-space:nowrap}
+  .chip.b{background:var(--blueBg);color:var(--blue);border-color:color-mix(in srgb,var(--blue) 30%,transparent)}
+  .chip.g{background:var(--greenBg);color:var(--green);border-color:color-mix(in srgb,var(--green) 30%,transparent)}
+  .chip.a{background:var(--amberBg);color:var(--amber);border-color:color-mix(in srgb,var(--amber) 30%,transparent)}
+  .chip.r{background:var(--redBg);color:var(--red);border-color:color-mix(in srgb,var(--red) 30%,transparent)}
+  .chip.p{background:var(--purpleBg);color:var(--purple);border-color:color-mix(in srgb,var(--purple) 30%,transparent)}
+  .chip.n{background:var(--paper3);color:var(--ink3);border-color:var(--line)}
+
+  .callout{border-left:4px solid var(--blue);background:var(--blueBg);border-radius:0 10px 10px 0;padding:14px 18px;margin:16px 0;max-width:860px}
+  .callout.warn{border-left-color:var(--amber);background:var(--amberBg)}
+  .callout.crit{border-left-color:var(--red);background:var(--redBg)}
+  .callout.ok{border-left-color:var(--green);background:var(--greenBg)}
+  .callout b:first-child{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+
+  /* Document facsimiles */
+  .doc{background:#fdfcf8;color:#1a1a1a;border:1px solid #d8d2c2;border-radius:8px;padding:26px 30px;margin:16px 0;font-family:var(--serif);font-size:13.5px;line-height:1.75;box-shadow:0 2px 8px rgba(60,50,20,.08)}
+  :root[data-theme="dark"] .doc{background:#fdfcf8;color:#1a1a1a}
+  .doc h5{margin:0 0 4px;font-size:15px;letter-spacing:.04em;text-transform:uppercase;text-align:center}
+  .doc .dochead{text-align:center;border-bottom:2px solid #1a1a1a;padding-bottom:8px;margin-bottom:14px;font-size:12px}
+  .doc .sec{font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;border-top:1px solid #c9c2b0;margin-top:14px;padding-top:10px}
+  .doc .blank{color:#888;letter-spacing:.06em}
+  .doc .verbatim{font-style:italic}
+  .doc .sig{margin-top:14px;border-top:1px dashed #b9b2a0;padding-top:10px;font-size:12.5px}
+
+  pre.note{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:18px 20px;font-family:var(--serif);font-size:12.8px;line-height:1.7;overflow-x:auto;white-space:pre;color:var(--ink);margin:14px 0}
+
+  .flow{counter-reset:step;margin:18px 0;max-width:900px}
+  .flow .step{display:flex;gap:16px;padding:13px 0;border-bottom:1px solid var(--line)}
+  .flow .step:last-child{border-bottom:none}
+  .flow .step::before{counter-increment:step;content:counter(step);flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--blue);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:2px}
+  .flow .step .who{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
+  .flow .step .who.staff{color:var(--amber)} .flow .step .who.md{color:var(--blue)} .flow .step .who.pt{color:#c05a10} .flow .step .who.sys{color:var(--purple)} .flow .step .who.patient{color:var(--green)}
+  :root[data-theme="dark"] .flow .step .who.pt{color:#ff9e5e}
+
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .sw{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--paper)}
+  .sw .c{height:44px}
+  .sw .m{padding:7px 10px;font-size:11px;line-height:1.45}
+  .sw .m b{display:block;font-size:11.5px}
+  .sw .m span{font-family:var(--mono);color:var(--ink3)}
+
+  dl.dict{max-width:900px}
+  dl.dict>div{display:grid;grid-template-columns:210px 1fr;gap:14px;padding:8px 0;border-bottom:1px solid var(--line)}
+  dl.dict dt{font-weight:800;font-size:13.5px}
+  dl.dict dd{margin:0;color:var(--ink2);font-size:13.5px}
+  @media(max-width:640px){dl.dict>div{grid-template-columns:1fr;gap:2px}}
+
+  .filetag{font-family:var(--mono);font-size:11.5px;background:var(--paper3);border:1px solid var(--line);border-radius:6px;padding:1px 7px;white-space:nowrap}
+  .small{font-size:12.5px;color:var(--ink3)}
+  footer{margin-top:80px;border-top:1px solid var(--line);padding-top:20px;color:var(--ink3);font-size:12.5px}
+  @media print{ nav.toc{display:none} body{background:#fff} .card,.tablewrap{break-inside:avoid} }
+</style>
+</head>
+<body>
+
+<header class="cover">
+  <div class="inner">
+    <div class="kicker">Design Source of Truth · Repository Audit · Read-Only</div>
+    <h1>PI Master™ Design Bible</h1>
+    <div class="sub">A complete audit of the <b>RenuviaMD / PI-Master-</b> repository: every screen and UI pattern in the application, the full clinical workflow from reception to discharge, every document template with its exact structure and language, and a clinical terminology dictionary extracted from all source documents. Prepared for physician review.</div>
+    <div class="covermeta">
+      <span>Wellness Healthcare Clinic Corp · Doral, FL</span>
+      <span>Dr. Armando Falcon, MD · ME 84789 · NPI 1447295126</span>
+      <span>Florida PIP · FL §627.736</span>
+      <span>Sources: src/App.jsx (8,344 lines) + 33 spec files</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc"><div class="inner">
+  <a href="#inventory">0 · Inventory</a>
+  <a href="#design">1 · Design System</a>
+  <a href="#screens">2 · Screens</a>
+  <a href="#workflow">3 · Clinical Workflow</a>
+  <a href="#documents">4 · Document Templates</a>
+  <a href="#dictionary">5 · Terminology Dictionary</a>
+  <a href="#compliance">6 · Compliance Constants</a>
+  <a href="#gaps">7 · Inconsistencies</a>
+</div></nav>
+
+<div class="wrap">
+
+<!-- ══════════════════════ 0 INVENTORY ══════════════════════ -->
+<h2 id="inventory"><span class="num">0</span>What PI Master Is, and What This Repository Contains</h2>
+<p class="lede">PI Master™ is a Florida Personal Injury Protection (PIP) clinical documentation system for a single-physician PI clinic. Its core thesis, stated on its own login screen: <i>“PI Master™ makes PI documentation faster, cleaner, and denial-proof.”</i> Every design decision serves that thesis: structured binary inputs instead of free text, automatic narrative generation, enforced medical-necessity language, statutory signature choreography, and billing packages that are pre-audited against the CMS-1500 standard before submission.</p>
+
+<div class="card">
+  <h4 style="margin-top:0">The one-sentence operating model</h4>
+  <p style="margin-bottom:0">Staff screens and checks in the patient (14-day rule enforced at the front desk) and collects a 6-form signed reception packet → the physician completes a pill-and-checkbox structured encounter → the system generates the narrative report, signs it with the physician’s embedded credentials, emails imaging orders to MAZEL Diagnostic, and notifies staff → staff prints, obtains the patient’s statutory counter-signature (Disclosure Form or Patient Log), and files the insurance package → PT documents daily sessions and weekly summaries that flow back into the physician’s follow-up view → at MMI the case is discharged, closed, and the complete package is submitted.</p>
+</div>
+
+<h3>Repository map (design-relevant files)</h3>
+<div class="tablewrap"><table>
+  <tr><th>Layer</th><th>Files</th><th>What it defines</th></tr>
+  <tr><td><b>Application (built UI)</b></td><td><span class="filetag">src/App.jsx</span> <span class="filetag">src/index.css</span> <span class="filetag">src/main.jsx</span></td><td>The entire working product: design tokens, all screens, all components, the AI note generators, the CMS-1500 audit engine, superbill and CMS-1500 viewers, MD visit module, PT module. Single-file React (~8,300 lines), inline styles, no CSS framework.</td></tr>
+  <tr><td><b>Workflow specs</b></td><td><span class="filetag">PI_MASTER_YOUR_EXACT_WORKFLOW.txt</span> <span class="filetag">PI_MASTER_FINAL_COMPLETE_WORKFLOW.txt</span> <span class="filetag">PI_MASTER_STAFF_PREFILL_PATIENT_SIGNATURE.txt</span> <span class="filetag">QUICK_REFERENCE_GUIDE.txt</span></td><td>The physician’s hour-by-hour day, the Section 1–12 form model, role matrix, MAZEL email integration, staff notification loop, report validation rules.</td></tr>
+  <tr><td><b>Reception packet</b></td><td><span class="filetag">STAFF_RECEPTION_FORMS.txt</span> <span class="filetag">COMPLETE_STAFF_RECEPTION_PACKET.txt</span></td><td>The six patient-signed check-in forms, with full layouts and staff scripts.</td></tr>
+  <tr><td><b>Clinical report templates</b></td><td><span class="filetag">INITIAL_VISIT_REPORT_WITH_SIGNATURE.txt</span> <span class="filetag">IMPROVED_INITIAL_MEDICAL_EVALUATION_REPORT.txt</span> <span class="filetag">INITIAL_MEDICAL_EVALUATION_REPORT_FINAL.txt</span> <span class="filetag">FOLLOWUP_VISIT_REPORT_WITH_SIGNATURE.txt</span> <span class="filetag">FINAL_DISCHARGE_SUMMARY_WITH_SIGNATURE.txt</span></td><td>Exact section structure and language of the three physician reports.</td></tr>
+  <tr><td><b>Statutory forms</b></td><td><span class="filetag">EMC_FORM_WITH_SIGNATURE.txt</span> <span class="filetag">EMC_CERTIFICATION_FORM_INTEGRATED.txt</span> <span class="filetag">SWORN_AFFIDAVIT_MEDICAL_SERVICE_RENDERED.txt</span> <span class="filetag">PI_MASTER_OIR_FORM_SIMPLE_INTEGRATION.txt</span> <span class="filetag">PI_MASTER_FLORIDA_PIP_COMPLIANT_FL627_736.txt</span> <span class="filetag">PI_MASTER_AFFIDAVIT_INTEGRATION.txt</span></td><td>EMC Certification, Sworn Affidavit, OIR B1-1571 workflow, and the FL §627.736 signature rules (who signs what, and when).</td></tr>
+  <tr><td><b>Billing</b></td><td><span class="filetag">PI_MASTER_FINAL_SUPERBILL_SIMPLIFIED.txt</span> <span class="filetag">PI_MASTER_SUPERBILL_CORRECTED_FL_PIP_COMPLIANCE.txt</span> <span class="filetag">PI_MASTER_MEDICAL_SUPERBILL_INTEGRATION.txt</span></td><td>Superbill format, Modifier-25-always rule, EMC $2,500/$10,000 gate, PT weekly billing.</td></tr>
+  <tr><td><b>UI/UX specs</b></td><td><span class="filetag">DETAILED_UI_UX_SPECIFICATION.txt</span> <span class="filetag">UI_UX_SPECIFICATION.txt</span> <span class="filetag">PI_MASTER_SPLIT_SCREEN_INTERFACE.txt</span> <span class="filetag">PI_MASTER_CLEAN_PROFESSIONAL_REPORTS.txt</span></td><td>ASCII wireframes for staff/physician/PT dashboards and the split-screen report viewer.</td></tr>
+  <tr><td><b>Identity</b></td><td><span class="filetag">SIGNATURE_REFERENCE_TEMPLATE.txt</span></td><td>The standardized physician signature block used across every document.</td></tr>
+</table></div>
+
+<!-- ══════════════════════ 1 DESIGN SYSTEM ══════════════════════ -->
+<h2 id="design"><span class="num">1</span>The Design System — and Why It Works</h2>
+<p class="lede">The application UI is a dark, high-contrast clinical console. Documents are the opposite: white paper, Georgia serif, statutory black ink. That deliberate two-world split — <b>dark console for data entry, white paper for legal output</b> — is the single most important pattern in the product.</p>
+
+<h3>1.1 Color tokens (the <span class="code">C</span> object, App.jsx lines 57–87)</h3>
+<div class="swatches">
+  <div class="sw"><div class="c" style="background:#0D0F14"></div><div class="m"><b>bg</b><span>#0D0F14</span> — app canvas</div></div>
+  <div class="sw"><div class="c" style="background:#13161E"></div><div class="m"><b>bgCard</b><span>#13161E</span> — cards, sidebar</div></div>
+  <div class="sw"><div class="c" style="background:#1A1E2A"></div><div class="m"><b>bgElevated</b><span>#1A1E2A</span> — inputs, sub-panels</div></div>
+  <div class="sw"><div class="c" style="background:#1F2435"></div><div class="m"><b>bgHover</b><span>#1F2435</span> — hover state</div></div>
+  <div class="sw"><div class="c" style="background:#252A3A"></div><div class="m"><b>border</b><span>#252A3A</span></div></div>
+  <div class="sw"><div class="c" style="background:#2D7DD2"></div><div class="m"><b>blue</b><span>#2D7DD2</span> — primary accent</div></div>
+  <div class="sw"><div class="c" style="background:#3D8FE8"></div><div class="m"><b>blueBright</b><span>#3D8FE8</span> — active text</div></div>
+  <div class="sw"><div class="c" style="background:#1A3A5C"></div><div class="m"><b>bluePale</b><span>#1A3A5C</span> — selected pills</div></div>
+  <div class="sw"><div class="c" style="background:#EDF0F7"></div><div class="m"><b>textPrimary</b><span>#EDF0F7</span></div></div>
+  <div class="sw"><div class="c" style="background:#8A93B0"></div><div class="m"><b>textSecond</b><span>#8A93B0</span></div></div>
+  <div class="sw"><div class="c" style="background:#525A75"></div><div class="m"><b>textMuted</b><span>#525A75</span></div></div>
+  <div class="sw"><div class="c" style="background:#22C97A"></div><div class="m"><b>green</b><span>#22C97A</span> — success / signed / low pain</div></div>
+  <div class="sw"><div class="c" style="background:#F0A832"></div><div class="m"><b>amber</b><span>#F0A832</span> — pending / warning / mid pain</div></div>
+  <div class="sw"><div class="c" style="background:#E84040"></div><div class="m"><b>red</b><span>#E84040</span> — hard stop / high pain</div></div>
+  <div class="sw"><div class="c" style="background:#9B6DFF"></div><div class="m"><b>purple</b><span>#9B6DFF</span> — MMI / AI badge</div></div>
+  <div class="sw"><div class="c" style="background:#E65100"></div><div class="m"><b>PT orange</b><span>#E65100</span> — everything Physical Therapy</div></div>
+</div>
+<p>Semantic pairings are systematic: every status color has a matching translucent background (<span class="code">greenBg #0D2B1E</span>, <span class="code">amberBg #2B1E0A</span>, <span class="code">redBg #2B0D0D</span>, <span class="code">purpleBg #1A1030</span>) and a “glow” variant (<span class="code">blueGlow = #2D7DD2 at 19% alpha</span>) used for box-shadows on primary actions — the electric-blue glow is the product’s signature visual gesture. A second, fixed color code distinguishes disciplines regardless of theme: <b>blue = physician/MD</b>, <b>orange #E65100 = physical therapy</b>, <b>teal #00695C = PT daily notes</b>, <b>amber = staff phase &amp; warnings</b>, <b>purple = AI/MMI</b>.</p>
+
+<h3>1.2 Case-status and outcome vocabularies (rendered as badges everywhere)</h3>
+<div class="grid2">
+<div class="card"><h4 style="margin-top:0">Case status → <span class="code">StatusBadge</span></h4>
+  <p><span class="chip g">Active</span> <span class="chip b">In Treatment</span> <span class="chip p">MMI Reached</span> <span class="chip n">Closed</span> <span class="chip a">Pending Review</span> <span class="chip a">EMC Pending</span> <span class="chip r">Peer Review</span> <span class="chip b">New</span></p>
+  <p class="small" style="margin-bottom:0">Pill with a glowing 5px status dot, uppercase, 11px/700. Statuses partition into ACTIVE = {Active, In Treatment, Pending Review, Peer Review, EMC Pending} and INACTIVE = {Closed, MMI Reached} for the registry toggle.</p></div>
+<div class="card"><h4 style="margin-top:0">Case outcome → <span class="code">OUTCOME_LABELS</span></h4>
+  <p><span class="chip g">Full Resolution</span> <span class="chip b">Improved</span> <span class="chip a">Partial Improvement</span> <span class="chip r">No Improvement</span> <span class="chip r">Declined</span> <span class="chip p">Surgical Referral</span> <span class="chip n">Active / Pending</span></p>
+  <p class="small" style="margin-bottom:0">Keys: RESOLVED · IMPROVED · PARTIAL · UNCHANGED · WORSENED · SURGICAL · PENDING.</p></div>
+</div>
+
+<h3>1.3 Component library (all defined inline in App.jsx)</h3>
+<div class="tablewrap"><table>
+  <tr><th>Component</th><th>Anatomy &amp; behavior</th><th>Why it works</th></tr>
+  <tr><td><b>Card</b></td><td>12px radius, <span class="code">bgCard</span>, 1px border; optional <span class="code">glow</span> prop adds blue halo.</td><td>One container primitive keeps 30+ screens visually coherent with zero CSS classes.</td></tr>
+  <tr><td><b>Btn</b></td><td>7 variants: primary, bright, outline, ghost, danger, success, amber. Uppercase 12px/700, glow shadow on primary.</td><td>Variant = semantic intent. Destructive actions are never blue.</td></tr>
+  <tr><td><b>MetricCard</b></td><td>28px numeral + label + sub-caption + faded icon.</td><td>Dashboard stats readable across the room.</td></tr>
+  <tr><td><b>Label / SectionHead</b></td><td>9px, 800 weight, 0.14em tracking, uppercase, blue — the “section eyebrow.”</td><td>Establishes a scannable typographic hierarchy without headings.</td></tr>
+  <tr><td><b>Input / Select</b></td><td>Uppercase 10px label above a <span class="code">bgElevated</span> field; border turns blue when active/valid.</td><td>Border-color-as-validation gives silent, glanceable feedback.</td></tr>
+  <tr><td><b>PillSelect</b> ⭐</td><td>Rounded 20px toggle chips; single or multi; selected = <span class="code">bluePale</span> fill + blue border + glow. Click again to deselect.</td><td><b>The core clinical input.</b> Every exam finding, complaint, allergy, palpation result, CPT and status is a pill. No typing, no typos, machine-readable, one-tap on tablets.</td></tr>
+  <tr><td><b>PainScoreRow</b> ⭐</td><td>Eleven 36×36 buttons, 0–10; color-graded green (0–3), amber (4–6), red (7–10).</td><td>The VAS scale rendered as UI — severity is color, not just number.</td></tr>
+  <tr><td><b>RomTestCard</b> ⭐</td><td>Functional ROM test tile: test name + AAOS degree + <i>the verbal command in quotes and italics</i> (“Tuck your chin to your chest”) + graded option pills (Full/Partial/Limited/Cannot; first option green, last red).</td><td>Turns the exam into a script the physician can read aloud; result maps directly to narrative text and ICD-10 support.</td></tr>
+  <tr><td><b>ICDRow</b></td><td>Diagnosis row with SPR (red) / STR (amber) type badges, monospace code, description, and R / L / Both laterality toggles when applicable.</td><td>Encodes the FL PIP convention “sprain/strain listed first”; laterality captured at selection time.</td></tr>
+  <tr><td><b>StatusBadge / AIBadge</b></td><td>Status pill with glowing dot; purple “AI” tag marks visits with a generated note.</td><td>Signature state (Signed green / Draft amber) is visible at every altitude.</td></tr>
+  <tr><td><b>NotePanel / PDF preview</b></td><td>Generated notes render in <b>Georgia serif on white (or near-black in-console)</b>, pre-wrapped monospace-ruled layout with ═ and ─ dividers.</td><td>The “paper inside the console” pattern: the moment content becomes a legal document, the visual language flips to print.</td></tr>
+  <tr><td><b>BackBtn / breadcrumbs</b></td><td>Uppercase ← BACK chip; App keeps a navigation history stack.</td><td>Full-screen modules (CaseDetail, MDVisit) are layered <span class="code">position:fixed</span> overlays, so back-navigation is explicit.</td></tr>
+  <tr><td><b>ErrorBoundary</b></td><td>Branded crash screen: “Your clinical data is safe. This is a display error only.” + reload.</td><td>Clinically calibrated failure language.</td></tr>
+</table></div>
+
+<h3>1.4 The five design principles that make it work</h3>
+<ol>
+  <li><b>Binary in, narrative out.</b> The physician never composes prose. Pills, pain scales, and checklists feed deterministic note generators that emit defensible, consistent, PIP-compliant narrative. (Spec: “All binary inputs — AI generates narrative.”)</li>
+  <li><b>Console vs. paper.</b> Dark UI = workspace; white Georgia-serif = anything an insurer, attorney, or patient will read. Users always know when they are looking at a legal artifact.</li>
+  <li><b>Color is clinical semantics.</b> Pain, signature state, EMC status, batch status, ROM grade, and discipline (MD/PT/staff) each own a hue. Nothing is decorated; everything is coded.</li>
+  <li><b>Compliance rendered as UI.</b> The 14-day countdown is a colored banner; Modifier 25 is auto-applied and explained inline; the CMS-1500 audit shows hard stops in red before a package can be built; unsigned notes block claims.</li>
+  <li><b>Deterministic autopopulation with physician override.</b> ROM findings preselect ICD-10; complaints preselect imaging orders with written justification; modalities derive CPT codes — and every auto-selection remains editable and visibly labeled (“Indicated”, “Auto-populated”).</li>
+</ol>
+
+<!-- ══════════════════════ 2 SCREENS ══════════════════════ -->
+<h2 id="screens"><span class="num">2</span>Every Screen in the Application</h2>
+<p class="lede">Fifteen distinct surfaces exist in <span class="filetag">src/App.jsx</span>. Access is role-gated: role is derived from the login email (contains “staff/front” → Staff, “pt/therapy” → PT, “admin” → Admin, otherwise Physician).</p>
+
+<h3>2.1 Login</h3>
+<div class="card"><p style="margin-top:0">Split-screen: left hero on the dark canvas with a 40px grid texture and a radial blue glow orb — brand block (“by RenuviaMD® / <b>PI Master™</b> / Personal Injury Protection Medical Documentation System… v 1.0”), the product promise headline, and a status strip (“● System Online · Florida PIP · HIPAA Compliant”). Right 440px panel: email + password (Enter submits), Google sign-in (stubbed), error banner, and the compliance footer: <i>“HIPAA Compliant. Access is role-based and audit-logged. Unauthorized access is prohibited under 45 CFR §164.”</i> Auth is Supabase password grant with a demo-mode fallback.</p></div>
+
+<h3>2.2 Global sidebar (230px, persistent)</h3>
+<ul>
+  <li><b>Brand block</b> — “by RenuviaMD® / PI Master™ / Clinical Documentation”.</li>
+  <li><b>Patient Search</b> — activates at 3+ characters of last name, first name, or phone digits; dropdown shows “Last, First · DOB · MRN (color-coded SS4 green / ID4 amber) · STATUS”; under 3 chars shows the amber hint “Type 3+ letters or phone digits”.</li>
+  <li><b>Clinic tag</b> — Wellness Healthcare Clinic · Doral, FL · Florida PIP.</li>
+  <li><b>Role-filtered nav</b> — Dashboard, Patients (all roles); Billing Codes (not PT); X-Ray Orders (physician/admin); Business Associates (admin only).</li>
+  <li><b>User block</b> — role caption (e.g., “Treating Physician”), Dr. A. Falcon, MD, FL #ME 84789, Sign Out.</li>
+</ul>
+
+<h3>2.3 Physician Dashboard — the Patient Registry</h3>
+<div class="card"><p style="margin-top:0">Header (“Clinical Documentation · Physician View”), then an <b>amber alert strip</b> when any case is Pending Review / EMC Pending / Peer Review (“N cases require attention — EMC certifications / Peer review / Signatures needed → Review”). Below, the registry: a search bar (last name / first name / phone / DOB / MRN / ZIP / case ID / insurer), an <b>Active vs Closed-MMI toggle</b> with live counts, and sort chips (Newest / Last Name / First Name).</p>
+<p>Patients are <b>grouped by MRN</b> — one expandable card per person (sex glyph avatar, “Last, First”, DOB · phone · ZIP, MRN badge, case count). Expanding reveals each case row: monospace case ID (<span class="code">PIP-2026-0089</span>), status badge, accident date, insurer, EMC state (Certified green / Pending amber), visit count, MMI date if set, outcome chip, and an <b>Open →</b> button into CaseDetail.</p>
+<p style="margin-bottom:0">The Cases-vs-Patients explainer (verbatim from CaseList): <i>“Cases — one record <b>per accident event</b>… A patient may have multiple cases if they had more than one accident.” / “Patients — one record <b>per person</b>. The HIPAA identity registry: name, DOB, MRN (SS4/ID4), contact info… used for duplicate detection, patient lookup, and intake verification.”</i></p></div>
+
+<h3>2.4 Staff Dashboard — Intake &amp; Documentation Workflow</h3>
+<div class="card"><p style="margin-top:0">Three sections. <b>Daily Workflow Steps</b> — six numbered cards: 1 Patient Check-In (verify ID, collect demographics, assign to room) · 2 Accident &amp; Insurance (enter accident details, verify PIP carrier) · 3 Legal Documents (generate consent forms, OIR, EMC — print for signature) · 4 Medical Interview (chief complaints, pain score, allergies, PMH) · 5 Mark Ready for MD (complete intake checklist, handoff to physician) · 6 Post-Visit (download reports, print for patient, file for billing). <b>Today’s Patients</b> — active-case cards with intake status chips (Pending Intake / Ready for MD / Visit Complete) and a <b>Start Intake</b> button. <b>Quick Reference</b> (collapsible) — the Forms Checklist (Demographics, AOB, HIPAA Privacy Notice, Consent to Treat, OIR B1-1571, EMC/Medical Necessity Letter), the <b>PIP 14-Day Rule</b> card (“CRITICAL DEADLINE — Patient must receive initial treatment within 14 days of the motor vehicle accident to preserve PIP benefits under Florida Statute 627.736. Failure to comply = loss of $10,000 PIP coverage.”), and Required Documents.</p></div>
+
+<h3>2.5 PT Dashboard</h3>
+<div class="card"><p style="margin-top:0">Mirrors the staff layout in PT orange. <b>Daily Workflow</b>: 1 Review Patient Chart → 2 Daily Session → 3 AI Generate Note → 4 Sign &amp; Lock → 5 Weekly Summary → 6 Superbill Review. <b>Today’s Schedule</b>: session number, visits completed, last pain score, <b>Document Session</b> button. <b>Recent Sessions</b> table (Date / Patient / Session # / Pain Start amber / Pain End green / Signed-Draft chip). <b>Quick Reference</b>: modality CPT list and Documentation Reminders — “Document functional improvement or decline each session · Include response to treatment: improved / plateau / worsened · Reference specific goals from Plan of Care · Note patient compliance and attendance · Use Modifier 25 when E/M + therapy same day · Re-evaluation required every 30 days or 10 visits.”</p></div>
+
+<h3>2.6 Case List (All PIP Cases)</h3>
+<p>Flat table view of every case with status-filter chips (All / Active / In Treatment / Pending Review / Peer Review / MMI Reached / Closed), the wide search bar, alternating-row table (Case ID · Patient/DOB · Accident Date · Insurance/Policy · Attorney · Status · Visits · EMC ✓/⏳/✗ · Physician · Open →), plus the Cases-vs-Patients explainer and a “＋ New Case” action.</p>
+
+<h3>2.7 New Case Wizard (5 steps)</h3>
+<div class="flow">
+  <div class="step"><div><div class="who staff">Step 1 · Patient Info</div>Legal first/last name, DOB, sex at birth, phone, email, address, city, 5-digit ZIP — all inline-validated. Then the <b>Patient Identifier (MRN)</b> block: <b>SS4</b> (last 4 of SSN, preferred, green) vs <b>ID4</b> (last 4 of government ID, “patient declined SS#”, amber). Four digits auto-mint the MRN (<span class="code">MRN-4421-CMR</span> pattern) and trigger <b>duplicate detection</b>: a match surfaces “⚠️ Duplicate MRN Detected — this SS4 matches existing patient …” and requires an override reason, “logged to HIPAA audit trail · Admin notified.”</div></div>
+  <div class="step"><div><div class="who staff">Step 2 · Accident Details</div>Date/time of accident, type (MVA, Slip &amp; Fall, Motorcycle, Pedestrian, Bicycle, Work-Related, Other), FL county, free-text description. A live <b>14-day countdown banner</b> colors by remaining days (green &gt;7, amber ≤7, red ≤3): “⏳ N days remaining in PIP 14-day treatment window” or “⚠️ PIP 14-day window has expired — EMC certification required.”</div></div>
+  <div class="step"><div><div class="who staff">Step 3 · Insurance</div>Carrier, policy #, adjuster, and PIP limit ($10,000 standard / $2,500 non-EMC). Info card, verbatim: “$10,000 available if physician certifies <b>Emergency Medical Condition (EMC)</b> · $2,500 cap if EMC is <b>not certified</b> · EMC must be certified by MD, DO, or ARNP — within first visit · PIP pays 80% of medical bills · 60% of lost wages.”</div></div>
+  <div class="step"><div><div class="who staff">Step 4 · Attorney, Physician &amp; Case Track</div><b>Case Track</b>: 📋 <b>PIP Only</b> (“Standard billing · Simple discharge · CMS-1500 to insurer / Standard SOAP · ROM functional only · plain clinical file download”) vs ⚖ <b>BI Litigation</b> (“Full defensive documentation · FCE · MMI impairment rating — activates Waddell’s Signs · FCE trigger · Causation documentation · Litigation package at MMI”). <b>Visit mode</b>: In-Person vs Telehealth — Telehealth reveals the doxy.me/renuviamd launch card (“HIPAA-Compliant Telehealth Platform · Synchronous audio + video”), patient-location city, who-is-present pills, A/V-confirmed and <b>FL §456.47 informed-consent</b> checkboxes. Attorney selection notes portal/download entitlements per track.</div></div>
+  <div class="step"><div><div class="who sys">Step 5 · Review &amp; Create</div>Four summary panels (Patient / Accident / Insurance / Assignment) + two banners: “⚠️ EMC certification required at first clinical visit · FL §627.736 · Determines $10,000 vs $2,500 PIP benefit” and “🤖 Claude AI will generate the initial clinical intake note after the first visit is entered. Physician review and signature required before locking.”</div></div>
+</div>
+
+<h3>2.8 Case Detail (full-page overlay, 4 tabs)</h3>
+<div class="tablewrap"><table>
+  <tr><th>Tab</th><th>Contents</th></tr>
+  <tr><td><b>Overview</b></td><td>Four info cards — Patient Profile, Insurance (EMC status color-coded), Clinical (diagnosis, ICD-10, CPT, physician, visits, POC weeks, MMI date, outcome), Case (ID, status, created, MRN). Header actions: <b>MD Visit</b> (blue), <b>PT Sessions</b>, <b>+ New PT Session</b> (orange).</td></tr>
+  <tr><td><b>Visit History</b> ⭐</td><td>The <b>split-screen report viewer</b>: left 40% timeline of every visit (numbered tile, date, provider, type badge — MD Initial / MD Follow-up blue, PT Daily teal, PT Weekly orange — CPT, Signed/Draft, purple AI badge); right 60% note panel with <b>Generate AI Note / Regenerate</b>, serif note display, and per-visit PDF download. Visit cadence model: Visit 1 = MD Initial (99203); every 5th = MD Follow-up (99213); every 7th = PT Weekly Summary; all others = PT Daily (James Rivera, DPT, 97110).</td></tr>
+  <tr><td><b>Billing</b> ⭐</td><td><b>Insurance Billing Packages</b>: three batch cards (Batch 1 visits 1–8, Batch 2 visits 9–16, Batch 3 visits 17–24) with status toggles <span class="chip a">Not Sent</span> <span class="chip b">Sent</span> <span class="chip g">Paid</span> <span class="chip r">Denied</span>. <b>Build Package</b> first runs the <b>CMS-1500 Pre-Submission Audit</b> (NUCC 02/12): ~25 box-level checks producing <span class="chip g">READY TO SUBMIT</span> / <span class="chip a">REVIEW RECOMMENDED</span> / <span class="chip r">CLAIM ON HOLD</span> with enumerated hard stops (missing patient name, DOB, diagnosis codes, service lines, unsigned MD notes, dx-pointer gaps) and soft warnings (missing policy #, duplicate CPT on one claim, case &gt;1 year post-accident). Only a clean audit opens the <b>package preview</b> — a serif cover sheet listing diagnoses, procedures with charges, every visit note included, billing summary against the $10,000 PIP limit, and the document manifest (Cover Sheet · MD Initial + Follow-Ups · PT Daily Notes ×N · PT Weekly ×N · Superbill · CMS-1500) with Print / Download / Mark-as-Sent. Quick-access cards open the <b>Superbill</b> and <b>CMS-1500</b> viewers; a billing summary shows codes, visits, billed vs paid.</td></tr>
+  <tr><td><b>Documents</b></td><td>Two PDF generators — <b>Case Summary PDF</b> (demographics, insurance, clinical overview, billing totals, signature) and <b>Full Clinical Chart PDF</b> (all visits + AI notes + codes + billing; navy-banded jsPDF layout with attestation line “I certify the information in this … is accurate and complete” and Falcon signature/date rules) — plus an AI-notes completion meter (MD notes n/n, PT notes n/n).</td></tr>
+</table></div>
+
+<h3>2.9 MD Visit Module (full-screen encounter engine)</h3>
+<div class="card">
+<p style="margin-top:0"><b>Visit-type selector</b> (suggested type derived from visit count): <b>Initial Evaluation</b> — “Full 8-step form: patient, accident, insurance, legal docs, interview, exam, dx+plan, AI report” · <b>Follow-Up Visit</b> — “Focused 5-step: region status, focused exam, PT review, assessment, continuance report” · <b>Final / Discharge</b> — “Discharge assessment, outcome, MMI determination, full case summary.”</p>
+<p>Chrome: top bar with patient, case ID/DOA, visit-type pill, <span class="chip g">Signed ✓</span> lock badge, and a <b>Staff / Physician phase badge</b>; left step rail split into an amber <b>Staff Phase</b> (👤 Patient → 🚗 Accident → 📄 Legal Docs) and a blue <b>Physician Phase</b>; bottom bar with autosave dot (“Draft saved / Saving…”), Previous/Next, and — on the last staff step — <b>“Ready for MD →”</b> handoff.</p>
+<h4>Staff steps</h4>
+<ul>
+<li><b>Patient</b> — demographics (pre-filled from intake, staff-tagged), <b>Government ID Verification</b> (ID-type pills + camera capture upload: “On mobile: tap button — camera opens directly”), PIP carrier select.</li>
+<li><b>Accident</b> — “All binary selections — no free text”: DOA + date of first visit, Mechanism of Injury (Rear-End MVA / Side Impact / T-Bone / Rollover / Head-On), Patient Position (Driver / Front Passenger / Rear Passenger), Vehicle at Impact (Stopped / Moving Slowly / Moving at Speed / Unknown), Seatbelt (Yes — Seatbelt worn / No — Unrestrained / Seatbelt + Airbag), Airbag Deployed, Vehicle Drivable, Loss of Consciousness.</li>
+<li><b>Legal Docs</b> — three generate-preview-print cards: Patient Consent Forms, OIR B1-1571 + Sworn Affidavit, EMC Certification. Each generates a pre-filled serif document in an <b>editable textarea preview</b> (white, Georgia) with Print / Regenerate.</li>
+</ul>
+<h4>Physician steps — Initial</h4>
+<ul>
+<li><b>Interview</b> — Chief Complaints multi-pills (Neck Pain, Upper Back Pain, Lower Back Pain, Headache, L/R Shoulder Pain, L/R Knee Pain, L/R Hip Pain, Numbness/Tingling, Dizziness, Jaw Pain, Chest Pain), PainScoreRow, Pain Onset (Immediate/Gradual/Delayed), Allergies (NKDA, Penicillin, Sulfa, NSAIDs, Codeine, Latex, Iodine, Other), medication tag-list, PMH pills (None, HTN, Diabetes, Asthma, COPD, Cardiac, Thyroid, Arthritis, Prior Back/Neck Surgery, Depression, Anxiety), ER visit + facility, prior accidents + year.</li>
+<li><b>Exam</b> — General/HEENT/Neuro pills (Alert &amp; Oriented ×4; Normal/Antalgic gait/Assistive device; Normocephalic, Atraumatic, PERRL, TMs Clear, Oropharynx Normal; Grossly Intact, DTRs Symmetric, Sensation Intact, Motor 5/5, Babinski Negative) then <b>ten region cards</b> (cervical, thoracic, lumbar, shoulder, elbow, wrist, hand/grip, hip, knee, ankle) each with per-region pain 0–10, onset (Immediate / Within hours / Next day / Gradual over days), palpation multi-pills (Paraspinal TTP, Facet TTP, SI Joint TTP, Muscle Spasm, Trigger Points, Costovertebral TTP; joints: TTP, Swelling, Crepitus, Impingement, Effusion, McMurray), and ROM Normal/Decreased. <b>Decreased opens the Functional ROM modal</b> (§5.4 table) — “Physician observes patient performing each movement. Select result… Results auto-populate ICD-10 and SOAP note.”</li>
+<li><b>Dx + Plan</b> — ICD-10 board grouped by 11 regions, “Sprains &amp; strains listed first per FL PIP documentation standard,” SPR/STR badges, R/L/Both laterality, <b>Auto: Core MVA Codes</b> preselection from complaints+exam; E/M pills (Initial: 99205 High / 99206 High MDM / 99204 Moderate — Established: 99214 / 99213); PT orders (“5x/Week × 4 Weeks Default (Initial Visit)”, frequency 5x/3x/4x/2x/Daily PRN, duration 4/6/8/12 weeks); PT modality multi-pills (97010 Hot/Cold, 97012 Mech Traction, 97014 E-Stim Unattend, 97035 Ultrasound, 97110 Therap Exercise, 97140 Manual Therapy, 97530 Therap Activities, 97032 E-Stim Attend, 97018 Paraffin Bath, 97112 Neuromuscular Re-ed); follow-up interval; Rx + referrals; and the <b>Imaging Orders clinical rules engine</b> — 11 X-ray tiles auto-flagged “Indicated” from findings, each carrying CPT, views, and a written justification, rendering a live <b>MAZEL referral order preview</b> on clinic letterhead with linked ICD codes and the closer “Advanced imaging such as MRI will be considered if symptoms persist or neurological deficits develop.”</li>
+<li><b>AI Note</b> — Generate SOAP Note → serif report (§4.6) → PDF Preview / Download / <b>Sign &amp; Lock</b> → “✅ Note Signed &amp; Locked — Signed by Dr. A. Falcon, MD on [timestamp] — This record is now locked.”</li>
+</ul>
+<h4>Physician steps — Follow-Up (5)</h4>
+<p><b>Region Status</b> — for each initially-injured region: read-only “Initial Visit Findings” summary, overall status pills <span class="chip g">Improved</span> <span class="chip a">Persistent</span> <span class="chip r">Worsened</span> <span class="chip n">Resolved</span>, per-ICD status (Improved/Stable/Resolved), and per-CPT <span class="chip g">Continue</span>/<span class="chip r">Stop</span> treatment management. → <b>Focused Exam</b> — only non-resolved regions, pain shown against previous score. → <b>PT Review</b> — read-only modality chips and progress rows (Pain Trend “8/10 → 5/10 across sessions”, Tolerance, ROM Progress, Strength, ADL Status: Conserved) — “This data is read-only and reflects PT session records.” → <b>Assessment</b> — active diagnoses with region-status badges; Plan-of-Care continuation (E/M 99214/99213, PT frequency/duration, follow-up, Rx/referrals); MAZEL imaging-results dropzone. → <b>AI Note</b> — follow-up report (§4.7), sign &amp; lock.</p>
+<h4>Physician steps — Final / Discharge (5)</h4>
+<p><b>Final Status</b> — every region graded <span class="chip g">Resolved</span> <span class="chip b">Improved with Residual</span> <span class="chip a">Persistent</span> <span class="chip n">Plateaued</span> <span class="chip r">Worsened</span>. → <b>Final Exam</b> — all regions, pain vs initial. → <b>Function</b> — Work Tolerance, Driving Tolerance, Sleep Quality, Mobility (Normal/Improved/Limited). → <b>MMI</b> — two large election cards: <b>MMI Reached</b> (“Patient has stabilized. No significant additional improvement expected with continued conservative care.” → “Patient will be discharged from active treatment”) vs <b>MMI Not Reached</b> (“Measurable improvement is still occurring…” → “Continued PT remains medically necessary”), plus the standing disclaimer (§4.8). → <b>Discharge Note</b> — generate, sign &amp; lock.</p>
+</div>
+
+<h3>2.10 PT Session Module (orange modal)</h3>
+<div class="card"><p style="margin-top:0"><b>Daily Session</b>: date / session # / total authorized; Pain-at-Start (red) and Pain-at-End (green) 0–10 rows; Modalities multi (Hot Pack, Ice/Cold Pack, Ultrasound, E-Stim TENS, E-Stim NMES, Traction Cervical/Lumbar, Manual Therapy, Massage/Soft Tissue, Therapeutic Exercise, Gait Training, Kinesiotaping — pre-seeded from the MD treatment plan CPTs); Exercises multi (Cervical AROM, Cervical Strengthening, Lumbar Stabilization, Core Strengthening, Shoulder AROM, Hip Strengthening, Balance/Proprioception, McKenzie Extension, Postural Training, Stretching — Hamstrings, Stretching — Hip Flexors, Neural Mobilization); Response (Tolerated Well / Mild Discomfort / Significant Pain / Adverse Reaction); Functional Progress (Improving / Plateau / Declining / No Change); Compliance; Barriers (None, Sleep Disturbance, Work Demands, Anxiety, Limited HEP Compliance, Transportation Issues). CPT codes <b>auto-derive from modality selections</b> and display with the billing line “Billing: Wellness Healthcare Clinic Corp · Rendering: Dr. A. Falcon, MD · NPI: 1447295126”; case ICD-10 shown read-only “from MD evaluation.”</p>
+<p style="margin-bottom:0"><b>Weekly Summary</b>: week #, pain trend start→end, four Improving/Stable/Declining pills (ROM, Strength, Functional, Pain Management), Overall Status (On Track / Needs Adjustment / At Risk). Both modes end in <b>AI Generate</b> → editable serif note (“Generated — includes medical necessity statement and PIP peer review defense language”) → <b>Sign &amp; Lock Note</b>.</p></div>
+
+<h3>2.11 Billing Codes · Superbill Viewer · CMS-1500 Viewer · Placeholders</h3>
+<ul>
+  <li><b>Billing Codes</b> — three tabs (CPT / ICD-10 / In Use). CPT rows grouped by category (E/M, PT Modality, PT Exercise, PT Manual, Imaging) with inline-editable fees, Active/Inactive toggles, delete, add-new form; ICD-10 grouped Cervical/Thoracic/Lumbar/Extremity/General; <b>In Use</b> aggregates code utilization across all cases with patient lists.</li>
+  <li><b>Superbill Viewer</b> — white print-styled encounter form: clinic header, patient + billing-provider blocks, lettered ICD-10 chips (A., B., C.…), CPT service-line table (CPT / description / MOD / DX PTR / UNITS / CHARGE), auto <b>Modifier 25</b> when E/M + PT share a date (“Modifier 25 auto-applied — MD E/M and PT services on same date of service. Significant, separately identifiable E/M service (FL PIP).”), treatment plan, totals, signature block, “Generated by PI Master™.”</li>
+  <li><b>CMS-1500 Viewer</b> — a faithful HCFA facsimile (“APPROVED BY NATIONAL UNIFORM CLAIM COMMITTEE (NUCC) 02/12”) with PIP defaults: Box 1 OTHER ☒; 6 Self; 10b Auto Accident YES, Place FL; 24B POS 11; 27 Accept Assignment YES; 31 rendering physician + NPI; 32/33 Wellness Healthcare Clinic Corp.</li>
+  <li><b>Placeholders</b> — X-Ray Orders (“Order imaging for any patient · Auto-email to MAZEL Medical · Track order status and results”) and Business Associates, marked Coming Soon.</li>
+</ul>
+
+<!-- ══════════════════════ 3 WORKFLOW ══════════════════════ -->
+<h2 id="workflow"><span class="num">3</span>The Complete Clinical Workflow</h2>
+<p class="lede">Assembled from the workflow specs. Four actors — Staff, Physician, PT, System — and one hard gate at the front door: <b>the clinic does not accept patients more than 14 days post-accident</b> (staff screens before PI Master entry), so every case inside the system is 14-day compliant by construction.</p>
+
+<h3>3.1 Reception — the 6-form signed packet (before the doctor sees the patient)</h3>
+<div class="tablewrap"><table>
+  <tr><th>#</th><th>Form</th><th>Purpose</th><th>Signs</th></tr>
+  <tr><td>1</td><td><b>Patient Intake Sheet</b></td><td>Demographics, accident (date/type/description), insurance (carrier, policy, claim #, adjuster), visit type (Initial / Follow-up #__ / Final), chief complaint. Staff fills; locked into Section 1.</td><td>Patient + staff initials</td></tr>
+  <tr><td>2</td><td><b>Notice of Privacy Practices &amp; Consent</b></td><td>HIPAA acknowledgment: TPO use/disclosure, right to restrictions, access &amp; amendment, accounting of disclosures, HHS complaint right, authorization to share with insurer for billing/claims.</td><td>Patient (or legal representative)</td></tr>
+  <tr><td>3</td><td><b>Authorization for Treatment &amp; Assumption of Risk</b></td><td>Consent to evaluation/treatment by Dr. Falcon and clinical staff; acknowledgment of inherent risks “including but not limited to temporary increased pain or soreness”; no guarantee of cure; consent to share information with insurer and other treating providers.</td><td>Patient</td></tr>
+  <tr><td>4</td><td><b>Acknowledgment of Workers’ Comp or PIP Benefits</b></td><td>Billing pathway election (PIP / Workers’ Comp / Self-Pay) + financial responsibility: non-covered services, itemized superbills, deductibles/co-insurance.</td><td>Patient</td></tr>
+  <tr><td>5</td><td><b>Florida PIP Insurance Regulation &amp; Requirements</b></td><td>The benefit-limit education sheet: $2,500 without EMC vs $10,000 with EMC; EMC determined at initial evaluation; <b>the 14-Day Rule with a computed deadline date</b> (“…or your PIP claim will be DENIED entirely”); what PIP covers (MD evaluation, PT, diagnostics, medically necessary services); what it does not (massage therapy, acupuncture); medical-necessity requirement; patient financial responsibility.</td><td>Patient + staff</td></tr>
+  <tr><td>6</td><td><b>Acknowledgment of Excluded Services</b></td><td>Explicit acknowledgment that massage therapy and acupuncture are excluded from Florida PIP; out-of-pocket consent path (request explicitly → acknowledge non-coverage → agree to pay in full → receive superbill/invoice); hold-harmless clause.</td><td>Patient + staff</td></tr>
+</table></div>
+<p class="small">Staff checklist: welcome → hand all 6 forms → explain each (~30 sec) → patient signs → staff initials → file originals → enter demographics into Section 1 → “The doctor will see you now.”</p>
+
+<h3>3.2 The physician’s day (the “chair view” — verbatim cadence from the workflow spec)</h3>
+<div class="flow">
+  <div class="step"><div><div class="who md">8:00 AM — Login</div>pimaster.renuviamd.com. Real-time <b>Waiting Room</b> queue with visit-type labels: Patient A [1 INITIAL] · Patient B [Follow-up #2] · Patient C [Follow-up #3] · Patient D [FINAL]. Each card shows age, insurer, days in care, chief complaint / previous pain.</div></div>
+  <div class="step"><div><div class="who md">8:30 AM — Initial visit (30–45 min)</div>Open Patient A. Section 1 read-only (staff-entered). Physician fills injury details, PMH, vitals, the 40+-movement ROM assessment (each movement Full/Partial/Limited/Cannot), ICD-10 auto-populates from ROM (locked), Treatment Plan with <b>required medical necessity of at least 50 words</b>, and Section 8 Image Orders (e.g., ☑ 72050 Cervical Spine 3-view).</div></div>
+  <div class="step"><div><div class="who sys">One click — [SIGN &amp; CREATE REPORT]</div>System validates required fields and the 50-word necessity minimum → auto-signs with the physician signature (Dr. Armando Falcon, MD | ME 84789 | NPI 1447295126) → generates the PDF report → <b>auto-emails the X-ray order to MAZEL</b> (To: orders@mazelmedical.com · Subject: “X-RAY ORDER - WELLNESS CLINIC - [Patient] DOB:[MM/DD/YYYY]” · results fax-back to 786-441-2179) → saves → <b>instantly notifies staff</b> “✓ Patient ready for download.”</div></div>
+  <div class="step"><div><div class="who staff">Staff completes the loop</div>Download PDF → print → patient counter-signs the statutory form (§3.4) → patient takes a copy home → original filed in the insurance package → ready for billing — all while the physician is with the next patient.</div></div>
+  <div class="step"><div><div class="who md">9:00–9:30 AM — Follow-ups (20–30 min each)</div>Form pre-populated with prior data for comparison; PT progress auto-loaded (pain trend, ROM %, compliance); no Section 8 → no MAZEL email; Section 9 Imaging Review (drag MAZEL reports to “Reviewed”); medical necessity for continuance enforced.</div></div>
+  <div class="step"><div><div class="who md">10:00 AM — Final visit (15–20 min)</div>Sections 1–7 review + Section 10 Discharge: Overall Outcome (Full Recovery / Significant / Moderate / Minimal / None), Return to Work (Full Duty / Modified / Unable), Return to Activities, Residual Issues, Sequelae. Sign → Discharge Summary PDF → <b>case marked CLOSED</b>.</div></div>
+  <div class="step"><div><div class="who md">10:30 AM — Done</div>4 patients documented, 4 signed reports, 1 MAZEL order sent, all insurance packages ready, billing can process the same day.</div></div>
+</div>
+
+<h3>3.3 Section model &amp; role visibility (the 12-section chart)</h3>
+<div class="tablewrap"><table>
+  <tr><th>Sec</th><th>Name</th><th>Initial</th><th>Follow-Up</th><th>Final</th><th>Owner / behavior</th></tr>
+  <tr><td>1</td><td>Staff Check-In (demographics, insurance, visit type)</td><td>Read-only</td><td>Read-only</td><td>Read-only</td><td>Staff (~5 min); locked for physician</td></tr>
+  <tr><td>2</td><td>Injury Details (MVA mechanism binaries)</td><td>Fill</td><td>Read-only</td><td>Read-only</td><td>MD; auto-narrativized</td></tr>
+  <tr><td>3</td><td>Past Medical History (10 binaries; conditional aggravation text; gender-specific LMP/pregnancy)</td><td>Fill</td><td>Read-only</td><td>Read-only</td><td>MD; feeds HPI narrative</td></tr>
+  <tr><td>4</td><td>General Exam (vitals + 5 system binaries)</td><td>Fill</td><td>Fill</td><td>Fill</td><td>MD</td></tr>
+  <tr><td>5</td><td>Functional ROM (40+ movements, 9 regions, AAOS norms, 4-point scale)</td><td>Fill</td><td>Fill</td><td>Fill</td><td>MD; <b>auto-populates Section 6</b></td></tr>
+  <tr><td>6</td><td>ICD-10 Diagnosis (sprain/strain first; psych optional; manual override)</td><td>Auto</td><td>Auto</td><td>Auto</td><td>Locked to ROM findings for compliance</td></tr>
+  <tr><td>7</td><td>Plan of Treatment (E/M level, <b>required medical necessity</b>, PT freq/duration, modalities)</td><td>Fill</td><td>Fill</td><td>Read-only</td><td>MD; cannot submit without necessity</td></tr>
+  <tr><td>8</td><td>Image Orders (X-ray CPTs by region → MAZEL)</td><td>Fill</td><td>Hidden</td><td>Hidden</td><td>Initial only; triggers auto-email</td></tr>
+  <tr><td>9</td><td>Imaging Review (drag-drop MAZEL reports)</td><td>Hidden</td><td>Fill</td><td>Fill</td><td>Follow-up/final</td></tr>
+  <tr><td>10</td><td>Final Discharge (outcome, RTW, activities, residuals, sequelae)</td><td>Hidden</td><td>Hidden</td><td>Fill</td><td>Closes the case</td></tr>
+  <tr><td>11</td><td>PT Daily Session Notes</td><td colspan="3" style="text-align:center">PT only (~10 min/session)</td><td>Hidden from MD form; syncs in real time</td></tr>
+  <tr><td>12</td><td>PT Weekly Summary</td><td colspan="3" style="text-align:center">PT only (~15 min/week)</td><td>Feeds MD follow-up “PT Progress” automatically</td></tr>
+</table></div>
+<p class="small">Role blinders: Staff cannot see Sections 2–12 (medical data); Physician cannot edit 11–12 (PT sessions, read-only view); PT cannot see 1–8, 10 (physician data).</p>
+
+<h3>3.4 The FL §627.736 signature choreography (who signs what)</h3>
+<div class="callout crit"><b>The rule the whole workflow bends around</b>
+The patient signature is <b>never on the clinical note</b>. The medical note is signed by the MD only. The patient signs <b>separate statutory instruments</b>: at the <b>initial</b> visit, the <b>Standard Disclosure &amp; Acknowledgment Form</b> (OIR-B1-1571) confirming services were explained and actually rendered; at <b>every subsequent</b> visit, a <b>Patient Log</b> entry — a chronological, per-visit signature record. “LEGAL REQUIREMENT — if patient doesn’t sign, insurer may deny payment.”</div>
+<div class="tablewrap"><table>
+  <tr><th>Visit</th><th>MD signs</th><th>Patient signs</th><th>Insurance submission</th></tr>
+  <tr><td><b>Initial</b></td><td>Medical Note (signature embedded at [SIGN &amp; CREATE REPORT]) + EMC Certification + OIR form (countersign after patient) + Sworn Affidavit</td><td>Standard Disclosure Form (OIR B1-1571); reception packet already signed</td><td>Medical Note + EMC Cert + Disclosure Form + imaging order confirmation + superbill</td></tr>
+  <tr><td><b>Follow-up</b></td><td>Updated Medical Note</td><td>Patient Log entry #N</td><td>Note + Log entries + PT progress summaries + medical necessity for continuance</td></tr>
+  <tr><td><b>Final</b></td><td>Final Medical Note / Discharge Summary</td><td>Patient Log final entry + Discharge acknowledgment (“Acknowledging Receipt &amp; Understanding”)</td><td>Discharge Summary + complete signed Patient Log + full PT record → claim closure</td></tr>
+</table></div>
+<p><b>OIR form round-trip</b> (from the OIR integration spec): system pre-fills patient/provider data → staff prints → patient signs at checkout → staff scans &amp; uploads (“Patient Signed, Awaiting Physician Signature”) → system emails drfalcon@renuviamd.com with the scan → physician signs digitally in-app or print-sign-scan → archived “Complete,” billing unblocked. <b>Patient-signature policy for reports</b>: Option 1 (recommended, spec’d): physician signs digitally in the PDF, patient signs the <i>printed</i> copy at checkout; the clinic files the dual-signature paper original.</p>
+
+<h3>3.5 PT loop &amp; billing engine</h3>
+<div class="grid2">
+<div class="card"><h4 style="margin-top:0">PT loop</h4><ol style="margin:0">
+<li>MD Section 7 orders PT (default 5×/week × 4 weeks) — modalities become the PT module’s pre-selected list.</li>
+<li>PT documents each daily session (Section 11): pain start/end, modalities, exercises, response, compliance, barriers → CPTs auto-derived → AI note with medical-necessity and “PIP peer review defense language” → sign &amp; lock.</li>
+<li>Every Friday, the Weekly Summary (Section 12) rolls the week up (pain trend, ROM/strength/ADL, overall status) and auto-generates the weekly PT superbill (97110/97112/97140/97035, units from session count, optional modifier GP).</li>
+<li>The physician’s follow-up form shows all of it read-only — the “Therapy Progress Review” block in the note quotes it directly.</li>
+<li>Re-evaluation is required every 30 days or 10 visits.</li></ol></div>
+<div class="card"><h4 style="margin-top:0">Billing rules (the “simplified final” system)</h4><ul style="margin:0">
+<li><b>14-day rule</b>: enforced by staff screening — no in-app calculator needed; all patients compliant by admission.</li>
+<li><b>PT always same day</b> as MD visits (clinic standard), therefore <b>Modifier 25 is always applied</b> to the E/M code: 99203-25, 99204-25, 99213-25, 99214-25, 99215-25 — “never changed or removed; prevents bundling of same-day services.”</li>
+<li><b>The only critical billing decision is EMC</b>: YES → $10,000 PIP benefit; NO → $2,500 cap. Carried forward from the initial visit to every superbill.</li>
+<li>Superbill auto-generates on every [SIGN &amp; CREATE REPORT]; batches of visit notes + superbill + CMS-1500 are assembled per 8-visit block and audited (hard stops vs warnings) before submission; PIP pays 80% of allowable charges.</li></ul></div>
+</div>
+
+<h3>3.6 Imaging (MAZEL) integration</h3>
+<p>Trigger: Section 8 imaging orders on an initial visit. The system emails <b>orders@mazelmedical.com</b> from pimaster@renuviamd.com, subject “X-RAY ORDER - WELLNESS CLINIC - [Name] DOB:[date]”, body containing facility block, ordering physician (ME 84789 / NPI 1447295126), patient demographics + insurance/claim, clinical indication (“MVA — Cervical sprain/strain evaluation”), checked CPT orders with views, results-delivery fax (786-441-2179, ATTN Wellness Healthcare Clinic Corp), authorization/PIP flags, order ID and timestamp. Delivery tracked in an <span class="code">imaging_orders</span> table (sent flag, timestamps, status pending/received/completed). In the app, the referral facility is <b>MAZEL DIAGNOSTIC CENTER INC., 8150 S.W. 8th Street Suite 119, Miami, FL 33144 · 305-261-3020 · fax 305-261-3070</b>; results return via the follow-up “Imaging Results (from MAZEL)” dropzone (PDF, DICOM, or images).</p>
+
+<!-- ══════════════════════ 4 DOCUMENTS ══════════════════════ -->
+<h2 id="documents"><span class="num">4</span>Every Document Template — Structure and Exact Language</h2>
+<p class="lede">Two families exist: <b>printed statutory/insurance templates</b> (the .txt specs — fill-in-the-blank forms with fixed language) and <b>system-generated notes</b> (deterministic text built by App.jsx generators). All share one identity header and one signature block.</p>
+
+<div class="doc">
+  <h5>Universal letterhead &amp; signature block (used on every document)</h5>
+  <div class="dochead"><b>WELLNESS HEALTHCARE CLINIC CORP</b><br>8180 NW 36th St, Suite 213 · Doral, FL 33166<br>Ph: (305) 994-9500 · Fax: (786) 441-2179<br>Armando Falcon, MD · FL License ME 84789 · NPI 1447295126</div>
+  <div class="sig">[DR. FALCON’S SIGNATURE — EMBEDDED AS DEFAULT]<br>──────────────────────────────<br><b>Armando Falcon, MD</b> &nbsp;·&nbsp; Florida License #: ME 84789 &nbsp;·&nbsp; NPI: 1447295126<br>Date: <span class="blank">___/___/_____</span> &nbsp;(MM/DD/YYYY, black ink, no pre-signing of blanks, identifiers must match across all documents)</div>
+  <p class="small" style="font-family:inherit">Attestation language varies by document: EMC uses the Chapter 458 licensure attestation; the three clinical reports use “I, Dr. Armando Falcon, MD, certify and attest…”; the discharge adds a patient acknowledgment line. Verification anchors: flboardofmedicine.gov (ME 84789) and npi.cms.gov (1447295126).</p>
+</div>
+
+<h3>4.1 Initial Medical Evaluation Report <span class="small">(INITIAL_VISIT_REPORT_WITH_SIGNATURE.txt — 14 sections)</span></h3>
+<div class="doc">
+  <h5>Initial Medical Evaluation Report</h5>
+  <p><b>Front matter:</b> Clinic + physician blocks · Patient demographics (name, DOB, age, sex, phone) · Accident info (DOA, date of initial visit, <b>days since accident</b>, incident type MVA/Work/Fall/Other) · Insurance (carrier, claim #, authorization status ☐ EMC CONFIRMED ☐ Pending).</p>
+  <div class="sec">Section 1 — Emergency Medical Condition Status</div>
+  <p>“EMC DETERMINATION: ☑ CONFIRMED ☐ NOT CONFIRMED. The patient’s emergency medical condition status has been formally documented in the separate ‘Certification of Emergency Medical Condition’ form completed at the time of this initial evaluation. PIP Authorization Status: APPROVED (EMC Confirmed).”</p>
+  <div class="sec">Section 2 — Chief Complaints</div>
+  <p>Presenting complaints + Pain Assessment: overall severity __/10 (severe/moderate/mild), pain distribution, onset ☐ Immediate ☐ Delayed.</p>
+  <div class="sec">Section 3 — History of Present Illness</div>
+  <p>Accident narrative + the three causation checkboxes, verbatim: <span class="verbatim">“☑ Symptoms began immediately after the accident / incident · ☑ NOT present prior to accident · ☑ Clear direct causal relationship between accident and current complaints.”</span> Time since injury with phase: Acute (0–2 wks) / Sub-acute (2–8 wks) / Chronic (&gt;8 wks).</p>
+  <div class="sec">Section 4 — Past Medical History</div>
+  <p>Prior injuries / prior similar complaints (“No baseline pain in affected areas”) / pre-existing conditions (“No evidence of pre-existing conditions affecting involved areas”) / allergies (NKDA default) / medications / surgical history / social history. The expanded template adds the significance sentence: <span class="verbatim">“The absence of pre-existing conditions … strengthens the causal nexus between the MVA and current symptoms.”</span></p>
+  <div class="sec">Section 5 — Review of Systems (pertinent)</div>
+  <p>Musculoskeletal (pain, stiffness, ↓ROM, reduced functional tolerance, muscle spasm) · Neurological (focal deficits none; LOC denies; AMS denies) · General (systemic complaints denies).</p>
+  <div class="sec">Section 6 — Physical Examination</div>
+  <p>Vitals (BP/pulse/RR/temp) · General appearance (alert, oriented ×3; distress level; posture guarding/protective/normal) · Regional exams per affected area — inspection, ROM with degree estimates vs normal (e.g., “Cervical flexion: limited, pain-restricted, approx 30°, normal 50°”), palpation (tenderness, muscle spasm, rigidity, crepitus), special tests (Spurling’s, neck compression; shoulder apprehension, drop arm; knee McMurray’s, Lachman’s) with per-region assessments (“Findings consistent with acute cervical sprain/strain from MVA trauma”) · Neurological exam (CN II–XII, motor 5/5, sensory, reflexes, gait, “No focal neurological deficits”).</p>
+  <div class="sec">Section 7 — Clinical Impression</div>
+  <p>Template sentence: <span class="verbatim">“Patient is a ___-year-old ☐ male ☐ female who sustained acute musculoskeletal injuries from ______ on ______. Patient presents within ___ hours/days of injury with __/10 pain and objective findings on physical examination consistent with soft tissue trauma.”</span> KEY FINDINGS checklist: acute onset · severe/moderate pain · multiple body regions · objective findings · clear causal relationship · no pre-existing confounders · <b>meets Emergency Medical Condition criteria</b>. The expanded version adds injury-pattern analysis (whiplash acceleration/deceleration; shoulder/knee bracing mechanism) and “absence of red-flag findings.”</p>
+  <div class="sec">Section 8 — ICD-10 Diagnosis Codes</div>
+  <p>Numbered primary trauma diagnoses (sprains/strains first), with laterality and coding notes: <span class="verbatim">“‘A’ suffix indicates initial encounter … will convert to ‘D’ (subsequent) or ‘S’ (sequela) on follow-up visits. MVA-related → injury codes (S-codes), not disease codes.”</span></p>
+  <div class="sec">Section 9 — Medical Necessity Statement (required for insurance authorization)</div>
+  <p>The six-pillar argument: 1 EMC documented · 2 Acute traumatic injury (temporal relationship) · 3 Objective evidence of dysfunction (ROM limitation, spasm, tenderness, functional limitation) · 4 Functional impairment (pain __/10; unable to perform ADL/work) · 5 Risk of adverse outcome without treatment (chronic pain, reduced recovery, delayed RTW) · 6 Appropriateness (conservative care is standard, evidence-based, reasonable frequency). Conclusion, verbatim: <span class="verbatim">“Medical treatment is reasonable, necessary, and consistent with accepted standards of medical practice. TREATMENT IS MEDICALLY NECESSARY.”</span></p>
+  <div class="sec">Sections 10–13 — Plan, Prognosis, Causation, PIP Orders</div>
+  <p><b>10 Treatment Plan:</b> PT frequency (2–3×/wk options) × duration (4–6 wks), re-eval 2–3 wks; modalities 97110/97112/97140 + heat/ice/EMS/ultrasound; HEP with written instructions; physician follow-up interval. <b>11 Functional Limitations &amp; Prognosis:</b> work status (unable/modified/full), ADL limitation grade, restrictions, duration, prognosis good/fair/poor + rationale. <b>12 Causation Statement</b>, verbatim: <span class="verbatim">“Within a reasonable degree of medical certainty: the patient’s acute musculoskeletal injuries are DIRECTLY CAUSED by the ______ that occurred on ______”</span> with the five supporting bases (immediate onset, anatomic consistency, objective match, no intervening cause, no prior similar complaints). <b>13 PIP Authorization &amp; Orders:</b> EMC confirmed → services AUTHORIZED under Florida PIP; standing orders for PT, follow-up, daily HEP compliance.</p>
+  <div class="sec">Section 14 — Physician Attestation</div>
+  <p class="verbatim">“I, Dr. Armando Falcon, MD, certify and attest that: 1. I personally evaluated and examined the above-named patient on ___ … 3. The patient meets Emergency Medical Condition criteria per FL 627.409 · 4. The patient’s injuries are directly caused by the incident described herein · 5. The treatment plan recommended is medically necessary and appropriate · 6. All information contained herein is true and accurate.”</p>
+  <div class="sig">Filed together with: EMC Certification (same date) · staff check-in demographics · patient medical record · insurance claim documentation. “Both documents submitted together to insurance carrier.”</div>
+</div>
+
+<h3>4.2 Follow-Up Medical Evaluation Report <span class="small">(FOLLOWUP_VISIT_REPORT_WITH_SIGNATURE.txt — 11 sections)</span></h3>
+<div class="doc">
+  <h5>Follow-Up Medical Evaluation Report</h5>
+  <p><b>1 Visit Summary</b> — reason (routine progress assessment · re-evaluation of treatment response · <b>medical necessity documentation for continuance</b>); interval since initial. <b>2 Interval History</b> — pain delta (Initial __/10 | Current __/10 | Change __/10 ↓), functional change, specific improvements, compliance (PT sessions __/__ %, HEP Excellent→Poor, meds), new symptoms/complications (default “None reported”). <b>3 Physical Examination</b> — vitals; distress “improved from initial”; <b>ROM compared to initial per region with % improvement</b>; palpation (spasm/tenderness Present→Decreased→Resolved); neuro intact. <b>4 Imaging Review</b> — what was ordered, results, findings, relevance to clinical course. <b>5 Physical Therapy Progress</b> — sessions completed, week-by-week pain and ROM-%-of-baseline rows pulled from PT notes, compliance %, PT recommendation (continue / modify / progress). <b>6 Clinical Impression</b> — “meaningful improvement in pain (__→__ = __% reduction)… consistent with expected healing pattern / response to PT / appropriate recovery trajectory”; injury phase.</p>
+  <div class="sec">Section 7 — Medical Necessity for Continuance (required for ongoing authorization)</div>
+  <p>Five-pillar continuance argument: 1 objective progress documented (pain, ROM, functional gains) · 2 therapeutic intervention is effective · 3 remaining deficits (ROM below 90% baseline target; not yet full work duty; not yet unrestricted ADL) · 4 risk without continued treatment (plateau, regression, chronicity, delayed RTW) · 5 treatment remains appropriate and evidence-based. Conclusion, verbatim: <span class="verbatim">“Documented progress indicates treatment is effective. Continued treatment is medically necessary for achievement of functional recovery goals. CONTINUED TREATMENT IS MEDICALLY NECESSARY.”</span></p>
+  <p><b>8 Updated Treatment Plan</b> — continue/modify frequency &amp; duration, treatment modifications, goals for next period. <b>9 Updated Functional Assessment</b> — work capacity ladder (unable → modified duty w/ restrictions → transitioning → full duty), ADL tolerance with quantified sitting/walking/lifting comparisons. <b>10 Diagnosis Updates</b> — each ICD-10 restated with status Improving / Resolved / Unchanged. <b>11 Physician Attestation</b> — adds “The patient demonstrates objective progress since the initial evaluation” and “Continued medical treatment is medically necessary for this patient.”</p>
+</div>
+
+<h3>4.3 Final Discharge Summary <span class="small">(FINAL_DISCHARGE_SUMMARY_WITH_SIGNATURE.txt — 11 sections + patient signature)</span></h3>
+<div class="doc">
+  <h5>Final Discharge Summary</h5>
+  <p><b>1 Case Summary</b> — injury overview, initial presentation snapshot, treatment duration (sessions, weeks, total days in care). <b>2 Clinical Course</b> — the four-phase progression table: Phase 1 Acute (wks 1–2) “pain reduction, protection, gentle ROM restoration” → Phase 2 Early sub-acute (3–4) “ROM restoration, early strengthening” → Phase 3 Sub-acute/healing (5–6) “strengthening progression, functional retraining” → Phase 4 Final “return to full function,” each with pain and ROM-% deltas. <b>3 Final Clinical Assessment</b> — discharge status with % reduction/improvement; objective findings: <span class="verbatim">“ROM essentially normalized (90%+ baseline) · muscle spasm resolved · tenderness resolved · functional tolerance full or near-full · neurological intact.”</span></p>
+  <div class="sec">Section 4 — Outcome Assessment (discharge criteria)</div>
+  <p>Overall outcome ladder (Full Recovery / Significant / Moderate / Minimal / No Change–Worsened) · Return-to-work status with clearance date (Full Duty / Modified with restrictions / Unable) · Return-to-activities (Full / Partial / Limited participation) · Residual issues (default “None identified”) · Apparent sequelae (default “None apparent”).</p>
+  <p><b>5 Total Improvement Summary</b> — quantified: pain initial/final/% reduction; ROM gain; functional “from Unable/Modified to Full Duty”; compliance achievement; time-to-goals (significant improvement / functional return / discharge readiness). <b>6 Final Diagnosis</b> — ICD-10 restated as sequela: <span class="verbatim">“Note: ‘A’ suffix changed to ‘S’ (sequela) to indicate completed healing phase.”</span> <b>7 Discharge Instructions</b> — six numbered blocks: HEP (2–3×/wk, non-consecutive days, “pain should not increase with exercise,” written program provided) · Activity &amp; ergonomics (breaks, lifting limit then graded return, body mechanics) · Pain management (ice/heat, OTC analgesics, anti-inflammatories, “expect baseline discomfort to continue diminishing over next 4 weeks”) · Return to function (work/recreation immediately, sports as tolerated) · <b>Signs to report</b> (sudden pain increase, new neuro symptoms, swelling/warmth, functional regression) · Follow-up (none required unless symptoms warrant; may return to PT if worse). <b>8 Prognosis</b> — long-term Excellent/Good/Fair/Poor; expected 1-year outcome; supporting factors; risk-mitigation education. <b>9 Case Closure</b> — “CASE STATUS: ✓ CLOSED … Authorization Status: Medical necessity no longer applicable. Future treatment: by referral only if symptoms recur.” <b>10 Case Statistics</b> — the metrics table (days/weeks in care, pain, ROM, sessions, compliance %, RTW days post-injury). <b>11 Physician Attestation</b> — “…the patient has achieved the treatment goals… the medical necessity for continued skilled treatment no longer exists.”</p>
+  <div class="sig">Physician signature block <b>plus</b>: “PATIENT/GUARDIAN SIGNATURE (Acknowledging Receipt &amp; Understanding): ____________ Date ___.” Filed with the complete chronology; “CASE MARKED CLOSED ✓ — No further treatment authorization required. Patient Copy ☑ Provided · Insurance Copy ☑ Submitted.”</div>
+</div>
+
+<h3>4.4 Certification of Emergency Medical Condition (EMC) <span class="small">(EMC_FORM_WITH_SIGNATURE.txt)</span></h3>
+<div class="doc">
+  <h5>Certification of Emergency Medical Condition</h5>
+  <p>Patient name/date · primary diagnosis · secondary diagnoses · injuries/conditions present.</p>
+  <div class="sec">Definition (verbatim, capitalized in source)</div>
+  <p class="verbatim">“EMERGENCY MEDICAL CONDITION means a condition manifesting itself by acute symptoms of sufficient severity, which may include severe pain, such that the absence of immediate medical attention could reasonably be expected to result in any of the following: A. Serious jeopardy to patient health · B. Serious impairment to bodily functions · C. Serious dysfunction of any bodily organ or part.” [Cited in form as Florida Statute 627.409 / 627.4093 — see §7 flags]</p>
+  <div class="sec">Physician certification</div>
+  <p>Body regions affected (Head / Cervical / Thoracic / Lumbar / Upper extremities R-L-Both / Lower extremities R-L-Both / Other) · the three criteria assessed YES/NO individually · clinical justification lines · licensure attestation, verbatim: <span class="verbatim">“I am a physician licensed under Chapter 458 or Chapter 456, a dentist licensed under Chapter 459, a physician assistant licensed under Chapter 458 or Chapter 459, or an advanced registered nurse practitioner licensed under Chapter 464, and that the above facts are true and correct.”</span></p>
+  <div class="sec">Determination result</div>
+  <p>“☐ EMC CONFIRMED — patient meets Florida Statute criteria… Immediate medical services are AUTHORIZED under PIP coverage. PIP Authorization Status: APPROVED.” or “☐ EMC NOT CONFIRMED — standard medical authorization applies.” Completed <b>at the time of initial evaluation</b> as a separate document; filed with the claim and referenced in Initial Report Section 1. The in-app generated version adds: “Physical examination reveals objective findings consistent with acute traumatic injury requiring medical intervention beyond the $2,500 non-EMC limit. This certification entitles the patient to the full $10,000 PIP benefit.”</p>
+</div>
+
+<h3>4.5 Sworn Affidavit · OIR B1-1571 · Superbill · Patient Log</h3>
+<div class="grid2">
+<div class="doc">
+  <h5>Sworn Affidavit of Medical Service Rendered</h5>
+  <p>Header fields: insurance carrier, patient’s name, <b>date of loss</b>, insured, claim #.</p>
+  <div class="sec">Affidavit statement (verbatim)</div>
+  <p class="verbatim">“This sworn affidavit is to let known that the patient mentioned above is under my medical judgment. I am letting known that in the ______ office visit, this patient was submitted to Physical Examination and medical studies every single one considerable Medically Documented. The above information is true and correct to the best of my knowledge and belief.”</p>
+  <p>Physician attestation (State of Florida, County of Miami-Dade, ME 84789) · <b>patient signature line</b> · notarization block (“Sworn before me this ___ day of ___, 20__” + commission expiry).</p>
+  <div class="sec">Legal notice (verbatim)</div>
+  <p class="verbatim">“Any person who knowingly, and with intent to injure, defraud, or deceive any insurance company, files a statement containing any false, incomplete, or misleading information, is guilty of a felony of the third degree. Florida Statute § 627.409.”</p>
+</div>
+<div class="doc">
+  <h5>Standard Disclosure &amp; Acknowledgment (OIR-B1-1571) + Patient Log</h5>
+  <p><b>OIR B1-1571</b> — the official Florida Office of Insurance Regulation form. PI Master pre-fills patient name, DOB, date of service, provider (Dr. Armando Falcon, MD · ME 84789 · NPI 1447295126) and leaves both signature lines blank; the statutory body text is the state’s own (“I acknowledge that Dr. Armando Falcon explained… services were rendered on [date]… I understand my treatment plan”). Patient signs at checkout of the <b>initial</b> visit; provider countersigns; both signatures required for FL 627.736 reimbursement.</p>
+  <div class="sec">Patient Log (follow-up visits)</div>
+  <p>Header: clinic · patient · case ID. One chronological entry per visit — <b>Date | Visit type | Services | PATIENT SIGNATURE</b> — signed at every follow-up and at the final visit, so the completed log holds a patient signature for each encounter (“Chronological record — FL 627.736 requirement”).</p>
+  <div class="sec">Superbill (per-visit encounter form)</div>
+  <p>Clinic header → patient/DOA/DOV/claim → <b>the EMC banner: “⚠️ EMERGENCY MEDICAL CONDITION (EMC): ☑ YES → $10,000 benefit / ☐ NO → $2,500 benefit (capped)”</b> → ICD-10 list → MD services table (E/M always with <b>-25</b>) → PT services (same day, default) → totals with running “Remaining PIP” → billing notes (“Modifier 25 on 99203 prevents bundling… EMC documented… CPT codes match clinical documentation”) → physician signature.</p>
+</div>
+</div>
+
+<h3>4.6 System-generated MD Initial Evaluation note (App.jsx <span class="code">generateSOAP()</span>)</h3>
+<p>The in-app narrative engine assembles this exact skeleton from the pill inputs (═/─ ruled, Georgia serif):</p>
+<pre class="note">══════════════════════════════════════════════
+  WELLNESS HEALTHCARE CLINIC CORP  ·  letterhead + physician line
+══════════════════════════════════════════════
+FLORIDA PIP INITIAL EVALUATION REPORT
+Patient Information  (name, DOB+age, sex, DOA, date of evaluation,
+                      carrier, "Case Type: Florida Personal Injury
+                      Protection (PIP)", case ID)
+Accident History     ← mechanism narrative built from binaries:
+  "The patient was involved in a rear-end mva on [DOA] while positioned
+   as the driver. The vehicle was stopped at the time of impact. The
+   patient was restrained with seatbelt, and airbags did not deploy.
+   The vehicle was not drivable after the collision. The patient denies
+   loss of consciousness."
+Previous Medical Attention  (ER vs "did not seek prior medical evaluation")
+Chief Complaints     (bullets + "Pain Severity: 7/10" + "Onset: Immediate
+                      post-traumatic")
+History of Present Illness   ← age/sex/onset/severity sentence ending
+  "…the clinical presentation is consistent with acute traumatic
+   musculoskeletal injury directly resulting from the motor vehicle accident."
+Past Medical History · Allergies · Current Medications · Prior Accidents
+Review of Systems    (musculoskeletal / neurological / psychological /
+                      "All other systems: Reviewed and negative unless
+                       otherwise stated")
+Physical Examination (general appearance + distress grade from pain score;
+                      ambulation; neuro bullets; HEENT bullets)
+SPINE EXAMINATION    ← per-region: Pain n/10 · Palpation narrative
+                      ("Muscle spasm is present." / "No involuntary muscle
+                       spasm appreciated.") · ROM narrative from functional
+                      tests, e.g. "Restricted cervical rotation limiting
+                      ability to turn head while driving and check blind spots"
+EXTREMITY / JOINT EXAMINATION   (same pattern, swelling noted)
+Assessment / Diagnoses (ICD-10)
+Medical Necessity Statement    ← mechanism-consistency + objective findings
+  + "not attributable to any pre-existing condition" + the five treatment
+  goals + "Without appropriate and timely intervention, the patient is at
+  significant risk for chronic pain, prolonged disability, deconditioning,
+  and delayed recovery."
+Functional Limitations         ← auto-derived from regional findings
+  (driving/work/sleep for cervical; lifting/mobility/work for lumbar; etc.)
+Treatment Plan (PT frequency × duration)
+CPT Code Justification         ← one clause per CPT + "Linked diagnoses: …"
+Medications Prescribed         ← per-drug Sig + Rationale (see §5.6)
+Referrals · Imaging Orders (MAZEL block with views + justification + linked ICD)
+Patient Counseling &amp; Education ← 4 fixed bullets: injury education
+  ("recovery typically requires 6-12 weeks of consistent treatment"),
+  activity modification (">10 lbs" rule, ergonomics), medication precautions,
+  treatment compliance; ends "The patient verbalized understanding…"
+Prognosis            ← severity-conditional Fair vs Good-to-fair paragraph
+Follow-Up Plan       ("Re-evaluation in 4 weeks…", MRI escalation clause)
+Signature block + "Generated by PI Master™ · RenuviaMD® Network"</pre>
+
+<h3>4.7 System-generated Follow-Up note (<span class="code">generateFollowUpSOAP()</span>)</h3>
+<pre class="note">FLORIDA PIP FOLLOW-UP EVALUATION REPORT   · Visit #N · DOS
+Patient Information
+History Since Initial Visit    ← region buckets: Improvement / Persistent /
+                                Worsened / Resolved + "Pain intensity has
+                                decreased overall, with improved tolerance
+                                to activities of daily living."
+Current Complaints             (non-resolved regions)
+Focused Physical Examination   ← per region: "Pain: 4/10 (previously 7/10)"
+                                · Palpation · ROM · Functional ROM results
+Therapy Progress Review        ← "Pain reduction during sessions (7/10 → 5/10)
+                                · tolerated all modalities · ROM: Improving
+                                · Strength: Improving · ADL: Conserved"
+Assessment                     ← each ICD-10 with region status suffix
+                                ("S13.4XXA Cervical sprain — Improved")
+Medical Necessity for Continued Treatment   ← 5 fixed bullets: persistent
+  pain/functional limitation · objective findings · "Incomplete recovery —
+  patient has not reached pre-accident functional baseline" · documented
+  improvement supports therapeutic benefit · "Discontinuation at this time
+  would result in regression of functional gains"
+Plan of Care (Continuation)    (frequency, duration, focus: "ROM restoration,
+                                strengthening, neuromuscular re-education")
+Maximum Medical Improvement (MMI / ME):
+  "The patient has not reached Maximum Medical Improvement and requires
+   continued treatment."
+Physician Signature</pre>
+
+<h3>4.8 System-generated Final / Discharge note (<span class="code">generateFinalSOAP()</span>)</h3>
+<pre class="note">FINAL VISIT / DISCHARGE NOTE
+Patient Information (incl. Date of Final Visit)
+Course of Treatment Summary    ← composed sentence: "…Cervical Spine has
+  improved with residual symptoms; Lumbar Spine has fully resolved…
+  Review of therapy documentation indicates the patient responded
+  favorably to conservative treatment overall."
+Current Complaints             (severity-graded per remaining region)
+Final Focused Physical Examination   ← every region: Pain n/10 (initially
+                                m/10) · Palpation · Spasm Present/Absent ·
+                                ROM · Functional ROM
+Final Regional Assessment      (each ICD-10 — final status)
+Overall Assessment             ← count-based paragraph ("Of N initially
+  injured regions, X have resolved and Y have improved with residual
+  symptoms… the patient has demonstrated meaningful clinical improvement
+  with conservative care.")
+Functional Status              (ADLs: Conserved · Work · Driving · Sleep · Mobility)
+Maximum Medical Improvement (MMI)
+  "The patient has reached Maximum Medical Improvement (MMI)." (or not)
+  + DISCLAIMER, verbatim: "Determination of Maximum Medical Improvement is
+  based on the patient's history, objective findings, and response to
+  treatment, within a reasonable degree of medical probability. Any
+  impairment rating should be established in accordance with the AMA Guides."
+Medical Necessity              ← MMI-reached: "…continued supervised physical
+  therapy is no longer medically necessary, as the patient has achieved
+  maximum therapeutic benefit from conservative care." / not reached:
+  continuance language
+Discharge / Continuity of Care ← discharge from active PT · HEP education ·
+  follow-up PRN · specialist referral if decline    (or Plan-of-Care
+  Continuation block when MMI not reached)
+Physician Signature</pre>
+
+<h3>4.9 System-generated PT notes (<span class="code">generateDaily()</span> / <span class="code">generateWeekly()</span>)</h3>
+<div class="grid2">
+<div class="card"><h4 style="margin-top:0">PT Daily Session Note</h4>
+<p class="small" style="margin:0">Header “PT DAILY SESSION NOTE — [date] · Session #N of M Authorized Sessions” → SUBJECTIVE (pain at start, barriers, compliance) → TREATMENT PROVIDED (modalities, exercises) → OBJECTIVE / RESPONSE (pain at end “improved N points”, response, functional progress) → ASSESSMENT, verbatim core: <i>“Patient continues to demonstrate functional deficits consistent with injuries sustained in MVA on [DOI]. Physical therapy is medically necessary at current frequency to restore pre-accident functional baseline and prevent chronicity… Discharge at this time would result in measurable functional loss.”</i> → PLAN → CPT CODES BILLED THIS SESSION (auto) → MEDICAL NECESSITY FOR CONTINUANCE → Treating PT/PTA + Supervising Physician signature lines.</p></div>
+<div class="card"><h4 style="margin-top:0">PT Weekly Progress Summary</h4>
+<p class="small" style="margin:0">“WEEKLY PT PROGRESS SUMMARY — Week N” → PAIN TREND (start→end) → PROGRESS ASSESSMENT (ROM, strength, ADL Conserved, functional, pain management, overall status) → WEEKLY ASSESSMENT (status-conditional sentence: On Track / At Risk / Needs Adjustment) → PLAN FOR NEXT WEEK (+ physician re-evaluation recommendation) → MEDICAL NECESSITY STATEMENT, the numbered four: <i>“(1) documented ROM deficits below pre-accident baseline; (2) objective muscle spasm and tenderness on examination; (3) measurable functional limitations in ADLs directly attributable to MVA injuries of [DOI]; (4) week-over-week objective improvement confirming therapeutic benefit of continued intervention.”</i></p></div>
+</div>
+
+<h3>4.10 Package artifacts</h3>
+<p><b>Insurance Billing Package cover sheet</b> (per batch): patient block, attending + NPI, billing provider + Tax ID, visit range and count, diagnoses, procedures with charges, itemized visit-note list, billing summary vs the $10,000 PIP limit, and the manifest “DOCUMENTS IN THIS PACKAGE: 1 Cover Sheet · 2 MD Initial Evaluation Report + Follow-Up(s) · 3 PT Daily Session Notes (×N) · 4 PT Weekly Summary (×N) · 5 Superbill · 6 CMS-1500 Claim Form.” <b>Case Summary / Full Clinical Chart PDFs</b>: navy-banner letterhead, numbered sections (Accident &amp; Case · Demographics · Insurance &amp; PIP · Clinical · Billing (PIP 80%) · Visit Notes), attestation + dual signature/date rules, “CONFIDENTIAL” footer with page numbers. <b>MAZEL X-ray order email</b>: see §3.6.</p>
+
+<!-- ══════════════════════ 5 DICTIONARY ══════════════════════ -->
+<h2 id="dictionary"><span class="num">5</span>Clinical Terminology Dictionary</h2>
+<p class="lede">Every code, term, phrase, and controlled vocabulary extracted from the application and documents. This is the language the system speaks — reports, superbills, and audits all reference these exact strings.</p>
+
+<h3>5.1 ICD-10 diagnosis codes (complete union across app + templates)</h3>
+<div class="tablewrap"><table>
+  <tr><th>Region</th><th>Code</th><th>Meaning as used in PI Master</th><th>Type</th></tr>
+  <tr><td rowspan="6">Cervical</td><td class="code">S13.4XXA</td><td>Sprain of ligaments of cervical spine, initial encounter (“Cervical sprain”)</td><td><span class="chip r">SPR</span></td></tr>
+  <tr><td class="code">S16.1XXA</td><td>Strain of muscle/tendon at neck level, initial (“Cervical strain”)</td><td><span class="chip a">STR</span></td></tr>
+  <tr><td class="code">M54.2</td><td>Cervicalgia (neck pain)</td><td><span class="chip b">Pain</span></td></tr>
+  <tr><td class="code">M54.12</td><td>Radiculopathy, cervical region</td><td><span class="chip b">Neuro</span></td></tr>
+  <tr><td class="code">M62.830</td><td>Muscle spasm of back (used for cervical/lumbar spasm)</td><td><span class="chip b">Spasm</span></td></tr>
+  <tr><td class="code">G44.309</td><td>Post-traumatic headache, unspecified (mock data also uses G44.1 “vascular headache NEC”)</td><td><span class="chip b">HA</span></td></tr>
+  <tr><td rowspan="3">Thoracic</td><td class="code">S23.3XXA</td><td>Sprain of ligaments of thoracic spine, initial</td><td><span class="chip r">SPR</span></td></tr>
+  <tr><td class="code">S29.012A</td><td>Strain of muscle/tendon of thorax, initial (“Thoracic strain”)</td><td><span class="chip a">STR</span></td></tr>
+  <tr><td class="code">M54.6</td><td>Pain in thoracic spine</td><td><span class="chip b">Pain</span></td></tr>
+  <tr><td rowspan="5">Lumbar</td><td class="code">S33.5XXA</td><td>Sprain of ligaments of lumbar spine, initial</td><td><span class="chip r">SPR</span></td></tr>
+  <tr><td class="code">S39.012A</td><td>Strain of muscle of lower back, initial</td><td><span class="chip a">STR</span></td></tr>
+  <tr><td class="code">M54.5</td><td>Low back pain (lumbago)</td><td><span class="chip b">Pain</span></td></tr>
+  <tr><td class="code">M54.4</td><td>Lumbago with sciatica</td><td><span class="chip b">Neuro</span></td></tr>
+  <tr><td class="code">M54.16</td><td>Radiculopathy, lumbar region</td><td><span class="chip b">Neuro</span></td></tr>
+  <tr><td rowspan="3">Shoulder</td><td class="code">S43.421A</td><td>Sprain — shoulder (template variant: S43.401A unspecified part, right)</td><td><span class="chip r">SPR</span></td></tr>
+  <tr><td class="code">S46.011A</td><td>Strain — shoulder (rotator-cuff muscle/tendon)</td><td><span class="chip a">STR</span></td></tr>
+  <tr><td class="code">M25.511 / M25.512</td><td>Pain in right / left shoulder</td><td><span class="chip b">Pain</span></td></tr>
+  <tr><td>Elbow</td><td class="code">S53.401A · S56.111A · M25.521</td><td>Elbow sprain · strain · pain</td><td><span class="chip n">set</span></td></tr>
+  <tr><td>Wrist</td><td class="code">S63.501A · S66.111A · M25.531</td><td>Wrist sprain · strain · pain</td><td><span class="chip n">set</span></td></tr>
+  <tr><td>Hand</td><td class="code">S63.90XA · S66.911A · M79.641</td><td>Hand sprain · strain · pain</td><td><span class="chip n">set</span></td></tr>
+  <tr><td>Hip</td><td class="code">S73.101A · S76.011A · M25.551/.552</td><td>Hip sprain · strain · pain R/L</td><td><span class="chip n">set</span></td></tr>
+  <tr><td>Knee</td><td class="code">S83.401A · S86.811A · M25.561/.562 · M62.831</td><td>Knee sprain (ligament) · strain · pain R/L · muscle spasm (template variant: S83.90XA unspecified sprain L knee; disc: M50.12 cervical disc disorder C4–C5 w/ radiculopathy)</td><td><span class="chip n">set</span></td></tr>
+  <tr><td>Ankle/Foot</td><td class="code">S93.401A · S96.811A · M25.571 · M62.841 · M79.671/.672</td><td>Ankle sprain · strain · pain · spasm · foot pain R/L</td><td><span class="chip n">set</span></td></tr>
+  <tr><td>Psychological</td><td class="code">F43.10 · F41.1 · F32.9</td><td>PTSD unspecified · Generalized anxiety disorder · Major depressive episode (optional PIP psych codes)</td><td><span class="chip p">Psych</span></td></tr>
+  <tr><td>General</td><td class="code">M79.1 · G89.29 · R29.898 · R52.9</td><td>Myalgia · Other chronic pain · Other musculoskeletal symptoms · Pain, unspecified</td><td><span class="chip n">misc</span></td></tr>
+</table></div>
+<div class="callout"><b>Encounter-suffix convention</b> “A” = initial encounter (first visit) → converts to “D” (subsequent encounter) at follow-up and “S” (sequela) at discharge. MVA injuries use S-codes (injury), not disease codes; every site is coded separately with laterality; <b>sprain/strain codes are listed first per the FL PIP documentation standard</b>.</div>
+
+<h3>5.2 CPT procedure codes and clinic fee schedule</h3>
+<div class="tablewrap"><table>
+  <tr><th>Category</th><th>Code</th><th>Description (as displayed)</th><th>Fee</th><th>Notes</th></tr>
+  <tr><td rowspan="6">E/M</td><td class="code">99203</td><td>New Patient — Moderate Complexity</td><td>$175</td><td rowspan="6"><b>Modifier 25 always appended</b> (PT same day is the clinic standard): 99203-25 … 99215-25. “Significant, separately identifiable E/M service (FL PIP).” Initial default 99203-25; follow-up default 99213-25. The MD dx step also offers 99205/99206 (high complexity) per spec.</td></tr>
+  <tr><td class="code">99204</td><td>New Patient — Moderate/High Complexity</td><td>$250</td></tr>
+  <tr><td class="code">99205/99206</td><td>New Patient — High Complexity / High MDM</td><td>$300 (99205)</td></tr>
+  <tr><td class="code">99212</td><td>Established — Straightforward (superbill spec)</td><td>—</td></tr>
+  <tr><td class="code">99213</td><td>Established Patient — Low Complexity</td><td>$110</td></tr>
+  <tr><td class="code">99214 / 99215</td><td>Established — Moderate / High</td><td>$165 / —</td></tr>
+  <tr><td rowspan="5">PT Modality</td><td class="code">97010</td><td>Hot/Cold Packs</td><td>$15</td><td>thermal, pain modulation</td></tr>
+  <tr><td class="code">97012</td><td>Mechanical Traction</td><td>$35</td><td>spinal decompression / radicular</td></tr>
+  <tr><td class="code">97014</td><td>Electrical Stimulation (unattended)</td><td>$30</td><td>TENS</td></tr>
+  <tr><td class="code">97032</td><td>Electrical Stimulation (attended)</td><td>$35</td><td>NMES</td></tr>
+  <tr><td class="code">97035</td><td>Ultrasound</td><td>$30</td><td>deep heating</td></tr>
+  <tr><td rowspan="5">PT Exercise / Manual</td><td class="code">97110</td><td>Therapeutic Exercise</td><td>$45</td><td>ROM + strengthening (default add when any exercise selected)</td></tr>
+  <tr><td class="code">97112</td><td>Neuromuscular Re-education</td><td>$45</td><td>proprioception/motor patterns</td></tr>
+  <tr><td class="code">97116</td><td>Gait Training</td><td>$45</td><td></td></tr>
+  <tr><td class="code">97140</td><td>Manual Therapy</td><td>$45</td><td>joint restriction / soft tissue</td></tr>
+  <tr><td class="code">97530</td><td>Therapeutic Activities</td><td>$45</td><td>functional movement (also mapped from Kinesiotaping)</td></tr>
+  <tr><td>PT other</td><td class="code">97018</td><td>Paraffin Bath</td><td>—</td><td>offered in MD modality list</td></tr>
+  <tr><td rowspan="7">Imaging (X-ray)</td><td class="code">72050 / 72052</td><td>Cervical Spine 3-view (AP, Lateral, Odontoid) / AP-Lat-Obliques</td><td>$85</td><td rowspan="7">Each order carries fixed views + a written “rule out fracture, dislocation, or instability”-style justification and linked ICD codes; all referred to MAZEL. Hip appears as 73510 (fee list) and 73502 (rules engine); knee as 73560 / 73562 — see §7.</td></tr>
+  <tr><td class="code">72070 / 72072</td><td>Thoracic Spine (AP, Lateral)</td><td>$80</td></tr>
+  <tr><td class="code">72100</td><td>Lumbar Spine 2-view (AP, Lateral)</td><td>$75</td></tr>
+  <tr><td class="code">73030</td><td>Shoulder (AP, Axillary, Y-view)</td><td>$80</td></tr>
+  <tr><td class="code">73080 / 73110 / 73130</td><td>Elbow / Wrist / Hand series</td><td>—</td></tr>
+  <tr><td class="code">73502/73510 · 73562/73560</td><td>Hip (AP Pelvis, Frog Lateral) · Knee (AP, Lateral, Sunrise)</td><td>$80 / $75</td></tr>
+  <tr><td class="code">73600 / 73620</td><td>Ankle (AP, Lateral, Mortise) / Foot (AP, Lateral, Oblique)</td><td>—</td></tr>
+  <tr><td>Modifiers</td><td class="code">-25</td><td>Significant, separately identifiable E/M service same day as procedure — <b>always on</b></td><td>—</td><td><span class="code">GP</span> optional on PT weekly billing</td></tr>
+</table></div>
+
+<h3>5.3 Florida PIP &amp; regulatory vocabulary</h3>
+<dl class="dict">
+  <div><dt>PIP</dt><dd>Personal Injury Protection — Florida no-fault auto medical coverage. Pays <b>80% of medical bills and 60% of lost wages</b>, up to the benefit limit.</dd></div>
+  <div><dt>14-Day Rule</dt><dd>Initial treatment must occur within 14 calendar days of the accident or the PIP claim is denied entirely (FL §627.736). Clinic policy: staff screens at admission; &gt;14 days is not accepted.</dd></div>
+  <div><dt>EMC — Emergency Medical Condition</dt><dd>Acute symptoms of sufficient severity (may include severe pain) such that absence of immediate medical attention could reasonably be expected to result in (A) serious jeopardy to patient health, (B) serious impairment to bodily functions, or (C) serious dysfunction of any bodily organ or part. EMC certified (by MD, DO, PA, or ARNP, at the first visit) → <b>$10,000</b> benefit; not certified → <b>$2,500</b> cap. The single most consequential clinical determination in the system.</dd></div>
+  <div><dt>OIR-B1-1571</dt><dd>Florida OIR “Standard Disclosure and Acknowledgment Form” — patient attests services were explained and actually rendered at the initial visit; dual patient + provider signatures; reimbursement prerequisite.</dd></div>
+  <div><dt>Patient Log</dt><dd>Chronological per-visit patient-signature record required for follow-up reimbursement under FL §627.736.</dd></div>
+  <div><dt>AOB</dt><dd>Assignment of Benefits — patient assigns insurance payment rights to the clinic (intake checklist item).</dd></div>
+  <div><dt>Excluded services</dt><dd>Massage therapy and acupuncture are not covered by Florida PIP; separately acknowledged and self-paid (Reception Form 6).</dd></div>
+  <div><dt>Fraud statute</dt><dd>FL §627.409 — false/incomplete/misleading insurance statements = third-degree felony; printed on the Sworn Affidavit.</dd></div>
+  <div><dt>Telehealth consent</dt><dd>FL §456.47 — Florida telehealth informed consent; documented with platform (doxy.me), patient location, persons present, synchronous A/V confirmation.</dd></div>
+  <div><dt>HIPAA</dt><dd>45 CFR §164 — role-based, audit-logged access; MRN built from SS4/ID4 instead of full SSN; duplicate-override reasons logged to the audit trail.</dd></div>
+  <div><dt>CMS-1500 / NUCC 02/12</dt><dd>The standard paper claim form; PI Master pre-audits ~25 box-level checks (hard stops vs soft warnings) before any package can be built.</dd></div>
+  <div><dt>Peer review defense</dt><dd>Language deliberately embedded in PT notes to survive insurer peer review — objective deficits, measurable progress, regression-if-discontinued reasoning.</dd></div>
+  <div><dt>PIP Only vs BI Litigation</dt><dd>The two case tracks. PIP Only = standard SOAP, functional ROM, CMS-1500, simple discharge. BI (bodily injury) Litigation = full defensive documentation: Waddell’s Signs, FCE trigger, causation documentation, MMI impairment rating, litigation package unlocked at MMI.</dd></div>
+  <div><dt>LOP</dt><dd>Letter of Protection — attorney’s promise to pay from settlement; specialist directory marks who accepts LOP / PIP / BI / Cash.</dd></div>
+</dl>
+
+<h3>5.4 Functional ROM assessment — tests, AAOS norms, and spoken commands</h3>
+<p>Each test is graded <b>Full / Partial / Limited / Cannot</b> (lumbar flexion uses distance anchors: Normal ≤4in / Mid-shin / Knee level / Cannot; some use Normal/Antalgic/Severe or Stable/Unsteady). The physician reads the command aloud and taps the observed grade; grades map to narrative text and support ICD selection.</p>
+<div class="tablewrap"><table>
+  <tr><th>Region</th><th>Test</th><th>Norm</th><th>Verbal command (verbatim)</th></tr>
+  <tr><td rowspan="4">Cervical</td><td>Chin to Chest (flexion)</td><td>~50°</td><td>“Tuck your chin to your chest”</td></tr>
+  <tr><td>Look at Ceiling (extension)</td><td>~60°</td><td>“Look up at the ceiling”</td></tr>
+  <tr><td>Ear to Shoulder R/L (lateral flexion)</td><td>~45°</td><td>“Tilt your right ear to your right shoulder”</td></tr>
+  <tr><td>Look Over Shoulder R/L (rotation)</td><td>~70°</td><td>“Turn and look over your right shoulder”</td></tr>
+  <tr><td rowspan="3">Lumbar</td><td>Fingertip to Floor (flexion)</td><td>~60°</td><td>“Bend forward and reach for the floor”</td></tr>
+  <tr><td>Backward Lean (extension)</td><td>~25°</td><td>“Lean backward gently”</td></tr>
+  <tr><td>Side Bend R/L</td><td>~25°</td><td>“Bend to the right side”</td></tr>
+  <tr><td rowspan="3">Shoulder</td><td>Raise Arm Overhead R/L</td><td>~180°</td><td>“Raise your right arm straight up”</td></tr>
+  <tr><td>Reach Behind Head R/L (ER)</td><td>~90°</td><td>“Reach behind your head with your right hand”</td></tr>
+  <tr><td>Tuck In Shirt R/L (IR)</td><td>~70°</td><td>“Reach behind your back as if tucking in your shirt”</td></tr>
+  <tr><td rowspan="2">Elbow</td><td>Touch Own Shoulder R/L (flexion)</td><td>~145°</td><td>“Bend your right elbow and touch your shoulder”</td></tr>
+  <tr><td>Turn Doorknob R/L (pron/sup)</td><td>~90°</td><td>“Rotate your right forearm as if turning a doorknob”</td></tr>
+  <tr><td>Wrist</td><td>Bend Wrist Back / Forward R/L</td><td>~70° / ~80°</td><td>“Bend your right wrist backward / forward”</td></tr>
+  <tr><td>Hand</td><td>Make Fist · Pinch Test R/L</td><td>—</td><td>“Make a tight fist” · “Pinch my finger with your thumb and index finger”</td></tr>
+  <tr><td rowspan="2">Hip</td><td>Get In Car R/L (flexion)</td><td>~120°</td><td>“Lift your right leg as if stepping into a car”</td></tr>
+  <tr><td>Step Sideways R/L (abduction)</td><td>~45°</td><td>“Step sideways to the right”</td></tr>
+  <tr><td rowspan="2">Knee</td><td>Rise from Chair R/L (flexion)</td><td>~135°</td><td>“Stand up from a seated position using your right leg”</td></tr>
+  <tr><td>Step Up R/L</td><td>—</td><td>“Step up onto a platform with your right leg” (Stable/Unsteady/Cannot)</td></tr>
+  <tr><td rowspan="2">Ankle</td><td>Heel-Toe Walk R/L (dorsiflexion)</td><td>~20° DF</td><td>“Walk heel-to-toe in a straight line” (Normal/Antalgic/Severe/Cannot)</td></tr>
+  <tr><td>Stand on Tiptoes R/L (plantarflexion)</td><td>~50° PF</td><td>“Stand on the toes of your right foot”</td></tr>
+</table></div>
+<p class="small">Each grade owns a fixed narrative fragment tied to function — e.g., cervical rotation Partial → “Restricted right cervical rotation limiting ability to turn head while driving and check blind spots”; lumbar flexion Limited → “Severely restricted lumbar flexion, patient unable to reach below knee level”; hand grip Partial → “Decreased grip strength, limiting ability to grasp objects and open containers.”</p>
+
+<h3>5.5 Examination &amp; clinical status vocabulary</h3>
+<dl class="dict">
+  <div><dt>TTP</dt><dd>Tenderness to palpation. Variants used: Paraspinal TTP, Facet TTP, SI Joint TTP, Costovertebral TTP.</dd></div>
+  <div><dt>Palpation set (spine)</dt><dd>Paraspinal TTP · Facet TTP · SI Joint TTP · Muscle Spasm · Trigger Points · Costovertebral TTP.</dd></div>
+  <div><dt>Palpation set (joints)</dt><dd>TTP · Swelling · Crepitus · Impingement (shoulder) · Effusion, McMurray (knee).</dd></div>
+  <div><dt>Special tests (templates)</dt><dd>Spurling’s / neck compression (cervical radiculopathy); apprehension &amp; drop-arm (shoulder); McMurray’s &amp; Lachman’s (knee).</dd></div>
+  <div><dt>Neuro exam set</dt><dd>Grossly Intact · DTRs Symmetric (deep tendon reflexes) · Sensation Intact · Motor 5/5 · Babinski Negative · CN II–XII intact.</dd></div>
+  <div><dt>HEENT set</dt><dd>Normocephalic · Atraumatic · PERRL (pupils equal, round, reactive to light) · TMs Clear · Oropharynx Normal.</dd></div>
+  <div><dt>General status / gait</dt><dd>Alert &amp; Oriented ×4 (or ×3 in templates) · Lethargic · Confused; Normal Gait · Antalgic Gait (pain-limited) · Uses Assistive Device; posture Guarding / Protective.</dd></div>
+  <div><dt>Pain descriptors</dt><dd>0–10 VAS; onset Immediate / Within hours / Next day / Gradual over days (interview: Immediate/Gradual/Delayed); severity bands: ≥7 “severe and constant,” 4–6 “moderate and persistent,” ≤3 “mild but persistent.”</dd></div>
+  <div><dt>Mechanism of Injury (MOI)</dt><dd>Rear-End MVA · Side Impact · T-Bone · Rollover · Head-On; occupant position, vehicle motion at impact, restraint status, airbag deployment, drivability, LOC.</dd></div>
+  <div><dt>Region status (follow-up)</dt><dd>Improved · Persistent · Worsened · Resolved (drives which regions get examined and how each ICD is suffixed).</dd></div>
+  <div><dt>Final region status</dt><dd>Resolved · Improved with Residual · Persistent · Plateaued · Worsened.</dd></div>
+  <div><dt>Dx status per ICD</dt><dd>Improved · Stable · Resolved (templates: Improving / Resolved / Unchanged).</dd></div>
+  <div><dt>PT response set</dt><dd>Tolerated Well · Mild Discomfort · Significant Pain · Adverse Reaction; functional progress Improving/Plateau/Declining/No Change; compliance Compliant/Partially/Non-Compliant; overall On Track / Needs Adjustment / At Risk.</dd></div>
+  <div><dt>MMI</dt><dd>Maximum Medical Improvement — “Patient has stabilized. No significant additional improvement expected with continued conservative care.” Determination expressed “within a reasonable degree of medical probability”; impairment ratings per the AMA Guides (BI cases: whole-person impairment %, e.g., “12% per AMA Guides 6th Edition”).</dd></div>
+  <div><dt>ADL: Conserved</dt><dd>The system’s stock phrase asserting activities of daily living are preserved; appears in nearly every generated note.</dd></div>
+  <div><dt>Causation phrases</dt><dd>“Clear direct causal relationship between accident and current complaints” · “directly caused by … within a reasonable degree of medical certainty” · “not attributable to any pre-existing condition” · “strengthens the causal nexus.”</dd></div>
+  <div><dt>Continuance phrases</dt><dd>“Has not reached pre-accident functional baseline” · “discontinuation would result in regression of functional gains” · “prevent chronicity / chronic pain syndrome” · “measurable week-over-week objective improvement confirming therapeutic benefit.”</dd></div>
+</dl>
+
+<h3>5.6 Medication formulary (with generated Sig &amp; rationale)</h3>
+<div class="tablewrap"><table>
+  <tr><th>Medication</th><th>Sig (verbatim)</th><th>Rationale (verbatim, abridged)</th></tr>
+  <tr><td><b>Cyclobenzaprine 10mg</b></td><td>10 mg PO TID PRN muscle spasm</td><td>“…documented paraspinal muscle spasm and myofascial pain to facilitate participation in physical therapy.”</td></tr>
+  <tr><td><b>Methocarbamol 750mg</b></td><td>750 mg PO TID PRN muscle spasm</td><td>“…reduce guarding and improve range of motion.”</td></tr>
+  <tr><td><b>Naproxen 500mg</b></td><td>500 mg PO BID with food</td><td>“Anti-inflammatory … acute soft tissue inflammation and pain secondary to traumatic sprain/strain injury.”</td></tr>
+  <tr><td><b>Meloxicam 15mg</b></td><td>15 mg PO once daily with food</td><td>“…to improve functional mobility.”</td></tr>
+  <tr><td><b>Ibuprofen 800mg</b></td><td>800 mg PO TID with food</td><td>“…acute post-traumatic musculoskeletal pain and tissue inflammation.”</td></tr>
+  <tr><td><b>Diclofenac Gel 1%</b></td><td>Apply topically QID to affected area(s)</td><td>“Topical NSAID … minimizing systemic side effects.”</td></tr>
+  <tr><td><b>Tramadol 50mg</b></td><td>50 mg PO q6h PRN moderate-severe pain</td><td>“…pain not adequately controlled by anti-inflammatory medications alone.”</td></tr>
+  <tr><td><b>Gabapentin 300mg</b></td><td>300 mg PO TID, titrate as tolerated</td><td>“…neuropathic pain component and radicular symptoms documented on neurological examination.”</td></tr>
+  <tr><td><b>Tizanidine 4mg</b></td><td>4 mg PO QHS PRN muscle spasm</td><td>“…nocturnal muscle spasm and sleep disruption secondary to musculoskeletal injury.”</td></tr>
+</table></div>
+
+<h3>5.7 Abbreviation index</h3>
+<dl class="dict">
+  <div><dt>DOA / DOI / DOL</dt><dd>Date of Accident / Date of Injury / Date of Loss (affidavit).</dd></div>
+  <div><dt>DOS / DOFV</dt><dd>Date of Service / Date of First Visit.</dd></div>
+  <div><dt>HPI · PMH · ROS · PE</dt><dd>History of Present Illness · Past Medical History · Review of Systems · Physical Examination.</dd></div>
+  <div><dt>SOAP</dt><dd>Subjective, Objective, Assessment, Plan — the note format.</dd></div>
+  <div><dt>ROM / AROM</dt><dd>Range of Motion / Active ROM; AAOS normative degrees displayed per test.</dd></div>
+  <div><dt>E/M · MDM</dt><dd>Evaluation &amp; Management CPT level · Medical Decision Making.</dd></div>
+  <div><dt>HEP</dt><dd>Home Exercise Program — daily compliance required; discharge maintenance 2–3×/week.</dd></div>
+  <div><dt>ADL / IADL</dt><dd>Activities / Instrumental Activities of Daily Living.</dd></div>
+  <div><dt>NKDA</dt><dd>No Known Drug Allergies (default allergy state).</dd></div>
+  <div><dt>MRN · SS4 · ID4</dt><dd>Medical Record Number minted from last-4 of SSN (preferred) or last-4 of government ID (fallback when SSN declined).</dd></div>
+  <div><dt>POC</dt><dd>Plan of Care (weeks of prescribed treatment; “POC Continuation” at follow-up).</dd></div>
+  <div><dt>RTW</dt><dd>Return to Work (Full Duty / Modified Duty / Unable).</dd></div>
+  <div><dt>MMI · ME</dt><dd>Maximum Medical Improvement (note header uses “MMI / ME”).</dd></div>
+  <div><dt>FCE</dt><dd>Functional Capacity Evaluation (BI-track trigger).</dd></div>
+  <div><dt>ESI · ACDF · ART · TENS/NMES</dt><dd>Epidural steroid injection · Anterior cervical discectomy &amp; fusion · Active Release Technique · trans/neuromuscular electrical stimulation (specialist-referral vocabulary).</dd></div>
+  <div><dt>NCV/EMG · VAS · SCAT-5</dt><dd>Nerve conduction / electromyography · Visual Analog Scale · Sport Concussion Assessment Tool (neurology consults).</dd></div>
+  <div><dt>PRN · TID · BID · QID · QHS · PO</dt><dd>As needed · three/two/four times daily · at bedtime · by mouth.</dd></div>
+  <div><dt>LOC · AMS · DTR · CN</dt><dd>Loss of consciousness · Altered mental status · Deep tendon reflexes · Cranial nerves.</dd></div>
+  <div><dt>ER · OTC · NSAID</dt><dd>Emergency room · Over-the-counter · Non-steroidal anti-inflammatory drug.</dd></div>
+  <div><dt>NPI · POS 11</dt><dd>National Provider Identifier · Place of Service “office” on the CMS-1500.</dd></div>
+</dl>
+
+<!-- ══════════════════════ 6 COMPLIANCE ══════════════════════ -->
+<h2 id="compliance"><span class="num">6</span>Fixed Identity &amp; Compliance Constants</h2>
+<div class="grid3">
+  <div class="card"><h4 style="margin-top:0">Clinic</h4><p class="small" style="margin:0"><b>Wellness Healthcare Clinic Corp</b><br>8180 NW 36th St, Suite 213, Doral, FL 33166<br>Ph (305) 994-9500 · Fax (786) 441-2179<br>Tax ID: XX-XXXXXXX (placeholder)<br>App/product email: pimaster@renuviamd.com<br>Domain: pimaster.renuviamd.com</p></div>
+  <div class="card"><h4 style="margin-top:0">Physician</h4><p class="small" style="margin:0"><b>Dr. Armando Falcon, MD</b><br>FL License ME 84789 (Chapter 458) · NPI 1447295126<br>Internal Medicine / PIP Management<br>drfalcon@renuviamd.com<br>Signature image embedded as default on EMC, Initial, Follow-up, and Discharge documents.<br><i>PT provider in demo data: James Rivera, DPT.</i></p></div>
+  <div class="card"><h4 style="margin-top:0">Partners</h4><p class="small" style="margin:0"><b>MAZEL Diagnostic Center Inc.</b> — 8150 SW 8th St Suite 119, Miami FL 33144 · 305-261-3020 · fax 305-261-3070 · orders@mazelmedical.com<br><b>Telehealth:</b> doxy.me/renuviamd (HIPAA-compliant, synchronous A/V)<br><b>Stack:</b> React + Vite · Supabase (auth/DB/edge functions) · jsPDF · Netlify.</p></div>
+</div>
+<div class="tablewrap"><table>
+  <tr><th>Statute / standard</th><th>Where it binds the design</th></tr>
+  <tr><td class="code">FL §627.736</td><td>14-day treatment window; $10,000/$2,500 EMC benefit split; disclosure-form + patient-log signature requirements; PIP 80/60 payment; the entire billing package design.</td></tr>
+  <tr><td class="code">FL §627.732(4)</td><td>EMC definition cited in the app-generated EMC certification.</td></tr>
+  <tr><td class="code">FL §627.409 / §627.4093</td><td>Cited on the EMC form and (627.409) as the fraud felony notice on the Sworn Affidavit and PIP info sheet.</td></tr>
+  <tr><td class="code">FL Ch. 458 / 456 / 459 / 464</td><td>Licensure classes enumerated in the EMC attestation (physician / PA / dentist / ARNP).</td></tr>
+  <tr><td class="code">FL §456.47</td><td>Telehealth informed consent checkbox in the New Case wizard.</td></tr>
+  <tr><td class="code">45 CFR §164 (HIPAA)</td><td>Login footer; role-based access; audit logging; MRN minimization (SS4/ID4); privacy notice form.</td></tr>
+  <tr><td class="code">NUCC 02/12 (CMS-1500)</td><td>Claim facsimile and the pre-submission audit engine’s box map.</td></tr>
+  <tr><td class="code">AMA Guides (6th Ed.)</td><td>Impairment-rating standard referenced in the MMI disclaimer and BI-track consult reports.</td></tr>
+</table></div>
+
+<!-- ══════════════════════ 7 GAPS ══════════════════════ -->
+<h2 id="gaps"><span class="num">7</span>Inconsistencies Flagged for Physician / Compliance Review</h2>
+<p class="lede">Found during the audit. None were altered (read-only audit); each is a decision the design owner should adjudicate before treating any single file as final truth.</p>
+<div class="tablewrap"><table>
+  <tr><th>#</th><th>Severity</th><th>Finding</th></tr>
+  <tr><td>1</td><td><span class="chip r">High</span></td><td><b>EMC statutory citation drift.</b> The EMC form cites “Florida Statute 627.409 / 627.4093”; the app-generated certification cites §627.732(4) and §627.736; the initial report attestation cites “FL 627.409.” §627.409 is the misrepresentation/fraud statute — the EMC definition lives in §627.732. Documents submitted to insurers should cite one correct section consistently.</td></tr>
+  <tr><td>2</td><td><span class="chip a">Med</span></td><td><b>Staff scope conflict.</b> Workflow specs repeatedly state staff enters “Section 1 only (demographics)” and cannot see medical data; the built MD Visit Module gives the staff phase three steps including accident mechanism and generation of legal documents (EMC among them). Decide which model governs.</td></tr>
+  <tr><td>3</td><td><span class="chip a">Med</span></td><td><b>E/M code sets differ by artifact.</b> Superbill spec: initial 99203-25/99204-25, follow-up 99212–99215-25. App dx step (initial): 99205 / 99206 / 99204. App case data and fee list use 99203/99204/99213/99214. 99206 does not exist in CPT — likely intended 99205 MDM variant; needs correction.</td></tr>
+  <tr><td>4</td><td><span class="chip a">Med</span></td><td><b>Imaging CPT drift.</b> Cervical: 72050 (workflow specs, 3-view AP/Lat/Odontoid) vs 72052 (app rules engine, AP/Lat/Obliques). Knee: 73560 (fee list) vs 73562 (rules engine). Hip: 73510 vs 73502. View counts should match the billed code.</td></tr>
+  <tr><td>5</td><td><span class="chip a">Med</span></td><td><b>Shoulder sprain code variants.</b> App uses S43.421A; the improved initial template uses S43.401A (unspecified part, right); knee similarly S83.401A vs S83.90XA. Pick canonical codes.</td></tr>
+  <tr><td>6</td><td><span class="chip n">Low</span></td><td><b>Headache code split.</b> Generators use G44.309 (post-traumatic headache); mock case data and billing tables use G44.1 (“vascular headache NEC” — actually complicated headache syndromes). G44.309 matches the clinical intent.</td></tr>
+  <tr><td>7</td><td><span class="chip n">Low</span></td><td><b>Fee schedule divergence.</b> BillingCodesScreen/superbill fees (99203 $175, 97012 $35…) differ from the billing-package charge map (99203 $150, 97010 $25, 97140 $60) and the superbill spec example ($250 for 99203). One master fee schedule should drive all three.</td></tr>
+  <tr><td>8</td><td><span class="chip n">Low</span></td><td><b>Brand drift.</b> The jsPDF chart generator titles documents “RenuviaMD Gate” and the CMS-1500 footer says “Generated by RenuviaMD Gate” — everywhere else the product is “PI Master™.”</td></tr>
+  <tr><td>9</td><td><span class="chip n">Low</span></td><td><b>Reception packet count.</b> STAFF_RECEPTION_FORMS.txt defines 4 forms; COMPLETE_STAFF_RECEPTION_PACKET.txt extends to 6 (adding the PIP regulation sheet and excluded-services acknowledgment). The 6-form packet is the later, more complete truth.</td></tr>
+  <tr><td>10</td><td><span class="chip n">Low</span></td><td><b>Sworn Affidavit grammar.</b> “this patient was submitted to Physical Examination and medical studies every single one considerable Medically Documented” is non-standard English on a notarized instrument; recommend counsel-reviewed rewording.</td></tr>
+  <tr><td>11</td><td><span class="chip n">Low</span></td><td><b>Alert/orientation drift.</b> App exam uses “Alert &amp; Oriented ×4”; printed templates use “×3.” Minor, but reports should match the exam UI.</td></tr>
+  <tr><td>12</td><td><span class="chip n">Low</span></td><td><b>PT frequency defaults differ.</b> Templates: 2–3×/week × 4–6 weeks. App/spec default: 5×/week × 4 weeks (initial). Follow-up default 3×/week. Confirm the intended standard of care per phase.</td></tr>
+</table></div>
+
+<footer>
+  <b>PI Master™ Design Bible</b> · generated from a read-only audit of the RenuviaMD/PI-Master- repository (src/App.jsx and 33 specification/template documents) · July 4, 2026.<br>
+  This document describes design intent and template language as found in the repository. It is not legal or billing advice; statutory citations should be verified by counsel (see §7).
+</footer>
+
+</div>
+</body>
+</html>
