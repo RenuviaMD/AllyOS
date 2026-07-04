@@ -34,3 +34,22 @@ implementation and all future document generation.
     add the **PIP regulation sheet** and **excluded-services acknowledgment**.
 12. **Staff scope**: staff enter demographics + accident intake facts and print
     patient-signature forms; clinical documentation, EMC, and affidavit are physician-side.
+
+## UX Blueprint approved (2026-07-04, Dr. Falcon: "yes go")
+Research-backed upgrades (design/UX_BLUEPRINT.html) approved for the batch design
+implementation, applied ON TOP of the April design (Design Bible):
+- U1 Today's Visits landing per role · U2 persistent patient banner (with
+  days-post-accident counter) · U3 encounter stepper (phased MD visit, audit gate
+  on Sign) · U4 defaults-first exam + physician phrase macros (60-second follow-up
+  target) · U5 case timeline in Case Detail with pinned action items · U6 patient
+  search everywhere ("/" shortcut) · U7 AI drafting inline in the encounter flow ·
+  U8 keep teal/gold dark identity, tuned contrast/targets.
+- Anti-patterns banned: mega-menus, alert stacking, configurable-everything.
+
+**PRESERVATION CLAUSE (physician directive):** every engine design stays exactly
+as built — in-person vs telehealth modality logic (consent gate, observation-only
+exam, POS 02/modifier 95 vs POS 11, §456.47 language), visit-type behavior
+(initial/follow-up/final), 3-point functional exam, EMC/§627.732(4), clone guard,
+multi-clinic RLS, fee schedule, carrier routing, document package rules, AI report
+specs. The batch restyles and rearranges the UI; it never alters clinical,
+billing, or compliance behavior.
