@@ -300,16 +300,20 @@ function openCfg(id){
 // through the owner-gated md-billing delete_clinic endpoint (refuses if a subscription is live;
 // Stripe history is never touched). Type-the-name confirm so a mis-click can't remove a clinic.
 function removeClinic(){
-  var c=cfgEditingId?findClinic(cfgEditingId):null;if(!c)return;
-  if(c.device){alert('This is the clinic this device is signed into — it can’t be removed from here.');return;}
-  var typed=prompt('Remove "'+(c.name||'this clinic')+'" from your network?\n\nType the clinic name to confirm:');
-  if(typed===null)return;
-  if((typed||'').trim().toLowerCase()!==(c.name||'').trim().toLowerCase()){alert('Name didn’t match — nothing removed.');return;}
+  var id=cfgEditingId;
+  if(!id){closeCfg();return;}                       // nothing selected -> just close
+  var c=findClinic(id);                             // may be null for a stale browser-only entry
+  if(c&&c.device){alert('This is the clinic this device is signed into — it can’t be removed from here.');return;}
+  var name=(c&&c.name)||document.getElementById('cfgName').value.trim()||'this clinic';
+  if(!confirm('Remove "'+name+'" from your network? This can’t be undone.'))return;
   var msg=document.getElementById('cfgMsg');
-  var dropLocal=function(){CLINICS=CLINICS.filter(function(x){return x.id!==c.id;});saveClinics(CLINICS);render();};
-  if(c.id&&c.id.indexOf('local-')===0){dropLocal();closeCfg();return;}
+  var dropLocal=function(){CLINICS=CLINICS.filter(function(x){return x.id!==id;});saveClinics(CLINICS);render();};
+  // A real DB clinic has a UUID; anything else (local- phantom or an unmatched stale entry) lives
+  // only in this browser -> just drop it locally. Real records go through the server delete.
+  var isDbRecord=/^[0-9a-fA-F-]{20,}$/.test(''+id)&&(''+id).indexOf('local-')!==0;
+  if(!isDbRecord||!(window.AllyOSCloud&&AllyOSCloud.postAuthed)){dropLocal();closeCfg();return;}
   msg.textContent='Removing…';
-  AllyOSCloud.postAuthed('/.netlify/functions/md-billing',{action:'delete_clinic',clinic_id:c.id})
+  AllyOSCloud.postAuthed('/.netlify/functions/md-billing',{action:'delete_clinic',clinic_id:id})
     .then(function(r){return r.json();})
     .then(function(d){
       if(d&&d.ok){dropLocal();msg.textContent='✓ Removed';setTimeout(closeCfg,700);}
