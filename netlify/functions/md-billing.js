@@ -88,6 +88,24 @@ async function invoicesFor(customer, key) {
     };
   });
 }
+// Per-clinic money rollup for the roster: outstanding (open), past_due (open & overdue), and
+// YTD collected (paid invoices dated this calendar year).
+async function invoiceAgg(customer, key, yearStartSec, nowSec) {
+  const out = { outstanding: 0, past_due: 0, ytd: 0 };
+  if (!customer) return out;
+  const list = await stripeGet("invoices?customer=" + encodeURIComponent(customer) + "&limit=100", key);
+  (list.data || []).forEach(function (inv) {
+    if (inv.status === "open" || inv.status === "uncollectible") {
+      out.outstanding += money(inv.amount_due);
+      if (inv.due_date && inv.due_date < nowSec) out.past_due += money(inv.amount_due);
+    }
+    if (inv.status === "paid") {
+      var paidAt = (inv.status_transitions && inv.status_transitions.paid_at) || inv.created;
+      if (paidAt && paidAt >= yearStartSec) out.ytd += money(inv.amount_paid);
+    }
+  });
+  return out;
+}
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return json(405, { error: "method_not_allowed" });
@@ -100,11 +118,31 @@ exports.handler = async (event) => {
     if (action === "roster") {
       const g = await requireOwner(event); if (g.error) return g.error;
       const rows = await sbGet("clinics?select=id,name,governance_type,md_fee,md_gfe_fee,md_subscription_status,md_billing_email,stripe_customer_id,status&order=name.asc");
-      const clinics = (rows || []).map(function (c) {
-        return { id: c.id, name: c.name, governance_type: c.governance_type || null, md_fee: (c.md_fee != null ? Number(c.md_fee) : null), gfe_fee: (c.md_gfe_fee != null ? Number(c.md_gfe_fee) : null), status: c.md_subscription_status || "none", email: c.md_billing_email || null, on_stripe: !!c.stripe_customer_id };
-      });
+      const now = new Date();
+      const yearStartSec = Math.floor(Date.UTC(now.getUTCFullYear(), 0, 1) / 1000);
+      const nowSec = Math.floor(now.getTime() / 1000);
+      const clinics = [];
+      for (var ci = 0; ci < (rows || []).length; ci++) {
+        var c = rows[ci];
+        var agg = await invoiceAgg(c.stripe_customer_id, key, yearStartSec, nowSec);
+        clinics.push({
+          id: c.id, name: c.name, governance_type: c.governance_type || null,
+          md_fee: (c.md_fee != null ? Number(c.md_fee) : null),
+          gfe_fee: (c.md_gfe_fee != null ? Number(c.md_gfe_fee) : null),
+          status: c.md_subscription_status || "none", email: c.md_billing_email || null,
+          on_stripe: !!c.stripe_customer_id,
+          past_due: agg.past_due, outstanding: agg.outstanding, ytd: agg.ytd,
+        });
+      }
       const recurring = clinics.reduce(function (a, c) { return a + (c.md_fee || 0); }, 0);
-      return json(200, { clinics: clinics, count: clinics.length, monthly_recurring: recurring });
+      const acha = clinics.filter(function (c) { return c.governance_type === "acha"; }).length;
+      return json(200, {
+        clinics: clinics, count: clinics.length,
+        count_acha: acha, count_non_acha: clinics.length - acha,
+        monthly_recurring: recurring,
+        total_past_due: clinics.reduce(function (a, c) { return a + c.past_due; }, 0),
+        total_ytd: clinics.reduce(function (a, c) { return a + c.ytd; }, 0),
+      });
     }
 
     // Onboard a new governed clinic straight onto the roster (name is the only required field;
