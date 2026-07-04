@@ -26,7 +26,7 @@ export function auditNote(form: VisitForm): AuditResult {
 
   if (form.visitType === "initial") {
     if (!form.plan.emc) {
-      errors.push("Emergency Medical Condition determination is required on initial visits (Section 7) — FL PIP § 627.736.");
+      errors.push("Emergency Medical Condition determination is required on initial visits (Section 7) — Fla. Stat. § 627.732(4).");
     }
     if (!form.plan.causation) {
       errors.push("Causation opinion is required on initial visits (Section 7).");

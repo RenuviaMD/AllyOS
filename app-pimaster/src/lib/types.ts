@@ -277,7 +277,7 @@ export function emptyForm(): VisitForm {
     plan: {
       emLevel: "",
       medicalNecessity: "",
-      ptFrequency: "5x/week",
+      ptFrequency: "3x/week",
       ptDuration: "4 weeks",
       modalities: [],
       followUp: "2 weeks",
