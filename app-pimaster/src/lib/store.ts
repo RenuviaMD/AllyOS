@@ -26,10 +26,15 @@ export type ReportMode =
   | "aob"
   | "records_release"
   | "attestation14"
+  | "pip_regulation"
+  | "excluded_services"
+  | "oir_disclosure"
   | "telehealth_consent"
-  | "affidavit";
+  | "affidavit"
+  // mailed insurance billing package (cover sheet archived; status tracked in form_data)
+  | "billing_package";
 
-const PACKAGE_MODES = ["aob", "records_release", "attestation14", "telehealth_consent", "affidavit"];
+const PACKAGE_MODES = ["aob", "records_release", "attestation14", "pip_regulation", "excluded_services", "oir_disclosure", "telehealth_consent", "affidavit"];
 
 // ---------- Active clinic (tenancy) ----------
 
@@ -237,6 +242,58 @@ export async function fetchSameAccidentForms(accidentDate: string, excludePatien
   }
 }
 
+export interface DayReport {
+  id: string;
+  mode: ReportMode;
+  dos: string;
+  created_at: string;
+  form: Partial<VisitForm> | null;
+}
+
+/** Every active report with DOS = `dos` — feeds the Today's Visits landing (U1). */
+export async function listReportsForDay(dos: string): Promise<DayReport[]> {
+  const { data, error } = await supabase()
+    .from("reports")
+    .select("id, mode, dos, created_at, form_data")
+    .eq("status", "active")
+    .eq("clinic_id", activeClinicId())
+    .eq("dos", dos)
+    .order("created_at", { ascending: true })
+    .limit(200);
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    id: r.id as string,
+    mode: r.mode as ReportMode,
+    dos: r.dos as string,
+    created_at: r.created_at as string,
+    form: (r.form_data as Partial<VisitForm>) ?? null,
+  }));
+}
+
+/** All archived package documents (intake/legal forms) — the staff landing groups them per patient for packet status. */
+export async function listPackageDocReports(): Promise<DayReport[]> {
+  try {
+    const { data, error } = await supabase()
+      .from("reports")
+      .select("id, mode, dos, created_at, form_data")
+      .in("mode", PACKAGE_MODES)
+      .eq("status", "active")
+      .eq("clinic_id", activeClinicId())
+      .order("created_at", { ascending: true })
+      .limit(500);
+    if (error) throw error;
+    return (data ?? []).map((r) => ({
+      id: r.id as string,
+      mode: r.mode as ReportMode,
+      dos: r.dos as string,
+      created_at: r.created_at as string,
+      form: (r.form_data as Partial<VisitForm>) ?? null,
+    }));
+  } catch {
+    return []; // offline: packet status shows unknown
+  }
+}
+
 export async function listReports(limit = 50): Promise<SavedReport[]> {
   const { data, error } = await supabase()
     .from("reports")
@@ -296,10 +353,10 @@ export async function updateAppUser(userId: string, partial: { roles?: string[];
 // ---------- Attorney package ----------
 
 /** Lightweight metadata for every active report (no HTML) — used to group patient cases. */
-export async function listReportMeta(): Promise<{ id: string; mode: string; dos: string; form: Partial<VisitForm> | null }[]> {
+export async function listReportMeta(): Promise<{ id: string; mode: string; dos: string; created_at: string; form: Partial<VisitForm> | null }[]> {
   const { data, error } = await supabase()
     .from("reports")
-    .select("id, mode, dos, form_data")
+    .select("id, mode, dos, created_at, form_data")
     .eq("status", "active")
     .eq("clinic_id", activeClinicId())
     .order("dos", { ascending: true })
@@ -309,6 +366,7 @@ export async function listReportMeta(): Promise<{ id: string; mode: string; dos:
     id: r.id as string,
     mode: r.mode as string,
     dos: r.dos as string,
+    created_at: (r.created_at as string) ?? "",
     form: (r.form_data as Partial<VisitForm>) ?? null,
   }));
 }
@@ -330,6 +388,125 @@ export async function fetchReportsByIds(
     html: (r.report_html as string) ?? "",
     cpt: (r.cpt_codes as string[] | null) ?? [],
   }));
+}
+
+// ---------- Insurance billing packages (mailed paper claims) ----------
+
+/** Full visit rows for package assembly: archived note HTML + the form snapshot (superbill/CMS-1500 rebuild). */
+export async function fetchVisitRowsByIds(
+  ids: string[],
+): Promise<{ id: string; mode: string; dos: string; html: string; form: Partial<VisitForm> | null }[]> {
+  if (ids.length === 0) return [];
+  const { data, error } = await supabase()
+    .from("reports")
+    .select("id, mode, dos, report_html, form_data")
+    .in("id", ids)
+    .order("dos", { ascending: true });
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    id: r.id as string,
+    mode: r.mode as string,
+    dos: r.dos as string,
+    html: (r.report_html as string) ?? "",
+    form: (r.form_data as Partial<VisitForm>) ?? null,
+  }));
+}
+
+export interface BillingPackageRow {
+  id: string;
+  dos: string;
+  created_at: string;
+  caseKey: string;
+  batchIndex: number;
+  status: string;
+  visitIds: string[];
+}
+
+interface PackageMeta {
+  caseKey: string;
+  batchIndex: number;
+  status: string;
+  visitIds: string[];
+}
+
+/** All built packages for this clinic (status lives in form_data._package). */
+export async function listBillingPackages(): Promise<BillingPackageRow[]> {
+  try {
+    const { data, error } = await supabase()
+      .from("reports")
+      .select("id, dos, created_at, form_data")
+      .eq("mode", "billing_package")
+      .eq("status", "active")
+      .eq("clinic_id", activeClinicId())
+      .order("created_at", { ascending: true })
+      .limit(500);
+    if (error) throw error;
+    const out: BillingPackageRow[] = [];
+    for (const r of data ?? []) {
+      const meta = (r.form_data as { _package?: PackageMeta } | null)?._package;
+      if (!meta) continue;
+      out.push({
+        id: r.id as string,
+        dos: r.dos as string,
+        created_at: r.created_at as string,
+        caseKey: meta.caseKey,
+        batchIndex: meta.batchIndex,
+        status: meta.status,
+        visitIds: meta.visitIds ?? [],
+      });
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+/** Archive a built package (cover sheet HTML + batch metadata, status "not_sent"). */
+export async function saveBillingPackage(args: {
+  dos: string;
+  form: VisitForm;
+  coverHtml: string;
+  icdCodes: string[];
+  cptCodes: string[];
+  caseKey: string;
+  batchIndex: number;
+  visitIds: string[];
+}): Promise<{ ok: boolean; id?: string; error?: string }> {
+  try {
+    const meta: PackageMeta = { caseKey: args.caseKey, batchIndex: args.batchIndex, status: "not_sent", visitIds: args.visitIds };
+    const { data, error } = await supabase()
+      .from("reports")
+      .insert({
+        mode: "billing_package",
+        dos: args.dos,
+        report_html: args.coverHtml,
+        form_data: { ...args.form, _package: meta },
+        icd_codes: args.icdCodes,
+        cpt_codes: args.cptCodes,
+        clinic_id: activeClinicId(),
+      })
+      .select("id")
+      .single();
+    if (error) throw error;
+    return { ok: true, id: data?.id as string };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+/** Update a package's send/payment status (Not Sent → Sent → Paid/Denied). */
+export async function updateBillingPackageStatus(id: string, status: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const { data, error } = await supabase().from("reports").select("form_data").eq("id", id).single();
+    if (error) throw error;
+    const fd = (data?.form_data ?? {}) as { _package?: PackageMeta };
+    fd._package = { ...(fd._package as PackageMeta), status };
+    const { error: e2 } = await supabase().from("reports").update({ form_data: fd }).eq("id", id);
+    if (e2) throw e2;
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
 }
 
 /** PHI-light disclosure log for attorney releases (who, to whom, which charts). */

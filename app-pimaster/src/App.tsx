@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { ReportsArchive } from "./components/ReportsArchive";
 import { Section10Discharge, Section3Pmh, Section4GeneralExam, Section5Exam } from "./components/SectionsExam";
 import { Section1CheckIn, Section2Injury, TelehealthConsent } from "./components/SectionsIntake";
 import { Section11PtDaily, Section12PtWeekly } from "./components/SectionsPt";
 import { Section6Assessment, Section7Plan, Section8ImageOrders, Section9ImagingReview } from "./components/SectionsPlan";
+import { BillingPackagesPage } from "./components/BillingPackages";
 import { BillingSettingsCard } from "./components/BillingSettings";
 import { CatalogPage } from "./components/CatalogPage";
 import { AhcaExportPage } from "./components/AhcaExport";
@@ -12,12 +13,15 @@ import { UsersPanel } from "./components/UsersPanel";
 import { AiReportPanel } from "./components/AiReportPanel";
 import { PackagePanel } from "./components/PackagePanel";
 import { PatientBanner } from "./components/PatientBanner";
+import { PatientsPage } from "./components/PatientsPage";
+import { Sidebar, type NavAction } from "./components/Sidebar";
+import { TodayVisits } from "./components/TodayVisits";
+import type { PatientIndexEntry } from "./lib/patients";
 import { OnboardingWizard } from "./components/OnboardingWizard";
 import { SignInScreen } from "./components/SignIn";
 import { allowedViews, changePassword, fetchAuthState, onAuthChange, signOut, type AuthState } from "./lib/auth";
 import { auditNote } from "./lib/audit";
 import { buildServiceLines, loadBillingSettings } from "./lib/billing";
-import { CLINIC } from "./lib/clinic";
 import {
   allCptCodes,
   allDiagnosisCodes,
@@ -40,6 +44,7 @@ import {
   type PeerNote,
   type SimilarityHit,
 } from "./lib/similarity";
+import { MD_SIGN_PHASE, phaseForSection, phasesFor } from "./lib/encounter";
 import { activeClinicId, fetchSameAccidentForms, listClinics, loadActiveClinicProfile, loadDraft, saveDraft, saveReport, setActiveClinicId, syncBillingFromCloud, type ClinicRow, type ReportMode } from "./lib/store";
 import { emptyForm, type Role, type VisitForm, type VisitMode, type VisitType } from "./lib/types";
 
@@ -47,21 +52,29 @@ const VISIT_LABELS: Record<VisitType, string> = { initial: "Initial", followup: 
 const MODE_LABELS: Record<VisitMode, string> = { inPerson: "In-Person", telehealth: "Telehealth" };
 const ROLE_LABELS: Record<Role, string> = { staff: "Staff", physician: "Physician", pt: "Physical Therapist" };
 
+/** Top-level navigation: the schedule-first landing (U1), the open encounter, or the patients registry. */
+type MainView = "today" | "encounter" | "patients";
+
 export default function App() {
   const [auth, setAuth] = useState<AuthState | null | undefined>(undefined);
+  const [view, setView] = useState<MainView>("today");
   const [role, setRole] = useState<Role>(() => (localStorage.getItem("pimaster-role") as Role) || "staff");
   const [form, setForm] = useState<VisitForm>(emptyForm);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "cloud" | "local">("idle");
   const [genState, setGenState] = useState<string>("");
   const [auditIssues, setAuditIssues] = useState<string[]>([]);
   const [showArchive, setShowArchive] = useState(false);
+  const [archiveQuery, setArchiveQuery] = useState("");
+  const [patientsQuery, setPatientsQuery] = useState("");
   const [showBilling, setShowBilling] = useState(false);
+  const [showBillingPackages, setShowBillingPackages] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showAttorney, setShowAttorney] = useState(false);
   const [showUsers, setShowUsers] = useState(false);
   const [showPackage, setShowPackage] = useState(false);
-  const [showAiReport, setShowAiReport] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  /** Encounter stepper position (U3) — physician: History→Exam→Assessment→Plan→Sign; staff: 2 steps */
+  const [phase, setPhase] = useState(0);
   const [clinics, setClinics] = useState<ClinicRow[]>([]);
   const [clinicId, setClinicId] = useState<string>(activeClinicId());
   const [showCatalogs, setShowCatalogs] = useState(false);
@@ -184,6 +197,7 @@ export default function App() {
 
   function chooseRole(r: Role) {
     setRole(r);
+    setPhase(0); // each role's stepper starts at its first step
     localStorage.setItem("pimaster-role", r);
   }
 
@@ -195,11 +209,18 @@ export default function App() {
 
   function jumpToIssue(issue: string) {
     const m = issue.match(/Section (\d+)/);
-    const el = m && document.getElementById(`section-${m[1]}`);
-    if (!el) return;
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
-    el.classList.add("flash");
-    setTimeout(() => el.classList.remove("flash"), 1600);
+    if (!m) return;
+    const num = Number(m[1]);
+    // The section may live in another phase of the stepper — switch first, then scroll.
+    const target = phaseForSection(role, num);
+    if (target !== undefined) setPhase(target);
+    setTimeout(() => {
+      const el = document.getElementById(`section-${num}`);
+      if (!el) return;
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      el.classList.add("flash");
+      setTimeout(() => el.classList.remove("flash"), 1600);
+    }, 80);
   }
 
   async function doChangePassword() {
@@ -214,6 +235,23 @@ export default function App() {
   }
 
   const vt = form.visitType;
+  const phases = phasesFor(role);
+  const stepper = phases.length > 0;
+  const curPhase = stepper ? Math.min(phase, phases.length - 1) : 0;
+  /** Section visible in the current stepper phase (PT has no stepper — everything shows). */
+  const inPhase = (section: number) => !stepper || phaseForSection(role, section) === curPhase;
+
+  /** Enter in a text input advances to the next phase (U3) — never in textareas, selects, or buttons. */
+  function enterAdvance(e: ReactKeyboardEvent) {
+    if (e.key !== "Enter" || !stepper) return;
+    const t = e.target as HTMLElement;
+    if (t.tagName !== "INPUT") return;
+    const type = (t as HTMLInputElement).type;
+    if (type === "checkbox" || type === "radio" || type === "button" || type === "submit") return;
+    e.preventDefault();
+    setPhase(Math.min(curPhase + 1, phases.length - 1));
+  }
+
   const show = {
     s1: true,
     s2: true,
@@ -378,6 +416,8 @@ export default function App() {
     if (!confirm(`Start a new blank visit?${who ? ` The unsaved draft for ${who} will be replaced.` : " The current draft will be replaced."}`)) return;
     dirty.current = true; // user action — the blank form must win over the cloud draft
     setForm(emptyForm());
+    setPhase(0);
+    setView("encounter");
   }
 
   if (auth === undefined) {
@@ -395,13 +435,45 @@ export default function App() {
     );
   }
 
+  function handleNav(a: NavAction) {
+    if ("view" in a) {
+      setView(a.view);
+      return;
+    }
+    if (a.modal === "package") setShowPackage(true);
+    else if (a.modal === "archive") {
+      setArchiveQuery("");
+      setShowArchive(true);
+    } else if (a.modal === "billing") setShowBilling(true);
+    else if (a.modal === "billing_packages") setShowBillingPackages(true);
+    else if (a.modal === "export") setShowExport(true);
+    else if (a.modal === "attorney") setShowAttorney(true);
+    else if (a.modal === "catalogs") setShowCatalogs(true);
+    else if (a.modal === "users") setShowUsers(true);
+    else if (a.modal === "onboarding") setShowOnboarding(true);
+  }
+
+  function openPatientRecord(p: PatientIndexEntry) {
+    setPatientsQuery(p.name);
+    setView("patients");
+  }
+
   return (
-    <>
+    <div className="app-shell">
+      <Sidebar
+        role={role}
+        roleLabel={ROLE_LABELS[role]}
+        isAdmin={auth.roles.includes("admin")}
+        isPlatform={auth.isPlatform}
+        view={view}
+        email={auth.email}
+        onNavigate={handleNav}
+        onSelectPatient={openPatientRecord}
+        onChangePassword={doChangePassword}
+        onSignOut={() => signOut()}
+      />
+      <div className="app-content">
       <header className="app-header">
-        <div className="brand">
-          <span className="brand-title">PI MASTER™</span>
-          <span className="brand-sub">by RenuviaMD® Network — {CLINIC.name}</span>
-        </div>
         {auth.isPlatform && clinics.length > 0 && (
           <div className="seg-wrap">
             <span className="seg-label">Clinic</span>
@@ -479,53 +551,71 @@ export default function App() {
           {saveState === "cloud" && "✓ Saved"}
           {saveState === "local" && "Saved locally (offline)"}
         </span>
-        <span className="status">{auth.email}</span>
-        {auth.roles.includes("admin") && (
-          <button className="btn ghost" onClick={() => setShowUsers(true)}>
-            Users
-          </button>
-        )}
-        {auth.isPlatform && (
-          <button className="btn ghost" onClick={() => setShowOnboarding(true)}>
-            New Clinic
-          </button>
-        )}
-        <button className="btn ghost" onClick={doChangePassword} title="Change password">
-          Password
-        </button>
-        <button className="btn ghost" onClick={() => signOut()}>
-          Sign out
-        </button>
       </header>
 
       <PatientBanner form={form} />
 
       <main className="main">
-        {form.visitMode === "telehealth" && role !== "pt" && <TelehealthConsent form={form} patch={patch} />}
-        {show.s1 && <Section1CheckIn form={form} patch={patch} />}
-        {show.s2 && <Section2Injury form={form} patch={patch} showNarrative={role === "physician"} apply={applyToForm} />}
-        {show.s3 && <Section3Pmh form={form} patch={patch} />}
-        {show.s4 && <Section4GeneralExam form={form} patch={patch} />}
-        {show.s5 && <Section5Exam form={form} patch={patch} />}
-        {show.s6 && <Section6Assessment form={form} patch={patch} />}
-        {show.s7 && <Section7Plan form={form} patch={patch} />}
-        {show.s8 && <Section8ImageOrders form={form} patch={patch} />}
-        {show.s9 && <Section9ImagingReview form={form} patch={patch} readOnly={role === "pt"} />}
-        {show.s10 && <Section10Discharge form={form} patch={patch} />}
+        {view === "today" && (
+          <TodayVisits role={role} form={form} onOpenEncounter={() => setView("encounter")} onNewVisit={newVisit} />
+        )}
+        {view === "patients" && <PatientsPage key={patientsQuery} initialQuery={patientsQuery} />}
+        {view === "encounter" && (
+          <div onKeyDownCapture={enterAdvance}>
+        {stepper && (
+          <div className="stepper-rail">
+            {phases.map((p, i) => (
+              <button
+                key={p}
+                className={`step-btn${i === curPhase ? " active" : ""}${i < curPhase ? " done" : ""}`}
+                onClick={() => setPhase(i)}
+              >
+                <span className="step-dot">{i + 1}</span>
+                <span>{p}</span>
+              </button>
+            ))}
+          </div>
+        )}
+        {form.visitMode === "telehealth" && role !== "pt" && inPhase(role === "staff" ? 2 : 1) && (
+          <TelehealthConsent form={form} patch={patch} />
+        )}
+        {show.s1 && inPhase(1) && <Section1CheckIn form={form} patch={patch} />}
+        {show.s2 && inPhase(2) && <Section2Injury form={form} patch={patch} showNarrative={role === "physician"} apply={applyToForm} />}
+        {show.s3 && inPhase(3) && <Section3Pmh form={form} patch={patch} />}
+        {show.s4 && inPhase(4) && <Section4GeneralExam form={form} patch={patch} />}
+        {show.s5 && inPhase(5) && <Section5Exam form={form} patch={patch} />}
+        {show.s6 && inPhase(6) && <Section6Assessment form={form} patch={patch} />}
+        {show.s7 && inPhase(7) && <Section7Plan form={form} patch={patch} />}
+        {show.s8 && inPhase(8) && <Section8ImageOrders form={form} patch={patch} />}
+        {show.s9 && (role === "pt" || inPhase(9)) && <Section9ImagingReview form={form} patch={patch} readOnly={role === "pt"} />}
+        {show.s10 && inPhase(10) && <Section10Discharge form={form} patch={patch} />}
         {show.s11 && <Section11PtDaily form={form} patch={patch} />}
         {show.s12 && <Section12PtWeekly form={form} patch={patch} />}
 
+        {role === "physician" && curPhase === MD_SIGN_PHASE && (
+          <>
+            {vt === "initial" && <AiReportPanel form={form} patch={patch} inline />}
+            <div className="section">
+              <div className="section-head">
+                <span className="section-title">Sign — the audit is the gate</span>
+              </div>
+              <div className="section-body">
+                <p className="status" style={{ margin: 0 }}>
+                  Generate Clinical Note runs the documentation audit and the same-accident clone guard. The note prints
+                  only when the audit is clean — failed items list below and tap-jump to their section.
+                </p>
+              </div>
+            </div>
+          </>
+        )}
+
+        {(role === "pt" || curPhase === phases.length - 1) && (
         <div className="toolbar">
           {role === "physician" && (
             <>
               <button className="btn" onClick={() => generate("note")}>
                 Generate Clinical Note {vt === "final" ? "+ Close Case" : ""}
               </button>
-              {vt === "initial" && (
-                <button className="btn gold" onClick={() => setShowAiReport(true)}>
-                  AI Initial Report
-                </button>
-              )}
               {vt === "initial" && (
                 <button className="btn gold" onClick={() => generate("xray")}>
                   Imaging Order
@@ -585,6 +675,21 @@ export default function App() {
           </button>
           <span className="status">{genState}</span>
         </div>
+        )}
+
+        {stepper && (
+          <div className="stepper-nav">
+            <button className="btn ghost" disabled={curPhase === 0} onClick={() => setPhase(curPhase - 1)}>
+              ← Previous
+            </button>
+            <span className="status">
+              {phases[curPhase]} — step {curPhase + 1} of {phases.length} · Enter advances
+            </span>
+            <button className="btn" disabled={curPhase === phases.length - 1} onClick={() => setPhase(curPhase + 1)}>
+              Next →
+            </button>
+          </div>
+        )}
 
         {auditIssues.length > 0 && (
           <div className="section" style={{ borderColor: "var(--warning)", marginBottom: 60 }}>
@@ -602,15 +707,18 @@ export default function App() {
             </div>
           </div>
         )}
+          </div>
+        )}
       </main>
+      </div>
 
-      {showArchive && <ReportsArchive onClose={() => setShowArchive(false)} />}
+      {showArchive && <ReportsArchive onClose={() => setShowArchive(false)} initialQuery={archiveQuery} />}
       {showBilling && <BillingSettingsCard onClose={() => setShowBilling(false)} />}
+      {showBillingPackages && <BillingPackagesPage onClose={() => setShowBillingPackages(false)} />}
       {showExport && <AhcaExportPage onClose={() => setShowExport(false)} />}
       {showAttorney && <AttorneyPackagePage onClose={() => setShowAttorney(false)} generatedBy={auth.email} />}
       {showUsers && <UsersPanel onClose={() => setShowUsers(false)} selfId={auth.userId} isPlatform={auth.isPlatform} />}
       {showPackage && <PackagePanel form={form} role={role} onClose={() => setShowPackage(false)} />}
-      {showAiReport && <AiReportPanel form={form} patch={patch} onClose={() => setShowAiReport(false)} />}
       {showOnboarding && (
         <OnboardingWizard
           onClose={() => setShowOnboarding(false)}
@@ -622,6 +730,6 @@ export default function App() {
         />
       )}
       {showCatalogs && <CatalogPage onClose={() => setShowCatalogs(false)} />}
-    </>
+    </div>
   );
 }

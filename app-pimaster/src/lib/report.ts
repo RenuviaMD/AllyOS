@@ -15,7 +15,7 @@ import {
 } from "./narratives";
 import { EXAM_REGIONS, impairedSides, JOINT_REGIONS, SPINE_REGION_IDS, SPINE_REGION_LABELS } from "./rom";
 import type { DxCode, VisitForm } from "./types";
-import { daysSinceAccident, weekBounds, weekNumber } from "./weeks";
+import { daysSinceAccident, parseIso, toIso, weekBounds, weekNumber } from "./weeks";
 
 function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -616,6 +616,64 @@ export function buildAttestation14Html(form: VisitForm): string {
   return wrap(`14-Day Attestation — ${form.patient.lastName}`, b, footerCtx(form));
 }
 
+/** Florida PIP regulation & requirements education sheet — patient signs once at the first visit
+ * (reception packet form 5 of 6). Benefit limits, the 14-day rule with the computed deadline,
+ * covered vs excluded services, medical necessity, and financial responsibility. */
+export function buildPipRegulationHtml(form: VisitForm): string {
+  const doa = form.accident.accidentDate;
+  const deadline = /^\d{4}-\d{2}-\d{2}$/.test(doa)
+    ? toIso(new Date(parseIso(doa).getTime() + 14 * 86400000))
+    : "";
+  const b = `<h1>FLORIDA PIP INSURANCE REGULATION &amp; REQUIREMENTS</h1>
+    ${packageIdentityBlock(form)}
+    <h2>Your PIP Benefit Limit</h2>
+    <table>
+      <tr><th>$10,000</th><td>Available when a physician certifies that you sustained an <strong>Emergency Medical Condition (EMC)</strong> as defined by Florida Statute § 627.732(4). The EMC determination is made at your initial medical evaluation.</td></tr>
+      <tr><th>$2,500</th><td>The maximum PIP benefit if an Emergency Medical Condition is <strong>not</strong> certified.</td></tr>
+    </table>
+    <h2>The 14-Day Rule</h2>
+    <p>Florida Statute § 627.736(1)(a) requires you to receive initial services and care within <strong>14 days</strong>
+    of your motor vehicle accident${deadline ? ` — for your accident of <strong>${esc(doa)}</strong>, no later than <strong>${esc(deadline)}</strong>` : ""} —
+    or your PIP claim will be <strong>DENIED entirely</strong>.</p>
+    <h2>What PIP Covers</h2>
+    <p>Physician evaluation and treatment, physical therapy, diagnostic imaging and testing, and other services that are
+    <strong>medically necessary</strong> and related to the accident. PIP pays <strong>80%</strong> of reasonable medical
+    expenses and <strong>60%</strong> of lost wages, up to your benefit limit.</p>
+    <h2>What PIP Does NOT Cover</h2>
+    <p><strong>Massage therapy</strong> and <strong>acupuncture</strong> are excluded from Florida PIP reimbursement,
+    regardless of who performs them (Fla. Stat. § 627.736(1)(a)5). A separate acknowledgment of excluded services is
+    provided with this packet.</p>
+    <h2>Medical Necessity &amp; Financial Responsibility</h2>
+    <p>Only medically necessary services documented by your treating providers are billable to PIP. I understand that I
+    remain financially responsible for applicable deductibles and co-insurance, and for services not covered by PIP, to
+    the extent permitted by law, and that I will receive itemized superbills on request.</p>
+    <p>I acknowledge that this information was explained to me and that I received a copy of this sheet.</p>
+    ${patientSignatureLines(form)}`;
+  return wrap(`PIP Regulation Sheet — ${form.patient.lastName}`, b, footerCtx(form));
+}
+
+/** Excluded-services acknowledgment — patient signs once at the first visit (reception packet
+ * form 6 of 6). Massage/acupuncture PIP exclusion with the explicit out-of-pocket consent path. */
+export function buildExcludedServicesHtml(form: VisitForm): string {
+  const b = `<h1>ACKNOWLEDGMENT OF EXCLUDED SERVICES (FLORIDA PIP)</h1>
+    ${packageIdentityBlock(form)}
+    <p>I, <strong>${esc(fullName(form))}</strong>, acknowledge that under Florida Statute § 627.736(1)(a)5,
+    <strong>massage therapy</strong> and <strong>acupuncture</strong> are excluded from Personal Injury Protection (PIP)
+    reimbursement, regardless of the license held by the person providing the service. These services will never be
+    billed to my PIP insurer by ${esc(CLINIC.name)}.</p>
+    <p>If I wish to receive an excluded service, I understand the required out-of-pocket path:</p>
+    <table>
+      <tr><td>1</td><td>I must <strong>explicitly request</strong> the excluded service.</td></tr>
+      <tr><td>2</td><td>I must <strong>acknowledge in writing</strong>, before the service is provided, that it is not covered by PIP.</td></tr>
+      <tr><td>3</td><td>I must <strong>agree to pay in full</strong>, out of pocket, at the clinic's posted rate.</td></tr>
+      <tr><td>4</td><td>I will receive an <strong>itemized superbill or invoice</strong> for the service, marked as not billable to PIP.</td></tr>
+    </table>
+    <p>I agree to hold ${esc(CLINIC.name)} and my insurance carrier harmless for the non-payment of excluded services I
+    elect to receive, and I understand this acknowledgment does not obligate me to purchase any excluded service.</p>
+    ${patientSignatureLines(form)}`;
+  return wrap(`Excluded Services Acknowledgment — ${form.patient.lastName}`, b, footerCtx(form));
+}
+
 /** Telehealth consent — signed for telehealth visits (facility-originated). */
 export function buildTelehealthConsentHtml(form: VisitForm): string {
   const t = form.telehealth;
@@ -652,6 +710,54 @@ export function buildAffidavitHtml(form: VisitForm): string {
     ${esc(CLINIC.provider)}, who is personally known to me or produced identification: ______________________.</p>
     <div class="sig"><div class="sig-line">Notary Public, State of Florida &nbsp;&nbsp;·&nbsp;&nbsp; Commission No. / Expiration</div></div>`;
   return wrap(`Sworn Affidavit — ${form.patient.lastName}`, b, footerCtx(form));
+}
+
+/* ---------------------------------------------------------------------------
+ * Insurance billing package cover sheet (mailed paper claims).
+ * ------------------------------------------------------------------------- */
+
+export interface PackageCoverArgs {
+  /** latest clinical form snapshot — identity/claim context */
+  form: VisitForm;
+  batchIndex: number;
+  /** batch visits with a display label ("Initial Evaluation" …) */
+  visits: { dos: string; label: string }[];
+  /** carrier claims MAILING address — the audit blocks the build without it */
+  claimsAddress: string;
+  /** "" prints blank (no charges configured) */
+  totalBilled: string;
+  manifest: string[];
+  emc: "Certified" | "Not Certified" | "Pending" | "—";
+}
+
+/** Cover sheet for the mailed PIP billing package: MAIL-TO block, claim identity, diagnoses, visit list, totals, manifest. */
+export function buildPackageCoverHtml(a: PackageCoverArgs): string {
+  const p = a.form.patient;
+  const dx = allDiagnosisCodes(a.form);
+  const benefit = a.emc === "Certified" ? "$10,000 (EMC certified)" : a.emc === "Not Certified" ? "$2,500 (EMC not certified)" : "pending EMC determination";
+  const b = `<h1>INSURANCE BILLING PACKAGE — BATCH ${a.batchIndex}</h1>
+    <table>
+      <tr><th>MAIL TO</th><td><strong>${esc(p.insuranceCarrier)}</strong> — PIP Claims<br>${esc(a.claimsAddress)}</td>
+      <th>From</th><td>${esc(CLINIC.name)}<br>${esc(CLINIC.address)}<br>Ph ${esc(CLINIC.phone)} · Fax ${esc(CLINIC.fax)}</td></tr>
+    </table>
+    <p>Florida PIP claims are submitted on paper by mail — this package prints complete for mailing.</p>
+    <table>
+      <tr><th>Patient</th><td>${esc(p.firstName)} ${esc(p.lastName)}</td><th>DOB</th><td>${esc(p.dob)}</td></tr>
+      <tr><th>Date of Accident</th><td>${esc(a.form.accident.accidentDate)}</td><th>Policy # / Claim #</th><td>${esc(p.policyNumber)}${p.claimNumber ? ` / ${esc(p.claimNumber)}` : ""}</td></tr>
+      <tr><th>PIP Benefit</th><td>${esc(benefit)}</td><th>Attending</th><td>${esc(CLINIC.provider)} · NPI ${esc(CLINIC.npi)}</td></tr>
+    </table>
+    ${dx.length > 0 ? `<h2>Diagnoses</h2><table><tr><th>ICD-10</th><th>Description</th></tr>${dx.map((d) => `<tr><td>${esc(d.code)}</td><td>${esc(d.desc)}</td></tr>`).join("")}</table>` : ""}
+    <h2>Visits in this batch (${a.visits.length})</h2>
+    <table><tr><th>#</th><th>Date of Service</th><th>Visit</th></tr>
+      ${a.visits.map((v, i) => `<tr><td>${i + 1}</td><td>${esc(v.dos)}</td><td>${esc(v.label)}</td></tr>`).join("")}
+    </table>
+    <h2>Billing Summary</h2>
+    <p>Total charges this batch: <strong>${a.totalBilled ? `$${esc(a.totalBilled)}` : "—"}</strong>.
+    PIP pays 80% of reasonable medical charges up to the benefit limit (Fla. Stat. § 627.736).</p>
+    <h2>Documents in this package</h2>
+    <table>${a.manifest.map((m, i) => `<tr><td>${i + 1}</td><td>${esc(m)}</td></tr>`).join("")}</table>
+    ${signature()}`;
+  return wrap(`Billing Package Batch ${a.batchIndex} — ${p.lastName}`, b, footerCtx(a.form));
 }
 
 /** Strip active content from HTML before rendering. Our own builders escape all

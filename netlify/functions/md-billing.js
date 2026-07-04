@@ -83,10 +83,29 @@ async function invoicesFor(customer, key) {
       amount_due: money(inv.amount_due), amount_paid: money(inv.amount_paid),
       created: inv.created ? new Date(inv.created * 1000).toISOString() : null,
       due: inv.due_date ? new Date(inv.due_date * 1000).toISOString() : null,
+      id: inv.id,
       url: inv.hosted_invoice_url || null, pdf: inv.invoice_pdf || null,
       paid: inv.status === "paid",
     };
   });
+}
+// Per-clinic money rollup for the roster: outstanding (open), past_due (open & overdue), and
+// YTD collected (paid invoices dated this calendar year).
+async function invoiceAgg(customer, key, yearStartSec, nowSec) {
+  const out = { outstanding: 0, past_due: 0, ytd: 0 };
+  if (!customer) return out;
+  const list = await stripeGet("invoices?customer=" + encodeURIComponent(customer) + "&limit=100", key);
+  (list.data || []).forEach(function (inv) {
+    if (inv.status === "open" || inv.status === "uncollectible") {
+      out.outstanding += money(inv.amount_due);
+      if (inv.due_date && inv.due_date < nowSec) out.past_due += money(inv.amount_due);
+    }
+    if (inv.status === "paid") {
+      var paidAt = (inv.status_transitions && inv.status_transitions.paid_at) || inv.created;
+      if (paidAt && paidAt >= yearStartSec) out.ytd += money(inv.amount_paid);
+    }
+  });
+  return out;
 }
 
 exports.handler = async (event) => {
@@ -100,11 +119,31 @@ exports.handler = async (event) => {
     if (action === "roster") {
       const g = await requireOwner(event); if (g.error) return g.error;
       const rows = await sbGet("clinics?select=id,name,governance_type,md_fee,md_gfe_fee,md_subscription_status,md_billing_email,stripe_customer_id,status&order=name.asc");
-      const clinics = (rows || []).map(function (c) {
-        return { id: c.id, name: c.name, governance_type: c.governance_type || null, md_fee: (c.md_fee != null ? Number(c.md_fee) : null), gfe_fee: (c.md_gfe_fee != null ? Number(c.md_gfe_fee) : null), status: c.md_subscription_status || "none", email: c.md_billing_email || null, on_stripe: !!c.stripe_customer_id };
-      });
+      const now = new Date();
+      const yearStartSec = Math.floor(Date.UTC(now.getUTCFullYear(), 0, 1) / 1000);
+      const nowSec = Math.floor(now.getTime() / 1000);
+      const clinics = [];
+      for (var ci = 0; ci < (rows || []).length; ci++) {
+        var c = rows[ci];
+        var agg = await invoiceAgg(c.stripe_customer_id, key, yearStartSec, nowSec);
+        clinics.push({
+          id: c.id, name: c.name, governance_type: c.governance_type || null,
+          md_fee: (c.md_fee != null ? Number(c.md_fee) : null),
+          gfe_fee: (c.md_gfe_fee != null ? Number(c.md_gfe_fee) : null),
+          status: c.md_subscription_status || "none", email: c.md_billing_email || null,
+          on_stripe: !!c.stripe_customer_id,
+          past_due: agg.past_due, outstanding: agg.outstanding, ytd: agg.ytd,
+        });
+      }
       const recurring = clinics.reduce(function (a, c) { return a + (c.md_fee || 0); }, 0);
-      return json(200, { clinics: clinics, count: clinics.length, monthly_recurring: recurring });
+      const acha = clinics.filter(function (c) { return c.governance_type === "acha"; }).length;
+      return json(200, {
+        clinics: clinics, count: clinics.length,
+        count_acha: acha, count_non_acha: clinics.length - acha,
+        monthly_recurring: recurring,
+        total_past_due: clinics.reduce(function (a, c) { return a + c.past_due; }, 0),
+        total_ytd: clinics.reduce(function (a, c) { return a + c.ytd; }, 0),
+      });
     }
 
     // Onboard a new governed clinic straight onto the roster (name is the only required field;
@@ -126,6 +165,18 @@ exports.handler = async (event) => {
       return json(200, { ok: true, id: created.id });
     }
 
+    // Reconcile: mark an invoice PAID out-of-band (clinic paid by check / Zelle / wire / cash).
+    // Stripe flips it to paid, so it leaves Past Due and rolls into Collected YTD. Owner only.
+    if (action === "mark_paid") {
+      const g = await requireOwner(event); if (g.error) return g.error;
+      const invId = body.invoice_id;
+      if (!invId) return json(400, { error: "invoice_id required" });
+      try {
+        const inv = await stripePost("invoices/" + encodeURIComponent(invId) + "/pay", { paid_out_of_band: true }, key);
+        return json(200, { ok: true, status: inv.status });
+      } catch (e) { return json(502, { error: "mark_paid_failed", detail: String(e).slice(0, 160) }); }
+    }
+
     const clinicId = body.clinic_id;
     if (!clinicId) return json(400, { error: "clinic_id required" });
     const rows = await sbGet("clinics?id=eq." + encodeURIComponent(clinicId) + "&select=id,name,governance_type,md_fee,md_gfe_fee,md_billing_email,stripe_customer_id,md_subscription_status,subscription_status,md_of_record,rn_iv_model");
@@ -136,6 +187,16 @@ exports.handler = async (event) => {
     // (md_of_record AND rn_iv_model). When the clinic's own provider performs the GFE (e.g.
     // Lemus, where the clinic APRN signs), the GFEs are NOT billable to RenuviaMD.
     const falconSignsGfe = !!clinic.md_of_record && !!clinic.rn_iv_model;
+
+    // Turn OFF autopay: cancel the recurring MD subscription (owner OR that clinic's member).
+    if (action === "cancel_autopay") {
+      const g = await requireClinic(event, clinicId); if (g.error) return g.error;
+      if (clinic.md_subscription_id) {
+        try { await stripeDelete("subscriptions/" + encodeURIComponent(clinic.md_subscription_id)); } catch (e) {}
+      }
+      await sbPatch("clinics?id=eq." + encodeURIComponent(clinicId), { md_subscription_id: null, md_subscription_status: "canceled", billing_updated_at: new Date().toISOString() });
+      return json(200, { ok: true });
+    }
 
     // Count this clinic's SIGNED GFEs since a given date (default: first of the current UTC month).
     if (action === "gfe_count") {
@@ -240,8 +301,17 @@ exports.handler = async (event) => {
         sent = await stripeGet("invoices/" + encodeURIComponent(inv.id), key);
         if (sent.status === "draft") throw e;
       }
-      try { sent = await stripePost("invoices/" + encodeURIComponent(inv.id) + "/send", {}, key); } catch (e) {}
-      return json(200, { ok: true, number: sent.number, amount_due: money(sent.amount_due), status: sent.status, url: sent.hosted_invoice_url || null, email: clinic.md_billing_email });
+      // Explicitly send (emails the hosted invoice). Track whether it actually went out so the
+      // UI can tell "emailed" from "created but not emailed" (e.g. Stripe test-mode emails off)
+      // and always fall back to the hosted pay link.
+      var emailed = false, sendErr = null;
+      try { var s = await stripePost("invoices/" + encodeURIComponent(inv.id) + "/send", {}, key); if (s && s.id) { sent = s; emailed = true; } }
+      catch (e) { sendErr = String(e).slice(0, 160); }
+      return json(200, {
+        ok: true, number: sent.number, amount_due: money(sent.amount_due), status: sent.status,
+        url: sent.hosted_invoice_url || null, email: clinic.md_billing_email,
+        emailed: emailed, send_error: sendErr,
+      });
     }
 
     // default: clinic statement (clinic pay page + owner drill-in) — owner OR that clinic's member
