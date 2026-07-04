@@ -1,9 +1,27 @@
 import { useState } from "react";
-import { draftInitialReport } from "../lib/ai";
+import { draftInitialReport, reportFacts } from "../lib/ai";
 import { sanitizeHtml } from "../lib/report";
 import type { SectionProps } from "./SectionsIntake";
 import { Area } from "./fields";
 import { PhraseBar } from "./PhraseBar";
+
+/** Render the de-identified facts object as a readable evidence list. */
+function evidenceLines(v: unknown, prefix = ""): string[] {
+  if (v === null || v === undefined || v === "") return [];
+  if (Array.isArray(v)) {
+    if (v.length === 0) return [];
+    return v.flatMap((item, i) => (typeof item === "object" ? evidenceLines(item, `${prefix}[${i + 1}] `) : [`${prefix}${String(item)}`]));
+  }
+  if (typeof v === "object") {
+    return Object.entries(v as Record<string, unknown>).flatMap(([k, val]) => {
+      const lines = evidenceLines(val, "");
+      if (lines.length === 0) return [];
+      if (lines.length === 1 && typeof val !== "object") return [`${prefix}${k}: ${lines[0]}`];
+      return [`${prefix}${k}:`, ...lines.map((l) => `   ${l}`)];
+    });
+  }
+  return [String(v)];
+}
 
 /**
  * AI Initial Medical Evaluation Report (Dr. Falcon's locked generation specs,
@@ -63,6 +81,19 @@ export function AiReportPanel({ form, patch, onClose, inline }: SectionProps & {
             onChange={(v) => patch("ai", { hpiNotes: v })}
           />
         </div>
+        <details style={{ margin: "10px 0", border: "1px solid var(--accent)", borderRadius: 6, padding: "8px 12px" }}>
+          <summary style={{ cursor: "pointer", color: "var(--gold)", fontWeight: 600 }}>
+            Evidence the AI will receive — verify every fact before generating
+          </summary>
+          <p className="status" style={{ marginTop: 6 }}>
+            This is the COMPLETE input (de-identified). The report may contain nothing beyond it. If a fact below is
+            wrong or left over from testing, fix it in the chart (or click New Visit for a clean form) before generating
+            — the draft will faithfully document whatever is here.
+          </p>
+          <pre style={{ whiteSpace: "pre-wrap", fontSize: 12, color: "var(--text)", background: "var(--hover)", borderRadius: 4, padding: "8px 10px", maxHeight: 300, overflowY: "auto" }}>
+            {evidenceLines(reportFacts(form)).join("\n") || "(no clinical facts entered yet)"}
+          </pre>
+        </details>
         <div className="toolbar" style={{ margin: "10px 0" }}>
           <button className="btn gold" disabled={busy} onClick={generate}>
             {busy ? "Drafting…" : draft ? "Re-generate report" : "Generate report"}
