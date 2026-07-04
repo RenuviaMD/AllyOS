@@ -380,6 +380,10 @@ body {
 .badge-status.emc-yes { background: rgba(39,174,96,.15); color: #7ee2ab; border-color: rgba(39,174,96,.5); }
 .badge-status.emc-no { background: rgba(231,76,60,.15); color: #ff9e93; border-color: rgba(231,76,60,.5); }
 .badge-status.emc-pending { background: rgba(243,156,18,.15); color: #ffbf69; border-color: rgba(243,156,18,.55); }
+.badge-status.pkg-not_sent { background: rgba(243,156,18,.15); color: #ffbf69; border-color: rgba(243,156,18,.55); }
+.badge-status.pkg-sent { background: rgba(22,160,133,.18); color: #2fd3b5; border-color: var(--accent); }
+.badge-status.pkg-paid { background: rgba(39,174,96,.15); color: #7ee2ab; border-color: rgba(39,174,96,.5); }
+.badge-status.pkg-denied { background: rgba(231,76,60,.15); color: #ff9e93; border-color: rgba(231,76,60,.5); }
 .modal.case-detail { width: min(1000px, 96vw); max-height: 90vh; }
 .case-detail-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
 .case-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }

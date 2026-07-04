@@ -700,6 +700,54 @@ export function buildAffidavitHtml(form: VisitForm): string {
   return wrap(`Sworn Affidavit — ${form.patient.lastName}`, b, footerCtx(form));
 }
 
+/* ---------------------------------------------------------------------------
+ * Insurance billing package cover sheet (mailed paper claims).
+ * ------------------------------------------------------------------------- */
+
+export interface PackageCoverArgs {
+  /** latest clinical form snapshot — identity/claim context */
+  form: VisitForm;
+  batchIndex: number;
+  /** batch visits with a display label ("Initial Evaluation" …) */
+  visits: { dos: string; label: string }[];
+  /** carrier claims MAILING address — the audit blocks the build without it */
+  claimsAddress: string;
+  /** "" prints blank (no charges configured) */
+  totalBilled: string;
+  manifest: string[];
+  emc: "Certified" | "Not Certified" | "Pending" | "—";
+}
+
+/** Cover sheet for the mailed PIP billing package: MAIL-TO block, claim identity, diagnoses, visit list, totals, manifest. */
+export function buildPackageCoverHtml(a: PackageCoverArgs): string {
+  const p = a.form.patient;
+  const dx = allDiagnosisCodes(a.form);
+  const benefit = a.emc === "Certified" ? "$10,000 (EMC certified)" : a.emc === "Not Certified" ? "$2,500 (EMC not certified)" : "pending EMC determination";
+  const b = `<h1>INSURANCE BILLING PACKAGE — BATCH ${a.batchIndex}</h1>
+    <table>
+      <tr><th>MAIL TO</th><td><strong>${esc(p.insuranceCarrier)}</strong> — PIP Claims<br>${esc(a.claimsAddress)}</td>
+      <th>From</th><td>${esc(CLINIC.name)}<br>${esc(CLINIC.address)}<br>Ph ${esc(CLINIC.phone)} · Fax ${esc(CLINIC.fax)}</td></tr>
+    </table>
+    <p>Florida PIP claims are submitted on paper by mail — this package prints complete for mailing.</p>
+    <table>
+      <tr><th>Patient</th><td>${esc(p.firstName)} ${esc(p.lastName)}</td><th>DOB</th><td>${esc(p.dob)}</td></tr>
+      <tr><th>Date of Accident</th><td>${esc(a.form.accident.accidentDate)}</td><th>Policy # / Claim #</th><td>${esc(p.policyNumber)}${p.claimNumber ? ` / ${esc(p.claimNumber)}` : ""}</td></tr>
+      <tr><th>PIP Benefit</th><td>${esc(benefit)}</td><th>Attending</th><td>${esc(CLINIC.provider)} · NPI ${esc(CLINIC.npi)}</td></tr>
+    </table>
+    ${dx.length > 0 ? `<h2>Diagnoses</h2><table><tr><th>ICD-10</th><th>Description</th></tr>${dx.map((d) => `<tr><td>${esc(d.code)}</td><td>${esc(d.desc)}</td></tr>`).join("")}</table>` : ""}
+    <h2>Visits in this batch (${a.visits.length})</h2>
+    <table><tr><th>#</th><th>Date of Service</th><th>Visit</th></tr>
+      ${a.visits.map((v, i) => `<tr><td>${i + 1}</td><td>${esc(v.dos)}</td><td>${esc(v.label)}</td></tr>`).join("")}
+    </table>
+    <h2>Billing Summary</h2>
+    <p>Total charges this batch: <strong>${a.totalBilled ? `$${esc(a.totalBilled)}` : "—"}</strong>.
+    PIP pays 80% of reasonable medical charges up to the benefit limit (Fla. Stat. § 627.736).</p>
+    <h2>Documents in this package</h2>
+    <table>${a.manifest.map((m, i) => `<tr><td>${i + 1}</td><td>${esc(m)}</td></tr>`).join("")}</table>
+    ${signature()}`;
+  return wrap(`Billing Package Batch ${a.batchIndex} — ${p.lastName}`, b, footerCtx(a.form));
+}
+
 /** Strip active content from HTML before rendering. Our own builders escape all
  * interpolation, but stored report_html can include legacy rows written by the
  * previous app — neutralize scripts/handlers to prevent stored-XSS. */

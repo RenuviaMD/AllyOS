@@ -13,7 +13,7 @@ import type { Role } from "../lib/types";
 
 export type NavAction =
   | { view: "today" | "encounter" | "patients" }
-  | { modal: "package" | "archive" | "billing" | "export" | "attorney" | "catalogs" | "users" | "onboarding" };
+  | { modal: "package" | "archive" | "billing" | "billing_packages" | "export" | "attorney" | "catalogs" | "users" | "onboarding" };
 
 interface NavItem {
   label: string;
@@ -75,6 +75,7 @@ export function Sidebar(props: {
     { label: "Open Encounter", action: { view: "encounter" }, show: true },
     { label: "Visit Documents", action: { modal: "package" }, show: true },
     { label: "Reports Archive", action: { modal: "archive" }, show: true },
+    { label: "Billing Packages", action: { modal: "billing_packages" }, show: role === "physician" },
     { label: "Billing Settings", action: { modal: "billing" }, show: role !== "staff" },
     { label: "Encounter Export", action: { modal: "export" }, show: role === "physician" },
     { label: "Attorney Package", action: { modal: "attorney" }, show: role === "physician" },
