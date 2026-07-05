@@ -96,7 +96,8 @@ async function invoiceAgg(customer, key, yearStartSec, nowSec) {
   if (!customer) return out;
   const list = await stripeGet("invoices?customer=" + encodeURIComponent(customer) + "&limit=100", key);
   (list.data || []).forEach(function (inv) {
-    if (inv.status === "open" || inv.status === "uncollectible") {
+    // Only OPEN invoices are collectable AR. "uncollectible" is a Stripe write-off — don't count it.
+    if (inv.status === "open") {
       out.outstanding += money(inv.amount_due);
       if (inv.due_date && inv.due_date < nowSec) out.past_due += money(inv.amount_due);
     }
@@ -156,6 +157,7 @@ exports.handler = async (event) => {
         name: name,
         governance_type: body.governance_type || null,
         md_fee: (body.md_fee === undefined || body.md_fee === null || body.md_fee === "") ? null : Number(body.md_fee),
+        md_gfe_fee: (body.md_gfe_fee === undefined || body.md_gfe_fee === null || body.md_gfe_fee === "") ? null : Number(body.md_gfe_fee),
         md_billing_email: body.md_billing_email || null,
         md_of_record: !!body.governance_type,
         status: "active",
@@ -179,7 +181,7 @@ exports.handler = async (event) => {
 
     const clinicId = body.clinic_id;
     if (!clinicId) return json(400, { error: "clinic_id required" });
-    const rows = await sbGet("clinics?id=eq." + encodeURIComponent(clinicId) + "&select=id,name,governance_type,md_fee,md_gfe_fee,md_billing_email,stripe_customer_id,md_subscription_status,subscription_status,md_of_record,rn_iv_model");
+    const rows = await sbGet("clinics?id=eq." + encodeURIComponent(clinicId) + "&select=id,name,governance_type,md_fee,md_gfe_fee,md_billing_email,stripe_customer_id,md_subscription_id,md_subscription_status,subscription_status,md_of_record,rn_iv_model");
     const clinic = rows[0];
     if (!clinic) return json(404, { error: "clinic_not_found" });
 
@@ -299,7 +301,10 @@ exports.handler = async (event) => {
       } catch (e) {
         // Idempotent retry of an already-finalized invoice — fetch it instead of failing.
         sent = await stripeGet("invoices/" + encodeURIComponent(inv.id), key);
-        if (sent.status === "draft") throw e;
+        // Still a draft = finalize genuinely failed. VOID it so auto_advance can't silently
+        // finalize+send it later (which, with the client generating a fresh bill_key on error,
+        // would double-bill). Then surface the error.
+        if (sent.status === "draft") { try { await stripeDelete("invoices/" + encodeURIComponent(inv.id), key); } catch (e2) {} throw e; }
       }
       // Explicitly send (emails the hosted invoice). Track whether it actually went out so the
       // UI can tell "emailed" from "created but not emailed" (e.g. Stripe test-mode emails off)
@@ -317,7 +322,7 @@ exports.handler = async (event) => {
     // default: clinic statement (clinic pay page + owner drill-in) — owner OR that clinic's member
     const g = await requireClinic(event, clinicId); if (g.error) return g.error;
     const invoices = await invoicesFor(clinic.stripe_customer_id, key);
-    const outstanding = invoices.filter(function (v) { return v.status === "open" || v.status === "uncollectible"; }).reduce(function (a, v) { return a + v.amount_due; }, 0);
+    const outstanding = invoices.filter(function (v) { return v.status === "open"; }).reduce(function (a, v) { return a + v.amount_due; }, 0);
     return json(200, {
       name: clinic.name, governance_type: clinic.governance_type || null,
       md_fee: (clinic.md_fee != null ? Number(clinic.md_fee) : null),

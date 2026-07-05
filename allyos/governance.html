@@ -116,7 +116,8 @@
   <div id="sections"></div>
 
   <div><button class="gen" id="genBtn" onclick="genReport()">⬇ Download report PDF</button>
-    <span style="font-size:11.5px;color:var(--dim);margin-left:12px">Binder-ready sections I–VIII · generated on this device · nothing uploaded.</span></div>
+    <button class="gen" style="background:linear-gradient(120deg,var(--gold,#b87913),#caa23e);color:#241a05;margin-left:10px" onclick="closeMonth()">↻ Close month &amp; carry forward</button>
+    <span style="font-size:11.5px;color:var(--dim);margin-left:12px">Download any time. <b>Close month</b> rolls this period’s open items into next month’s corrected/pending list.</span></div>
 </div>
 
 <script src="allyos-auth.js"></script>
@@ -188,14 +189,14 @@ function render(){
   var P=0,M=0,N=0,U=0;
   document.getElementById('sections').innerHTML=visibleSections().map(function(sec){
     var rows=sec.items.map(function(it,i){
-      var id=sec.k+':'+i,v=stt()[id]||'';
+      var id=sec.k+':'+govslug(it),v=stt()[id]||'';
       if(v==='present')P++;else if(v==='missing')M++;else if(v==='na')N++;else U++;
       return '<div class="item"><span class="lbl">'+esc(it)+'</span><span class="tog">'+
         '<button class="p'+(v==='present'?' on':'')+'" onclick="setItem(\''+id+'\',\'present\')">Present</button>'+
         '<button class="m'+(v==='missing'?' on':'')+'" onclick="setItem(\''+id+'\',\'missing\')">Missing</button>'+
         '<button class="n'+(v==='na'?' on':'')+'" onclick="setItem(\''+id+'\',\'na\')">N/A</button></span></div>';
     }).join('');
-    var sc=sec.items.reduce(function(a,_,i){return a+(stt()[sec.k+':'+i]==='present'?1:0);},0);
+    var sc=sec.items.reduce(function(a,it){return a+(stt()[sec.k+':'+govslug(it)]==='present'?1:0);},0);
     return '<details class="sec" open><summary>'+esc(sec.title)+'<span class="cnt">'+sc+' / '+sec.items.length+' present</span></summary><div class="body">'+rows+'</div></details>';
   }).join('')||'<div class="note">No active lines selected — turn on the lines this clinic offers above.</div>';
   document.getElementById('nPresent').textContent=P;document.getElementById('nMissing').textContent=M;document.getElementById('nNa').textContent=N;document.getElementById('nUnset').textContent=U;
@@ -205,7 +206,7 @@ function render(){
 function parseRows(id,n){return (document.getElementById(id).value||'').split(/\r?\n/).map(function(l){return l.trim();}).filter(Boolean).map(function(l){return l.split('|').map(function(x){return x.trim();});});}
 function collectPayload(){
   var manual=document.getElementById('hStatus').value,M=0,U=0;
-  visibleSections().forEach(function(sec){sec.items.forEach(function(_,i){var v=stt()[sec.k+':'+i];if(v==='missing')M++;else if(!v)U++;});});
+  visibleSections().forEach(function(sec){sec.items.forEach(function(it){var v=stt()[sec.k+':'+govslug(it)];if(v==='missing')M++;else if(!v)U++;});});
   var pl={clinic:document.getElementById('hClinic').value,program:document.getElementById('hProgram').value,address:document.getElementById('hAddr').value,md:document.getElementById('hMD').value,mdLicense:document.getElementById('hMDLic').value,
     reportDate:document.getElementById('hMonth').value,rec:document.getElementById('hRec').value,overall:manual||(M>0?'Needs correction':(U>0?'Not reviewed':'Compliant')),
     verifyDate:document.getElementById('dVerify').value,scopeNote:document.getElementById('dScope').value,protocolStatus:document.getElementById('dProto').value,
@@ -215,10 +216,10 @@ function collectPayload(){
   var rc=rev().charts||[];
   pl.charts = rc.length ? rc.map(function(c){var sec=secByK(c.line);var st=chartStatus(c,sec);return {ref:c.ref,ini:c.ini,dos:c.dos,line:sec.title,status:st.cls==='pass'?'Pass':(st.cls==='fail'?'Fail':'Pending')};}) : parseRows('dCharts').map(function(r){return {ref:r[0],ini:'',dos:r[1],line:r[2],status:'Reviewed'};});
   // per-chart failures -> corrective action
-  rc.forEach(function(c){var sec=secByK(c.line);sec.items.forEach(function(it,i){if(c.st[i]==='missing')pl.corrections.push({label:c.ref+' — '+it,resp:'Clinic provider',due:''});});});
+  rc.forEach(function(c){var sec=secByK(c.line);sec.items.forEach(function(it){if(c.st[govslug(it)]==='missing')pl.corrections.push({label:c.ref+' — '+it,resp:'Clinic provider',due:''});});});
   // Section VI line-level attestation (+ its own missing items)
-  visibleSections().forEach(function(sec){pl.lines.push({title:sec.title,items:sec.items.map(function(it,i){return {label:it,status:STATUS[stt()[sec.k+':'+i]]||'Not set'};})});
-    sec.items.forEach(function(it,i){var id=sec.k+':'+i;if(stt()[id]==='missing'){var c=corr()[id]||{};pl.corrections.push({label:it,resp:c.resp,due:c.due});}});});
+  visibleSections().forEach(function(sec){pl.lines.push({title:sec.title,items:sec.items.map(function(it){return {label:it,status:STATUS[stt()[sec.k+':'+govslug(it)]]||'Not set'};})});
+    sec.items.forEach(function(it){var id=sec.k+':'+govslug(it);if(stt()[id]==='missing'){var c=corr()[id]||{};pl.corrections.push({label:it,resp:c.resp,due:c.due});}});});
   // carry-forward — last month's corrections + their corrected/pending status
   (rev().prior||[]).forEach(function(p){pl.priorCorrections.push({label:p.label,status:p.status==='corrected'?'Corrected':'Pending'});});
   return pl;
@@ -227,18 +228,34 @@ function genReport(){
   if(!window.AllyOSGovReport){alert('Report module not loaded.');return;}
   var pl=collectPayload();
   var btn=document.getElementById('genBtn');if(btn){btn.textContent='Generating…';btn.disabled=true;}
+  // NOTE: downloading does NOT roll the month forward (that used to duplicate items on a second
+  // download). Carry-forward is the explicit "Close month" action below.
   AllyOSGovReport.download(pl).then(function(){
     if(btn){btn.textContent='⬇ Download report PDF';btn.disabled=false;}
-    // this month's failures become next month's carry-forward (corrected/pending)
-    rev().prior=(pl.corrections||[]).map(function(c){return {label:c.label,status:'pending'};});
-    save(SKEY,store);renderCharts();
   }).catch(function(e){if(btn){btn.textContent='⬇ Download report PDF';btn.disabled=false;}alert('Report error: '+(e&&e.message||e));});
+}
+// Explicit, idempotent month close: this period's still-open failures roll into next month's
+// "prior corrections" (pending), MERGED with any earlier items still pending — deduped by label,
+// resolved (corrected) ones dropped. Running it twice is a no-op.
+function closeMonth(){
+  var pl=collectPayload();
+  var stillPending=(rev().prior||[]).filter(function(p){return p.status!=='corrected';});
+  var seen={};stillPending.forEach(function(p){seen[p.label]=1;});
+  (pl.corrections||[]).forEach(function(c){if(!seen[c.label]){stillPending.push({label:c.label,status:'pending'});seen[c.label]=1;}});
+  rev().prior=stillPending;save(SKEY,store);renderCharts();
+  alert('✓ Month closed — '+stillPending.length+' item(s) carried forward as pending. They’ll show as corrected/pending next period.');
 }
 // ---- Chart review (Section V): sample 5 at random + inspect (+ optional AI parse) ----
 function normLine(t){t=(''+(t||'')).toLowerCase().trim();if(t.indexOf('iv')===0||t.indexOf('im')===0)return 'iv';if(t.indexOf('pep')===0)return 'pep';if(t.indexOf('bhrt')>=0||t.indexOf('hrt')>=0||t.indexOf('horm')>=0)return 'bhrt';return 'iv';}
 function secByK(k){for(var i=0;i<SECTIONS.length;i++)if(SECTIONS[i].k===k)return SECTIONS[i];return SECTIONS[0];}
+// Stable, reorder-safe key for a parameter's verdict (was array index — removing/reordering an
+// item used to silently mislabel a saved verdict in the binder). Keyed by the item text.
+function govslug(s){return (''+s).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');}
+// AI evidence snippets are kept in memory only (never written to localStorage) — a note fragment
+// must not persist on-device. Cleared on reload.
+var EVID={};
 function rev(){store[cid].rev=store[cid].rev||{pool:'',charts:[],prior:[]};return store[cid].rev;}
-function chartStatus(c,sec){var miss=0,uns=0;sec.items.forEach(function(_,i){var v=c.st[i];if(v==='missing')miss++;else if(!v)uns++;});if(miss>0)return {cls:'fail',label:'FAIL · '+miss+' missing'};if(uns>0)return {cls:'pend',label:'Pending'};return {cls:'pass',label:'PASS'};}
+function chartStatus(c,sec){var miss=0,uns=0;sec.items.forEach(function(it){var v=c.st[govslug(it)];if(v==='missing')miss++;else if(!v)uns++;});if(miss>0)return {cls:'fail',label:'FAIL · '+miss+' missing'};if(uns>0)return {cls:'pend',label:'Pending'};return {cls:'pass',label:'PASS'};}
 function pickCharts(){
   var raw=document.getElementById('chartPool').value;rev().pool=raw;
   var pool=raw.split(/\r?\n/).map(function(l){return l.trim();}).filter(Boolean).map(function(l){var p=l.split('|').map(function(x){return x.trim();});return {ref:p[0]||'',ini:p[1]||'',line:normLine(p[2]),dos:p[3]||''};}).filter(function(c){return c.ref;});
@@ -249,7 +266,7 @@ function pickCharts(){
   document.getElementById('poolCount').textContent=pool.length+' in pool · 5 sampled';
   save(SKEY,store);renderCharts();render();
 }
-function setChartItem(ci,i,v){var c=rev().charts[ci];if(c.st[i]===v)delete c.st[i];else c.st[i]=v;save(SKEY,store);renderCharts();render();}
+function setChartItem(ci,i,v){var c=rev().charts[ci];var sec=secByK(c.line);var k=govslug(sec.items[i]);if(c.st[k]===v)delete c.st[k];else c.st[k]=v;save(SKEY,store);renderCharts();render();}
 function fileToB64(file){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result);};r.onerror=rej;r.readAsDataURL(file);});}
 function parseText(ci){var ta=document.getElementById('nt'+ci);if(!ta||!ta.value.trim()){alert('Paste the note text first.');return;}callParse(ci,{text:ta.value});}
 function parseImage(ci,input){if(!input.files||!input.files[0])return;fileToB64(input.files[0]).then(function(b64){callParse(ci,{image:b64});});}
@@ -261,8 +278,11 @@ function callParse(ci,payload){
   Promise.resolve(call).then(function(rp){return rp.json();}).then(function(d){
     if(!d||d.error){if(msg)msg.textContent=(d&&(d.hint||d.error))||'Parse failed';return;}
     (d.results||[]).forEach(function(res,i){
-      var idx=i;for(var k=0;k<sec.items.length;k++){if(res.item&&sec.items[k].toLowerCase()===(''+res.item).toLowerCase()){idx=k;break;}}
-      if(idx<sec.items.length){c.st[idx]=res.status;if(res.evidence)c.ev[idx]=res.evidence;}
+      // Match strictly by parameter LABEL. If the model paraphrased and nothing matches, SKIP
+      // (never positionally guess — that would write a verdict to the wrong parameter).
+      var idx=-1;for(var k=0;k<sec.items.length;k++){if(res.item&&govslug(sec.items[k])===govslug(res.item)){idx=k;break;}}
+      if(idx<0&&i<sec.items.length&&(d.results||[]).length===sec.items.length)idx=i; // safe fallback only if counts align 1:1
+      if(idx>=0){var key=govslug(sec.items[idx]);c.st[key]=res.status;if(res.evidence)EVID[ci+'|'+key]=res.evidence;}
     });
     save(SKEY,store);renderCharts();render();
   }).catch(function(){if(msg)msg.textContent='Could not reach the parser.';});
@@ -276,7 +296,7 @@ function renderCharts(){
   var cardsHtml=(!r.charts||!r.charts.length)?'<div style="font-size:11.5px;color:var(--dim)">No charts selected yet — paste the list and pick 5.</div>':
     r.charts.map(function(c,ci){
       var sec=secByK(c.line);
-      var rows=sec.items.map(function(it,i){var v=c.st[i]||'';var ev=c.ev[i]?'<div class="ev">“'+esc(c.ev[i])+'”</div>':'';
+      var rows=sec.items.map(function(it,i){var k=govslug(it);var v=c.st[k]||'';var e=EVID[ci+'|'+k];var ev=e?'<div class="ev">“'+esc(e)+'”</div>':'';
         return '<div class="citem"><span class="cl">'+esc(it)+'</span>'+
           '<button class="cbtn p'+(v==='present'?' on':'')+'" onclick="setChartItem('+ci+','+i+',\'present\')">Present</button>'+
           '<button class="cbtn m'+(v==='missing'?' on':'')+'" onclick="setChartItem('+ci+','+i+',\'missing\')">Missing</button>'+
