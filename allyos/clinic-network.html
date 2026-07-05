@@ -191,7 +191,10 @@ var CLINICS=loadClinics();   // module-level; cloud refresh replaces it in place
 function deviceClinicId(){return (ses&&ses.clinicId)||'lemus';}
 function lineKeys(l){return ['iv','peptides','bhrt'].filter(function(k){return l&&l[k];});}
 function lineLabel(k){return k==='iv'?'IV':k==='peptides'?'PEP':k==='bhrt'?'BHRT':k;}
-function mrrOf(c){var n=lineKeys(c.lines).length;return BUNDLE[n]!=null?BUNDLE[n]:(n>3?499:0);}
+// SaaS MRR is the AllyOS software subscription. For MD-of-record clinics the software is bundled
+// into the (externally billed) MD fee — not separate SaaS revenue — so they contribute $0 here.
+// Their real recurring shows on the MD Finance page instead.
+function mrrOf(c){if(c.falconIsMd)return 0;var n=lineKeys(c.lines).length;return BUNDLE[n]!=null?BUNDLE[n]:(n>3?499:0);}
 // today's GFE counts for the device clinic, from the shared chairside queue (PHI-free counts)
 function gfeCounts(){try{var s=JSON.parse(localStorage.getItem('allyos_chairside_v1')||'{}');var q=s.q||[];
   var done=0,pend=0;q.forEach(function(p){if(p.gfe)done++;else pend++;});return {total:q.length,done:done,pend:pend};

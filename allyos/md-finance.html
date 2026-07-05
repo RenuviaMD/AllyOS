@@ -185,7 +185,11 @@ function newBillKey(){try{return crypto.randomUUID();}catch(e){return 'bk'+Date.
 function openBill(id){billId=id;billKey=newBillKey();var c=byId(id);document.getElementById('billName').textContent=c.name||'';document.getElementById('billMsg').textContent='';
   document.getElementById('lines').innerHTML='';
   var month=new Date().toLocaleString(undefined,{month:'long'});
-  addLine('Medical Director — '+month, c.md_fee!=null?c.md_fee:'');
+  // If the clinic is on AUTOPAY, the base monthly fee is already charged by the subscription —
+  // do NOT pre-fill it (that would double-bill). Only extras/one-offs go on a manual bill.
+  var onAutopay=(c.status==='active'||c.status==='trialing'||c.status==='past_due');
+  if(onAutopay){document.getElementById('billMsg').style.color='var(--gold)';document.getElementById('billMsg').textContent='⏱ On autopay — base fee auto-charges. Add only one-off extras here.';}
+  else{addLine('Medical Director — '+month, c.md_fee!=null?c.md_fee:'');}
   document.getElementById('billBack').classList.add('on');recalc();
   // Auto-add this month's signed GFEs × the per-GFE fee (from the database) as a line.
   api({action:'gfe_count',clinic_id:id}).then(function(d){
