@@ -71,6 +71,7 @@
 </div>
 
 <input type="file" id="csvPick" accept=".csv,text/csv" style="display:none">
+<input type="file" id="chartPick" accept="image/*,.pdf" multiple style="display:none">
 <script src="allyos-auth.js"></script>
 <script src="supabase-client.js"></script>
 <script src="governance-report.js"></script>
@@ -119,17 +120,39 @@ function ingestCSV(txt){
   }).filter(function(e){return e.id;});
   S.encounters=enc; S.selected=[]; S.review={}; save(); S.stage=2; render();
 }
-function ingestPaste(){
-  var raw=(document.getElementById('pasteBox')||{}).value||'';
-  var enc=raw.split(/\r?\n/).map(function(l){return l.trim();}).filter(Boolean).map(function(l,idx){var p=l.split('|').map(function(x){return x.trim();});return {id:p[0]||('ENC-'+(idx+1)),pt:p[1]||'—',line:(p[2]?normLine(p[2]):(S.hdr.line||'iv')),dos:p[3]||'',risk:0,flags:[]};}).filter(function(e){return e.id;});
-  if(!enc.length){alert('Add at least one chart:  chart # | initials | line | date');return;}
-  S.encounters=enc; S.selected=[]; S.review={}; save(); S.stage=2; render();
+// ---- drag chart → vision/Sonnet extract (chart #, initials, line, date) ----
+function extractDoc(file){
+  if(!file)return;
+  var tmpId='PARSING-'+(S.encounters.length+1)+'-'+Math.floor(Math.random()*1e6);
+  fileToB64(file).then(function(b64){
+    S.encounters.push({id:tmpId,pt:'…',line:(S.hdr.line||'iv'),dos:'',risk:0,flags:[],parsing:true});
+    // keep the dragged doc as this chart's progress note so Stage 3 already has it
+    S.review[tmpId]={note:{image:b64,name:file.name}};
+    save(); render();
+    var body={mode:'extract',doc:{image:b64},clinic_id:(sess.clinicId||null)};
+    var call=(window.AllyOSCloud&&AllyOSCloud.postAuthed)?AllyOSCloud.postAuthed('/.netlify/functions/governance-parse',body):fetch('/.netlify/functions/governance-parse',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+    Promise.resolve(call).then(function(r){return r.json();}).then(function(d){
+      var e=encById(tmpId);if(!e)return;
+      e.parsing=false;
+      if(!d||d.error){e.pt='—';e.err=(d&&(d.detail||d.error))||'Could not read';save();render();return;}
+      e.pt=(''+(d.initials||'')).trim()||'—';
+      e.line=normLine(d.line||e.line);
+      e.dos=(''+(d.date||'')).trim();
+      var newId=(''+(d.chart_id||'')).trim();
+      if(newId&&newId!==tmpId){
+        if(encById(newId))newId=newId+'-'+Math.floor(Math.random()*1000);
+        S.review[newId]=S.review[tmpId];delete S.review[tmpId];
+        var si=S.selected.indexOf(tmpId);if(si>=0)S.selected[si]=newId;
+        e.id=newId;
+      }
+      save();render();
+    }).catch(function(){var e=encById(tmpId);if(e){e.parsing=false;e.err='Could not reach the parser.';save();render();}});
+  });
 }
 
 // ---- selection (random — unbiased audit; cash-pay wellness, no billing risk score) ----
 function toggleSel(id){var k=S.selected.indexOf(id);if(k>=0)S.selected.splice(k,1);else if(S.selected.length<5)S.selected.push(id);save();render();}
-function randomFive(){var pool=S.encounters.slice();if(!pool.length){alert('Add charts first (upload, paste, or + Add).');return;}var idx=pool.map(function(_,i){return i;});for(var i=idx.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idx[i];idx[i]=idx[j];idx[j]=t;}S.selected=idx.slice(0,Math.min(5,pool.length)).map(function(i){return pool[i].id;});save();render();}
-function addManual(){var id=(document.getElementById('mAid')||{}).value;id=(id||'').trim();if(!id){alert('Chart # required.');return;}var e={id:id,pt:((document.getElementById('mAini')||{}).value||'').trim()||'—',line:(document.getElementById('mAline')||{}).value||'iv',dos:((document.getElementById('mAdos')||{}).value||'').trim(),risk:0,flags:[]};S.encounters.push(e);save();render();}
+function randomFive(){var pool=S.encounters.slice();if(!pool.length){alert('Drop chart documents first (Stage 1).');return;}var idx=pool.map(function(_,i){return i;});for(var i=idx.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idx[i];idx[i]=idx[j];idx[j]=t;}S.selected=idx.slice(0,Math.min(5,pool.length)).map(function(i){return pool[i].id;});save();render();}
 function clearSel(){S.selected=[];save();render();}
 function encById(id){for(var i=0;i<S.encounters.length;i++)if(S.encounters[i].id===id)return S.encounters[i];return null;}
 
@@ -165,7 +188,7 @@ function patternFlags(){
 function sessionRating(){var f=0;S.selected.forEach(function(id){var r=S.review[id]&&S.review[id].result;if(r&&r.status==='FAIL')f++;if(r){f+=(r.deficiencies||[]).length+(r.conflicts||[]).length;}});return {findings:f,rating:f?'ACTION REQ':'CLEAN'};}
 
 // ============ RENDER ============
-var STAGES=[{n:1,t:'Upload CSV'},{n:2,t:'Chart Selection'},{n:3,t:'AI Review'},{n:4,t:'Summary'}];
+var STAGES=[{n:1,t:'Load Charts'},{n:2,t:'Chart Selection'},{n:3,t:'AI Review'},{n:4,t:'Summary'}];
 function go(n){if(n===3&&S.selected.length<1)return;S.stage=n;save();render();}
 function render(){
   document.getElementById('stages').innerHTML=STAGES.map(function(s){
@@ -190,13 +213,10 @@ function stage1(){
     '<div><label>EMR / source</label><input id="hEmr" value="'+esc(h.emr||'')+'" placeholder="e.g. clinic EMR export" oninput="setHdr(\'emr\',this.value)"></div>'+
     '</div></div>'+
     '<div class="card"><div class="grp">MD statutory items — confirm before reviewing charts</div>'+stat+'</div>'+
-    '<div class="card"><div class="grp">Stage 1 · data entry</div>'+
-    '<div class="drop" id="drop" onclick="document.getElementById(\'csvPick\').click()"><div class="ic">⬆</div><div style="margin-top:8px;font-weight:700">Drag &amp; drop the encounter CSV — or click to browse</div><div class="muted" style="font-size:11px;margin-top:4px">Cash-pay wellness — columns auto-detected (chart · initials · line · date).</div></div>'+
-    '<div style="margin-top:14px"><label>No CSV? Paste the chart list — one per line: <code>chart # | initials | line | date</code></label>'+
-    '<textarea id="pasteBox" rows="3" placeholder="IV-2026-018 | J.D. | iv | 07/09/2026&#10;BH-2026-044 | M.R. | bhrt | 07/11/2026">'+esc((S.encounters.length?'':''))+'</textarea>'+
-    '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn ghost" onclick="ingestPaste()">Load pasted charts</button>'+
-    '<button class="btn ghost" onclick="go(2)">Skip — add charts manually in the next step →</button></div></div>'+
-    (S.encounters.length?'<div class="note" style="margin-top:12px">✓ '+S.encounters.length+' chart(s) loaded. <a href="#" onclick="go(2);return false" style="color:var(--teal)">Continue to Chart Selection →</a></div>':'')+
+    '<div class="card"><div class="grp">Stage 1 · load charts</div>'+
+    '<div class="drop" id="drop" onclick="document.getElementById(\'chartPick\').click()"><div class="ic">⬆</div><div style="margin-top:8px;font-weight:700">Drag &amp; drop chart documents — or click to browse</div><div class="muted" style="font-size:11px;margin-top:4px">Progress notes / superbills (PDF or photo, handwritten OK). AI reads each and pulls chart #, initials, line &amp; date — drop several at once. The doc is kept as that chart\'s note for review.</div></div>'+
+    '<div style="margin-top:12px;text-align:center"><span class="muted" style="font-size:11px">Have a roster spreadsheet instead? <a href="#" onclick="document.getElementById(\'csvPick\').click();return false" style="color:var(--teal)">Upload CSV</a> <span style="opacity:.6">(chart · initials · line · date)</span></span></div>'+
+    (S.encounters.length?'<div class="note" style="margin-top:12px">✓ '+S.encounters.length+' chart(s) loaded'+(S.encounters.some(function(e){return e.parsing;})?' · reading…':'')+'. <a href="#" onclick="go(2);return false" style="color:var(--teal)">Continue to Chart Selection →</a></div>':'')+
     '</div>';
 }
 function setHdr(k,v){S.hdr[k]=v;save();}
@@ -210,18 +230,13 @@ function stage2(){
     '<div style="display:flex;gap:8px;align-items:center"><button class="btn gold" onclick="randomFive()">🎲 Pick 5 at random</button><button class="btn ghost" onclick="clearSel()">Clear</button><span class="muted" style="font-size:12px">'+S.selected.length+' / 5</span></div></div>'+
     (picks.length?'<div class="chiprow" style="margin-top:12px">'+picks.map(function(e,i){return '<span class="chip" style="border-color:var(--teal);color:var(--teal)">#'+(i+1)+' '+esc(e.pt)+' · '+esc(e.id)+'</span>';}).join('')+'</div>':'')+
     '</div>';
-  var rows=enc.map(function(e){var sel=S.selected.indexOf(e.id)>=0;
-    return '<tr class="'+(sel?'pick':'')+'"><td><button class="btn ghost" style="padding:3px 9px;font-size:11px" onclick="toggleSel(\''+esc(e.id)+'\')">'+(sel?'✓':'+')+'</button></td>'+
-      '<td><b>'+esc(e.id)+'</b></td><td>'+esc(e.pt)+'</td><td><span class="flag">'+esc((e.line||'iv').toUpperCase())+'</span></td><td>'+esc(e.dos||'—')+'</td></tr>';}).join('')
-    ||'<tr><td colspan="5" class="muted" style="text-align:center;padding:18px">No charts yet — paste/upload on Stage 1, or add one below.</td></tr>';
-  var addRow='<div class="card"><div class="grp">Add a chart manually</div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">'+
-    '<div style="flex:1;min-width:120px"><label>Chart #</label><input id="mAid"></div>'+
-    '<div style="flex:1;min-width:90px"><label>Initials</label><input id="mAini"></div>'+
-    '<div style="min-width:120px"><label>Line</label><select id="mAline"><option value="iv">IV / IM</option><option value="pep">Peptides</option><option value="bhrt">BHRT</option></select></div>'+
-    '<div style="min-width:120px"><label>Date</label><input id="mAdos"></div>'+
-    '<button class="btn ghost" onclick="addManual()">+ Add</button></div></div>';
-  return head+'<div class="card"><div style="overflow:auto"><table><tr><th>Sel</th><th>Chart #</th><th>Initials</th><th>Line</th><th>DOS</th></tr>'+rows+'</table></div></div>'+addRow+
-    '<div class="navrow"><button class="btn ghost" onclick="go(1)">← Upload</button><button class="btn go" onclick="go(3)"'+(S.selected.length<1?' disabled':'')+'>Inspect '+S.selected.length+' chart(s) →</button></div>';
+  var rows=enc.map(function(e){var sel=S.selected.indexOf(e.id)>=0;var busy=e.parsing;
+    return '<tr class="'+(sel?'pick':'')+'"><td><button class="btn ghost" style="padding:3px 9px;font-size:11px" onclick="toggleSel(\''+esc(e.id)+'\')"'+(busy?' disabled':'')+'>'+(sel?'✓':'+')+'</button></td>'+
+      '<td>'+(busy?'<span class="muted">reading…</span>':'<b>'+esc(e.id)+'</b>'+(e.err?' <span class="flag dup">'+esc(e.err)+'</span>':''))+'</td><td>'+esc(e.pt)+'</td><td><span class="flag">'+esc((e.line||'iv').toUpperCase())+'</span></td><td>'+esc(e.dos||'—')+'</td></tr>';}).join('')
+    ||'<tr><td colspan="5" class="muted" style="text-align:center;padding:18px">No charts yet — drop chart documents on Stage 1.</td></tr>';
+  return head+'<div class="card"><div style="overflow:auto"><table><tr><th>Sel</th><th>Chart #</th><th>Initials</th><th>Line</th><th>DOS</th></tr>'+rows+'</table></div>'+
+    '<div style="margin-top:10px;text-align:center"><button class="btn ghost" onclick="document.getElementById(\'chartPick\').click()">＋ Drop / add more charts</button></div></div>'+
+    '<div class="navrow"><button class="btn ghost" onclick="go(1)">← Load</button><button class="btn go" onclick="go(3)"'+(S.selected.length<1?' disabled':'')+'>Inspect '+S.selected.length+' chart(s) →</button></div>';
 }
 // ---- Stage 3 ----
 var curChart=0;
@@ -299,9 +314,20 @@ render();
 </script>
 <input type="file" id="docPick" accept="image/*,.pdf" style="display:none">
 <script>
-document.getElementById('csvPick').addEventListener('change',function(){var f=this.files&&this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){ingestCSV(r.result);};r.readAsText(f);});
+document.getElementById('csvPick').addEventListener('change',function(){var f=this.files&&this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){ingestCSV(r.result);};r.readAsText(f);this.value='';});
+document.getElementById('chartPick').addEventListener('change',function(){var fs=this.files;if(!fs||!fs.length)return;for(var i=0;i<fs.length;i++)extractDoc(fs[i]);this.value='';});
 document.getElementById('docPick').addEventListener('change',function(){var f=this.files&&this.files[0];if(!f||!_dropTarget)return;fileToB64(f).then(function(b64){S.review[_dropTarget.id]=S.review[_dropTarget.id]||{};S.review[_dropTarget.id][_dropTarget.which]={image:b64,name:f.name};save();render();});});
-// page-level drag styling for the CSV drop
-(function(){var d=document.body;d.addEventListener('dragover',function(e){var t=document.getElementById('drop');if(t){e.preventDefault();t.classList.add('hi');}});d.addEventListener('dragleave',function(){var t=document.getElementById('drop');if(t)t.classList.remove('hi');});d.addEventListener('drop',function(e){var t=document.getElementById('drop');if(t){e.preventDefault();t.classList.remove('hi');var f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f&&/\.csv$/i.test(f.name)){var r=new FileReader();r.onload=function(){ingestCSV(r.result);};r.readAsText(f);}}});})();
+// page-level drag: CSV → roster ingest; chart docs (pdf/image) → vision extract
+(function(){var d=document.body;
+  d.addEventListener('dragover',function(e){var t=document.getElementById('drop');if(t){e.preventDefault();t.classList.add('hi');}});
+  d.addEventListener('dragleave',function(){var t=document.getElementById('drop');if(t)t.classList.remove('hi');});
+  d.addEventListener('drop',function(e){var t=document.getElementById('drop');if(!t)return;e.preventDefault();t.classList.remove('hi');
+    var fs=e.dataTransfer.files;if(!fs||!fs.length)return;
+    for(var i=0;i<fs.length;i++){var f=fs[i];
+      if(/\.csv$/i.test(f.name)||f.type==='text/csv'){var r=new FileReader();r.onload=(function(rr){return function(){ingestCSV(rr.result);};})(r);r.readAsText(f);}
+      else extractDoc(f);
+    }
+  });
+})();
 </script>
 </body></html>
