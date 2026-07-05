@@ -37,6 +37,55 @@ exports.handler = async (event) => {
   if (clinicId) { const g = await requireClinic(event, clinicId); if (g.error) return g.error; }
   else { const c = await verifyCaller(event); if (!c) return json(401, { error: "unauthorized" }); }
 
+  const KEY = key;
+  function pushDoc(content, label, doc) {
+    if (!doc) return;
+    content.push({ type: "text", text: "\n\n=== " + label + " ===\n" });
+    if (doc.image) {
+      var m = /^data:([^;]+);base64,(.*)$/.exec(doc.image);
+      content.push({ type: "image", source: { type: "base64", media_type: (m ? m[1] : (doc.mime || "image/jpeg")), data: (m ? m[2] : doc.image) } });
+    } else if (doc.text) { content.push({ type: "text", text: String(doc.text).slice(0, 12000) }); }
+  }
+  async function callModel(sys, content, maxTok) {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST", headers: { "content-type": "application/json", "x-api-key": KEY, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({ model: "claude-sonnet-5", max_tokens: maxTok || 1500, system: sys, output_config: { effort: "medium" }, messages: [{ role: "user", content: content }] }),
+    });
+    if (!resp.ok) throw new Error("upstream " + resp.status + " " + (await resp.text()).slice(0, 200));
+    const data = await resp.json();
+    const raw = (data.content || []).filter(function (b) { return b.type === "text"; }).map(function (b) { return b.text; }).join("").trim();
+    const jStart = raw.indexOf("{"), jEnd = raw.lastIndexOf("}");
+    return JSON.parse(jStart >= 0 ? raw.slice(jStart, jEnd + 1) : raw);
+  }
+
+  // ---- DUAL-DOCUMENT INSPECTION (AHCA-style: progress note + superbill) ----
+  if (body.mode === "dual") {
+    const params = Array.isArray(body.params) ? body.params.filter(function (x) { return typeof x === "string"; }).slice(0, 30) : [];
+    if (!body.note && !body.superbill) return json(400, { error: "no_docs", hint: "Attach at least the progress note." });
+    const DUAL_SYS =
+      "You are a MEDICAL-DIRECTOR GOVERNANCE AUDITOR doing a DUAL-DOCUMENT chart review for a wellness clinic " +
+      "(" + (body.line || "IV/peptide/BHRT") + "). You are given a PROGRESS NOTE and (optionally) a SUPERBILL/claim. " +
+      "Check the documentation-compliance PARAMETERS below AND cross-check the note against the superbill for agreement " +
+      "(codes, date of service, provider signature, services billed vs documented). Judge ONLY from the documents; never invent.\n" +
+      "PARAMETERS:\n" + params.map(function (p, i) { return (i + 1) + ". " + p; }).join("\n") + "\n" +
+      "Return STRICT JSON only: {\"status\":\"PASS|FAIL\",\"deficiencies\":[\"...\"],\"conflicts\":[\"note vs superbill mismatch ...\"]," +
+      "\"clean\":[\"parameter that passed\"],\"narrative\":\"2-4 sentence summary\"}. " +
+      "status=FAIL if any parameter is missing or any note-vs-superbill conflict exists; else PASS. Keep every string PHI-free (no name/DOB).";
+    const content = [{ type: "text", text: "Review these documents against the parameters." }];
+    pushDoc(content, "PROGRESS NOTE", body.note);
+    pushDoc(content, "SUPERBILL / CLAIM", body.superbill);
+    try {
+      const p = await callModel(DUAL_SYS, content, 1600);
+      return json(200, {
+        status: (String(p.status || "").toUpperCase() === "PASS") ? "PASS" : "FAIL",
+        deficiencies: (p.deficiencies || []).map(function (x) { return String(x).slice(0, 200); }),
+        conflicts: (p.conflicts || []).map(function (x) { return String(x).slice(0, 200); }),
+        clean: (p.clean || []).map(function (x) { return String(x).slice(0, 120); }),
+        narrative: String(p.narrative || "").slice(0, 900),
+      });
+    } catch (e) { return json(502, { error: "dual_parse_failed", detail: String(e).slice(0, 200) }); }
+  }
+
   const items = Array.isArray(body.items) ? body.items.filter(function (x) { return typeof x === "string"; }).slice(0, 30) : [];
   if (!items.length) return json(400, { error: "no_items" });
   const text = typeof body.text === "string" ? body.text.slice(0, 12000) : "";

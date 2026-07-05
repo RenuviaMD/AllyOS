@@ -1,319 +1,302 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Governance binder report · AllyOS · RenuviaMD®</title>
+<title>Governance inspection · AllyOS · RenuviaMD®</title>
 <meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
 <link rel="stylesheet" href="allyos-theme.css">
 <style>
  body.allyos{font-family:var(--fbody)}
  .top{display:flex;align-items:center;gap:14px;padding:0 20px;height:54px;background:#0a1120cc;backdrop-filter:blur(8px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
  .brand{font-family:var(--fdisp);font-weight:900}.brand b{color:var(--teal)}
  .tag{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);border:1px solid var(--line2);border-radius:5px;padding:3px 8px}
- .top .right{margin-left:auto}.top .right a{color:var(--teal);font-size:12.5px;text-decoration:none}
- .wrap{max-width:880px;margin:0 auto;padding:22px 20px 90px}
+ .top .right{margin-left:auto;font-size:12px;color:var(--muted)}.top .right a{color:var(--teal);text-decoration:none;margin-left:10px}
+ .wrap{max-width:1000px;margin:0 auto;padding:18px 20px 100px}
  h1{font-family:var(--fdisp);font-weight:900;font-size:1.5rem;margin:0}
  .sub{color:var(--muted);font-size:.9rem;margin:3px 0 0}
- .note{font-size:11.5px;color:var(--dim);border:1px solid var(--line);border-radius:9px;padding:11px 14px;margin:14px 0;line-height:1.55}
- .hdr{background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0}
- .hgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 18px}
- @media(max-width:640px){.hgrid{grid-template-columns:1fr}}
- .hgrid label,.fl label{display:block;font-size:11px;color:var(--dim);margin-bottom:3px;text-transform:uppercase;letter-spacing:.08em}
- .hgrid input,.hgrid select,.fl input,.fl select,.fl textarea{width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:8px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px}
- .fl{margin-top:10px}.fl textarea{resize:vertical}
- .grp{font-family:var(--fdisp);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin:20px 0 8px;display:flex;align-items:center;gap:10px}.grp:after{content:'';flex:1;height:1px;background:var(--line)}
- .lines{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
- .lchip{font-size:12.5px;border:1px solid var(--line2);border-radius:9px;padding:8px 13px;cursor:pointer;color:var(--muted);user-select:none}
- .lchip.on{background:#0e2e2b;border-color:var(--teal);color:var(--teal)}
- .sumbar{display:flex;gap:16px;flex-wrap:wrap;align-items:center;background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0}
- .sumbar .n{font-family:var(--fdisp);font-weight:900;font-size:1.2rem}
- .sp{color:var(--green)}.sm{color:#f0b3aa}.sn{color:var(--blue)}.su{color:var(--muted)}
- details.sec{background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:12px;margin:10px 0;overflow:hidden}
- details.sec>summary{cursor:pointer;list-style:none;padding:14px 16px;font-family:var(--fdisp);font-weight:800;font-size:14px;display:flex;align-items:center;gap:10px}
- details.sec>summary::-webkit-details-marker{display:none}
- details.sec>summary:before{content:'▸';color:var(--teal);font-size:12px}
- details.sec[open]>summary:before{content:'▾'}
- details.sec>summary .cnt{margin-left:auto;font-family:var(--fbody);font-weight:600;font-size:11.5px;color:var(--muted)}
- .body{padding:2px 16px 14px}
- .item{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
- .item .lbl{flex:1;font-size:13.5px}
- .tog{display:flex;gap:6px}
- .tog button{font-size:11.5px;font-weight:700;border-radius:8px;padding:6px 11px;cursor:pointer;border:1px solid var(--line2);background:#0a1422;color:var(--muted)}
- .tog button.on.p{background:#0e2a1f;border-color:#1e6e4a;color:var(--green)}
- .tog button.on.m{background:#2a1512;border-color:#8a322c;color:#f0b3aa}
- .tog button.on.n{background:#0e2436;border-color:#2a5a7e;color:var(--blue)}
- .gen{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a;border:none;border-radius:10px;padding:11px 18px;font-weight:800;font-size:.9rem;cursor:pointer;margin-top:16px}
- .ccard{background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:10px}
- .chead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
- .cref{font-family:var(--fdisp);font-weight:800;font-size:13.5px}
- .cini{font-size:12px;color:var(--muted)}
- .cline{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line2);border-radius:5px;padding:2px 7px;color:var(--teal)}
- .cstat{margin-left:auto;font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px}
- .cstat.pass{background:#0e2a1f;color:var(--green);border:1px solid #1e6e4a}
- .cstat.fail{background:#2a1512;color:#f0b3aa;border:1px solid #8a322c}
- .cstat.pend{background:#1a222b;color:var(--muted);border:1px solid var(--line2)}
- .citem{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line);font-size:12.5px}
- .citem .cl{flex:1}.citem .ev{font-size:10.5px;color:var(--dim);flex-basis:100%;margin-left:2px}
- .cbtn{font-size:10.5px;font-weight:700;border-radius:7px;padding:4px 9px;cursor:pointer;border:1px solid var(--line2);background:#0a1422;color:var(--muted)}
- .cbtn.on.p{background:#0e2a1f;border-color:#1e6e4a;color:var(--green)}.cbtn.on.m{background:#2a1512;border-color:#8a322c;color:#f0b3aa}.cbtn.on.n{background:#0e2436;border-color:#2a5a7e;color:var(--blue)}
- .cparse{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line2)}
- .cparse label{font-size:11px;color:var(--teal);cursor:pointer;border:1px solid var(--line2);border-radius:7px;padding:5px 10px}
- .cprior{background:#12100a;border:1px solid #3a3117;border-radius:9px;padding:10px 12px;margin:10px 0}
+ .stages{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+ .stg{display:flex;align-items:center;gap:8px;padding:8px 13px;border-radius:9px;border:1px solid var(--line2);background:rgba(255,255,255,.02);color:var(--muted);font-size:12.5px;font-weight:700;cursor:pointer}
+ .stg .n{display:inline-flex;width:18px;height:18px;border-radius:50%;background:#1a2636;align-items:center;justify-content:center;font-size:10px}
+ .stg.on{border-color:var(--teal);background:linear-gradient(120deg,rgba(46,197,193,.14),rgba(46,197,193,.05));color:var(--ink)}
+ .stg.done{color:var(--green)}.stg.done .n{background:#0e2a1f;color:var(--green)}
+ .card{background:linear-gradient(180deg,#0f1c2e,#0c1626);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0}
+ .grp{font-family:var(--fdisp);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:6px 0 10px;font-weight:700}
+ .hgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 16px}@media(max-width:640px){.hgrid{grid-template-columns:1fr}}
+ label{display:block;font-size:11px;color:var(--dim);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em}
+ input,select,textarea{width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:8px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px}
+ .drop{border:2px dashed var(--line2);border-radius:12px;padding:34px 18px;text-align:center;color:var(--muted);cursor:pointer;transition:.15s}
+ .drop.hi{border-color:var(--teal);background:rgba(46,197,193,.06);color:var(--ink)}
+ .drop .ic{font-size:26px;opacity:.8}
+ .btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:9px;padding:10px 16px;font-weight:800;font-size:.86rem;cursor:pointer}
+ .btn.go{background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a}
+ .btn.gold{background:linear-gradient(120deg,var(--gold,#b87913),#caa23e);color:#241a05}
+ .btn.ghost{background:transparent;border:1px solid var(--line2);color:var(--ink)}
+ .btn:disabled{opacity:.45;cursor:not-allowed}
+ .yn{display:flex;gap:6px}.yn button{font-size:11px;font-weight:800;border:1px solid var(--line2);background:#0a1422;color:var(--muted);border-radius:7px;padding:5px 12px;cursor:pointer}
+ .yn button.y.on{background:#0e2a1f;border-color:#1e6e4a;color:var(--green)}.yn button.n.on{background:#2a1512;border-color:#8a322c;color:#f0b3aa}
+ .stat{display:flex;gap:8px;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-size:13px}.stat:first-child{border-top:none}.stat .lbl{flex:1}
+ table{width:100%;border-collapse:collapse;font-size:12.5px}
+ th{text-align:left;color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.05em;padding:8px;border-bottom:1px solid var(--line2)}
+ td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+ tr.pick{background:rgba(46,197,193,.06)}
+ .rk{font-weight:800;font-size:11px}.rk.hi{color:#f0857d}.rk.md{color:var(--gold)}.rk.lo{color:var(--muted)}
+ .flag{display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:1px 6px;border-radius:4px;margin:1px;border:1px solid var(--line2);color:var(--muted)}
+ .flag.dup{background:#2a1512;color:#f0b3aa;border-color:#8a322c}.flag.new{background:#0e2436;color:#4ea8e0;border-color:#2a5a7e}.flag.hem{background:#31220e;color:var(--gold);border-color:#4a3c18}.flag.hf{background:#2a1a30;color:#e59be5;border-color:#5a2f5a}
+ .chip{font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid var(--line2);color:var(--muted)}
+ .chiprow{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+ .tabrow{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 14px}
+ .ctab{padding:7px 12px;border-radius:9px;border:1px solid var(--line2);background:rgba(255,255,255,.02);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer}
+ .ctab.on{border-color:var(--gold);background:#211a0c;color:var(--gold)}.ctab.pass{border-color:#1e6e4a}.ctab.fail{border-color:#8a322c}
+ .verdict{font-size:12px;font-weight:800;padding:3px 12px;border-radius:20px}
+ .verdict.pass{background:#0e2a1f;color:var(--green);border:1px solid #1e6e4a}.verdict.fail{background:#2a1512;color:#f0b3aa;border:1px solid #8a322c}.verdict.pend{background:#1a222b;color:var(--muted);border:1px solid var(--line2)}
+ .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0}
+ .kpi{background:#0a1422;border:1px solid var(--line2);border-radius:10px;padding:12px;text-align:center}
+ .kpi .v{font-family:var(--fdisp);font-size:1.5rem}.kpi.red .v{color:#f0857d}.kpi.gold .v{color:var(--gold)}.kpi.green .v{color:var(--green)}
+ .pf{background:#12100a;border:1px solid #3a3117;border-radius:9px;padding:6px 12px;margin:6px 0;font-size:12.5px;color:#e8d9b0}
+ .findbox{background:#0a1422;border:1px solid var(--line2);border-radius:9px;padding:10px 12px;margin:8px 0;font-size:12.5px}
+ .findbox.def{border-color:#8a322c}.findbox.con{border-color:#4a3c18}
+ .muted{color:var(--muted)}.note{font-size:11.5px;color:var(--dim);border:1px solid var(--line);border-radius:9px;padding:10px 13px;margin:10px 0;line-height:1.5}
+ .navrow{display:flex;justify-content:space-between;margin-top:18px;gap:10px}
 </style></head>
 <body class="allyos">
 <div class="top">
-  <span class="brand"><b>Ally</b>OS</span>
-  <span class="tag">Governance binder report</span>
-  <span class="right"><a href="dashboard.html">← Dashboard</a></span>
+  <span class="brand"><b>Ally</b>OS</span><span class="tag">Governance inspection</span>
+  <span class="right"><span id="clinicLbl"></span><a href="clinic-network.html">← Cockpit</a></span>
 </div>
 <div class="wrap">
-  <h1>Monthly governance binder report</h1>
-  <p class="sub">Wellness directorship · non-AHCA oversight</p>
-  <div class="note">Fill in the clinic's details, mark each service-line item <b>Present / Missing / N/A</b>, then <b>Download report PDF</b> for a binder-ready monthly report (sections I–VIII). <b>Only the lines this clinic offers appear</b> — set them below. Saved on this device; no PHI.</div>
+  <h1>Live Governance Inspection</h1>
+  <p class="sub" id="hdrSub">Wellness directorship · non-AHCA oversight · 4-stage chart audit</p>
 
-  <div class="grp">Clinic</div>
-  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
-    <select id="clinicPicker" onchange="switchClinic(this.value)" style="min-width:240px;background:#0a1422;border:1px solid var(--line2);border-radius:8px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px"></select>
-    <button onclick="addClinic()" style="background:#0a1422;border:1px solid var(--line2);border-radius:8px;color:var(--teal);font:inherit;font-size:12.5px;font-weight:700;padding:8px 12px;cursor:pointer">+ Add clinic</button>
-    <span style="font-size:11px;color:var(--dim)">Each clinic keeps its own letterhead, lines &amp; monthly state — details pre-load from the Clinic Card.</span>
-  </div>
-
-  <div class="hdr hgrid">
-    <div><label>Clinic (legal name)</label><input id="hClinic" type="text" placeholder="e.g. Lemus Natural Medicine, Inc."></div>
-    <div><label>Program / DBA</label><input id="hProgram" type="text" placeholder="DBA or program (optional)"></div>
-    <div style="grid-column:1 / -1"><label>Clinic address</label><input id="hAddr" type="text" placeholder="e.g. 395 Alhambra Circle, Suite 301, Coral Gables, FL 33134"></div>
-    <div><label>Medical Director</label><input id="hMD" type="text"></div>
-    <div><label>MD license</label><input id="hMDLic" type="text" value="Florida Medical License · ME 84789"></div>
-    <div><label>Report date</label><input id="hMonth" type="text" placeholder="e.g. July __, 2026"></div>
-    <div><label>Clinic record location</label><input id="hRec" type="text" value="Clinic EMR / paper chart remains the official record"></div>
-    <div><label>Overall status</label><select id="hStatus"><option value="">— auto —</option><option>Compliant</option><option>Needs correction</option><option>Not reviewed</option></select></div>
-  </div>
-
-  <div class="grp">Lines this clinic offers</div>
-  <div class="lines" id="lines"></div>
-  <div style="font-size:11px;color:var(--dim)">Auto-detected from the clinic's active lines — click to correct. Lines that are off do not appear in the report.</div>
-
-  <div class="grp">Chart review (Section V) — sample &amp; inspect</div>
-  <div class="note">Paste the clinic's <b>PHI-free</b> chart list — one per line: <code>chart # | initials | line | date</code> (line = iv / pep / bhrt). Then <b>pick 5 at random</b> and inspect each against the same parameters. Chart # + initials only — <b>no PHI</b>.</div>
-  <textarea id="chartPool" rows="4" placeholder="IV-2026-018 | J.D. | iv | 07/09/2026&#10;BH-2026-044 | M.R. | bhrt | 07/11/2026&#10;PEP-2026-007 | A.L. | pep | 07/14/2026" style="width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:8px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px;resize:vertical"></textarea>
-  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px">
-    <button onclick="pickCharts()" style="background:#0a1422;border:1px solid var(--teal);border-radius:8px;color:var(--teal);font:inherit;font-size:12.5px;font-weight:700;padding:8px 13px;cursor:pointer">🎲 Pick 5 at random</button>
-    <span style="font-size:11px;color:var(--dim)" id="poolCount"></span>
-  </div>
-  <div id="chartCards" style="margin-top:12px"></div>
-
-  <details class="sec"><summary>Binder detail — sections I–V <span class="cnt">optional · fills the report</span></summary><div class="body">
-    <div class="fl"><label>License verification date</label><input id="dVerify" type="text" placeholder="e.g. 07/05/2026"></div>
-    <div class="fl"><label>Practitioners (one per line: Name | Position | License | Expires)</label><textarea id="dPrac" rows="3">Armando A. Falcon | Medical Director | FL Medical License · ME 84789 | Verify</textarea></div>
-    <div class="fl"><label>Scope / supervision note</label><input id="dScope" type="text" placeholder="Scope reviewed against role + signed protocol"></div>
-    <div class="fl"><label>Physician protocol status</label><input id="dProto" type="text" value="ACTIVE / COMPLIANT"></div>
-    <div class="fl"><label>Adverse incidents this period</label><select id="dAdverse"><option>NONE REPORTED</option><option>SEE INCIDENT LOG</option></select></div>
-    <div class="fl"><label>Adverse note (optional)</label><input id="dAdvNote" type="text" placeholder="none reported unless separately attached in the clinic incident log."></div>
-    <div class="hgrid" style="margin-top:10px"><div><label>Biohazard vendor</label><input id="dBio" type="text" placeholder="Vendor name"></div><div><label>Vendor active since</label><input id="dBioSince" type="text" placeholder="date"></div></div>
-    <div class="fl"><label>Records reviewed (one per line: chart ref | date of service | review type) — no PHI</label><textarea id="dCharts" rows="4" placeholder="e.g. IV-2026-018 | 07/09/2026 | IV chart audit"></textarea></div>
-  </div></details>
-
-  <div class="sumbar"><div><span class="n sp" id="nPresent">0</span> <span class="su">Present</span></div><div><span class="n sm" id="nMissing">0</span> <span class="su">Missing</span></div><div><span class="n sn" id="nNa">0</span> <span class="su">N/A</span></div><div><span class="n su" id="nUnset">0</span> <span class="su">Not set</span></div><div style="margin-left:auto;font-size:12.5px" id="overallLbl"></div></div>
-
-  <div id="sections"></div>
-
-  <div><button class="gen" id="genBtn" onclick="genReport()">⬇ Download report PDF</button>
-    <button class="gen" style="background:linear-gradient(120deg,var(--gold,#b87913),#caa23e);color:#241a05;margin-left:10px" onclick="closeMonth()">↻ Close month &amp; carry forward</button>
-    <span style="font-size:11.5px;color:var(--dim);margin-left:12px">Download any time. <b>Close month</b> rolls this period’s open items into next month’s corrected/pending list.</span></div>
+  <div class="stages" id="stages"></div>
+  <div id="view"></div>
 </div>
 
+<input type="file" id="csvPick" accept=".csv,text/csv" style="display:none">
 <script src="allyos-auth.js"></script>
 <script src="supabase-client.js"></script>
 <script src="governance-report.js"></script>
 <script>
 if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin']);}
-var SECTIONS=[
-  {k:'iv',title:'IV / IM Therapy',line:'iv',items:['IV protocol','GFE before treatment','Aftercare instructions','Signed by authorized provider','Equipment adequacy for procedures']},
-  {k:'pep',title:'Peptides',line:'peptides',items:['Peptide protocol','Provider signed','Peptide consent','Dose / schedule','Follow-up plan','Side-effect check']},
-  {k:'bhrt',title:'BHRT / HRT',line:'bhrt',items:['POC / plan of care','Provider signed','Reason for treatment','Hormone consent','Labs / monitoring plan','Follow-up plan']}
-];
-var LINES=[{k:'iv',t:'IV / IM'},{k:'peptides',t:'Peptides'},{k:'bhrt',t:'BHRT / HRT'}];
-var STATUS={present:'Present',missing:'Missing',na:'Not applicable'};
-function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function clinicId(){var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};return s.clinicId||'local';}
-var SKEY='allyos_governance_v2',OKEY='allyos_governance_lines_v1',HKEY='allyos_governance_hdr_v2';
-function load(k,d){try{return JSON.parse(localStorage.getItem(k)||'null')||d;}catch(e){return d;}}
-function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 var sess=(window.AllyOSAuth&&AllyOSAuth.session())||{};
-var CLKEY='allyos_governance_clinics_v1',CURKEY='allyos_governance_current_v1';
-function clinicList(){var a=load(CLKEY,null);if(!a||!a.length){var nm=(load('allyos_clinic_config_v1',{}).name)||sess.clinic||'Primary clinic';a=[{id:clinicId(),name:nm}];save(CLKEY,a);}return a;}
-var clinics=clinicList();
-var cid=load(CURKEY,null);if(!cid||!clinics.some(function(c){return c.id===cid;}))cid=clinics[0].id;
-var store=load(SKEY,{});
-function ensureStore(){store[cid]=store[cid]||{status:{},corr:{}};if(!store[cid].status)store[cid].status={};if(!store[cid].corr)store[cid].corr={};}
-ensureStore();
-var offered={};
-function loadOffered(){
-  offered=load(OKEY,{})[cid];
-  if(offered)return;
-  offered={};
-  var src=(cid===clinicId())?load('allyos_clinic_lines_v1',null):null;   // Clinic Card lines (object {iv:true,...}) or array
-  if(src&&!Array.isArray(src)){ LINES.forEach(function(l){offered[l.k]=!!src[l.k];}); return; }
-  var arr=Array.isArray(src)?src:(Array.isArray(sess.lines)?sess.lines:['iv','peptides','bhrt']);
-  LINES.forEach(function(l){offered[l.k]=arr.indexOf(l.k)>=0;});
-}
-loadOffered();
-function setOffered(){var o=load(OKEY,{});o[cid]=offered;save(OKEY,o);}
-function stt(){return store[cid].status;}function corr(){return store[cid].corr;}
-function setItem(id,v){if(stt()[id]===v)delete stt()[id];else stt()[id]=v;save(SKEY,store);render();}
-function setCorr(id,f,v){corr()[id]=corr()[id]||{};corr()[id][f]=v;save(SKEY,store);}
-function visibleSections(){return SECTIONS.filter(function(s){return offered[s.line];});}
-function toggleLine(k){offered[k]=!offered[k];setOffered();render();}
-var HF=['hClinic','hProgram','hAddr','hMD','hMDLic','hMonth','hRec','hStatus','dVerify','dPrac','dScope','dProto','dAdverse','dAdvNote','dBio','dBioSince','dCharts'];
-var DEFAULTS={hRec:'Clinic EMR / paper chart remains the official record',hMDLic:'Florida Medical License · ME 84789',dProto:'ACTIVE / COMPLIANT',dAdverse:'NONE REPORTED',dPrac:'Armando A. Falcon | Medical Director | FL Medical License · ME 84789 | Verify'};
-var listenersAttached=false;
-function attachListeners(){if(listenersAttached)return;listenersAttached=true;HF.forEach(function(id){document.getElementById(id).addEventListener('input',function(){saveHeader();render();});});}
-function loadHeaderValues(){
-  var h=load(HKEY,{})[cid]||{};
-  HF.forEach(function(id){document.getElementById(id).value=DEFAULTS[id]||'';});
-  document.getElementById('hMD').value=(window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||sess.name||'Armando Augusto Falcon, MD';
-  HF.forEach(function(id){if(h[id]!=null&&h[id]!=='')document.getElementById(id).value=h[id];});
-  preloadFromCard();
-}
-function preloadFromCard(){
-  if(cid!==clinicId())return;   // pre-load only the Clinic-Card's own clinic
-  var cfg=load('allyos_clinic_config_v1',{}),C=document.getElementById('hClinic'),P=document.getElementById('hProgram'),A=document.getElementById('hAddr');
-  if(!C.value&&cfg.name)C.value=cfg.name;
-  if(!P.value&&cfg.dba)P.value=cfg.dba;
-  if(!A.value&&(cfg.addr||cfg.city))A.value=[cfg.addr,cfg.city].filter(Boolean).join(', ');
-}
-function saveHeader(){var o=load(HKEY,{});var v={};HF.forEach(function(id){v[id]=document.getElementById(id).value;});o[cid]=v;save(HKEY,o);}
-function renderPicker(){var sel=document.getElementById('clinicPicker');if(!sel)return;sel.innerHTML=clinics.map(function(c){return '<option value="'+esc(c.id)+'"'+(c.id===cid?' selected':'')+'>'+esc(c.name)+'</option>';}).join('');}
-function switchClinic(id){saveHeader();cid=id;save(CURKEY,cid);ensureStore();loadOffered();loadHeaderValues();saveHeader();renderPicker();render();}
-function addClinic(){var nm=prompt('New clinic name:');if(!nm||!nm.trim())return;var id='gc'+Date.now().toString(36);clinics.push({id:id,name:nm.trim()});save(CLKEY,clinics);switchClinic(id);}
-function render(){
-  document.getElementById('lines').innerHTML=LINES.map(function(l){return '<span class="lchip'+(offered[l.k]?' on':'')+'" onclick="toggleLine(\''+l.k+'\')">'+esc(l.t)+(offered[l.k]?' ✓':'')+'</span>';}).join('');
-  var P=0,M=0,N=0,U=0;
-  document.getElementById('sections').innerHTML=visibleSections().map(function(sec){
-    var rows=sec.items.map(function(it,i){
-      var id=sec.k+':'+govslug(it),v=stt()[id]||'';
-      if(v==='present')P++;else if(v==='missing')M++;else if(v==='na')N++;else U++;
-      return '<div class="item"><span class="lbl">'+esc(it)+'</span><span class="tog">'+
-        '<button class="p'+(v==='present'?' on':'')+'" onclick="setItem(\''+id+'\',\'present\')">Present</button>'+
-        '<button class="m'+(v==='missing'?' on':'')+'" onclick="setItem(\''+id+'\',\'missing\')">Missing</button>'+
-        '<button class="n'+(v==='na'?' on':'')+'" onclick="setItem(\''+id+'\',\'na\')">N/A</button></span></div>';
-    }).join('');
-    var sc=sec.items.reduce(function(a,it){return a+(stt()[sec.k+':'+govslug(it)]==='present'?1:0);},0);
-    return '<details class="sec" open><summary>'+esc(sec.title)+'<span class="cnt">'+sc+' / '+sec.items.length+' present</span></summary><div class="body">'+rows+'</div></details>';
-  }).join('')||'<div class="note">No active lines selected — turn on the lines this clinic offers above.</div>';
-  document.getElementById('nPresent').textContent=P;document.getElementById('nMissing').textContent=M;document.getElementById('nNa').textContent=N;document.getElementById('nUnset').textContent=U;
-  var manual=document.getElementById('hStatus').value,auto=M>0?'Needs correction':(U>0?'Not reviewed':'Compliant');
-  document.getElementById('overallLbl').innerHTML='Overall: <b class="'+((manual||auto)==='Compliant'?'sp':((manual||auto)==='Needs correction'?'sm':'su'))+'">'+esc(manual||auto)+(manual?'':' (auto)')+'</b>';
-}
-function parseRows(id,n){return (document.getElementById(id).value||'').split(/\r?\n/).map(function(l){return l.trim();}).filter(Boolean).map(function(l){return l.split('|').map(function(x){return x.trim();});});}
-function collectPayload(){
-  var manual=document.getElementById('hStatus').value,M=0,U=0;
-  visibleSections().forEach(function(sec){sec.items.forEach(function(it){var v=stt()[sec.k+':'+govslug(it)];if(v==='missing')M++;else if(!v)U++;});});
-  var pl={clinic:document.getElementById('hClinic').value,program:document.getElementById('hProgram').value,address:document.getElementById('hAddr').value,md:document.getElementById('hMD').value,mdLicense:document.getElementById('hMDLic').value,
-    reportDate:document.getElementById('hMonth').value,rec:document.getElementById('hRec').value,overall:manual||(M>0?'Needs correction':(U>0?'Not reviewed':'Compliant')),
-    verifyDate:document.getElementById('dVerify').value,scopeNote:document.getElementById('dScope').value,protocolStatus:document.getElementById('dProto').value,
-    adverse:document.getElementById('dAdverse').value,adverseNote:document.getElementById('dAdvNote').value,bioVendor:document.getElementById('dBio').value,bioSince:document.getElementById('dBioSince').value,
-    practitioners:parseRows('dPrac'),charts:[],lines:[],corrections:[],priorCorrections:[]};
-  // Section V — the 5 sampled charts with their pass/fail (PHI-free: chart # + initials only).
-  var rc=rev().charts||[];
-  pl.charts = rc.length ? rc.map(function(c){var sec=secByK(c.line);var st=chartStatus(c,sec);return {ref:c.ref,ini:c.ini,dos:c.dos,line:sec.title,status:st.cls==='pass'?'Pass':(st.cls==='fail'?'Fail':'Pending')};}) : parseRows('dCharts').map(function(r){return {ref:r[0],ini:'',dos:r[1],line:r[2],status:'Reviewed'};});
-  // per-chart failures -> corrective action
-  rc.forEach(function(c){var sec=secByK(c.line);sec.items.forEach(function(it){if(c.st[govslug(it)]==='missing')pl.corrections.push({label:c.ref+' — '+it,resp:'Clinic provider',due:''});});});
-  // Section VI line-level attestation (+ its own missing items)
-  visibleSections().forEach(function(sec){pl.lines.push({title:sec.title,items:sec.items.map(function(it){return {label:it,status:STATUS[stt()[sec.k+':'+govslug(it)]]||'Not set'};})});
-    sec.items.forEach(function(it){var id=sec.k+':'+govslug(it);if(stt()[id]==='missing'){var c=corr()[id]||{};pl.corrections.push({label:it,resp:c.resp,due:c.due});}});});
-  // carry-forward — last month's corrections + their corrected/pending status
-  (rev().prior||[]).forEach(function(p){pl.priorCorrections.push({label:p.label,status:p.status==='corrected'?'Corrected':'Pending'});});
-  return pl;
-}
-function genReport(){
-  if(!window.AllyOSGovReport){alert('Report module not loaded.');return;}
-  var pl=collectPayload();
-  var btn=document.getElementById('genBtn');if(btn){btn.textContent='Generating…';btn.disabled=true;}
-  // NOTE: downloading does NOT roll the month forward (that used to duplicate items on a second
-  // download). Carry-forward is the explicit "Close month" action below.
-  AllyOSGovReport.download(pl).then(function(){
-    if(btn){btn.textContent='⬇ Download report PDF';btn.disabled=false;}
-  }).catch(function(e){if(btn){btn.textContent='⬇ Download report PDF';btn.disabled=false;}alert('Report error: '+(e&&e.message||e));});
-}
-// Explicit, idempotent month close: this period's still-open failures roll into next month's
-// "prior corrections" (pending), MERGED with any earlier items still pending — deduped by label,
-// resolved (corrected) ones dropped. Running it twice is a no-op.
-function closeMonth(){
-  var pl=collectPayload();
-  var stillPending=(rev().prior||[]).filter(function(p){return p.status!=='corrected';});
-  var seen={};stillPending.forEach(function(p){seen[p.label]=1;});
-  (pl.corrections||[]).forEach(function(c){if(!seen[c.label]){stillPending.push({label:c.label,status:'pending'});seen[c.label]=1;}});
-  rev().prior=stillPending;save(SKEY,store);renderCharts();
-  alert('✓ Month closed — '+stillPending.length+' item(s) carried forward as pending. They’ll show as corrected/pending next period.');
-}
-// ---- Chart review (Section V): sample 5 at random + inspect (+ optional AI parse) ----
-function normLine(t){t=(''+(t||'')).toLowerCase().trim();if(t.indexOf('iv')===0||t.indexOf('im')===0)return 'iv';if(t.indexOf('pep')===0)return 'pep';if(t.indexOf('bhrt')>=0||t.indexOf('hrt')>=0||t.indexOf('horm')>=0)return 'bhrt';return 'iv';}
-function secByK(k){for(var i=0;i<SECTIONS.length;i++)if(SECTIONS[i].k===k)return SECTIONS[i];return SECTIONS[0];}
-// Stable, reorder-safe key for a parameter's verdict (was array index — removing/reordering an
-// item used to silently mislabel a saved verdict in the binder). Keyed by the item text.
-function govslug(s){return (''+s).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');}
-// AI evidence snippets are kept in memory only (never written to localStorage) — a note fragment
-// must not persist on-device. Cleared on reload.
-var EVID={};
-function rev(){store[cid].rev=store[cid].rev||{pool:'',charts:[],prior:[]};return store[cid].rev;}
-function chartStatus(c,sec){var miss=0,uns=0;sec.items.forEach(function(it){var v=c.st[govslug(it)];if(v==='missing')miss++;else if(!v)uns++;});if(miss>0)return {cls:'fail',label:'FAIL · '+miss+' missing'};if(uns>0)return {cls:'pend',label:'Pending'};return {cls:'pass',label:'PASS'};}
-function pickCharts(){
-  var raw=document.getElementById('chartPool').value;rev().pool=raw;
-  var pool=raw.split(/\r?\n/).map(function(l){return l.trim();}).filter(Boolean).map(function(l){var p=l.split('|').map(function(x){return x.trim();});return {ref:p[0]||'',ini:p[1]||'',line:normLine(p[2]),dos:p[3]||''};}).filter(function(c){return c.ref;});
-  if(pool.length<1){alert('Add at least one chart (chart # | initials | line | date).');return;}
-  var idx=pool.map(function(_,i){return i;});
-  for(var i=idx.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idx[i];idx[i]=idx[j];idx[j]=t;}
-  rev().charts=idx.slice(0,Math.min(5,pool.length)).sort(function(a,b){return a-b;}).map(function(i){var c=pool[i];return {ref:c.ref,ini:c.ini,line:c.line,dos:c.dos,st:{},ev:{}};});
-  document.getElementById('poolCount').textContent=pool.length+' in pool · 5 sampled';
-  save(SKEY,store);renderCharts();render();
-}
-function setChartItem(ci,i,v){var c=rev().charts[ci];var sec=secByK(c.line);var k=govslug(sec.items[i]);if(c.st[k]===v)delete c.st[k];else c.st[k]=v;save(SKEY,store);renderCharts();render();}
-function fileToB64(file){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result);};r.onerror=rej;r.readAsDataURL(file);});}
-function parseText(ci){var ta=document.getElementById('nt'+ci);if(!ta||!ta.value.trim()){alert('Paste the note text first.');return;}callParse(ci,{text:ta.value});}
-function parseImage(ci,input){if(!input.files||!input.files[0])return;fileToB64(input.files[0]).then(function(b64){callParse(ci,{image:b64});});}
-function callParse(ci,payload){
-  var r=rev(),c=r.charts[ci],sec=secByK(c.line),msg=document.getElementById('pmsg'+ci);
-  if(msg)msg.textContent='Reading the note…';
-  var body=Object.assign({line:sec.title,items:sec.items,clinic_id:(sess.clinicId||null)},payload);
-  var call=(window.AllyOSCloud&&AllyOSCloud.postAuthed)?AllyOSCloud.postAuthed('/.netlify/functions/governance-parse',body):fetch('/.netlify/functions/governance-parse',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
-  Promise.resolve(call).then(function(rp){return rp.json();}).then(function(d){
-    if(!d||d.error){if(msg)msg.textContent=(d&&(d.hint||d.error))||'Parse failed';return;}
-    (d.results||[]).forEach(function(res,i){
-      // Match strictly by parameter LABEL. If the model paraphrased and nothing matches, SKIP
-      // (never positionally guess — that would write a verdict to the wrong parameter).
-      var idx=-1;for(var k=0;k<sec.items.length;k++){if(res.item&&govslug(sec.items[k])===govslug(res.item)){idx=k;break;}}
-      if(idx<0&&i<sec.items.length&&(d.results||[]).length===sec.items.length)idx=i; // safe fallback only if counts align 1:1
-      if(idx>=0){var key=govslug(sec.items[idx]);c.st[key]=res.status;if(res.evidence)EVID[ci+'|'+key]=res.evidence;}
-    });
-    save(SKEY,store);renderCharts();render();
-  }).catch(function(){if(msg)msg.textContent='Could not reach the parser.';});
-}
-function renderCharts(){
-  var el=document.getElementById('chartCards');if(!el)return;var r=rev();
-  var prior=(r.prior||[]);
-  var priorHtml=prior.length?'<div class="cprior"><div style="font-size:11px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Last month’s corrections</div>'+prior.map(function(p,pi){return '<div class="citem" style="border-top:none"><span class="cl">'+esc(p.label)+'</span>'+
-    '<button class="cbtn p'+(p.status==='corrected'?' on':'')+'" onclick="setPrior('+pi+',\'corrected\')">Corrected</button>'+
-    '<button class="cbtn m'+(p.status==='pending'?' on':'')+'" onclick="setPrior('+pi+',\'pending\')">Pending</button></div>';}).join('')+'</div>':'';
-  var cardsHtml=(!r.charts||!r.charts.length)?'<div style="font-size:11.5px;color:var(--dim)">No charts selected yet — paste the list and pick 5.</div>':
-    r.charts.map(function(c,ci){
-      var sec=secByK(c.line);
-      var rows=sec.items.map(function(it,i){var k=govslug(it);var v=c.st[k]||'';var e=EVID[ci+'|'+k];var ev=e?'<div class="ev">“'+esc(e)+'”</div>':'';
-        return '<div class="citem"><span class="cl">'+esc(it)+'</span>'+
-          '<button class="cbtn p'+(v==='present'?' on':'')+'" onclick="setChartItem('+ci+','+i+',\'present\')">Present</button>'+
-          '<button class="cbtn m'+(v==='missing'?' on':'')+'" onclick="setChartItem('+ci+','+i+',\'missing\')">Missing</button>'+
-          '<button class="cbtn n'+(v==='na'?' on':'')+'" onclick="setChartItem('+ci+','+i+',\'na\')">N/A</button>'+ev+'</div>';}).join('');
-      var st=chartStatus(c,sec);
-      return '<div class="ccard"><div class="chead"><span class="cref">'+esc(c.ref)+'</span><span class="cini">'+esc(c.ini||'—')+'</span><span class="cline">'+esc(sec.title)+'</span>'+(c.dos?'<span class="cini">'+esc(c.dos)+'</span>':'')+'<span class="cstat '+st.cls+'">'+st.label+'</span></div>'+rows+
-        '<div class="cparse"><textarea id="nt'+ci+'" rows="2" placeholder="Paste the EMR note text (optional) — processed transiently, never stored" style="flex-basis:100%;background:#0a1422;border:1px solid var(--line2);border-radius:7px;color:var(--ink);font:inherit;font-size:12px;padding:6px 8px;resize:vertical"></textarea>'+
-        '<button class="cbtn" onclick="parseText('+ci+')">📝 Parse text (AI)</button>'+
-        '<label>📷 Photo of handwriting<input type="file" accept="image/*" style="display:none" onchange="parseImage('+ci+',this)"></label>'+
-        '<span style="font-size:10.5px;color:var(--dim)" id="pmsg'+ci+'"></span></div></div>';
-    }).join('');
-  el.innerHTML=priorHtml+cardsHtml;
-}
-function setPrior(pi,v){var p=rev().prior[pi];p.status=(p.status===v)?'':v;save(SKEY,store);renderCharts();}
+document.getElementById('clinicLbl').textContent=sess.clinic||'';
+function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-renderPicker();attachListeners();loadHeaderValues();saveHeader();
-if(rev().pool)document.getElementById('chartPool').value=rev().pool;
-renderCharts();render();
+// Wellness compliance rubric per line (same parameters as the binder — no AHCA billing content).
+var PARAMS={
+  iv:['IV protocol','GFE before treatment','Aftercare instructions','Signed by authorized provider','Equipment adequacy for procedures'],
+  pep:['Peptide protocol','Provider signed','Peptide consent','Dose / schedule','Follow-up plan','Side-effect check'],
+  bhrt:['POC / plan of care','Provider signed','Reason for treatment','Hormone consent','Labs / monitoring plan','Follow-up plan']
+};
+var STATUTORY=['Practitioner licenses active & unencumbered','Scope of practice within signed protocol','Adverse-incident reporting current','Biohazardous-waste plan on file & staff trained','Standing orders / GFE model current','Medical Director identification available'];
+
+var CK='allyos_govinspect_v1';
+function load(){try{return JSON.parse(localStorage.getItem(CK)||'null')||{};}catch(e){return {};}}
+function save(){try{localStorage.setItem(CK,JSON.stringify(S));}catch(e){}}
+var S=load();
+S.stage=S.stage||1; S.statutory=S.statutory||{}; S.encounters=S.encounters||[]; S.selected=S.selected||[]; S.review=S.review||{}; S.hdr=S.hdr||{};
+if(!S.hdr.clinic&&sess.clinic)S.hdr.clinic=sess.clinic;
+
+function normLine(t){t=(''+(t||'')).toLowerCase();if(/bhrt|hrt|horm|estr|test|progest/.test(t))return 'bhrt';if(/pep|glp|semag|tirzep|bpc|sermorel|ipamorel/.test(t))return 'pep';return 'iv';}
+function num(x){var n=parseFloat((''+(x||'')).replace(/[^0-9.\-]/g,''));return isNaN(n)?0:n;}
+
+// ---- CSV parse (flexible column detection) ----
+function parseCSV(txt){
+  var rows=[];var i=0,f='',row=[],q=false;
+  while(i<txt.length){var c=txt[i];
+    if(q){if(c==='"'){if(txt[i+1]==='"'){f+='"';i++;}else q=false;}else f+=c;}
+    else{if(c==='"')q=true;else if(c===','){row.push(f);f='';}else if(c==='\n'||c==='\r'){if(f!==''||row.length){row.push(f);rows.push(row);row=[];f='';}if(c==='\r'&&txt[i+1]==='\n')i++;}else f+=c;}
+    i++;}
+  if(f!==''||row.length){row.push(f);rows.push(row);}
+  return rows.filter(function(r){return r.some(function(x){return (''+x).trim();});});
+}
+function ingestCSV(txt){
+  var rows=parseCSV(txt); if(rows.length<2){alert('CSV looks empty.');return;}
+  var head=rows[0].map(function(h){return (''+h).toLowerCase().trim();});
+  function col(){for(var a=0;a<arguments.length;a++){var k=arguments[a];for(var j=0;j<head.length;j++)if(head[j].indexOf(k)>=0)return j;}return -1;}
+  var ci={id:col('chart','claim','encounter','visit id','record'),pt:col('patient','initial','name','member'),dos:col('dos','date of service','service date','date'),cpt:col('cpt','procedure','code'),lob:col('lob','line of business','carrier','insurance','payer','plan'),chg:col('charge','amount','fee','billed')};
+  var enc=rows.slice(1).map(function(r,idx){
+    return {id:(ci.id>=0?r[ci.id]:'')||('ENC-'+(idx+1)),pt:(ci.pt>=0?r[ci.pt]:'')||'—',dos:(ci.dos>=0?r[ci.dos]:'')||'',cpt:(ci.cpt>=0?r[ci.cpt]:'')||'',lob:(ci.lob>=0?r[ci.lob]:'')||'',chg:(ci.chg>=0?num(r[ci.chg]):0),line:normLine((ci.cpt>=0?r[ci.cpt]:'')+' '+(ci.id>=0?r[ci.id]:''))};
+  }).filter(function(e){return e.id;});
+  scoreRisk(enc);
+  S.encounters=enc; S.selected=[]; S.review={}; save(); S.stage=2; render();
+}
+function scoreRisk(enc){
+  var byPt={},byKey={};
+  enc.forEach(function(e){var p=(''+e.pt).toUpperCase();byPt[p]=(byPt[p]||0)+1;var k=p+'|'+e.cpt+'|'+e.dos;byKey[k]=(byKey[k]||0)+1;});
+  enc.forEach(function(e){var f=[],s=0;var p=(''+e.pt).toUpperCase();var cpt=(''+e.cpt);
+    if(/9921[45]|9920[45]/.test(cpt)){f.push({t:'HIGH EM',c:'hem'});s+=25;}
+    if(byKey[p+'|'+e.cpt+'|'+e.dos]>1){f.push({t:'DUPLICATE',c:'dup'});s+=30;}
+    if(byPt[p]>=3){f.push({t:'HI-FREQ',c:'hf'});s+=20;}
+    if((cpt.match(/\d{4,5}/g)||[]).length>=3){f.push({t:'MULTI CPT',c:'new'});s+=10;}
+    if(!e.chg){s+=8;}
+    e.flags=f; e.risk=Math.min(99,s+((''+e.id).length%7));});
+}
+
+// ---- risk selection ----
+function toggleSel(id){var k=S.selected.indexOf(id);if(k>=0)S.selected.splice(k,1);else if(S.selected.length<5)S.selected.push(id);save();render();}
+function autoSelect(){var top=S.encounters.slice().sort(function(a,b){return b.risk-a.risk;}).slice(0,5);S.selected=top.map(function(e){return e.id;});save();render();}
+function clearSel(){S.selected=[];save();render();}
+function encById(id){for(var i=0;i<S.encounters.length;i++)if(S.encounters[i].id===id)return S.encounters[i];return null;}
+
+// ---- dual-doc AI review ----
+function fileToB64(file){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result);};r.onerror=rej;r.readAsDataURL(file);});}
+function attach(id,which,input){if(!input.files||!input.files[0])return;var f=input.files[0];
+  fileToB64(f).then(function(b64){S.review[id]=S.review[id]||{};S.review[id][which]={image:b64,name:f.name};save();render();});}
+function runReview(id){
+  var e=encById(id);var rv=S.review[id]||{};if(!rv.note){alert('Attach the progress note first.');return;}
+  rv.busy=true;save();render();
+  var body={mode:'dual',line:e.line,params:PARAMS[e.line]||PARAMS.iv,note:rv.note,superbill:rv.bill||null,clinic_id:(sess.clinicId||null)};
+  var call=(window.AllyOSCloud&&AllyOSCloud.postAuthed)?AllyOSCloud.postAuthed('/.netlify/functions/governance-parse',body):fetch('/.netlify/functions/governance-parse',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+  Promise.resolve(call).then(function(r){return r.json();}).then(function(d){
+    S.review[id]=S.review[id]||{};S.review[id].busy=false;
+    if(!d||d.error){S.review[id].err=(d&&(d.hint||d.detail||d.error))||'Review failed';save();render();return;}
+    S.review[id].result=d;S.review[id].err=null;save();render();
+  }).catch(function(){S.review[id].busy=false;S.review[id].err='Could not reach the reviewer.';save();render();});
+}
+function reviewedCount(){return S.selected.filter(function(id){return S.review[id]&&S.review[id].result;}).length;}
+
+// ---- pattern flags across the sampled set ----
+function patternFlags(){
+  var out=[];var sel=S.selected.map(encById).filter(Boolean);
+  var glp=sel.filter(function(e){return /glp|semag|tirzep|reta/.test((e.cpt+e.id).toLowerCase());}).length;
+  if(glp>=2)out.push(glp+' of '+sel.length+' charts are GLP/metabolic — individualized note required per encounter');
+  var dup=sel.filter(function(e){return (e.flags||[]).some(function(f){return f.c==='dup';});}).length;
+  if(dup)out.push(dup+' same-day same-CPT pattern(s) — potential duplicate billing');
+  var hf=sel.filter(function(e){return (e.flags||[]).some(function(f){return f.c==='hf';});}).length;
+  if(hf)out.push(hf+' high-frequency patient(s) (3+ this period) — medical-necessity review recommended');
+  var noChg=sel.filter(function(e){return !e.chg;}).length;
+  if(noChg)out.push(noChg+' encounter(s) with no charge amount — fee-schedule check');
+  return out;
+}
+function sessionRating(){var f=0;S.selected.forEach(function(id){var r=S.review[id]&&S.review[id].result;if(r&&r.status==='FAIL')f++;if(r){f+=(r.deficiencies||[]).length+(r.conflicts||[]).length;}});return {findings:f,rating:f?'ACTION REQ':'CLEAN'};}
+
+// ============ RENDER ============
+var STAGES=[{n:1,t:'Upload CSV'},{n:2,t:'Chart Selection'},{n:3,t:'AI Review'},{n:4,t:'Summary'}];
+function go(n){if(n===2&&!S.encounters.length)return;if(n===3&&S.selected.length<1)return;S.stage=n;save();render();}
+function render(){
+  document.getElementById('stages').innerHTML=STAGES.map(function(s){
+    var cls=S.stage===s.n?'on':((s.n===1&&S.encounters.length)||(s.n===2&&S.selected.length)||(s.n===3&&reviewedCount())?'done':'');
+    return '<div class="stg '+cls+'" onclick="go('+s.n+')"><span class="n">'+s.n+'</span>'+esc(s.t)+'</div>';
+  }).join('');
+  var v=document.getElementById('view');
+  if(S.stage===1)v.innerHTML=stage1();
+  else if(S.stage===2)v.innerHTML=stage2();
+  else if(S.stage===3)v.innerHTML=stage3();
+  else v.innerHTML=stage4();
+}
+// ---- Stage 1 ----
+function stage1(){
+  var h=S.hdr;
+  var stat=STATUTORY.map(function(it,i){var val=S.statutory[i];
+    return '<div class="stat"><span class="lbl">'+esc(it)+'</span><span class="yn"><button class="y'+(val==='y'?' on':'')+'" onclick="setStat('+i+',\'y\')">Y</button><button class="n'+(val==='n'?' on':'')+'" onclick="setStat('+i+',\'n\')">N</button></span></div>';}).join('');
+  return '<div class="card"><div class="grp">Clinic &amp; period</div><div class="hgrid">'+
+    '<div><label>Clinic (legal name)</label><input id="hClinic" value="'+esc(h.clinic||'')+'" oninput="setHdr(\'clinic\',this.value)"></div>'+
+    '<div><label>Report date</label><input id="hDate" value="'+esc(h.date||'')+'" placeholder="e.g. July 2026" oninput="setHdr(\'date\',this.value)"></div>'+
+    '<div><label>Active line (default for charts)</label><select onchange="setHdr(\'line\',this.value)"><option value="iv"'+(h.line==='iv'?' selected':'')+'>IV / IM</option><option value="pep"'+(h.line==='pep'?' selected':'')+'>Peptides</option><option value="bhrt"'+(h.line==='bhrt'?' selected':'')+'>BHRT / HRT</option></select></div>'+
+    '<div><label>EMR / source</label><input id="hEmr" value="'+esc(h.emr||'')+'" placeholder="e.g. clinic EMR export" oninput="setHdr(\'emr\',this.value)"></div>'+
+    '</div></div>'+
+    '<div class="card"><div class="grp">MD statutory items — confirm before reviewing charts</div>'+stat+'</div>'+
+    '<div class="card"><div class="grp">Stage 1 · data entry</div>'+
+    '<div class="drop" id="drop" onclick="document.getElementById(\'csvPick\').click()"><div class="ic">⬆</div><div style="margin-top:8px;font-weight:700">Drag &amp; drop the encounter CSV — or click to browse</div><div class="muted" style="font-size:11px;margin-top:4px">Any EHR/clearinghouse export. Columns auto-detected (chart · patient/initials · DOS · CPT · payer · charge).</div></div>'+
+    (S.encounters.length?'<div class="note" style="margin-top:12px">✓ '+S.encounters.length+' encounters loaded. <a href="#" onclick="go(2);return false" style="color:var(--teal)">Continue to Chart Selection →</a></div>':'')+
+    '</div>';
+}
+function setHdr(k,v){S.hdr[k]=v;save();}
+function setStat(i,v){S.statutory[i]=(S.statutory[i]===v?'':v);save();render();}
+// ---- Stage 2 ----
+function stage2(){
+  var enc=S.encounters.slice().sort(function(a,b){return b.risk-a.risk;});
+  var picks=S.selected.map(encById).filter(Boolean);
+  var head='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">'+
+    '<div><div class="grp" style="margin:0">Stage 2 · chart selection · '+S.encounters.length+' scored</div><div style="font-family:var(--fdisp);font-size:1.2rem;margin-top:4px">Select 5 charts</div></div>'+
+    '<div style="display:flex;gap:8px;align-items:center"><button class="btn gold" onclick="autoSelect()">⚡ Auto-select best 5</button><button class="btn ghost" onclick="clearSel()">Clear</button><span class="muted" style="font-size:12px">'+S.selected.length+' / 5</span></div></div>'+
+    (picks.length?'<div class="chiprow" style="margin-top:12px">'+picks.map(function(e,i){return '<span class="chip" style="border-color:var(--teal);color:var(--teal)">#'+(i+1)+' '+esc(e.pt)+' · '+esc(e.dos)+'</span>';}).join('')+'</div>':'')+
+    '</div>';
+  var rows=enc.slice(0,60).map(function(e){var sel=S.selected.indexOf(e.id)>=0;var rc=e.risk>=50?'hi':(e.risk>=30?'md':'lo');
+    return '<tr class="'+(sel?'pick':'')+'"><td><button class="btn ghost" style="padding:3px 9px;font-size:11px" onclick="toggleSel(\''+esc(e.id)+'\')">'+(sel?'✓':'+')+'</button></td>'+
+      '<td class="rk '+rc+'">'+e.risk+'</td><td><b>'+esc(e.pt)+'</b><div class="muted" style="font-size:10px">'+esc(e.id)+'</div></td><td>'+esc(e.dos)+'</td><td>'+esc(e.lob||'—')+'</td><td style="font-family:var(--fmono,monospace);font-size:11px">'+esc(e.cpt||'—')+'</td><td>'+(e.chg?'$'+e.chg.toFixed(2):'—')+'</td>'+
+      '<td>'+(e.flags||[]).map(function(f){return '<span class="flag '+f.c+'">'+f.t+'</span>';}).join('')+'</td></tr>';}).join('');
+  return head+'<div class="card"><div style="overflow:auto"><table><tr><th>Sel</th><th>Risk</th><th>Patient</th><th>DOS</th><th>Payer</th><th>CPT</th><th>Charge</th><th>Flags</th></tr>'+rows+'</table></div></div>'+
+    '<div class="navrow"><button class="btn ghost" onclick="go(1)">← Upload</button><button class="btn go" onclick="go(3)"'+(S.selected.length<1?' disabled':'')+'>Inspect '+S.selected.length+' chart(s) →</button></div>';
+}
+// ---- Stage 3 ----
+var curChart=0;
+function stage3(){
+  if(curChart>=S.selected.length)curChart=0;
+  var tabs=S.selected.map(function(id,i){var e=encById(id);var r=S.review[id]&&S.review[id].result;var cls=(i===curChart?'on ':'')+(r?(r.status==='PASS'?'pass':'fail'):'');
+    return '<div class="ctab '+cls+'" onclick="curChart='+i+';render()">'+(r?(r.status==='PASS'?'✓ ':'⚠ '):'')+'Chart '+(i+1)+' — '+esc(e?e.pt:'')+'</div>';}).join('');
+  var id=S.selected[curChart];var e=encById(id);var rv=S.review[id]||{};var r=rv.result;
+  var noteBox='<div style="flex:1"><label>Progress note</label><div class="drop" style="padding:22px" ondragover="dh(event,1)" ondragleave="dh(event,0)" ondrop="dropDoc(event,\''+esc(id)+'\',\'note\')" onclick="pickDoc(\''+esc(id)+'\',\'note\')">'+(rv.note?('📄 '+esc(rv.note.name||'attached')):'<div class="ic">⬆</div><div style="margin-top:6px;font-size:12px">Drop / click — PDF or image</div>')+'</div></div>';
+  var billBox='<div style="flex:1"><label>Superbill / claim (optional)</label><div class="drop" style="padding:22px" ondragover="dh(event,1)" ondragleave="dh(event,0)" ondrop="dropDoc(event,\''+esc(id)+'\',\'bill\')" onclick="pickDoc(\''+esc(id)+'\',\'bill\')">'+(rv.bill?('📄 '+esc(rv.bill.name||'attached')):'<div class="ic">⬆</div><div style="margin-top:6px;font-size:12px">Drop / click — PDF or image</div>')+'</div></div>';
+  var result='';
+  if(rv.busy)result='<div class="note">Reading the documents…</div>';
+  else if(rv.err)result='<div class="findbox def">'+esc(rv.err)+'</div>';
+  else if(r){
+    result='<div style="display:flex;align-items:center;gap:10px;margin:10px 0"><span class="verdict '+(r.status==='PASS'?'pass':'fail')+'">'+r.status+'</span><span class="muted" style="font-size:12px">'+esc(e?e.line.toUpperCase():'')+'</span></div>'+
+      '<div class="kpis"><div class="kpi red"><div class="v">'+(r.deficiencies||[]).length+'</div><div class="muted" style="font-size:10px">Deficiencies</div></div><div class="kpi gold"><div class="v">'+(r.conflicts||[]).length+'</div><div class="muted" style="font-size:10px">Conflicts</div></div><div class="kpi green"><div class="v">'+(r.clean||[]).length+'</div><div class="muted" style="font-size:10px">Clean fields</div></div></div>'+
+      (r.narrative?'<div class="findbox">'+esc(r.narrative)+'</div>':'')+
+      (r.deficiencies||[]).map(function(x){return '<div class="findbox def">⚠ '+esc(x)+'</div>';}).join('')+
+      (r.conflicts||[]).map(function(x){return '<div class="findbox con">⇄ '+esc(x)+'</div>';}).join('');
+  }
+  return '<div class="card"><div class="grp" style="margin:0 0 4px">Stage 3 · dual-document inspection · '+reviewedCount()+'/'+S.selected.length+' complete</div>'+
+    '<div class="tabrow">'+tabs+'</div>'+
+    '<div style="font-weight:800">'+esc(e?e.pt:'')+' <span class="muted" style="font-weight:400;font-size:12px">· '+esc(e?e.dos:'')+' · '+esc(e?e.cpt:'')+'</span></div>'+
+    '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">'+noteBox+billBox+'</div>'+
+    '<div style="margin-top:12px"><button class="btn gold" onclick="runReview(\''+esc(id)+'\')"'+(rv.busy?' disabled':'')+'>'+(r?'↻ Re-analyze':'▶ Analyze with AI')+'</button>'+
+      (curChart<S.selected.length-1?'<button class="btn ghost" style="margin-left:8px" onclick="curChart++;render()">Next chart →</button>':'')+'</div>'+
+    result+
+    '</div>'+
+    '<div class="navrow"><button class="btn ghost" onclick="go(2)">← Selection</button><button class="btn go" onclick="go(4)"'+(reviewedCount()<1?' disabled':'')+'>Summary →</button></div>';
+}
+var _dropTarget=null;
+function dh(ev,on){ev.preventDefault();ev.currentTarget.classList.toggle('hi',!!on);}
+function dropDoc(ev,id,which){ev.preventDefault();ev.currentTarget.classList.remove('hi');var f=ev.dataTransfer.files&&ev.dataTransfer.files[0];if(!f)return;fileToB64(f).then(function(b64){S.review[id]=S.review[id]||{};S.review[id][which]={image:b64,name:f.name};save();render();});}
+function pickDoc(id,which){_dropTarget={id:id,which:which};var inp=document.getElementById('docPick');inp.value='';inp.click();}
+// ---- Stage 4 ----
+function stage4(){
+  var rt=sessionRating();var pats=patternFlags();
+  var results=S.selected.map(function(id,i){var e=encById(id);var r=S.review[id]&&S.review[id].result;
+    return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><div><b>'+(i+1)+'. '+esc(e?e.pt:'')+'</b> <span class="muted" style="font-size:11px">'+esc(e?e.dos:'')+' · '+esc(e?e.cpt:'')+'</span></div><span class="verdict '+(r?(r.status==='PASS'?'pass':'fail'):'pend')+'">'+(r?r.status:'NOT REVIEWED')+'</span></div>'+
+      (r?('<div class="muted" style="font-size:12.5px;margin-top:8px">'+esc(r.narrative||'')+'</div>'+
+        (r.deficiencies||[]).map(function(x){return '<div class="findbox def" style="margin-top:6px">⚠ '+esc(x)+'</div>';}).join('')+
+        (r.conflicts||[]).map(function(x){return '<div class="findbox con" style="margin-top:6px">⇄ '+esc(x)+'</div>';}).join('')+
+        (!(r.deficiencies||[]).length&&!(r.conflicts||[]).length?'<div style="color:var(--green);font-size:12px;margin-top:6px">✓ Clean — no deficiencies</div>':'')):'')+
+      '</div>';}).join('');
+  return '<div class="card" style="border-color:'+(rt.findings?'#4a3c18':'#1e6e4a')+'"><div style="display:flex;justify-content:space-between;align-items:center"><div><div class="grp" style="margin:0">Session rating</div><div style="font-family:var(--fdisp);font-size:1.4rem;color:'+(rt.findings?'var(--gold)':'var(--green)')+'">'+rt.rating+'</div></div><div style="text-align:right"><div style="font-family:var(--fdisp);font-size:1.6rem;color:'+(rt.findings?'#f0857d':'var(--green)')+'">'+rt.findings+'</div><div class="muted" style="font-size:10px">Total findings</div></div></div></div>'+
+    '<div class="grp">Chart results</div>'+results+
+    (pats.length?'<div class="card"><div class="grp" style="color:var(--gold)">Auto-detected pattern flags · set-wide</div>'+pats.map(function(p){return '<div class="pf">⚠ '+esc(p)+'</div>';}).join('')+'</div>':'')+
+    '<div class="card"><div class="grp">Finish</div><div style="display:flex;gap:10px;flex-wrap:wrap">'+
+      '<button class="btn gold" onclick="previewPDF()">📄 Preview / download report</button>'+
+      '<button class="btn go" onclick="signArchive()">🔒 Sign &amp; archive</button>'+
+      '<span class="muted" style="font-size:11.5px;align-self:center">Sends to the per-clinic audit log; download the PDF to email the clinic.</span></div></div>'+
+    '<div class="navrow"><button class="btn ghost" onclick="go(3)">← Review</button><button class="btn ghost" onclick="if(confirm(\'Start a new inspection? Current data clears.\')){S={stage:1,statutory:{},encounters:[],selected:[],review:{},hdr:{clinic:sess.clinic||\'\'}};save();render();}">＋ New inspection</button></div>';
+}
+// ---- report + archive ----
+function buildPayload(){
+  var rt=sessionRating();
+  return {clinic:S.hdr.clinic,reportDate:S.hdr.date,md:(window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||sess.name||'Medical Director',mdLicense:'Florida Medical License · ME 84789',
+    overall:rt.findings?'Needs correction':'Compliant',
+    charts:S.selected.map(function(id){var e=encById(id);var r=S.review[id]&&S.review[id].result;return {ref:e?e.id:'',ini:e?e.pt:'',dos:e?e.dos:'',line:(e?e.line:'').toUpperCase(),status:r?r.status:'Not reviewed'};}),
+    lines:[],corrections:S.selected.reduce(function(acc,id){var e=encById(id);var r=S.review[id]&&S.review[id].result;if(r){(r.deficiencies||[]).forEach(function(x){acc.push({label:(e?e.pt:'')+' — '+x,resp:'Clinic provider',due:''});});(r.conflicts||[]).forEach(function(x){acc.push({label:(e?e.pt:'')+' — conflict: '+x,resp:'Clinic provider',due:''});});}return acc;},[]),
+    priorCorrections:[]};
+}
+function previewPDF(){if(!window.AllyOSGovReport){alert('Report module not loaded.');return;}AllyOSGovReport.download(buildPayload()).catch(function(e){alert('Report error: '+(e&&e.message||e));});}
+function signArchive(){
+  var rt=sessionRating();
+  var rec={clinic_id:sess.clinicId||null,clinic:S.hdr.clinic,report_date:S.hdr.date||'',rating:rt.rating,findings:rt.findings,
+    charts:S.selected.map(function(id){var e=encById(id);var r=S.review[id]&&S.review[id].result;return {ref:e?e.id:'',ini:e?e.pt:'',status:r?r.status:'—',deficiencies:(r&&r.deficiencies)||[]};})};
+  if(window.AllyOSCloud&&AllyOSCloud.postAuthed){
+    AllyOSCloud.postAuthed('/.netlify/functions/governance-archive',rec).then(function(r){return r.json();}).then(function(d){
+      alert(d&&d.ok?'🔒 Inspection signed & archived to the audit log.':'Saved locally — archive endpoint not available.');
+    }).catch(function(){alert('Saved locally — could not reach the server.');});
+  }else alert('Saved on this device.');
+}
+render();
+</script>
+<input type="file" id="docPick" accept="image/*,.pdf" style="display:none">
+<script>
+document.getElementById('csvPick').addEventListener('change',function(){var f=this.files&&this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){ingestCSV(r.result);};r.readAsText(f);});
+document.getElementById('docPick').addEventListener('change',function(){var f=this.files&&this.files[0];if(!f||!_dropTarget)return;fileToB64(f).then(function(b64){S.review[_dropTarget.id]=S.review[_dropTarget.id]||{};S.review[_dropTarget.id][_dropTarget.which]={image:b64,name:f.name};save();render();});});
+// page-level drag styling for the CSV drop
+(function(){var d=document.body;d.addEventListener('dragover',function(e){var t=document.getElementById('drop');if(t){e.preventDefault();t.classList.add('hi');}});d.addEventListener('dragleave',function(){var t=document.getElementById('drop');if(t)t.classList.remove('hi');});d.addEventListener('drop',function(e){var t=document.getElementById('drop');if(t){e.preventDefault();t.classList.remove('hi');var f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f&&/\.csv$/i.test(f.name)){var r=new FileReader();r.onload=function(){ingestCSV(r.result);};r.readAsText(f);}}});})();
 </script>
 </body></html>
