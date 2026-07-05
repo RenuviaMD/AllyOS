@@ -121,33 +121,45 @@ function ingestCSV(txt){
   S.encounters=enc; S.selected=[]; S.review={}; save(); S.stage=2; render();
 }
 // ---- drag chart → vision/Sonnet extract (chart #, initials, line, date) ----
-function extractDoc(file){
-  if(!file)return;
-  var tmpId='PARSING-'+(S.encounters.length+1)+'-'+Math.floor(Math.random()*1e6);
+// extractInto: attach the dropped note to an EXISTING chart slot and vision-parse its metadata.
+function extractInto(id,file){
+  if(!file||!id)return;
   fileToB64(file).then(function(b64){
-    S.encounters.push({id:tmpId,pt:'…',line:(S.hdr.line||'iv'),dos:'',risk:0,flags:[],parsing:true});
-    // keep the dragged doc as this chart's progress note so Stage 3 already has it
-    S.review[tmpId]={note:{image:b64,name:file.name}};
-    save(); render();
+    S.review[id]=S.review[id]||{};S.review[id].note={image:b64,name:file.name};
+    var e0=encById(id);if(e0){e0.parsing=true;e0.blank=false;e0.err=null;}
+    save();render();
     var body={mode:'extract',doc:{image:b64},clinic_id:(sess.clinicId||null)};
     var call=(window.AllyOSCloud&&AllyOSCloud.postAuthed)?AllyOSCloud.postAuthed('/.netlify/functions/governance-parse',body):fetch('/.netlify/functions/governance-parse',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
     Promise.resolve(call).then(function(r){return r.json();}).then(function(d){
-      var e=encById(tmpId);if(!e)return;
+      var e=encById(id);if(!e)return;
       e.parsing=false;
-      if(!d||d.error){e.pt='—';e.err=(d&&(d.detail||d.error))||'Could not read';save();render();return;}
-      e.pt=(''+(d.initials||'')).trim()||'—';
-      e.line=normLine(d.line||e.line);
-      e.dos=(''+(d.date||'')).trim();
+      if(!d||d.error){e.err=(d&&(d.detail||d.error))||'Could not read';save();render();return;}
+      if((''+(d.initials||'')).trim())e.pt=(''+d.initials).trim();
+      if((''+(d.line||'')).trim())e.line=normLine(d.line);
+      if((''+(d.date||'')).trim())e.dos=(''+d.date).trim();
       var newId=(''+(d.chart_id||'')).trim();
-      if(newId&&newId!==tmpId){
-        if(encById(newId))newId=newId+'-'+Math.floor(Math.random()*1000);
-        S.review[newId]=S.review[tmpId];delete S.review[tmpId];
-        var si=S.selected.indexOf(tmpId);if(si>=0)S.selected[si]=newId;
+      if(newId&&newId!==id&&!encById(newId)){
+        S.review[newId]=S.review[id];delete S.review[id];
+        var si=S.selected.indexOf(id);if(si>=0)S.selected[si]=newId;
         e.id=newId;
       }
       save();render();
-    }).catch(function(){var e=encById(tmpId);if(e){e.parsing=false;e.err='Could not reach the parser.';save();render();}});
+    }).catch(function(){var e=encById(id);if(e){e.parsing=false;e.err='Could not reach the parser.';}save();render();});
   });
+}
+// extractDoc: a chart dragged onto the pool (Stage 1/2) — create a slot, then parse into it.
+function extractDoc(file){
+  if(!file)return;
+  var tmpId='PARSING-'+(S.encounters.length+1)+'-'+Math.floor(Math.random()*1e6);
+  S.encounters.push({id:tmpId,pt:'…',line:(S.hdr.line||'iv'),dos:'',risk:0,flags:[],parsing:true});
+  save();render();
+  extractInto(tmpId,file);
+}
+// startBlank: no roster — jump straight to 5 empty chart-note slots and drop the notes in Stage 3.
+function startBlank(){
+  if(S.encounters.length&&!confirm('Start 5 blank chart-note slots? This clears the current pool.'))return;
+  var enc=[];for(var i=0;i<5;i++)enc.push({id:'CHART-'+(i+1),pt:'—',line:(S.hdr.line||'iv'),dos:'',risk:0,flags:[],blank:true});
+  S.encounters=enc;S.selected=enc.map(function(e){return e.id;});S.review={};save();S.stage=3;render();
 }
 
 // ---- selection (random — unbiased audit; cash-pay wellness, no billing risk score) ----
@@ -216,6 +228,7 @@ function stage1(){
     '<div class="card"><div class="grp">Stage 1 · load charts</div>'+
     '<div class="drop" id="drop" onclick="document.getElementById(\'chartPick\').click()"><div class="ic">⬆</div><div style="margin-top:8px;font-weight:700">Drag &amp; drop chart documents — or click to browse</div><div class="muted" style="font-size:11px;margin-top:4px">Progress notes / superbills (PDF or photo, handwritten OK). AI reads each and pulls chart #, initials, line &amp; date — drop several at once. The doc is kept as that chart\'s note for review.</div></div>'+
     '<div style="margin-top:12px;text-align:center"><span class="muted" style="font-size:11px">Have a roster spreadsheet instead? <a href="#" onclick="document.getElementById(\'csvPick\').click();return false" style="color:var(--teal)">Upload CSV</a> <span style="opacity:.6">(chart · initials · line · date)</span></span></div>'+
+    '<div style="margin-top:14px;text-align:center"><button class="btn ghost" onclick="startBlank()">Skip — start 5 blank chart notes →</button><div class="muted" style="font-size:11px;margin-top:5px">No roster needed. You\'ll drop one note per chart in the review step; AI reads each.</div></div>'+
     (S.encounters.length?'<div class="note" style="margin-top:12px">✓ '+S.encounters.length+' chart(s) loaded'+(S.encounters.some(function(e){return e.parsing;})?' · reading…':'')+'. <a href="#" onclick="go(2);return false" style="color:var(--teal)">Continue to Chart Selection →</a></div>':'')+
     '</div>';
 }
@@ -235,7 +248,8 @@ function stage2(){
       '<td>'+(busy?'<span class="muted">reading…</span>':'<b>'+esc(e.id)+'</b>'+(e.err?' <span class="flag dup">'+esc(e.err)+'</span>':''))+'</td><td>'+esc(e.pt)+'</td><td><span class="flag">'+esc((e.line||'iv').toUpperCase())+'</span></td><td>'+esc(e.dos||'—')+'</td></tr>';}).join('')
     ||'<tr><td colspan="5" class="muted" style="text-align:center;padding:18px">No charts yet — drag chart documents onto the box below.</td></tr>';
   return head+'<div class="card"><div style="overflow:auto"><table><tr><th>Sel</th><th>Chart #</th><th>Initials</th><th>Line</th><th>DOS</th></tr>'+rows+'</table></div>'+
-    '<div class="drop" id="drop2" style="margin-top:12px;padding:20px" onclick="document.getElementById(\'chartPick\').click()"><div class="ic">⬆</div><div style="margin-top:6px;font-size:12px;font-weight:700">Drag chart documents here to add more</div><div class="muted" style="font-size:11px;margin-top:3px">PDF or photo — or click to browse</div></div></div>'+
+    '<div class="drop" id="drop2" style="margin-top:12px;padding:20px" onclick="document.getElementById(\'chartPick\').click()"><div class="ic">⬆</div><div style="margin-top:6px;font-size:12px;font-weight:700">Drag chart documents here to add more</div><div class="muted" style="font-size:11px;margin-top:3px">PDF or photo — or click to browse</div></div>'+
+    '<div style="margin-top:10px;text-align:center"><button class="btn ghost" onclick="startBlank()">No roster? Skip → start 5 blank chart notes</button></div></div>'+
     '<div class="navrow"><button class="btn ghost" onclick="go(1)">← Load</button><button class="btn go" onclick="go(3)"'+(S.selected.length<1?' disabled':'')+'>Inspect '+S.selected.length+' chart(s) →</button></div>';
 }
 // ---- Stage 3 (dual-document inspection — mirrors AHCA AuditPro; Sonnet vision reads both docs) ----
@@ -281,7 +295,7 @@ function stage3(){
 }
 var _dropTarget=null;
 function dh(ev,on){ev.preventDefault();ev.currentTarget.classList.toggle('hi',!!on);}
-function dropDoc(ev,id,which){ev.preventDefault();ev.currentTarget.classList.remove('hi');var f=ev.dataTransfer.files&&ev.dataTransfer.files[0];if(!f)return;fileToB64(f).then(function(b64){S.review[id]=S.review[id]||{};S.review[id][which]={image:b64,name:f.name};save();render();});}
+function dropDoc(ev,id,which){ev.preventDefault();ev.currentTarget.classList.remove('hi');var f=ev.dataTransfer.files&&ev.dataTransfer.files[0];if(!f)return;extractInto(id,f);}
 function pickDoc(id,which){_dropTarget={id:id,which:which};var inp=document.getElementById('docPick');inp.value='';inp.click();}
 // ---- Stage 4 ----
 function stage4(){
@@ -328,7 +342,7 @@ render();
 <script>
 document.getElementById('csvPick').addEventListener('change',function(){var f=this.files&&this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){ingestCSV(r.result);};r.readAsText(f);this.value='';});
 document.getElementById('chartPick').addEventListener('change',function(){var fs=this.files;if(!fs||!fs.length)return;for(var i=0;i<fs.length;i++)extractDoc(fs[i]);this.value='';});
-document.getElementById('docPick').addEventListener('change',function(){var f=this.files&&this.files[0];if(!f||!_dropTarget)return;fileToB64(f).then(function(b64){S.review[_dropTarget.id]=S.review[_dropTarget.id]||{};S.review[_dropTarget.id][_dropTarget.which]={image:b64,name:f.name};save();render();});});
+document.getElementById('docPick').addEventListener('change',function(){var f=this.files&&this.files[0];if(!f||!_dropTarget)return;extractInto(_dropTarget.id,f);this.value='';});
 // page-level drag: works on ANY stage. CSV → roster ingest; chart docs (pdf/image) → vision extract.
 // Must preventDefault on dragover regardless of stage, else the browser opens the file instead of dropping.
 (function(){var d=document.body;function zone(){return document.getElementById('drop')||document.getElementById('drop2');}
