@@ -43,7 +43,11 @@ exports.handler = async (event) => {
     content.push({ type: "text", text: "\n\n=== " + label + " ===\n" });
     if (doc.image) {
       var m = /^data:([^;]+);base64,(.*)$/.exec(doc.image);
-      content.push({ type: "image", source: { type: "base64", media_type: (m ? m[1] : (doc.mime || "image/jpeg")), data: (m ? m[2] : doc.image) } });
+      var mime = m ? m[1] : (doc.mime || "image/jpeg");
+      var data = m ? m[2] : doc.image;
+      // PDFs go in as a document block (Claude reads them natively); images as image blocks.
+      if (mime === "application/pdf") content.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: data } });
+      else content.push({ type: "image", source: { type: "base64", media_type: mime, data: data } });
     } else if (doc.text) { content.push({ type: "text", text: String(doc.text).slice(0, 12000) }); }
   }
   async function callModel(sys, content, maxTok) {
@@ -56,6 +60,30 @@ exports.handler = async (event) => {
     const raw = (data.content || []).filter(function (b) { return b.type === "text"; }).map(function (b) { return b.text; }).join("").trim();
     const jStart = raw.indexOf("{"), jEnd = raw.lastIndexOf("}");
     return JSON.parse(jStart >= 0 ? raw.slice(jStart, jEnd + 1) : raw);
+  }
+
+  // ---- EXTRACT (read a dragged chart doc/photo → encounter metadata) ----
+  if (body.mode === "extract") {
+    if (!body.doc) return json(400, { error: "no_doc" });
+    const EX_SYS =
+      "Read this ONE wellness chart document (progress note / superbill / scan / photo — may be handwritten) and " +
+      "extract identifying metadata. Return STRICT JSON only: " +
+      "{\"chart_id\":\"...\",\"initials\":\"X.Y.\",\"line\":\"iv|pep|bhrt\",\"date\":\"MM/DD/YYYY\"}. " +
+      "chart_id = the chart/MRN/encounter number if present, else empty. " +
+      "initials = patient INITIALS ONLY (first + last initial, e.g. 'J.D.') — never the full name. " +
+      "line = iv (IV/IM infusion), pep (peptide therapy), or bhrt (hormone/BHRT) based on the therapy documented. " +
+      "date = date of service. Use '' for any field you cannot find.";
+    const content = [{ type: "text", text: "Extract the metadata from this document." }];
+    pushDoc(content, "CHART", body.doc);
+    try {
+      const p = await callModel(EX_SYS, content, 400);
+      return json(200, {
+        chart_id: String(p.chart_id || "").slice(0, 48),
+        initials: String(p.initials || "").slice(0, 12),
+        line: String(p.line || "iv").toLowerCase(),
+        date: String(p.date || "").slice(0, 24),
+      });
+    } catch (e) { return json(502, { error: "extract_failed", detail: String(e).slice(0, 200) }); }
   }
 
   // ---- DUAL-DOCUMENT INSPECTION (AHCA-style: progress note + superbill) ----
