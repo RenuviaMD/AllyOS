@@ -233,9 +233,9 @@ function stage2(){
   var rows=enc.map(function(e){var sel=S.selected.indexOf(e.id)>=0;var busy=e.parsing;
     return '<tr class="'+(sel?'pick':'')+'"><td><button class="btn ghost" style="padding:3px 9px;font-size:11px" onclick="toggleSel(\''+esc(e.id)+'\')"'+(busy?' disabled':'')+'>'+(sel?'✓':'+')+'</button></td>'+
       '<td>'+(busy?'<span class="muted">reading…</span>':'<b>'+esc(e.id)+'</b>'+(e.err?' <span class="flag dup">'+esc(e.err)+'</span>':''))+'</td><td>'+esc(e.pt)+'</td><td><span class="flag">'+esc((e.line||'iv').toUpperCase())+'</span></td><td>'+esc(e.dos||'—')+'</td></tr>';}).join('')
-    ||'<tr><td colspan="5" class="muted" style="text-align:center;padding:18px">No charts yet — drop chart documents on Stage 1.</td></tr>';
+    ||'<tr><td colspan="5" class="muted" style="text-align:center;padding:18px">No charts yet — drag chart documents onto the box below.</td></tr>';
   return head+'<div class="card"><div style="overflow:auto"><table><tr><th>Sel</th><th>Chart #</th><th>Initials</th><th>Line</th><th>DOS</th></tr>'+rows+'</table></div>'+
-    '<div style="margin-top:10px;text-align:center"><button class="btn ghost" onclick="document.getElementById(\'chartPick\').click()">＋ Drop / add more charts</button></div></div>'+
+    '<div class="drop" id="drop2" style="margin-top:12px;padding:20px" onclick="document.getElementById(\'chartPick\').click()"><div class="ic">⬆</div><div style="margin-top:6px;font-size:12px;font-weight:700">Drag chart documents here to add more</div><div class="muted" style="font-size:11px;margin-top:3px">PDF or photo — or click to browse</div></div></div>'+
     '<div class="navrow"><button class="btn ghost" onclick="go(1)">← Load</button><button class="btn go" onclick="go(3)"'+(S.selected.length<1?' disabled':'')+'>Inspect '+S.selected.length+' chart(s) →</button></div>';
 }
 // ---- Stage 3 ----
@@ -317,16 +317,20 @@ render();
 document.getElementById('csvPick').addEventListener('change',function(){var f=this.files&&this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){ingestCSV(r.result);};r.readAsText(f);this.value='';});
 document.getElementById('chartPick').addEventListener('change',function(){var fs=this.files;if(!fs||!fs.length)return;for(var i=0;i<fs.length;i++)extractDoc(fs[i]);this.value='';});
 document.getElementById('docPick').addEventListener('change',function(){var f=this.files&&this.files[0];if(!f||!_dropTarget)return;fileToB64(f).then(function(b64){S.review[_dropTarget.id]=S.review[_dropTarget.id]||{};S.review[_dropTarget.id][_dropTarget.which]={image:b64,name:f.name};save();render();});});
-// page-level drag: CSV → roster ingest; chart docs (pdf/image) → vision extract
-(function(){var d=document.body;
-  d.addEventListener('dragover',function(e){var t=document.getElementById('drop');if(t){e.preventDefault();t.classList.add('hi');}});
-  d.addEventListener('dragleave',function(){var t=document.getElementById('drop');if(t)t.classList.remove('hi');});
-  d.addEventListener('drop',function(e){var t=document.getElementById('drop');if(!t)return;e.preventDefault();t.classList.remove('hi');
+// page-level drag: works on ANY stage. CSV → roster ingest; chart docs (pdf/image) → vision extract.
+// Must preventDefault on dragover regardless of stage, else the browser opens the file instead of dropping.
+(function(){var d=document.body;function zone(){return document.getElementById('drop')||document.getElementById('drop2');}
+  d.addEventListener('dragover',function(e){e.preventDefault();var t=zone();if(t)t.classList.add('hi');});
+  d.addEventListener('dragleave',function(e){if(e.relatedTarget)return;var t=zone();if(t)t.classList.remove('hi');});
+  d.addEventListener('drop',function(e){e.preventDefault();var t=zone();if(t)t.classList.remove('hi');
     var fs=e.dataTransfer.files;if(!fs||!fs.length)return;
+    // A dropped chart lands in the pool — if we're still on Stage 1, move to Chart Selection so it's visible.
+    var sawChart=false;
     for(var i=0;i<fs.length;i++){var f=fs[i];
       if(/\.csv$/i.test(f.name)||f.type==='text/csv'){var r=new FileReader();r.onload=(function(rr){return function(){ingestCSV(rr.result);};})(r);r.readAsText(f);}
-      else extractDoc(f);
+      else {extractDoc(f);sawChart=true;}
     }
+    if(sawChart&&S.stage===1){S.stage=2;save();render();}
   });
 })();
 </script>
