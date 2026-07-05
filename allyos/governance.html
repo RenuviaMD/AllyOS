@@ -238,31 +238,45 @@ function stage2(){
     '<div class="drop" id="drop2" style="margin-top:12px;padding:20px" onclick="document.getElementById(\'chartPick\').click()"><div class="ic">⬆</div><div style="margin-top:6px;font-size:12px;font-weight:700">Drag chart documents here to add more</div><div class="muted" style="font-size:11px;margin-top:3px">PDF or photo — or click to browse</div></div></div>'+
     '<div class="navrow"><button class="btn ghost" onclick="go(1)">← Load</button><button class="btn go" onclick="go(3)"'+(S.selected.length<1?' disabled':'')+'>Inspect '+S.selected.length+' chart(s) →</button></div>';
 }
-// ---- Stage 3 ----
-var curChart=0;
+// ---- Stage 3 (dual-document inspection — mirrors AHCA AuditPro; Sonnet vision reads both docs) ----
+var curChart=0;var _cleanOpen={};
+function clearAllResults(){if(!confirm('Clear all AI results for this session? Attached documents stay.'))return;S.selected.forEach(function(id){if(S.review[id]){S.review[id].result=null;S.review[id].err=null;}});save();render();}
+function swapChart(){var id=S.selected[curChart];var pool=S.encounters.filter(function(e){return S.selected.indexOf(e.id)<0;});if(!pool.length){alert('No other charts in the pool to swap in — drop more on Stage 1.');return;}var pick=pool[Math.floor(Math.random()*pool.length)];S.selected[curChart]=pick.id;save();render();}
+function toggleClean(id){_cleanOpen[id]=!_cleanOpen[id];render();}
 function stage3(){
   if(curChart>=S.selected.length)curChart=0;
   var tabs=S.selected.map(function(id,i){var e=encById(id);var r=S.review[id]&&S.review[id].result;var cls=(i===curChart?'on ':'')+(r?(r.status==='PASS'?'pass':'fail'):'');
     return '<div class="ctab '+cls+'" onclick="curChart='+i+';render()">'+(r?(r.status==='PASS'?'✓ ':'⚠ '):'')+'Chart '+(i+1)+' — '+esc(e?e.pt:'')+'</div>';}).join('');
   var id=S.selected[curChart];var e=encById(id);var rv=S.review[id]||{};var r=rv.result;
-  var noteBox='<div style="flex:1"><label>Progress note</label><div class="drop" style="padding:22px" ondragover="dh(event,1)" ondragleave="dh(event,0)" ondrop="dropDoc(event,\''+esc(id)+'\',\'note\')" onclick="pickDoc(\''+esc(id)+'\',\'note\')">'+(rv.note?('📄 '+esc(rv.note.name||'attached')):'<div class="ic">⬆</div><div style="margin-top:6px;font-size:12px">Drop / click — PDF or image</div>')+'</div></div>';
-  var billBox='<div style="flex:1"><label>Superbill / claim (optional)</label><div class="drop" style="padding:22px" ondragover="dh(event,1)" ondragleave="dh(event,0)" ondrop="dropDoc(event,\''+esc(id)+'\',\'bill\')" onclick="pickDoc(\''+esc(id)+'\',\'bill\')">'+(rv.bill?('📄 '+esc(rv.bill.name||'attached')):'<div class="ic">⬆</div><div style="margin-top:6px;font-size:12px">Drop / click — PDF or image</div>')+'</div></div>';
+  var noteBox='<div style="flex:1;min-width:240px"><label>Progress note</label><div class="drop" style="padding:22px" ondragover="dh(event,1)" ondragleave="dh(event,0)" ondrop="dropDoc(event,\''+esc(id)+'\',\'note\')" onclick="pickDoc(\''+esc(id)+'\',\'note\')">'+(rv.note?('📄 '+esc(rv.note.name||'attached')):'<div class="ic">⬆</div><div style="margin-top:6px;font-size:12px">Drop Progress Note PDF</div><div class="muted" style="font-size:11px">PDF or image</div>')+'</div></div>';
+  var billBox='<div style="flex:1;min-width:240px"><label>Superbill / claim (optional)</label><div class="drop" style="padding:22px" ondragover="dh(event,1)" ondragleave="dh(event,0)" ondrop="dropDoc(event,\''+esc(id)+'\',\'bill\')" onclick="pickDoc(\''+esc(id)+'\',\'bill\')">'+(rv.bill?('📄 '+esc(rv.bill.name||'attached')):'<div class="ic">⬆</div><div style="margin-top:6px;font-size:12px">Drop Superbill PDF</div><div class="muted" style="font-size:11px">PDF or image</div>')+'</div></div>';
+  // Chart header — name, DOS · line, verdict badge, Clear & Re-run
+  var head='<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;border-top:1px solid var(--line);padding-top:12px;margin-top:6px">'+
+    '<div><div style="font-weight:800">Chart '+(curChart+1)+' — '+esc(e?e.pt:'')+'</div>'+
+      '<div class="muted" style="font-size:12px;margin-top:2px">DOS: '+esc(e?(e.dos||'—'):'—')+' · <span class="flag">'+esc(e?(e.line||'').toUpperCase():'')+'</span> · '+esc(e?e.id:'')+'</div></div>'+
+    '<div style="display:flex;gap:8px;align-items:center">'+(r?'<span class="verdict '+(r.status==='PASS'?'pass':'fail')+'">'+r.status+'</span>':'<span class="verdict pend">NOT REVIEWED</span>')+
+      (r?'<button class="btn ghost" style="padding:5px 11px;font-size:11px" onclick="runReview(\''+esc(id)+'\')">↻ Clear &amp; Re-run</button>':'')+'</div></div>';
   var result='';
   if(rv.busy)result='<div class="note">Reading the documents…</div>';
   else if(rv.err)result='<div class="findbox def">'+esc(rv.err)+'</div>';
   else if(r){
-    result='<div style="display:flex;align-items:center;gap:10px;margin:10px 0"><span class="verdict '+(r.status==='PASS'?'pass':'fail')+'">'+r.status+'</span><span class="muted" style="font-size:12px">'+esc(e?e.line.toUpperCase():'')+'</span></div>'+
-      '<div class="kpis"><div class="kpi red"><div class="v">'+(r.deficiencies||[]).length+'</div><div class="muted" style="font-size:10px">Deficiencies</div></div><div class="kpi gold"><div class="v">'+(r.conflicts||[]).length+'</div><div class="muted" style="font-size:10px">Conflicts</div></div><div class="kpi green"><div class="v">'+(r.clean||[]).length+'</div><div class="muted" style="font-size:10px">Clean fields</div></div></div>'+
+    var nd=(r.deficiencies||[]).length,nc=(r.conflicts||[]).length,ncl=(r.clean||[]).length;
+    result='<div class="kpis"><div class="kpi red"><div class="v">'+nd+'</div><div class="muted" style="font-size:10px">Deficiencies</div></div><div class="kpi gold"><div class="v">'+nc+'</div><div class="muted" style="font-size:10px">Conflicts to Resolve</div></div><div class="kpi green"><div class="v">'+ncl+'</div><div class="muted" style="font-size:10px">Clean Fields</div></div></div>'+
       (r.narrative?'<div class="findbox">'+esc(r.narrative)+'</div>':'')+
       (r.deficiencies||[]).map(function(x){return '<div class="findbox def">⚠ '+esc(x)+'</div>';}).join('')+
-      (r.conflicts||[]).map(function(x){return '<div class="findbox con">⇄ '+esc(x)+'</div>';}).join('');
+      (r.conflicts||[]).map(function(x){return '<div class="findbox con">⇄ '+esc(x)+'</div>';}).join('')+
+      (ncl?'<div class="findbox" style="cursor:pointer" onclick="toggleClean(\''+esc(id)+'\')"><b style="color:var(--green)">'+(_cleanOpen[id]?'▾':'▸')+' CLEAN FIELDS ('+ncl+')</b> <span class="muted">— click to '+(_cleanOpen[id]?'collapse':'expand')+'</span>'+(_cleanOpen[id]?'<div style="margin-top:8px">'+(r.clean||[]).map(function(x){return '<div style="color:var(--green);font-size:12px;margin:3px 0">✓ '+esc(x)+'</div>';}).join('')+'</div>':'')+'</div>':'')+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px;flex-wrap:wrap"><span style="font-size:12.5px;color:'+(nc?'var(--gold)':'var(--green)')+'">'+(nc?('⚠ Chart '+(curChart+1)+' — '+nc+' conflict(s) to resolve'):('✓ Chart '+(curChart+1)+' — No unresolved conflicts'))+'</span>'+
+        (curChart<S.selected.length-1?'<button class="btn gold" onclick="curChart++;render()">Next Chart →</button>':'<button class="btn gold" onclick="go(4)">Proceed to Summary →</button>')+'</div>';
   }
-  return '<div class="card"><div class="grp" style="margin:0 0 4px">Stage 3 · dual-document inspection · '+reviewedCount()+'/'+S.selected.length+' complete</div>'+
-    '<div class="tabrow">'+tabs+'</div>'+
-    '<div style="font-weight:800">'+esc(e?e.pt:'')+' <span class="muted" style="font-weight:400;font-size:12px">· '+esc(e?e.id:'')+' · '+esc(e?e.dos:'')+' · '+esc(e?(e.line||'').toUpperCase():'')+'</span></div>'+
+  return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">'+
+      '<div class="grp" style="margin:0">Stage 3 · dual document inspection · '+reviewedCount()+'/'+S.selected.length+' complete</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" style="padding:6px 12px;font-size:12px" onclick="clearAllResults()">↻ Clear All AI Results</button><button class="btn ghost" style="padding:6px 12px;font-size:12px" onclick="swapChart()">⇄ Swap a chart</button>'+(reviewedCount()>=S.selected.length?'<button class="btn gold" style="padding:6px 12px;font-size:12px" onclick="go(4)">All Charts Done → Summary</button>':'')+'</div></div>'+
+    '<div class="tabrow" style="margin-top:10px">'+tabs+'</div>'+
+    head+
     '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">'+noteBox+billBox+'</div>'+
     '<div style="margin-top:12px"><button class="btn gold" onclick="runReview(\''+esc(id)+'\')"'+(rv.busy?' disabled':'')+'>'+(r?'↻ Re-analyze':'▶ Analyze with AI')+'</button>'+
-      (curChart<S.selected.length-1?'<button class="btn ghost" style="margin-left:8px" onclick="curChart++;render()">Next chart →</button>':'')+'</div>'+
+      '<span class="muted" style="font-size:11px;margin-left:10px">'+(rv.note?'📄 Note attached from Stage 1 — add the superbill (optional), then Analyze.':'Drop the progress note above to start.')+'</span></div>'+
     result+
     '</div>'+
     '<div class="navrow"><button class="btn ghost" onclick="go(2)">← Selection</button><button class="btn go" onclick="go(4)"'+(reviewedCount()<1?' disabled':'')+'>Summary →</button></div>';
