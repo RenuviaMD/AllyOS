@@ -112,28 +112,24 @@ function ingestCSV(txt){
   var rows=parseCSV(txt); if(rows.length<2){alert('CSV looks empty.');return;}
   var head=rows[0].map(function(h){return (''+h).toLowerCase().trim();});
   function col(){for(var a=0;a<arguments.length;a++){var k=arguments[a];for(var j=0;j<head.length;j++)if(head[j].indexOf(k)>=0)return j;}return -1;}
-  var ci={id:col('chart','claim','encounter','visit id','record'),pt:col('patient','initial','name','member'),dos:col('dos','date of service','service date','date'),cpt:col('cpt','procedure','code'),lob:col('lob','line of business','carrier','insurance','payer','plan'),chg:col('charge','amount','fee','billed')};
+  // Cash-pay wellness — no insurance/billing columns needed. Just chart · initials · line · date.
+  var ci={id:col('chart','encounter','visit','record','mrn','id'),pt:col('initial','patient','name','member'),dos:col('dos','date of service','service date','date'),line:col('line','service','program','type','category')};
   var enc=rows.slice(1).map(function(r,idx){
-    return {id:(ci.id>=0?r[ci.id]:'')||('ENC-'+(idx+1)),pt:(ci.pt>=0?r[ci.pt]:'')||'—',dos:(ci.dos>=0?r[ci.dos]:'')||'',cpt:(ci.cpt>=0?r[ci.cpt]:'')||'',lob:(ci.lob>=0?r[ci.lob]:'')||'',chg:(ci.chg>=0?num(r[ci.chg]):0),line:normLine((ci.cpt>=0?r[ci.cpt]:'')+' '+(ci.id>=0?r[ci.id]:''))};
+    return {id:(ci.id>=0?r[ci.id]:'')||('ENC-'+(idx+1)),pt:(ci.pt>=0?r[ci.pt]:'')||'—',dos:(ci.dos>=0?r[ci.dos]:'')||'',line:(ci.line>=0?normLine(r[ci.line]):(S.hdr.line||'iv')),risk:0,flags:[]};
   }).filter(function(e){return e.id;});
-  scoreRisk(enc);
   S.encounters=enc; S.selected=[]; S.review={}; save(); S.stage=2; render();
 }
-function scoreRisk(enc){
-  var byPt={},byKey={};
-  enc.forEach(function(e){var p=(''+e.pt).toUpperCase();byPt[p]=(byPt[p]||0)+1;var k=p+'|'+e.cpt+'|'+e.dos;byKey[k]=(byKey[k]||0)+1;});
-  enc.forEach(function(e){var f=[],s=0;var p=(''+e.pt).toUpperCase();var cpt=(''+e.cpt);
-    if(/9921[45]|9920[45]/.test(cpt)){f.push({t:'HIGH EM',c:'hem'});s+=25;}
-    if(byKey[p+'|'+e.cpt+'|'+e.dos]>1){f.push({t:'DUPLICATE',c:'dup'});s+=30;}
-    if(byPt[p]>=3){f.push({t:'HI-FREQ',c:'hf'});s+=20;}
-    if((cpt.match(/\d{4,5}/g)||[]).length>=3){f.push({t:'MULTI CPT',c:'new'});s+=10;}
-    if(!e.chg){s+=8;}
-    e.flags=f; e.risk=Math.min(99,s+((''+e.id).length%7));});
+function ingestPaste(){
+  var raw=(document.getElementById('pasteBox')||{}).value||'';
+  var enc=raw.split(/\r?\n/).map(function(l){return l.trim();}).filter(Boolean).map(function(l,idx){var p=l.split('|').map(function(x){return x.trim();});return {id:p[0]||('ENC-'+(idx+1)),pt:p[1]||'—',line:(p[2]?normLine(p[2]):(S.hdr.line||'iv')),dos:p[3]||'',risk:0,flags:[]};}).filter(function(e){return e.id;});
+  if(!enc.length){alert('Add at least one chart:  chart # | initials | line | date');return;}
+  S.encounters=enc; S.selected=[]; S.review={}; save(); S.stage=2; render();
 }
 
-// ---- risk selection ----
+// ---- selection (random — unbiased audit; cash-pay wellness, no billing risk score) ----
 function toggleSel(id){var k=S.selected.indexOf(id);if(k>=0)S.selected.splice(k,1);else if(S.selected.length<5)S.selected.push(id);save();render();}
-function autoSelect(){var top=S.encounters.slice().sort(function(a,b){return b.risk-a.risk;}).slice(0,5);S.selected=top.map(function(e){return e.id;});save();render();}
+function randomFive(){var pool=S.encounters.slice();if(!pool.length){alert('Add charts first (upload, paste, or + Add).');return;}var idx=pool.map(function(_,i){return i;});for(var i=idx.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idx[i];idx[i]=idx[j];idx[j]=t;}S.selected=idx.slice(0,Math.min(5,pool.length)).map(function(i){return pool[i].id;});save();render();}
+function addManual(){var id=(document.getElementById('mAid')||{}).value;id=(id||'').trim();if(!id){alert('Chart # required.');return;}var e={id:id,pt:((document.getElementById('mAini')||{}).value||'').trim()||'—',line:(document.getElementById('mAline')||{}).value||'iv',dos:((document.getElementById('mAdos')||{}).value||'').trim(),risk:0,flags:[]};S.encounters.push(e);save();render();}
 function clearSel(){S.selected=[];save();render();}
 function encById(id){for(var i=0;i<S.encounters.length;i++)if(S.encounters[i].id===id)return S.encounters[i];return null;}
 
@@ -157,21 +153,20 @@ function reviewedCount(){return S.selected.filter(function(id){return S.review[i
 // ---- pattern flags across the sampled set ----
 function patternFlags(){
   var out=[];var sel=S.selected.map(encById).filter(Boolean);
-  var glp=sel.filter(function(e){return /glp|semag|tirzep|reta/.test((e.cpt+e.id).toLowerCase());}).length;
-  if(glp>=2)out.push(glp+' of '+sel.length+' charts are GLP/metabolic — individualized note required per encounter');
-  var dup=sel.filter(function(e){return (e.flags||[]).some(function(f){return f.c==='dup';});}).length;
-  if(dup)out.push(dup+' same-day same-CPT pattern(s) — potential duplicate billing');
-  var hf=sel.filter(function(e){return (e.flags||[]).some(function(f){return f.c==='hf';});}).length;
-  if(hf)out.push(hf+' high-frequency patient(s) (3+ this period) — medical-necessity review recommended');
-  var noChg=sel.filter(function(e){return !e.chg;}).length;
-  if(noChg)out.push(noChg+' encounter(s) with no charge amount — fee-schedule check');
+  // Cross-chart shared deficiencies (a systemic documentation gap, not a one-off).
+  var counts={};S.selected.forEach(function(id){var r=S.review[id]&&S.review[id].result;if(r)(r.deficiencies||[]).forEach(function(x){var k=(''+x).replace(/^[^—:]*[—:]\s*/,'').toLowerCase().slice(0,44);counts[k]=(counts[k]||0)+1;});});
+  Object.keys(counts).forEach(function(k){if(counts[k]>=2)out.push(counts[k]+' of '+sel.length+' charts share a deficiency: '+k);});
+  var pep=sel.filter(function(e){return e.line==='pep';}).length;
+  if(pep>=2)out.push(pep+' peptide chart(s) — confirm grade→consent-tier and an individualized POC per encounter');
+  var fails=S.selected.filter(function(id){var r=S.review[id]&&S.review[id].result;return r&&r.status==='FAIL';}).length;
+  if(fails)out.push(fails+' of '+sel.length+' charts did not pass — corrective actions listed above');
   return out;
 }
 function sessionRating(){var f=0;S.selected.forEach(function(id){var r=S.review[id]&&S.review[id].result;if(r&&r.status==='FAIL')f++;if(r){f+=(r.deficiencies||[]).length+(r.conflicts||[]).length;}});return {findings:f,rating:f?'ACTION REQ':'CLEAN'};}
 
 // ============ RENDER ============
 var STAGES=[{n:1,t:'Upload CSV'},{n:2,t:'Chart Selection'},{n:3,t:'AI Review'},{n:4,t:'Summary'}];
-function go(n){if(n===2&&!S.encounters.length)return;if(n===3&&S.selected.length<1)return;S.stage=n;save();render();}
+function go(n){if(n===3&&S.selected.length<1)return;S.stage=n;save();render();}
 function render(){
   document.getElementById('stages').innerHTML=STAGES.map(function(s){
     var cls=S.stage===s.n?'on':((s.n===1&&S.encounters.length)||(s.n===2&&S.selected.length)||(s.n===3&&reviewedCount())?'done':'');
@@ -196,26 +191,36 @@ function stage1(){
     '</div></div>'+
     '<div class="card"><div class="grp">MD statutory items — confirm before reviewing charts</div>'+stat+'</div>'+
     '<div class="card"><div class="grp">Stage 1 · data entry</div>'+
-    '<div class="drop" id="drop" onclick="document.getElementById(\'csvPick\').click()"><div class="ic">⬆</div><div style="margin-top:8px;font-weight:700">Drag &amp; drop the encounter CSV — or click to browse</div><div class="muted" style="font-size:11px;margin-top:4px">Any EHR/clearinghouse export. Columns auto-detected (chart · patient/initials · DOS · CPT · payer · charge).</div></div>'+
-    (S.encounters.length?'<div class="note" style="margin-top:12px">✓ '+S.encounters.length+' encounters loaded. <a href="#" onclick="go(2);return false" style="color:var(--teal)">Continue to Chart Selection →</a></div>':'')+
+    '<div class="drop" id="drop" onclick="document.getElementById(\'csvPick\').click()"><div class="ic">⬆</div><div style="margin-top:8px;font-weight:700">Drag &amp; drop the encounter CSV — or click to browse</div><div class="muted" style="font-size:11px;margin-top:4px">Cash-pay wellness — columns auto-detected (chart · initials · line · date).</div></div>'+
+    '<div style="margin-top:14px"><label>No CSV? Paste the chart list — one per line: <code>chart # | initials | line | date</code></label>'+
+    '<textarea id="pasteBox" rows="3" placeholder="IV-2026-018 | J.D. | iv | 07/09/2026&#10;BH-2026-044 | M.R. | bhrt | 07/11/2026">'+esc((S.encounters.length?'':''))+'</textarea>'+
+    '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn ghost" onclick="ingestPaste()">Load pasted charts</button>'+
+    '<button class="btn ghost" onclick="go(2)">Skip — add charts manually in the next step →</button></div></div>'+
+    (S.encounters.length?'<div class="note" style="margin-top:12px">✓ '+S.encounters.length+' chart(s) loaded. <a href="#" onclick="go(2);return false" style="color:var(--teal)">Continue to Chart Selection →</a></div>':'')+
     '</div>';
 }
 function setHdr(k,v){S.hdr[k]=v;save();}
 function setStat(i,v){S.statutory[i]=(S.statutory[i]===v?'':v);save();render();}
 // ---- Stage 2 ----
 function stage2(){
-  var enc=S.encounters.slice().sort(function(a,b){return b.risk-a.risk;});
+  var enc=S.encounters;
   var picks=S.selected.map(encById).filter(Boolean);
   var head='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">'+
-    '<div><div class="grp" style="margin:0">Stage 2 · chart selection · '+S.encounters.length+' scored</div><div style="font-family:var(--fdisp);font-size:1.2rem;margin-top:4px">Select 5 charts</div></div>'+
-    '<div style="display:flex;gap:8px;align-items:center"><button class="btn gold" onclick="autoSelect()">⚡ Auto-select best 5</button><button class="btn ghost" onclick="clearSel()">Clear</button><span class="muted" style="font-size:12px">'+S.selected.length+' / 5</span></div></div>'+
-    (picks.length?'<div class="chiprow" style="margin-top:12px">'+picks.map(function(e,i){return '<span class="chip" style="border-color:var(--teal);color:var(--teal)">#'+(i+1)+' '+esc(e.pt)+' · '+esc(e.dos)+'</span>';}).join('')+'</div>':'')+
+    '<div><div class="grp" style="margin:0">Stage 2 · chart selection · '+enc.length+' in pool</div><div style="font-family:var(--fdisp);font-size:1.2rem;margin-top:4px">Select 5 charts</div><div class="muted" style="font-size:11px">Random sampling — unbiased audit method. Cash-pay wellness; no billing risk score.</div></div>'+
+    '<div style="display:flex;gap:8px;align-items:center"><button class="btn gold" onclick="randomFive()">🎲 Pick 5 at random</button><button class="btn ghost" onclick="clearSel()">Clear</button><span class="muted" style="font-size:12px">'+S.selected.length+' / 5</span></div></div>'+
+    (picks.length?'<div class="chiprow" style="margin-top:12px">'+picks.map(function(e,i){return '<span class="chip" style="border-color:var(--teal);color:var(--teal)">#'+(i+1)+' '+esc(e.pt)+' · '+esc(e.id)+'</span>';}).join('')+'</div>':'')+
     '</div>';
-  var rows=enc.slice(0,60).map(function(e){var sel=S.selected.indexOf(e.id)>=0;var rc=e.risk>=50?'hi':(e.risk>=30?'md':'lo');
+  var rows=enc.map(function(e){var sel=S.selected.indexOf(e.id)>=0;
     return '<tr class="'+(sel?'pick':'')+'"><td><button class="btn ghost" style="padding:3px 9px;font-size:11px" onclick="toggleSel(\''+esc(e.id)+'\')">'+(sel?'✓':'+')+'</button></td>'+
-      '<td class="rk '+rc+'">'+e.risk+'</td><td><b>'+esc(e.pt)+'</b><div class="muted" style="font-size:10px">'+esc(e.id)+'</div></td><td>'+esc(e.dos)+'</td><td>'+esc(e.lob||'—')+'</td><td style="font-family:var(--fmono,monospace);font-size:11px">'+esc(e.cpt||'—')+'</td><td>'+(e.chg?'$'+e.chg.toFixed(2):'—')+'</td>'+
-      '<td>'+(e.flags||[]).map(function(f){return '<span class="flag '+f.c+'">'+f.t+'</span>';}).join('')+'</td></tr>';}).join('');
-  return head+'<div class="card"><div style="overflow:auto"><table><tr><th>Sel</th><th>Risk</th><th>Patient</th><th>DOS</th><th>Payer</th><th>CPT</th><th>Charge</th><th>Flags</th></tr>'+rows+'</table></div></div>'+
+      '<td><b>'+esc(e.id)+'</b></td><td>'+esc(e.pt)+'</td><td><span class="flag">'+esc((e.line||'iv').toUpperCase())+'</span></td><td>'+esc(e.dos||'—')+'</td></tr>';}).join('')
+    ||'<tr><td colspan="5" class="muted" style="text-align:center;padding:18px">No charts yet — paste/upload on Stage 1, or add one below.</td></tr>';
+  var addRow='<div class="card"><div class="grp">Add a chart manually</div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">'+
+    '<div style="flex:1;min-width:120px"><label>Chart #</label><input id="mAid"></div>'+
+    '<div style="flex:1;min-width:90px"><label>Initials</label><input id="mAini"></div>'+
+    '<div style="min-width:120px"><label>Line</label><select id="mAline"><option value="iv">IV / IM</option><option value="pep">Peptides</option><option value="bhrt">BHRT</option></select></div>'+
+    '<div style="min-width:120px"><label>Date</label><input id="mAdos"></div>'+
+    '<button class="btn ghost" onclick="addManual()">+ Add</button></div></div>';
+  return head+'<div class="card"><div style="overflow:auto"><table><tr><th>Sel</th><th>Chart #</th><th>Initials</th><th>Line</th><th>DOS</th></tr>'+rows+'</table></div></div>'+addRow+
     '<div class="navrow"><button class="btn ghost" onclick="go(1)">← Upload</button><button class="btn go" onclick="go(3)"'+(S.selected.length<1?' disabled':'')+'>Inspect '+S.selected.length+' chart(s) →</button></div>';
 }
 // ---- Stage 3 ----
@@ -239,7 +244,7 @@ function stage3(){
   }
   return '<div class="card"><div class="grp" style="margin:0 0 4px">Stage 3 · dual-document inspection · '+reviewedCount()+'/'+S.selected.length+' complete</div>'+
     '<div class="tabrow">'+tabs+'</div>'+
-    '<div style="font-weight:800">'+esc(e?e.pt:'')+' <span class="muted" style="font-weight:400;font-size:12px">· '+esc(e?e.dos:'')+' · '+esc(e?e.cpt:'')+'</span></div>'+
+    '<div style="font-weight:800">'+esc(e?e.pt:'')+' <span class="muted" style="font-weight:400;font-size:12px">· '+esc(e?e.id:'')+' · '+esc(e?e.dos:'')+' · '+esc(e?(e.line||'').toUpperCase():'')+'</span></div>'+
     '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">'+noteBox+billBox+'</div>'+
     '<div style="margin-top:12px"><button class="btn gold" onclick="runReview(\''+esc(id)+'\')"'+(rv.busy?' disabled':'')+'>'+(r?'↻ Re-analyze':'▶ Analyze with AI')+'</button>'+
       (curChart<S.selected.length-1?'<button class="btn ghost" style="margin-left:8px" onclick="curChart++;render()">Next chart →</button>':'')+'</div>'+
@@ -255,7 +260,7 @@ function pickDoc(id,which){_dropTarget={id:id,which:which};var inp=document.getE
 function stage4(){
   var rt=sessionRating();var pats=patternFlags();
   var results=S.selected.map(function(id,i){var e=encById(id);var r=S.review[id]&&S.review[id].result;
-    return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><div><b>'+(i+1)+'. '+esc(e?e.pt:'')+'</b> <span class="muted" style="font-size:11px">'+esc(e?e.dos:'')+' · '+esc(e?e.cpt:'')+'</span></div><span class="verdict '+(r?(r.status==='PASS'?'pass':'fail'):'pend')+'">'+(r?r.status:'NOT REVIEWED')+'</span></div>'+
+    return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><div><b>'+(i+1)+'. '+esc(e?e.pt:'')+'</b> <span class="muted" style="font-size:11px">'+esc(e?e.id:'')+' · '+esc(e?e.dos:'')+' · '+esc(e?(e.line||'').toUpperCase():'')+'</span></div><span class="verdict '+(r?(r.status==='PASS'?'pass':'fail'):'pend')+'">'+(r?r.status:'NOT REVIEWED')+'</span></div>'+
       (r?('<div class="muted" style="font-size:12.5px;margin-top:8px">'+esc(r.narrative||'')+'</div>'+
         (r.deficiencies||[]).map(function(x){return '<div class="findbox def" style="margin-top:6px">⚠ '+esc(x)+'</div>';}).join('')+
         (r.conflicts||[]).map(function(x){return '<div class="findbox con" style="margin-top:6px">⇄ '+esc(x)+'</div>';}).join('')+
