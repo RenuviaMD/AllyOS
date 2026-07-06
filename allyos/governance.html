@@ -73,6 +73,7 @@
 <input type="file" id="csvPick" accept=".csv,text/csv" style="display:none">
 <input type="file" id="chartPick" accept="image/*,.pdf" multiple style="display:none">
 <script src="allyos-auth.js"></script>
+<script src="allyos-credentials.js"></script>
 <script src="supabase-client.js"></script>
 <script src="governance-report.js"></script>
 <script>
@@ -332,7 +333,9 @@ function stage4(){
   return '<div class="card" style="border-color:'+(rt.findings?'#4a3c18':'#1e6e4a')+'"><div style="display:flex;justify-content:space-between;align-items:center"><div><div class="grp" style="margin:0">Session rating</div><div style="font-family:var(--fdisp);font-size:1.4rem;color:'+(rt.findings?'var(--gold)':'var(--green)')+'">'+rt.rating+'</div></div><div style="text-align:right"><div style="font-family:var(--fdisp);font-size:1.6rem;color:'+(rt.findings?'#f0857d':'var(--green)')+'">'+rt.findings+'</div><div class="muted" style="font-size:10px">Total findings</div></div></div></div>'+
     '<div class="grp">Encounter results</div>'+results+
     (pats.length?'<div class="card"><div class="grp" style="color:var(--gold)">Auto-detected pattern flags · set-wide</div>'+pats.map(function(p){return '<div class="pf">⚠ '+esc(p)+'</div>';}).join('')+'</div>':'')+
-    '<div class="card"><div class="grp">Finish</div><div style="display:flex;gap:10px;flex-wrap:wrap">'+
+    '<div class="card"><div class="grp">Finish</div>'+
+      '<div style="max-width:300px;margin-bottom:12px"><label>Report date / period '+(S.hdr.date?'':'<span style="color:#f0857d">— required</span>')+'</label><input value="'+esc(S.hdr.date||'')+'" placeholder="e.g. July 2026" oninput="setHdr(\'date\',this.value)"><div class="muted" style="font-size:10.5px;margin-top:4px">Prints as the binder\'s Report Date (also settable on Stage 1).</div></div>'+
+      '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
       '<button class="btn gold" onclick="previewPDF()">📄 Preview / download report</button>'+
       '<button class="btn go" onclick="signArchive()">🔒 Sign &amp; archive</button>'+
       '<span class="muted" style="font-size:11.5px;align-self:center">Sends to the per-clinic audit log; download the PDF to email the clinic.</span></div></div>'+
@@ -349,7 +352,13 @@ function buildPayload(){
     return {title:(LINE_LABEL[ln]||ln.toUpperCase())+' — active this period',
       items:(PARAMS[ln]||[]).map(function(p){return {label:p,status:(allDef.indexOf(p.toLowerCase().slice(0,14))>=0?'Missing':'Present')};})};
   });
-  return {clinic:S.hdr.clinic,reportDate:S.hdr.date,md:(window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||sess.name||'Medical Director',mdLicense:'Florida Medical License · ME 84789',
+  // §I Active/Unencumbered License — the clinic's licensed practitioners (MD-of-record + APPs/RNs).
+  var POS={MD:'Medical Director',DO:'Medical Director',ARNP:'ARNP · Nurse Practitioner',APRN:'ARNP · Nurse Practitioner',NP:'Nurse Practitioner',PA:'Physician Assistant',RN:'Registered Nurse'};
+  var roster=(window.AllyOSCred&&AllyOSCred.roster&&AllyOSCred.roster())||[];
+  var practitioners=roster.filter(function(s){return (s.status||'active')!=='inactive';}).map(function(s){
+    return [s.name||'—',(POS[(s.cred||'').toUpperCase().replace(/[^A-Z]/g,'')]||s.cred||'Provider'),(s.license||s.state_license||'—'),'Active'];
+  });
+  return {clinic:S.hdr.clinic,reportDate:S.hdr.date,practitioners:practitioners,md:(window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||sess.name||'Medical Director',mdLicense:'Florida Medical License · ME 84789',
     overall:rt.findings?'Needs correction':'Compliant',
     charts:S.selected.map(function(id){var e=encById(id);var r=S.review[id]&&S.review[id].result;return {ref:e?e.id:'',ini:e?e.pt:'',dos:e?e.dos:'',line:(e?e.line:'').toUpperCase(),status:r?r.status:'Not reviewed'};}),
     lines:lines,corrections:S.selected.reduce(function(acc,id){var e=encById(id);var r=S.review[id]&&S.review[id].result;if(r){(r.deficiencies||[]).forEach(function(x){acc.push({label:(e?e.pt:'')+' — '+x,resp:'Clinic provider',due:''});});}return acc;},[]),
