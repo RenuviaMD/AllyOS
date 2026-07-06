@@ -94,6 +94,10 @@ function load(){try{return JSON.parse(localStorage.getItem(CK)||'null')||{};}cat
 function save(){try{localStorage.setItem(CK,JSON.stringify(S));}catch(e){}}
 var S=load();
 S.stage=S.stage||1; S.statutory=S.statutory||{}; S.encounters=S.encounters||[]; S.selected=S.selected||[]; S.review=S.review||{}; S.hdr=S.hdr||{};
+// Repair stale saved state: drop selections whose encounter is gone, and never boot into a
+// review/summary stage with nothing to show (prevents landing on a blank Stage 3/4).
+S.selected=S.selected.filter(function(id){for(var i=0;i<S.encounters.length;i++)if(S.encounters[i].id===id)return true;return false;});
+if(S.stage>=3&&!S.selected.length)S.stage=S.encounters.length?2:1;
 if(!S.hdr.clinic&&sess.clinic)S.hdr.clinic=sess.clinic;
 
 function normLine(t){t=(''+(t||'')).toLowerCase();if(/bhrt|hrt|horm|estr|test|progest/.test(t))return 'bhrt';if(/pep|glp|semag|tirzep|bpc|sermorel|ipamorel/.test(t))return 'pep';return 'iv';}
@@ -302,7 +306,7 @@ function stage3(){
       '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" style="padding:6px 12px;font-size:12px" onclick="clearAllResults()">↻ Clear All AI Results</button><button class="btn ghost" style="padding:6px 12px;font-size:12px" onclick="swapChart()">⇄ Swap an encounter</button>'+(reviewedCount()>=S.selected.length?'<button class="btn gold" style="padding:6px 12px;font-size:12px" onclick="go(4)">All Encounters Done → Summary</button>':'')+'</div></div>'+
     '<div class="tabrow" style="margin-top:10px">'+tabs+'</div>'+
     head+
-    '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">'+noteBox+billBox+'</div>'+
+    '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">'+noteBox+'</div>'+
     '<div style="margin-top:12px"><button class="btn gold" onclick="runReview(\''+esc(id)+'\')"'+(rv.busy?' disabled':'')+'>'+(r?'↻ Re-analyze':'▶ Analyze with AI')+'</button>'+
       (rv.note||r?'<button class="btn ghost" style="margin-left:8px;padding:8px 12px;font-size:12px" onclick="clearChart(\''+esc(id)+'\')">✕ Clear encounter</button>':'')+
       '<span class="muted" style="font-size:11px;margin-left:10px">'+(rv.note?'📄 Note attached — click Analyze to review it.':'Drop the encounter note above to start.')+'</span></div>'+
