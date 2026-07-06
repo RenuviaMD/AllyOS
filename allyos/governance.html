@@ -147,9 +147,13 @@ function extractInto(id,file){
     }).catch(function(){var e=encById(id);if(e){e.parsing=false;e.err='Could not reach the parser.';}save();render();});
   });
 }
-// extractDoc: a chart dragged onto the pool (Stage 1/2) — create a slot, then parse into it.
+// extractDoc: a chart dragged onto the pool (Stage 1/2). If empty "skip" slots exist, fill the
+// first one; otherwise create a new slot. Then vision-parse into it.
 function extractDoc(file){
   if(!file)return;
+  var blank=null;
+  for(var i=0;i<S.encounters.length;i++){var e=S.encounters[i];if(e.blank&&!(S.review[e.id]&&S.review[e.id].note)&&!e.parsing){blank=e;break;}}
+  if(blank){extractInto(blank.id,file);return;}
   var tmpId='PARSING-'+(S.encounters.length+1)+'-'+Math.floor(Math.random()*1e6);
   S.encounters.push({id:tmpId,pt:'…',line:(S.hdr.line||'iv'),dos:'',risk:0,flags:[],parsing:true});
   save();render();
