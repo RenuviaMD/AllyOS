@@ -59,8 +59,17 @@ window.AllyOSAuth = (function () {
   function can(perm) { var s = session(); if (!s) return false; var r = ROLES[s.role]; return !!(r && r.can.indexOf(perm) >= 0); }
   function hasRole(roles) { var s = session(); return !!(s && roles.indexOf(s.role) >= 0); }
 
-  // greeting: MD/DO -> "Dr. <last>", others -> first/last as given
-  function greeting() { var s = session(); if (!s) return ''; return (s.credential === 'MD' || s.credential === 'DO') ? ('Dr. ' + s.name) : s.name; }
+  // greeting: MD/DO -> "Dr. <full name>, <cred>", others -> name as given.
+  // The MD-of-record's short "Falcon" seat expands to his full legal display name.
+  function greeting() {
+    var s = session(); if (!s) return '';
+    if (s.credential === 'MD' || s.credential === 'DO') {
+      var nm = s.name || '';
+      if (/^falcon$/i.test(nm.trim())) nm = 'Armando A. Falcon';
+      return 'Dr. ' + nm + ', ' + s.credential;
+    }
+    return s.name;
+  }
 
   // guard a page: call at top of each protected page with the roles allowed.
   function guard(roles) {
