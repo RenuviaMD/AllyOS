@@ -97,6 +97,9 @@ S.stage=S.stage||1; S.statutory=S.statutory||{}; S.encounters=S.encounters||[]; 
 if(!S.hdr.clinic&&sess.clinic)S.hdr.clinic=sess.clinic;
 
 function normLine(t){t=(''+(t||'')).toLowerCase();if(/bhrt|hrt|horm|estr|test|progest/.test(t))return 'bhrt';if(/pep|glp|semag|tirzep|bpc|sermorel|ipamorel/.test(t))return 'pep';return 'iv';}
+// Full name shows ON SCREEN for the MD's identification; e.pt (initials) is what goes to the report + archive.
+function initialsOf(nm){var p=(''+(nm||'')).replace(/,/g,' ').trim().split(/\s+/).filter(Boolean);if(!p.length)return '';if(p.length===1)return (p[0][0]||'').toUpperCase()+'.';return ((p[0][0]||'')+'.'+(p[p.length-1][0]||'')+'.').toUpperCase();}
+function dispPt(e){return (e&&e.name)?e.name:((e&&e.pt)||'—');}
 function num(x){var n=parseFloat((''+(x||'')).replace(/[^0-9.\-]/g,''));return isNaN(n)?0:n;}
 
 // ---- CSV parse (flexible column detection) ----
@@ -134,7 +137,9 @@ function extractInto(id,file){
       var e=encById(id);if(!e)return;
       e.parsing=false;
       if(!d||d.error){e.err=(d&&(d.detail||d.error))||'Could not read';save();render();return;}
+      if((''+(d.name||'')).trim())e.name=(''+d.name).trim();
       if((''+(d.initials||'')).trim())e.pt=(''+d.initials).trim();
+      else if(e.name&&(!e.pt||e.pt==='—'||e.pt==='…'))e.pt=initialsOf(e.name);
       if((''+(d.line||'')).trim())e.line=normLine(d.line);
       if((''+(d.date||'')).trim())e.dos=(''+d.date).trim();
       var newId=(''+(d.chart_id||'')).trim();
@@ -245,13 +250,13 @@ function stage2(){
   var head='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">'+
     '<div><div class="grp" style="margin:0">Stage 2 · chart selection · '+enc.length+' in pool</div><div style="font-family:var(--fdisp);font-size:1.2rem;margin-top:4px">Select 5 charts</div><div class="muted" style="font-size:11px">Random sampling — unbiased audit method. Cash-pay wellness; no billing risk score.</div></div>'+
     '<div style="display:flex;gap:8px;align-items:center"><button class="btn gold" onclick="randomFive()">🎲 Pick 5 at random</button><button class="btn ghost" onclick="clearSel()">Clear</button><span class="muted" style="font-size:12px">'+S.selected.length+' / 5</span></div></div>'+
-    (picks.length?'<div class="chiprow" style="margin-top:12px">'+picks.map(function(e,i){return '<span class="chip" style="border-color:var(--teal);color:var(--teal)">#'+(i+1)+' '+esc(e.pt)+' · '+esc(e.id)+'</span>';}).join('')+'</div>':'')+
+    (picks.length?'<div class="chiprow" style="margin-top:12px">'+picks.map(function(e,i){return '<span class="chip" style="border-color:var(--teal);color:var(--teal)">#'+(i+1)+' '+esc(dispPt(e))+' · '+esc(e.id)+'</span>';}).join('')+'</div>':'')+
     '</div>';
   var rows=enc.map(function(e){var sel=S.selected.indexOf(e.id)>=0;var busy=e.parsing;
     return '<tr class="'+(sel?'pick':'')+'"><td><button class="btn ghost" style="padding:3px 9px;font-size:11px" onclick="toggleSel(\''+esc(e.id)+'\')"'+(busy?' disabled':'')+'>'+(sel?'✓':'+')+'</button></td>'+
-      '<td>'+(busy?'<span class="muted">reading…</span>':'<b>'+esc(e.id)+'</b>'+(e.err?' <span class="flag dup">'+esc(e.err)+'</span>':''))+'</td><td>'+esc(e.pt)+'</td><td><span class="flag">'+esc((e.line||'iv').toUpperCase())+'</span></td><td>'+esc(e.dos||'—')+'</td></tr>';}).join('')
+      '<td>'+(busy?'<span class="muted">reading…</span>':'<b>'+esc(e.id)+'</b>'+(e.err?' <span class="flag dup">'+esc(e.err)+'</span>':''))+'</td><td>'+esc(busy?'…':dispPt(e))+'</td><td><span class="flag">'+esc((e.line||'iv').toUpperCase())+'</span></td><td>'+esc(e.dos||'—')+'</td></tr>';}).join('')
     ||'<tr><td colspan="5" class="muted" style="text-align:center;padding:18px">No charts yet — drag chart documents onto the box below.</td></tr>';
-  return head+'<div class="card"><div style="overflow:auto"><table><tr><th>Sel</th><th>Chart #</th><th>Initials</th><th>Line</th><th>DOS</th></tr>'+rows+'</table></div>'+
+  return head+'<div class="card"><div class="muted" style="font-size:11px;margin-bottom:8px">Full patient name shows here for your identification — the report &amp; audit log record initials only.</div><div style="overflow:auto"><table><tr><th>Sel</th><th>Chart #</th><th>Patient</th><th>Line</th><th>DOS</th></tr>'+rows+'</table></div>'+
     '<div class="drop" id="drop2" style="margin-top:12px;padding:20px" onclick="document.getElementById(\'chartPick\').click()"><div class="ic">⬆</div><div style="margin-top:6px;font-size:12px;font-weight:700">Drag chart documents here to add more</div><div class="muted" style="font-size:11px;margin-top:3px">PDF or photo — or click to browse</div></div>'+
     '<div style="margin-top:10px;text-align:center"><button class="btn ghost" onclick="startBlank()">No roster? Skip → start 5 blank chart notes</button></div></div>'+
     '<div class="navrow"><button class="btn ghost" onclick="go(1)">← Load</button><button class="btn go" onclick="go(3)"'+(S.selected.length<1?' disabled':'')+'>Inspect '+S.selected.length+' chart(s) →</button></div>';
@@ -264,12 +269,12 @@ function toggleClean(id){_cleanOpen[id]=!_cleanOpen[id];render();}
 function stage3(){
   if(curChart>=S.selected.length)curChart=0;
   var tabs=S.selected.map(function(id,i){var e=encById(id);var r=S.review[id]&&S.review[id].result;var cls=(i===curChart?'on ':'')+(r?(r.status==='PASS'?'pass':'fail'):'');
-    return '<div class="ctab '+cls+'" onclick="curChart='+i+';render()">'+(r?(r.status==='PASS'?'✓ ':'⚠ '):'')+'Chart '+(i+1)+' — '+esc(e?e.pt:'')+'</div>';}).join('');
+    return '<div class="ctab '+cls+'" onclick="curChart='+i+';render()">'+(r?(r.status==='PASS'?'✓ ':'⚠ '):'')+'Chart '+(i+1)+' — '+esc(e?dispPt(e):'')+'</div>';}).join('');
   var id=S.selected[curChart];var e=encById(id);var rv=S.review[id]||{};var r=rv.result;
   var noteBox='<div style="flex:1"><label>Chart / progress note</label><div class="drop" style="padding:22px" ondragover="dh(event,1)" ondragleave="dh(event,0)" ondrop="dropDoc(event,\''+esc(id)+'\',\'note\')" onclick="pickDoc(\''+esc(id)+'\',\'note\')">'+(rv.note?('📄 '+esc(rv.note.name||'attached')):'<div class="ic">⬆</div><div style="margin-top:6px;font-size:12px">Drop the chart note</div><div class="muted" style="font-size:11px">PDF or image</div>')+'</div></div>';
   // Chart header — name, DOS · line, verdict badge, Clear & Re-run
   var head='<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;border-top:1px solid var(--line);padding-top:12px;margin-top:6px">'+
-    '<div><div style="font-weight:800">Chart '+(curChart+1)+' — '+esc(e?e.pt:'')+'</div>'+
+    '<div><div style="font-weight:800">Chart '+(curChart+1)+' — '+esc(e?dispPt(e):'')+'</div>'+
       '<div class="muted" style="font-size:12px;margin-top:2px">DOS: '+esc(e?(e.dos||'—'):'—')+' · <span class="flag">'+esc(e?(e.line||'').toUpperCase():'')+'</span> · '+esc(e?e.id:'')+'</div></div>'+
     '<div style="display:flex;gap:8px;align-items:center">'+(r?'<span class="verdict '+(r.status==='PASS'?'pass':'fail')+'">'+r.status+'</span>':'<span class="verdict pend">NOT REVIEWED</span>')+
       (r?'<button class="btn ghost" style="padding:5px 11px;font-size:11px" onclick="runReview(\''+esc(id)+'\')">↻ Clear &amp; Re-run</button>':'')+'</div></div>';
@@ -305,7 +310,7 @@ function pickDoc(id,which){_dropTarget={id:id,which:which};var inp=document.getE
 function stage4(){
   var rt=sessionRating();var pats=patternFlags();
   var results=S.selected.map(function(id,i){var e=encById(id);var r=S.review[id]&&S.review[id].result;
-    return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><div><b>'+(i+1)+'. '+esc(e?e.pt:'')+'</b> <span class="muted" style="font-size:11px">'+esc(e?e.id:'')+' · '+esc(e?e.dos:'')+' · '+esc(e?(e.line||'').toUpperCase():'')+'</span></div><span class="verdict '+(r?(r.status==='PASS'?'pass':'fail'):'pend')+'">'+(r?r.status:'NOT REVIEWED')+'</span></div>'+
+    return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><div><b>'+(i+1)+'. '+esc(e?dispPt(e):'')+'</b> <span class="muted" style="font-size:11px">'+esc(e?e.id:'')+' · '+esc(e?e.dos:'')+' · '+esc(e?(e.line||'').toUpperCase():'')+'</span></div><span class="verdict '+(r?(r.status==='PASS'?'pass':'fail'):'pend')+'">'+(r?r.status:'NOT REVIEWED')+'</span></div>'+
       (r?('<div class="muted" style="font-size:12.5px;margin-top:8px">'+esc(r.narrative||'')+'</div>'+
         (r.deficiencies||[]).map(function(x){return '<div class="findbox def" style="margin-top:6px">⚠ '+esc(x)+'</div>';}).join('')+
         (r.conflicts||[]).map(function(x){return '<div class="findbox con" style="margin-top:6px">⇄ '+esc(x)+'</div>';}).join('')+
