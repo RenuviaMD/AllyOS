@@ -194,7 +194,7 @@ function attach(id,which,input){if(!input.files||!input.files[0])return;var f=in
 function runReview(id){
   var e=encById(id);var rv=S.review[id]||{};if(!rv.note){alert('Attach the progress note first.');return;}
   rv.busy=true;save();render();
-  var body={mode:'dual',line:e.line,params:PARAMS[e.line]||PARAMS.iv,note:rv.note,superbill:rv.bill||null,clinic_id:(sess.clinicId||null)};
+  var body={mode:'dual',line:e.line,params:PARAMS[e.line]||PARAMS.iv,note:rv.note,clinic_id:(sess.clinicId||null)};
   var call=(window.AllyOSCloud&&AllyOSCloud.postAuthed)?AllyOSCloud.postAuthed('/.netlify/functions/governance-parse',body):fetch('/.netlify/functions/governance-parse',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
   Promise.resolve(call).then(function(r){return r.json();}).then(function(d){
     S.review[id]=S.review[id]||{};S.review[id].busy=false;
@@ -245,7 +245,7 @@ function stage1(){
     '</div></div>'+
     '<div class="card"><div class="grp">MD statutory items — confirm before reviewing encounters</div>'+stat+'</div>'+
     '<div class="card"><div class="grp">Stage 1 · load encounters</div>'+
-    '<div class="drop" id="drop" onclick="document.getElementById(\'chartPick\').click()"><div class="ic">⬆</div><div style="margin-top:8px;font-weight:700">Drag &amp; drop encounter documents — or click to browse</div><div class="muted" style="font-size:11px;margin-top:4px">Progress notes / superbills (PDF or photo, handwritten OK). AI reads each and pulls encounter #, initials, line &amp; date — drop several at once. The doc is kept as that encounter\'s note for review.</div></div>'+
+    '<div class="drop" id="drop" onclick="document.getElementById(\'chartPick\').click()"><div class="ic">⬆</div><div style="margin-top:8px;font-weight:700">Drag &amp; drop encounter documents — or click to browse</div><div class="muted" style="font-size:11px;margin-top:4px">Encounter / progress notes (PDF or photo, handwritten OK). AI reads each and pulls encounter #, initials, line &amp; date — drop several at once. The doc is kept as that encounter\'s note for review.</div></div>'+
     '<div style="margin-top:12px;text-align:center"><span class="muted" style="font-size:11px">Have a roster spreadsheet instead? <a href="#" onclick="document.getElementById(\'csvPick\').click();return false" style="color:var(--teal)">Upload CSV</a> <span style="opacity:.6">(encounter · initials · line · date)</span></span></div>'+
     '<div style="margin-top:14px;text-align:center"><button class="btn ghost" onclick="startBlank()">Skip — start 5 blank encounter notes →</button><div class="muted" style="font-size:11px;margin-top:5px">No roster needed. You\'ll drop one note per encounter in the review step; AI reads each.</div></div>'+
     (S.encounters.length?'<div class="note" style="margin-top:12px">✓ '+S.encounters.length+' encounter(s) loaded'+(S.encounters.some(function(e){return e.parsing;})?' · reading…':'')+'. <a href="#" onclick="go(2);return false" style="color:var(--teal)">Continue to Encounter Selection →</a></div>':'')+
