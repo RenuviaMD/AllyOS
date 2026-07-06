@@ -23,6 +23,7 @@
  .hgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 16px}@media(max-width:640px){.hgrid{grid-template-columns:1fr}}
  label{display:block;font-size:11px;color:var(--dim);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em}
  input,select,textarea{width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:8px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px}
+ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.85);cursor:pointer}
  .drop{border:2px dashed var(--line2);border-radius:12px;padding:34px 18px;text-align:center;color:var(--muted);cursor:pointer;transition:.15s}
  .drop.hi{border-color:var(--teal);background:rgba(46,197,193,.06);color:var(--ink)}
  .drop .ic{font-size:26px;opacity:.8}
@@ -107,6 +108,8 @@ function normLine(t){t=(''+(t||'')).toLowerCase();if(/bhrt|hrt|horm|estr|test|pr
 // Full name shows ON SCREEN for the MD's identification; e.pt (initials) is what goes to the report + archive.
 function initialsOf(nm){var p=(''+(nm||'')).replace(/,/g,' ').trim().split(/\s+/).filter(Boolean);if(!p.length)return '';if(p.length===1)return (p[0][0]||'').toUpperCase()+'.';return ((p[0][0]||'')+'.'+(p[p.length-1][0]||'')+'.').toUpperCase();}
 function dispPt(e){return (e&&e.name)?e.name:((e&&e.pt)||'—');}
+// A YYYY-MM-DD (calendar picker) value prints as a readable date on the binder; other text passes through.
+function fmtDate(d){d=''+(d||'');var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(d);if(!m)return d;var MO=['January','February','March','April','May','June','July','August','September','October','November','December'];return MO[+m[2]-1]+' '+(+m[3])+', '+m[1];}
 function num(x){var n=parseFloat((''+(x||'')).replace(/[^0-9.\-]/g,''));return isNaN(n)?0:n;}
 
 // ---- CSV parse (flexible column detection) ----
@@ -242,7 +245,7 @@ function stage1(){
     return '<div class="stat"><span class="lbl">'+esc(it)+'</span><span class="yn"><button class="y'+(val==='y'?' on':'')+'" onclick="setStat('+i+',\'y\')">Y</button><button class="n'+(val==='n'?' on':'')+'" onclick="setStat('+i+',\'n\')">N</button></span></div>';}).join('');
   return '<div class="card"><div class="grp">Clinic &amp; period</div><div class="hgrid">'+
     '<div><label>Clinic (legal name)</label><input id="hClinic" value="'+esc(h.clinic||'')+'" oninput="setHdr(\'clinic\',this.value)"></div>'+
-    '<div><label>Report date</label><input id="hDate" value="'+esc(h.date||'')+'" placeholder="e.g. July 2026" oninput="setHdr(\'date\',this.value)"></div>'+
+    '<div><label>Report date</label><input id="hDate" type="date" value="'+esc(h.date||'')+'" oninput="setHdr(\'date\',this.value)"></div>'+
     '<div><label>Active line (default for encounters)</label><select onchange="setHdr(\'line\',this.value)"><option value="iv"'+(h.line==='iv'?' selected':'')+'>IV / IM</option><option value="pep"'+(h.line==='pep'?' selected':'')+'>Peptides</option><option value="bhrt"'+(h.line==='bhrt'?' selected':'')+'>BHRT / HRT</option></select></div>'+
     '<div><label>EMR / source</label><input id="hEmr" value="'+esc(h.emr||'')+'" placeholder="e.g. clinic EMR export" oninput="setHdr(\'emr\',this.value)"></div>'+
     '</div></div>'+
@@ -334,7 +337,7 @@ function stage4(){
     '<div class="grp">Encounter results</div>'+results+
     (pats.length?'<div class="card"><div class="grp" style="color:var(--gold)">Auto-detected pattern flags · set-wide</div>'+pats.map(function(p){return '<div class="pf">⚠ '+esc(p)+'</div>';}).join('')+'</div>':'')+
     '<div class="card"><div class="grp">Finish</div>'+
-      '<div style="max-width:300px;margin-bottom:12px"><label>Report date / period '+(S.hdr.date?'':'<span style="color:#f0857d">— required</span>')+'</label><input value="'+esc(S.hdr.date||'')+'" placeholder="e.g. July 2026" oninput="setHdr(\'date\',this.value)"><div class="muted" style="font-size:10.5px;margin-top:4px">Prints as the binder\'s Report Date (also settable on Stage 1).</div></div>'+
+      '<div style="max-width:300px;margin-bottom:12px"><label>Report date '+(S.hdr.date?'':'<span style="color:#f0857d">— required</span>')+'</label><input type="date" value="'+esc(S.hdr.date||'')+'" oninput="setHdr(\'date\',this.value)"><div class="muted" style="font-size:10.5px;margin-top:4px">Prints as the binder\'s Report Date (also settable on Stage 1).</div></div>'+
       '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
       '<button class="btn gold" onclick="previewPDF()">📄 Preview / download report</button>'+
       '<button class="btn go" onclick="signArchive()">🔒 Sign &amp; archive</button>'+
@@ -358,7 +361,7 @@ function buildPayload(){
   var practitioners=roster.filter(function(s){return (s.status||'active')!=='inactive';}).map(function(s){
     return [s.name||'—',(POS[(s.cred||'').toUpperCase().replace(/[^A-Z]/g,'')]||s.cred||'Provider'),(s.license||s.state_license||'—'),'Active'];
   });
-  return {clinic:S.hdr.clinic,reportDate:S.hdr.date,practitioners:practitioners,md:(window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||sess.name||'Medical Director',mdLicense:'Florida Medical License · ME 84789',
+  return {clinic:S.hdr.clinic,reportDate:fmtDate(S.hdr.date),practitioners:practitioners,md:(window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||sess.name||'Medical Director',mdLicense:'Florida Medical License · ME 84789',
     overall:rt.findings?'Needs correction':'Compliant',
     charts:S.selected.map(function(id){var e=encById(id);var r=S.review[id]&&S.review[id].result;return {ref:e?e.id:'',ini:e?e.pt:'',dos:e?e.dos:'',line:(e?e.line:'').toUpperCase(),status:r?r.status:'Not reviewed'};}),
     lines:lines,corrections:S.selected.reduce(function(acc,id){var e=encById(id);var r=S.review[id]&&S.review[id].result;if(r){(r.deficiencies||[]).forEach(function(x){acc.push({label:(e?e.pt:'')+' — '+x,resp:'Clinic provider',due:''});});}return acc;},[]),
@@ -367,7 +370,7 @@ function buildPayload(){
 function previewPDF(){if(!window.AllyOSGovReport){alert('Report module not loaded.');return;}AllyOSGovReport.download(buildPayload()).catch(function(e){alert('Report error: '+(e&&e.message||e));});}
 function signArchive(){
   var rt=sessionRating();
-  var rec={clinic_id:sess.clinicId||null,clinic:S.hdr.clinic,report_date:S.hdr.date||'',rating:rt.rating,findings:rt.findings,
+  var rec={clinic_id:sess.clinicId||null,clinic:S.hdr.clinic,report_date:fmtDate(S.hdr.date)||'',rating:rt.rating,findings:rt.findings,
     charts:S.selected.map(function(id){var e=encById(id);var r=S.review[id]&&S.review[id].result;return {ref:e?e.id:'',ini:e?e.pt:'',status:r?r.status:'—',deficiencies:(r&&r.deficiencies)||[]};})};
   if(window.AllyOSCloud&&AllyOSCloud.postAuthed){
     AllyOSCloud.postAuthed('/.netlify/functions/governance-archive',rec).then(function(r){return r.json();}).then(function(d){
