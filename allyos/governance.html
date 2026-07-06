@@ -64,7 +64,7 @@
 </div>
 <div class="wrap">
   <h1>Live Governance Inspection</h1>
-  <p class="sub" id="hdrSub">Wellness directorship · non-AHCA oversight · 4-stage chart audit</p>
+  <p class="sub" id="hdrSub">Wellness directorship · non-AHCA oversight · 4-stage encounter audit</p>
 
   <div class="stages" id="stages"></div>
   <div id="view"></div>
@@ -159,26 +159,26 @@ function extractDoc(file){
   var blank=null;
   for(var i=0;i<S.encounters.length;i++){var e=S.encounters[i];if(e.blank&&!(S.review[e.id]&&S.review[e.id].note)&&!e.parsing){blank=e;break;}}
   if(blank){extractInto(blank.id,file);return;}
-  var tmpId='PARSING-'+(S.encounters.length+1)+'-'+Math.floor(Math.random()*1e6);
+  var tmpId='ENC-'+(S.encounters.length+1)+'-'+Math.floor(Math.random()*1e6);
   S.encounters.push({id:tmpId,pt:'…',line:(S.hdr.line||'iv'),dos:'',risk:0,flags:[],parsing:true});
   save();render();
   extractInto(tmpId,file);
 }
-// startBlank: no roster — jump straight to 5 empty chart-note slots and drop the notes in Stage 3.
+// startBlank: no roster — jump straight to 5 empty encounter slots and drop the notes in Stage 3.
 function startBlank(){
-  if(S.encounters.length&&!confirm('Start 5 blank chart-note slots? This clears the current pool.'))return;
-  var enc=[];for(var i=0;i<5;i++)enc.push({id:'CHART-'+(i+1),pt:'—',line:(S.hdr.line||'iv'),dos:'',risk:0,flags:[],blank:true});
+  if(S.encounters.length&&!confirm('Start 5 blank encounter slots? This clears the current pool.'))return;
+  var enc=[];for(var i=0;i<5;i++)enc.push({id:'ENC-'+(i+1),pt:'—',line:(S.hdr.line||'iv'),dos:'',risk:0,flags:[],blank:true});
   S.encounters=enc;S.selected=enc.map(function(e){return e.id;});S.review={};save();S.stage=3;render();
 }
 
 // ---- selection (random — unbiased audit; cash-pay wellness, no billing risk score) ----
 function toggleSel(id){var k=S.selected.indexOf(id);if(k>=0)S.selected.splice(k,1);else if(S.selected.length<5)S.selected.push(id);save();render();}
-function randomFive(){var pool=S.encounters.slice();if(!pool.length){alert('Drop chart documents first (Stage 1).');return;}var idx=pool.map(function(_,i){return i;});for(var i=idx.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idx[i];idx[i]=idx[j];idx[j]=t;}S.selected=idx.slice(0,Math.min(5,pool.length)).map(function(i){return pool[i].id;});save();render();}
+function randomFive(){var pool=S.encounters.slice();if(!pool.length){alert('Drop encounter documents first (Stage 1).');return;}var idx=pool.map(function(_,i){return i;});for(var i=idx.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idx[i];idx[i]=idx[j];idx[j]=t;}S.selected=idx.slice(0,Math.min(5,pool.length)).map(function(i){return pool[i].id;});save();render();}
 function clearSel(){S.selected=[];save();render();}
 function removeChart(id){var i=S.encounters.map(function(e){return e.id;}).indexOf(id);if(i>=0)S.encounters.splice(i,1);var s=S.selected.indexOf(id);if(s>=0)S.selected.splice(s,1);if(S.review[id])delete S.review[id];save();render();}
-function clearPool(){if(S.encounters.length&&!confirm('Clear ALL charts and start over?'))return;S.encounters=[];S.selected=[];S.review={};save();render();}
+function clearPool(){if(S.encounters.length&&!confirm('Clear ALL encounters and start over?'))return;S.encounters=[];S.selected=[];S.review={};save();render();}
 // clear a single chart back to a blank slot (keeps its place so you can re-drop the note)
-function clearChart(id){if(!confirm('Clear this chart\'s note and result so you can re-drop it?'))return;var e=encById(id);if(e){e.name='';e.pt='—';e.dos='';e.blank=true;e.err=null;e.parsing=false;}S.review[id]={};save();render();}
+function clearChart(id){if(!confirm('Clear this encounter\'s note and result so you can re-drop it?'))return;var e=encById(id);if(e){e.name='';e.pt='—';e.dos='';e.blank=true;e.err=null;e.parsing=false;}S.review[id]={};save();render();}
 function encById(id){for(var i=0;i<S.encounters.length;i++)if(S.encounters[i].id===id)return S.encounters[i];return null;}
 
 // ---- dual-doc AI review ----
@@ -203,17 +203,17 @@ function patternFlags(){
   var out=[];var sel=S.selected.map(encById).filter(Boolean);
   // Cross-chart shared deficiencies (a systemic documentation gap, not a one-off).
   var counts={};S.selected.forEach(function(id){var r=S.review[id]&&S.review[id].result;if(r)(r.deficiencies||[]).forEach(function(x){var k=(''+x).replace(/^[^—:]*[—:]\s*/,'').toLowerCase().slice(0,44);counts[k]=(counts[k]||0)+1;});});
-  Object.keys(counts).forEach(function(k){if(counts[k]>=2)out.push(counts[k]+' of '+sel.length+' charts share a deficiency: '+k);});
+  Object.keys(counts).forEach(function(k){if(counts[k]>=2)out.push(counts[k]+' of '+sel.length+' encounters share a deficiency: '+k);});
   var pep=sel.filter(function(e){return e.line==='pep';}).length;
-  if(pep>=2)out.push(pep+' peptide chart(s) — confirm grade→consent-tier and an individualized POC per encounter');
+  if(pep>=2)out.push(pep+' peptide encounter(s) — confirm grade→consent-tier and an individualized POC per encounter');
   var fails=S.selected.filter(function(id){var r=S.review[id]&&S.review[id].result;return r&&r.status==='FAIL';}).length;
-  if(fails)out.push(fails+' of '+sel.length+' charts did not pass — corrective actions listed above');
+  if(fails)out.push(fails+' of '+sel.length+' encounters did not pass — corrective actions listed above');
   return out;
 }
 function sessionRating(){var f=0;S.selected.forEach(function(id){var r=S.review[id]&&S.review[id].result;if(r&&r.status==='FAIL')f++;if(r){f+=(r.deficiencies||[]).length+(r.conflicts||[]).length;}});return {findings:f,rating:f?'ACTION REQ':'CLEAN'};}
 
 // ============ RENDER ============
-var STAGES=[{n:1,t:'Load Charts'},{n:2,t:'Chart Selection'},{n:3,t:'AI Review'},{n:4,t:'Summary'}];
+var STAGES=[{n:1,t:'Load Encounters'},{n:2,t:'Encounter Selection'},{n:3,t:'AI Review'},{n:4,t:'Summary'}];
 function go(n){if(n===3&&S.selected.length<1)return;S.stage=n;save();render();}
 function render(){
   document.getElementById('stages').innerHTML=STAGES.map(function(s){
@@ -234,15 +234,15 @@ function stage1(){
   return '<div class="card"><div class="grp">Clinic &amp; period</div><div class="hgrid">'+
     '<div><label>Clinic (legal name)</label><input id="hClinic" value="'+esc(h.clinic||'')+'" oninput="setHdr(\'clinic\',this.value)"></div>'+
     '<div><label>Report date</label><input id="hDate" value="'+esc(h.date||'')+'" placeholder="e.g. July 2026" oninput="setHdr(\'date\',this.value)"></div>'+
-    '<div><label>Active line (default for charts)</label><select onchange="setHdr(\'line\',this.value)"><option value="iv"'+(h.line==='iv'?' selected':'')+'>IV / IM</option><option value="pep"'+(h.line==='pep'?' selected':'')+'>Peptides</option><option value="bhrt"'+(h.line==='bhrt'?' selected':'')+'>BHRT / HRT</option></select></div>'+
+    '<div><label>Active line (default for encounters)</label><select onchange="setHdr(\'line\',this.value)"><option value="iv"'+(h.line==='iv'?' selected':'')+'>IV / IM</option><option value="pep"'+(h.line==='pep'?' selected':'')+'>Peptides</option><option value="bhrt"'+(h.line==='bhrt'?' selected':'')+'>BHRT / HRT</option></select></div>'+
     '<div><label>EMR / source</label><input id="hEmr" value="'+esc(h.emr||'')+'" placeholder="e.g. clinic EMR export" oninput="setHdr(\'emr\',this.value)"></div>'+
     '</div></div>'+
-    '<div class="card"><div class="grp">MD statutory items — confirm before reviewing charts</div>'+stat+'</div>'+
-    '<div class="card"><div class="grp">Stage 1 · load charts</div>'+
-    '<div class="drop" id="drop" onclick="document.getElementById(\'chartPick\').click()"><div class="ic">⬆</div><div style="margin-top:8px;font-weight:700">Drag &amp; drop chart documents — or click to browse</div><div class="muted" style="font-size:11px;margin-top:4px">Progress notes / superbills (PDF or photo, handwritten OK). AI reads each and pulls chart #, initials, line &amp; date — drop several at once. The doc is kept as that chart\'s note for review.</div></div>'+
-    '<div style="margin-top:12px;text-align:center"><span class="muted" style="font-size:11px">Have a roster spreadsheet instead? <a href="#" onclick="document.getElementById(\'csvPick\').click();return false" style="color:var(--teal)">Upload CSV</a> <span style="opacity:.6">(chart · initials · line · date)</span></span></div>'+
-    '<div style="margin-top:14px;text-align:center"><button class="btn ghost" onclick="startBlank()">Skip — start 5 blank chart notes →</button><div class="muted" style="font-size:11px;margin-top:5px">No roster needed. You\'ll drop one note per chart in the review step; AI reads each.</div></div>'+
-    (S.encounters.length?'<div class="note" style="margin-top:12px">✓ '+S.encounters.length+' chart(s) loaded'+(S.encounters.some(function(e){return e.parsing;})?' · reading…':'')+'. <a href="#" onclick="go(2);return false" style="color:var(--teal)">Continue to Chart Selection →</a></div>':'')+
+    '<div class="card"><div class="grp">MD statutory items — confirm before reviewing encounters</div>'+stat+'</div>'+
+    '<div class="card"><div class="grp">Stage 1 · load encounters</div>'+
+    '<div class="drop" id="drop" onclick="document.getElementById(\'chartPick\').click()"><div class="ic">⬆</div><div style="margin-top:8px;font-weight:700">Drag &amp; drop encounter documents — or click to browse</div><div class="muted" style="font-size:11px;margin-top:4px">Progress notes / superbills (PDF or photo, handwritten OK). AI reads each and pulls encounter #, initials, line &amp; date — drop several at once. The doc is kept as that encounter\'s note for review.</div></div>'+
+    '<div style="margin-top:12px;text-align:center"><span class="muted" style="font-size:11px">Have a roster spreadsheet instead? <a href="#" onclick="document.getElementById(\'csvPick\').click();return false" style="color:var(--teal)">Upload CSV</a> <span style="opacity:.6">(encounter · initials · line · date)</span></span></div>'+
+    '<div style="margin-top:14px;text-align:center"><button class="btn ghost" onclick="startBlank()">Skip — start 5 blank encounter notes →</button><div class="muted" style="font-size:11px;margin-top:5px">No roster needed. You\'ll drop one note per encounter in the review step; AI reads each.</div></div>'+
+    (S.encounters.length?'<div class="note" style="margin-top:12px">✓ '+S.encounters.length+' encounter(s) loaded'+(S.encounters.some(function(e){return e.parsing;})?' · reading…':'')+'. <a href="#" onclick="go(2);return false" style="color:var(--teal)">Continue to Encounter Selection →</a></div>':'')+
     '</div>';
 }
 function setHdr(k,v){S.hdr[k]=v;save();}
@@ -252,34 +252,34 @@ function stage2(){
   var enc=S.encounters;
   var picks=S.selected.map(encById).filter(Boolean);
   var head='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">'+
-    '<div><div class="grp" style="margin:0">Stage 2 · chart selection · '+enc.length+' in pool</div><div style="font-family:var(--fdisp);font-size:1.2rem;margin-top:4px">Select 5 charts</div><div class="muted" style="font-size:11px">Random sampling — unbiased audit method. Cash-pay wellness; no billing risk score.</div></div>'+
+    '<div><div class="grp" style="margin:0">Stage 2 · encounter selection · '+enc.length+' in pool</div><div style="font-family:var(--fdisp);font-size:1.2rem;margin-top:4px">Select 5 encounters</div><div class="muted" style="font-size:11px">Random sampling — unbiased audit method. Cash-pay wellness; no billing risk score.</div></div>'+
     '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn gold" onclick="randomFive()">🎲 Pick 5 at random</button><button class="btn ghost" onclick="clearSel()">Clear selection</button><button class="btn ghost" onclick="clearPool()">🗑 Clear all</button><span class="muted" style="font-size:12px">'+S.selected.length+' / 5</span></div></div>'+
     (picks.length?'<div class="chiprow" style="margin-top:12px">'+picks.map(function(e,i){return '<span class="chip" style="border-color:var(--teal);color:var(--teal)">#'+(i+1)+' '+esc(dispPt(e))+' · '+esc(e.id)+'</span>';}).join('')+'</div>':'')+
     '</div>';
   var rows=enc.map(function(e){var sel=S.selected.indexOf(e.id)>=0;var busy=e.parsing;
     return '<tr class="'+(sel?'pick':'')+'"><td><button class="btn ghost" style="padding:3px 9px;font-size:11px" onclick="toggleSel(\''+esc(e.id)+'\')"'+(busy?' disabled':'')+'>'+(sel?'✓':'+')+'</button></td>'+
       '<td>'+(busy?'<span class="muted">reading…</span>':'<b>'+esc(e.id)+'</b>'+(e.err?' <span class="flag dup">'+esc(e.err)+'</span>':''))+'</td><td>'+esc(busy?'…':dispPt(e))+'</td><td><span class="flag">'+esc((e.line||'iv').toUpperCase())+'</span></td><td>'+esc(e.dos||'—')+'</td>'+
-      '<td style="text-align:right"><button class="btn ghost" style="padding:3px 8px;font-size:11px" onclick="removeChart(\''+esc(e.id)+'\')" title="Remove this chart">✕</button></td></tr>';}).join('')
-    ||'<tr><td colspan="6" class="muted" style="text-align:center;padding:18px">No charts yet — drag chart documents onto the box below.</td></tr>';
-  return head+'<div class="card"><div class="muted" style="font-size:11px;margin-bottom:8px">Full patient name shows here for your identification — the report &amp; audit log record initials only.</div><div style="overflow:auto"><table><tr><th>Sel</th><th>Chart #</th><th>Patient</th><th>Line</th><th>DOS</th><th></th></tr>'+rows+'</table></div>'+
-    '<div class="drop" id="drop2" style="margin-top:12px;padding:20px" onclick="document.getElementById(\'chartPick\').click()"><div class="ic">⬆</div><div style="margin-top:6px;font-size:12px;font-weight:700">Drag chart documents here to add more</div><div class="muted" style="font-size:11px;margin-top:3px">PDF or photo — or click to browse</div></div>'+
-    '<div style="margin-top:10px;text-align:center"><button class="btn ghost" onclick="startBlank()">No roster? Skip → start 5 blank chart notes</button></div></div>'+
-    '<div class="navrow"><button class="btn ghost" onclick="go(1)">← Load</button><button class="btn go" onclick="go(3)"'+(S.selected.length<1?' disabled':'')+'>Inspect '+S.selected.length+' chart(s) →</button></div>';
+      '<td style="text-align:right"><button class="btn ghost" style="padding:3px 8px;font-size:11px" onclick="removeChart(\''+esc(e.id)+'\')" title="Remove this encounter">✕</button></td></tr>';}).join('')
+    ||'<tr><td colspan="6" class="muted" style="text-align:center;padding:18px">No encounters yet — drag encounter documents onto the box below.</td></tr>';
+  return head+'<div class="card"><div class="muted" style="font-size:11px;margin-bottom:8px">Full patient name shows here for your identification — the report &amp; audit log record initials only.</div><div style="overflow:auto"><table><tr><th>Sel</th><th>Encounter</th><th>Patient</th><th>Line</th><th>DOS</th><th></th></tr>'+rows+'</table></div>'+
+    '<div class="drop" id="drop2" style="margin-top:12px;padding:20px" onclick="document.getElementById(\'chartPick\').click()"><div class="ic">⬆</div><div style="margin-top:6px;font-size:12px;font-weight:700">Drag encounter documents here to add more</div><div class="muted" style="font-size:11px;margin-top:3px">PDF or photo — or click to browse</div></div>'+
+    '<div style="margin-top:10px;text-align:center"><button class="btn ghost" onclick="startBlank()">No roster? Skip → start 5 blank encounter notes</button></div></div>'+
+    '<div class="navrow"><button class="btn ghost" onclick="go(1)">← Load</button><button class="btn go" onclick="go(3)"'+(S.selected.length<1?' disabled':'')+'>Inspect '+S.selected.length+' encounter(s) →</button></div>';
 }
 // ---- Stage 3 (dual-document inspection — mirrors AHCA AuditPro; Sonnet vision reads both docs) ----
 var curChart=0;var _cleanOpen={};
 function clearAllResults(){if(!confirm('Clear all AI results for this session? Attached documents stay.'))return;S.selected.forEach(function(id){if(S.review[id]){S.review[id].result=null;S.review[id].err=null;}});save();render();}
-function swapChart(){var id=S.selected[curChart];var pool=S.encounters.filter(function(e){return S.selected.indexOf(e.id)<0;});if(!pool.length){alert('No other charts in the pool to swap in — drop more on Stage 1.');return;}var pick=pool[Math.floor(Math.random()*pool.length)];S.selected[curChart]=pick.id;save();render();}
+function swapChart(){var id=S.selected[curChart];var pool=S.encounters.filter(function(e){return S.selected.indexOf(e.id)<0;});if(!pool.length){alert('No other encounters in the pool to swap in — drop more on Stage 1.');return;}var pick=pool[Math.floor(Math.random()*pool.length)];S.selected[curChart]=pick.id;save();render();}
 function toggleClean(id){_cleanOpen[id]=!_cleanOpen[id];render();}
 function stage3(){
   if(curChart>=S.selected.length)curChart=0;
   var tabs=S.selected.map(function(id,i){var e=encById(id);var r=S.review[id]&&S.review[id].result;var cls=(i===curChart?'on ':'')+(r?(r.status==='PASS'?'pass':'fail'):'');
-    return '<div class="ctab '+cls+'" onclick="curChart='+i+';render()">'+(r?(r.status==='PASS'?'✓ ':'⚠ '):'')+'Chart '+(i+1)+' — '+esc(e?dispPt(e):'')+'</div>';}).join('');
+    return '<div class="ctab '+cls+'" onclick="curChart='+i+';render()">'+(r?(r.status==='PASS'?'✓ ':'⚠ '):'')+'Encounter '+(i+1)+' — '+esc(e?dispPt(e):'')+'</div>';}).join('');
   var id=S.selected[curChart];var e=encById(id);var rv=S.review[id]||{};var r=rv.result;
-  var noteBox='<div style="flex:1"><label>Chart / progress note</label><div class="drop" style="padding:22px" ondragover="dh(event,1)" ondragleave="dh(event,0)" ondrop="dropDoc(event,\''+esc(id)+'\',\'note\')" onclick="pickDoc(\''+esc(id)+'\',\'note\')">'+(rv.note?('📄 '+esc(rv.note.name||'attached')):'<div class="ic">⬆</div><div style="margin-top:6px;font-size:12px">Drop the chart note</div><div class="muted" style="font-size:11px">PDF or image</div>')+'</div></div>';
+  var noteBox='<div style="flex:1"><label>Encounter note</label><div class="drop" style="padding:22px" ondragover="dh(event,1)" ondragleave="dh(event,0)" ondrop="dropDoc(event,\''+esc(id)+'\',\'note\')" onclick="pickDoc(\''+esc(id)+'\',\'note\')">'+(rv.note?('📄 '+esc(rv.note.name||'attached')):'<div class="ic">⬆</div><div style="margin-top:6px;font-size:12px">Drop the encounter note</div><div class="muted" style="font-size:11px">PDF or image</div>')+'</div></div>';
   // Chart header — name, DOS · line, verdict badge, Clear & Re-run
   var head='<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;border-top:1px solid var(--line);padding-top:12px;margin-top:6px">'+
-    '<div><div style="font-weight:800">Chart '+(curChart+1)+' — '+esc(e?dispPt(e):'')+'</div>'+
+    '<div><div style="font-weight:800">Encounter '+(curChart+1)+' — '+esc(e?dispPt(e):'')+'</div>'+
       '<div class="muted" style="font-size:12px;margin-top:2px">DOS: '+esc(e?(e.dos||'—'):'—')+' · <span class="flag">'+esc(e?(e.line||'').toUpperCase():'')+'</span> · '+esc(e?e.id:'')+'</div></div>'+
     '<div style="display:flex;gap:8px;align-items:center">'+(r?'<span class="verdict '+(r.status==='PASS'?'pass':'fail')+'">'+r.status+'</span>':'<span class="verdict pend">NOT REVIEWED</span>')+
       (r?'<button class="btn ghost" style="padding:5px 11px;font-size:11px" onclick="runReview(\''+esc(id)+'\')">↻ Clear &amp; Re-run</button>':'')+'</div></div>';
@@ -292,18 +292,18 @@ function stage3(){
       (r.narrative?'<div class="findbox">'+esc(r.narrative)+'</div>':'')+
       (r.deficiencies||[]).map(function(x){return '<div class="findbox def">⚠ '+esc(x)+'</div>';}).join('')+
       (ncl?'<div class="findbox" style="cursor:pointer" onclick="toggleClean(\''+esc(id)+'\')"><b style="color:var(--green)">'+(_cleanOpen[id]?'▾':'▸')+' CLEAN FIELDS ('+ncl+')</b> <span class="muted">— click to '+(_cleanOpen[id]?'collapse':'expand')+'</span>'+(_cleanOpen[id]?'<div style="margin-top:8px">'+(r.clean||[]).map(function(x){return '<div style="color:var(--green);font-size:12px;margin:3px 0">✓ '+esc(x)+'</div>';}).join('')+'</div>':'')+'</div>':'')+
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px;flex-wrap:wrap"><span style="font-size:12.5px;color:'+(nd?'var(--gold)':'var(--green)')+'">'+(nd?('⚠ Chart '+(curChart+1)+' — '+nd+' deficiency(ies) to correct'):('✓ Chart '+(curChart+1)+' — No deficiencies'))+'</span>'+
-        (curChart<S.selected.length-1?'<button class="btn gold" onclick="curChart++;render()">Next Chart →</button>':'<button class="btn gold" onclick="go(4)">Proceed to Summary →</button>')+'</div>';
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px;flex-wrap:wrap"><span style="font-size:12.5px;color:'+(nd?'var(--gold)':'var(--green)')+'">'+(nd?('⚠ Encounter '+(curChart+1)+' — '+nd+' deficiency(ies) to correct'):('✓ Encounter '+(curChart+1)+' — No deficiencies'))+'</span>'+
+        (curChart<S.selected.length-1?'<button class="btn gold" onclick="curChart++;render()">Next Encounter →</button>':'<button class="btn gold" onclick="go(4)">Proceed to Summary →</button>')+'</div>';
   }
   return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">'+
-      '<div class="grp" style="margin:0">Stage 3 · chart-note inspection · '+reviewedCount()+'/'+S.selected.length+' complete</div>'+
-      '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" style="padding:6px 12px;font-size:12px" onclick="clearAllResults()">↻ Clear All AI Results</button><button class="btn ghost" style="padding:6px 12px;font-size:12px" onclick="swapChart()">⇄ Swap a chart</button>'+(reviewedCount()>=S.selected.length?'<button class="btn gold" style="padding:6px 12px;font-size:12px" onclick="go(4)">All Charts Done → Summary</button>':'')+'</div></div>'+
+      '<div class="grp" style="margin:0">Stage 3 · encounter inspection · '+reviewedCount()+'/'+S.selected.length+' complete</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" style="padding:6px 12px;font-size:12px" onclick="clearAllResults()">↻ Clear All AI Results</button><button class="btn ghost" style="padding:6px 12px;font-size:12px" onclick="swapChart()">⇄ Swap an encounter</button>'+(reviewedCount()>=S.selected.length?'<button class="btn gold" style="padding:6px 12px;font-size:12px" onclick="go(4)">All Encounters Done → Summary</button>':'')+'</div></div>'+
     '<div class="tabrow" style="margin-top:10px">'+tabs+'</div>'+
     head+
     '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">'+noteBox+billBox+'</div>'+
     '<div style="margin-top:12px"><button class="btn gold" onclick="runReview(\''+esc(id)+'\')"'+(rv.busy?' disabled':'')+'>'+(r?'↻ Re-analyze':'▶ Analyze with AI')+'</button>'+
-      (rv.note||r?'<button class="btn ghost" style="margin-left:8px;padding:8px 12px;font-size:12px" onclick="clearChart(\''+esc(id)+'\')">✕ Clear chart</button>':'')+
-      '<span class="muted" style="font-size:11px;margin-left:10px">'+(rv.note?'📄 Note attached — click Analyze to review it.':'Drop the chart note above to start.')+'</span></div>'+
+      (rv.note||r?'<button class="btn ghost" style="margin-left:8px;padding:8px 12px;font-size:12px" onclick="clearChart(\''+esc(id)+'\')">✕ Clear encounter</button>':'')+
+      '<span class="muted" style="font-size:11px;margin-left:10px">'+(rv.note?'📄 Note attached — click Analyze to review it.':'Drop the encounter note above to start.')+'</span></div>'+
     result+
     '</div>'+
     '<div class="navrow"><button class="btn ghost" onclick="go(2)">← Selection</button><button class="btn go" onclick="go(4)"'+(reviewedCount()<1?' disabled':'')+'>Summary →</button></div>';
@@ -323,7 +323,7 @@ function stage4(){
         (!(r.deficiencies||[]).length&&!(r.conflicts||[]).length?'<div style="color:var(--green);font-size:12px;margin-top:6px">✓ Clean — no deficiencies</div>':'')):'')+
       '</div>';}).join('');
   return '<div class="card" style="border-color:'+(rt.findings?'#4a3c18':'#1e6e4a')+'"><div style="display:flex;justify-content:space-between;align-items:center"><div><div class="grp" style="margin:0">Session rating</div><div style="font-family:var(--fdisp);font-size:1.4rem;color:'+(rt.findings?'var(--gold)':'var(--green)')+'">'+rt.rating+'</div></div><div style="text-align:right"><div style="font-family:var(--fdisp);font-size:1.6rem;color:'+(rt.findings?'#f0857d':'var(--green)')+'">'+rt.findings+'</div><div class="muted" style="font-size:10px">Total findings</div></div></div></div>'+
-    '<div class="grp">Chart results</div>'+results+
+    '<div class="grp">Encounter results</div>'+results+
     (pats.length?'<div class="card"><div class="grp" style="color:var(--gold)">Auto-detected pattern flags · set-wide</div>'+pats.map(function(p){return '<div class="pf">⚠ '+esc(p)+'</div>';}).join('')+'</div>':'')+
     '<div class="card"><div class="grp">Finish</div><div style="display:flex;gap:10px;flex-wrap:wrap">'+
       '<button class="btn gold" onclick="previewPDF()">📄 Preview / download report</button>'+
