@@ -175,6 +175,10 @@ function startBlank(){
 function toggleSel(id){var k=S.selected.indexOf(id);if(k>=0)S.selected.splice(k,1);else if(S.selected.length<5)S.selected.push(id);save();render();}
 function randomFive(){var pool=S.encounters.slice();if(!pool.length){alert('Drop chart documents first (Stage 1).');return;}var idx=pool.map(function(_,i){return i;});for(var i=idx.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idx[i];idx[i]=idx[j];idx[j]=t;}S.selected=idx.slice(0,Math.min(5,pool.length)).map(function(i){return pool[i].id;});save();render();}
 function clearSel(){S.selected=[];save();render();}
+function removeChart(id){var i=S.encounters.map(function(e){return e.id;}).indexOf(id);if(i>=0)S.encounters.splice(i,1);var s=S.selected.indexOf(id);if(s>=0)S.selected.splice(s,1);if(S.review[id])delete S.review[id];save();render();}
+function clearPool(){if(S.encounters.length&&!confirm('Clear ALL charts and start over?'))return;S.encounters=[];S.selected=[];S.review={};save();render();}
+// clear a single chart back to a blank slot (keeps its place so you can re-drop the note)
+function clearChart(id){if(!confirm('Clear this chart\'s note and result so you can re-drop it?'))return;var e=encById(id);if(e){e.name='';e.pt='—';e.dos='';e.blank=true;e.err=null;e.parsing=false;}S.review[id]={};save();render();}
 function encById(id){for(var i=0;i<S.encounters.length;i++)if(S.encounters[i].id===id)return S.encounters[i];return null;}
 
 // ---- dual-doc AI review ----
@@ -249,14 +253,15 @@ function stage2(){
   var picks=S.selected.map(encById).filter(Boolean);
   var head='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">'+
     '<div><div class="grp" style="margin:0">Stage 2 · chart selection · '+enc.length+' in pool</div><div style="font-family:var(--fdisp);font-size:1.2rem;margin-top:4px">Select 5 charts</div><div class="muted" style="font-size:11px">Random sampling — unbiased audit method. Cash-pay wellness; no billing risk score.</div></div>'+
-    '<div style="display:flex;gap:8px;align-items:center"><button class="btn gold" onclick="randomFive()">🎲 Pick 5 at random</button><button class="btn ghost" onclick="clearSel()">Clear</button><span class="muted" style="font-size:12px">'+S.selected.length+' / 5</span></div></div>'+
+    '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn gold" onclick="randomFive()">🎲 Pick 5 at random</button><button class="btn ghost" onclick="clearSel()">Clear selection</button><button class="btn ghost" onclick="clearPool()">🗑 Clear all</button><span class="muted" style="font-size:12px">'+S.selected.length+' / 5</span></div></div>'+
     (picks.length?'<div class="chiprow" style="margin-top:12px">'+picks.map(function(e,i){return '<span class="chip" style="border-color:var(--teal);color:var(--teal)">#'+(i+1)+' '+esc(dispPt(e))+' · '+esc(e.id)+'</span>';}).join('')+'</div>':'')+
     '</div>';
   var rows=enc.map(function(e){var sel=S.selected.indexOf(e.id)>=0;var busy=e.parsing;
     return '<tr class="'+(sel?'pick':'')+'"><td><button class="btn ghost" style="padding:3px 9px;font-size:11px" onclick="toggleSel(\''+esc(e.id)+'\')"'+(busy?' disabled':'')+'>'+(sel?'✓':'+')+'</button></td>'+
-      '<td>'+(busy?'<span class="muted">reading…</span>':'<b>'+esc(e.id)+'</b>'+(e.err?' <span class="flag dup">'+esc(e.err)+'</span>':''))+'</td><td>'+esc(busy?'…':dispPt(e))+'</td><td><span class="flag">'+esc((e.line||'iv').toUpperCase())+'</span></td><td>'+esc(e.dos||'—')+'</td></tr>';}).join('')
-    ||'<tr><td colspan="5" class="muted" style="text-align:center;padding:18px">No charts yet — drag chart documents onto the box below.</td></tr>';
-  return head+'<div class="card"><div class="muted" style="font-size:11px;margin-bottom:8px">Full patient name shows here for your identification — the report &amp; audit log record initials only.</div><div style="overflow:auto"><table><tr><th>Sel</th><th>Chart #</th><th>Patient</th><th>Line</th><th>DOS</th></tr>'+rows+'</table></div>'+
+      '<td>'+(busy?'<span class="muted">reading…</span>':'<b>'+esc(e.id)+'</b>'+(e.err?' <span class="flag dup">'+esc(e.err)+'</span>':''))+'</td><td>'+esc(busy?'…':dispPt(e))+'</td><td><span class="flag">'+esc((e.line||'iv').toUpperCase())+'</span></td><td>'+esc(e.dos||'—')+'</td>'+
+      '<td style="text-align:right"><button class="btn ghost" style="padding:3px 8px;font-size:11px" onclick="removeChart(\''+esc(e.id)+'\')" title="Remove this chart">✕</button></td></tr>';}).join('')
+    ||'<tr><td colspan="6" class="muted" style="text-align:center;padding:18px">No charts yet — drag chart documents onto the box below.</td></tr>';
+  return head+'<div class="card"><div class="muted" style="font-size:11px;margin-bottom:8px">Full patient name shows here for your identification — the report &amp; audit log record initials only.</div><div style="overflow:auto"><table><tr><th>Sel</th><th>Chart #</th><th>Patient</th><th>Line</th><th>DOS</th><th></th></tr>'+rows+'</table></div>'+
     '<div class="drop" id="drop2" style="margin-top:12px;padding:20px" onclick="document.getElementById(\'chartPick\').click()"><div class="ic">⬆</div><div style="margin-top:6px;font-size:12px;font-weight:700">Drag chart documents here to add more</div><div class="muted" style="font-size:11px;margin-top:3px">PDF or photo — or click to browse</div></div>'+
     '<div style="margin-top:10px;text-align:center"><button class="btn ghost" onclick="startBlank()">No roster? Skip → start 5 blank chart notes</button></div></div>'+
     '<div class="navrow"><button class="btn ghost" onclick="go(1)">← Load</button><button class="btn go" onclick="go(3)"'+(S.selected.length<1?' disabled':'')+'>Inspect '+S.selected.length+' chart(s) →</button></div>';
@@ -297,7 +302,8 @@ function stage3(){
     head+
     '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">'+noteBox+billBox+'</div>'+
     '<div style="margin-top:12px"><button class="btn gold" onclick="runReview(\''+esc(id)+'\')"'+(rv.busy?' disabled':'')+'>'+(r?'↻ Re-analyze':'▶ Analyze with AI')+'</button>'+
-      '<span class="muted" style="font-size:11px;margin-left:10px">'+(rv.note?'📄 Note attached from Stage 1 — click Analyze to review it.':'Drop the chart note above to start.')+'</span></div>'+
+      (rv.note||r?'<button class="btn ghost" style="margin-left:8px;padding:8px 12px;font-size:12px" onclick="clearChart(\''+esc(id)+'\')">✕ Clear chart</button>':'')+
+      '<span class="muted" style="font-size:11px;margin-left:10px">'+(rv.note?'📄 Note attached — click Analyze to review it.':'Drop the chart note above to start.')+'</span></div>'+
     result+
     '</div>'+
     '<div class="navrow"><button class="btn ghost" onclick="go(2)">← Selection</button><button class="btn go" onclick="go(4)"'+(reviewedCount()<1?' disabled':'')+'>Summary →</button></div>';
