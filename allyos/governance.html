@@ -80,6 +80,8 @@ if(window.AllyOSAuth){AllyOSAuth.guard(['provider','admin']);}
 var sess=(window.AllyOSAuth&&AllyOSAuth.session())||{};
 document.getElementById('clinicLbl').textContent=sess.clinic||'';
 function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+// Note-only audit: strip any stale sentence that mentions a superbill/claim cross-check.
+function narr(t){return(''+(t||'')).replace(/[^.!?]*\b(superbill|cross[- ]?check(?:ing)?|billed code[s]?|claim)\b[^.!?]*[.!?]/gi,'').replace(/\s{2,}/g,' ').trim();}
 
 // Wellness compliance rubric per line (same parameters as the binder — no AHCA billing content).
 var PARAMS={
@@ -216,7 +218,7 @@ function patternFlags(){
   if(fails)out.push(fails+' of '+sel.length+' encounters did not pass — corrective actions listed above');
   return out;
 }
-function sessionRating(){var f=0;S.selected.forEach(function(id){var r=S.review[id]&&S.review[id].result;if(r&&r.status==='FAIL')f++;if(r){f+=(r.deficiencies||[]).length+(r.conflicts||[]).length;}});return {findings:f,rating:f?'ACTION REQ':'CLEAN'};}
+function sessionRating(){var f=0;S.selected.forEach(function(id){var r=S.review[id]&&S.review[id].result;if(r){f+=(r.deficiencies||[]).length;}});return {findings:f,rating:f?'ACTION REQ':'CLEAN'};}
 
 // ============ RENDER ============
 var STAGES=[{n:1,t:'Load Encounters'},{n:2,t:'Encounter Selection'},{n:3,t:'AI Review'},{n:4,t:'Summary'}];
@@ -295,7 +297,7 @@ function stage3(){
   else if(r){
     var nd=(r.deficiencies||[]).length,ncl=(r.clean||[]).length;
     result='<div class="kpis" style="grid-template-columns:repeat(2,1fr)"><div class="kpi red"><div class="v">'+nd+'</div><div class="muted" style="font-size:10px">Deficiencies</div></div><div class="kpi green"><div class="v">'+ncl+'</div><div class="muted" style="font-size:10px">Clean Fields</div></div></div>'+
-      (r.narrative?'<div class="findbox">'+esc(r.narrative)+'</div>':'')+
+      (narr(r.narrative)?'<div class="findbox">'+esc(narr(r.narrative))+'</div>':'')+
       (r.deficiencies||[]).map(function(x){return '<div class="findbox def">⚠ '+esc(x)+'</div>';}).join('')+
       (ncl?'<div class="findbox" style="cursor:pointer" onclick="toggleClean(\''+esc(id)+'\')"><b style="color:var(--green)">'+(_cleanOpen[id]?'▾':'▸')+' CLEAN FIELDS ('+ncl+')</b> <span class="muted">— click to '+(_cleanOpen[id]?'collapse':'expand')+'</span>'+(_cleanOpen[id]?'<div style="margin-top:8px">'+(r.clean||[]).map(function(x){return '<div style="color:var(--green);font-size:12px;margin:3px 0">✓ '+esc(x)+'</div>';}).join('')+'</div>':'')+'</div>':'')+
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px;flex-wrap:wrap"><span style="font-size:12.5px;color:'+(nd?'var(--gold)':'var(--green)')+'">'+(nd?('⚠ Encounter '+(curChart+1)+' — '+nd+' deficiency(ies) to correct'):('✓ Encounter '+(curChart+1)+' — No deficiencies'))+'</span>'+
@@ -323,10 +325,9 @@ function stage4(){
   var rt=sessionRating();var pats=patternFlags();
   var results=S.selected.map(function(id,i){var e=encById(id);var r=S.review[id]&&S.review[id].result;
     return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><div><b>'+(i+1)+'. '+esc(e?dispPt(e):'')+'</b> <span class="muted" style="font-size:11px">'+esc(e?e.id:'')+' · '+esc(e?e.dos:'')+' · '+esc(e?(e.line||'').toUpperCase():'')+'</span></div><span class="verdict '+(r?(r.status==='PASS'?'pass':'fail'):'pend')+'">'+(r?r.status:'NOT REVIEWED')+'</span></div>'+
-      (r?('<div class="muted" style="font-size:12.5px;margin-top:8px">'+esc(r.narrative||'')+'</div>'+
+      (r?('<div class="muted" style="font-size:12.5px;margin-top:8px">'+esc(narr(r.narrative))+'</div>'+
         (r.deficiencies||[]).map(function(x){return '<div class="findbox def" style="margin-top:6px">⚠ '+esc(x)+'</div>';}).join('')+
-        (r.conflicts||[]).map(function(x){return '<div class="findbox con" style="margin-top:6px">⇄ '+esc(x)+'</div>';}).join('')+
-        (!(r.deficiencies||[]).length&&!(r.conflicts||[]).length?'<div style="color:var(--green);font-size:12px;margin-top:6px">✓ Clean — no deficiencies</div>':'')):'')+
+        (!(r.deficiencies||[]).length?'<div style="color:var(--green);font-size:12px;margin-top:6px">✓ Clean — no deficiencies</div>':'')):'')+
       '</div>';}).join('');
   return '<div class="card" style="border-color:'+(rt.findings?'#4a3c18':'#1e6e4a')+'"><div style="display:flex;justify-content:space-between;align-items:center"><div><div class="grp" style="margin:0">Session rating</div><div style="font-family:var(--fdisp);font-size:1.4rem;color:'+(rt.findings?'var(--gold)':'var(--green)')+'">'+rt.rating+'</div></div><div style="text-align:right"><div style="font-family:var(--fdisp);font-size:1.6rem;color:'+(rt.findings?'#f0857d':'var(--green)')+'">'+rt.findings+'</div><div class="muted" style="font-size:10px">Total findings</div></div></div></div>'+
     '<div class="grp">Encounter results</div>'+results+
