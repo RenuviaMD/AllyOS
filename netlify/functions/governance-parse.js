@@ -66,7 +66,7 @@ exports.handler = async (event) => {
   if (body.mode === "extract") {
     if (!body.doc) return json(400, { error: "no_doc" });
     const EX_SYS =
-      "Read this ONE wellness chart document (progress note / superbill / scan / photo — may be handwritten) and " +
+      "Read this ONE wellness encounter document (progress / encounter note, scan or photo — may be handwritten) and " +
       "extract identifying metadata. Return STRICT JSON only: " +
       "{\"chart_id\":\"...\",\"name\":\"Full Patient Name\",\"initials\":\"X.Y.\",\"line\":\"iv|pep|bhrt\",\"date\":\"MM/DD/YYYY\"}. " +
       "chart_id = the chart/MRN/encounter number if present, else empty. " +
@@ -88,31 +88,28 @@ exports.handler = async (event) => {
     } catch (e) { return json(502, { error: "extract_failed", detail: String(e).slice(0, 200) }); }
   }
 
-  // ---- DUAL-DOCUMENT INSPECTION (AHCA-style: progress note + superbill) ----
+  // ---- ENCOUNTER-NOTE INSPECTION (cash-pay wellness — note only, no superbill) ----
   if (body.mode === "dual") {
     const params = Array.isArray(body.params) ? body.params.filter(function (x) { return typeof x === "string"; }).slice(0, 30) : [];
-    if (!body.note && !body.superbill) return json(400, { error: "no_docs", hint: "Attach at least the progress note." });
-    const hasBill = !!body.superbill;
+    if (!body.note) return json(400, { error: "no_docs", hint: "Attach the encounter note." });
     const DUAL_SYS =
-      "You are a MEDICAL-DIRECTOR GOVERNANCE AUDITOR reviewing a wellness clinic encounter " +
-      "(" + (body.line || "IV/peptide/BHRT") + "). " +
-      (hasBill
-        ? "You are given a PROGRESS NOTE and a SUPERBILL/claim. Check the documentation-compliance PARAMETERS below AND cross-check the note against the superbill for agreement (codes, date of service, provider signature, services billed vs documented). "
-        : "You are given the PROGRESS NOTE only — this is a cash-pay wellness encounter with NO superbill/claim. Review the note against the documentation-compliance PARAMETERS below ONLY. Do NOT cross-check against any superbill and do NOT treat the absence of a superbill as a conflict or a deficiency; conflicts MUST be an empty array. ") +
-      "Judge ONLY from the document(s); never invent.\n" +
+      "You are a MEDICAL-DIRECTOR GOVERNANCE AUDITOR reviewing ONE cash-pay wellness encounter note " +
+      "(" + (body.line || "IV/peptide/BHRT") + "). There is NO superbill, claim, or billing document — this is a " +
+      "documentation review of the encounter note ONLY. Review the note against the documentation-compliance " +
+      "PARAMETERS below. Never mention or expect a superbill/claim/billing; 'conflicts' MUST be an empty array. " +
+      "Judge ONLY from the note; never invent.\n" +
       "PARAMETERS:\n" + params.map(function (p, i) { return (i + 1) + ". " + p; }).join("\n") + "\n" +
-      "Return STRICT JSON only: {\"status\":\"PASS|FAIL\",\"deficiencies\":[\"...\"],\"conflicts\":[" + (hasBill ? "\"note vs superbill mismatch ...\"" : "") + "]," +
+      "Return STRICT JSON only: {\"status\":\"PASS|FAIL\",\"deficiencies\":[\"...\"],\"conflicts\":[]," +
       "\"clean\":[\"parameter that passed\"],\"narrative\":\"2-4 sentence summary\"}. " +
-      "status=FAIL only if a required PARAMETER is missing" + (hasBill ? " or a note-vs-superbill conflict exists" : "") + "; else PASS. Keep every string PHI-free (no name/DOB).";
-    const content = [{ type: "text", text: "Review these documents against the parameters." }];
-    pushDoc(content, "PROGRESS NOTE", body.note);
-    pushDoc(content, "SUPERBILL / CLAIM", body.superbill);
+      "status=FAIL only if a required PARAMETER is missing; else PASS. Keep every string PHI-free (no name/DOB).";
+    const content = [{ type: "text", text: "Review this encounter note against the parameters." }];
+    pushDoc(content, "ENCOUNTER NOTE", body.note);
     try {
       const p = await callModel(DUAL_SYS, content, 1600);
       return json(200, {
         status: (String(p.status || "").toUpperCase() === "PASS") ? "PASS" : "FAIL",
         deficiencies: (p.deficiencies || []).map(function (x) { return String(x).slice(0, 200); }),
-        conflicts: (p.conflicts || []).map(function (x) { return String(x).slice(0, 200); }),
+        conflicts: [],
         clean: (p.clean || []).map(function (x) { return String(x).slice(0, 120); }),
         narrative: String(p.narrative || "").slice(0, 900),
       });
