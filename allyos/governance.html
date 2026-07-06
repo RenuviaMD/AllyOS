@@ -161,6 +161,8 @@ function extractDoc(file){
   if(blank){extractInto(blank.id,file);return;}
   var tmpId='ENC-'+(S.encounters.length+1)+'-'+Math.floor(Math.random()*1e6);
   S.encounters.push({id:tmpId,pt:'…',line:(S.hdr.line||'iv'),dos:'',risk:0,flags:[],parsing:true});
+  // a dropped encounter is one the MD chose to audit — auto-select it (up to 5)
+  if(S.selected.length<5&&S.selected.indexOf(tmpId)<0)S.selected.push(tmpId);
   save();render();
   extractInto(tmpId,file);
 }
