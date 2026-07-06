@@ -101,6 +101,8 @@ S.stage=S.stage||1; S.statutory=S.statutory||{}; S.encounters=S.encounters||[]; 
 // Repair stale saved state: drop selections whose encounter is gone, and never boot into a
 // review/summary stage with nothing to show (prevents landing on a blank Stage 3/4).
 S.selected=S.selected.filter(function(id){for(var i=0;i<S.encounters.length;i++)if(S.encounters[i].id===id)return true;return false;});
+// A "reading…" flag left over from a refresh has no request behind it — clear it so the row is recoverable.
+S.encounters.forEach(function(e){if(e.parsing){e.parsing=false;if(!e.pt||e.pt==='…')e.pt='—';if(!(S.review[e.id]&&S.review[e.id].note))e.blank=true;else e.err='Interrupted — re-drop or ✕ to remove';}});
 if(S.stage>=3&&!S.selected.length)S.stage=S.encounters.length?2:1;
 if(!S.hdr.clinic&&sess.clinic)S.hdr.clinic=sess.clinic;
 
@@ -143,7 +145,10 @@ function extractInto(id,file){
     save();render();
     var body={mode:'extract',doc:{image:b64},clinic_id:(sess.clinicId||null)};
     var call=(window.AllyOSCloud&&AllyOSCloud.postAuthed)?AllyOSCloud.postAuthed('/.netlify/functions/governance-parse',body):fetch('/.netlify/functions/governance-parse',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+    var done=false;
+    var TO=setTimeout(function(){if(done)return;done=true;var e=encById(id);if(e&&e.parsing){e.parsing=false;e.err='Timed out — re-drop or ✕ to remove';}save();render();},75000);
     Promise.resolve(call).then(function(r){return r.json();}).then(function(d){
+      if(done)return;done=true;clearTimeout(TO);
       var e=encById(id);if(!e)return;
       e.parsing=false;
       if(!d||d.error){e.err=(d&&(d.detail||d.error))||'Could not read';save();render();return;}
@@ -159,7 +164,7 @@ function extractInto(id,file){
         e.id=newId;
       }
       save();render();
-    }).catch(function(){var e=encById(id);if(e){e.parsing=false;e.err='Could not reach the parser.';}save();render();});
+    }).catch(function(){if(done)return;done=true;clearTimeout(TO);var e=encById(id);if(e){e.parsing=false;e.err='Could not reach the parser.';}save();render();});
   });
 }
 // extractDoc: a chart dragged onto the pool (Stage 1/2). If empty "skip" slots exist, fill the
