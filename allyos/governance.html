@@ -83,11 +83,11 @@ function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&l
 
 // Wellness compliance rubric per line (same parameters as the binder — no AHCA billing content).
 var PARAMS={
-  iv:['IV protocol','GFE before treatment','Aftercare instructions','Signed by authorized provider','Equipment adequacy for procedures'],
+  iv:['IV protocol','GFE before treatment','Aftercare instructions','Signed by authorized provider'],
   pep:['Peptide protocol','Provider signed','Peptide consent','Dose / schedule','Follow-up plan','Side-effect check'],
   bhrt:['POC / plan of care','Provider signed','Reason for treatment','Hormone consent','Labs / monitoring plan','Follow-up plan']
 };
-var STATUTORY=['Practitioner licenses active & unencumbered','Scope of practice within signed protocol','Adverse-incident reporting current','Biohazardous-waste plan on file & staff trained','Standing orders / GFE model current','Medical Director identification available'];
+var STATUTORY=['Practitioner licenses active & unencumbered','Scope of practice within signed protocol','Adverse-incident reporting current','Biohazardous-waste plan on file & staff trained','Standing orders / GFE model current','Equipment adequacy/functionality — pump + emergency/resuscitation checked','Medical Director identification available'];
 
 var CK='allyos_govinspect_v1';
 function load(){try{return JSON.parse(localStorage.getItem(CK)||'null')||{};}catch(e){return {};}}
