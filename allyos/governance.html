@@ -340,10 +340,18 @@ function stage4(){
 // ---- report + archive ----
 function buildPayload(){
   var rt=sessionRating();
+  // Active service lines are the ones actually seen in the reviewed encounters (§VI).
+  var LINE_LABEL={iv:'IV / IM Therapy',pep:'Peptide Therapy',bhrt:'BHRT / HRT'};
+  var seen={};S.selected.forEach(function(id){var e=encById(id);if(e&&e.line)seen[e.line]=true;});
+  var allDef=S.selected.reduce(function(a,id){var r=S.review[id]&&S.review[id].result;if(r)a=a.concat(r.deficiencies||[]);return a;},[]).join(' | ').toLowerCase();
+  var lines=Object.keys(seen).map(function(ln){
+    return {title:(LINE_LABEL[ln]||ln.toUpperCase())+' — active this period',
+      items:(PARAMS[ln]||[]).map(function(p){return {label:p,status:(allDef.indexOf(p.toLowerCase().slice(0,14))>=0?'Missing':'Present')};})};
+  });
   return {clinic:S.hdr.clinic,reportDate:S.hdr.date,md:(window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||sess.name||'Medical Director',mdLicense:'Florida Medical License · ME 84789',
     overall:rt.findings?'Needs correction':'Compliant',
     charts:S.selected.map(function(id){var e=encById(id);var r=S.review[id]&&S.review[id].result;return {ref:e?e.id:'',ini:e?e.pt:'',dos:e?e.dos:'',line:(e?e.line:'').toUpperCase(),status:r?r.status:'Not reviewed'};}),
-    lines:[],corrections:S.selected.reduce(function(acc,id){var e=encById(id);var r=S.review[id]&&S.review[id].result;if(r){(r.deficiencies||[]).forEach(function(x){acc.push({label:(e?e.pt:'')+' — '+x,resp:'Clinic provider',due:''});});(r.conflicts||[]).forEach(function(x){acc.push({label:(e?e.pt:'')+' — conflict: '+x,resp:'Clinic provider',due:''});});}return acc;},[]),
+    lines:lines,corrections:S.selected.reduce(function(acc,id){var e=encById(id);var r=S.review[id]&&S.review[id].result;if(r){(r.deficiencies||[]).forEach(function(x){acc.push({label:(e?e.pt:'')+' — '+x,resp:'Clinic provider',due:''});});}return acc;},[]),
     priorCorrections:[]};
 }
 function previewPDF(){if(!window.AllyOSGovReport){alert('Report module not loaded.');return;}AllyOSGovReport.download(buildPayload()).catch(function(e){alert('Report error: '+(e&&e.message||e));});}

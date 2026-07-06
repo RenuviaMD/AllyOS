@@ -92,15 +92,18 @@ exports.handler = async (event) => {
   if (body.mode === "dual") {
     const params = Array.isArray(body.params) ? body.params.filter(function (x) { return typeof x === "string"; }).slice(0, 30) : [];
     if (!body.note && !body.superbill) return json(400, { error: "no_docs", hint: "Attach at least the progress note." });
+    const hasBill = !!body.superbill;
     const DUAL_SYS =
-      "You are a MEDICAL-DIRECTOR GOVERNANCE AUDITOR doing a DUAL-DOCUMENT chart review for a wellness clinic " +
-      "(" + (body.line || "IV/peptide/BHRT") + "). You are given a PROGRESS NOTE and (optionally) a SUPERBILL/claim. " +
-      "Check the documentation-compliance PARAMETERS below AND cross-check the note against the superbill for agreement " +
-      "(codes, date of service, provider signature, services billed vs documented). Judge ONLY from the documents; never invent.\n" +
+      "You are a MEDICAL-DIRECTOR GOVERNANCE AUDITOR reviewing a wellness clinic encounter " +
+      "(" + (body.line || "IV/peptide/BHRT") + "). " +
+      (hasBill
+        ? "You are given a PROGRESS NOTE and a SUPERBILL/claim. Check the documentation-compliance PARAMETERS below AND cross-check the note against the superbill for agreement (codes, date of service, provider signature, services billed vs documented). "
+        : "You are given the PROGRESS NOTE only — this is a cash-pay wellness encounter with NO superbill/claim. Review the note against the documentation-compliance PARAMETERS below ONLY. Do NOT cross-check against any superbill and do NOT treat the absence of a superbill as a conflict or a deficiency; conflicts MUST be an empty array. ") +
+      "Judge ONLY from the document(s); never invent.\n" +
       "PARAMETERS:\n" + params.map(function (p, i) { return (i + 1) + ". " + p; }).join("\n") + "\n" +
-      "Return STRICT JSON only: {\"status\":\"PASS|FAIL\",\"deficiencies\":[\"...\"],\"conflicts\":[\"note vs superbill mismatch ...\"]," +
+      "Return STRICT JSON only: {\"status\":\"PASS|FAIL\",\"deficiencies\":[\"...\"],\"conflicts\":[" + (hasBill ? "\"note vs superbill mismatch ...\"" : "") + "]," +
       "\"clean\":[\"parameter that passed\"],\"narrative\":\"2-4 sentence summary\"}. " +
-      "status=FAIL if any parameter is missing or any note-vs-superbill conflict exists; else PASS. Keep every string PHI-free (no name/DOB).";
+      "status=FAIL only if a required PARAMETER is missing" + (hasBill ? " or a note-vs-superbill conflict exists" : "") + "; else PASS. Keep every string PHI-free (no name/DOB).";
     const content = [{ type: "text", text: "Review these documents against the parameters." }];
     pushDoc(content, "PROGRESS NOTE", body.note);
     pushDoc(content, "SUPERBILL / CLAIM", body.superbill);
