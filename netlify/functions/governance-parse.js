@@ -68,9 +68,10 @@ exports.handler = async (event) => {
     const EX_SYS =
       "Read this ONE wellness chart document (progress note / superbill / scan / photo — may be handwritten) and " +
       "extract identifying metadata. Return STRICT JSON only: " +
-      "{\"chart_id\":\"...\",\"initials\":\"X.Y.\",\"line\":\"iv|pep|bhrt\",\"date\":\"MM/DD/YYYY\"}. " +
+      "{\"chart_id\":\"...\",\"name\":\"Full Patient Name\",\"initials\":\"X.Y.\",\"line\":\"iv|pep|bhrt\",\"date\":\"MM/DD/YYYY\"}. " +
       "chart_id = the chart/MRN/encounter number if present, else empty. " +
-      "initials = patient INITIALS ONLY (first + last initial, e.g. 'J.D.') — never the full name. " +
+      "name = the patient's full name exactly as written (for the reviewing physician's on-screen identification). " +
+      "initials = first + last initial only (e.g. 'J.D.'). " +
       "line = iv (IV/IM infusion), pep (peptide therapy), or bhrt (hormone/BHRT) based on the therapy documented. " +
       "date = date of service. Use '' for any field you cannot find.";
     const content = [{ type: "text", text: "Extract the metadata from this document." }];
@@ -79,6 +80,7 @@ exports.handler = async (event) => {
       const p = await callModel(EX_SYS, content, 400);
       return json(200, {
         chart_id: String(p.chart_id || "").slice(0, 48),
+        name: String(p.name || "").slice(0, 80),
         initials: String(p.initials || "").slice(0, 12),
         line: String(p.line || "iv").toLowerCase(),
         date: String(p.date || "").slice(0, 24),
