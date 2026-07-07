@@ -90,14 +90,17 @@ window.AllyOSGovReport = (function () {
     content.push(bodyP('Compliance education: staff reminded that services may only be performed within signed protocol, active license/scope, documented consent, and clinic record requirements. The clinic EMR or paper chart remains the official medical record.'));
     content.push(sec('VIII. Medical Director Attestation'));
     content.push(bodyP(pl.note||'I reviewed the governance items above for the reporting period. This report documents Medical Director oversight status, practitioner/license review, service-line governance, clinical record review, and any corrective-action needs for the clinic binder.'));
-    content.push({text:' ',margin:[0,8]});
-    // Keep the signature line + its label together so they never split across a page break.
-    content.push({unbreakable:true,columns:[
-      {width:'*',stack:[{canvas:[{type:'line',x1:0,y1:0,x2:250,y2:0,lineWidth:0.75}]},{text:(pl.md||'Medical Director')+' — Signature & Print',color:SLATE,fontSize:9,margin:[0,4,0,0]}]},
-      {width:150,stack:[{canvas:[{type:'line',x1:0,y1:0,x2:130,y2:0,lineWidth:0.75}]},{text:'Date',color:SLATE,fontSize:9,margin:[0,4,0,0]}]}
-    ]});
+    // Signature line + its label as one unbreakable table row — never splits across a page break.
+    content.push({
+      unbreakable:true, margin:[0,20,0,0],
+      table:{widths:['*',150],body:[[
+        {border:[false,false,false,false],stack:[{canvas:[{type:'line',x1:0,y1:0,x2:250,y2:0,lineWidth:0.75}]},{text:(pl.md||'Medical Director')+' — Signature & Print',color:SLATE,fontSize:9,margin:[0,4,0,0]}]},
+        {border:[false,false,false,false],stack:[{canvas:[{type:'line',x1:0,y1:0,x2:130,y2:0,lineWidth:0.75}]},{text:'Date',color:SLATE,fontSize:9,margin:[0,4,0,0]}]}
+      ]]},
+      layout:'noBorders'
+    });
     return {
-      pageSize:'LETTER',pageMargins:[50,46,50,54],
+      pageSize:'LETTER',pageMargins:[50,46,50,40],
       info:{title:'Ally Monthly Governance Binder Report',author:pl.md||'Medical Director'},
       footer:function(cp,pc){return {margin:[50,8,50,0],columns:[{text:'Ally AuditPro · powered by RenuviaMD Compliance Division',color:SLATE,fontSize:7.5},{text:'Page '+cp+' of '+pc,color:SLATE,fontSize:7.5,alignment:'right'}]};},
       content:content,
