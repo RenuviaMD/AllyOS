@@ -90,8 +90,9 @@ window.AllyOSGovReport = (function () {
     content.push(bodyP('Compliance education: staff reminded that services may only be performed within signed protocol, active license/scope, documented consent, and clinic record requirements. The clinic EMR or paper chart remains the official medical record.'));
     content.push(sec('VIII. Medical Director Attestation'));
     content.push(bodyP(pl.note||'I reviewed the governance items above for the reporting period. This report documents Medical Director oversight status, practitioner/license review, service-line governance, clinical record review, and any corrective-action needs for the clinic binder.'));
-    content.push({text:' ',margin:[0,18]});
-    content.push({columns:[
+    content.push({text:' ',margin:[0,8]});
+    // Keep the signature line + its label together so they never split across a page break.
+    content.push({unbreakable:true,columns:[
       {width:'*',stack:[{canvas:[{type:'line',x1:0,y1:0,x2:250,y2:0,lineWidth:0.75}]},{text:(pl.md||'Medical Director')+' — Signature & Print',color:SLATE,fontSize:9,margin:[0,4,0,0]}]},
       {width:150,stack:[{canvas:[{type:'line',x1:0,y1:0,x2:130,y2:0,lineWidth:0.75}]},{text:'Date',color:SLATE,fontSize:9,margin:[0,4,0,0]}]}
     ]});
