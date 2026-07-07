@@ -248,7 +248,8 @@ function stage1(){
   var h=S.hdr;
   var stat=STATUTORY.map(function(it,i){var val=S.statutory[i];
     return '<div class="stat"><span class="lbl">'+esc(it)+'</span><span class="yn"><button class="y'+(val==='y'?' on':'')+'" onclick="setStat('+i+',\'y\')">Y</button><button class="n'+(val==='n'?' on':'')+'" onclick="setStat('+i+',\'n\')">N</button></span></div>';}).join('');
-  return '<div class="card"><div class="grp">Clinic &amp; period</div><div class="hgrid">'+
+  return '<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div class="muted" style="font-size:12px">Need a report you already signed? Reprint the binder from the audit log — no re-review.</div><button class="btn ghost" onclick="reprintArchived()">📄 Reprint a signed report</button></div>'+
+    '<div class="card"><div class="grp">Clinic &amp; period</div><div class="hgrid">'+
     '<div><label>Clinic (legal name)</label><input id="hClinic" value="'+esc(h.clinic||'')+'" oninput="setHdr(\'clinic\',this.value)"></div>'+
     '<div><label>Report date</label><input id="hDate" type="date" value="'+esc(h.date||'')+'" oninput="setHdr(\'date\',this.value)"></div>'+
     '<div><label>Active line (default for encounters)</label><select onchange="setHdr(\'line\',this.value)"><option value="iv"'+(h.line==='iv'?' selected':'')+'>IV / IM</option><option value="pep"'+(h.line==='pep'?' selected':'')+'>Peptides</option><option value="bhrt"'+(h.line==='bhrt'?' selected':'')+'>BHRT / HRT</option></select></div>'+
@@ -373,10 +374,42 @@ function buildPayload(){
     priorCorrections:[]};
 }
 function previewPDF(){if(!window.AllyOSGovReport){alert('Report module not loaded.');return;}AllyOSGovReport.download(buildPayload()).catch(function(e){alert('Report error: '+(e&&e.message||e));});}
+// ---- Reprint a previously signed & archived report (no re-review needed) ----
+function archPayload(rec){
+  var POS={MD:'Medical Director',DO:'Medical Director',ARNP:'ARNP · Nurse Practitioner',APRN:'ARNP · Nurse Practitioner',NP:'Nurse Practitioner',PA:'Physician Assistant',RN:'Registered Nurse'};
+  var LINE_LABEL={iv:'IV / IM Therapy',pep:'Peptide Therapy',bhrt:'BHRT / HRT'};
+  var roster=(window.AllyOSCred&&AllyOSCred.roster&&AllyOSCred.roster())||[];
+  var practitioners=roster.filter(function(s){return (s.status||'active')!=='inactive';}).map(function(s){return [s.name||'—',(POS[(s.cred||'').toUpperCase().replace(/[^A-Z]/g,'')]||s.cred||'Provider'),(s.license||s.state_license||'—'),'Active'];});
+  var charts=(rec.charts||[]).map(function(c){return {ref:c.ref||'',ini:c.ini||'',dos:c.dos||'',line:(c.line||'').toUpperCase(),status:c.status||'Reviewed'};});
+  var seen={};charts.forEach(function(c){if(c.line)seen[c.line.toLowerCase()]=true;});
+  var lines=Object.keys(seen).map(function(ln){return {title:(LINE_LABEL[ln]||ln.toUpperCase())+' — active this period',items:(PARAMS[ln]||[]).map(function(p){return {label:p,status:'Present'};})};});
+  var corrections=[];(rec.charts||[]).forEach(function(c){(c.deficiencies||[]).forEach(function(x){corrections.push({label:(c.ini||'')+' — '+x,resp:'Clinic provider',due:''});});});
+  return {clinic:rec.clinic,reportDate:fmtDate(rec.report_date)||fmtDate((''+(rec.created_at||'')).slice(0,10)),practitioners:practitioners,
+    md:(window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||sess.name||'Medical Director',mdLicense:'Florida Medical License · ME 84789',
+    overall:rec.findings?'Needs correction':'Compliant',charts:charts,lines:lines,corrections:corrections,priorCorrections:[]};
+}
+function reprintArchived(){
+  if(!(window.AllyOSCloud&&AllyOSCloud._sb)){alert('Cloud not available — sign in to load saved reports.');return;}
+  var name=S.hdr.clinic||sess.clinic||'';
+  var q=AllyOSCloud._sb.from('governance_inspections').select('*').order('created_at',{ascending:false}).limit(24);
+  if(sess.clinicId)q=q.eq('clinic_id',sess.clinicId);else if(name)q=q.eq('clinic',name);
+  Promise.resolve(q).then(function(r){var rows=(r&&r.data)||[];if(!rows.length){alert('No signed reports on file'+(name?(' for '+name):'')+' yet.');return;}archModal(rows);}).catch(function(){alert('Could not load saved reports.');});
+}
+function archModal(rows){
+  window._archRows=rows;
+  var body=rows.map(function(rec,i){var d=fmtDate(rec.report_date)||fmtDate((''+(rec.created_at||'')).slice(0,10));var nc=(rec.charts||[]).length;
+    return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;border-top:1px solid var(--line);padding:10px 0"><div><b>'+esc(rec.clinic||'')+'</b><div class="muted" style="font-size:11.5px">'+esc(d)+' · '+esc(rec.rating||'')+' · '+nc+' encounter'+(nc===1?'':'s')+' · '+(rec.findings||0)+' finding'+((rec.findings||0)===1?'':'s')+'</div></div><button class="btn gold" style="padding:7px 12px" onclick="archDownload('+i+')">📄 Download binder</button></div>';
+  }).join('');
+  var ov=document.createElement('div');ov.id='archOv';ov.style.cssText='position:fixed;inset:0;background:rgba(3,8,15,.75);z-index:60;display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.innerHTML='<div class="card" style="max-width:560px;width:100%;max-height:80vh;overflow:auto"><div style="display:flex;justify-content:space-between;align-items:center"><div class="grp" style="margin:0">Signed reports on file</div><button class="btn ghost" style="padding:4px 10px" onclick="var o=document.getElementById(\'archOv\');if(o)o.remove()">✕</button></div>'+body+'</div>';
+  ov.addEventListener('click',function(e){if(e.target===ov)ov.remove();});
+  document.body.appendChild(ov);
+}
+function archDownload(i){var rec=(window._archRows||[])[i];if(!rec)return;if(!window.AllyOSGovReport){alert('Report module not loaded.');return;}AllyOSGovReport.download(archPayload(rec)).catch(function(e){alert('Report error: '+(e&&e.message||e));});}
 function signArchive(){
   var rt=sessionRating();
   var rec={clinic_id:sess.clinicId||null,clinic:S.hdr.clinic,report_date:fmtDate(S.hdr.date)||'',rating:rt.rating,findings:rt.findings,
-    charts:S.selected.map(function(id){var e=encById(id);var r=S.review[id]&&S.review[id].result;return {ref:e?e.id:'',ini:e?e.pt:'',status:r?r.status:'—',deficiencies:(r&&r.deficiencies)||[]};})};
+    charts:S.selected.map(function(id){var e=encById(id);var r=S.review[id]&&S.review[id].result;return {ref:e?e.id:'',ini:e?e.pt:'',dos:e?e.dos:'',line:(e?e.line:'').toUpperCase(),status:r?r.status:'—',deficiencies:(r&&r.deficiencies)||[]};})};
   if(window.AllyOSCloud&&AllyOSCloud.postAuthed){
     AllyOSCloud.postAuthed('/.netlify/functions/governance-archive',rec).then(function(r){return r.json();}).then(function(d){
       alert(d&&d.ok?'🔒 Inspection signed & archived to the audit log.':'Saved locally — archive endpoint not available.');
