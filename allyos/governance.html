@@ -217,7 +217,9 @@ function reviewedCount(){return S.selected.filter(function(id){return S.review[i
 
 // ---- pattern flags across the sampled set ----
 function patternFlags(){
-  var out=[];var sel=S.selected.map(encById).filter(Boolean);
+  // Only consider REVIEWED encounters — empty/placeholder slots must not trigger flags.
+  var out=[];var sel=S.selected.map(encById).filter(function(e){return e&&S.review[e.id]&&S.review[e.id].result;});
+  if(!sel.length)return out;
   // Cross-chart shared deficiencies (a systemic documentation gap, not a one-off).
   var counts={};S.selected.forEach(function(id){var r=S.review[id]&&S.review[id].result;if(r)(r.deficiencies||[]).forEach(function(x){var k=(''+x).replace(/^[^—:]*[—:]\s*/,'').toLowerCase().slice(0,44);counts[k]=(counts[k]||0)+1;});});
   Object.keys(counts).forEach(function(k){if(counts[k]>=2)out.push(counts[k]+' of '+sel.length+' encounters share a deficiency: '+k);});
