@@ -365,7 +365,7 @@ function buildPayload(){
   });
   // §I Active/Unencumbered License — the clinic's licensed practitioners (MD-of-record + APPs/RNs).
   var POS={MD:'Medical Director',DO:'Medical Director',ARNP:'ARNP · Nurse Practitioner',APRN:'ARNP · Nurse Practitioner',NP:'Nurse Practitioner',PA:'Physician Assistant',RN:'Registered Nurse'};
-  var roster=(window.AllyOSCred&&AllyOSCred.roster&&AllyOSCred.roster())||[];
+  var roster=(window.AllyOSCred&&AllyOSCred.credentialedRoster&&AllyOSCred.credentialedRoster())||[];
   var practitioners=roster.filter(function(s){return (s.status||'active')!=='inactive';}).map(function(s){
     return [s.name||'—',(POS[(s.cred||'').toUpperCase().replace(/[^A-Z]/g,'')]||s.cred||'Provider'),(s.license||s.state_license||'—'),'Active'];
   });
@@ -375,12 +375,16 @@ function buildPayload(){
     lines:lines,corrections:S.selected.reduce(function(acc,id){var e=encById(id);var r=S.review[id]&&S.review[id].result;if(r){(r.deficiencies||[]).forEach(function(x){acc.push({label:(e?e.pt:'')+' — '+x,resp:'Clinic provider',due:''});});}return acc;},[]),
     priorCorrections:[]};
 }
-function previewPDF(){if(!window.AllyOSGovReport){alert('Report module not loaded.');return;}AllyOSGovReport.download(buildPayload()).catch(function(e){alert('Report error: '+(e&&e.message||e));});}
+function previewPDF(){if(!window.AllyOSGovReport){alert('Report module not loaded.');return;}
+  var rc=reviewedCount();
+  if(rc===0){alert('No encounters have been reviewed yet — nothing to report. Analyze the encounters in Stage 3 first, or use "Reprint a signed report" (Stage 1) for a previously signed audit.');return;}
+  if(rc<S.selected.length&&!confirm((S.selected.length-rc)+' of '+S.selected.length+' encounters are not reviewed yet and would print as "Not reviewed". Continue anyway?'))return;
+  AllyOSGovReport.download(buildPayload()).catch(function(e){alert('Report error: '+(e&&e.message||e));});}
 // ---- Reprint a previously signed & archived report (no re-review needed) ----
 function archPayload(rec){
   var POS={MD:'Medical Director',DO:'Medical Director',ARNP:'ARNP · Nurse Practitioner',APRN:'ARNP · Nurse Practitioner',NP:'Nurse Practitioner',PA:'Physician Assistant',RN:'Registered Nurse'};
   var LINE_LABEL={iv:'IV / IM Therapy',pep:'Peptide Therapy',bhrt:'BHRT / HRT'};
-  var roster=(window.AllyOSCred&&AllyOSCred.roster&&AllyOSCred.roster())||[];
+  var roster=(window.AllyOSCred&&AllyOSCred.credentialedRoster&&AllyOSCred.credentialedRoster())||[];
   var practitioners=roster.filter(function(s){return (s.status||'active')!=='inactive';}).map(function(s){return [s.name||'—',(POS[(s.cred||'').toUpperCase().replace(/[^A-Z]/g,'')]||s.cred||'Provider'),(s.license||s.state_license||'—'),'Active'];});
   var charts=(rec.charts||[]).map(function(c){return {ref:c.ref||'',ini:c.ini||'',dos:c.dos||'',line:(c.line||'').toUpperCase(),status:c.status||'Reviewed'};});
   var seen={};charts.forEach(function(c){if(c.line)seen[c.line.toLowerCase()]=true;});
@@ -409,6 +413,7 @@ function archModal(rows){
 }
 function archDownload(i){var rec=(window._archRows||[])[i];if(!rec)return;if(!window.AllyOSGovReport){alert('Report module not loaded.');return;}AllyOSGovReport.download(archPayload(rec)).catch(function(e){alert('Report error: '+(e&&e.message||e));});}
 function signArchive(){
+  if(reviewedCount()===0){alert('No encounters have been reviewed — there is nothing to sign. Analyze the encounters first (Stage 3).');return;}
   var rt=sessionRating();
   var rec={clinic_id:sess.clinicId||null,clinic:S.hdr.clinic,report_date:fmtDate(S.hdr.date)||'',rating:rt.rating,findings:rt.findings,
     charts:S.selected.map(function(id){var e=encById(id);var r=S.review[id]&&S.review[id].result;return {ref:e?e.id:'',ini:e?e.pt:'',dos:e?e.dos:'',line:(e?e.line:'').toUpperCase(),status:r?r.status:'—',deficiencies:(r&&r.deficiencies)||[]};})};
