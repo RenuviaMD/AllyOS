@@ -149,8 +149,14 @@ function renderCloud(){
     AllyOSCloud.user().then(function(u){
       if(!u){ if(banner)banner.innerHTML='🔌 <b>Cloud sync available.</b> <a href="login.html" style="color:var(--teal)">Sign in</a> to see your clinics\' de-identified audits here automatically — no import. <span class="cc">Until then this cockpit shows locally imported data.</span>'; return; }
       AllyOSCloud.clinicSummaries(ymNow()).then(function(list){
-        if(banner)banner.innerHTML='☁ <b style="color:var(--green)">Live cloud sync active</b> — clinics &amp; de-identified audits below are pulled from the AllyOS hub in real time (signed in as '+esc(u.email)+'). <span class="cc">PHI never leaves the clinic.</span>';
-        if(!list||!list.length){return;}
+        // AllyAuditPro is the WELLNESS audit engine. AHCA clinics are audited in AHCA Pro and billed
+        // via governance retainer in MD Finance — they do NOT belong in this audit cockpit.
+        var all=list||[];
+        var acha=all.filter(function(s){return ((s.clinic.governance_type||'').toLowerCase()==='acha');}).length;
+        list=all.filter(function(s){return ((s.clinic.governance_type||'').toLowerCase()!=='acha');});
+        var achaNote=acha?' <span class="cc">· '+acha+' AHCA clinic'+(acha>1?'s':'')+' audited in AHCA Pro (billed in MD Finance), not shown here.</span>':'';
+        if(banner)banner.innerHTML='☁ <b style="color:var(--green)">Live cloud sync active</b> — wellness clinics &amp; de-identified audits pulled from the AllyOS hub in real time (signed in as '+esc(u.email)+'). <span class="cc">PHI never leaves the clinic.</span>'+achaNote;
+        if(!list.length){document.getElementById('tbl').innerHTML='<tr><th>Clinic</th><th>Month</th><th>Encounters</th><th>Mandatory</th><th>Reviewed</th><th>Status</th><th></th></tr><tr><td colspan="7" class="cc" style="padding:18px">No wellness clinics to audit yet.</td></tr>';document.getElementById('stats').innerHTML=stat('teal','Clinics',0)+stat('green','Need review',0)+stat('green','Corrections open',0)+stat('','Sync','☁ live');return;}
         var pend=0,corrTot=0;
         var rows=list.map(function(s){var c=s.clinic;var rev=s.audited,need=Math.min(5,s.encounters||0);
           var state=rev===0&&s.encounters? 'pend':(rev<need||s.corrections?'prog':(s.encounters?'done':'none'));
