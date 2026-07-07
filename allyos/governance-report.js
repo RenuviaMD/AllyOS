@@ -69,8 +69,8 @@ window.AllyOSGovReport = (function () {
       statusBox('Biohazardous waste plan on file; staff trained.','COMPLIANT',GREEN),
       bodyP('Biohazard vendor: '+(pl.bioVendor||'{Vendor name}')+'. Vendor active since '+(pl.bioSince||'{date}')+'. Clinic maintains vendor documentation and staff training record in the clinic binder.'),
       sec('V. Clinical Record Review / Monthly Governance Audit'),
-      bodyP('Charts were randomly sampled from the clinic’s monthly encounter list and reviewed against the service-line documentation parameters. No PHI is published in this binder copy — chart reference + patient initials only.'),
-      dataTable(['#','Chart ref','Initials','Date of service','Line','Result'],chartRows,[20,'*',48,72,'*',52]),
+      bodyP('Encounters were randomly sampled from the clinic’s monthly encounter list and reviewed against the service-line documentation parameters. No PHI is published in this binder copy — encounter reference + patient initials only.'),
+      dataTable(['#','Encounter ref','Initials','Date of service','Line','Result'],chartRows,[20,'*',48,72,'*',52]),
       sec('VI. Service-Line Governance Review'),
       bodyP('Only active treatment lines are shown below. Inactive service lines are omitted from this report.')
     ];

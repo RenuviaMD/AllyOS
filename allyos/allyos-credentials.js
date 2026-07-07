@@ -80,8 +80,13 @@
     return o;
   }
 
+  // Credentialed practitioners for the governance binder — the clinic's executed collaborative-practice
+  // roster (MD-of-record + APP/ARNP), independent of the local signer-authority seats. Falcon is the
+  // Medical Director (oversight); the ARNP is the treating provider.
+  function credentialedRoster() { return DEFAULT_ROSTER.map(function (x) { return Object.assign({}, x); }); }
+
   window.AllyOSCred = {
-    roster: roster, credClass: credClass, signers: signers, options: options,
+    roster: roster, credentialedRoster: credentialedRoster, credClass: credClass, signers: signers, options: options,
     DOC: { STANDING_ORDER: "standing_order", GFE: "gfe", INFUSION_NOTE: "infusion_note" },
   };
 })();
