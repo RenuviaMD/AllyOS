@@ -153,10 +153,19 @@
       status: c.status,
     };
   }
-  // the signed-in user's clinic (RLS returns only theirs), mapped to the app config shape
+  // the signed-in user's clinic, mapped to the app config shape. An admin can read MULTIPLE clinics,
+  // so pick the one matching this user's membership (profile.clinicId) — never blindly cs[0], which
+  // would sync the wrong clinic's lines/care-model onto the dashboard.
   Cloud.myClinic = function () {
     if (!guard()) return Promise.resolve(null);
-    return Cloud.listClinics().then(function (cs) { return clinicToCfg((cs && cs[0]) || null); }).catch(function () { return null; });
+    return Cloud.profile().then(function (p) {
+      var cid = p && p.clinicId;
+      return Cloud.listClinics().then(function (cs) {
+        cs = cs || [];
+        var mine = cid ? cs.filter(function (c) { return c.id === cid; })[0] : null;
+        return clinicToCfg(mine || cs[0] || null);
+      });
+    }).catch(function () { return null; });
   };
   // owner-only write (RLS: only app_admin may UPDATE clinics — the RN/clinic cannot)
   Cloud.saveClinicConfig = function (clinicId, cfg) {
