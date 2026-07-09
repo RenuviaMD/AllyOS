@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Advanced Peptides — live demo · AllyOS · RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
+<style>
+  :root{--bg:#060a12;--line:#1b2839;--ink:#eaf3f5;--muted:#7f96ab;--teal:#2ee6d6;--green:#2bbf76;--gold:#e7b84e}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;display:flex;flex-direction:column}
+  .demobar{display:flex;align-items:center;gap:12px;padding:9px 16px;background:#0a1120;border-bottom:1px solid var(--line);flex:0 0 auto}
+  .demobar .brand{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:.95rem;text-decoration:none;color:var(--ink)}
+  .demobar .brand img{width:26px;height:26px;border-radius:50%}
+  .demobar .brand b{color:var(--gold)}.demobar .brand span{color:var(--teal)}
+  .demobar .tag{font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(231,184,78,.4);border-radius:6px;padding:3px 9px}
+  .demobar .sp{margin-left:auto}
+  .demobar a.back{color:var(--muted);text-decoration:none;font-size:.85rem;margin-right:6px}
+  .demobar a.book{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(120deg,var(--teal),var(--green));color:#04140e;font-weight:700;font-size:.85rem;text-decoration:none;padding:8px 15px;border-radius:9px;white-space:nowrap}
+  @media(max-width:560px){.demobar .back{display:none}.demobar .tag{display:none}}
+  iframe{flex:1 1 auto;width:100%;border:0;display:block}
+</style>
+</head>
+<body>
+  <div class="demobar">
+    <a class="brand" href="index.html"><img src="ally-avatar-64.png" alt="Ally">Renuvia<b>MD</b>® <span>AllyOS</span></a>
+    <span class="tag">Peptides Workspace · live demo</span>
+    <span class="sp"></span>
+    <a class="back" href="index.html">← All lines</a>
+    <a class="book" href="book-demo.html">📅 Book a 1:1 live demo</a>
+  </div>
+  <iframe src="peptides-demo-app.html" title="AllyOS Peptides Workspace demo" allow="clipboard-write"></iframe>
+</body>
+</html>
