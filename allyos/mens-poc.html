@@ -39,12 +39,15 @@
  table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
  th{font-family:var(--fdisp);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
  .sig{border-top:1px solid var(--line);margin-top:16px;padding-top:12px;font-size:12px;color:var(--muted)}.sig b{color:var(--ink)}
- details.grpc{margin:16px 0 14px}
- details.grpc>summary{font-family:var(--fdisp);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;padding:4px 0}
+ details.grpc{margin:14px 0 12px}
+ details.grpc>summary{font-family:var(--fdisp);font-size:11.5px;letter-spacing:.05em;color:var(--ink,#cfe0e6);cursor:pointer;list-style:none;display:flex;align-items:center;gap:11px;padding:10px 13px;background:#0e1c2e;border:1px solid var(--line2,#2a4a6a);border-radius:9px}
+ details.grpc[open]>summary{border-bottom-left-radius:0;border-bottom-right-radius:0;border-color:var(--teal)}
+ details.grpc>summary:hover{background:#13273c;border-color:var(--teal)}
  details.grpc>summary::-webkit-details-marker{display:none}
- details.grpc>summary:before{content:'▸';color:var(--teal);transition:transform .15s;font-size:11px}
+ details.grpc>summary:before{content:'▸';display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;border-radius:6px;background:var(--teal);color:#04121a;font-size:11px;font-weight:900;transition:transform .15s;flex:0 0 auto}
  details.grpc[open]>summary:before{transform:rotate(90deg)}
- details.grpc>summary:after{content:'';flex:1;height:1px;background:var(--line)}
+ details.grpc>summary:after{content:'SHOW';margin-left:auto;font-size:9.5px;letter-spacing:.12em;color:var(--teal);border:1px solid var(--teal);border-radius:20px;padding:3px 11px;flex:0 0 auto}
+ details.grpc[open]>summary:after{content:'HIDE'}
  .labgrid{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
  .fw{display:flex;flex-direction:column}.fw .q{margin:0 0 5px}
  .li{width:104px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px}
@@ -269,8 +272,6 @@ function testosteroneRx(cls, elig, blocker, singlePanel){
   return '<div class="grp">Testosterone — starting regimens (provider titrates &amp; signs)</div>'+
     (singlePanel?'<div class="rx" style="border-color:#6e5a1c;background:#2a241033;color:var(--amber)"><b>Single-panel candidacy</b> — regimen shown for provider review; <b>a repeat AM confirmation is recommended before initiating</b> (Endocrine Society 2018). Set “Repeat AM labs confirm the pattern?” to Yes once a confirming panel is on file.</div>':'')+
     '<div class="rx" style="border-color:#1e6e4a;background:#0e2a1f33;color:#e6f2ec"><b style="color:var(--green)">▶ Recommended starting order (first-line):</b> <b>Testosterone cypionate (or enanthate) 100 mg IM or SC once weekly.</b> Recheck <b>trough total T + hematocrit at ~6 weeks</b> (steady state), then titrate toward <b>450–600 ng/dL</b>. Safety: <b>Hct</b> (hold if &gt;54%), <b>BP</b> every visit, <b>PSA</b> baseline per age/risk. Alternatives &amp; full detail below.</div>'+
-    coll('Prescribing authority, targets &amp; controlled-substance rules (reference)',
-    '<div class="rx" style="border-color:#4a3c18;background:#2a221022;color:#e6d6a8"><b>DEA Schedule III controlled substance.</b> Prescribe under the <b>treating provider\'s own DEA / state authority</b> — never the software owner\'s. <b>Goal = physiologic restoration, not enhancement.</b> Target total T <b>450–600 ng/dL preferred</b> (monitored ~450–750 if symptoms improve &amp; safety markers stay clean); <b>avoid sustained supraphysiologic levels (&gt;900–1000)</b>; use the <b>lowest effective dose &amp; route</b>. Free T to mid/upper-mid normal when SHBG is abnormal. <span style="color:var(--muted)">AUA middle tertile ≈450–600 · Endocrine Society 2018 mid-normal (PMID 29562364).</span></div>')+
     coll('Preferred route order &amp; full regimen detail (all 5 routes)',
     '<div class="rx" style="border-color:#2a5a7e;background:#0e243622"><b>Preferred route order — rapid, trackable optimization</b> — (1) weekly injectable → (2) weekly SC auto-injector → (3) topical gel (needle-free alternative, <b>not inferior</b>). Selected-use: (4) oral undecanoate · (5) pellets (<b>not first-line</b>). Injectable is favored for fast, measurable optimization with clean trough-based titration; gel suits needle-averse men, higher-Hct concern, or reversibility. <b>Safety monitoring is identical across every route.</b></div>'+
     '<div class="rx"><b>1 · Weekly injectable — cypionate or enanthate (IM or SC) <span style="color:var(--green)">(first-line — rapid optimization)</span></b>'+
