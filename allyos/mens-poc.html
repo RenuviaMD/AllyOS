@@ -67,7 +67,7 @@
   <span class="right"><a href="dashboard.html">← Dashboard</a></span>
 </div>
 <div class="wrap">
-  <h1>Men's Hormone Optimization — Plan</h1>
+  <h1 id="entry">Men's Hormone Optimization — Plan</h1>
   <p class="sub">Wellness-first. Goals trigger evaluation; testosterone is one physician-directed tool, not the program.</p>
   <div class="disc">
     <b>Wellness optimization decision support.</b> Wellness goals qualify a man for evaluation; <b>testosterone is considered only after provider review</b> of symptoms, repeat AM androgen labs (total + free/bioavailable T vs your lab ranges), fertility goals, and the safety gates. <b>Dosing appears only when the review reaches a candidate decision with gates clear</b> — shown as a starting regimen the provider titrates to mid-normal and signs (testosterone is a Schedule III controlled substance; prescribe under your own DEA / state authority). Not a prescription; the treating provider owns and signs every decision. PHI stays on this device.
@@ -498,7 +498,9 @@ function generate(){
 
   if(!dom.length){out.innerHTML='<div class="poc"><div class="elig found">Rate at least one wellness domain to generate a plan.</div></div>';return;}
   var goalLine=dom.map(function(p){return esc(p.t)+' '+(sev[p.k])+'/4';}).join(' · ');
-  out.innerHTML='<div class="poc">'+docHeader('Men’s Hormone Optimization Plan')+
+  out.innerHTML='<div class="poc">'+
+    '<div class="noprint" style="margin-bottom:12px"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs / add more data</button></div>'+
+    docHeader('Men’s Hormone Optimization Plan')+
     '<h2>Men’s Hormone Optimization Plan</h2><div class="meta">Wellness-first · goals: '+goalLine+'</div>'+
     '<div class="grp" style="margin-top:14px">Eligibility determination</div>'+
       '<div class="elig '+cls+'">'+esc(elig)+'</div><div style="font-size:12.5px;color:var(--muted);line-height:1.55">'+why+'</div>'+
@@ -514,7 +516,7 @@ function generate(){
     coll('Foundational optimization — lifestyle plan (always attached · reference)', tbl(FOUND,['Domain','Target / structure','Why']))+
     '<div class="noprint">'+coll('Cross-line adjunct options — provider review (screen only)', crosswalkBlock())+'</div>'+
     providerSig()+
-    '<div class="noprint" style="margin-top:14px"><button class="gen" onclick="window.print()">🖨 Print / export plan</button></div>'+
+    '<div class="noprint" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs / add more data</button><button class="gen" onclick="window.print()">🖨 Print / export plan</button></div>'+
   '</div>';
   out.scrollIntoView({behavior:'smooth'});
 }
