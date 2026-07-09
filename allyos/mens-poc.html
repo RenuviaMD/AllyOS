@@ -39,12 +39,15 @@
  table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
  th{font-family:var(--fdisp);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
  .sig{border-top:1px solid var(--line);margin-top:16px;padding-top:12px;font-size:12px;color:var(--muted)}.sig b{color:var(--ink)}
- details.grpc{margin:16px 0 14px}
- details.grpc>summary{font-family:var(--fdisp);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;padding:4px 0}
+ details.grpc{margin:14px 0 12px}
+ details.grpc>summary{font-family:var(--fdisp);font-size:11.5px;letter-spacing:.05em;color:var(--ink,#cfe0e6);cursor:pointer;list-style:none;display:flex;align-items:center;gap:11px;padding:10px 13px;background:#0e1c2e;border:1px solid var(--line2,#2a4a6a);border-radius:9px}
+ details.grpc[open]>summary{border-bottom-left-radius:0;border-bottom-right-radius:0;border-color:var(--teal)}
+ details.grpc>summary:hover{background:#13273c;border-color:var(--teal)}
  details.grpc>summary::-webkit-details-marker{display:none}
- details.grpc>summary:before{content:'▸';color:var(--teal);transition:transform .15s;font-size:11px}
+ details.grpc>summary:before{content:'▸';display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;border-radius:6px;background:var(--teal);color:#04121a;font-size:11px;font-weight:900;transition:transform .15s;flex:0 0 auto}
  details.grpc[open]>summary:before{transform:rotate(90deg)}
- details.grpc>summary:after{content:'';flex:1;height:1px;background:var(--line)}
+ details.grpc>summary:after{content:'SHOW';margin-left:auto;font-size:9.5px;letter-spacing:.12em;color:var(--teal);border:1px solid var(--teal);border-radius:20px;padding:3px 11px;flex:0 0 auto}
+ details.grpc[open]>summary:after{content:'HIDE'}
  .labgrid{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
  .fw{display:flex;flex-direction:column}.fw .q{margin:0 0 5px}
  .li{width:104px;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:8px 10px}
@@ -64,7 +67,7 @@
   <span class="right"><a href="dashboard.html">← Dashboard</a></span>
 </div>
 <div class="wrap">
-  <h1>Men's Hormone Optimization — Plan</h1>
+  <h1 id="entry">Men's Hormone Optimization — Plan</h1>
   <p class="sub">Wellness-first. Goals trigger evaluation; testosterone is one physician-directed tool, not the program.</p>
   <div class="disc">
     <b>Wellness optimization decision support.</b> Wellness goals qualify a man for evaluation; <b>testosterone is considered only after provider review</b> of symptoms, repeat AM androgen labs (total + free/bioavailable T vs your lab ranges), fertility goals, and the safety gates. <b>Dosing appears only when the review reaches a candidate decision with gates clear</b> — shown as a starting regimen the provider titrates to mid-normal and signs (testosterone is a Schedule III controlled substance; prescribe under your own DEA / state authority). Not a prescription; the treating provider owns and signs every decision. PHI stays on this device.
@@ -173,7 +176,8 @@ var GATES=[
  'Hematocrit elevated, or baseline hematocrit missing',
  'Uncontrolled BP / HF · MI or stroke <6 mo · thrombophilia',
  'Untreated severe obstructive sleep apnea (OSA)',
- 'Severe LUTS / BPH symptoms'
+ 'Severe LUTS / BPH symptoms',
+ 'Untreated hyperprolactinemia / suspected pituitary mass'
 ];
 var sev={},g={},noSGaffirm=false;
 function toggleGate(i){g[i]=!g[i];if(g[i])noSGaffirm=false;renderGates();}
@@ -189,6 +193,14 @@ function renderGates(){
   document.getElementById('gates').innerHTML=noneChip+GATES.map(function(x,i){return '<span class="chip red'+(g[i]?' on':'')+'" onclick="toggleGate('+i+')">'+esc(x)+'</span>';}).join('');
 }
 renderPheno();renderGates();
+// DOB auto-format → mm/dd/yyyy as you type. Plain ages (<=2 digits, no slash) pass through untouched.
+(function(){var d=document.getElementById('pocDob');if(!d)return;d.addEventListener('input',function(){
+  var raw=d.value.replace(/[^\d]/g,'').slice(0,8);
+  if(raw.length<=2){d.value=raw;return;} // still could be an age
+  var out=raw.slice(0,2)+'/'+raw.slice(2,4);
+  if(raw.length>4)out+='/'+raw.slice(4,8);
+  d.value=out;
+});})();
 // PHI-free lab import (paste/drag → confirm → fill). Values judged vs the ranges in section 3.
 if(window.AllyOSLabImport&&document.getElementById('labimport')){
   AllyOSLabImport.mount(document.getElementById('labimport'),[
@@ -260,7 +272,6 @@ function testosteroneRx(cls, elig, blocker, singlePanel){
   return '<div class="grp">Testosterone — starting regimens (provider titrates &amp; signs)</div>'+
     (singlePanel?'<div class="rx" style="border-color:#6e5a1c;background:#2a241033;color:var(--amber)"><b>Single-panel candidacy</b> — regimen shown for provider review; <b>a repeat AM confirmation is recommended before initiating</b> (Endocrine Society 2018). Set “Repeat AM labs confirm the pattern?” to Yes once a confirming panel is on file.</div>':'')+
     '<div class="rx" style="border-color:#1e6e4a;background:#0e2a1f33;color:#e6f2ec"><b style="color:var(--green)">▶ Recommended starting order (first-line):</b> <b>Testosterone cypionate (or enanthate) 100 mg IM or SC once weekly.</b> Recheck <b>trough total T + hematocrit at ~6 weeks</b> (steady state), then titrate toward <b>450–600 ng/dL</b>. Safety: <b>Hct</b> (hold if &gt;54%), <b>BP</b> every visit, <b>PSA</b> baseline per age/risk. Alternatives &amp; full detail below.</div>'+
-    '<div class="rx" style="border-color:#4a3c18;background:#2a221022;color:#e6d6a8"><b>DEA Schedule III controlled substance.</b> Prescribe under the <b>treating provider\'s own DEA / state authority</b> — never the software owner\'s. <b>Goal = physiologic restoration, not enhancement.</b> Target total T <b>450–600 ng/dL preferred</b> (monitored ~450–750 if symptoms improve &amp; safety markers stay clean); <b>avoid sustained supraphysiologic levels (&gt;900–1000)</b>; use the <b>lowest effective dose &amp; route</b>. Free T to mid/upper-mid normal when SHBG is abnormal. <span style="color:var(--muted)">AUA middle tertile ≈450–600 · Endocrine Society 2018 mid-normal (PMID 29562364).</span></div>'+
     coll('Preferred route order &amp; full regimen detail (all 5 routes)',
     '<div class="rx" style="border-color:#2a5a7e;background:#0e243622"><b>Preferred route order — rapid, trackable optimization</b> — (1) weekly injectable → (2) weekly SC auto-injector → (3) topical gel (needle-free alternative, <b>not inferior</b>). Selected-use: (4) oral undecanoate · (5) pellets (<b>not first-line</b>). Injectable is favored for fast, measurable optimization with clean trough-based titration; gel suits needle-averse men, higher-Hct concern, or reversibility. <b>Safety monitoring is identical across every route.</b></div>'+
     '<div class="rx"><b>1 · Weekly injectable — cypionate or enanthate (IM or SC) <span style="color:var(--green)">(first-line — rapid optimization)</span></b>'+
@@ -481,28 +492,31 @@ function generate(){
   var anySG = [hct,sbp,dbp,psa,stopbang,ipss,e2,lh,fsh,prl,hgb,a1c,glu,apob,egfr,alt,tsh].some(function(x){return x!=null;});
   var sgLabel = sgStatus==='red'?'🔴 RED — resolve before any start':(sgStatus==='yellow'?'🟡 YELLOW — proceed with documentation/management':'🟢 GREEN — no start-safety flags on the entered values');
   var sgItems = sgReds.concat(sgYellows);
-  var sgHTML = anySG ? ('<div class="grp">Start-safety &amp; context gate</div><div class="ryg '+sgStatus+'"><b>'+sgLabel+'</b>'+(sgItems.length?('<ul>'+sgItems.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'):'')+'<div style="font-size:11px;margin-top:8px;opacity:.85">Start-safety: Hct 48/50/54 · BP AHA · PSA &gt;4 (&gt;3 risk) · IPSS &gt;19 · STOP-BANG · eGFR &lt;30. Context: E2 · LH/FSH/prolactin · A1c/glucose · ApoB · ALT · TSH · Hgb. Qualitative hard stops (fertility, cancer, CV/VTE) are the checkboxes above.</div></div>') : '';
+  var sgLegend = sgItems.length ? '<div style="font-size:11px;margin-top:8px;opacity:.85">Start-safety: Hct 48/50/54 · BP AHA · PSA &gt;4 (&gt;3 risk) · IPSS &gt;19 · STOP-BANG · eGFR &lt;30. Context: E2 · LH/FSH/prolactin · A1c/glucose · ApoB · ALT · TSH · Hgb. Qualitative hard stops (fertility, cancer, CV/VTE) are the checkboxes above.</div>' : '';
+  var sgHTML = anySG ? ('<div class="grp">Start-safety &amp; context gate</div><div class="ryg '+sgStatus+'"><b>'+sgLabel+'</b>'+(sgItems.length?('<ul>'+sgItems.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'):'')+sgLegend+'</div>') : '';
   var warnHTML = warns.length ? ('<div class="ryg yellow" style="margin-top:8px"><b>⚠ Check before deciding:</b><ul>'+warns.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>') : '';
 
   if(!dom.length){out.innerHTML='<div class="poc"><div class="elig found">Rate at least one wellness domain to generate a plan.</div></div>';return;}
   var goalLine=dom.map(function(p){return esc(p.t)+' '+(sev[p.k])+'/4';}).join(' · ');
-  out.innerHTML='<div class="poc">'+docHeader('Men’s Hormone Optimization Plan')+
+  out.innerHTML='<div class="poc">'+
+    '<div class="noprint" style="margin-bottom:12px"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs / add more data</button></div>'+
+    docHeader('Men’s Hormone Optimization Plan')+
     '<h2>Men’s Hormone Optimization Plan</h2><div class="meta">Wellness-first · goals: '+goalLine+'</div>'+
     '<div class="grp" style="margin-top:14px">Eligibility determination</div>'+
       '<div class="elig '+cls+'">'+esc(elig)+'</div><div style="font-size:12.5px;color:var(--muted);line-height:1.55">'+why+'</div>'+
-      (haveLabs?'<div class="rx" style="border-color:#2a5a7e;background:#0e243622;margin-top:10px"><b>Lab read (vs your lab ranges):</b> '+labRead+'</div>':'')+
+      (haveLabs?coll('Lab read (vs your lab ranges) — reference','<div class="rx" style="border-color:#2a5a7e;background:#0e243622"><b>Lab read:</b> '+labRead+'</div>'):'')+
       warnHTML+
       (noSGaffirm?'<div class="rx" style="border-color:#1e6e4a;color:var(--green);font-size:12px">✓ Provider affirms <b>no qualitative safety-screen issues</b> (fertility, prostate, hematocrit, CV/VTE, OSA, LUTS).</div>':'')+
       sgHTML+
     (cls==='go'
-      ? '<div class="grp">Baseline &amp; safety labs</div><div class="rx" style="color:var(--muted);font-size:12px">Eligibility labs are confirmed for this candidate (see the lab read above). Ongoing safety labs (T to the 450–600 target, hematocrit, PSA, BP, estradiol, metabolic) follow the <b>visit cadence</b> and the <b>dosing safety stops</b> below — not re-ordered here.</div>'
+      ? coll('Baseline &amp; safety labs — reference','<div class="rx" style="color:var(--muted);font-size:12px">Eligibility labs are confirmed for this candidate (see the lab read above). Ongoing safety labs (T to the 450–600 target, hematocrit, PSA, BP, estradiol, metabolic) follow the <b>visit cadence</b> and the <b>dosing safety stops</b> below — not re-ordered here.</div>')
       : '<div class="grp">Hormone-axis &amp; safety labs to order</div>'+tbl(LABMAP,['Lab / measure','Timing','Decision note']))+
     testosteroneRx(cls, elig, blocker, singlePanel)+
     '<div class="grp">Monitoring &amp; visit cadence</div>'+tbl(CADENCE,['Visit','Name','Key actions'])+
     coll('Foundational optimization — lifestyle plan (always attached · reference)', tbl(FOUND,['Domain','Target / structure','Why']))+
     '<div class="noprint">'+coll('Cross-line adjunct options — provider review (screen only)', crosswalkBlock())+'</div>'+
     providerSig()+
-    '<div class="noprint" style="margin-top:14px"><button class="gen" onclick="window.print()">🖨 Print / export plan</button></div>'+
+    '<div class="noprint" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs / add more data</button><button class="gen" onclick="window.print()">🖨 Print / export plan</button></div>'+
   '</div>';
   out.scrollIntoView({behavior:'smooth'});
 }

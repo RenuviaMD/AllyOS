@@ -55,7 +55,7 @@
 </div>
 
 <div class="wrap">
-  <h1>BHRT Plan of Care — Generator</h1>
+  <h1 id="entry">BHRT Plan of Care — Generator</h1>
   <p class="sub">Symptom-driven decision support for perimenopause / menopause. The provider reviews and signs.</p>
 
   <div class="disc">
@@ -411,7 +411,7 @@ function generate(){
   var sg=safetyRouteGate();
   if(anyFlag || sg.status==='red'){
     var redWhy = sg.status==='red' ? ('<div class="rxc" style="margin-top:8px">Safety gate (RED): '+sg.reds.join(' ')+'</div>') : '';
-    out.innerHTML='<div class="poc">'+docHeader('BHRT — Wellness summary &amp; referral')+'<h2>Wellness summary &amp; referral</h2><div class="red"><b>'+(anyFlag?'Red flag present':'Severe safety flag (BP)')+' — hormone-medication recommendations are suppressed.</b> Generate a wellness summary and route for evaluation/clearance or co-management before any hormone therapy.</div>'+redWhy+providerSig()+'<div class="noprint" style="margin-top:12px"><button class="gen" onclick="window.print()">🖨 Print / export</button></div></div>';
+    out.innerHTML='<div class="poc">'+'<div class="noprint" style="margin-bottom:12px"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs / add more data</button></div>'+docHeader('BHRT — Wellness summary &amp; referral')+'<h2>Wellness summary &amp; referral</h2><div class="red"><b>'+(anyFlag?'Red flag present':'Severe safety flag (BP)')+' — hormone-medication recommendations are suppressed.</b> Generate a wellness summary and route for evaluation/clearance or co-management before any hormone therapy.</div>'+redWhy+providerSig()+'<div class="noprint" style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs / add more data</button><button class="gen" onclick="window.print()">🖨 Print / export</button></div></div>';
     out.scrollIntoView({behavior:'smooth'});return;
   }
   var ds=domains().filter(function(d){return d.s>0;}).sort(function(a,b){return b.s-a.s;});
@@ -420,7 +420,9 @@ function generate(){
     return '<div class="row"><span class="pri '+p[0]+'">'+p[1]+'</span><div><div style="font-size:13.5px;color:var(--ink)">'+esc(d.name)+' <span style="color:var(--muted)">· severity '+d.s+'/4</span></div><div style="font-size:11.5px;color:var(--muted);margin-top:2px">'+esc(d.mech)+'</div></div></div>';
   }).join('');
   var goals=Object.keys(gl).filter(function(k){return gl[k];}).map(function(k){return GOALS[k];});
-  out.innerHTML='<div class="poc">'+docHeader('BHRT Plan of Care')+
+  out.innerHTML='<div class="poc">'+
+    '<div class="noprint" style="margin-bottom:12px"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs / add more data</button></div>'+
+    docHeader('BHRT Plan of Care')+
     '<h2>BHRT Plan of Care</h2><div class="meta">Symptom-based · '+esc(document.getElementById('stage').value||'menopause transition')+' · uterus: '+esc(document.getElementById('uterus').value||'—')+(goals.length?' · goals: '+esc(goals.join(', ')):'')+'</div>'+
     '<div class="grp" style="margin-top:14px">Symptom map (severity-ranked)</div><div class="map">'+map+'</div>'+
     sg.panel+
@@ -433,7 +435,7 @@ function generate(){
     crosswalkBlock()+
     '<div class="rxc" style="margin-top:10px">Reminder: <b>symptom-based</b> decision support per NAMS 2022. Labs confirm and monitor — they do not determine whether to treat symptoms. <b>Doses, formulations, titration, and pharmacy are the provider\'s decision and signature.</b></div>'+
     providerSig()+
-    '<div class="noprint" style="margin-top:14px"><button class="gen" onclick="window.print()">🖨 Print / export Plan of Care</button></div>'+
+    '<div class="noprint" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs / add more data</button><button class="gen" onclick="window.print()">🖨 Print / export Plan of Care</button></div>'+
   '</div>';
   out.scrollIntoView({behavior:'smooth'});
 }
