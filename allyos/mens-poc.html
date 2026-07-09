@@ -249,7 +249,7 @@ window.addEventListener('beforeprint',function(){var ds=document.querySelectorAl
 // ---- Testosterone target/dosing/administration (RenuviaMD addendum v0.1; AUA + Endocrine 2018 + DailyMed labels) ----
 // Shown ONLY when eligibility = candidate-review (cls 'go'). Engine proposes a starting regimen;
 // provider titrates to the 450–600 ng/dL wellness target and signs. Schedule III controlled substance.
-function testosteroneRx(cls, elig, blocker){
+function testosteroneRx(cls, elig, blocker, singlePanel){
   if(cls!=='go'){
     return '<div class="rx" style="border-color:#4a3c18;background:#2a221022;color:#e0c98a"><b>Testosterone — eligibility step only; no dosing yet.</b>'+
       (elig?(' <b style="color:#f0c674">Current status: '+esc(elig)+'.</b>'):'')+
@@ -257,6 +257,8 @@ function testosteroneRx(cls, elig, blocker){
       ' When the provider reaches a <b>candidate decision with safety gates clear</b>, the starting regimens appear here. Blocked claims: T for energy / anti-aging / fat-loss / diabetes; "safe for everyone"; "compounded/pellets automatically superior."</div>';
   }
   return '<div class="grp">Testosterone — starting regimens (provider titrates &amp; signs)</div>'+
+    (singlePanel?'<div class="rx" style="border-color:#6e5a1c;background:#2a241033;color:var(--amber)"><b>Single-panel candidacy</b> — regimen shown for provider review; <b>a repeat AM confirmation is recommended before initiating</b> (Endocrine Society 2018). Set “Repeat AM labs confirm the pattern?” to Yes once a confirming panel is on file.</div>':'')+
+    '<div class="rx" style="border-color:#1e6e4a;background:#0e2a1f33;color:#e6f2ec"><b style="color:var(--green)">▶ Recommended starting order (first-line):</b> <b>Testosterone cypionate (or enanthate) 100 mg IM or SC once weekly.</b> Recheck <b>trough total T + hematocrit at ~6 weeks</b> (steady state), then titrate toward <b>450–600 ng/dL</b>. Safety: <b>Hct</b> (hold if &gt;54%), <b>BP</b> every visit, <b>PSA</b> baseline per age/risk. Alternatives &amp; full detail below.</div>'+
     '<div class="rx" style="border-color:#4a3c18;background:#2a221022;color:#e6d6a8"><b>DEA Schedule III controlled substance.</b> Prescribe under the <b>treating provider\'s own DEA / state authority</b> — never the software owner\'s. <b>Goal = physiologic restoration, not enhancement.</b> Target total T <b>450–600 ng/dL preferred</b> (monitored ~450–750 if symptoms improve &amp; safety markers stay clean); <b>avoid sustained supraphysiologic levels (&gt;900–1000)</b>; use the <b>lowest effective dose &amp; route</b>. Free T to mid/upper-mid normal when SHBG is abnormal. <span style="color:var(--muted)">AUA middle tertile ≈450–600 · Endocrine Society 2018 mid-normal (PMID 29562364).</span></div>'+
     '<div class="rx" style="border-color:#2a5a7e;background:#0e243622"><b>Preferred route order — rapid, trackable optimization</b> — (1) weekly injectable → (2) weekly SC auto-injector → (3) topical gel (needle-free alternative, <b>not inferior</b>). Selected-use: (4) oral undecanoate · (5) pellets (<b>not first-line</b>). Injectable is favored for fast, measurable optimization with clean trough-based titration; gel suits needle-averse men, higher-Hct concern, or reversibility. <b>Safety monitoring is identical across every route.</b></div>'+
     '<div class="rx"><b>1 · Weekly injectable — cypionate or enanthate (IM or SC) <span style="color:var(--green)">(first-line — rapid optimization)</span></b>'+
@@ -448,12 +450,12 @@ function generate(){
   else if(fertility){ elig='FERTILITY-PRESERVING REVIEW'; cls='hold'; why='Fertility desired — do NOT auto-start exogenous testosterone. Route to fertility-preserving review (semen analysis / reproductive-urology when appropriate). Exogenous T suppresses spermatogenesis (AUA/ASRM).'; }
   else if(anyGate){ elig='HOLD — pending safety review'; cls='hold'; why='A safety gate is active (prostate/PSA, hematocrit, CV/BP, OSA, or LUTS). Hold the testosterone pathway pending review; foundational optimization proceeds.'; }
   else if(!haveLabs){ elig='LAB MAPPING REQUIRED'; cls='found'; why='Enter total T plus free or bioavailable T (with your lab’s reference-low) so the axis can be read. Order the panel below; foundational optimization starts now.'; }
-  else if(deficiency && symptomatic && confirmed){ elig='TESTOSTERONE OPTIMIZATION — CANDIDATE REVIEW'; cls='go'; why=(discordant?('Normal total T ('+tt+' ng/dL) but LOW '+[lowFree?'free':'',lowBio?'bioavailable':''].filter(Boolean).join(' & ')+' T'+(highSHBG?(' with high-ish SHBG ('+shbg+' nmol/L)'):'')+' — usable androgen is low despite a normal total. '):'Confirmed low testosterone. ')+'Repeat AM labs confirm the pattern, symptoms align, and safety gates pass → the provider may consider the testosterone optimization pathway with monitoring (shared decision, not an automatic prescription).'; }
-  else if(deficiency && symptomatic && !confirmed){ elig='CONFIRM-FIRST — repeat AM labs'; cls='hold'; why='Suspicious pattern ('+(discordant?'normal total, low free/bioavailable T':'low T')+') with high symptom burden, but a single panel is not enough to start. Repeat 7–10 AM fasting labs (total + free/calculated with SHBG + albumin) to confirm before candidacy (Endocrine Society 2018). Foundational optimization proceeds now.'; }
+  else if(deficiency && symptomatic){ elig='TESTOSTERONE OPTIMIZATION — CANDIDATE REVIEW'; cls='go'; why=(discordant?('Normal total T ('+tt+' ng/dL) but LOW '+[lowFree?'free':'',lowBio?'bioavailable':''].filter(Boolean).join(' & ')+' T'+(highSHBG?(' with high-ish SHBG ('+shbg+' nmol/L)'):'')+' — usable androgen is low despite a normal total. '):'Low testosterone. ')+'Symptoms align'+(confirmed?', repeat AM labs confirm the pattern,':'')+' and safety gates pass → the provider may consider the testosterone optimization pathway with monitoring (shared decision, not an automatic prescription).'+(confirmed?'':' <b style="color:var(--amber)">Single panel — a repeat AM confirmation is recommended before initiating (Endocrine Society 2018).</b>'); }
   else { elig='FOUNDATIONAL OPTIMIZATION FIRST'; cls='found'; why='The entered labs do not show a total or free/bioavailable-T deficiency against your lab ranges (or symptoms are goal-only). ACP: do not start testosterone for energy/vitality/cognition alone. Optimize foundations; re-evaluate with repeat labs.'; }
   // a RED start-safety flag defers an otherwise-eligible candidate (dosing withheld)
   if(cls==='go' && sgStatus==='red'){ cls='hold'; elig='DEFER — start-safety gate (RED)'; why='The androgen + symptom pattern supports candidacy, but a RED start-safety flag must be resolved before any testosterone start: '+sgReds.join(' '); }
   // the single specific action that would move a non-candidate to candidate (shown in the dosing box)
+  var singlePanel = (cls==='go' && !confirmed);
   var blocker='';
   if(cls!=='go'){
     if(!dom.length) blocker='Rate at least one wellness / phenotype domain in Section 1.';
@@ -491,7 +493,7 @@ function generate(){
     (cls==='go'
       ? '<div class="grp">Baseline &amp; safety labs</div><div class="rx" style="color:var(--muted);font-size:12px">Eligibility labs are confirmed for this candidate (see the lab read above). Ongoing safety labs (T to the 450–600 target, hematocrit, PSA, BP, estradiol, metabolic) follow the <b>visit cadence</b> and the <b>dosing safety stops</b> below — not re-ordered here.</div>'
       : '<div class="grp">Hormone-axis &amp; safety labs to order</div>'+tbl(LABMAP,['Lab / measure','Timing','Decision note']))+
-    testosteroneRx(cls, elig, blocker)+
+    testosteroneRx(cls, elig, blocker, singlePanel)+
     '<div class="grp">Monitoring &amp; visit cadence</div>'+tbl(CADENCE,['Visit','Name','Key actions'])+
     coll('Foundational optimization — lifestyle plan (always attached · reference)', tbl(FOUND,['Domain','Target / structure','Why']))+
     '<div class="noprint">'+coll('Cross-line adjunct options — provider review (screen only)', crosswalkBlock())+'</div>'+
