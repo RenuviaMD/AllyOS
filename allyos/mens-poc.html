@@ -221,7 +221,14 @@ if(window.AllyOSLabImport&&document.getElementById('labimport')){
     {id:'egfr',label:'eGFR',pats:[/egfr/i,/estimated\s*gfr/i,/\bgfr\b/i]},
     {id:'alt',label:'ALT',pats:[/\balt\b/i,/alanine/i]},
     {id:'tsh',label:'TSH',pats:[/\btsh\b/i,/thyroid\s*stim/i]}
-  ]);
+  ], function(){
+    // Interpret against the lab's OWN reference range from the dragged report (lab's-own-range first):
+    // auto-fill the ref-low fields from the captured ranges so eligibility uses the original report's parameters.
+    var R=window.AllyOSLabRanges||{};
+    function setLow(fieldId, rid){ var f=document.getElementById(fieldId); if(f && R[rid] && R[rid].low!=null && !f.dataset.userset) f.value=R[rid].low; }
+    setLow('ftlow','ft'); setLow('btlow','bt');
+    if(document.getElementById('ttlow') && R.tt && R.tt.low!=null && !document.getElementById('ttlow').dataset.userset){/* keep AUA 300 decision default for total unless provider edits */}
+  });
 }
 
 // ---- lab map (v0.2) ----
@@ -254,6 +261,36 @@ var CADENCE=[
  ['Mo 6','Comprehensive review','Full domains, Hct, BP, PSA context, metabolic, sleep — benefit-risk'],
  ['Annual','Re-assessment','Ongoing benefit, safety labs, prostate/BP/CV, fertility, goals']
 ];
+// ---- treatment options / monitoring schedule / dose-adjustment / references (reference-PDF parity) ----
+var OPTIONS=[
+ ['<b>Preferred injectable</b>','Testosterone cypionate or enanthate <b>100 mg IM once weekly</b>','200 mg/mL → 0.5 mL IM weekly. Deep IM gluteal or vastus lateralis; rotate sites.','First-line for trackable optimization. POC ceiling: do not exceed 100 mg/week without medical-director review. VA 50–100 mg weekly.'],
+ ['Topical','Testosterone gel 1.62% <b>40.5 mg every morning</b>','~2 pump actuations or one 40.5 mg packet to clean, dry shoulders / upper arms; wash hands; cover after drying; avoid transfer.','Steady levels, needle-free. Variable absorption and transfer risk.'],
+ ['Label-supported SQ','Testosterone enanthate autoinjector <b>75 mg SQ once weekly</b>','Abdominal SQ only. Measure trough total T 7 days after the most recent dose, after 6 weeks.','SQ route with label-supported dosing. Cost / access may limit use.']
+];
+var MONITOR=[
+ ['Baseline / before first dose','Confirm consent, BP, fertility intent, OSA/LUTS/prostate/breast-cancer/CV/thrombophilia screen, PSA per protocol, CBC/Hct, and repeat AM fasting androgen panel.','Retain documentation of the negative safety screen.'],
+ ['6–8 weeks after start or dose change','Total T, free or bioavailable T if SHBG-relevant, CBC/Hct, BP, adverse effects, and wellness-goal rescoring; PSA per protocol.','Weekly IM: draw day 3–4 after injection. Gel: 2–8 h after application at steady state. SQ autoinjector: trough 7 days after dose (after 6 wk).'],
+ ['3–6 months','Repeat symptom score, CBC/Hct, testosterone level, BP, adverse effects, PSA/prostate per protocol.','Adjust only if clinical response and labs support change.'],
+ ['12 months, then every 6–12 months if stable','Continue surveillance for response, safety, and ongoing need for therapy.','Stop if no consistent benefit despite physiologic levels.']
+];
+var DOSEADJ=[
+ ['Symptoms improved and testosterone physiologic; Hct/BP/PSA safe','Continue current dose. Do not chase higher testosterone once the outcome is achieved.'],
+ ['Partial response, free/bioavailable T still low, no safety signal','Increase by 10–20 mg/week (injectable). Do not exceed 100 mg/week in this POC without higher-level review.'],
+ ['Total T &gt;900 ng/dL, high free T, acne, edema, irritability, insomnia, BP rise, or OSA worsening','Reduce by 10–20 mg/week or hold depending on severity; reassess labs and symptoms.'],
+ ['Hematocrit &gt;51%','Do not increase dose. Evaluate contributors; consider dose reduction, route change, or hold.'],
+ ['Hematocrit &gt;54%','Stop / hold testosterone and evaluate. Resume only after risk is addressed and the clinician determines it is safe.'],
+ ['PSA &gt;4 ng/mL, concerning DRE, or PSA rise &gt;1.4 ng/mL within 12 months','Hold escalation and refer / evaluate per urology / prostate-risk protocol.'],
+ ['No meaningful improvement by 6–12 months despite physiologic testosterone','Discontinue the optimization pathway; reassess alternative causes of symptoms.']
+];
+var REFS=[
+ 'Endocrine Society. Testosterone Therapy for Hypogonadism Guideline (2018).',
+ 'Bhasin S, et al. Testosterone Therapy in Men With Hypogonadism: An Endocrine Society Clinical Practice Guideline. J Clin Endocrinol Metab 2018;103(5):1715–1744.',
+ 'Veterans Health Administration. Evaluation for and Management of Males with Low Testosterone: Recommendations for Use (Jan 2026).',
+ 'DailyMed. Testosterone Cypionate Injection labeling (rev. Jun 2025).',
+ 'DailyMed. AndroGel 1.62% testosterone gel labeling.',
+ 'DailyMed. XYOSTED testosterone enanthate autoinjector labeling.',
+ 'American College of Physicians. Guideline for testosterone treatment in adult men with age-related low testosterone (2020).'
+];
 function tbl(rows,cols){return '<table><thead><tr>'+cols.map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+c+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table>';}
 // collapsible reference section — provider opens as needed; printing expands everything.
 function coll(title,html){return '<details class="grpc"><summary>'+title+'</summary><div style="padding:4px 0 2px">'+html+'</div></details>';}
@@ -271,13 +308,12 @@ function testosteroneRx(cls, elig, blocker, singlePanel, pn){
       ' When the provider reaches a <b>candidate decision with safety gates clear</b>, the starting regimens appear here. Blocked claims: T for energy / anti-aging / fat-loss / diabetes; "safe for everyone"; "compounded/pellets automatically superior."</div>';
   }
   var gateMet = !singlePanel; // cls==='go' here; a RED start-safety flag already downgraded to hold upstream
-  return '<div class="grp">5 · Treatment start'+(gateMet?' — '+esc(pn)+' meets the confirmatory gate':' — pending confirmatory repeat labs for '+esc(pn))+'</div>'+
+  return '<div class="grp">5 · Treatment options'+(gateMet?' — '+esc(pn)+' meets the confirmatory gate':' — pending confirmatory repeat labs for '+esc(pn))+'</div>'+
     (gateMet
-      ? '<div class="rx" style="border-color:#1e6e4a;background:#0e2a1f33;color:#e6f2ec"><b style="color:var(--green)">✓ On the data entered, '+esc(pn)+' meets the confirmatory gate</b> — symptomatic, low usable androgen confirmed on repeat AM labs, and start-safety gates clear. <b>Proposed start (provider titrates &amp; signs):</b></div>'
-      : '<div class="rx" style="border-color:#6e5a1c;background:#2a241033;color:var(--amber)"><b>'+esc(pn)+' — confirmatory gate not yet met.</b> The androgen + symptom pattern supports candidacy, but before starting, repeat <b>morning (6–10 AM), fasting</b> androgen labs on a <b>separate day</b> must confirm the low free/bioavailable-T pattern. The regimen below is shown <b>for provider review only</b>; set “Repeat AM labs confirm the pattern?” to Yes once a confirming panel is on file. <span style="color:var(--muted)">Severe symptom scores alone are not enough (Endocrine Society 2018).</span></div>')+
-    '<div class="rx" style="border-color:#1e6e4a;background:#0e2a1f33;color:#e6f2ec"><b style="color:var(--green)">▶ Preferred injectable (first-line):</b> <b>Testosterone cypionate or enanthate 100 mg IM once weekly</b> (200 mg/mL → <b>0.5 mL weekly</b>); deep IM gluteal or vastus lateralis, rotate sites. Recheck <b>total T + free T + hematocrit at 6–8 weeks</b> (draw <b>day 3–4</b> after a weekly injection), then titrate to symptom response within the <b>physiologic range</b>. <span style="color:var(--muted)">VA 2026: 50–100 mg IM weekly is first-line; &gt;100 mg weekly flags a supraphysiologic / AAS concern.</span></div>'+
-    '<div class="rx"><b>Topical option — testosterone gel 1.62%:</b> start <b>40.5 mg every morning</b> to clean, dry shoulders / upper arms only; cover after drying, wash hands, avoid transfer. Titrate 20.25–81 mg/day on morning levels drawn 2–8 h post-application. <span style="color:var(--muted)">DailyMed.</span></div>'+
-    '<div class="rx"><b>Label-supported SQ option — enanthate autoinjector (XYOSTED):</b> start <b>75 mg subcutaneously once weekly — abdomen only</b>; trough per product protocol. <span style="color:var(--muted)">DailyMed.</span></div>'+
+      ? '<div class="rx" style="border-color:#1e6e4a;background:#0e2a1f33;color:#e6f2ec"><b style="color:var(--green)">✓ On the data entered, '+esc(pn)+' meets the confirmatory gate</b> — symptomatic, low usable androgen confirmed on repeat AM labs, and start-safety gates clear. Because total T is not frankly low, start conservative and avoid supraphysiologic levels. <b>Proposed options (provider selects, titrates &amp; signs):</b></div>'
+      : '<div class="rx" style="border-color:#6e5a1c;background:#2a241033;color:var(--amber)"><b>'+esc(pn)+' — confirmatory gate not yet met.</b> The androgen + symptom pattern supports candidacy, but before starting, repeat <b>morning (6–10 AM), fasting</b> androgen labs on a <b>separate day</b> must confirm the low free/bioavailable-T pattern. The options below are shown <b>for provider review only</b>; set “Repeat AM labs confirm the pattern?” to Yes once a confirming panel is on file. <span style="color:var(--muted)">Severe symptom scores alone are not enough (Endocrine Society 2018).</span></div>')+
+    tbl(OPTIONS,['Option','Dose &amp; route','Administration','Use case / comments'])+
+    '<div class="rx" style="font-size:11.5px;color:var(--muted)">Recheck <b>total T + free T + hematocrit at 6–8 weeks</b> (weekly IM: draw day 3–4), then titrate to symptom response within the physiologic range. VA 2026: 50–100 mg IM weekly first-line; &gt;100 mg weekly flags a supraphysiologic / AAS concern.</div>'+
     coll('Preferred route order &amp; full regimen detail (all 5 routes)',
     '<div class="rx" style="border-color:#2a5a7e;background:#0e243622"><b>Preferred route order — rapid, trackable optimization</b> — (1) weekly injectable → (2) weekly SC auto-injector → (3) topical gel (needle-free alternative, <b>not inferior</b>). Selected-use: (4) oral undecanoate · (5) pellets (<b>not first-line</b>). Injectable is favored for fast, measurable optimization with clean trough-based titration; gel suits needle-averse men, higher-Hct concern, or reversibility. <b>Safety monitoring is identical across every route.</b></div>'+
     '<div class="rx"><b>1 · Weekly injectable — cypionate or enanthate (IM or SC) <span style="color:var(--green)">(first-line — rapid optimization)</span></b>'+
@@ -308,15 +344,11 @@ function testosteroneRx(cls, elig, blocker, singlePanel, pn){
       '<br>· Free T moves into range if initially low.'+
       '<br>· <b>Hematocrit</b> stays safe — reduce/hold if rising (adjust if &gt;51%), <b>stop if &gt;54%</b>.'+
       ' <span style="color:var(--muted)">VA 2026 monitoring.</span></div>'+
-    '<div class="grp">7 · Monitoring</div>'+
-    '<div class="rx"><b>At 6–8 weeks after start or any dose change:</b> total T, free T (if SHBG relevant), CBC / Hct, PSA (if indicated or per protocol), BP, adverse effects, goal-score change.'+
-      '<br><b>Draw timing:</b> weekly IM → <b>day 3–4</b> after injection · gel → <b>2–8 h</b> post-application at steady state · SQ autoinjector → trough per product.'+
-      ' <span style="color:var(--muted)">VA 2026 timing.</span></div>'+
-    '<div class="rx"><b>Continue · adjust · stop:</b>'+
-      '<br>· <b>Continue</b> if symptoms improve and labs stay safe.'+
-      '<br>· <b>Increase</b> only in small increments (~<b>+10–20 mg/week</b>) if free T stays low and symptoms persist — <b>do not exceed 100 mg/week in this wellness POC without higher-level review</b>.'+
-      '<br>· <b>Stop</b> if no consistent benefit by 6–12 months despite physiologic levels.'+
-      ' <span style="color:var(--muted)">ACP: evidence supports testosterone mainly for sexual dysfunction in age-related low T — not energy / vitality / physical function / cognition alone.</span></div>'+
+    '<div class="grp">8 · Monitoring schedule</div>'+
+    tbl(MONITOR,['Time point','Required actions','Timing notes'])+
+    '<div class="grp">9 · Dose adjustment rules</div>'+
+    tbl(DOSEADJ,['Finding at follow-up','POC action'])+
+    '<div class="rx" style="font-size:11.5px;color:var(--muted)">ACP: evidence supports testosterone mainly for sexual dysfunction in age-related low T — not energy / vitality / physical function / cognition alone.</div>'+
     '<div class="rx"><b>Safety stops (all routes):</b>'+
       '<br>· <b>Hct &gt;54% → hold / stop / review</b> (evaluate OSA / hypoxia; restart reduced or shift to gel).'+
       '<br>· <b>BP every visit</b> (FDA class-wide warning · TRAVERSE). <b>PSA / prostate</b> per age/risk, then monitor — do not overstate risk, do not drop monitoring.'+
@@ -518,34 +550,76 @@ function generate(){
   var sgLabel = sgStatus==='red'?'🔴 RED — resolve before any start':(sgStatus==='yellow'?'🟡 YELLOW — proceed with documentation/management':'🟢 GREEN — no start-safety flags on the entered values');
   var sgItems = sgReds.concat(sgYellows);
   var sgLegend = sgItems.length ? '<div style="font-size:11px;margin-top:8px;opacity:.85">Start-safety: Hct 48/50/54 · BP AHA · PSA &gt;4 (&gt;3 risk) · IPSS &gt;19 · STOP-BANG · eGFR &lt;30. Context: E2 · LH/FSH/prolactin · A1c/glucose · ApoB · ALT · TSH · Hgb. Qualitative hard stops (fertility, cancer, CV/VTE) are the checkboxes above.</div>' : '';
-  var sgHTML = anySG ? ('<div class="grp">4 · Safety exclusions / hold criteria · 8 · non-testosterone lab flags</div><div class="ryg '+sgStatus+'"><b>'+sgLabel+'</b>'+(sgItems.length?('<ul>'+sgItems.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'):'')+sgLegend+'</div>') : '';
+  var sgHTML = anySG ? ('<div class="grp">4 · Safety exclusions / hold criteria</div><div class="ryg '+sgStatus+'"><b>'+sgLabel+'</b>'+(sgItems.length?('<ul>'+sgItems.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'):'')+sgLegend+'</div>') : '';
   var warnHTML = warns.length ? ('<div class="ryg yellow" style="margin-top:8px"><b>⚠ Check before deciding:</b><ul>'+warns.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>') : '';
 
   if(!dom.length){out.innerHTML='<div class="poc"><div class="elig found">Rate at least one wellness domain to generate a plan.</div></div>';return;}
   var goalLine=dom.map(function(p){return esc(p.t)+' '+(sev[p.k])+'/4';}).join(' · ');
+
+  // section 2 — wellness goals & safety screen (table)
+  var sec2 = '<div class="grp">2 · Wellness goals &amp; safety screen</div>'+
+    tbl(PHENO.map(function(p){return [esc(p.t), esc(p.s), (sev[p.k]||0)+' / 4'];}),['Wellness domain','Reported phenotype','Score'])+
+    '<div class="rx" style="font-size:12px"><b>Safety screen:</b> '+(anyGate?'<b style="color:#f0b3aa">hard-stop item flagged — hold pending provider review.</b>':(sgStatus==='red'?'<b style="color:#f0b3aa">RED start-safety flag present — resolve before start.</b>':'<b style="color:var(--green)">No hard-stop safety issues present per the completed screen.</b>'))+' If any item becomes positive later (fertility intent, prostate / breast cancer, elevated / unevaluated PSA, high hematocrit, uncontrolled CV disease, severe untreated OSA, severe LUTS/BPH, untreated hyperprolactinemia, or suspected pituitary mass), hold the pathway pending review.</div>';
+
+  // section 3 — testosterone-relevant lab summary (interpret lab's-own-range first from the imported report)
+  var Rz=window.AllyOSLabRanges||{};
+  function rrng(id,dLo,dHi,u){var r=Rz[id]||{};var lo=(r.low!=null?r.low:dLo),hi=(r.high!=null?r.high:dHi);if(lo==null&&hi==null)return '—';return (lo!=null?lo:'')+(lo!=null&&hi!=null?'–':(hi!=null?'≤':''))+(hi!=null?hi:'')+(u?(' '+u):'');}
+  function rint(v,id,dLo,dHi){if(v==null)return '';var r=Rz[id]||{};var lo=(r.low!=null?r.low:dLo),hi=(r.high!=null?r.high:dHi);if(r.flag==='low'||(lo!=null&&v<lo))return ' <b style="color:var(--amber)">LOW</b>';if(r.flag==='high'||(hi!=null&&v>hi))return ' <b style="color:var(--amber)">HIGH</b>';return ' <span style="color:var(--muted)">in range</span>';}
+  var labRows=[];
+  function LR(label,v,id,dLo,dHi,u,note){if(v==null)return;labRows.push([label, '<b>'+esc(v)+'</b>'+(u?(' '+u):'')+rint(v,id,dLo,dHi), rrng(id,dLo,dHi,u), note]);}
+  LR('Total testosterone',tt,'tt',null,null,'ng/dL','Core androgen axis; an in-range total does not exclude low usable androgen.');
+  LR('Free testosterone',ft,'ft',ftlow,null,'pg/mL','Low usable androgen supports the optimization trial when confirmed + symptomatic.');
+  LR('Bioavailable T',bt,'bt',btlow,null,'ng/dL','Aligns with phenotype and SHBG influence.');
+  LR('SHBG',shbg,'shbg',null,null,'nmol/L','High-normal reduces the free / bioavailable fraction.');
+  LR('Hematocrit',hct,'hct',null,54,'%','Erythrocytosis surveillance — stop &gt;54%.');
+  LR('Hemoglobin',hgb,'hgb',null,null,'g/dL','Baseline.');
+  LR('Estradiol',e2,'e2',null,29,'pg/mL','Not elevated → no default aromatase inhibitor.');
+  LR('PSA',psa,'psa',null,4,'ng/mL','Prostate-safety surveillance.');
+  LR('LH',lh,'lh',null,null,'','Primary vs secondary differentiation.');
+  LR('FSH',fsh,'fsh',null,null,'','');
+  LR('Prolactin',prl,'prl',null,null,'','Pituitary context.');
+  var sec3 = '<div class="grp">3 · Testosterone-relevant lab summary</div>'+
+    (labRows.length
+      ? ('<div class="rx" style="font-size:11.5px;color:var(--muted)">Interpreted against the lab\'s own reference range from the imported report where available (lab\'s-own-range first). '+(confirmed?'<b style="color:var(--green)">Repeat AM fasting confirmation on file — gate met ✓.</b>':'<b style="color:var(--amber)">Confirmatory repeat AM fasting labs pending before start.</b>')+'</div>'+tbl(labRows,['Marker','Result','Reference range','POC interpretation']))
+      : '<div class="rx" style="color:var(--amber);font-size:12px">No testosterone labs entered yet — import a report or enter Total T plus Free / Bioavailable T in the Section 3 inputs.</div>');
+
+  // section 11 — non-testosterone lab flags for provider review (table)
+  var ntRows=[];
+  function NT(label,v,u,rule){if(v==null)return;ntRows.push([label, '<b>'+esc(v)+'</b>'+(u?(' '+u):''), rule]);}
+  NT('Fasting glucose',glu,'mg/dL','Review metabolic risk and lifestyle / pharmacologic strategy per clinical judgment. Not a testosterone-dose rule.');
+  NT('HbA1c',a1c,'%','Prediabetes / diabetes context — manage independently. Testosterone is not a glycemic therapy.');
+  NT('ApoB',apob,'mg/dL','Atherogenic-risk marker; manage per ASCVD risk. Testosterone is not CV therapy.');
+  NT('ALT',alt,'U/L','Hepatic context — evaluate if persistently elevated.');
+  NT('TSH',tsh,'mIU/L','Thyroid context in the fatigue / mood differential — do not misattribute to low T.');
+  NT('eGFR',egfr,'mL/min','Renal context; eGFR &lt;30 defers.');
+  var sec11 = ntRows.length ? ('<div class="grp">11 · Non-testosterone lab flags for provider review</div>'+
+    '<div class="rx" style="font-size:11.5px;color:var(--muted)">Listed for provider review; these <b>do not</b> automatically block testosterone optimization when the safety screen is negative, and should not drive testosterone dosing unless the provider judges patient-specific risk requires it.</div>'+
+    tbl(ntRows,['Finding','Result','Provider note'])) : '';
+
+  // section 13 — reference sources
+  var sec13 = coll('13 · Reference sources','<ol style="font-size:11.5px;color:var(--muted);line-height:1.6;margin:0 0 0 18px;padding:0">'+REFS.map(function(r){return '<li>'+esc(r)+'</li>';}).join('')+'</ol>');
+
   out.innerHTML='<div class="poc">'+
     '<div class="noprint" style="margin-bottom:12px"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs / add more data</button></div>'+
     docHeader('Men’s Hormone Optimization Plan')+
     '<h2>Men’s Hormone Optimization Plan</h2><div class="meta">Wellness-oriented · physiologic range only · confirmatory-gated · goals: '+goalLine+'</div>'+
     '<div class="grp" style="margin-top:14px">1 · Program &amp; pathway framing</div>'+
       '<div class="rx"><b>Male testosterone optimization pathway for symptomatic wellness goals</b> — using repeat-confirmed androgen bioavailability, safety screening, and physiologic-range dosing. <b>Not</b> a “treat testosterone deficiency,” “anti-aging,” “high-T,” or “performance-enhancement” program. Guidelines require <b>symptoms + consistently low testosterone</b>, confirmed on <b>repeat morning fasting</b> labs (free T when indicated), before testosterone therapy is justified. <span style="color:var(--muted)">Endocrine Society 2018.</span></div>'+
-    '<div class="grp">2 · Entry criteria</div>'+
-      '<div class="rx">Adult male · documented wellness goals · no active safety exclusion · baseline labs completed · '+(confirmed?'<b style="color:var(--green)">repeat morning fasting confirmatory labs on file — gate met ✓</b>':'<b>repeat morning fasting confirmatory labs required before prescribing</b>')+'. <b>Severe symptom scoring alone is not enough.</b></div>'+
+    sec2+
     '<div class="grp">Eligibility determination</div>'+
       '<div class="elig '+cls+'">'+esc(elig)+'</div><div style="font-size:12.5px;color:var(--muted);line-height:1.55">'+why+'</div>'+
       (haveLabs?coll('Lab read (vs your lab ranges) — reference','<div class="rx" style="border-color:#2a5a7e;background:#0e243622"><b>Lab read:</b> '+labRead+'</div>'):'')+
-    '<div class="grp">3 · Required confirmatory labs before treatment'+(confirmed?' — met ✓':' — pending')+'</div>'+
-      '<div class="rx">'+(confirmed?'<b style="color:var(--green)">Confirmatory panel on file (repeat AM, fasting):</b>':'<b>Repeat on a separate day — 6–10 AM, fasting, no acute illness:</b>')+' total testosterone (LC/MS-MS preferred), free testosterone, bioavailable or calculated free T, SHBG, albumin, CBC (Hgb/Hct), PSA, LH, FSH, prolactin, CMP; document BP and OSA/LUTS screens. '+(confirmed?'<b style="color:var(--green)">✓ Repeat AM labs confirm the low free/bioavailable-T pattern — confirmatory gate met.</b>':'<b>If repeat labs do not confirm low free/bioavailable T (or another meaningful low-bioavailability pattern), testosterone is not started in this POC.</b>')+'</div>'+
+    sec3+
       warnHTML+
       (noSGaffirm?'<div class="rx" style="border-color:#1e6e4a;color:var(--green);font-size:12px">✓ Provider affirms <b>no qualitative safety-screen issues</b> (fertility, prostate, hematocrit, CV/VTE, OSA, LUTS).</div>':'')+
       sgHTML+
-    (cls==='go'
-      ? coll('Baseline &amp; safety labs — reference','<div class="rx" style="color:var(--muted);font-size:12px">Eligibility labs are confirmed for this candidate (see the lab read above). Ongoing safety labs (T to the physiologic target, hematocrit, PSA, BP, estradiol, metabolic) follow the <b>visit cadence</b> and the <b>dosing safety stops</b> below — not re-ordered here.</div>')
-      : '<div class="grp">Hormone-axis &amp; safety labs to order</div>'+tbl(LABMAP,['Lab / measure','Timing','Decision note']))+
+    (cls==='go' ? '' : '<div class="grp">Hormone-axis &amp; safety labs to order</div>'+tbl(LABMAP,['Lab / measure','Timing','Decision note']))+
     testosteroneRx(cls, elig, blocker, singlePanel, pn)+
-    '<div class="grp">Monitoring &amp; visit cadence</div>'+tbl(CADENCE,['Visit','Name','Key actions'])+
+    sec11+
+    coll('Visit cadence (operational) — reference', tbl(CADENCE,['Visit','Name','Key actions']))+
     coll('Foundational optimization — lifestyle plan (always attached · reference)', tbl(FOUND,['Domain','Target / structure','Why']))+
     '<div class="noprint">'+coll('Cross-line adjunct options — provider review (screen only)', crosswalkBlock())+'</div>'+
+    sec13+
     providerSig()+
     '<div class="noprint" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs / add more data</button><button class="gen" onclick="window.print()">🖨 Print / export plan</button></div>'+
   '</div>';
