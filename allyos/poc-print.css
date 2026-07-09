@@ -36,4 +36,19 @@
   .poc .dochead{ display:block !important; border-bottom:2px solid #0e8a8a; padding-bottom:10px; margin-bottom:16px; }
   .poc .dochead .lh-brand{ font-weight:900; font-size:1.25rem; color:#0e3a40; }
   .poc .dochead .lh-meta{ font-size:10.5px; color:#5b6b72; line-height:1.5; }
+
+  /* Start-safety / context gate (RYG) — flatten dark boxes to light with a colored left rule */
+  .poc .ryg{ background:#fff !important; color:#1c2b32 !important; border:1px solid #cfe3e3 !important; border-left:4px solid #cfe3e3 !important; border-radius:6px !important; }
+  .poc .ryg *{ color:#1c2b32 !important; }
+  .poc .ryg.green{ border-left-color:#1e9e6a !important; }
+  .poc .ryg.yellow{ border-left-color:#c79200 !important; }
+  .poc .ryg.red{ border-left-color:#d1493f !important; }
+
+  /* Collapsible reference sections — render summaries as clean section headings, not UI bars.
+     beforeprint opens every <details>, so the content prints; here we strip the screen chrome. */
+  .poc details.grpc{ margin:18px 0 8px !important; border:none !important; }
+  .poc details.grpc>summary{ background:#fff !important; border:none !important; border-bottom:1px solid #cfe3e3 !important; border-radius:0 !important;
+    color:#0e8a8a !important; font-size:10px !important; letter-spacing:.14em !important; text-transform:uppercase !important;
+    padding:0 0 6px 0 !important; display:block !important; }
+  .poc details.grpc>summary:before, .poc details.grpc>summary:after{ display:none !important; content:'' !important; }
 }
