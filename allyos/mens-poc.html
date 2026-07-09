@@ -169,6 +169,7 @@ var PHENO=[
 var GATES=[
  'Fertility desired / trying to conceive',
  'Prostate cancer hx · palpable nodule · PSA elevated without evaluation',
+ 'Male breast cancer (active or history)',
  'Hematocrit elevated, or baseline hematocrit missing',
  'Uncontrolled BP / HF · MI or stroke <6 mo · thrombophilia',
  'Untreated severe obstructive sleep apnea (OSA)',
@@ -451,7 +452,7 @@ function generate(){
   var elig, cls, why;
   if(!dom.length){ elig='Rate at least one domain.'; cls='found'; why=''; }
   else if(fertility){ elig='FERTILITY-PRESERVING REVIEW'; cls='hold'; why='Fertility desired — do NOT auto-start exogenous testosterone. Route to fertility-preserving review (semen analysis / reproductive-urology when appropriate). Exogenous T suppresses spermatogenesis (AUA/ASRM).'; }
-  else if(anyGate){ elig='HOLD — pending safety review'; cls='hold'; why='A safety gate is active (prostate/PSA, hematocrit, CV/BP, OSA, or LUTS). Hold the testosterone pathway pending review; foundational optimization proceeds.'; }
+  else if(anyGate){ elig='HOLD — pending safety review'; cls='hold'; why='A safety gate is active (prostate or breast cancer, PSA, hematocrit, CV/BP/VTE, OSA, or LUTS). Hold the testosterone pathway pending review; foundational optimization proceeds.'; }
   else if(!haveLabs){ elig='LAB MAPPING REQUIRED'; cls='found'; why='Enter total T plus free or bioavailable T (with your lab’s reference-low) so the axis can be read. Order the panel below; foundational optimization starts now.'; }
   else if(deficiency && symptomatic){ elig='TESTOSTERONE OPTIMIZATION — CANDIDATE REVIEW'; cls='go'; why=(discordant?('Normal total T ('+tt+' ng/dL) but LOW '+[lowFree?'free':'',lowBio?'bioavailable':''].filter(Boolean).join(' & ')+' T'+(highSHBG?(' with high-ish SHBG ('+shbg+' nmol/L)'):'')+' — usable androgen is low despite a normal total. '):'Low testosterone. ')+'Symptoms align'+(confirmed?', repeat AM labs confirm the pattern,':'')+' and safety gates pass → the provider may consider the testosterone optimization pathway with monitoring (shared decision, not an automatic prescription).'+(confirmed?'':' <b style="color:var(--amber)">Single panel — a repeat AM confirmation is recommended before initiating (Endocrine Society 2018).</b>'); }
   else { elig='FOUNDATIONAL OPTIMIZATION FIRST'; cls='found'; why='The entered labs do not show a total or free/bioavailable-T deficiency against your lab ranges (or symptoms are goal-only). ACP: do not start testosterone for energy/vitality/cognition alone. Optimize foundations; re-evaluate with repeat labs.'; }
