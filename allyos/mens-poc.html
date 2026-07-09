@@ -190,6 +190,14 @@ function renderGates(){
   document.getElementById('gates').innerHTML=noneChip+GATES.map(function(x,i){return '<span class="chip red'+(g[i]?' on':'')+'" onclick="toggleGate('+i+')">'+esc(x)+'</span>';}).join('');
 }
 renderPheno();renderGates();
+// DOB auto-format → mm/dd/yyyy as you type. Plain ages (<=2 digits, no slash) pass through untouched.
+(function(){var d=document.getElementById('pocDob');if(!d)return;d.addEventListener('input',function(){
+  var raw=d.value.replace(/[^\d]/g,'').slice(0,8);
+  if(raw.length<=2){d.value=raw;return;} // still could be an age
+  var out=raw.slice(0,2)+'/'+raw.slice(2,4);
+  if(raw.length>4)out+='/'+raw.slice(4,8);
+  d.value=out;
+});})();
 // PHI-free lab import (paste/drag → confirm → fill). Values judged vs the ranges in section 3.
 if(window.AllyOSLabImport&&document.getElementById('labimport')){
   AllyOSLabImport.mount(document.getElementById('labimport'),[
