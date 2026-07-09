@@ -351,12 +351,13 @@ function docHeader(title){
   var sig={};try{sig=JSON.parse(localStorage.getItem('allyos_provider_sig_v1')||'{}');}catch(e){}
   var provName=((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||s.name||'Provider');
   var prov=provName+((s.credential && (''+provName).indexOf(s.credential)<0)?(', '+s.credential):''); // greeting() may already carry the credential — don't double it
-  var lic=[sig.license,sig.npi?('NPI '+sig.npi):''].filter(Boolean).join(' · ');
+  // NPI + medical license always shown for the clinic's designated provider; blank placeholder until set.
+  var lic=(sig.npi?('NPI '+sig.npi):'NPI ______________')+' · '+(sig.license?('License '+sig.license):'License ______________');
   var nm=(document.getElementById('pocName')&&document.getElementById('pocName').value)||'—';
   var dob=(document.getElementById('pocDob')&&document.getElementById('pocDob').value)||'';
   return '<div class="dochead"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px">'+
     '<div><div class="lh-brand">RenuviaMD®</div><div class="lh-meta">'+esc(title||'Plan of Care')+'</div></div>'+
-    '<div class="lh-meta" style="text-align:right">'+new Date().toLocaleDateString()+'<br>Provider: '+esc(prov)+(lic?('<br>'+esc(lic)):'')+'</div></div>'+
+    '<div class="lh-meta" style="text-align:right">'+new Date().toLocaleDateString()+'<br>Provider: '+esc(prov)+'<br>'+esc(lic)+'</div></div>'+
     '<div class="lh-meta" style="margin-top:6px">Patient: <b>'+esc(nm)+'</b>'+(dob?(' · '+esc(dob)):'')+'</div></div>';
 }
 // ---- Red/Amber/Green safety & route gate (NICE NG23 / NAMS 2022) — governs safety+route, NOT candidacy ----
