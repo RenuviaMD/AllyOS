@@ -43,16 +43,28 @@ window.AllyOSLabImport = (function () {
     var m = line.match(/(\d+(?:\.\d+)?)\s*(?:[-–]|to)\s*(\d+(?:\.\d+)?)/); // e.g. 46.0-224.0 / 250 to 1100
     var lo = null, hi = null;
     if (m) { lo = parseFloat(m[1]); hi = parseFloat(m[2]); }
+    // H/L flags are standalone, whitespace-delimited letters (e.g. "38.4 L 46.0-224.0") — NOT the "L" in unit
+    // strings like mg/L, umol/L, U/L. Require surrounding whitespace so units never register as a flag.
     var flag = null;
-    if (/\b(?:low|\bL\b)\b/i.test(line) && !/follow|glucose|luteinizing/i.test(line)) flag = 'low';
-    if (/\b(?:high|\bH\b)\b/i.test(line)) flag = 'high';
+    if (/\bLow\b/.test(line) || /\sL\s/.test(line)) flag = 'low';
+    if (/\bHigh\b/.test(line) || /\sH\s/.test(line)) flag = 'high';
     return { lo: lo, hi: hi, flag: flag };
+  }
+  // A reference/threshold-definition row (e.g. Quest Cardio IQ "HS CRP <1.0 N/A 1.0-3.0 >3.0 mg/L")
+  // carries thresholds, NOT the patient value — skip it so we grab the real result line instead.
+  function isDefinitionRow(line) {
+    if (/\bN\/A\b|optimal|non[- ]?optimal|risk\/reference|reference interval|reference range:/i.test(line)) return true;
+    // first numeric token is a comparison threshold (preceded by < or >), so the "value" is a cutoff, not a result
+    var m = line.match(/([<>]=?)\s*\d|(?:\d)/);
+    if (m && m[1]) return true;
+    return false;
   }
   function findValue(lines, pats, exclude) {
     for (var i = 0; i < lines.length; i++) {
       var ln = lines[i];
       if (exclude && exclude.test(ln)) continue;
       if (!pats.some(function (p) { return p.test(ln); })) continue;
+      if (isDefinitionRow(ln)) continue;
       var v = extractNumber(ln);
       var rng = extractRange(ln);
       if (v == null && lines[i + 1] && /^\s*[<>]?\s*-?\d/.test(lines[i + 1])) { v = extractNumber(lines[i + 1]); if (rng.lo == null) rng = extractRange(lines[i + 1]); }
@@ -67,9 +79,12 @@ window.AllyOSLabImport = (function () {
       var r = findValue(lines, t.pats, t.exclude);
       if (r && r.v != null) { out[t.id] = r.v; ranges[t.id] = { low: r.lo, high: r.hi, flag: r.flag }; }
     });
-    // Expose the lab's own ranges/flags so the report can interpret against the ORIGINAL report, not hardcoded defaults.
+    // Expose the lab's own ranges/flags + parsed values so the report can interpret against the ORIGINAL report
+    // (not hardcoded defaults) and render markers that have no dedicated form field.
     window.AllyOSLabRanges = window.AllyOSLabRanges || {};
+    window.AllyOSLabValues = window.AllyOSLabValues || {};
     Object.keys(ranges).forEach(function (k) { window.AllyOSLabRanges[k] = ranges[k]; });
+    Object.keys(out).forEach(function (k) { window.AllyOSLabValues[k] = out[k]; });
     return out;
   }
   function esc(x){return (''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}

@@ -102,16 +102,17 @@
     </div>
     <div style="margin-top:12px"><label class="q">Repeat AM labs confirm the pattern?</label>
       <select id="confirmed"><option value="no" selected>No / not yet</option><option value="yes">Yes — repeat confirms</option></select></div>
-    <details class="grpc"><summary>Reference ranges — pre-filled (Quest); edit to match YOUR lab</summary>
+    <div style="font-size:11px;color:var(--dim);margin-top:10px;line-height:1.5">🔬 <b>Reference ranges are read from your uploaded lab report</b> (lab's-own-range first, per assay/age/units) — you don't need to enter them. Values stay on this device.</div>
+    <details class="grpc"><summary>Manual override — reference ranges (only for typed entry / no report)</summary>
+      <div style="font-size:11px;color:var(--dim);margin:6px 0 2px">Pre-filled Quest adult-male LC/MS defaults; auto-filled from an imported report. Edit only if you're entering values by hand or overriding what the report shows.</div>
       <div class="labgrid" style="margin-top:8px">
-        <div class="fw"><label class="q">Total T — low</label><input id="ttlow" class="li" type="number" step="1" value="300"><span class="u">decision (AUA 300)</span></div>
-        <div class="fw"><label class="q">Total T — high</label><input id="tthigh" class="li" type="number" step="1" value="1100"><span class="u">above = ?exogenous</span></div>
-        <div class="fw"><label class="q">Free T — low</label><input id="ftlow" class="li" type="number" step="0.1" value="46"><span class="u">your lab ref-low</span></div>
-        <div class="fw"><label class="q">Free T — high</label><input id="fthigh" class="li" type="number" step="0.1" value="224"><span class="u">your lab ref-high</span></div>
-        <div class="fw"><label class="q">Bio T — low</label><input id="btlow" class="li" type="number" step="0.1" value="110"><span class="u">your lab ref-low</span></div>
-        <div class="fw"><label class="q">Bio T — high</label><input id="bthigh" class="li" type="number" step="0.1" value="575"><span class="u">your lab ref-high</span></div>
+        <div class="fw"><label class="q">Total T — low</label><input id="ttlow" class="li" type="number" step="1" value="300" onchange="this.dataset.userset=1"><span class="u">decision (AUA 300)</span></div>
+        <div class="fw"><label class="q">Total T — high</label><input id="tthigh" class="li" type="number" step="1" value="1100" onchange="this.dataset.userset=1"><span class="u">above = ?exogenous</span></div>
+        <div class="fw"><label class="q">Free T — low</label><input id="ftlow" class="li" type="number" step="0.1" value="46" onchange="this.dataset.userset=1"><span class="u">from report / your lab</span></div>
+        <div class="fw"><label class="q">Free T — high</label><input id="fthigh" class="li" type="number" step="0.1" value="224" onchange="this.dataset.userset=1"><span class="u">from report / your lab</span></div>
+        <div class="fw"><label class="q">Bio T — low</label><input id="btlow" class="li" type="number" step="0.1" value="110" onchange="this.dataset.userset=1"><span class="u">from report / your lab</span></div>
+        <div class="fw"><label class="q">Bio T — high</label><input id="bthigh" class="li" type="number" step="0.1" value="575" onchange="this.dataset.userset=1"><span class="u">from report / your lab</span></div>
       </div>
-      <div style="font-size:11px;color:var(--dim);margin-top:8px"><b>Ranges are configurable</b> — the engine flags "low/high" against these, not a hardcoded database. Lab's-own-range first (per assay/age/units). Defaults are Quest adult-male LC/MS. Values stay on this device.</div>
     </details>
   </div>
 
@@ -220,7 +221,21 @@ if(window.AllyOSLabImport&&document.getElementById('labimport')){
     {id:'apob',label:'ApoB',pats:[/apolipoprotein\s*b/i,/\bapo\s*b\b/i,/apob/i]},
     {id:'egfr',label:'eGFR',pats:[/egfr/i,/estimated\s*gfr/i,/\bgfr\b/i]},
     {id:'alt',label:'ALT',pats:[/\balt\b/i,/alanine/i]},
-    {id:'tsh',label:'TSH',pats:[/\btsh\b/i,/thyroid\s*stim/i]}
+    {id:'tsh',label:'TSH',pats:[/\btsh\b/i,/thyroid\s*stim/i]},
+    // extra markers pulled straight from the report (value + its own range + H/L flag) — no dedicated form field
+    {id:'dht',label:'Dihydrotestosterone',pats:[/dihydrotestosterone/i,/\bdht\b/i]},
+    {id:'ca',label:'Calcium',pats:[/\bcalcium\b/i],exclude:/ratio/i},
+    {id:'mchc',label:'MCHC',pats:[/\bmchc\b/i]},
+    {id:'hscrp',label:'hs-CRP',pats:[/hs\s*crp/i,/c[- ]?reactive/i]},
+    {id:'insulin',label:'Insulin',pats:[/\binsulin\b/i],exclude:/c[- ]?peptide/i},
+    {id:'homocys',label:'Homocysteine',pats:[/homocysteine/i]},
+    {id:'trig',label:'Triglycerides',pats:[/triglyceride/i]},
+    {id:'ldl',label:'LDL cholesterol',pats:[/ldl[- ]?chol/i,/\bldl\b/i]},
+    {id:'hdl',label:'HDL cholesterol',pats:[/hdl[- ]?chol/i,/\bhdl\b/i],exclude:/non[- ]?hdl/i},
+    {id:'chol',label:'Total cholesterol',pats:[/cholesterol,\s*total/i,/total\s*cholesterol/i]},
+    {id:'igf1',label:'IGF-1',pats:[/igf[- ]?1/i,/insulin[- ]?like growth/i]},
+    {id:'creat',label:'Creatinine',pats:[/creatinine/i],exclude:/ratio/i},
+    {id:'bun',label:'BUN',pats:[/urea nitrogen/i,/\bbun\b/i],exclude:/ratio/i}
   ], function(){
     // Interpret against the lab's OWN reference range from the dragged report (lab's-own-range first):
     // auto-fill the ref-low fields from the captured ranges so eligibility uses the original report's parameters.
@@ -563,6 +578,8 @@ function generate(){
 
   // section 3 — testosterone-relevant lab summary (interpret lab's-own-range first from the imported report)
   var Rz=window.AllyOSLabRanges||{};
+  var Lv=window.AllyOSLabValues||{};
+  function lv(id){return Lv[id]!=null?Lv[id]:null;} // value pulled from the imported report (no dedicated form field)
   function rrng(id,dLo,dHi,u){var r=Rz[id]||{};var lo=(r.low!=null?r.low:dLo),hi=(r.high!=null?r.high:dHi);if(lo==null&&hi==null)return '—';return (lo!=null?lo:'')+(lo!=null&&hi!=null?'–':(hi!=null?'≤':''))+(hi!=null?hi:'')+(u?(' '+u):'');}
   function rint(v,id,dLo,dHi){if(v==null)return '';var r=Rz[id]||{};var lo=(r.low!=null?r.low:dLo),hi=(r.high!=null?r.high:dHi);if(r.flag==='low'||(lo!=null&&v<lo))return ' <b style="color:var(--amber)">LOW</b>';if(r.flag==='high'||(hi!=null&&v>hi))return ' <b style="color:var(--amber)">HIGH</b>';return ' <span style="color:var(--muted)">in range</span>';}
   var labRows=[];
@@ -578,6 +595,8 @@ function generate(){
   LR('LH',lh,'lh',null,null,'','Primary vs secondary differentiation.');
   LR('FSH',fsh,'fsh',null,null,'','');
   LR('Prolactin',prl,'prl',null,null,'','Pituitary context.');
+  LR('Dihydrotestosterone',lv('dht'),'dht',null,null,'ng/dL','Downstream androgen; in-range → no default 5-alpha-reductase intervention.');
+  LR('IGF-1',lv('igf1'),'igf1',null,null,'ng/mL','GH-axis context (not a testosterone rule).');
   var sec3 = '<div class="grp">3 · Testosterone-relevant lab summary</div>'+
     (labRows.length
       ? ('<div class="rx" style="font-size:11.5px;color:var(--muted)">Interpreted against the lab\'s own reference range from the imported report where available (lab\'s-own-range first). '+(confirmed?'<b style="color:var(--green)">Repeat AM fasting confirmation on file — gate met ✓.</b>':'<b style="color:var(--amber)">Confirmatory repeat AM fasting labs pending before start.</b>')+'</div>'+tbl(labRows,['Marker','Result','Reference range','POC interpretation']))
@@ -592,6 +611,14 @@ function generate(){
   NT('ALT',alt,'U/L','Hepatic context — evaluate if persistently elevated.');
   NT('TSH',tsh,'mIU/L','Thyroid context in the fatigue / mood differential — do not misattribute to low T.');
   NT('eGFR',egfr,'mL/min','Renal context; eGFR &lt;30 defers.');
+  NT('Calcium',lv('ca'),'mg/dL','If elevated, confirm and work up (repeat Ca, albumin-adjusted/ionized Ca, PTH, meds, renal) per judgment.');
+  NT('Insulin',lv('insulin'),'uIU/mL','Insulin-resistance context; not a testosterone-dose rule.');
+  NT('Triglycerides',lv('trig'),'mg/dL','Cardiometabolic risk — manage independently.');
+  NT('hs-CRP',lv('hscrp'),'mg/L','Inflammatory / CV-risk context; repeat if acute illness suspected.');
+  NT('Homocysteine',lv('homocys'),'umol/L','Evaluate B12/folate, MMA, renal, meds, nutrition as appropriate.');
+  NT('LDL cholesterol',lv('ldl'),'mg/dL','Atherogenic lipid — manage per ASCVD risk.');
+  NT('Total cholesterol',lv('chol'),'mg/dL','Lipid context — manage independently.');
+  NT('MCHC',lv('mchc'),'g/dL','Correlate with iron indices / CBC trend if clinically relevant.');
   var sec11 = ntRows.length ? ('<div class="grp">11 · Non-testosterone lab flags for provider review</div>'+
     '<div class="rx" style="font-size:11.5px;color:var(--muted)">Listed for provider review; these <b>do not</b> automatically block testosterone optimization when the safety screen is negative, and should not drive testosterone dosing unless the provider judges patient-specific risk requires it.</div>'+
     tbl(ntRows,['Finding','Result','Provider note'])) : '';
