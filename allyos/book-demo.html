@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Book a live 1:1 demo — AllyOS · RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
+<style>
+  :root{--bg:#060a12;--card:#0b1422;--line:#1b2839;--line2:#283a52;--ink:#eaf3f5;--muted:#7f96ab;--dim:#5a6b7d;--teal:#2ee6d6;--green:#2bbf76;--gold:#e7b84e}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:radial-gradient(1200px 600px at 50% -10%,#0d1a2b,transparent),var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;min-height:100vh;padding:28px 18px}
+  .wrap{max-width:560px;margin:0 auto}
+  .brand{display:inline-flex;align-items:center;gap:9px;font-weight:700;font-size:1.05rem;text-decoration:none;color:var(--ink)}
+  .brand img{width:30px;height:30px;border-radius:50%}
+  .brand b{color:var(--gold)}.brand span{color:var(--teal)}
+  .back{display:inline-block;color:var(--teal);text-decoration:none;font-size:.85rem;margin-bottom:18px}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--line2);border-radius:18px;padding:26px 24px;margin-top:16px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  h1{font-size:1.6rem;font-weight:700;margin:14px 0 6px;line-height:1.2}
+  .lead{color:var(--muted);font-size:.95rem;line-height:1.55;margin-bottom:6px}
+  label{display:block;font-size:.8rem;color:var(--muted);margin:15px 0 6px;font-weight:600}
+  input,select,textarea{width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:10px;color:var(--ink);font:inherit;font-size:.95rem;padding:11px 13px}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
+  textarea{resize:vertical;min-height:76px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:460px){.row{grid-template-columns:1fr}}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:22px;padding:14px 20px;font-size:1rem;font-weight:700;border:none;border-radius:12px;cursor:pointer;background:linear-gradient(120deg,var(--teal),var(--green));color:#04140e}
+  .fine{font-size:.72rem;color:var(--dim);margin-top:14px;line-height:1.5}
+  .ok{display:none;text-align:center;padding:20px 0}
+  .ok h2{color:var(--green);font-size:1.3rem;margin-bottom:8px}
+  .req{color:var(--teal)}
+  .hp{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← Back to AllyOS</a>
+  <a class="brand" href="index.html"><img src="ally-avatar-64.png" alt="Ally">Renuvia<b>MD</b>® <span>AllyOS</span></a>
+  <div class="card">
+    <div id="formview">
+      <h1>Book a live 1:1 demo</h1>
+      <p class="lead">A real walkthrough of AllyOS for your clinic — see the line you care about running live, ask anything, and talk medical-director options. For serious, interested clinics.</p>
+
+      <form name="allyos-demo-request" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="?sent=1" id="demoform">
+        <input type="hidden" name="form-name" value="allyos-demo-request">
+        <p class="hp"><label>Don't fill this out: <input name="bot-field"></label></p>
+
+        <div class="row">
+          <div><label>Your name <span class="req">*</span></label><input name="name" required autocomplete="name"></div>
+          <div><label>Clinic / practice</label><input name="clinic" autocomplete="organization"></div>
+        </div>
+        <div class="row">
+          <div><label>Email <span class="req">*</span></label><input type="email" name="email" required autocomplete="email"></div>
+          <div><label>Phone</label><input name="phone" autocomplete="tel"></div>
+        </div>
+
+        <label>Line(s) you're interested in</label>
+        <select name="line">
+          <option value="">— select —</option>
+          <option>IV &amp; IM Infusion</option>
+          <option>Advanced Peptides</option>
+          <option>BHRT</option>
+          <option>Men's Hormone Optimization</option>
+          <option>Multiple / not sure yet</option>
+        </select>
+
+        <label>Also interested in a Medical Director of record?</label>
+        <select name="md_interest">
+          <option value="">— select —</option>
+          <option>Yes — need an MD of record</option>
+          <option>No — we have our own MD</option>
+          <option>Maybe / want to discuss</option>
+        </select>
+
+        <label>Best times to reach you</label>
+        <input name="preferred_time" placeholder="e.g. weekday mornings ET">
+
+        <label>Anything you'd like us to prepare?</label>
+        <textarea name="notes" placeholder="Your setup, questions, goals…"></textarea>
+
+        <button class="btn" type="submit">📅 Request my live demo</button>
+        <p class="fine">We'll reply from <b>drfalcon@renuviamd.com</b> to schedule. No PHI in this form — clinic/contact details only.</p>
+      </form>
+    </div>
+
+    <div class="ok" id="okview">
+      <h2>✓ Request received</h2>
+      <p class="lead">Thanks — we'll email you from <b>drfalcon@renuviamd.com</b> to lock in a time. Talk soon.</p>
+      <a class="back" href="index.html" style="margin-top:16px">← Back to AllyOS</a>
+    </div>
+  </div>
+</div>
+<script>
+  // Show the thank-you view after a successful Netlify submission redirect (?sent=1).
+  if (location.search.indexOf('sent=1') > -1) {
+    document.getElementById('formview').style.display = 'none';
+    document.getElementById('okview').style.display = 'block';
+  }
+</script>
+</body>
+</html>
