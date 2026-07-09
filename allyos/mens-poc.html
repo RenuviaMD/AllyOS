@@ -241,9 +241,12 @@ function tbl(rows,cols){return '<table><thead><tr>'+cols.map(function(c){return 
 // ---- Testosterone target/dosing/administration (RenuviaMD addendum v0.1; AUA + Endocrine 2018 + DailyMed labels) ----
 // Shown ONLY when eligibility = candidate-review (cls 'go'). Engine proposes a starting regimen;
 // provider titrates to the 450–600 ng/dL wellness target and signs. Schedule III controlled substance.
-function testosteroneRx(cls){
+function testosteroneRx(cls, elig, blocker){
   if(cls!=='go'){
-    return '<div class="rx" style="border-color:#4a3c18;background:#2a221022;color:#e0c98a"><b>Testosterone — eligibility step only; no dosing yet.</b> Resolve the eligibility path above first (fertility / safety gate / lab mapping / foundational optimization). When the provider reaches a <b>candidate decision with safety gates clear</b>, the starting regimens appear here. Blocked claims: T for energy / anti-aging / fat-loss / diabetes; "safe for everyone"; "compounded/pellets automatically superior."</div>';
+    return '<div class="rx" style="border-color:#4a3c18;background:#2a221022;color:#e0c98a"><b>Testosterone — eligibility step only; no dosing yet.</b>'+
+      (elig?(' <b style="color:#f0c674">Current status: '+esc(elig)+'.</b>'):'')+
+      (blocker?(' <b style="color:#f0c674">To proceed: '+esc(blocker)+'</b>'):'')+
+      ' When the provider reaches a <b>candidate decision with safety gates clear</b>, the starting regimens appear here. Blocked claims: T for energy / anti-aging / fat-loss / diabetes; "safe for everyone"; "compounded/pellets automatically superior."</div>';
   }
   return '<div class="grp">Testosterone — starting regimens (provider titrates &amp; signs)</div>'+
     '<div class="rx" style="border-color:#4a3c18;background:#2a221022;color:#e6d6a8"><b>DEA Schedule III controlled substance.</b> Prescribe under the <b>treating provider\'s own DEA / state authority</b> — never the software owner\'s. <b>Goal = physiologic restoration, not enhancement.</b> Target total T <b>450–600 ng/dL preferred</b> (monitored ~450–750 if symptoms improve &amp; safety markers stay clean); <b>avoid sustained supraphysiologic levels (&gt;900–1000)</b>; use the <b>lowest effective dose &amp; route</b>. Free T to mid/upper-mid normal when SHBG is abnormal. <span style="color:var(--muted)">AUA middle tertile ≈450–600 · Endocrine Society 2018 mid-normal (PMID 29562364).</span></div>'+
@@ -441,6 +444,18 @@ function generate(){
   else { elig='FOUNDATIONAL OPTIMIZATION FIRST'; cls='found'; why='The entered labs do not show a total or free/bioavailable-T deficiency against your lab ranges (or symptoms are goal-only). ACP: do not start testosterone for energy/vitality/cognition alone. Optimize foundations; re-evaluate with repeat labs.'; }
   // a RED start-safety flag defers an otherwise-eligible candidate (dosing withheld)
   if(cls==='go' && sgStatus==='red'){ cls='hold'; elig='DEFER — start-safety gate (RED)'; why='The androgen + symptom pattern supports candidacy, but a RED start-safety flag must be resolved before any testosterone start: '+sgReds.join(' '); }
+  // the single specific action that would move a non-candidate to candidate (shown in the dosing box)
+  var blocker='';
+  if(cls!=='go'){
+    if(!dom.length) blocker='Rate at least one wellness / phenotype domain in Section 1.';
+    else if(fertility) blocker='Fertility is desired — route to fertility-preserving review before any testosterone start.';
+    else if(anyGate) blocker='A safety-screen item in Section 2 is checked — clear/resolve it first.';
+    else if(!haveLabs) blocker='Enter Total T plus Free or Bioavailable T (with your lab reference-low) in Section 3.';
+    else if(sgStatus==='red') blocker='Resolve the RED start-safety flag in Section 4 first.';
+    else if(deficiency && symptomatic && !confirmed) blocker='Set “Repeat AM labs confirm the pattern?” to “Yes — repeat confirms.”';
+    else if(!deficiency) blocker='Free and Bioavailable T are not below your lab reference-low — no low usable androgen to optimize on these values.';
+    else if(!symptomatic) blocker='Rate the symptom burden — a low lab alone is not a testosterone indication (rate the phenotype domains).';
+  }
   // lab read (shown in the plan)
   var labRead = (tt!=null?('Total T <b>'+tt+'</b> ('+(lowTotal?('LOW &lt;'+ttlow):(highTotal?'ABOVE range':'not low'))+'). '):'Total T not entered. ')
     +(ft!=null?('Free T <b>'+ft+'</b>'+(ftlow!=null?(' vs your ref-low '+ftlow):'')+' ('+(lowFree?'<b style=\"color:var(--amber)\">LOW</b>':'ok')+'). '):'')
@@ -468,7 +483,7 @@ function generate(){
       : '<div class="grp">Hormone-axis &amp; safety labs to order</div>'+tbl(LABMAP,['Lab / measure','Timing','Decision note']))+
     '<div class="grp">Foundational optimization (always attached)</div>'+tbl(FOUND,['Domain','Target / structure','Why'])+
     '<div class="grp">Monitoring &amp; visit cadence</div>'+tbl(CADENCE,['Visit','Name','Key actions'])+
-    testosteroneRx(cls)+
+    testosteroneRx(cls, elig, blocker)+
     crosswalkBlock()+
     providerSig()+
     '<div class="noprint" style="margin-top:14px"><button class="gen" onclick="window.print()">🖨 Print / export plan</button></div>'+
