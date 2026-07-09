@@ -81,7 +81,7 @@
 
   <div class="grp">2 · Safety screen</div>
   <div class="panel">
-    <p style="font-size:12px;color:var(--muted);margin:0 0 8px">Any checked item holds the testosterone pathway pending review — foundational optimization still proceeds.</p>
+    <p style="font-size:12px;color:var(--muted);margin:0 0 8px">Check any that apply — each holds the testosterone pathway pending review (foundational optimization still proceeds). <b>If none apply, tap “✓ No safety issues present.”</b></p>
     <div class="chips" id="gates"></div>
   </div>
 
@@ -174,14 +174,19 @@ var GATES=[
  'Untreated severe obstructive sleep apnea (OSA)',
  'Severe LUTS / BPH symptoms'
 ];
-var sev={},g={};
+var sev={},g={},noSGaffirm=false;
+function toggleGate(i){g[i]=!g[i];if(g[i])noSGaffirm=false;renderGates();}
+function affirmNoSG(){noSGaffirm=!noSGaffirm;if(noSGaffirm){for(var i=0;i<GATES.length;i++)g[i]=false;}renderGates();}
 function renderPheno(){
   document.getElementById('phenoPanel').innerHTML=PHENO.map(function(p){
     var sc='';for(var n=0;n<=4;n++){sc+='<div class="sc'+(sev[p.k]===n?' on':'')+'" onclick="sev[\''+p.k+'\']='+n+';renderPheno()">'+n+'</div>';}
     return '<div class="mrs"><div class="lab">'+esc(p.t)+' <small>— '+esc(p.s)+'</small></div><div class="scale">'+sc+'</div></div>';
   }).join('');
 }
-function renderGates(){document.getElementById('gates').innerHTML=GATES.map(function(x,i){return '<span class="chip red'+(g[i]?' on':'')+'" onclick="g['+i+']=!g['+i+'];renderGates()">'+esc(x)+'</span>';}).join('');}
+function renderGates(){
+  var noneChip='<span class="chip'+(noSGaffirm?' on':'')+'" style="'+(noSGaffirm?'background:#0e2a1f;border-color:#1e6e4a;color:var(--green)':'border-color:#1e6e4a;color:var(--green)')+'" onclick="affirmNoSG()">'+(noSGaffirm?'✓ ':'')+'No safety issues present</span>';
+  document.getElementById('gates').innerHTML=noneChip+GATES.map(function(x,i){return '<span class="chip red'+(g[i]?' on':'')+'" onclick="toggleGate('+i+')">'+esc(x)+'</span>';}).join('');
+}
 renderPheno();renderGates();
 // PHI-free lab import (paste/drag → confirm → fill). Values judged vs the ranges in section 3.
 if(window.AllyOSLabImport&&document.getElementById('labimport')){
@@ -237,6 +242,9 @@ var CADENCE=[
  ['Annual','Re-assessment','Ongoing benefit, safety labs, prostate/BP/CV, fertility, goals']
 ];
 function tbl(rows,cols){return '<table><thead><tr>'+cols.map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+c+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table>';}
+// collapsible reference section — provider opens as needed; printing expands everything.
+function coll(title,html){return '<details class="grpc"><summary>'+title+'</summary><div style="padding:4px 0 2px">'+html+'</div></details>';}
+window.addEventListener('beforeprint',function(){var ds=document.querySelectorAll('details.grpc');for(var i=0;i<ds.length;i++)ds[i].open=true;});
 
 // ---- Testosterone target/dosing/administration (RenuviaMD addendum v0.1; AUA + Endocrine 2018 + DailyMed labels) ----
 // Shown ONLY when eligibility = candidate-review (cls 'go'). Engine proposes a starting regimen;
@@ -278,12 +286,13 @@ function testosteroneRx(cls, elig, blocker){
       '<br>· <b>Estradiol — do NOT auto-suppress</b>; check if gynecomastia, breast symptoms, edema, libido issue, or aromatization risk.'+
       '<br>· <b>Fertility</b> — no exogenous T if trying to conceive without fertility-preserving review. <b>OSA</b> hold gate; <b>severe LUTS/BPH</b> review.'+
       ' <span style="color:var(--muted)">Endocrine Society 2018 · AUA TD · FDA 2025 BP labeling · HHS/FDA 2026 prostate/BPH context.</span></div>'+
-    '<div class="rx"><b>Testosterone-level timing by route</b> — do not adjust dose from a level unless timing relative to route is documented:'+
+    coll('Testosterone-level timing by route (reference)',
+      '<div class="rx"><b>Testosterone-level timing by route</b> — do not adjust dose from a level unless timing relative to route is documented:'+
       '<br>· Weekly IM/SQ cypionate/enanthate: <b>trough</b> (just before next dose), consistent.'+
       '<br>· Split IM/SQ twice-weekly: trough before next injection, or a consistent midpoint.'+
       '<br>· Topical gel: after ≥1 week of steady use, <b>2–8 h post-application</b>, consistent timing.'+
       '<br>· Patch: <b>3–12 h after application</b>. · Pellets: end of dosing interval. · Oral undecanoate: product-specific, meal/fat-dependent — follow label.'+
-      ' <span style="color:var(--muted)">Endocrine Society 2018 monitoring table (PMID 29562364).</span></div>'+
+      ' <span style="color:var(--muted)">Endocrine Society 2018 monitoring table (PMID 29562364).</span></div>')+
     '<div class="rx" style="color:var(--muted);font-size:12px">Patient-specific dosing is physician-directed; formulation per the provider\'s decision &amp; pharmacy of choice — <b>compounded testosterone and pellets carry no automatic superiority</b>; do not chase the highest possible level. Not for anti-aging / fat-loss / diabetes / "all men over 40" / fatigue-without-labs. The treating provider owns the regimen and the signature.</div>';
 }
 
@@ -477,14 +486,15 @@ function generate(){
       '<div class="elig '+cls+'">'+esc(elig)+'</div><div style="font-size:12.5px;color:var(--muted);line-height:1.55">'+why+'</div>'+
       (haveLabs?'<div class="rx" style="border-color:#2a5a7e;background:#0e243622;margin-top:10px"><b>Lab read (vs your lab ranges):</b> '+labRead+'</div>':'')+
       warnHTML+
+      (noSGaffirm?'<div class="rx" style="border-color:#1e6e4a;color:var(--green);font-size:12px">✓ Provider affirms <b>no qualitative safety-screen issues</b> (fertility, prostate, hematocrit, CV/VTE, OSA, LUTS).</div>':'')+
       sgHTML+
     (cls==='go'
       ? '<div class="grp">Baseline &amp; safety labs</div><div class="rx" style="color:var(--muted);font-size:12px">Eligibility labs are confirmed for this candidate (see the lab read above). Ongoing safety labs (T to the 450–600 target, hematocrit, PSA, BP, estradiol, metabolic) follow the <b>visit cadence</b> and the <b>dosing safety stops</b> below — not re-ordered here.</div>'
       : '<div class="grp">Hormone-axis &amp; safety labs to order</div>'+tbl(LABMAP,['Lab / measure','Timing','Decision note']))+
-    '<div class="grp">Foundational optimization (always attached)</div>'+tbl(FOUND,['Domain','Target / structure','Why'])+
-    '<div class="grp">Monitoring &amp; visit cadence</div>'+tbl(CADENCE,['Visit','Name','Key actions'])+
     testosteroneRx(cls, elig, blocker)+
-    crosswalkBlock()+
+    '<div class="grp">Monitoring &amp; visit cadence</div>'+tbl(CADENCE,['Visit','Name','Key actions'])+
+    coll('Foundational optimization — lifestyle plan (always attached · reference)', tbl(FOUND,['Domain','Target / structure','Why']))+
+    '<div class="noprint">'+coll('Cross-line adjunct options — provider review (screen only)', crosswalkBlock())+'</div>'+
     providerSig()+
     '<div class="noprint" style="margin-top:14px"><button class="gen" onclick="window.print()">🖨 Print / export plan</button></div>'+
   '</div>';
