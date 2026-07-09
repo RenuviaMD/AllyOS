@@ -38,24 +38,38 @@ window.AllyOSLabImport = (function () {
     var m = s.match(/(-?\d+(?:\.\d+)?)/);
     return m ? parseFloat(m[1]) : null;
   }
+  // Capture the lab's OWN reference range + H/L flag from the report line (interpret lab's-own-range first).
+  function extractRange(line) {
+    var m = line.match(/(\d+(?:\.\d+)?)\s*(?:[-–]|to)\s*(\d+(?:\.\d+)?)/); // e.g. 46.0-224.0 / 250 to 1100
+    var lo = null, hi = null;
+    if (m) { lo = parseFloat(m[1]); hi = parseFloat(m[2]); }
+    var flag = null;
+    if (/\b(?:low|\bL\b)\b/i.test(line) && !/follow|glucose|luteinizing/i.test(line)) flag = 'low';
+    if (/\b(?:high|\bH\b)\b/i.test(line)) flag = 'high';
+    return { lo: lo, hi: hi, flag: flag };
+  }
   function findValue(lines, pats, exclude) {
     for (var i = 0; i < lines.length; i++) {
       var ln = lines[i];
       if (exclude && exclude.test(ln)) continue;
       if (!pats.some(function (p) { return p.test(ln); })) continue;
       var v = extractNumber(ln);
-      if (v == null && lines[i + 1] && /^\s*[<>]?\s*-?\d/.test(lines[i + 1])) v = extractNumber(lines[i + 1]);
-      if (v != null) return v;
+      var rng = extractRange(ln);
+      if (v == null && lines[i + 1] && /^\s*[<>]?\s*-?\d/.test(lines[i + 1])) { v = extractNumber(lines[i + 1]); if (rng.lo == null) rng = extractRange(lines[i + 1]); }
+      if (v != null) return { v: v, lo: rng.lo, hi: rng.hi, flag: rng.flag };
     }
     return null;
   }
   function parse(text, targets) {
     var lines = (text || '').split(/\r?\n/).filter(function (l) { return l.trim(); });
-    var out = {};
+    var out = {}, ranges = {};
     targets.forEach(function (t) {
-      var v = findValue(lines, t.pats, t.exclude);
-      if (v != null) out[t.id] = v;
+      var r = findValue(lines, t.pats, t.exclude);
+      if (r && r.v != null) { out[t.id] = r.v; ranges[t.id] = { low: r.lo, high: r.hi, flag: r.flag }; }
     });
+    // Expose the lab's own ranges/flags so the report can interpret against the ORIGINAL report, not hardcoded defaults.
+    window.AllyOSLabRanges = window.AllyOSLabRanges || {};
+    Object.keys(ranges).forEach(function (k) { window.AllyOSLabRanges[k] = ranges[k]; });
     return out;
   }
   function esc(x){return (''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
