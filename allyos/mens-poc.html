@@ -374,7 +374,8 @@ function crosswalkBlock(){
 function docHeader(title){
   var s=(window.AllyOSAuth&&AllyOSAuth.session())||{};
   var sig={};try{sig=JSON.parse(localStorage.getItem('allyos_provider_sig_v1')||'{}');}catch(e){}
-  var prov=((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||s.name||'Provider')+(s.credential?(', '+s.credential):'');
+  var provName=((window.AllyOSAuth&&AllyOSAuth.greeting&&AllyOSAuth.greeting())||s.name||'Provider');
+  var prov=provName+((s.credential && (''+provName).indexOf(s.credential)<0)?(', '+s.credential):''); // greeting() may already carry the credential — don't double it
   var lic=[sig.license,sig.npi?('NPI '+sig.npi):''].filter(Boolean).join(' · ');
   var nm=(document.getElementById('pocName')&&document.getElementById('pocName').value)||'—';
   var dob=(document.getElementById('pocDob')&&document.getElementById('pocDob').value)||'';
