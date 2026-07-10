@@ -77,12 +77,31 @@
   <div class="panel noprint"><div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end">
     <div style="flex:1;min-width:200px"><label class="q" style="margin-top:0">Name or Encounter ID</label><input id="pocName" type="text" placeholder="e.g., J. Garcia or MX-4821" style="width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:9px 11px"></div>
     <div style="min-width:150px"><label class="q" style="margin-top:0">DOB / age</label><input id="pocDob" type="text" placeholder="mm/dd/yyyy or age" style="width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:9px 11px"></div>
-  </div><div style="font-size:11px;color:var(--dim);margin-top:8px">Only printed on the document — never transmitted. AllyOS stays PHI-free on the server.</div></div>
+  </div>
+  <div class="labgrid" style="margin-top:12px">
+    <div class="fw"><label class="q">Weight</label><input id="pocWt" class="li" type="number" step="1" placeholder="lb" oninput="updateBMI()"><span class="u">lb</span></div>
+    <div class="fw"><label class="q">Height — ft</label><input id="pocHtFt" class="li" type="number" step="1" placeholder="ft" oninput="updateBMI()"><span class="u">feet</span></div>
+    <div class="fw"><label class="q">Height — in</label><input id="pocHtIn" class="li" type="number" step="1" placeholder="in" oninput="updateBMI()"><span class="u">inches</span></div>
+    <div class="fw"><label class="q">BMI</label><div id="pocBMI" class="li" style="display:flex;align-items:center;color:var(--muted)">—</div><span class="u" id="pocBMIcat">auto-computed</span></div>
+  </div>
+  <div style="font-size:11px;color:var(--dim);margin-top:8px">Only printed on the document — never transmitted. AllyOS stays PHI-free on the server.</div></div>
 
-  <div class="grp">1 · Wellness goals / phenotype (rate 0 none → 4 very severe)</div>
+  <div class="grp">1 · Primary wellness goals (select all that apply)</div>
+  <div class="panel"><div class="chips" id="goals"></div></div>
+
+  <div class="grp">2 · Symptom severity (rate 0 none → 4 very severe)</div>
   <div class="panel" id="phenoPanel"></div>
 
-  <div class="grp">2 · Safety screen</div>
+  <div class="grp">3 · Lifestyle snapshot</div>
+  <div class="panel"><div class="labgrid">
+    <div class="fw"><label class="q">Resistance exercise</label><select id="lsResist" class="li" style="width:auto"><option value="">—</option><option value="lo">&lt;2 d/wk</option><option value="mid">2–3 d/wk</option><option value="hi">≥4 d/wk</option></select></div>
+    <div class="fw"><label class="q">Sleep</label><select id="lsSleep" class="li" style="width:auto"><option value="">—</option><option value="lo">&lt;6 h</option><option value="mid">6–7 h</option><option value="hi">&gt;7 h</option></select></div>
+    <div class="fw"><label class="q">Nutrition</label><select id="lsNutr" class="li" style="width:auto"><option value="">—</option><option value="ok">Optimized</option><option value="bad">Needs improvement</option></select></div>
+    <div class="fw"><label class="q">Alcohol</label><select id="lsAlc" class="li" style="width:auto"><option value="">—</option><option value="none">None</option><option value="mod">Moderate</option><option value="heavy">Heavy</option></select></div>
+    <div class="fw"><label class="q">Nicotine</label><select id="lsNic" class="li" style="width:auto"><option value="">—</option><option value="no">No</option><option value="yes">Yes</option></select></div>
+  </div></div>
+
+  <div class="grp">4 · Safety screen</div>
   <div class="panel">
     <p style="font-size:12px;color:var(--muted);margin:0 0 8px">Check any that apply — each holds the testosterone pathway pending review (foundational optimization still proceeds). <b>If none apply, tap “✓ No safety issues present.”</b></p>
     <div class="chips" id="gates"></div>
@@ -92,7 +111,7 @@
     <div class="panel"><div id="labimport"></div></div>
   </details>
 
-  <div class="grp">3 · Androgen labs (AM)</div>
+  <div class="grp">5 · Androgen labs (AM)</div>
   <div class="panel">
     <div class="labgrid">
       <div class="fw"><label class="q">Total T</label><input id="tt" class="li" type="number" step="1" placeholder="e.g. 454"><span class="u">ng/dL</span></div>
@@ -117,7 +136,7 @@
     </details>
   </div>
 
-  <details class="grpc"><summary>4 · Start-safety gate (Hct · BP · PSA · OSA · LUTS) — optional, recommended</summary>
+  <details class="grpc"><summary>6 · Start-safety gate (Hct · BP · PSA · OSA · LUTS) — optional, recommended</summary>
     <div class="panel">
       <div class="labgrid">
         <div class="fw"><label class="q">Hematocrit</label><input id="hct" class="li" type="number" step="0.1" placeholder="opt"><span class="u">% (≥50 defer · ≥54 stop)</span></div>
@@ -132,7 +151,7 @@
     </div>
   </details>
 
-  <details class="grpc"><summary>5 · Context labs (E2 · axis · CBC · metabolic · CMP · thyroid) — optional</summary>
+  <details class="grpc"><summary>7 · Context labs (E2 · axis · CBC · metabolic · CMP · thyroid) — optional</summary>
     <div class="panel">
       <div class="labgrid">
         <div class="fw"><label class="q">Estradiol</label><input id="e2" class="li" type="number" step="0.1" placeholder="opt"><span class="u">pg/mL (US ≤29)</span></div>
@@ -167,9 +186,9 @@ var PHENO=[
  {k:'body', t:'Body composition', s:'abdominal fat, poor lean-mass response'},
  {k:'recovery',t:'Strength / recovery', s:'poor training recovery, soreness'},
  {k:'mood', t:'Mood / cognition', s:'irritability, low mood, brain fog'},
- {k:'sleep',t:'Sleep / recovery biology', s:'snoring, non-restorative sleep, ?apnea'},
- {k:'cardio',t:'Cardiometabolic longevity', s:'BP, waist, lipids/ApoB, A1c'}
+ {k:'sleep',t:'Sleep / recovery biology', s:'snoring, non-restorative sleep, ?apnea'}
 ];
+// Cardiometabolic is an objective outcome, not a symptom — it lives in labs/baseline, and as a GOAL below.
 // safety gate triggers (from v0.2 gates) — any => hold testosterone pathway
 var GATES=[
  'Fertility desired / trying to conceive',
@@ -182,6 +201,28 @@ var GATES=[
  'Untreated hyperprolactinemia / suspected pituitary mass'
 ];
 var sev={},g={},noSGaffirm=false;
+// Primary wellness goals (framing only — symptom severity drives eligibility)
+var GOALS=['Sexual vitality','Energy & drive','Body composition','Strength & recovery','Mood & cognition','Sleep & recovery','Healthy aging / longevity'];
+var goals={};
+function toggleGoal(i){goals[i]=!goals[i];renderGoals();}
+function renderGoals(){
+  document.getElementById('goals').innerHTML=GOALS.map(function(x,i){return '<span class="chip'+(goals[i]?' on':'')+'" onclick="toggleGoal('+i+')">'+esc(x)+'</span>';}).join('');
+}
+// BMI (auto) — obesity lowers SHBG, raises aromatization, raises OSA risk; and is the GLP/metabolic signal.
+function bmiVal(){
+  var wt=parseFloat((document.getElementById('pocWt')||{}).value);
+  var ft=parseFloat((document.getElementById('pocHtFt')||{}).value)||0;
+  var inch=parseFloat((document.getElementById('pocHtIn')||{}).value)||0;
+  var totIn=ft*12+inch;
+  if(isFinite(wt)&&wt>0&&totIn>0) return Math.round(703*wt/(totIn*totIn)*10)/10;
+  return null;
+}
+function bmiCat(b){return b==null?'':(b<18.5?'underweight':b<25?'normal':b<30?'overweight':b<35?'obese I':b<40?'obese II':'obese III');}
+function updateBMI(){
+  var b=bmiVal(), el=document.getElementById('pocBMI'), cat=document.getElementById('pocBMIcat');
+  if(b!=null){ el.textContent=b; el.style.color=(b>=30?'var(--amber)':'var(--ink)'); if(cat)cat.textContent=bmiCat(b); }
+  else { el.textContent='—'; el.style.color='var(--muted)'; if(cat)cat.textContent='auto-computed'; }
+}
 function toggleGate(i){g[i]=!g[i];if(g[i])noSGaffirm=false;renderGates();}
 function affirmNoSG(){noSGaffirm=!noSGaffirm;if(noSGaffirm){for(var i=0;i<GATES.length;i++)g[i]=false;}renderGates();}
 function renderPheno(){
@@ -194,7 +235,7 @@ function renderGates(){
   var noneChip='<span class="chip'+(noSGaffirm?' on':'')+'" style="'+(noSGaffirm?'background:#0e2a1f;border-color:#1e6e4a;color:var(--green)':'border-color:#1e6e4a;color:var(--green)')+'" onclick="affirmNoSG()">'+(noSGaffirm?'✓ ':'')+'No safety issues present</span>';
   document.getElementById('gates').innerHTML=noneChip+GATES.map(function(x,i){return '<span class="chip red'+(g[i]?' on':'')+'" onclick="toggleGate('+i+')">'+esc(x)+'</span>';}).join('');
 }
-renderPheno();renderGates();
+renderPheno();renderGates();renderGoals();
 // DOB auto-format → mm/dd/yyyy as you type. Plain ages (<=2 digits, no slash) pass through untouched.
 (function(){var d=document.getElementById('pocDob');if(!d)return;d.addEventListener('input',function(){
   var raw=d.value.replace(/[^\d]/g,'').slice(0,8);
@@ -365,7 +406,7 @@ function testosteroneRx(cls, elig, blocker, singlePanel, pn){
       '<br>· <b>Hct &gt;54% → hold / stop / review</b> (evaluate OSA / hypoxia; restart reduced or shift to gel).'+
       '<br>· <b>BP every visit</b> (FDA class-wide warning · TRAVERSE). <b>PSA / prostate</b> per age/risk, then monitor — do not overstate risk, do not drop monitoring.'+
       '<br>· <b>Estradiol — do NOT auto-suppress</b>; check only if gynecomastia, breast symptoms, edema, libido issue, or aromatization risk.'+
-      '<br>· <b>Fertility</b> — no exogenous T if trying to conceive without fertility-preserving review. <b>OSA</b> hold gate; <b>severe LUTS/BPH</b> review.'+
+      '<br>· <b>Fertility</b> — no exogenous T if trying to conceive without fertility-preserving review. <b>OSA</b> — screen if BMI / sleep symptoms warrant; <b>known severe untreated OSA</b> holds. <b>Severe LUTS/BPH</b> review.'+
       ' <span style="color:var(--muted)">Endocrine Society 2018 · AUA TD · FDA 2025 BP · HHS/FDA 2026 prostate/BPH.</span></div>'+
     '<div class="rx" style="color:var(--muted);font-size:12px">Patient-specific dosing is physician-directed; formulation per the provider\'s decision &amp; pharmacy of choice — <b>compounded testosterone and pellets carry no automatic superiority</b>; do not chase the highest possible level. Not for anti-aging / fat-loss / diabetes / "all men over 40" / fatigue-without-labs. The treating provider owns the regimen and the signature.</div>';
 }
@@ -518,8 +559,14 @@ function generate(){
   var sgStatus = sgReds.length?'red':(sgYellows.length?'yellow':'green');
   var dom=PHENO.filter(function(p){return (sev[p.k]||0)>0;}).sort(function(a,b){return (sev[b.k]||0)-(sev[a.k]||0);});
   var sexualOrAxis=(sev.sexual||0)>=2;
-  var burden=['sexual','energy','body','strength','mood','sleep','cardio'].reduce(function(a,k){return a+(sev[k]||0);},0);
-  var symptomatic = sexualOrAxis || burden>=14;
+  // 6-domain symptom burden (max 24); 'recovery' is the strength/recovery key (fixes prior 'strength'/'cardio' mismatch)
+  var burden=['sexual','energy','body','recovery','mood','sleep'].reduce(function(a,k){return a+(sev[k]||0);},0);
+  // Phase-A intake enrichments: BMI, lifestyle snapshot, selected goals
+  var bmi=bmiVal(), bmiC=bmiCat(bmi);
+  function lsv(id){return (document.getElementById(id)||{}).value||'';}
+  var ls={resist:lsv('lsResist'),sleep:lsv('lsSleep'),nutr:lsv('lsNutr'),alc:lsv('lsAlc'),nic:lsv('lsNic')};
+  var goalList=GOALS.filter(function(x,i){return goals[i];});
+  var symptomatic = sexualOrAxis || burden>=12; // 12/24 on the 6-domain scale
   // eligibility determination — lab-aware (total + free/bioavailable + SHBG), confirm-first
   var pn=(((document.getElementById('pocName')&&document.getElementById('pocName').value)||'').trim())||'This patient';
   var elig, cls, why;
@@ -559,7 +606,55 @@ function generate(){
   var warnHTML = warns.length ? ('<div class="ryg yellow" style="margin-top:8px"><b>⚠ Check before deciding:</b><ul>'+warns.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>') : '';
 
   if(!dom.length){out.innerHTML='<div class="poc"><div class="elig found">Rate at least one wellness domain to generate a plan.</div></div>';return;}
-  var goalLine=dom.map(function(p){return esc(p.t)+' '+(sev[p.k])+'/4';}).join(' · ');
+  var goalLine=(goalList.length?goalList.join(' · '):dom.map(function(p){return esc(p.t)+' '+(sev[p.k])+'/4';}).join(' · '));
+
+  // ---- Phase-A personalization: patient snapshot, BMI note, lifestyle-driven foundational, baseline-panel gap check ----
+  var dob=(document.getElementById('pocDob')&&document.getElementById('pocDob').value)||'';
+  var safeWord = anyGate?'AMBER — hold pending review':(sgStatus==='red'?'RED — resolve first':'GREEN — no hard stops');
+  var snapBits=[];
+  if(bmi!=null) snapBits.push('BMI '+bmi+' ('+bmiC+')');
+  if(goalList.length) snapBits.push('Goals: '+goalList.join(', '));
+  snapBits.push('Symptom burden '+burden+'/24');
+  snapBits.push('Safety: '+safeWord);
+  snapBits.push('Confirmatory labs: '+(confirmed?'on file ✓':'pending'));
+  var patientSnapshot='<div class="rx" style="border-color:var(--teal);background:#0e2a2a22"><b style="color:var(--teal)">'+esc(pn)+'</b>'+(dob?(' · '+esc(dob)):'')+' — '+snapBits.join(' · ')+'</div>';
+  var bmiNote='';
+  if(bmi!=null && bmi>=30) bmiNote='<div class="rx" style="border-color:#6e5a1c;background:#2a241033;color:var(--amber)"><b>BMI '+bmi+' ('+bmiC+').</b> Obesity lowers SHBG and raises aromatization — weight loss can raise endogenous testosterone and improve the free/bioavailable fraction; screen for OSA (STOP-BANG). <span style="color:#cbbce6">Cross-line (screen only): a metabolic / GLP-1 weight pathway may be considered by the provider — not part of the testosterone plan.</span></div>';
+  else if(bmi!=null && bmi>=27) bmiNote='<div class="rx" style="font-size:12px;color:var(--muted)"><b>BMI '+bmi+' ('+bmiC+').</b> Overweight — weight optimization supports SHBG/aromatization and lowers OSA risk; reinforce the foundational plan.</div>';
+  function foundationalPlan(){
+    var rows=[];
+    if(ls.resist==='lo') rows.push(['Resistance training','<b>Begin 2–3 d/wk</b> compound lifts, progressive overload (currently &lt;2 d/wk)','Lean mass, strength, insulin sensitivity']);
+    else if(ls.resist==='mid') rows.push(['Resistance training','Progress toward 3–4 d/wk (currently 2–3)','Lean mass, strength']);
+    else if(ls.resist==='hi') rows.push(['Resistance training','Maintain ≥4 d/wk — strong baseline','Preserve lean mass on therapy']);
+    else rows.push(['Resistance training','3–4 d/wk compound lifts, progressive overload','Lean mass, strength, insulin sensitivity']);
+    if(ls.sleep==='lo') rows.push(['Sleep','<b>Extend to 7+ h</b> (currently &lt;6 h)'+((bmi!=null&&bmi>=28)?' · <b>screen OSA (STOP-BANG)</b> given BMI '+bmi:''),'Recovery, T rhythm, mood']);
+    else if(ls.sleep==='mid') rows.push(['Sleep','Aim &gt;7 h (currently 6–7)','Recovery, T rhythm']);
+    else if(ls.sleep==='hi') rows.push(['Sleep','Maintain &gt;7 h','Recovery']);
+    if(ls.nutr==='bad') rows.push(['Nutrition','<b>Protein-forward Mediterranean pattern</b> (currently needs improvement)','Lean mass, satiety, metabolic']);
+    else rows.push(['Nutrition','Protein-forward Mediterranean pattern; adjust to kidney/goals','Lean mass, satiety']);
+    if(ls.alc==='heavy') rows.push(['Alcohol','<b>Reduce — currently heavy</b>','Lowers T; harms sleep, BP, sexual function']);
+    else if(ls.alc==='mod') rows.push(['Alcohol','Limit','Sleep, BP, weight']);
+    if(ls.nic==='yes') rows.push(['Nicotine / smoking','<b>Cessation support</b>','CV risk, sleep, vascular / sexual function']);
+    rows.push(['Creatine monohydrate (if appropriate)','provider-approved','Strength / power (ISSN, PMID 28615996)']);
+    rows.push(['Vitamin D / Magnesium (lab-informed)','if low / renal-screen clear','Nutrient support — not a T substitute']);
+    return tbl(rows,['Domain','Target / structure','Why']);
+  }
+  function baselinePanel(){
+    function st(v){return v!=null?('<b style="color:var(--green)">✓ on file ('+esc(v)+')</b>'):'<b style="color:var(--amber)">⚠ pending</b>';}
+    var rows=[
+     ['Total testosterone (AM, LC/MS)', st(tt)],
+     ['Free / bioavailable testosterone', st(ft!=null?ft:bt)],
+     ['SHBG', st(shbg)],
+     ['CBC / hematocrit', st(hct!=null?hct:hgb)],
+     ['PSA (age / risk-appropriate)', st(psa)],
+     ['CMP (eGFR · ALT · calcium)', st(egfr!=null?egfr:alt)],
+     ['Estradiol (sensitive)', st(e2)],
+     ['LH / FSH', st(lh!=null?lh:fsh)],
+     ['Prolactin (if indicated)', st(prl)],
+     ['Second AM fasting confirmation', confirmed?'<b style="color:var(--green)">✓ documented</b>':'<b style="color:var(--amber)">⚠ pending</b>']
+    ];
+    return tbl(rows,['Recommended baseline panel','Status']);
+  }
 
   // section 2 — wellness goals & safety screen (table)
   var sec2 = '<div class="grp" style="font-size:13.5px;color:var(--teal);border-left:3px solid var(--teal);padding-left:10px">1 · Wellness goals &amp; safety screen</div>'+
@@ -619,10 +714,13 @@ function generate(){
     '<div class="noprint" style="margin-bottom:12px"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs / add more data</button></div>'+
     docHeader('Men’s Hormone Optimization Plan')+
     '<h2>Men’s Hormone Optimization Plan</h2><div class="meta">Wellness-oriented · physiologic range only · confirmatory-gated · goals: '+goalLine+'</div>'+
+    patientSnapshot+
+    bmiNote+
     coll('Program &amp; pathway framing (reference)',
       '<div class="rx"><b>Male testosterone optimization pathway for symptomatic wellness goals</b> — using repeat-confirmed androgen bioavailability, safety screening, and physiologic-range dosing. <b>Not</b> a “treat testosterone deficiency,” “anti-aging,” “high-T,” or “performance-enhancement” program. Guidelines require <b>symptoms + consistently low testosterone</b>, confirmed on <b>repeat morning fasting</b> labs (free T when indicated), before testosterone therapy is justified. <span style="color:var(--muted)">Endocrine Society 2018.</span></div>')+
     sec2+
     sec3+
+    coll('Recommended baseline panel — data readiness', baselinePanel())+
     coll('Eligibility determination &amp; safety review (reference)',
       '<div class="elig '+cls+'">'+esc(elig)+'</div><div style="font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:6px">'+why+'</div>'+
       warnHTML+
@@ -632,7 +730,7 @@ function generate(){
     (cls==='go' ? '' : '<div class="grp">Hormone-axis &amp; safety labs to order</div>'+tbl(LABMAP,['Lab / measure','Timing','Decision note']))+
     testosteroneRx(cls, elig, blocker, singlePanel, pn)+
     sec11+
-    coll('Foundational optimization — lifestyle plan (always attached · reference)', tbl(FOUND,['Domain','Target / structure','Why']))+
+    coll('Foundational optimization — personalized to this patient (always attached)', foundationalPlan())+
     '<div class="noprint">'+coll('Cross-line adjunct options — provider review (screen only)', crosswalkBlock())+'</div>'+
     sec13+
     providerSig()+
