@@ -122,6 +122,8 @@
     <div style="margin-top:12px"><label class="q">Repeat AM fasting labs — is the low-T pattern confirmed on a second draw?</label>
       <select id="confirmed"><option value="no" selected>No / not yet — single panel only (repeat before starting)</option><option value="yes">Yes — confirmed on a second morning fasting panel</option></select>
       <div style="font-size:11px;color:var(--dim);margin-top:5px">Endocrine Society: confirm the low-testosterone pattern on two separate morning fasting draws before treatment. “Yes” means the confirmatory (second) panel is on file.</div></div>
+    <div style="margin-top:12px"><label class="q">Prescribed regimen <span style="font-weight:400;color:var(--dim)">— provider selects; drives the After-Visit Summary</span></label>
+      <select id="rxPick"><option value="">— provider selects —</option><option value="inj">Testosterone cypionate / enanthate 100 mg IM once weekly</option><option value="gel">Testosterone gel 1.62% — 40.5 mg every morning</option><option value="sq">Testosterone enanthate 75 mg SQ once weekly (autoinjector)</option></select></div>
     <div style="font-size:11px;color:var(--dim);margin-top:10px;line-height:1.5">🔬 <b>Reference ranges are read from your uploaded lab report</b> (lab's-own-range first, per assay/age/units) — you don't need to enter them. Values stay on this device.</div>
     <details class="grpc"><summary>Manual override — reference ranges (only for typed entry / no report)</summary>
       <div style="font-size:11px;color:var(--dim);margin:6px 0 2px">Pre-filled Quest adult-male LC/MS defaults; auto-filled from an imported report. Edit only if you're entering values by hand or overriding what the report shows.</div>
@@ -171,6 +173,7 @@
   </details>
 
   <div class="noprint"><button class="gen" onclick="generate()">▶ Generate optimization plan</button></div>
+  <div class="noprint" id="doctabs" style="display:none;gap:8px;margin-top:14px;flex-wrap:wrap"></div>
   <div class="out" id="out"></div>
 </div>
 
@@ -736,7 +739,44 @@ function generate(){
     providerSig()+
     '<div class="noprint" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs / add more data</button><button class="gen" onclick="window.print()">🖨 Print / export plan</button></div>'+
   '</div>';
+  window._pocHTML = out.innerHTML;
+
+  // ---- Phase C: After-Visit Summary (patient-facing, plain language, driven by the selected regimen) ----
+  var rxPick=(document.getElementById('rxPick')||{}).value||'';
+  var rxMap={
+    inj:{med:'Testosterone cypionate or enanthate 100 mg',route:'injected into the muscle (IM) once a week',how:'Inject 100 mg (0.5 mL of a 200 mg/mL vial) into the muscle once a week. Rotate sites (buttock or thigh). Your clinic will show you the technique and provide sharps disposal.'},
+    gel:{med:'Testosterone gel 1.62% — 40.5 mg',route:'applied to the skin every morning',how:'Apply once every morning to clean, dry skin on the shoulders / upper arms. Wash your hands afterward, let it dry, and cover the area. Avoid skin-to-skin transfer to partners, children, or pets.'},
+    sq:{med:'Testosterone enanthate 75 mg',route:'injected under the skin (SQ) once a week',how:'Inject 75 mg under the skin of the abdomen once a week using the autoinjector, as shown by your clinic.'}
+  };
+  var rx=rxMap[rxPick];
+  var fu=new Date(Date.now()+49*864e5).toLocaleDateString();
+  var avsBody=(cls==='go')
+    ? ('<div class="grp">Your medication</div>'+
+        (rx?('<div class="rx"><b>'+esc(rx.med)+'</b> — '+esc(rx.route)+'.</div>'+'<div class="grp">How to take it</div><div class="rx">'+esc(rx.how)+'</div>')
+           :'<div class="rx" style="border-color:#6e5a1c;color:var(--amber)">Your provider will confirm your exact medication and dose. <span style="color:var(--dim)">(No regimen selected — pick one under “Prescribed regimen” in the intake.)</span></div>')+
+        '<div class="grp">Your next visit</div><div class="rx">Please follow up in about <b>6–8 weeks</b> (around <b>'+esc(fu)+'</b>). We\'ll recheck your testosterone and blood count, review how you\'re feeling, and decide whether to continue or adjust.</div>'+
+        '<div class="grp">Labs to complete before / at your next visit</div><div class="rx">Testosterone level and a complete blood count (CBC / hematocrit); PSA when appropriate. Draw testosterone in the morning; if you inject weekly, draw it about 3–4 days after your shot.</div>')
+    : '<div class="grp">Today\'s plan</div><div class="rx">No testosterone medication was started today. Continue the lifestyle plan your provider reviewed, complete any recommended labs, and return for re-evaluation as advised.</div>';
+  window._avsHTML='<div class="poc">'+
+    '<div class="noprint" style="margin-bottom:12px"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs</button></div>'+
+    '<div class="dochead"><div style="display:flex;justify-content:space-between"><div><div class="lh-brand">RenuviaMD®</div><div class="lh-meta">After-Visit Summary</div></div><div class="lh-meta" style="text-align:right">'+new Date().toLocaleDateString()+'</div></div><div class="lh-meta" style="margin-top:6px">Patient: <b>'+esc(pn)+'</b>'+(dob?(' · '+esc(dob)):'')+'</div></div>'+
+    '<h2>After-Visit Summary</h2><div class="meta">A simple summary of your plan and next steps.</div>'+
+    avsBody+
+    '<div class="grp">When to contact the clinic</div>'+
+    '<div class="rx"><b>Call 911</b> for chest pain, trouble breathing, weakness or numbness, or trouble speaking.<br>Call the clinic for: swelling or pain in a leg, a severe headache or vision changes, an erection lasting more than 4 hours, unusual mood changes, or any effect that worries you.</div>'+
+    '<div class="sig" style="margin-top:16px">Generated by <b>AllyOS</b> for '+esc(pn)+'. This plain-language summary does not replace your provider\'s instructions; your treating clinician directs all decisions about starting, changing, or stopping therapy.</div>'+
+    '<div class="noprint" style="margin-top:14px"><button class="gen" onclick="window.print()">🖨 Print / export summary</button></div>'+
+  '</div>';
+  window._activeDoc='poc';
+  renderDocTabs();
   out.scrollIntoView({behavior:'smooth'});
 }
+function renderDocTabs(){
+  var tabs=document.getElementById('doctabs'); if(!tabs)return;
+  tabs.style.display='flex';
+  function t(id,label){return '<button class="gen" style="margin-top:0;'+(window._activeDoc===id?'background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a':'background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)')+'" onclick="showDoc(\''+id+'\')">'+label+'</button>';}
+  tabs.innerHTML=t('poc','📋 Provider POC')+t('avs','👤 After-Visit Summary');
+}
+function showDoc(id){ window._activeDoc=id; document.getElementById('out').innerHTML=(id==='avs'?window._avsHTML:window._pocHTML); renderDocTabs(); document.getElementById('out').scrollIntoView({behavior:'smooth'}); }
 </script>
 </body></html>
