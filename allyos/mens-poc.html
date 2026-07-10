@@ -482,7 +482,7 @@ function generate(){
   // ---- start-safety gate (Red / Yellow / Green) from configurable thresholds ----
   var sbp=nv('sbp'), dbp=nv('dbp'), psa=nv('psa'), stopbang=nv('stopbang'), ipss=nv('ipss');
   var psarisk=(document.getElementById('psarisk')||{}).value==='yes';
-  var sgReds=[], sgYellows=[];
+  var sgReds=[], sgYellows=[], sgContext=[]; // sgContext = non-start-safety findings shown in §3/§6, NOT in the §4 gate
   if(hct!=null){ if(hct>=54) sgReds.push('Hematocrit '+hct+'% (≥54) — hard stop: hold therapy, evaluate hypoxia/OSA, restart only when safe.');
     else if(hct>=50) sgReds.push('Hematocrit '+hct+'% (≥50) — defer until etiology investigated (conservative gate).');
     else if(hct>=48) sgYellows.push('Hematocrit '+hct+'% (48–49.9) — caution, esp. injectable: consider lower/split dose, topical, or closer CBC.'); }
@@ -497,24 +497,24 @@ function generate(){
     else if(stopbang>=3) sgYellows.push('STOP-BANG '+stopbang+' (intermediate OSA risk) — evaluate.'); }
   if(ipss!=null){ if(ipss>19) sgReds.push('IPSS '+ipss+' (severe LUTS) — defer or urology evaluation.');
     else if(ipss>=8) sgYellows.push('IPSS '+ipss+' (moderate LUTS) — document/manage.'); }
-  // ---- context labs (Phase 2): yellow context flags; eGFR<30 defers ----
+  // ---- context / non-start-safety labs → sgContext (surfaced in §3 axis + §6 metabolic, NOT the §4 gate); eGFR<30 still defers ----
   var e2=nv('e2'), lh=nv('lh'), fsh=nv('fsh'), prl=nv('prl'), hgb=nv('hgb'), a1c=nv('a1c'), glu=nv('glu'), apob=nv('apob'), egfr=nv('egfr'), alt=nv('alt'), tsh=nv('tsh');
-  if(e2!=null){ if(e2>29) sgYellows.push('Estradiol '+e2+' (&gt;29) — aromatization context; review obesity/alcohol/liver/meds. Do NOT use automatic aromatase-inhibitor protocols.');
-    else if(e2<10) sgYellows.push('Estradiol '+e2+' (low) — review AI over-use / low androgen substrate; watch bone/joint/libido.'); }
+  if(e2!=null){ if(e2>29) sgContext.push('Estradiol '+e2+' (&gt;29) — aromatization context; review obesity/alcohol/liver/meds. Do NOT use automatic aromatase-inhibitor protocols.');
+    else if(e2<10) sgContext.push('Estradiol '+e2+' (low) — review AI over-use / low androgen substrate; watch bone/joint/libido.'); }
   if(egfr!=null){ if(egfr<30) sgReds.push('eGFR '+egfr+' (&lt;30) — defer elective optimization or obtain renal/specialist review.');
-    else if(egfr<60) sgYellows.push('eGFR '+egfr+' (30–59) — review renal history/meds; monitor.'); }
-  if(a1c!=null){ if(a1c>=6.5) sgYellows.push('A1c '+a1c+'% (diabetes range) — confirm/manage; testosterone is NOT a diabetes therapy.');
-    else if(a1c>=5.7) sgYellows.push('A1c '+a1c+'% (prediabetes) — nutrition / resistance training / sleep / weight plan.'); }
-  if(glu!=null){ if(glu>=126) sgYellows.push('Fasting glucose '+glu+' (diabetes range) — confirm/manage.');
-    else if(glu>=100) sgYellows.push('Fasting glucose '+glu+' (prediabetes) — metabolic plan.'); }
-  if(apob!=null && apob>=90) sgYellows.push('ApoB '+apob+' (≥90) — atherogenic risk; manage per ASCVD risk. Testosterone is not CV therapy.');
-  if(alt!=null && alt>100) sgYellows.push('ALT '+alt+' (marked) — evaluate meds / alcohol / viral / fatty liver before aggressive optimization.');
-  if(tsh!=null && (tsh<0.4||tsh>4.5)) sgYellows.push('TSH '+tsh+' (abnormal) — thyroid changes SHBG and mimics low-T; evaluate before attributing symptoms to testosterone.');
-  if(prl!=null && prl>18) sgYellows.push('Prolactin '+prl+' (&gt;18) — repeat fasting AM, review meds/macroprolactin; marked/persistent or pituitary symptoms → endocrine evaluation before start.');
-  if(hgb!=null && hgb<13) sgYellows.push('Hemoglobin '+hgb+' (low) — evaluate anemia before attributing fatigue to low testosterone.');
-  if(deficiency && lh!=null){ if(lh>9.3) sgYellows.push('LH '+lh+' (high) with low T — <b>primary</b> (testicular) pattern.');
-    else sgYellows.push('LH '+lh+' (low/normal) with low T — <b>secondary</b> pattern; review prolactin, opioids, glucocorticoids, pituitary, prior AAS/TRT.'); }
-  if(fsh!=null && fsh>8) sgYellows.push('FSH '+fsh+' (high) — impaired-spermatogenesis context; if fertility relevant, semen analysis / fertility pathway before exogenous testosterone.');
+    else if(egfr<60) sgContext.push('eGFR '+egfr+' (30–59) — review renal history/meds; monitor.'); }
+  if(a1c!=null){ if(a1c>=6.5) sgContext.push('A1c '+a1c+'% (diabetes range) — confirm/manage; testosterone is NOT a diabetes therapy.');
+    else if(a1c>=5.7) sgContext.push('A1c '+a1c+'% (prediabetes) — nutrition / resistance training / sleep / weight plan.'); }
+  if(glu!=null){ if(glu>=126) sgContext.push('Fasting glucose '+glu+' (diabetes range) — confirm/manage.');
+    else if(glu>=100) sgContext.push('Fasting glucose '+glu+' (prediabetes) — metabolic plan.'); }
+  if(apob!=null && apob>=90) sgContext.push('ApoB '+apob+' (≥90) — atherogenic risk; manage per ASCVD risk. Testosterone is not CV therapy.');
+  if(alt!=null && alt>100) sgContext.push('ALT '+alt+' (marked) — evaluate meds / alcohol / viral / fatty liver before aggressive optimization.');
+  if(tsh!=null && (tsh<0.4||tsh>4.5)) sgContext.push('TSH '+tsh+' (abnormal) — thyroid changes SHBG and mimics low-T; evaluate before attributing symptoms to testosterone.');
+  if(prl!=null && prl>18) sgContext.push('Prolactin '+prl+' (&gt;18) — repeat fasting AM, review meds/macroprolactin; marked/persistent or pituitary symptoms → endocrine evaluation before start.');
+  if(hgb!=null && hgb<13) sgContext.push('Hemoglobin '+hgb+' (low) — evaluate anemia before attributing fatigue to low testosterone.');
+  if(deficiency && lh!=null){ if(lh>9.3) sgContext.push('LH '+lh+' (high) with low T — <b>primary</b> (testicular) pattern.');
+    else sgContext.push('LH '+lh+' (low/normal) with low T — <b>secondary</b> pattern; review prolactin, opioids, glucocorticoids, pituitary, prior AAS/TRT.'); }
+  if(fsh!=null && fsh>8) sgContext.push('FSH '+fsh+' (high) — impaired-spermatogenesis context; if fertility relevant, semen analysis / fertility pathway before exogenous testosterone.');
   var sgStatus = sgReds.length?'red':(sgYellows.length?'yellow':'green');
   var dom=PHENO.filter(function(p){return (sev[p.k]||0)>0;}).sort(function(a,b){return (sev[b.k]||0)-(sev[a.k]||0);});
   var sexualOrAxis=(sev.sexual||0)>=2;
@@ -554,7 +554,7 @@ function generate(){
   var anySG = [hct,sbp,dbp,psa,stopbang,ipss,e2,lh,fsh,prl,hgb,a1c,glu,apob,egfr,alt,tsh].some(function(x){return x!=null;});
   var sgLabel = sgStatus==='red'?'🔴 RED — resolve before any start':(sgStatus==='yellow'?'🟡 YELLOW — proceed with documentation/management':'🟢 GREEN — no start-safety flags on the entered values');
   var sgItems = sgReds.concat(sgYellows);
-  var sgLegend = sgItems.length ? '<div style="font-size:11px;margin-top:8px;opacity:.85">Start-safety: Hct 48/50/54 · BP AHA · PSA &gt;4 (&gt;3 risk) · IPSS &gt;19 · STOP-BANG · eGFR &lt;30. Context: E2 · LH/FSH/prolactin · A1c/glucose · ApoB · ALT · TSH · Hgb. Qualitative hard stops (fertility, cancer, CV/VTE) are the checkboxes above.</div>' : '';
+  var sgLegend = sgItems.length ? '<div style="font-size:11px;margin-top:8px;opacity:.85">Start-safety only: Hct 48/50/54 · BP AHA · PSA &gt;4 (&gt;3 risk) · IPSS &gt;19 · STOP-BANG · eGFR &lt;30. Qualitative hard stops (fertility, cancer, CV/VTE) are the checkboxes above. Metabolic / axis context labs are listed under §6 (non-testosterone flags) and §2 (lab summary).</div>' : '';
   var sgHTML = anySG ? ('<div class="ryg '+sgStatus+'"><b>'+sgLabel+'</b>'+(sgItems.length?('<ul>'+sgItems.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'):'')+sgLegend+'</div>') : '';
   var warnHTML = warns.length ? ('<div class="ryg yellow" style="margin-top:8px"><b>⚠ Check before deciding:</b><ul>'+warns.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>') : '';
 
