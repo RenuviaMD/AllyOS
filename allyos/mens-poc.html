@@ -100,8 +100,9 @@
       <div class="fw"><label class="q">Bioavailable T</label><input id="bt" class="li" type="number" step="0.1" placeholder="e.g. 74.1"><span class="u">ng/dL</span></div>
       <div class="fw"><label class="q">SHBG</label><input id="shbg" class="li" type="number" step="1" placeholder="e.g. 56"><span class="u">nmol/L</span></div>
     </div>
-    <div style="margin-top:12px"><label class="q">Repeat AM labs confirm the pattern?</label>
-      <select id="confirmed"><option value="no" selected>No / not yet</option><option value="yes">Yes — repeat confirms</option></select></div>
+    <div style="margin-top:12px"><label class="q">Repeat AM fasting labs — is the low-T pattern confirmed on a second draw?</label>
+      <select id="confirmed"><option value="no" selected>No / not yet — single panel only (repeat before starting)</option><option value="yes">Yes — confirmed on a second morning fasting panel</option></select>
+      <div style="font-size:11px;color:var(--dim);margin-top:5px">Endocrine Society: confirm the low-testosterone pattern on two separate morning fasting draws before treatment. “Yes” means the confirmatory (second) panel is on file.</div></div>
     <div style="font-size:11px;color:var(--dim);margin-top:10px;line-height:1.5">🔬 <b>Reference ranges are read from your uploaded lab report</b> (lab's-own-range first, per assay/age/units) — you don't need to enter them. Values stay on this device.</div>
     <details class="grpc"><summary>Manual override — reference ranges (only for typed entry / no report)</summary>
       <div style="font-size:11px;color:var(--dim);margin:6px 0 2px">Pre-filled Quest adult-male LC/MS defaults; auto-filled from an imported report. Edit only if you're entering values by hand or overriding what the report shows.</div>
@@ -324,7 +325,7 @@ function testosteroneRx(cls, elig, blocker, singlePanel, pn){
   return '<div class="grp">5 · Treatment options'+(gateMet?' — '+esc(pn)+' meets the confirmatory gate':' — pending confirmatory repeat labs for '+esc(pn))+'</div>'+
     (gateMet
       ? '<div class="rx" style="border-color:#1e6e4a;background:#0e2a1f33;color:#e6f2ec"><b style="color:var(--green)">✓ On the data entered, '+esc(pn)+' meets the confirmatory gate</b> — symptomatic, low usable androgen confirmed on repeat AM labs, and start-safety gates clear. Because total T is not frankly low, start conservative and avoid supraphysiologic levels. <b>Proposed options (provider selects, titrates &amp; signs):</b></div>'
-      : '<div class="rx" style="border-color:#6e5a1c;background:#2a241033;color:var(--amber)"><b>'+esc(pn)+' — confirmatory gate not yet met.</b> The androgen + symptom pattern supports candidacy, but before starting, repeat <b>morning (6–10 AM), fasting</b> androgen labs on a <b>separate day</b> must confirm the low free/bioavailable-T pattern. The options below are shown <b>for provider review only</b>; set “Repeat AM labs confirm the pattern?” to Yes once a confirming panel is on file. <span style="color:var(--muted)">Severe symptom scores alone are not enough (Endocrine Society 2018).</span></div>')+
+      : '<div class="rx" style="border-color:#6e5a1c;background:#2a241033;color:var(--amber)"><b>'+esc(pn)+' — confirmatory gate not yet met.</b> The androgen + symptom pattern supports candidacy, but before starting, repeat <b>morning (6–10 AM), fasting</b> androgen labs on a <b>separate day</b> must confirm the low free/bioavailable-T pattern. The options below are shown <b>for provider review only</b>; set the confirmation toggle to “Yes — confirmed on a second morning fasting panel” once the repeat panel is on file. <span style="color:var(--muted)">Severe symptom scores alone are not enough (Endocrine Society 2018).</span></div>')+
     tbl(OPTIONS,['Option','Dose &amp; route','Administration','Use case / comments'])+
     '<div class="rx" style="font-size:11.5px;color:var(--muted)">Recheck <b>total T + free T + hematocrit at 6–8 weeks</b> (weekly IM: draw day 3–4), then titrate to symptom response within the physiologic range. VA 2026: 50–100 mg IM weekly first-line; &gt;100 mg weekly flags a supraphysiologic / AAS concern.</div>'+
     coll('Preferred route order &amp; full regimen detail (all 5 routes)',
@@ -539,7 +540,7 @@ function generate(){
     else if(anyGate) blocker='A safety-screen item in Section 2 is checked — clear/resolve it first.';
     else if(!haveLabs) blocker='Enter Total T plus Free or Bioavailable T (with your lab reference-low) in Section 3.';
     else if(sgStatus==='red') blocker='Resolve the RED start-safety flag in Section 4 first.';
-    else if(deficiency && symptomatic && !confirmed) blocker='Set “Repeat AM labs confirm the pattern?” to “Yes — repeat confirms.”';
+    else if(deficiency && symptomatic && !confirmed) blocker='Set the confirmation toggle to “Yes — confirmed on a second morning fasting panel.”';
     else if(!deficiency) blocker='Free and Bioavailable T are not below your lab reference-low — no low usable androgen to optimize on these values.';
     else if(!symptomatic) blocker='Rate the symptom burden — a low lab alone is not a testosterone indication (rate the phenotype domains).';
   }
