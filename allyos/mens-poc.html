@@ -322,7 +322,7 @@ function testosteroneRx(cls, elig, blocker, singlePanel, pn){
       ' When the provider reaches a <b>candidate decision with safety gates clear</b>, the starting regimens appear here. Blocked claims: T for energy / anti-aging / fat-loss / diabetes; "safe for everyone"; "compounded/pellets automatically superior."</div>';
   }
   var gateMet = !singlePanel; // cls==='go' here; a RED start-safety flag already downgraded to hold upstream
-  return '<div class="grp">5 · Treatment options'+(gateMet?' — '+esc(pn)+' meets the confirmatory gate':' — pending confirmatory repeat labs for '+esc(pn))+'</div>'+
+  return '<div class="grp" style="font-size:13.5px;color:var(--teal);border-left:3px solid var(--teal);padding-left:10px">3 · Treatment options'+(gateMet?' — '+esc(pn)+' meets the confirmatory gate':' — pending confirmatory repeat labs for '+esc(pn))+'</div>'+
     (gateMet
       ? '<div class="rx" style="border-color:#1e6e4a;background:#0e2a1f33;color:#e6f2ec"><b style="color:var(--green)">✓ On the data entered, '+esc(pn)+' meets the confirmatory gate</b> — symptomatic, low usable androgen confirmed on repeat AM labs, and start-safety gates clear. Because total T is not frankly low, start conservative and avoid supraphysiologic levels. <b>Proposed options (provider selects, titrates &amp; signs):</b></div>'
       : '<div class="rx" style="border-color:#6e5a1c;background:#2a241033;color:var(--amber)"><b>'+esc(pn)+' — confirmatory gate not yet met.</b> The androgen + symptom pattern supports candidacy, but before starting, repeat <b>morning (6–10 AM), fasting</b> androgen labs on a <b>separate day</b> must confirm the low free/bioavailable-T pattern. The options below are shown <b>for provider review only</b>; set the confirmation toggle to “Yes — confirmed on a second morning fasting panel” once the repeat panel is on file. <span style="color:var(--muted)">Severe symptom scores alone are not enough (Endocrine Society 2018).</span></div>')+
@@ -351,16 +351,16 @@ function testosteroneRx(cls, elig, blocker, singlePanel, pn){
       '<br>· 150–450 mg SC every 3–6 months. <b>Only</b> after stable response, stable safety markers, and a clear patient preference for long-duration therapy.'+
       '<br>· Cons: low reversibility, procedure risk, extrusion / infection, hard to dose-adjust. <b>No automatic superiority.</b>'+
       ' <span style="color:var(--muted)"><a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=a1741a0b-3d4c-42dc-880d-a06e96cce9ef" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed Testopel label ✓</a></span></div>')+
-    coll('6 · Target (reference)',
+    coll('Target (reference)',
     '<div class="rx"><b>Clinical response + physiologic range — not “high-normal” or supraphysiologic.</b>'+
       '<br>· Documented <b>goal-score improvement by 8–12 weeks</b>.'+
       '<br>· Total T stays <b>within the lab reference range</b> (practical mid-range ~450–600 ng/dL); <b>avoid total T &gt;900 ng/dL</b>.'+
       '<br>· Free T moves into range if initially low.'+
       '<br>· <b>Hematocrit</b> stays safe — reduce/hold if rising (adjust if &gt;51%), <b>stop if &gt;54%</b>.'+
       ' <span style="color:var(--muted)">VA 2026 monitoring.</span></div>')+
-    '<div class="grp">8 · Monitoring schedule</div>'+
+    '<div class="grp" style="font-size:13.5px;color:var(--teal);border-left:3px solid var(--teal);padding-left:10px">4 · Monitoring schedule</div>'+
     tbl(MONITOR,['Time point','Required actions','Timing notes'])+
-    coll('9 · Dose adjustment rules', tbl(DOSEADJ,['Finding at follow-up','POC action']))+
+    coll('5 · Dose adjustment rules', tbl(DOSEADJ,['Finding at follow-up','POC action']))+
     '<div class="rx"><b>Safety stops (all routes):</b>'+
       '<br>· <b>Hct &gt;54% → hold / stop / review</b> (evaluate OSA / hypoxia; restart reduced or shift to gel).'+
       '<br>· <b>BP every visit</b> (FDA class-wide warning · TRAVERSE). <b>PSA / prostate</b> per age/risk, then monitor — do not overstate risk, do not drop monitoring.'+
@@ -562,7 +562,7 @@ function generate(){
   var goalLine=dom.map(function(p){return esc(p.t)+' '+(sev[p.k])+'/4';}).join(' · ');
 
   // section 2 — wellness goals & safety screen (table)
-  var sec2 = '<div class="grp" style="font-size:13.5px;color:var(--teal);border-left:3px solid var(--teal);padding-left:10px">2 · Wellness goals &amp; safety screen</div>'+
+  var sec2 = '<div class="grp" style="font-size:13.5px;color:var(--teal);border-left:3px solid var(--teal);padding-left:10px">1 · Wellness goals &amp; safety screen</div>'+
     tbl(PHENO.map(function(p){return [esc(p.t), esc(p.s), (sev[p.k]||0)+' / 4'];}),['Wellness domain','Reported phenotype','Score'])+
     '<div class="rx" style="font-size:12px"><b>Safety screen:</b> '+(anyGate?'<b style="color:#f0b3aa">hard-stop item flagged — hold pending provider review.</b>':(sgStatus==='red'?'<b style="color:#f0b3aa">RED start-safety flag present — resolve before start.</b>':'<b style="color:var(--green)">No hard-stop safety issues present per the completed screen.</b>'))+' If any item becomes positive later (fertility intent, prostate / breast cancer, elevated / unevaluated PSA, high hematocrit, uncontrolled CV disease, severe untreated OSA, severe LUTS/BPH, untreated hyperprolactinemia, or suspected pituitary mass), hold the pathway pending review.</div>';
 
@@ -586,7 +586,7 @@ function generate(){
   LR('FSH',fsh,'fsh',null,null,'','');
   LR('Prolactin',prl,'prl',null,null,'','Pituitary context.');
   LR('Dihydrotestosterone',lv('dht'),'dht',null,null,'ng/dL','Downstream androgen; in-range → no default 5-alpha-reductase intervention.');
-  var sec3 = '<div class="grp" style="font-size:13.5px;color:var(--teal);border-left:3px solid var(--teal);padding-left:10px">3 · Testosterone-relevant lab summary</div>'+
+  var sec3 = '<div class="grp" style="font-size:13.5px;color:var(--teal);border-left:3px solid var(--teal);padding-left:10px">2 · Testosterone-relevant lab summary</div>'+
     (labRows.length
       ? ('<div class="rx" style="font-size:11.5px;color:var(--muted)">Interpreted against the lab\'s own reference range from the imported report where available (lab\'s-own-range first). '+(confirmed?'<b style="color:var(--green)">Repeat AM fasting confirmation on file — gate met ✓.</b>':'<b style="color:var(--amber)">Confirmatory repeat AM fasting labs pending before start.</b>')+'</div>'+tbl(labRows,['Marker','Result','Reference range','POC interpretation']))
       : '<div class="rx" style="color:var(--amber);font-size:12px">No testosterone labs entered yet — import a report or enter Total T plus Free / Bioavailable T in the Section 3 inputs.</div>');
@@ -608,18 +608,18 @@ function generate(){
   NT('LDL cholesterol',lv('ldl'),'mg/dL','Atherogenic lipid — manage per ASCVD risk.');
   NT('Total cholesterol',lv('chol'),'mg/dL','Lipid context — manage independently.');
   NT('MCHC',lv('mchc'),'g/dL','Correlate with iron indices / CBC trend if clinically relevant.');
-  var sec11 = ntRows.length ? ('<div class="grp" style="font-size:13.5px;color:var(--amber);border-left:3px solid var(--amber);padding-left:10px">11 · Non-testosterone lab flags for provider review</div>'+
+  var sec11 = ntRows.length ? ('<div class="grp" style="font-size:13.5px;color:var(--amber);border-left:3px solid var(--amber);padding-left:10px">6 · Non-testosterone lab flags for provider review</div>'+
     '<div class="rx" style="font-size:11.5px;background:#2a2410;border:1px solid #6e5a1c;color:var(--amber)">Listed for provider review; these <b>do not</b> automatically block testosterone optimization when the safety screen is negative, and should not drive testosterone dosing unless the provider judges patient-specific risk requires it.</div>'+
     tbl(ntRows,['Finding','Result','Provider note'])) : '';
 
   // section 13 — reference sources
-  var sec13 = coll('13 · Reference sources','<ol style="font-size:11.5px;color:var(--muted);line-height:1.6;margin:0 0 0 18px;padding:0">'+REFS.map(function(r){return '<li>'+esc(r)+'</li>';}).join('')+'</ol>');
+  var sec13 = coll('7 · Reference sources','<ol style="font-size:11.5px;color:var(--muted);line-height:1.6;margin:0 0 0 18px;padding:0">'+REFS.map(function(r){return '<li>'+esc(r)+'</li>';}).join('')+'</ol>');
 
   out.innerHTML='<div class="poc">'+
     '<div class="noprint" style="margin-bottom:12px"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs / add more data</button></div>'+
     docHeader('Men’s Hormone Optimization Plan')+
     '<h2>Men’s Hormone Optimization Plan</h2><div class="meta">Wellness-oriented · physiologic range only · confirmatory-gated · goals: '+goalLine+'</div>'+
-    coll('1 · Program &amp; pathway framing (reference)',
+    coll('Program &amp; pathway framing (reference)',
       '<div class="rx"><b>Male testosterone optimization pathway for symptomatic wellness goals</b> — using repeat-confirmed androgen bioavailability, safety screening, and physiologic-range dosing. <b>Not</b> a “treat testosterone deficiency,” “anti-aging,” “high-T,” or “performance-enhancement” program. Guidelines require <b>symptoms + consistently low testosterone</b>, confirmed on <b>repeat morning fasting</b> labs (free T when indicated), before testosterone therapy is justified. <span style="color:var(--muted)">Endocrine Society 2018.</span></div>')+
     sec2+
     sec3+
@@ -627,7 +627,7 @@ function generate(){
       '<div class="elig '+cls+'">'+esc(elig)+'</div><div style="font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:6px">'+why+'</div>'+
       warnHTML+
       (noSGaffirm?'<div class="rx" style="border-color:#1e6e4a;color:var(--green);font-size:12px">✓ Provider affirms <b>no qualitative safety-screen issues</b> (fertility, prostate, hematocrit, CV/VTE, OSA, LUTS).</div>':'')+
-      '<div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:12px 0 6px">4 · Safety exclusions / hold criteria</div>'+
+      '<div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:12px 0 6px">Safety exclusions / hold criteria</div>'+
       sgHTML)+
     (cls==='go' ? '' : '<div class="grp">Hormone-axis &amp; safety labs to order</div>'+tbl(LABMAP,['Lab / measure','Timing','Decision note']))+
     testosteroneRx(cls, elig, blocker, singlePanel, pn)+
