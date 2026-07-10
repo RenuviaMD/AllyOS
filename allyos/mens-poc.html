@@ -282,7 +282,6 @@ var OPTIONS=[
  ['Label-supported SQ','Testosterone enanthate autoinjector <b>75 mg SQ once weekly</b>','Abdominal SQ only. Measure trough total T 7 days after the most recent dose, after 6 weeks.','SQ route with label-supported dosing. Cost / access may limit use.']
 ];
 var MONITOR=[
- ['Baseline / before first dose','Confirm consent, BP, fertility intent, OSA/LUTS/prostate/breast-cancer/CV/thrombophilia screen, PSA per protocol, CBC/Hct, and repeat AM fasting androgen panel.','Retain documentation of the negative safety screen.'],
  ['6–8 weeks after start or dose change','Total T, free or bioavailable T if SHBG-relevant, CBC/Hct, BP, adverse effects, and wellness-goal rescoring; PSA per protocol.','Weekly IM: draw day 3–4 after injection. Gel: 2–8 h after application at steady state. SQ autoinjector: trough 7 days after dose (after 6 wk).'],
  ['3–6 months','Repeat symptom score, CBC/Hct, testosterone level, BP, adverse effects, PSA/prostate per protocol.','Adjust only if clinical response and labs support change.'],
  ['12 months, then every 6–12 months if stable','Continue surveillance for response, safety, and ongoing need for therapy.','Stop if no consistent benefit despite physiologic levels.']
@@ -360,22 +359,13 @@ function testosteroneRx(cls, elig, blocker, singlePanel, pn){
       ' <span style="color:var(--muted)">VA 2026 monitoring.</span></div>')+
     '<div class="grp">8 · Monitoring schedule</div>'+
     tbl(MONITOR,['Time point','Required actions','Timing notes'])+
-    '<div class="grp">9 · Dose adjustment rules</div>'+
-    tbl(DOSEADJ,['Finding at follow-up','POC action'])+
-    '<div class="rx" style="font-size:11.5px;color:var(--muted)">ACP: evidence supports testosterone mainly for sexual dysfunction in age-related low T — not energy / vitality / physical function / cognition alone.</div>'+
+    coll('9 · Dose adjustment rules', tbl(DOSEADJ,['Finding at follow-up','POC action']))+
     '<div class="rx"><b>Safety stops (all routes):</b>'+
       '<br>· <b>Hct &gt;54% → hold / stop / review</b> (evaluate OSA / hypoxia; restart reduced or shift to gel).'+
       '<br>· <b>BP every visit</b> (FDA class-wide warning · TRAVERSE). <b>PSA / prostate</b> per age/risk, then monitor — do not overstate risk, do not drop monitoring.'+
       '<br>· <b>Estradiol — do NOT auto-suppress</b>; check only if gynecomastia, breast symptoms, edema, libido issue, or aromatization risk.'+
       '<br>· <b>Fertility</b> — no exogenous T if trying to conceive without fertility-preserving review. <b>OSA</b> hold gate; <b>severe LUTS/BPH</b> review.'+
       ' <span style="color:var(--muted)">Endocrine Society 2018 · AUA TD · FDA 2025 BP · HHS/FDA 2026 prostate/BPH.</span></div>'+
-    coll('Testosterone-level timing by route (reference)',
-      '<div class="rx"><b>Testosterone-level timing by route</b> — do not adjust dose from a level unless timing relative to route is documented:'+
-      '<br>· Weekly IM/SQ cypionate/enanthate: <b>trough</b> (just before next dose), consistent.'+
-      '<br>· Split IM/SQ twice-weekly: trough before next injection, or a consistent midpoint.'+
-      '<br>· Topical gel: after ≥1 week of steady use, <b>2–8 h post-application</b>, consistent timing.'+
-      '<br>· Patch: <b>3–12 h after application</b>. · Pellets: end of dosing interval. · Oral undecanoate: product-specific, meal/fat-dependent — follow label.'+
-      ' <span style="color:var(--muted)">Endocrine Society 2018 monitoring table (PMID 29562364).</span></div>')+
     '<div class="rx" style="color:var(--muted);font-size:12px">Patient-specific dosing is physician-directed; formulation per the provider\'s decision &amp; pharmacy of choice — <b>compounded testosterone and pellets carry no automatic superiority</b>; do not chase the highest possible level. Not for anti-aging / fat-loss / diabetes / "all men over 40" / fatigue-without-labs. The treating provider owns the regimen and the signature.</div>';
 }
 
@@ -571,7 +561,7 @@ function generate(){
   var goalLine=dom.map(function(p){return esc(p.t)+' '+(sev[p.k])+'/4';}).join(' · ');
 
   // section 2 — wellness goals & safety screen (table)
-  var sec2 = '<div class="grp">2 · Wellness goals &amp; safety screen</div>'+
+  var sec2 = '<div class="grp" style="font-size:13.5px;color:var(--teal);border-left:3px solid var(--teal);padding-left:10px">2 · Wellness goals &amp; safety screen</div>'+
     tbl(PHENO.map(function(p){return [esc(p.t), esc(p.s), (sev[p.k]||0)+' / 4'];}),['Wellness domain','Reported phenotype','Score'])+
     '<div class="rx" style="font-size:12px"><b>Safety screen:</b> '+(anyGate?'<b style="color:#f0b3aa">hard-stop item flagged — hold pending provider review.</b>':(sgStatus==='red'?'<b style="color:#f0b3aa">RED start-safety flag present — resolve before start.</b>':'<b style="color:var(--green)">No hard-stop safety issues present per the completed screen.</b>'))+' If any item becomes positive later (fertility intent, prostate / breast cancer, elevated / unevaluated PSA, high hematocrit, uncontrolled CV disease, severe untreated OSA, severe LUTS/BPH, untreated hyperprolactinemia, or suspected pituitary mass), hold the pathway pending review.</div>';
 
@@ -595,7 +585,7 @@ function generate(){
   LR('FSH',fsh,'fsh',null,null,'','');
   LR('Prolactin',prl,'prl',null,null,'','Pituitary context.');
   LR('Dihydrotestosterone',lv('dht'),'dht',null,null,'ng/dL','Downstream androgen; in-range → no default 5-alpha-reductase intervention.');
-  var sec3 = '<div class="grp">3 · Testosterone-relevant lab summary</div>'+
+  var sec3 = '<div class="grp" style="font-size:13.5px;color:var(--teal);border-left:3px solid var(--teal);padding-left:10px">3 · Testosterone-relevant lab summary</div>'+
     (labRows.length
       ? ('<div class="rx" style="font-size:11.5px;color:var(--muted)">Interpreted against the lab\'s own reference range from the imported report where available (lab\'s-own-range first). '+(confirmed?'<b style="color:var(--green)">Repeat AM fasting confirmation on file — gate met ✓.</b>':'<b style="color:var(--amber)">Confirmatory repeat AM fasting labs pending before start.</b>')+'</div>'+tbl(labRows,['Marker','Result','Reference range','POC interpretation']))
       : '<div class="rx" style="color:var(--amber);font-size:12px">No testosterone labs entered yet — import a report or enter Total T plus Free / Bioavailable T in the Section 3 inputs.</div>');
@@ -617,8 +607,8 @@ function generate(){
   NT('LDL cholesterol',lv('ldl'),'mg/dL','Atherogenic lipid — manage per ASCVD risk.');
   NT('Total cholesterol',lv('chol'),'mg/dL','Lipid context — manage independently.');
   NT('MCHC',lv('mchc'),'g/dL','Correlate with iron indices / CBC trend if clinically relevant.');
-  var sec11 = ntRows.length ? ('<div class="grp">11 · Non-testosterone lab flags for provider review</div>'+
-    '<div class="rx" style="font-size:11.5px;color:var(--muted)">Listed for provider review; these <b>do not</b> automatically block testosterone optimization when the safety screen is negative, and should not drive testosterone dosing unless the provider judges patient-specific risk requires it.</div>'+
+  var sec11 = ntRows.length ? ('<div class="grp" style="font-size:13.5px;color:var(--amber);border-left:3px solid var(--amber);padding-left:10px">11 · Non-testosterone lab flags for provider review</div>'+
+    '<div class="rx" style="font-size:11.5px;background:#2a2410;border:1px solid #6e5a1c;color:var(--amber)">Listed for provider review; these <b>do not</b> automatically block testosterone optimization when the safety screen is negative, and should not drive testosterone dosing unless the provider judges patient-specific risk requires it.</div>'+
     tbl(ntRows,['Finding','Result','Provider note'])) : '';
 
   // section 13 — reference sources
@@ -641,7 +631,7 @@ function generate(){
     (cls==='go' ? '' : '<div class="grp">Hormone-axis &amp; safety labs to order</div>'+tbl(LABMAP,['Lab / measure','Timing','Decision note']))+
     testosteroneRx(cls, elig, blocker, singlePanel, pn)+
     sec11+
-    coll('Visit cadence (operational) — reference', tbl(CADENCE,['Visit','Name','Key actions']))+
+    '<div class="grp">Visit cadence (operational)</div>'+tbl(CADENCE,['Visit','Name','Key actions'])+
     coll('Foundational optimization — lifestyle plan (always attached · reference)', tbl(FOUND,['Domain','Target / structure','Why']))+
     '<div class="noprint">'+coll('Cross-line adjunct options — provider review (screen only)', crosswalkBlock())+'</div>'+
     sec13+
