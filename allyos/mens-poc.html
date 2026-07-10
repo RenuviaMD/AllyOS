@@ -123,7 +123,29 @@
       <select id="confirmed"><option value="no" selected>No / not yet — single panel only (repeat before starting)</option><option value="yes">Yes — confirmed on a second morning fasting panel</option></select>
       <div style="font-size:11px;color:var(--dim);margin-top:5px">Endocrine Society: confirm the low-testosterone pattern on two separate morning fasting draws before treatment. “Yes” means the confirmatory (second) panel is on file.</div></div>
     <div style="margin-top:12px"><label class="q">Prescribed regimen <span style="font-weight:400;color:var(--dim)">— provider selects; drives the After-Visit Summary</span></label>
-      <select id="rxPick"><option value="">— provider selects —</option><option value="inj">Testosterone cypionate / enanthate 100 mg IM once weekly</option><option value="gel">Testosterone gel 1.62% — 40.5 mg every morning</option><option value="sq">Testosterone enanthate 75 mg SQ once weekly (autoinjector)</option></select></div>
+      <select id="rxPick"><option value="">— provider selects —</option>
+        <optgroup label="Cypionate — IM once weekly">
+          <option>Testosterone cypionate 50 mg IM once weekly</option>
+          <option>Testosterone cypionate 75 mg IM once weekly</option>
+          <option>Testosterone cypionate 100 mg IM once weekly</option>
+        </optgroup>
+        <optgroup label="Enanthate — IM once weekly">
+          <option>Testosterone enanthate 50 mg IM once weekly</option>
+          <option>Testosterone enanthate 75 mg IM once weekly</option>
+          <option>Testosterone enanthate 100 mg IM once weekly</option>
+        </optgroup>
+        <optgroup label="Enanthate autoinjector — SQ once weekly">
+          <option>Testosterone enanthate (autoinjector) 50 mg SQ once weekly</option>
+          <option>Testosterone enanthate (autoinjector) 75 mg SQ once weekly</option>
+          <option>Testosterone enanthate (autoinjector) 100 mg SQ once weekly</option>
+        </optgroup>
+        <optgroup label="Gel 1.62% — topical every morning">
+          <option>Testosterone gel 1.62% 20.25 mg topically every morning</option>
+          <option>Testosterone gel 1.62% 40.5 mg topically every morning (starting dose)</option>
+          <option>Testosterone gel 1.62% 60.75 mg topically every morning</option>
+          <option>Testosterone gel 1.62% 81 mg topically every morning</option>
+        </optgroup>
+      </select></div>
     <div style="font-size:11px;color:var(--dim);margin-top:10px;line-height:1.5">🔬 <b>Reference ranges are read from your uploaded lab report</b> (lab's-own-range first, per assay/age/units) — you don't need to enter them. Values stay on this device.</div>
     <details class="grpc"><summary>Manual override — reference ranges (only for typed entry / no report)</summary>
       <div style="font-size:11px;color:var(--dim);margin:6px 0 2px">Pre-filled Quest adult-male LC/MS defaults; auto-filled from an imported report. Edit only if you're entering values by hand or overriding what the report shows.</div>
@@ -321,10 +343,11 @@ var CADENCE=[
  ['Annual','Re-assessment','Ongoing benefit, safety labs, prostate/BP/CV, fertility, goals']
 ];
 // ---- treatment options / monitoring schedule / dose-adjustment / references (reference-PDF parity) ----
+// Slim decision-support table — WHEN to choose each route (the exact drug/dose is chosen in the Prescribed-regimen dropdown).
 var OPTIONS=[
- ['<b>Preferred injectable</b>','Testosterone cypionate or enanthate <b>100 mg IM once weekly</b>','200 mg/mL → 0.5 mL IM weekly. Deep IM gluteal or vastus lateralis; rotate sites.','First-line for trackable optimization. POC ceiling: do not exceed 100 mg/week without medical-director review. VA 50–100 mg weekly.'],
- ['Topical','Testosterone gel 1.62% <b>40.5 mg every morning</b>','~2 pump actuations or one 40.5 mg packet to clean, dry shoulders / upper arms; wash hands; cover after drying; avoid transfer.','Steady levels, needle-free. Variable absorption and transfer risk.'],
- ['Label-supported SQ','Testosterone enanthate autoinjector <b>75 mg SQ once weekly</b>','Abdominal SQ only. Measure trough total T 7 days after the most recent dose, after 6 weeks.','SQ route with label-supported dosing. Cost / access may limit use.']
+ ['<b>Injectable (IM)</b> — cypionate / enanthate','First-line for trackable optimization with clean, trough-based titration. Wellness range 50–100 mg once weekly (this POC caps at 100 mg/wk).'],
+ ['<b>SQ autoinjector</b> — enanthate','Subcutaneous route with FDA-labeled dosing; abdomen only. Choose when SQ is preferred; cost / access may limit use.'],
+ ['<b>Topical gel</b> 1.62%','Needle-free with steady levels — good for needle-averse men or when reversibility matters. Variable absorption; avoid skin transfer.']
 ];
 var MONITOR=[
  ['6–8 weeks after start or dose change','Total T, free or bioavailable T if SHBG-relevant, CBC/Hct, BP, adverse effects, and wellness-goal rescoring; PSA per protocol.','Weekly IM: draw day 3–4 after injection. Gel: 2–8 h after application at steady state. SQ autoinjector: trough 7 days after dose (after 6 wk).'],
@@ -366,11 +389,15 @@ function testosteroneRx(cls, elig, blocker, singlePanel, pn){
       ' When the provider reaches a <b>candidate decision with safety gates clear</b>, the starting regimens appear here. Blocked claims: T for energy / anti-aging / fat-loss / diabetes; "safe for everyone"; "compounded/pellets automatically superior."</div>';
   }
   var gateMet = !singlePanel; // cls==='go' here; a RED start-safety flag already downgraded to hold upstream
+  var rxSel=(document.getElementById('rxPick')||{}).value||''; // the provider's specific prescription (drives the POC line + AVS)
   return '<div class="grp" style="font-size:13.5px;color:var(--teal);border-left:3px solid var(--teal);padding-left:10px">3 · Treatment options'+(gateMet?' — '+esc(pn)+' meets the confirmatory gate':' — pending confirmatory repeat labs for '+esc(pn))+'</div>'+
     (gateMet
       ? '<div class="rx" style="border-color:#1e6e4a;background:#0e2a1f33;color:#e6f2ec"><b style="color:var(--green)">✓ On the data entered, '+esc(pn)+' meets the confirmatory gate</b> — symptomatic, low usable androgen confirmed on repeat AM labs, and start-safety gates clear. Because total T is not frankly low, start conservative and avoid supraphysiologic levels. <b>Proposed options (provider selects, titrates &amp; signs):</b></div>'
       : '<div class="rx" style="border-color:#6e5a1c;background:#2a241033;color:var(--amber)"><b>'+esc(pn)+' — confirmatory gate not yet met.</b> The androgen + symptom pattern supports candidacy, but before starting, repeat <b>morning (6–10 AM), fasting</b> androgen labs on a <b>separate day</b> must confirm the low free/bioavailable-T pattern. The options below are shown <b>for provider review only</b>; set the confirmation toggle to “Yes — confirmed on a second morning fasting panel” once the repeat panel is on file. <span style="color:var(--muted)">Severe symptom scores alone are not enough (Endocrine Society 2018).</span></div>')+
-    tbl(OPTIONS,['Option','Dose &amp; route','Administration','Use case / comments'])+
+    tbl(OPTIONS,['Route','When to choose'])+
+    (rxSel
+      ? '<div class="rx" style="border-color:#1e6e4a;background:#0e2a1f33"><b style="color:var(--green)">▶ Prescribed:</b> <b>'+esc(rxSel)+'</b> <span style="color:var(--muted)">— provider-selected; appears on the After-Visit Summary.</span></div>'
+      : '<div class="rx" style="font-size:12px;color:var(--amber)">No specific regimen selected yet — choose one under <b>“Prescribed regimen”</b> in the intake to set the prescription and the After-Visit Summary.</div>')+
     '<div class="rx" style="font-size:11.5px;color:var(--muted)">Recheck <b>total T + free T + hematocrit at 6–8 weeks</b> (weekly IM: draw day 3–4), then titrate to symptom response within the physiologic range. VA 2026: 50–100 mg IM weekly first-line; &gt;100 mg weekly flags a supraphysiologic / AAS concern.</div>'+
     coll('Preferred route order &amp; full regimen detail (all 5 routes)',
     '<div class="rx" style="border-color:#2a5a7e;background:#0e243622"><b>Preferred route order — rapid, trackable optimization</b> — (1) weekly injectable → (2) weekly SC auto-injector → (3) topical gel (needle-free alternative, <b>not inferior</b>). Selected-use: (4) oral undecanoate · (5) pellets (<b>not first-line</b>). Injectable is favored for fast, measurable optimization with clean trough-based titration; gel suits needle-averse men, higher-Hct concern, or reversibility. <b>Safety monitoring is identical across every route.</b></div>'+
@@ -742,17 +769,16 @@ function generate(){
   window._pocHTML = out.innerHTML;
 
   // ---- Phase C: After-Visit Summary (patient-facing, plain language, driven by the selected regimen) ----
-  var rxPick=(document.getElementById('rxPick')||{}).value||'';
-  var rxMap={
-    inj:{med:'Testosterone cypionate or enanthate 100 mg',route:'injected into the muscle (IM) once a week',how:'Inject 100 mg (0.5 mL of a 200 mg/mL vial) into the muscle once a week. Rotate sites (buttock or thigh). Your clinic will show you the technique and provide sharps disposal.'},
-    gel:{med:'Testosterone gel 1.62% — 40.5 mg',route:'applied to the skin every morning',how:'Apply once every morning to clean, dry skin on the shoulders / upper arms. Wash your hands afterward, let it dry, and cover the area. Avoid skin-to-skin transfer to partners, children, or pets.'},
-    sq:{med:'Testosterone enanthate 75 mg',route:'injected under the skin (SQ) once a week',how:'Inject 75 mg under the skin of the abdomen once a week using the autoinjector, as shown by your clinic.'}
-  };
-  var rx=rxMap[rxPick];
+  var rxSel=(document.getElementById('rxPick')||{}).value||'';
+  var rxRoute=/topically|gel/i.test(rxSel)?'topical':(/\bSQ\b/i.test(rxSel)?'sq':(/\bIM\b/i.test(rxSel)?'im':''));
+  var rxHow=rxRoute==='im'?'Inject your prescribed dose into the muscle (IM) once a week. Rotate injection sites (buttock or thigh). Your clinic will show you the technique and provide sharps disposal.'
+           :rxRoute==='sq'?'Inject your prescribed dose under the skin (SQ) of the abdomen once a week using the autoinjector, as shown by your clinic.'
+           :rxRoute==='topical'?'Apply your prescribed dose to clean, dry skin on the shoulders / upper arms every morning. Wash your hands afterward, let it dry, and cover the area. Avoid skin-to-skin transfer to partners, children, or pets.'
+           :'';
   var fu=new Date(Date.now()+49*864e5).toLocaleDateString();
   var avsBody=(cls==='go')
     ? ('<div class="grp">Your medication</div>'+
-        (rx?('<div class="rx"><b>'+esc(rx.med)+'</b> — '+esc(rx.route)+'.</div>'+'<div class="grp">How to take it</div><div class="rx">'+esc(rx.how)+'</div>')
+        (rxSel?('<div class="rx"><b>'+esc(rxSel)+'</b>.</div>'+(rxHow?'<div class="grp">How to take it</div><div class="rx">'+esc(rxHow)+'</div>':''))
            :'<div class="rx" style="border-color:#6e5a1c;color:var(--amber)">Your provider will confirm your exact medication and dose. <span style="color:var(--dim)">(No regimen selected — pick one under “Prescribed regimen” in the intake.)</span></div>')+
         '<div class="grp">Your next visit</div><div class="rx">Please follow up in about <b>6–8 weeks</b> (around <b>'+esc(fu)+'</b>). We\'ll recheck your testosterone and blood count, review how you\'re feeling, and decide whether to continue or adjust.</div>'+
         '<div class="grp">Labs to complete before / at your next visit</div><div class="rx">Testosterone level and a complete blood count (CBC / hematocrit); PSA when appropriate. Draw testosterone in the morning; if you inject weekly, draw it about 3–4 days after your shot.</div>')
