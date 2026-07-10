@@ -59,14 +59,28 @@ window.AllyOSLabImport = (function () {
     if (m && m[1]) return true;
     return false;
   }
+  // Citation / comment / journal prose lines carry stray numbers (publication years, page numbers) that are
+  // NOT lab values — e.g. "Homocysteine is increased by... Ann Intern Med. 1999;131(5):331-9." Skip them.
+  function isProse(line) {
+    return /\b(?:19|20)\d\d[;,)]|\bet al\b|doi:|Ann Intern|J Clin|Circulation|Endocr Pract|\bJAMA\b|increased by|recommendations?|guidelines?|according to|consider retesting/i.test(line);
+  }
   function findValue(lines, pats, exclude) {
     for (var i = 0; i < lines.length; i++) {
       var ln = lines[i];
       if (exclude && exclude.test(ln)) continue;
       if (!pats.some(function (p) { return p.test(ln); })) continue;
-      if (isDefinitionRow(ln)) continue;
-      var v = extractNumber(ln);
+      if (isProse(ln)) continue;                       // skip citation/comment lines (fixes e.g. homocysteine grabbing "1999")
       var rng = extractRange(ln);
+      if (isDefinitionRow(ln)) {
+        // Quest two-line layout: the header row carries the reference threshold; the patient value is on the next line.
+        var nx = lines[i + 1];
+        if (nx && /^\s*[<>]?\s*-?\d/.test(nx) && !isDefinitionRow(nx) && !isProse(nx)) {
+          var vv = extractNumber(nx);
+          if (vv != null) return { v: vv, lo: rng.lo, hi: rng.hi, flag: rng.flag || extractRange(nx).flag };
+        }
+        continue;
+      }
+      var v = extractNumber(ln);
       if (v == null && lines[i + 1] && /^\s*[<>]?\s*-?\d/.test(lines[i + 1])) { v = extractNumber(lines[i + 1]); if (rng.lo == null) rng = extractRange(lines[i + 1]); }
       if (v != null) return { v: v, lo: rng.lo, hi: rng.hi, flag: rng.flag };
     }
