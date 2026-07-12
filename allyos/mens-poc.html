@@ -122,30 +122,6 @@
     <div style="margin-top:12px"><label class="q">Repeat AM fasting labs — is the low-T pattern confirmed on a second draw?</label>
       <select id="confirmed"><option value="no" selected>No / not yet — single panel only (repeat before starting)</option><option value="yes">Yes — confirmed on a second morning fasting panel</option></select>
       <div style="font-size:11px;color:var(--dim);margin-top:5px">Endocrine Society: confirm the low-testosterone pattern on two separate morning fasting draws before treatment. “Yes” means the confirmatory (second) panel is on file.</div></div>
-    <div style="margin-top:12px"><label class="q">Prescribed regimen <span style="font-weight:400;color:var(--dim)">— provider selects; drives the After-Visit Summary</span></label>
-      <select id="rxPick"><option value="">— provider selects —</option>
-        <optgroup label="Cypionate — IM once weekly">
-          <option>Testosterone cypionate 50 mg IM once weekly</option>
-          <option>Testosterone cypionate 75 mg IM once weekly</option>
-          <option>Testosterone cypionate 100 mg IM once weekly</option>
-        </optgroup>
-        <optgroup label="Enanthate — IM once weekly">
-          <option>Testosterone enanthate 50 mg IM once weekly</option>
-          <option>Testosterone enanthate 75 mg IM once weekly</option>
-          <option>Testosterone enanthate 100 mg IM once weekly</option>
-        </optgroup>
-        <optgroup label="Enanthate autoinjector — SQ once weekly">
-          <option>Testosterone enanthate (autoinjector) 50 mg SQ once weekly</option>
-          <option>Testosterone enanthate (autoinjector) 75 mg SQ once weekly</option>
-          <option>Testosterone enanthate (autoinjector) 100 mg SQ once weekly</option>
-        </optgroup>
-        <optgroup label="Gel 1.62% — topical every morning">
-          <option>Testosterone gel 1.62% 20.25 mg topically every morning</option>
-          <option>Testosterone gel 1.62% 40.5 mg topically every morning (starting dose)</option>
-          <option>Testosterone gel 1.62% 60.75 mg topically every morning</option>
-          <option>Testosterone gel 1.62% 81 mg topically every morning</option>
-        </optgroup>
-      </select></div>
     <div style="font-size:11px;color:var(--dim);margin-top:10px;line-height:1.5">🔬 <b>Reference ranges are read from your uploaded lab report</b> (lab's-own-range first, per assay/age/units) — you don't need to enter them. Values stay on this device.</div>
     <details class="grpc"><summary>Manual override — reference ranges (only for typed entry / no report)</summary>
       <div style="font-size:11px;color:var(--dim);margin:6px 0 2px">Pre-filled Quest adult-male LC/MS defaults; auto-filled from an imported report. Edit only if you're entering values by hand or overriding what the report shows.</div>
@@ -389,15 +365,14 @@ function testosteroneRx(cls, elig, blocker, singlePanel, pn){
       ' When the provider reaches a <b>candidate decision with safety gates clear</b>, the starting regimens appear here. Blocked claims: T for energy / anti-aging / fat-loss / diabetes; "safe for everyone"; "compounded/pellets automatically superior."</div>';
   }
   var gateMet = !singlePanel; // cls==='go' here; a RED start-safety flag already downgraded to hold upstream
-  var rxSel=(document.getElementById('rxPick')||{}).value||''; // the provider's specific prescription (drives the POC line + AVS)
+  var rxSel=window._rxSel||''; // persists across regenerations; chosen inside §3, after the decision
   return '<div class="grp" style="font-size:13.5px;color:var(--teal);border-left:3px solid var(--teal);padding-left:10px">3 · Treatment options'+(gateMet?' — '+esc(pn)+' meets the confirmatory gate':' — pending confirmatory repeat labs for '+esc(pn))+'</div>'+
     (gateMet
       ? '<div class="rx" style="border-color:#1e6e4a;background:#0e2a1f33;color:#e6f2ec"><b style="color:var(--green)">✓ On the data entered, '+esc(pn)+' meets the confirmatory gate</b> — symptomatic, low usable androgen confirmed on repeat AM labs, and start-safety gates clear. Because total T is not frankly low, start conservative and avoid supraphysiologic levels. <b>Proposed options (provider selects, titrates &amp; signs):</b></div>'
       : '<div class="rx" style="border-color:#6e5a1c;background:#2a241033;color:var(--amber)"><b>'+esc(pn)+' — confirmatory gate not yet met.</b> The androgen + symptom pattern supports candidacy, but before starting, repeat <b>morning (6–10 AM), fasting</b> androgen labs on a <b>separate day</b> must confirm the low free/bioavailable-T pattern. The options below are shown <b>for provider review only</b>; set the confirmation toggle to “Yes — confirmed on a second morning fasting panel” once the repeat panel is on file. <span style="color:var(--muted)">Severe symptom scores alone are not enough (Endocrine Society 2018).</span></div>')+
     tbl(OPTIONS,['Route','When to choose'])+
-    (rxSel
-      ? '<div class="rx" style="border-color:#1e6e4a;background:#0e2a1f33"><b style="color:var(--green)">▶ Prescribed:</b> <b>'+esc(rxSel)+'</b> <span style="color:var(--muted)">— provider-selected; appears on the After-Visit Summary.</span></div>'
-      : '<div class="rx" style="font-size:12px;color:var(--amber)">No specific regimen selected yet — choose one under <b>“Prescribed regimen”</b> in the intake to set the prescription and the After-Visit Summary.</div>')+
+    '<div class="rx noprint" style="border-color:#2a5a7e;background:#0e243622"><label class="q" style="margin-top:0">Prescribed regimen <span style="font-weight:400;color:var(--dim)">— now that you\'ve seen the decision, select what you\'re prescribing (drives the ▶ line &amp; After-Visit Summary)</span></label>'+regimenSelectHTML(rxSel)+'</div>'+
+    '<div class="rx" id="rxLine">'+prescribedLineHTML(rxSel)+'</div>'+
     '<div class="rx" style="font-size:11.5px;color:var(--muted)">Recheck <b>total T + free T + hematocrit at 6–8 weeks</b> (weekly IM: draw day 3–4), then titrate to symptom response within the physiologic range. VA 2026: 50–100 mg IM weekly first-line; &gt;100 mg weekly flags a supraphysiologic / AAS concern.</div>'+
     coll('Preferred route order &amp; full regimen detail (all 5 routes)',
     '<div class="rx" style="border-color:#2a5a7e;background:#0e243622"><b>Preferred route order — rapid, trackable optimization</b> — (1) weekly injectable → (2) weekly SC auto-injector → (3) topical gel (needle-free alternative, <b>not inferior</b>). Selected-use: (4) oral undecanoate · (5) pellets (<b>not first-line</b>). Injectable is favored for fast, measurable optimization with clean trough-based titration; gel suits needle-averse men, higher-Hct concern, or reversibility. <b>Safety monitoring is identical across every route.</b></div>'+
@@ -523,6 +498,54 @@ function providerSig(){
   var cred=(s.credential && (''+name).indexOf(s.credential)<0)?(', '+s.credential):'';
   return '<div class="sig">Generated by <b>AllyOS clinical decision-support</b> · '+new Date().toLocaleDateString()+'.<br>Prepared for review and signature by <b>'+esc(name)+esc(cred)+'</b>'+(sig.license?(' · '+esc(sig.license)):'')+(sig.npi?(' · NPI '+esc(sig.npi)):'')+' — <b>the signing provider is solely responsible for this clinical decision.</b>'+
     '<div style="margin-top:9px;font-size:10.5px;color:var(--dim);line-height:1.55">AllyOS is clinical decision-support software, not a prescription. Using it does <b>not</b> create a medical-director, supervisory, or physician–patient relationship with RenuviaMD® or Armando A. Falcon, MD, except where separately contracted in writing. Agents referenced are not FDA-approved unless noted and evidence grade varies; the signing provider verifies every value and owns the decision under their own license and DEA/state authority. AllyOS stores no PHI and holds no pharmacy or product financial relationship.</div></div>';
+}
+
+// ---- Prescribed regimen + After-Visit Summary (regimen is chosen AFTER the decision, inside §3) ----
+var REGIMENS=[
+ ['Cypionate — IM once weekly',['Testosterone cypionate 50 mg IM once weekly','Testosterone cypionate 75 mg IM once weekly','Testosterone cypionate 100 mg IM once weekly']],
+ ['Enanthate — IM once weekly',['Testosterone enanthate 50 mg IM once weekly','Testosterone enanthate 75 mg IM once weekly','Testosterone enanthate 100 mg IM once weekly']],
+ ['Enanthate autoinjector — SQ once weekly',['Testosterone enanthate (autoinjector) 50 mg SQ once weekly','Testosterone enanthate (autoinjector) 75 mg SQ once weekly','Testosterone enanthate (autoinjector) 100 mg SQ once weekly']],
+ ['Gel 1.62% — topical every morning',['Testosterone gel 1.62% 20.25 mg topically every morning','Testosterone gel 1.62% 40.5 mg topically every morning (starting dose)','Testosterone gel 1.62% 60.75 mg topically every morning','Testosterone gel 1.62% 81 mg topically every morning']]
+];
+function regimenSelectHTML(sel){
+  var h='<select id="rxPick" onchange="pickRegimen(this.value)"><option value=""'+(!sel?' selected':'')+'>— select the prescribed regimen —</option>';
+  REGIMENS.forEach(function(gr){ h+='<optgroup label="'+esc(gr[0])+'">'; gr[1].forEach(function(o){ h+='<option'+(o===sel?' selected':'')+'>'+esc(o)+'</option>'; }); h+='</optgroup>'; });
+  return h+'</select>';
+}
+function prescribedLineHTML(sel){
+  return sel
+    ? '<b style="color:var(--green)">▶ Prescribed:</b> <b>'+esc(sel)+'</b> <span style="color:var(--muted)">— appears on the After-Visit Summary.</span>'
+    : '<span style="color:var(--amber)">Select the prescribed regimen above to set the prescription and the After-Visit Summary.</span>';
+}
+function regimenRoute(s){return /topically|gel/i.test(s)?'topical':(/\bSQ\b/i.test(s)?'sq':(/\bIM\b/i.test(s)?'im':''));}
+function regimenHow(r){return r==='im'?'Inject your prescribed dose into the muscle (IM) once a week. Rotate injection sites (buttock or thigh). Your clinic will show you the technique and provide sharps disposal.':r==='sq'?'Inject your prescribed dose under the skin (SQ) of the abdomen once a week using the autoinjector, as shown by your clinic.':r==='topical'?'Apply your prescribed dose to clean, dry skin on the shoulders / upper arms every morning. Wash your hands afterward, let it dry, and cover the area. Avoid skin-to-skin transfer to partners, children, or pets.':'';}
+function buildAVS(rxSel, ctx){
+  ctx=ctx||{}; var pn=ctx.pn||'This patient', dob=ctx.dob||'', isGo=!!ctx.isGo;
+  var rxHow=regimenHow(regimenRoute(rxSel));
+  var fu=new Date(Date.now()+49*864e5).toLocaleDateString();
+  var body=isGo
+    ? ('<div class="grp">Your medication</div>'+
+        (rxSel?('<div class="rx"><b>'+esc(rxSel)+'</b>.</div>'+(rxHow?'<div class="grp">How to take it</div><div class="rx">'+esc(rxHow)+'</div>':''))
+             :'<div class="rx" style="border-color:#6e5a1c;color:var(--amber)">Your provider will confirm your exact medication and dose. <span style="color:var(--dim)">(No regimen selected yet.)</span></div>')+
+        '<div class="grp">Your next visit</div><div class="rx">Please follow up in about <b>6–8 weeks</b> (around <b>'+esc(fu)+'</b>). We\'ll recheck your testosterone and blood count, review how you\'re feeling, and decide whether to continue or adjust.</div>'+
+        '<div class="grp">Labs to complete before / at your next visit</div><div class="rx">Testosterone level and a complete blood count (CBC / hematocrit); PSA when appropriate. Draw testosterone in the morning; if you inject weekly, draw it about 3–4 days after your shot.</div>')
+    : '<div class="grp">Today\'s plan</div><div class="rx">No testosterone medication was started today. Continue the lifestyle plan your provider reviewed, complete any recommended labs, and return for re-evaluation as advised.</div>';
+  return '<div class="poc">'+
+    '<div class="noprint" style="margin-bottom:12px"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs</button></div>'+
+    '<div class="dochead"><div style="display:flex;justify-content:space-between"><div><div class="lh-brand">RenuviaMD®</div><div class="lh-meta">After-Visit Summary</div></div><div class="lh-meta" style="text-align:right">'+new Date().toLocaleDateString()+'</div></div><div class="lh-meta" style="margin-top:6px">Patient: <b>'+esc(pn)+'</b>'+(dob?(' · '+esc(dob)):'')+'</div></div>'+
+    '<h2>After-Visit Summary</h2><div class="meta">A simple summary of your plan and next steps.</div>'+
+    body+
+    '<div class="grp">When to contact the clinic</div>'+
+    '<div class="rx"><b>Call 911</b> for chest pain, trouble breathing, weakness or numbness, or trouble speaking.<br>Call the clinic for: swelling or pain in a leg, a severe headache or vision changes, an erection lasting more than 4 hours, unusual mood changes, or any effect that worries you.</div>'+
+    '<div class="sig" style="margin-top:16px">Generated by <b>AllyOS</b> for '+esc(pn)+'. This plain-language summary does not replace your provider\'s instructions; your treating clinician directs all decisions about starting, changing, or stopping therapy.</div>'+
+    '<div class="noprint" style="margin-top:14px"><button class="gen" onclick="window.print()">🖨 Print / export summary</button></div>'+
+  '</div>';
+}
+function pickRegimen(val){
+  window._rxSel=val;
+  var line=document.getElementById('rxLine'); if(line) line.innerHTML=prescribedLineHTML(val);
+  window._avsHTML=buildAVS(val, window._planCtx);
+  if(window._activeDoc==='avs'){ document.getElementById('out').innerHTML=window._avsHTML; }
 }
 
 function generate(){
@@ -768,31 +791,9 @@ function generate(){
   '</div>';
   window._pocHTML = out.innerHTML;
 
-  // ---- Phase C: After-Visit Summary (patient-facing, plain language, driven by the selected regimen) ----
-  var rxSel=(document.getElementById('rxPick')||{}).value||'';
-  var rxRoute=/topically|gel/i.test(rxSel)?'topical':(/\bSQ\b/i.test(rxSel)?'sq':(/\bIM\b/i.test(rxSel)?'im':''));
-  var rxHow=rxRoute==='im'?'Inject your prescribed dose into the muscle (IM) once a week. Rotate injection sites (buttock or thigh). Your clinic will show you the technique and provide sharps disposal.'
-           :rxRoute==='sq'?'Inject your prescribed dose under the skin (SQ) of the abdomen once a week using the autoinjector, as shown by your clinic.'
-           :rxRoute==='topical'?'Apply your prescribed dose to clean, dry skin on the shoulders / upper arms every morning. Wash your hands afterward, let it dry, and cover the area. Avoid skin-to-skin transfer to partners, children, or pets.'
-           :'';
-  var fu=new Date(Date.now()+49*864e5).toLocaleDateString();
-  var avsBody=(cls==='go')
-    ? ('<div class="grp">Your medication</div>'+
-        (rxSel?('<div class="rx"><b>'+esc(rxSel)+'</b>.</div>'+(rxHow?'<div class="grp">How to take it</div><div class="rx">'+esc(rxHow)+'</div>':''))
-           :'<div class="rx" style="border-color:#6e5a1c;color:var(--amber)">Your provider will confirm your exact medication and dose. <span style="color:var(--dim)">(No regimen selected — pick one under “Prescribed regimen” in the intake.)</span></div>')+
-        '<div class="grp">Your next visit</div><div class="rx">Please follow up in about <b>6–8 weeks</b> (around <b>'+esc(fu)+'</b>). We\'ll recheck your testosterone and blood count, review how you\'re feeling, and decide whether to continue or adjust.</div>'+
-        '<div class="grp">Labs to complete before / at your next visit</div><div class="rx">Testosterone level and a complete blood count (CBC / hematocrit); PSA when appropriate. Draw testosterone in the morning; if you inject weekly, draw it about 3–4 days after your shot.</div>')
-    : '<div class="grp">Today\'s plan</div><div class="rx">No testosterone medication was started today. Continue the lifestyle plan your provider reviewed, complete any recommended labs, and return for re-evaluation as advised.</div>';
-  window._avsHTML='<div class="poc">'+
-    '<div class="noprint" style="margin-bottom:12px"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs</button></div>'+
-    '<div class="dochead"><div style="display:flex;justify-content:space-between"><div><div class="lh-brand">RenuviaMD®</div><div class="lh-meta">After-Visit Summary</div></div><div class="lh-meta" style="text-align:right">'+new Date().toLocaleDateString()+'</div></div><div class="lh-meta" style="margin-top:6px">Patient: <b>'+esc(pn)+'</b>'+(dob?(' · '+esc(dob)):'')+'</div></div>'+
-    '<h2>After-Visit Summary</h2><div class="meta">A simple summary of your plan and next steps.</div>'+
-    avsBody+
-    '<div class="grp">When to contact the clinic</div>'+
-    '<div class="rx"><b>Call 911</b> for chest pain, trouble breathing, weakness or numbness, or trouble speaking.<br>Call the clinic for: swelling or pain in a leg, a severe headache or vision changes, an erection lasting more than 4 hours, unusual mood changes, or any effect that worries you.</div>'+
-    '<div class="sig" style="margin-top:16px">Generated by <b>AllyOS</b> for '+esc(pn)+'. This plain-language summary does not replace your provider\'s instructions; your treating clinician directs all decisions about starting, changing, or stopping therapy.</div>'+
-    '<div class="noprint" style="margin-top:14px"><button class="gen" onclick="window.print()">🖨 Print / export summary</button></div>'+
-  '</div>';
+  // ---- Phase C: After-Visit Summary — built by buildAVS() so the §3 regimen picker can refresh it live ----
+  window._planCtx={pn:pn, dob:dob, isGo:(cls==='go')};
+  window._avsHTML=buildAVS(window._rxSel||'', window._planCtx);
   // ---- Phase B: Patient Education Guide (plain language, expectations, follow-up, safety) ----
   var eduGoals=(goalList.length?goalList:dom.map(function(p){return p.t;}));
   var TL=[['Sexual desire','3–6 weeks'],['Energy','4–8 weeks'],['Mood','4–8 weeks'],['Exercise recovery','6–12 weeks'],['Lean body mass','3–6 months'],['Body composition','3–12 months'],['Bone health','6–24 months']];
