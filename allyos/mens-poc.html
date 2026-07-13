@@ -370,40 +370,10 @@ function testosteroneRx(cls, elig, blocker, singlePanel, pn){
     (gateMet
       ? '<div class="rx" style="border-color:#1e6e4a;background:#0e2a1f33;color:#e6f2ec"><b style="color:var(--green)">✓ On the data entered, '+esc(pn)+' meets the confirmatory gate</b> — symptomatic, low usable androgen confirmed on repeat AM labs, and start-safety gates clear. Because total T is not frankly low, start conservative and avoid supraphysiologic levels. <b>Proposed options (provider selects, titrates &amp; signs):</b></div>'
       : '<div class="rx" style="border-color:#6e5a1c;background:#2a241033;color:var(--amber)"><b>'+esc(pn)+' — confirmatory gate not yet met.</b> The androgen + symptom pattern supports candidacy, but before starting, repeat <b>morning (6–10 AM), fasting</b> androgen labs on a <b>separate day</b> must confirm the low free/bioavailable-T pattern. The options below are shown <b>for provider review only</b>; set the confirmation toggle to “Yes — confirmed on a second morning fasting panel” once the repeat panel is on file. <span style="color:var(--muted)">Severe symptom scores alone are not enough (Endocrine Society 2018).</span></div>')+
-    tbl(OPTIONS,['Route','When to choose'])+
-    '<div class="rx noprint" style="border-color:#2a5a7e;background:#0e243622"><label class="q" style="margin-top:0">Prescribed regimen <span style="font-weight:400;color:var(--dim)">— now that you\'ve seen the decision, select what you\'re prescribing (drives the ▶ line &amp; After-Visit Summary)</span></label>'+regimenSelectHTML(rxSel)+'</div>'+
-    '<div class="rx" id="rxLine">'+prescribedLineHTML(rxSel)+'</div>'+
-    '<div class="rx" style="font-size:11.5px;color:var(--muted)">Recheck <b>total T + free T + hematocrit at 6–8 weeks</b> (weekly IM: draw day 3–4), then titrate to symptom response within the physiologic range. VA 2026: 50–100 mg IM weekly first-line; &gt;100 mg weekly flags a supraphysiologic / AAS concern.</div>'+
-    coll('Preferred route order &amp; full regimen detail (all 5 routes)',
-    '<div class="rx" style="border-color:#2a5a7e;background:#0e243622"><b>Preferred route order — rapid, trackable optimization</b> — (1) weekly injectable → (2) weekly SC auto-injector → (3) topical gel (needle-free alternative, <b>not inferior</b>). Selected-use: (4) oral undecanoate · (5) pellets (<b>not first-line</b>). Injectable is favored for fast, measurable optimization with clean trough-based titration; gel suits needle-averse men, higher-Hct concern, or reversibility. <b>Safety monitoring is identical across every route.</b></div>'+
-    '<div class="rx"><b>1 · Weekly injectable — cypionate or enanthate (IM or SC) <span style="color:var(--green)">(first-line — rapid optimization)</span></b>'+
-      '<br>· Label range 50–400 mg every 2–4 weeks, but for optimization <b>prefer smaller / more frequent</b>: AUA example <b>100 mg weekly</b> &gt; 200 mg q2wk &gt; 300–400 mg monthly (steadier levels, less Hct / estradiol / mood swing).'+
-      '<br>· Check <b>trough</b> total T at steady state; titrate toward the 450–600 target. Generic SC use is common but off-label; the FDA-labeled SC option is the enanthate auto-injector below.'+
-      ' <span style="color:var(--muted)">AUA TD · <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=cfbb53d4-b868-4a28-8436-f9112eb01c39" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed cypionate label ✓</a></span></div>'+
-    '<div class="rx"><b>2 · Weekly SC auto-injector — enanthate (XYOSTED)</b>'+
-      '<br>· <b>Start 75 mg subcutaneously once weekly — abdomen only</b> (strengths 50 / 75 / 100 mg); <b>trough drawn 7 days after the dose</b> (steady state ~6 wk), adjust by ±25 mg.'+
-      '<br>· Label normal-range window <b>350–650 ng/dL</b>; titrate toward the 450–600 wellness target.'+
-      ' <span style="color:var(--muted)"><a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=8a3d204c-be26-49e0-8599-0ac12a272e81" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed XYOSTED label ✓</a></span></div>'+
-    '<div class="rx"><b>3 · Topical gel <span style="color:var(--muted)">(needle-free alternative — not inferior)</span></b>'+
-      '<br>· <b>1.62% gel: start 40.5 mg once daily</b> (adjust 20.25–81 mg/day); or <b>1% gel: start 50 mg/day</b> → 75 → 100 mg. Titrate on <b>pre-dose morning T at ~14 and 28 days</b> after start/adjustment.'+
-      '<br>· Clean, dry shoulders / upper arms; wash hands; cover after drying. <b>FDA secondary-exposure warning</b> — prevent transfer to partners, children, pets.'+
-      '<br>· Best when: needle-averse, higher hematocrit concern, reversibility matters. Cons: transfer risk, variable absorption, daily adherence.'+
-      ' <span style="color:var(--muted)"><a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=f4e8d29b-8707-4d47-e053-2a95a90aecee" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed AndroGel 1.62% label ✓</a></span></div>'+
-    '<div class="rx" style="border-color:#3a4452"><b>4 · Oral testosterone undecanoate <span style="color:var(--muted)">(selected-use)</span></b>'+
-      '<br>· <b>Product-specific dosing</b> — e.g., KYZATREX 200 mg BID; JATENZO 237 mg BID; TLANDO 225 mg BID (fixed) — <b>all with food</b>. Check T <b>7 days</b> after start/adjustment, <b>3–5 h after the morning dose</b>.'+
-      '<br>· Avoids injection &amp; topical transfer. Cautions: <b>BP</b>, absorption variability, cost/access.'+
-      ' <span style="color:var(--muted)"><a href="https://dailymed.nlm.nih.gov/dailymed/search.cfm?query=testosterone+undecanoate+oral" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed oral-undecanoate labels ✓</a></span></div>'+
-    '<div class="rx" style="border-color:#3a4452"><b>5 · Pellets <span style="color:var(--amber)">(selected-use — NOT first-line)</span></b>'+
-      '<br>· 150–450 mg SC every 3–6 months. <b>Only</b> after stable response, stable safety markers, and a clear patient preference for long-duration therapy.'+
-      '<br>· Cons: low reversibility, procedure risk, extrusion / infection, hard to dose-adjust. <b>No automatic superiority.</b>'+
-      ' <span style="color:var(--muted)"><a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=a1741a0b-3d4c-42dc-880d-a06e96cce9ef" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed Testopel label ✓</a></span></div>')+
-    coll('Target (reference)',
-    '<div class="rx"><b>Clinical response + physiologic range — not “high-normal” or supraphysiologic.</b>'+
-      '<br>· Documented <b>goal-score improvement by 8–12 weeks</b>.'+
-      '<br>· Total T stays <b>within the lab reference range</b> (practical mid-range ~450–600 ng/dL); <b>avoid total T &gt;900 ng/dL</b>.'+
-      '<br>· Free T moves into range if initially low.'+
-      '<br>· <b>Hematocrit</b> stays safe — reduce/hold if rising (adjust if &gt;51%), <b>stop if &gt;54%</b>.'+
-      ' <span style="color:var(--muted)">VA 2026 monitoring.</span></div>')+
+    '<div class="noprint">'+tbl(OPTIONS,['Route','When to choose'])+
+    '<div class="rx" style="border-color:#2a5a7e;background:#0e243622"><label class="q" style="margin-top:0">Prescribed regimen <span style="font-weight:400;color:var(--dim)">— now that you\'ve seen the decision, select what you\'re prescribing (drives the ▶ line &amp; After-Visit Summary)</span></label>'+regimenSelectHTML(rxSel)+'</div></div>'+
+    '<div class="rx" id="rxLine" style="font-size:13.5px;border-color:#1e6e4a;background:#0e2a1f22">'+prescribedLineHTML(rxSel)+'</div>'+
+    '<div class="rx" style="font-size:11.5px;color:var(--muted)">Recheck <b>total T + free T + hematocrit at 6–8 weeks</b> (weekly IM: draw day 3–4), then titrate to symptom response within the physiologic range (practical mid-range ~450–600 ng/dL; avoid total T &gt;900). Hematocrit stays safe — adjust if &gt;51%, stop if &gt;54%.</div>'+
     '<div class="grp" style="font-size:13.5px;color:var(--teal);border-left:3px solid var(--teal);padding-left:10px">4 · Monitoring schedule</div>'+
     tbl(MONITOR,['Time point','Required actions','Timing notes'])+
     coll('5 · Dose adjustment rules', tbl(DOSEADJ,['Finding at follow-up','POC action']))+
@@ -513,9 +483,10 @@ function regimenSelectHTML(sel){
   return h+'</select>';
 }
 function prescribedLineHTML(sel){
-  return sel
-    ? '<b style="color:var(--green)">▶ Prescribed:</b> <b>'+esc(sel)+'</b> <span style="color:var(--muted)">— appears on the After-Visit Summary.</span>'
-    : '<span style="color:var(--amber)">Select the prescribed regimen above to set the prescription and the After-Visit Summary.</span>';
+  if(!sel) return '<b>▶ Regimen:</b> <span style="color:var(--amber)">to be selected by the provider</span>';
+  var r=regimenRoute(sel);
+  var why=r==='im'?'Injectable — rapid, trackable optimization with clean trough-based titration.':r==='sq'?'SQ autoinjector — FDA-labeled subcutaneous dosing; abdomen only.':r==='topical'?'Topical gel — needle-free with steady levels; avoids injection.':'';
+  return '<b style="color:var(--green)">▶ Prescribed:</b> <b>'+esc(sel)+'</b>'+(why?'<br><span style="font-size:12px;color:var(--muted)"><b>Why this route:</b> '+esc(why)+'</span>':'');
 }
 function regimenRoute(s){return /topically|gel/i.test(s)?'topical':(/\bSQ\b/i.test(s)?'sq':(/\bIM\b/i.test(s)?'im':''));}
 function regimenHow(r){return r==='im'?'Inject your prescribed dose into the muscle (IM) once a week. Rotate injection sites (buttock or thigh). Your clinic will show you the technique and provide sharps disposal.':r==='sq'?'Inject your prescribed dose under the skin (SQ) of the abdomen once a week using the autoinjector, as shown by your clinic.':r==='topical'?'Apply your prescribed dose to clean, dry skin on the shoulders / upper arms every morning. Wash your hands afterward, let it dry, and cover the area. Avoid skin-to-skin transfer to partners, children, or pets.':'';}
@@ -769,23 +740,24 @@ function generate(){
     '<h2>Men’s Hormone Optimization Plan</h2><div class="meta">Wellness-oriented · physiologic range only · confirmatory-gated · goals: '+goalLine+'</div>'+
     patientSnapshot+
     bmiNote+
-    coll('Program &amp; pathway framing (reference)',
-      '<div class="rx"><b>Male testosterone optimization pathway for symptomatic wellness goals</b> — using repeat-confirmed androgen bioavailability, safety screening, and physiologic-range dosing. <b>Not</b> a “treat testosterone deficiency,” “anti-aging,” “high-T,” or “performance-enhancement” program. Guidelines require <b>symptoms + consistently low testosterone</b>, confirmed on <b>repeat morning fasting</b> labs (free T when indicated), before testosterone therapy is justified. <span style="color:var(--muted)">Endocrine Society 2018.</span></div>')+
+    '<div class="rx" style="border-color:'+(cls==='go'?'#1e6e4a':'#6e5a1c')+';background:'+(cls==='go'?'#0e2a1f22':'#2a241022')+'"><b>Clinical conclusion — </b><b style="color:'+(cls==='go'?'var(--green)':'var(--amber)')+'">'+esc(elig)+'</b></div>'+
+    '<div class="noprint">'+coll('Program &amp; pathway framing (reference)',
+      '<div class="rx"><b>Male testosterone optimization pathway for symptomatic wellness goals</b> — using repeat-confirmed androgen bioavailability, safety screening, and physiologic-range dosing. <b>Not</b> a “treat testosterone deficiency,” “anti-aging,” “high-T,” or “performance-enhancement” program. Guidelines require <b>symptoms + consistently low testosterone</b>, confirmed on <b>repeat morning fasting</b> labs (free T when indicated), before testosterone therapy is justified. <span style="color:var(--muted)">Endocrine Society 2018.</span></div>')+'</div>'+
     sec2+
     sec3+
-    coll('Recommended baseline panel — data readiness', baselinePanel())+
-    coll('Eligibility determination &amp; safety review (reference)',
+    '<div class="noprint">'+coll('Recommended baseline panel — data readiness', baselinePanel())+'</div>'+
+    '<div class="noprint">'+coll('Eligibility determination &amp; safety review (reference)',
       '<div class="elig '+cls+'">'+esc(elig)+'</div><div style="font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:6px">'+why+'</div>'+
       warnHTML+
       (noSGaffirm?'<div class="rx" style="border-color:#1e6e4a;color:var(--green);font-size:12px">✓ Provider affirms <b>no qualitative safety-screen issues</b> (fertility, prostate, hematocrit, CV/VTE, OSA, LUTS).</div>':'')+
       '<div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:12px 0 6px">Safety exclusions / hold criteria</div>'+
-      sgHTML)+
+      sgHTML)+'</div>'+
     (cls==='go' ? '' : '<div class="grp">Hormone-axis &amp; safety labs to order</div>'+tbl(LABMAP,['Lab / measure','Timing','Decision note']))+
     testosteroneRx(cls, elig, blocker, singlePanel, pn)+
     sec11+
     coll('Foundational optimization — personalized to this patient (always attached)', foundationalPlan())+
     '<div class="noprint">'+coll('Cross-line adjunct options — provider review (screen only)', crosswalkBlock())+'</div>'+
-    sec13+
+    '<div class="noprint">'+sec13+'</div>'+
     providerSig()+
     '<div class="noprint" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs / add more data</button><button class="gen" onclick="window.print()">🖨 Print / export plan</button></div>'+
   '</div>';
