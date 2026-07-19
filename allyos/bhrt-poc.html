@@ -114,6 +114,7 @@
   </details>
 
   <div class="noprint"><button class="gen" onclick="generate()">▶ Generate Plan of Care</button></div>
+  <div class="noprint" id="doctabs" style="display:none;gap:8px;margin-top:14px;flex-wrap:wrap"></div>
 
   <div class="out" id="out"></div>
 </div>
@@ -407,38 +408,138 @@ function safetyRouteGate(){
   return { status:status, reds:reds, panel:panel };
 }
 
+// ============ BHRT parity: prescription selection · patient snapshot · 3 documents ============
+function bhrtNv(id){var el=document.getElementById(id);if(!el)return null;var n=parseFloat(el.value);return isFinite(n)?n:null;}
+function tbl2(rows,cols){return '<table style="width:100%;border-collapse:collapse;font-size:12px;margin:6px 0"><thead><tr>'+cols.map(function(c){return '<th style="text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)">'+c+'</th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c){return '<td style="padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top">'+c+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table>';}
+// prescribable regimens from the current symptom/uterus/lab profile (mirrors treatmentPlan)
+function bhrtRxItems(){
+  var ut=(document.getElementById('uterus')||{}).value||'';
+  var vmsS=score(['vms','vms2']), moodS=score(['mood','irrit','anx']), sleepS=score(['sleep']), gsmS=score(['vag','bladder']), sexS=score(['sex']), mskS=score(['msk']);
+  var needSys = vmsS>=1 || moodS>=2 || mskS>=2 || sleepS>=2;
+  var ttv=bhrtNv('tt'); var items=[];
+  if(needSys){
+    items.push({id:'est',med:'Systemic 17β-estradiol (transdermal) — start 0.025–0.05 mg/day',how:'Apply the estradiol patch (1–2 times a week) or the gel/spray (once each morning) to clean, dry skin. Rotate where you put it, and never on the breasts.'});
+    if(ut!=='removed') items.push({id:'prog',med:'Micronized progesterone 100 mg by mouth at bedtime'+(ut==='intact'?'':' — if uterus intact (confirm)'),how:'Take one 100 mg capsule at bedtime. It can make you a little sleepy (that often helps sleep) and it protects the lining of the uterus.'});
+  }
+  if(gsmS>=1) items.push({id:'vag',med:'Local (vaginal) estrogen — low-dose cream / tablet / ring',how:'Use as directed (often a couple of times a week). It works locally for vaginal dryness and urinary symptoms.'});
+  if(sexS>=2 && !(ttv!=null && ttv>60)) items.push({id:'test',med:'Testosterone for low desire (HSDD) — low-dose transdermal to the female physiologic range',how:'Apply the small prescribed amount as directed. Watch for acne or extra hair growth and tell us if they happen. This is used off-label, only for low desire that distresses you.'});
+  if(vmsS>=2) items.push({id:'fez',med:'Fezolinetant 45 mg once daily (non-hormonal option)',how:'Take one tablet daily. You will need liver blood tests before starting and at months 1, 2, 3, 6, and 9.'});
+  return items;
+}
+function bhrtRxSelectorHTML(items){
+  if(!items.length) return '<div class="rxc noprint">No pharmacologic hormone regimen proposed from the current symptom profile — see Lifestyle.</div>';
+  var h='<div class="rxc noprint"><b>Prescribed — check what you are prescribing</b> <span style="color:#9a8fc0">(drives the ▶ line &amp; the After-Visit Summary)</span>:';
+  items.forEach(function(it){ h+='<div style="margin-top:7px"><label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;font-size:12.5px;color:var(--ink)"><input type="checkbox" '+(window._bhrtRx&&window._bhrtRx[it.id]?'checked':'')+' onchange="pickBhrtRx(\''+it.id+'\')" style="margin-top:3px"> <span>'+esc(it.med)+'</span></label></div>'; });
+  return h+'</div>';
+}
+function bhrtPrescribedHTML(items){
+  var sel=(items||[]).filter(function(it){return window._bhrtRx&&window._bhrtRx[it.id];});
+  if(!sel.length) return '<b>▶ Prescribed:</b> <span style="color:var(--amber)">to be selected by the provider</span>';
+  return '<b style="color:var(--green)">▶ Prescribed:</b><ul style="margin:6px 0 0 18px;padding:0">'+sel.map(function(it){return '<li style="margin:3px 0">'+esc(it.med)+'</li>';}).join('')+'</ul>';
+}
+function pickBhrtRx(id){
+  window._bhrtRx=window._bhrtRx||{}; window._bhrtRx[id]=!window._bhrtRx[id];
+  var line=document.getElementById('bhrtRxLine'); if(line) line.innerHTML=bhrtPrescribedHTML(window._bhrtItems||[]);
+  window._avsHTML=buildBhrtAVS(window._bhrtItems||[], window._planCtx);
+  if(window._activeDoc==='avs'){ document.getElementById('out').innerHTML=window._avsHTML; }
+}
+function buildBhrtAVS(items, ctx){
+  ctx=ctx||{}; var pn=ctx.pn||'This patient';
+  var sel=(items||[]).filter(function(it){return window._bhrtRx&&window._bhrtRx[it.id];});
+  var fu=new Date(Date.now()+63*864e5).toLocaleDateString(); // ~9 weeks
+  var medBlock = sel.length
+    ? ('<div class="grp">Your medications</div>'+sel.map(function(it){return '<div class="rx"><b>'+esc(it.med)+'</b><br>'+esc(it.how)+'</div>';}).join(''))
+    : '<div class="grp">Your medications</div><div class="rx" style="border-color:#6e5a1c;color:var(--amber)">Your provider will confirm your exact medications and doses. <span style="color:var(--dim)">(None checked in the plan yet.)</span></div>';
+  return '<div class="poc">'+
+    '<div class="noprint" style="margin-bottom:12px"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs</button></div>'+
+    docHeader('After-Visit Summary')+
+    '<h2>After-Visit Summary</h2><div class="meta">A simple summary of your menopause plan and next steps.</div>'+
+    medBlock+
+    '<div class="grp">Your next visit</div><div class="rx">Please follow up in about <b>8–12 weeks</b> (around <b>'+esc(fu)+'</b>). We\'ll see how your symptoms are responding, check for side effects, and adjust if needed.</div>'+
+    '<div class="grp">Good to know</div><div class="rx">Hot flashes and sleep often improve in <b>2–4 weeks</b>; mood over <b>4–8 weeks</b>. A little spotting can happen early. <b>Any new or heavy vaginal bleeding — call the clinic</b> so we can check it.</div>'+
+    '<div class="grp">When to contact the clinic</div><div class="rx"><b>Call 911</b> for chest pain, trouble breathing, sudden weakness or numbness, trouble speaking, or a sudden severe headache.<br>Call the clinic for: new or heavy vaginal bleeding, a painful swollen leg, a breast lump, yellowing of skin/eyes, or any effect that worries you.</div>'+
+    '<div class="sig" style="margin-top:16px">Generated by <b>AllyOS</b> for '+esc(pn)+'. This plain-language summary does not replace your provider\'s instructions; your treating clinician directs all decisions about starting, changing, or stopping therapy.</div>'+
+    '<div class="noprint" style="margin-top:14px"><button class="gen" onclick="window.print()">🖨 Print / export summary</button></div>'+
+  '</div>';
+}
+function buildBhrtEdu(ctx){
+  ctx=ctx||{}; var pn=ctx.pn||'you';
+  var goalsSel=Object.keys(gl).filter(function(k){return gl[k];}).map(function(k){return GOALS[k];});
+  var TL=[['Hot flashes / night sweats','2–4 weeks'],['Sleep','2–4 weeks'],['Mood / anxiety','4–8 weeks'],['Vaginal / urinary symptoms','4–12 weeks'],['Sexual desire','variable, often months'],['Bone protection','long-term']];
+  return '<div class="poc">'+
+    '<div class="noprint" style="margin-bottom:12px"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs</button></div>'+
+    docHeader('Patient Education Guide')+
+    '<h2>Understanding Your Menopause Hormone Plan</h2><div class="meta">This guide explains your personalized plan — the goals, what may improve over time, and why follow-up matters. It does not replace your provider\'s advice.</div>'+
+    '<div class="grp">1 · Why was this recommended?</div><div class="rx">Your plan is based on <b>your symptoms</b> — how bothersome they are — together with a safety review. Menopause hormone therapy is a personal, shared decision; it is not right for everyone, and your provider tailored it to you.</div>'+
+    '<div class="grp">2 · What are we trying to improve?</div><div class="rx">'+(goalsSel.length?('Your goals include:<br>'+goalsSel.map(function(x){return '✓ '+esc(x);}).join('<br>')):'The symptoms you rated as most bothersome.')+'</div>'+
+    '<div class="grp">3 · What might improve, and when?</div><div class="rx" style="margin-bottom:6px"><b>Many women notice improvement in:</b></div>'+tbl2(TL,['Symptom','Typical timeline*'])+'<div style="font-size:11px;color:var(--muted);margin-top:6px">*Approximate; individual results vary.</div>'+
+    '<div class="grp">4 · Using it safely</div><div class="rx">We usually prefer <b>estrogen through the skin</b> (patch/gel) — a lower clot risk than pills. If you still have your uterus and take estrogen, you also take <b>progesterone</b> to protect the uterine lining. We use <b>FDA-approved</b> options first. Tell us about any new bleeding, leg swelling, or breast changes.</div>'+
+    '<div class="grp">5 · Why follow-up matters</div><div class="rx">Follow-up lets us see whether your symptoms are improving, adjust the dose, catch side effects early, and decide how long to continue.</div>'+
+    '<div class="grp">6 · Questions to bring to your next visit</div><div class="rx">· Are your hot flashes / sleep better?<br>· How is your mood?<br>· Any bleeding, breast tenderness, or other side effects?<br>· Are your goals changing?</div>'+
+    '<div class="sig" style="margin-top:16px"><b>Important information.</b> This guide is generated by AllyOS for education after your provider developed your plan. Menopause hormone therapy is individualized; benefits and risks depend on your age, time since menopause, health history, and the type / route / dose used. It is informational only and does not replace your provider\'s judgment.</div>'+
+    '<div class="noprint" style="margin-top:14px"><button class="gen" onclick="window.print()">🖨 Print / export guide</button></div>'+
+  '</div>';
+}
+function bhrtRenderDocTabs(){
+  var tabs=document.getElementById('doctabs'); if(!tabs)return; tabs.style.display='flex';
+  function t(id,label){return '<button class="gen" style="margin-top:0;'+(window._activeDoc===id?'background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a':'background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)')+'" onclick="bhrtShowDoc(\''+id+'\')">'+label+'</button>';}
+  tabs.innerHTML=t('poc','📋 Provider POC')+t('edu','📖 Patient Education')+t('avs','👤 After-Visit Summary');
+}
+function bhrtShowDoc(id){ window._activeDoc=id; document.getElementById('out').innerHTML=(id==='avs'?window._avsHTML:id==='edu'?window._eduHTML:window._pocHTML); bhrtRenderDocTabs(); document.getElementById('out').scrollIntoView({behavior:'smooth'}); }
+
 function generate(){
   var out=document.getElementById('out');
   var anyFlag=Object.keys(fl).some(function(k){return fl[k];});
   var sg=safetyRouteGate();
   if(anyFlag || sg.status==='red'){
     var redWhy = sg.status==='red' ? ('<div class="rxc" style="margin-top:8px">Safety gate (RED): '+sg.reds.join(' ')+'</div>') : '';
+    var _dt0=document.getElementById('doctabs'); if(_dt0)_dt0.style.display='none';
     out.innerHTML='<div class="poc">'+'<div class="noprint" style="margin-bottom:12px"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs / add more data</button></div>'+docHeader('BHRT — Wellness summary &amp; referral')+'<h2>Wellness summary &amp; referral</h2><div class="red"><b>'+(anyFlag?'Red flag present':'Severe safety flag (BP)')+' — hormone-medication recommendations are suppressed.</b> Generate a wellness summary and route for evaluation/clearance or co-management before any hormone therapy.</div>'+redWhy+providerSig()+'<div class="noprint" style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs / add more data</button><button class="gen" onclick="window.print()">🖨 Print / export</button></div></div>';
     out.scrollIntoView({behavior:'smooth'});return;
   }
   var ds=domains().filter(function(d){return d.s>0;}).sort(function(a,b){return b.s-a.s;});
-  if(!ds.length){out.innerHTML='<div class="poc"><div class="red" style="background:#0e2436;border-color:var(--line2);color:var(--muted)">Rate at least one symptom to generate a plan.</div></div>';return;}
+  if(!ds.length){var _dt1=document.getElementById('doctabs'); if(_dt1)_dt1.style.display='none'; out.innerHTML='<div class="poc"><div class="red" style="background:#0e2436;border-color:var(--line2);color:var(--muted)">Rate at least one symptom to generate a plan.</div></div>';return;}
   var map=ds.map(function(d){var p=pri(d.s);
     return '<div class="row"><span class="pri '+p[0]+'">'+p[1]+'</span><div><div style="font-size:13.5px;color:var(--ink)">'+esc(d.name)+' <span style="color:var(--muted)">· severity '+d.s+'/4</span></div><div style="font-size:11.5px;color:var(--muted);margin-top:2px">'+esc(d.mech)+'</div></div></div>';
   }).join('');
   var goals=Object.keys(gl).filter(function(k){return gl[k];}).map(function(k){return GOALS[k];});
+  var pn=(((document.getElementById('pocName')||{}).value)||'').trim()||'This patient';
+  var dob=((document.getElementById('pocDob')||{}).value)||'';
+  var burden=ITEMS.reduce(function(a,it){return a+(sev[it.k]||0);},0);
+  var stageV=(document.getElementById('stage')||{}).value||'menopause transition';
+  var utV=(document.getElementById('uterus')||{}).value||'—';
+  var items=bhrtRxItems(); window._bhrtItems=items;
+  var snapBits=['Stage: '+esc(stageV),'Uterus: '+esc(utV)];
+  if(goals.length) snapBits.push('Goals: '+esc(goals.join(', ')));
+  snapBits.push('Symptom burden '+burden+'/44'); snapBits.push('Safety / route: '+sg.status.toUpperCase());
+  var patientSnapshot='<div class="rxc" style="border-color:var(--teal);color:#bfeae6;background:#0e2a2a22"><b style="color:var(--teal)">'+esc(pn)+'</b>'+(dob?(' · '+esc(dob)):'')+' — '+snapBits.join(' · ')+'</div>';
+  var conclusion='<div class="rx"><b style="color:var(--green)">Clinical conclusion — candidate for symptom-based menopause therapy.</b> FDA-approved options first, transdermal-preferred; the treating provider reviews &amp; signs. <span style="color:var(--muted)">(Safety / route gate: '+sg.status.toUpperCase()+'.)</span></div>';
   out.innerHTML='<div class="poc">'+
     '<div class="noprint" style="margin-bottom:12px"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs / add more data</button></div>'+
     docHeader('BHRT Plan of Care')+
-    '<h2>BHRT Plan of Care</h2><div class="meta">Symptom-based · '+esc(document.getElementById('stage').value||'menopause transition')+' · uterus: '+esc(document.getElementById('uterus').value||'—')+(goals.length?' · goals: '+esc(goals.join(', ')):'')+'</div>'+
+    '<h2>BHRT Plan of Care</h2><div class="meta">Symptom-based · '+esc(stageV)+' · uterus: '+esc(utV)+(goals.length?' · goals: '+esc(goals.join(', ')):'')+'</div>'+
+    patientSnapshot+
+    conclusion+
     '<div class="grp" style="margin-top:14px">Symptom map (severity-ranked)</div><div class="map">'+map+'</div>'+
     sg.panel+
     '<div class="grp">Treatment plan (starting regimens)</div>'+treatmentPlan()+
+    bhrtRxSelectorHTML(items)+
+    '<div class="rx" id="bhrtRxLine" style="font-size:13px;border-color:#1e6e4a;background:#0e2a1f22">'+bhrtPrescribedHTML(items)+'</div>'+
     '<div class="grp">Monitoring &amp; titration — "if symptoms persist"</div>'+titrationBlock()+
     '<div class="grp">Monitoring cadence &amp; bleeding pathway</div>'+cadenceBlock()+
     (score(['sex'])>=2?('<div class="grp">DHEA (adjunct)</div>'+dheaNote()):'')+
     '<div class="grp">Lifestyle (advisory)</div>'+lifestyleBlock()+
     confLabs()+
-    crosswalkBlock()+
+    '<div class="noprint">'+crosswalkBlock()+'</div>'+
     '<div class="rxc" style="margin-top:10px">Reminder: <b>symptom-based</b> decision support per NAMS 2022. Labs confirm and monitor — they do not determine whether to treat symptoms. <b>Doses, formulations, titration, and pharmacy are the provider\'s decision and signature.</b></div>'+
     providerSig()+
     '<div class="noprint" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button class="gen" style="background:#0e1c2e;color:var(--teal);border:1px solid var(--teal)" onclick="document.getElementById(\'entry\').scrollIntoView({behavior:\'smooth\'})">← Edit inputs / add more data</button><button class="gen" onclick="window.print()">🖨 Print / export Plan of Care</button></div>'+
   '</div>';
+  window._pocHTML=out.innerHTML;
+  window._planCtx={pn:pn, dob:dob};
+  window._avsHTML=buildBhrtAVS(items, window._planCtx);
+  window._eduHTML=buildBhrtEdu(window._planCtx);
+  window._activeDoc='poc'; bhrtRenderDocTabs();
   out.scrollIntoView({behavior:'smooth'});
 }
 </script>
