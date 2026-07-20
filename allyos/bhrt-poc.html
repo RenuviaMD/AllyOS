@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BHRT Plan of Care · Generator (DRAFT) · AllyOS · RenuviaMD®</title>
+<title>BHRT Plan of Care · Generator · v1.5 (MD-signed) · AllyOS · RenuviaMD®</title>
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="allyos-theme.css">
 <link rel="stylesheet" href="poc-print.css">
@@ -244,7 +244,7 @@ function treatmentPlan(){
       '<div class="rxc" style="margin-top:8px">Formulation per ISSWSH 2021: use a <b>government-approved male transdermal testosterone product dosed to the female physiologic premenopausal range</b>; total testosterone is a monitoring baseline, <b>not</b> a diagnostic. <b>Compounded testosterone is not recommended</b> for women (insufficient efficacy/safety data). <span style="color:#9a8fc0">ISSWSH 2021, PMID 33792440.</span></div></div>');
   }
   if(vmsS>=2){
-    blocks.push('<div class="rx" style="border-color:#3a4452;background:#0e243622"><b>If MHT declined / not used (non-hormonal VMS):</b> fezolinetant 45 mg (FDA; LFTs at <b>baseline, then months 1, 2, 3, 6, and 9</b>, plus liver-symptom counseling — per the updated FDA Veozah label), elinzanetant (NK1/NK3, <b>VERIFY-AT-LOCK</b> vs the Lynkuet PI — hepatic thresholds + pregnancy contraindication), paroxetine 7.5 mg (FDA for VMS) or SSRI/SNRI, gabapentin (nocturnal/sleep-dominant), oxybutynin; CBT / clinical hypnosis for bother/sleep. Do NOT position wild yam / unstandardized "hormone-balancing" creams as core VMS therapy. <span style="color:var(--muted)">NAMS 2023 nonhormone · <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=cae9f798-24f9-4580-a4fc-e6c710cbda3c" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed Veozah ✓</a> (LFT schedule confirmed) · Lynkuet PI (verify)</span></div>');
+    blocks.push('<div class="rx" style="border-color:#3a4452;background:#0e243622"><b>If MHT declined / not used (non-hormonal VMS):</b> fezolinetant 45 mg (FDA; LFTs at <b>baseline, then months 1, 2, 3, 6, and 9</b>, plus liver-symptom counseling — per the updated FDA Veozah label), elinzanetant (NK1/NK3 — verify hepatic monitoring &amp; pregnancy contraindication against current FDA labeling), paroxetine 7.5 mg (FDA for VMS) or SSRI/SNRI, gabapentin (nocturnal/sleep-dominant), oxybutynin; CBT / clinical hypnosis for bother/sleep. Do NOT position wild yam / unstandardized "hormone-balancing" creams as core VMS therapy. <span style="color:var(--muted)">NAMS 2023 nonhormone · <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=cae9f798-24f9-4580-a4fc-e6c710cbda3c" target="_blank" rel="noopener" style="color:#7fb0c8">DailyMed Veozah ✓</a> (LFT schedule confirmed) · elinzanetant per current FDA labeling</span></div>');
   }
   if(!blocks.length) blocks.push('<div class="rx" style="color:var(--muted)">No pharmacologic hormone indication from the current symptom profile — see Lifestyle. Reassess as symptoms evolve.</div>');
   return blocks.join('');
