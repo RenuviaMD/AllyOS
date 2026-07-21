@@ -218,4 +218,30 @@ function renderModule(){
 
 getJSON('../protocols/peptide-module.json').then(function(j){MOD=j;renderModule();});
 </script>
+
+<!-- Guided tour (Tier-1 demo): activates only on ?tour=1 -->
+<script>
+window.ALLYOS_TOUR_TITLE="Peptides — prescriber guardrails";
+window.ALLYOS_TOUR_SEED=function(){
+  function setV(id,v){var el=document.getElementById(id); if(!el)return; el.value=v; el.dispatchEvent(new Event('change',{bubbles:true}));}
+  setV('role','physician'); try{ if(window.gate) gate(); }catch(e){}
+  // agent options render after the module JSON fetch — poll, then select the first real agent
+  (function trySeed(n){
+    var opts=document.querySelectorAll('#agent option'), opt=null;
+    for(var j=0;j<opts.length;j++){ if(opts[j].value){ opt=opts[j]; break; } }
+    if(opt){ var a=document.getElementById('agent'); a.value=opt.value; try{ if(window.renderAgent) renderAgent(); }catch(e){} return; }
+    if(n<24) setTimeout(function(){trySeed(n+1);},250);
+  })(0);
+};
+window.ALLYOS_TOUR_STEPS=[
+  {intro:true,title:"Peptides — a 90-second guided preview",body:"Built for the category's scrutiny, on <b>sample data</b>. Advisory only — the prescriber owns every decision. Use <b>Next ›</b>."},
+  {sel:'#roleBlock',title:"1 · Prescriber authority first",body:"Scope is set by the prescriber's role before anything is selected — the tool won't let a role act outside its authority."},
+  {sel:'#hardScreen',title:"2 · Metabolic / GLP-1 red-flag screen",body:"Safety screening comes before agent selection. Hard flags stop the pathway pending review."},
+  {sel:'#agentOut',title:"3 · Agent → grade → consent tier",body:"Pick the peptide and the tool auto-derives its evidence grade, consent tier, contraindications, and monitoring."},
+  {sel:'#glp1Rules',title:"4 · GLP-1 / incretin guardrails",body:"Category-specific incretin rules apply automatically — the guardrails the space is scrutinized for."},
+  {sel:'#override',title:"5 · Override policy",body:"Every exception is explicit and documented — nothing happens silently or off the record."},
+  {cta:true,title:"That's the guided preview",body:"Want it on <b>your</b> formulary and prescriber roster? Book a 1:1 and we'll run it live with you."}
+];
+</script>
+<script src="tour.js"></script>
 </body></html>

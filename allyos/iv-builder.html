@@ -175,7 +175,8 @@ button.ask:disabled{opacity:.5;cursor:default}
 </div>
 <script>
 var MOD=null, BAG=[], MENU=[], timer=null, remain=0, total=0, lastMon=0;
-if(window.AllyOSAuth){ AllyOSAuth.guard(['provider','admin']); }
+var IS_TOUR=location.search.indexOf('tour=1')>-1||location.search.indexOf('demo=1')>-1;
+if(window.AllyOSAuth && !IS_TOUR){ AllyOSAuth.guard(['provider','admin']); }
 
 fetch('../protocols/iv-module.json').then(function(r){return r.json()}).then(function(d){
   MOD=d; MENU=d.ingredients||[];
@@ -462,4 +463,30 @@ function parseTimeMin(s){ if(!s)return null; s=(''+s).toLowerCase();
   return null; }
 function esc(s){return(''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>
+
+<!-- Guided tour (Tier-1 demo): activates only on ?tour=1 -->
+<script>
+window.ALLYOS_TOUR_TITLE="IV / IM Drip Builder";
+window.ALLYOS_TOUR_SEED=function(){
+  function setV(id,v){var el=document.getElementById(id); if(!el)return; el.value=v; el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true}));}
+  // templates render after the module JSON fetch resolves — poll, then load the first sample stack
+  (function trySeed(n){
+    var btn=document.querySelector('#templates button');
+    if(btn){ try{ btn.click(); }catch(e){}
+      setV('visitType','in'); setV('gfeName','M. Alvarez · MX-4821'); setV('gfeProvider','Clinic provider'); return; }
+    if(n<24) setTimeout(function(){trySeed(n+1);},250);
+  })(0);
+};
+window.ALLYOS_TOUR_STEPS=[
+  {intro:true,title:"IV / IM Drip Builder — a 90-second guided preview",body:"Wellness IV/IM only, on <b>sample data</b>. Advisory decision-support — the provider owns every order. Use <b>Next ›</b>."},
+  {sel:'#templates',title:"1 · Start from a protocol template",body:"Begin from a vetted stack or build custom. We've loaded a sample template to show the flow."},
+  {sel:'#menu',title:"2 · Add from the formulary",body:"Ingredients come from the module formulary — each with route and reference context. Nothing is invented."},
+  {sel:'#bag',title:"3 · The bag builds live",body:"Additives, doses, and volume assemble as you go — editable line by line."},
+  {sel:'#dripOut',title:"4 · Drip rate, calculated",body:"Base volume, drop factor, and infusion time compute the drip rate automatically — no manual math."},
+  {sel:'#gfeName',title:"5 · Good-Faith Exam first",body:"The GFE is captured before the order — the standard the category requires. Blank stays blank."},
+  {sel:'#disclaimer',title:"6 · A clean, chart-ready record",body:"The result is an advisory record with the right disclaimers — ready to file or scan into the EMR."},
+  {cta:true,title:"That's the guided preview",body:"Want it on <b>your</b> formulary and workflow? Book a 1:1 and we'll run it live with you."}
+];
+</script>
+<script src="tour.js"></script>
 </body></html>
