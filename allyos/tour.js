@@ -66,7 +66,7 @@
     var dock = document.createElement('div');
     dock.style.cssText = 'position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:2147483001;width:min(540px,92vw);'
       + 'background:' + BG + ';border:1px solid ' + LINE + ';border-radius:16px;padding:17px 19px 15px;'
-      + 'box-shadow:0 18px 50px rgba(0,0,0,.55);font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:' + INK;
+      + 'box-shadow:0 18px 50px rgba(0,0,0,.55);font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:' + INK + ';max-height:min(74vh,560px);overflow:auto';
     dock.innerHTML =
       '<div style="display:flex;align-items:center;gap:9px;margin-bottom:7px">'
         + '<span data-t="dot" style="width:7px;height:7px;border-radius:50%;background:' + TEAL + '"></span>'
@@ -75,6 +75,7 @@
       + '</div>'
       + '<div data-t="title" style="font:750 16px/1.25 inherit;margin-bottom:5px"></div>'
       + '<div data-t="body" style="font:400 13.5px/1.55 inherit;color:' + MUT + '"></div>'
+      + '<div data-t="opts" style="margin-top:10px;display:none"></div>'
       + '<div data-t="cta" style="margin-top:12px;display:none"></div>'
       + '<div data-t="nav" style="display:flex;gap:9px;justify-content:space-between;align-items:center;margin-top:14px">'
         + '<button data-t="prev" style="background:transparent;border:1px solid ' + LINE + ';color:' + MUT + ';font:600 13px inherit;padding:8px 14px;border-radius:9px;cursor:pointer">‹ Back</button>'
@@ -108,6 +109,15 @@
       q('title').textContent = s.title || '';
       q('body').innerHTML = s.body || '';
       q('prev').style.visibility = i === 0 ? 'hidden' : 'visible';
+
+      var opts = q('opts');
+      if (s.options && s.options.length) {
+        opts.style.display = 'block';
+        opts.innerHTML = '<div style="font:700 9.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.1em;color:' + MUT + ';text-transform:uppercase;margin-bottom:2px">' + (s.optsLabel || 'What you configure here') + '</div>'
+          + s.options.map(function (o) {
+              return '<div style="font:400 12.5px/1.4 -apple-system,Segoe UI,sans-serif;color:' + INK + ';padding:6px 10px;margin-top:6px;background:#0e1c2e;border:1px solid ' + LINE + ';border-radius:8px">' + o + '</div>';
+            }).join('');
+      } else { opts.style.display = 'none'; }
 
       var cta = q('cta');
       if (s.cta) {
