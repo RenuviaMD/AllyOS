@@ -122,7 +122,7 @@
 <script src="allyos-auth.js"></script>
 <script src="lab-import.js"></script>
 <script>
-var IS_DEMO=location.search.indexOf('demo=1')>-1; // public no-signup demo mode
+var IS_DEMO=location.search.indexOf('demo=1')>-1||location.search.indexOf('tour=1')>-1; // public no-signup demo / guided-tour mode
 if(window.AllyOSAuth && !IS_DEMO){AllyOSAuth.guard(['provider','admin','nurse']);}
 if(IS_DEMO){document.addEventListener('DOMContentLoaded',function(){var r=document.querySelector('.top .right');if(r)r.innerHTML='<a href="book-demo.html" style="color:#04121a;background:linear-gradient(120deg,var(--teal),var(--green));font-weight:800;padding:7px 13px;border-radius:8px;text-decoration:none">📅 Book a 1:1 live demo</a>';});}
 function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -556,4 +556,28 @@ function generate(){
   out.scrollIntoView({behavior:'smooth'});
 }
 </script>
+
+<!-- Guided tour (Tier-1 demo): activates only on ?tour=1 -->
+<script>
+window.ALLYOS_TOUR_TITLE="Women's BHRT (Menopause)";
+window.ALLYOS_TOUR_SEED=function(){
+  function setV(id,v){var el=document.getElementById(id); if(!el)return; el.value=v; el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true}));}
+  setV('pocName','R. Delgado · WX-2207'); setV('pocDob','52'); setV('age','52');
+  setV('uterus','intact'); setV('stage','post'); setV('bmi','26.5'); setV('sbp','124'); setV('dbp','78');
+  // symptom-based (NAMS 2022) — rate a realistic moderate profile
+  try{ ['hot','sleep','vag','sex','anx','irrit','cog','msk','bladder'].forEach(function(k){ window.sev[k]= (k==='vag'||k==='hot')?3:2; }); if(window.renderMrs) renderMrs(); }catch(e){}
+  try{ if(window.generate) generate(); }catch(e){}
+};
+window.ALLYOS_TOUR_STEPS=[
+  {intro:true,title:"Women's BHRT — a 90-second guided preview",body:"Menopause hormone therapy on <b>sample data</b>, NAMS 2022. The treating provider owns and signs every decision. Use <b>Next ›</b>."},
+  {sel:'#flags',title:"1 · Red-flag screen first",body:"Absolute contraindications (undiagnosed bleeding, active clot or breast cancer…) are screened before anything. A red flag <b>stops the plan</b>."},
+  {sel:'#uterus',title:"2 · Context sets the rules",body:"Uterus status and menopause stage drive the plan — an <b>intact uterus means progesterone is required</b> for endometrial protection."},
+  {sel:'#mrsPanel',title:"3 · Symptom-based, per NAMS 2022",body:"The plan is built from <b>symptom severity</b>, not labs. Labs confirm and monitor — they never decide whether to treat."},
+  {sel:'#out',title:"4 · The provider conclusion",body:"Candidacy, <b>transdermal-preferred</b> route, FDA-before-compounded, uterus-aware progesterone — with the citations the physician signs."},
+  {sel:'#bhrtRxLine',title:"5 · Regimen after the decision",body:"The prescriber picks the starting regimen <b>after</b> the decision; the plan and after-visit summary update to match."},
+  {sel:'#doctabs',title:"6 · One intake → three documents",body:"A <b>provider POC</b>, a <b>patient-education guide</b>, and an <b>after-visit summary</b> from the same encounter."},
+  {cta:true,title:"That's the guided preview",body:"Want to see it on <b>your</b> workflow — your protocols, letterhead, and formulary? Book a 1:1 and we'll run it live with you."}
+];
+</script>
+<script src="tour.js"></script>
 </body></html>

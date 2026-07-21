@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demo Center — see each line run · AllyOS · RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
+<style>
+  :root{--bg:#060a12;--card:#0b1422;--line:#1b2839;--line2:#283a52;--ink:#eaf3f5;--muted:#7f96ab;--dim:#5a6b7d;--teal:#2ee6d6;--green:#2bbf76;--gold:#e7b84e;--blue:#6fb7e0;--pink:#e59ac0}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:radial-gradient(1200px 600px at 50% -10%,#0d1a2b,transparent),var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;min-height:100vh}
+  .bar{display:flex;align-items:center;gap:12px;padding:11px 18px;background:#0a1120;border-bottom:1px solid var(--line)}
+  .bar .brand{display:inline-flex;align-items:center;gap:8px;font-weight:700;text-decoration:none;color:var(--ink)}
+  .bar .brand img{width:26px;height:26px;border-radius:50%}.bar .brand b{color:var(--gold)}.bar .brand span{color:var(--teal)}
+  .bar .sp{margin-left:auto}
+  .bar a.book{background:linear-gradient(120deg,var(--teal),var(--green));color:#04140e;font-weight:700;font-size:.85rem;text-decoration:none;padding:8px 15px;border-radius:9px}
+  .wrap{max-width:1000px;margin:0 auto;padding:38px 20px 80px}
+  h1{font-size:clamp(1.6rem,4vw,2.3rem);font-weight:750;text-align:center}
+  .lead{color:var(--muted);text-align:center;max-width:60ch;margin:14px auto 0;line-height:1.55}
+  .how{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:20px auto 0;max-width:640px}
+  .how span{font-size:.8rem;color:var(--muted);border:1px solid var(--line2);border-radius:20px;padding:5px 12px}
+  .how b{color:var(--teal)}
+  .cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-top:34px}
+  @media(max-width:820px){.cards{grid-template-columns:1fr}}
+  .c{display:flex;flex-direction:column;gap:11px;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--line2);border-radius:18px;padding:24px 22px}
+  .c .sym{font-size:2rem;line-height:1}
+  .c.iv{border-color:rgba(111,183,224,.34)} .c.iv .sym{color:var(--blue)}
+  .c.pep{border-color:rgba(43,191,118,.34)} .c.pep .sym{color:var(--green)}
+  .c.hor{border-color:rgba(229,154,192,.34)} .c.hor .sym{color:var(--pink)}
+  .c h2{font-size:1.2rem;font-weight:700}
+  .c .d{color:var(--muted);font-size:.88rem;line-height:1.5;flex:1}
+  .c .shows{font-size:.78rem;color:var(--dim);line-height:1.5;border-top:1px solid var(--line);padding-top:10px}
+  .c .shows b{color:var(--muted)}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+  .btn{flex:1;text-align:center;text-decoration:none;font-weight:700;font-size:.86rem;padding:11px 12px;border-radius:11px;white-space:nowrap}
+  .btn.tour{background:linear-gradient(120deg,var(--teal),var(--green));color:#04140e}
+  .btn.g{background:transparent;border:1px solid var(--line2);color:var(--muted)}
+  .btn.hor{background:linear-gradient(120deg,#e59ac0,#c98bd6);color:#1a0e18}
+  .soon{display:inline-block;font-size:.68rem;font-weight:700;color:var(--gold);border:1px solid rgba(231,184,78,.4);background:rgba(231,184,78,.08);border-radius:20px;padding:2px 9px}
+  .band{margin-top:32px;text-align:center;background:linear-gradient(180deg,rgba(46,230,214,.06),transparent);border:1px solid var(--line);border-radius:14px;padding:22px}
+  .band a{display:inline-block;margin-top:12px;background:linear-gradient(120deg,var(--teal),var(--green));color:#04140e;font-weight:700;text-decoration:none;padding:12px 22px;border-radius:11px}
+  .fine{color:var(--dim);font-size:.76rem;text-align:center;margin-top:24px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="bar">
+  <a class="brand" href="index.html"><img src="ally-avatar-64.png" alt="Ally">Renuvia<b>MD</b>® <span>AllyOS</span></a>
+  <span class="sp"></span>
+  <a class="book" href="book-demo.html">📅 Book a 1:1 live demo</a>
+</div>
+<div class="wrap">
+  <h1>Demo Center</h1>
+  <p class="lead">See exactly how each line runs — a guided, on-rails walkthrough of the real product. Like what you see? Request a live demo and we'll set it up on your own workflow.</p>
+  <div class="how">
+    <span><b>Guided</b> — on rails, ~90 sec</span>
+    <span><b>Sample data</b> — no PHI, nothing saved</span>
+    <span><b>No signup</b></span>
+    <span><b>Then</b> → request a live demo</span>
+  </div>
+
+  <div class="cards">
+
+    <div class="c iv">
+      <span class="sym">💧</span>
+      <h2>IV / IM</h2>
+      <div class="d">Drip &amp; injection builder — dosing, compatibility, inventory, and a clean chart-ready record.</div>
+      <div class="shows"><b>The tour shows:</b> intake → formulation guardrails → the order → the documented note.</div>
+      <div class="btnrow">
+        <a class="btn g" href="book-demo.html">Guided tour <span class="soon">soon</span></a>
+        <a class="btn tour" href="book-demo.html">Request a live demo</a>
+      </div>
+    </div>
+
+    <div class="c pep">
+      <span class="sym">🧬</span>
+      <h2>Peptides</h2>
+      <div class="d">Peptide protocols with the compliance guardrails the category needs — built for scrutiny.</div>
+      <div class="shows"><b>The tour shows:</b> candidacy → protocol selection → safety flags → patient plan.</div>
+      <div class="btnrow">
+        <a class="btn g" href="book-demo.html">Guided tour <span class="soon">soon</span></a>
+        <a class="btn tour" href="book-demo.html">Request a live demo</a>
+      </div>
+    </div>
+
+    <div class="c hor">
+      <span class="sym">⚕️</span>
+      <h2>Hormones</h2>
+      <div class="d">Testosterone optimization (Him) and menopause BHRT (Her) — decision support that cites the evidence and never invents.</div>
+      <div class="shows"><b>The tour shows:</b> intake → safety gate → the decision → prescription → 3 documents.</div>
+      <div class="btnrow">
+        <a class="btn hor" href="mens-poc.html?tour=1">♂ Him — take the tour →</a>
+        <a class="btn hor" href="bhrt-poc.html?tour=1">♀ Her — take the tour →</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="band">
+    <b>Want a guided walkthrough for your clinic?</b>
+    <div style="color:var(--muted);font-size:.9rem;margin-top:6px">See it run on your workflow, with your protocols and letterhead — and talk medical-director options.</div>
+    <a href="book-demo.html">📅 Book a 1:1 live demo</a>
+  </div>
+
+  <p class="fine">Demos are illustrative clinical decision-support running on sample data — advisory only, not a prescription. PHI stays on the device; nothing is transmitted or saved. The treating provider owns and signs every decision.</p>
+</div>
+</body>
+</html>

@@ -178,7 +178,7 @@
 <script src="allyos-auth.js"></script>
 <script src="lab-import.js"></script>
 <script>
-var IS_DEMO=location.search.indexOf('demo=1')>-1; // public no-signup demo mode
+var IS_DEMO=location.search.indexOf('demo=1')>-1||location.search.indexOf('tour=1')>-1; // public no-signup demo / guided-tour mode
 if(window.AllyOSAuth && !IS_DEMO){AllyOSAuth.guard(['provider','admin','nurse']);}
 if(IS_DEMO){document.addEventListener('DOMContentLoaded',function(){var r=document.querySelector('.top .right');if(r)r.innerHTML='<a href="book-demo.html" style="color:#04121a;background:linear-gradient(120deg,var(--teal),var(--green));font-weight:800;padding:7px 13px;border-radius:8px;text-decoration:none">📅 Book a 1:1 live demo</a>';});}
 function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -819,4 +819,35 @@ function renderDocTabs(){
 }
 function showDoc(id){ window._activeDoc=id; document.getElementById('out').innerHTML=(id==='avs'?window._avsHTML:id==='edu'?window._eduHTML:window._pocHTML); renderDocTabs(); document.getElementById('out').scrollIntoView({behavior:'smooth'}); }
 </script>
+
+<!-- Guided tour (Tier-1 demo): activates only on ?tour=1 -->
+<script>
+window.ALLYOS_TOUR_TITLE="Men's Hormone Optimization";
+window.ALLYOS_TOUR_SEED=function(){
+  function setV(id,v){var el=document.getElementById(id); if(!el)return; el.value=v; el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true}));}
+  // A realistic, confirmed low-T candidate — sample data only
+  setV('pocName','M. Alvarez · MX-4821'); setV('pocDob','47');
+  setV('pocWt','198'); setV('pocHtFt','5'); setV('pocHtIn','10');
+  setV('tt','286'); setV('ft','5.9'); setV('bt','92'); setV('shbg','44');
+  setV('confirmed','yes');
+  setV('hct','44.2'); setV('sbp','128'); setV('dbp','80'); setV('psa','0.9'); setV('stopbang','2'); setV('ipss','6'); setV('psarisk','no');
+  setV('e2','22'); setV('lh','4.1'); setV('fsh','3.6'); setV('prl','9'); setV('hgb','15.1');
+  setV('a1c','5.6'); setV('glu','94'); setV('apob','88'); setV('egfr','92'); setV('alt','26'); setV('tsh','2.2');
+  // rate a realistic symptom profile (drives the plan)
+  try{ window.sev.sexual=3; window.sev.energy=3; window.sev.mood=2; window.sev.sleep=2; window.sev.body=2; window.sev.recovery=2; if(window.renderPheno) renderPheno(); }catch(e){}
+  try{ if(window.updateBMI) updateBMI(); }catch(e){}
+  try{ if(window.generate) generate(); }catch(e){}
+};
+window.ALLYOS_TOUR_STEPS=[
+  {intro:true,title:"Men's Hormone Optimization — a 90-second guided preview",body:"This runs on <b>sample data</b> — the treating provider owns and signs every decision. Use <b>Next ›</b> (or → key) to walk the flow."},
+  {sel:'#entry',title:"1 · Real intake, nothing invented",body:"The plan is built <b>only</b> from entered data — height, weight, BMI, symptoms, goals. Blank stays blank; the tool never fabricates a finding."},
+  {sel:'#gates',title:"2 · Safety gates come first",body:"Absolute contraindications are screened before anything else. A red flag here <b>stops the start</b> — the tool won't route around it."},
+  {sel:'#confirmed',title:"3 · Confirm before treating",body:"Low testosterone must be confirmed on a <b>second morning fasting panel</b> — the Endocrine Society standard — before any therapy is offered."},
+  {sel:'#out',title:"4 · The provider conclusion",body:"This is what the physician reviews and signs: the decision, the reasoning, physiologic-range dosing, and the <b>citations</b> behind each step."},
+  {sel:'#rxPick',title:"5 · Prescription after the decision",body:"The prescriber selects the regimen <b>only after</b> the clinical decision — and the plan + after-visit summary update live to match."},
+  {sel:'#doctabs',title:"6 · One intake → three documents",body:"The same encounter produces a <b>provider POC</b>, a <b>patient-education guide</b>, and an <b>after-visit summary</b> — no re-typing."},
+  {cta:true,title:"That's the guided preview",body:"Want to see it on <b>your</b> workflow — your clinic's protocols, letterhead, and lines? Book a 1:1 and we'll run it live with you."}
+];
+</script>
+<script src="tour.js"></script>
 </body></html>
