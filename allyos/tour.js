@@ -39,6 +39,23 @@
     st.textContent = '.top{top:40px !important}';
     document.head.appendChild(st);
 
+    // keep the visitor inside the guided tour — block any click that would navigate
+    // to a login-walled app page (dashboard, chairside, login, etc.). Allow the tour's
+    // own CTAs (book-demo), the exit link (demo-center), external, and in-page anchors.
+    document.addEventListener('click', function (e) {
+      var a = e.target && e.target.closest ? e.target.closest('a') : null;
+      if (!a) return;
+      var href = a.getAttribute('href') || '';
+      var oc = a.getAttribute('onclick') || '';
+      if (/book-demo|demo-center/.test(href)) return;              // tour CTA + exit
+      if (/tour|replay|showTour/i.test(oc)) return;                 // tour controls
+      if ((href === '' || href === '#') && !oc) return;             // harmless anchor
+      if (/^(https?:|mailto:|tel:)/i.test(href)) return;            // external
+      // everything else would navigate / sign out to a login wall — stay in the tour
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }, true);
+
     // 3) spotlight ring (follows the target element)
     var ring = document.createElement('div');
     ring.style.cssText = 'position:fixed;z-index:2147482000;pointer-events:none;border:2px solid ' + TEAL + ';border-radius:12px;'

@@ -308,11 +308,21 @@ Promise.all([
   MOD=d; REF=arr[1]||{}; DRAFTS=arr[2]||{ingredients:[],stacks:[]}; SCREEN=arr[3]||{ingredients:{}};
   MENU=(d.ingredients||[]).concat(DRAFTS.ingredients||[]);
   try{var iv=JSON.parse(localStorage.getItem('allyos_iv_inventory_v1')||'{}');INV=iv.inv||{};}catch(e){}
-  if(window.AllyOSAuth){AllyOSAuth.guard(['nurse','provider','admin']);var s=AllyOSAuth.session();if(s){document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+((AllyOSAuth.ROLES[s.role]||{}).label||s.role);document.getElementById('mdMode').checked=!!s.mdOfRecord;
+  var IS_TOUR=location.search.indexOf('tour=1')>-1||location.search.indexOf('demo=1')>-1;
+  if(window.AllyOSAuth && !IS_TOUR){AllyOSAuth.guard(['nurse','provider','admin']);var s=AllyOSAuth.session();if(s){document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+((AllyOSAuth.ROLES[s.role]||{}).label||s.role);document.getElementById('mdMode').checked=!!s.mdOfRecord;
     if(s.sandbox){var db=document.getElementById('demobar');if(db){db.style.display='flex';db.innerHTML='<span>🧪 <b>DEMO MODE</b> — sample patients · nothing is saved to a real chart · <b>not for real patient care</b></span><span><a href="#" onclick="tourOpen();return false">▶ replay guide</a> &nbsp;·&nbsp; <a href="login.html">Sign in</a> &nbsp;·&nbsp; <a href="onboard.html" style="color:var(--gold)">Set up your clinic →</a></span>';}
       IS_DEMO=true;var dm=document.getElementById('demoMode');if(dm)dm.checked=true; // alarms playable in demo
       try{if(!sessionStorage.getItem('allyos_demo_tour'))setTimeout(showTour,700);}catch(e){setTimeout(showTour,700);}
     }}}
+  if(IS_TOUR){
+    var who=document.getElementById('who'); if(who)who.textContent='Demo · sample data';
+    var db=document.getElementById('demobar');
+    if(db){db.style.display='flex';db.innerHTML='<span>🧪 <b>GUIDED DEMO</b> — sample patients · nothing is saved · advisory only, not a prescription</span><span><a href="#" onclick="tourOpen();return false" style="color:var(--teal)">▶ replay guide</a> &nbsp;·&nbsp; <a href="book-demo.html" style="color:var(--gold)">📅 Request a live demo →</a></span>';}
+    IS_DEMO=true; var dm=document.getElementById('demoMode'); if(dm)dm.checked=true;
+    // keep the visitor inside the demo — block any nav / sign-out that would hit a login wall (allow the CTA + replay guide)
+    document.addEventListener('click',function(e){var a=e.target&&e.target.closest?e.target.closest('a'):null;if(!a)return;var h=a.getAttribute('href')||'';var oc=a.getAttribute('onclick')||'';if(/book-demo/.test(h))return;if(/tour|replay|showTour/i.test(oc))return;if((h===''||h==='#')&&!oc)return;if(/^(https?:|mailto:|tel:)/i.test(h))return;e.preventDefault();e.stopImmediatePropagation();},true);
+    setTimeout(showTour,700);
+  }
   document.getElementById('disc').innerHTML='AllyOS Chairside · advisory clinical decision-support · <b>PHI stays on this device only</b> (no server, no analytics) · no drug brokering · gates enforce in MD-of-record mode. © 2026 RenuviaMD® Compliance Division.';
   load(); fillProto(); renderEmergency(); renderQueue(); renderChairs(); renderPrep(); renderDetail();
 }).catch(function(e){document.getElementById('chairs').innerHTML='<div class="flag crit">Could not load IV module ('+e.message+')</div>';});
