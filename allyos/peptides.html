@@ -234,13 +234,13 @@ window.ALLYOS_TOUR_SEED=function(){
   })(0);
 };
 window.ALLYOS_TOUR_STEPS=[
-  {intro:true,title:"Peptides — a 90-second guided preview",body:"Built for the category's scrutiny, on <b>sample data</b>. Advisory only — the prescriber owns every decision. Use <b>Next ›</b>."},
-  {sel:'#roleBlock',title:"1 · Prescriber authority first",body:"Scope is set by the prescriber's role before anything is selected — the tool won't let a role act outside its authority."},
-  {sel:'#hardScreen',title:"2 · Metabolic / GLP-1 red-flag screen",body:"Safety screening comes before agent selection. Hard flags stop the pathway pending review."},
-  {sel:'#agentOut',title:"3 · Agent → grade → consent tier",body:"Pick the peptide and the tool auto-derives its evidence grade, consent tier, contraindications, and monitoring."},
-  {sel:'#glp1Rules',title:"4 · GLP-1 / incretin guardrails",body:"Category-specific incretin rules apply automatically — the guardrails the space is scrutinized for."},
-  {sel:'#override',title:"5 · Override policy",body:"Every exception is explicit and documented — nothing happens silently or off the record."},
-  {cta:true,title:"That's the guided preview",body:"Want it on <b>your</b> formulary and prescriber roster? Book a 1:1 and we'll run it live with you."}
+  {intro:true,title:"Peptides — the complete walkthrough",body:"Every step, every option, on <b>sample data</b> — built for the category's liability and scrutiny. Advisory only; the prescriber owns every decision, fully source-bound with no doses and no selling. ~2 min · use <b>Next ›</b>."},
+  {sel:'#roleBlock',title:"Step 1 · Prescriber authority first",body:"Scope is set by the prescriber's role <b>before</b> anything is selected. Unlicensed roles are boxed out — the tool won't let a role act outside its authority.",optsLabel:"Roles & scope",options:["Physician (MD / DO) — full scope","APRN / ARNP","Physician Assistant (PA)","RN — administer only, cannot select","MA / coordinator — no prescribing scope"]},
+  {sel:'#hardScreen',title:"Step 2 · Metabolic / GLP-1 red-flag screen",body:"Safety screening comes <b>before</b> agent selection. A hard-screen hit blocks the metabolic line until cleared or overridden with a documented rationale.",optsLabel:"Screened (hard stops + flags)",options:["Personal/family MTC or MEN2 (GLP-1 boxed warning)","Pregnancy / breastfeeding","Active pancreatitis / gallbladder disease","Severe GI disease","Prior serious reaction"]},
+  {sel:'#agentOut',title:"Step 3 · Agent → grade → consent tier",body:"Pick the peptide and the tool auto-derives its <b>evidence grade (A–D)</b>, <b>consent tier (1–4)</b>, FDA status, contraindications, interactions, and monitoring — all source-bound.",optsLabel:"10 agents · grade → tier",options:["Semaglutide · Tirzepatide · Liraglutide — Grade A, Tier 1","Bremelanotide (PT-141) — Grade A on-label, Tier 1","Tesamorelin — Grade A on-label, Tier 2","Retatrutide — Grade B (investigational), Tier 3","Sermorelin · MOTS-c · SS-31 — Tier 3","AOD-9604 — Grade D, Tier 4"]},
+  {sel:'#glp1Rules',title:"Step 4 · GLP-1 / incretin guardrails",body:"Category-specific incretin rules apply automatically — dose-overlap flags, backbone-stacking limits, and the guardrails this space is scrutinized for.",optsLabel:"Auto-applied rules",options:["No stacking two GLP-1 / incretin backbones","Overlap flags (e.g., tirzepatide + retatrutide)","Titration & monitoring cadence","Investigational-status consent"]},
+  {sel:'#override',title:"Step 5 · Override policy",body:"Every exception is <b>explicit and documented</b> — a role can override a soft flag only with a recorded rationale. Nothing happens silently or off the record.",optsLabel:"Override controls",options:["Documented rationale required","Hard stops are not overridable","Full audit trail of every exception"]},
+  {cta:true,title:"You've seen the whole workflow",body:"Authority → screen → agent grade/tier → guardrails → documented overrides. A <b>1:1</b> sets this up on <b>your</b> formulary and prescriber roster, with pricing and go-live — that's the conversation, not another explainer."}
 ];
 </script>
 <script src="tour.js"></script>

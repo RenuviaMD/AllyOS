@@ -1150,17 +1150,21 @@ function allySend(){var inp=document.getElementById('allyInput');var q=(inp.valu
 
 // ---------- DEMO COACH GUIDE (non-blocking, step-by-step, highlights the area) ----------
 var TOUR=[
- {sel:'#queue',t:'👈 Start here. Click a waiting patient — try <b>Emily R.</b> (she reads <b style="color:var(--green)">READY</b>).'},
- {sel:'#detail',t:'On the right, choose <b>🧪 Pre-made protocol</b> (or à-la-carte), then <b>Prepare on the bench →</b>.'},
- {sel:'#prep',t:'This is the compounding bench. <b>Ally screens every additive live</b> — clear any flag, then <b>▶ Send to chair</b>.'},
- {sel:'#chairs',t:'On the chair, hit <b>▶ Start</b> (pre-vitals). Then tap the <b>⏩</b> button to fast-forward and hear the <b>🟠 orange / 🔴 red alarms</b>.'},
- {sel:'#chairs',t:'When it ends, <b>Discharge</b> → it auto-builds a <b>signed infusion note</b> + a <b>patient aftercare handout</b>. That\'s the whole loop! 🎉'}
+ {sel:'#embar',t:'<b>IV / IM Chairside — the complete walkthrough.</b> Emergency protocols are pinned on top, always one tap away — the safety net an infusion suite has to have.',o:['Anaphylaxis','Vasovagal','Suspected Mg toxicity','Infiltration']},
+ {sel:'#queue',t:'👈 The patient queue — each card shows a live status. Click a waiting patient; try <b>Emily R.</b> (she reads <b style="color:var(--green)">READY</b>).',o:['GFE NEEDED — Good-Faith Exam not yet done','CONSENT — consent pending','READY — cleared to build']},
+ {sel:'#detail',t:'The <b>Good-Faith Exam gates the visit</b> — nothing is built until it\'s on file. Then choose a pre-made protocol or build à-la-carte from the formulary.',o:['GFE required before any build','🧪 Pre-made protocol (vetted stacks)','À-la-carte from the formulary']},
+ {sel:'#prep',t:'The compounding bench. <b>Ally screens every additive live</b> — compatibility, dose sanity, interactions. Clear any flag, then <b>▶ Send to chair</b>.',o:['Live additive screening','Compatibility & dose flags','Fix flags, then send to chair']},
+ {sel:'#chairs',t:'Six treatment chairs. Send the prepared bag to an open chair and hit <b>▶ Start</b> — <b>pre-vitals are captured first</b>.',o:['6 chairs · live occupancy','Pre-infusion vitals','Start → running → ended']},
+ {sel:'#chairs',t:'The chair runs with <b>monitoring alarms</b>. Tap <b>⏩</b> to fast-forward and hear the <b>🟠 orange</b> (near-end) and <b>🔴 red</b> (ended) alerts.',o:['Timed infusion + countdown','🟠 orange near-end alarm','🔴 red end alarm']},
+ {sel:'#chairs',t:'On <b>Discharge</b>, AllyOS auto-builds the <b>signed infusion note</b> + the <b>patient aftercare handout</b> — the whole loop, documented. 🎉',o:['Signed infusion note','Patient aftercare handout','Chart-ready · PHI stays on device']},
+ {sel:'#demobar',t:'That\'s the full loop — <b>GFE → build → screen → run → documented discharge.</b> A <b>1:1</b> sets this up on <b>your</b> formulary and stations, with pricing and go-live. Tap <b>📅 Request a live demo</b> above — that\'s the conversation.'}
 ];
 var tStep=0,tEl=null;
 function clearHi(){if(tEl){tEl.classList.remove('tourhi');tEl=null;}}
 function showTour(){var g=document.getElementById('demoGuide');if(!g)return;tStep=Math.max(0,Math.min(tStep,TOUR.length-1));var s=TOUR[tStep];clearHi();tEl=document.querySelector(s.sel);if(tEl){tEl.classList.add('tourhi');tEl.scrollIntoView({behavior:'smooth',block:'center'});}
   g.style.display='block';
-  g.innerHTML='<div class="gh"><b>📋 Demo guide</b><span class="gstep">'+(tStep+1)+' / '+TOUR.length+'</span></div><p>'+s.t+'</p>'+
+  var optHtml=(s.o&&s.o.length)?('<div style="margin:2px 0 10px">'+s.o.map(function(o){return '<div style="font-size:11.5px;color:#eaf3f5;padding:5px 9px;margin-top:5px;background:#0e1c2e;border:1px solid #28405c;border-radius:7px">'+o+'</div>';}).join('')+'</div>'):'';
+  g.innerHTML='<div class="gh"><b>📋 Demo guide</b><span class="gstep">'+(tStep+1)+' / '+TOUR.length+'</span></div><p>'+s.t+'</p>'+optHtml+
     '<div class="gbtns">'+(tStep<TOUR.length-1?'<button class="btn neon" style="flex:1" onclick="tourNext()">Next →</button>':'<button class="btn neon-green" style="flex:1" onclick="tourDone()">Got it ✓</button>')+'<button class="btn ghost" onclick="tourDone()">Skip</button></div>';}
 function tourNext(){tStep++;showTour();}
 function tourDone(){clearHi();var g=document.getElementById('demoGuide');if(g)g.style.display='none';try{sessionStorage.setItem('allyos_demo_tour','1');}catch(e){}}

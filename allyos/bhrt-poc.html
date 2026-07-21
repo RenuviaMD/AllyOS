@@ -564,19 +564,21 @@ window.ALLYOS_TOUR_SEED=function(){
   function setV(id,v){var el=document.getElementById(id); if(!el)return; el.value=v; el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true}));}
   setV('pocName','R. Delgado · WX-2207'); setV('pocDob','52'); setV('age','52');
   setV('uterus','intact'); setV('stage','post'); setV('bmi','26.5'); setV('sbp','124'); setV('dbp','78');
-  // symptom-based (NAMS 2022) — rate a realistic moderate profile
-  try{ ['hot','sleep','vag','sex','anx','irrit','cog','msk','bladder'].forEach(function(k){ window.sev[k]= (k==='vag'||k==='hot')?3:2; }); if(window.renderMrs) renderMrs(); }catch(e){}
+  // symptom-based (NAMS 2022) — rate a realistic moderate profile (correct MRS keys)
+  try{ window.sev.vms=3; window.sev.vag=3; window.sev.sleep=2; window.sev.mood=2; window.sev.anx=2; window.sev.cog=2; window.sev.sex=2; window.sev.msk=2; window.sev.bladder=1; if(window.renderMrs) renderMrs(); }catch(e){}
   try{ if(window.generate) generate(); }catch(e){}
 };
 window.ALLYOS_TOUR_STEPS=[
-  {intro:true,title:"Women's BHRT — a 90-second guided preview",body:"Menopause hormone therapy on <b>sample data</b>, NAMS 2022. The treating provider owns and signs every decision. Use <b>Next ›</b>."},
-  {sel:'#flags',title:"1 · Red-flag screen first",body:"Absolute contraindications (undiagnosed bleeding, active clot or breast cancer…) are screened before anything. A red flag <b>stops the plan</b>."},
-  {sel:'#uterus',title:"2 · Context sets the rules",body:"Uterus status and menopause stage drive the plan — an <b>intact uterus means progesterone is required</b> for endometrial protection."},
-  {sel:'#mrsPanel',title:"3 · Symptom-based, per NAMS 2022",body:"The plan is built from <b>symptom severity</b>, not labs. Labs confirm and monitor — they never decide whether to treat."},
-  {sel:'#out',title:"4 · The provider conclusion",body:"Candidacy, <b>transdermal-preferred</b> route, FDA-before-compounded, uterus-aware progesterone — with the citations the physician signs."},
-  {sel:'#bhrtRxLine',title:"5 · Regimen after the decision",body:"The prescriber picks the starting regimen <b>after</b> the decision; the plan and after-visit summary update to match."},
-  {sel:'#doctabs',title:"6 · One intake → three documents",body:"A <b>provider POC</b>, a <b>patient-education guide</b>, and an <b>after-visit summary</b> from the same encounter."},
-  {cta:true,title:"That's the guided preview",body:"Want to see it on <b>your</b> workflow — your protocols, letterhead, and formulary? Book a 1:1 and we'll run it live with you."}
+  {intro:true,title:"Women's BHRT (Menopause) — the complete walkthrough",body:"Every step, every option, on <b>sample data</b>, per NAMS 2022. Symptom-based, transdermal-preferred. The treating provider owns and signs every decision. ~2–3 min · use <b>Next ›</b>."},
+  {sel:'#flags',title:"Step 1 · Red-flag screen (first, always)",body:"Absolute contraindications are screened before anything. Any red flag <b>stops the plan</b> pending review — the tool never routes around it.",optsLabel:"Hard stops screened",options:["Postmenopausal / unexplained vaginal bleeding","Estrogen-sensitive cancer (uncleared)","Active/recent VTE · PE · stroke · MI","Active liver disease","Pregnant / breastfeeding"]},
+  {sel:'#uterus',title:"Step 2 · Context sets the rules",body:"Uterus status and menopause stage drive the plan. An <b>intact uterus means progesterone is required</b> for endometrial protection — the tool enforces it.",optsLabel:"Context inputs",options:["Uterus: intact · hysterectomy · unknown","Stage: perimenopause · postmenopause · surgical/POI","Age · BP · BMI (route factors)"]},
+  {sel:'#mrsPanel',title:"Step 3 · Symptoms — the driver (MRS 0–4)",body:"The plan is built from <b>symptom severity</b>, not labs — the NAMS 2022 standard. Each symptom is rated 0 (none) → 4 (very severe).",optsLabel:"Menopause Rating Scale",options:["Hot flushes / sweating (VMS)","Sleep problems","Depressive mood · irritability · anxiety","Exhaustion — memory / focus","Sexual problems (desire)","Bladder problems · vaginal dryness (GSM)","Joint & muscle discomfort"]},
+  {sel:'#goals',title:"Step 4 · Goals (optional)",body:"Goals shape the conversation and monitoring — never whether to treat. Symptoms decide that."},
+  {sel:'#labimport',title:"Step 5 · Confirmatory labs (optional)",body:"BHRT is symptom-based — labs <b>confirm and monitor</b>, they never gate the decision. Drag a report if you have one; the plan doesn't wait on it.",optsLabel:"Optional, does NOT change the plan",options:["FSH · Estradiol · TSH","Metabolic · hepatic context","Reads the lab's own reference ranges"]},
+  {sel:'#out',title:"Step 6 · The clinical conclusion",body:"Candidacy, <b>transdermal-preferred</b> route, <b>FDA-approved before compounded</b>, and uterus-aware progesterone — with the citations the physician reviews and signs. Nothing invented."},
+  {sel:'#bhrtRxLine',title:"Step 7 · Regimen options — matched to symptoms",body:"After the decision, the tool proposes regimens matched to the symptom profile. The provider checks what they're prescribing; the plan and after-visit summary update live.",optsLabel:"Proposed regimens (symptom-matched)",options:["Systemic 17β-estradiol — transdermal (patch / gel / spray)","Micronized progesterone 100 mg — if uterus intact","Local vaginal estrogen — for GSM","Testosterone — low-dose transdermal for HSDD (ISSWSH)","Fezolinetant 45 mg — non-hormonal VMS option"]},
+  {sel:'#doctabs',title:"Step 8 · Three documents from one intake",body:"The same encounter produces three documents — no re-typing, ready to file or scan into the EMR.",optsLabel:"Generated documents",options:["📋 Provider POC (the clinical conclusion)","📖 Patient Education guide","👤 After-Visit Summary"]},
+  {cta:true,title:"You've seen the whole workflow",body:"Red-flag screen → context → symptoms → decision → regimen → signed documents. A <b>1:1</b> sets this up on <b>your</b> formulary, letterhead, and pricing, and gets your team live — that's the conversation, not another explainer."}
 ];
 </script>
 <script src="tour.js"></script>
