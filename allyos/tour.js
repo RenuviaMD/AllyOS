@@ -27,13 +27,17 @@
     var ribbon = document.createElement('div');
     ribbon.setAttribute('data-tour', 'ribbon');
     ribbon.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;gap:10px;'
-      + 'background:linear-gradient(90deg,rgba(46,230,214,.16),rgba(43,191,118,.16));backdrop-filter:blur(6px);'
-      + 'border-bottom:1px solid ' + LINE + ';color:' + INK + ';font:600 12.5px/1 -apple-system,Segoe UI,Roboto,sans-serif;padding:9px 14px';
+      + 'background:#08131f;border-bottom:1px solid ' + TEAL + ';box-shadow:0 2px 14px rgba(0,0,0,.5);'
+      + 'color:' + INK + ';font:600 12.5px/1 -apple-system,Segoe UI,Roboto,sans-serif;padding:10px 14px';
     ribbon.innerHTML = '<span style="color:' + TEAL + '">● GUIDED DEMO</span>'
       + '<span style="color:' + MUT + '">' + (window.ALLYOS_TOUR_TITLE || 'AllyOS') + ' · sample data · advisory only, not a prescription</span>'
       + '<a href="demo-center.html" style="margin-left:6px;color:' + MUT + ';text-decoration:underline">exit</a>';
     document.body.appendChild(ribbon);
-    document.body.style.paddingTop = '38px';
+    document.body.style.paddingTop = '40px';
+    // push any sticky page nav below the ribbon so it doesn't slide under it
+    var st = document.createElement('style');
+    st.textContent = '.top{top:40px !important}';
+    document.head.appendChild(st);
 
     // 3) spotlight ring (follows the target element)
     var ring = document.createElement('div');
