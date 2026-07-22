@@ -218,4 +218,31 @@ function renderModule(){
 
 getJSON('../protocols/peptide-module.json').then(function(j){MOD=j;renderModule();});
 </script>
+
+<!-- Guided tour (Tier-1 demo): activates only on ?tour=1 -->
+<script>
+window.ALLYOS_TOUR_TITLE="Peptides — prescriber guardrails";
+window.ALLYOS_TOUR_SEED=function(){
+  function setV(id,v){var el=document.getElementById(id); if(!el)return; el.value=v; el.dispatchEvent(new Event('change',{bubbles:true}));}
+  setV('role','physician'); try{ if(window.gate) gate(); }catch(e){}
+  // agent options render after the module JSON fetch — poll, then select the first real agent
+  (function trySeed(n){
+    var opts=document.querySelectorAll('#agent option'), opt=null;
+    for(var j=0;j<opts.length;j++){ if(opts[j].value){ opt=opts[j]; break; } }
+    if(opt){ var a=document.getElementById('agent'); a.value=opt.value; try{ if(window.renderAgent) renderAgent(); }catch(e){} return; }
+    if(n<24) setTimeout(function(){trySeed(n+1);},250);
+  })(0);
+};
+window.ALLYOS_TOUR_STEPS=[
+  {intro:true,title:"Peptides — the complete walkthrough",body:"Every step, every option, on <b>sample data</b> — built for the category's liability and scrutiny. Advisory only; the prescriber owns every decision, fully source-bound with no doses and no selling. ~2 min · use <b>Next ›</b>."},
+  {sel:'#roleBlock',title:"Step 1 · Prescriber authority first",body:"Scope is set by the prescriber's role <b>before</b> anything is selected. Unlicensed roles are boxed out — the tool won't let a role act outside its authority.",optsLabel:"Roles & scope",options:["Physician (MD / DO) — full scope","APRN / ARNP","Physician Assistant (PA)","RN — administer only, cannot select","MA / coordinator — no prescribing scope"]},
+  {sel:'#hardScreen',title:"Step 2 · Metabolic / GLP-1 red-flag screen",body:"Safety screening comes <b>before</b> agent selection. A hard-screen hit blocks the metabolic line until cleared or overridden with a documented rationale.",optsLabel:"Screened (hard stops + flags)",options:["Personal/family MTC or MEN2 (GLP-1 boxed warning)","Pregnancy / breastfeeding","Active pancreatitis / gallbladder disease","Severe GI disease","Prior serious reaction"]},
+  {sel:'#agentOut',title:"Step 3 · Agent → grade → consent tier",body:"Pick the peptide and the tool auto-derives its <b>evidence grade (A–D)</b>, <b>consent tier (1–4)</b>, FDA status, contraindications, interactions, and monitoring — all source-bound.",optsLabel:"10 agents · grade → tier",options:["Semaglutide · Tirzepatide · Liraglutide — Grade A, Tier 1","Bremelanotide (PT-141) — Grade A on-label, Tier 1","Tesamorelin — Grade A on-label, Tier 2","Retatrutide — Grade B (investigational), Tier 3","Sermorelin · MOTS-c · SS-31 — Tier 3","AOD-9604 — Grade D, Tier 4"]},
+  {sel:'#glp1Rules',title:"Step 4 · GLP-1 / incretin guardrails",body:"Category-specific incretin rules apply automatically — dose-overlap flags, backbone-stacking limits, and the guardrails this space is scrutinized for.",optsLabel:"Auto-applied rules",options:["No stacking two GLP-1 / incretin backbones","Overlap flags (e.g., tirzepatide + retatrutide)","Titration & monitoring cadence","Investigational-status consent"]},
+  {sel:'#override',title:"Step 5 · Override policy",body:"Every exception is <b>explicit and documented</b> — a role can override a soft flag only with a recorded rationale. Nothing happens silently or off the record.",optsLabel:"Override controls",options:["Documented rationale required","Hard stops are not overridable","Full audit trail of every exception"]},
+  {sel:'#agentOut',title:"Step 6 · Monitoring plan (per agent)",body:"Each agent carries its own <b>source-bound</b> baseline and follow-up monitoring — the tool surfaces the exact labs and cadence, so nothing is prescribed without a plan to watch it.",optsLabel:"Auto-derived per agent",options:["Baseline labs (metabolic · LFTs · per agent)","Scheduled follow-up labs & cadence","GLP-1: titration + GI tolerance checks","Every recommendation cites its source"]},
+  {cta:true,title:"You've seen the whole workflow",body:"Authority → screen → agent grade/tier → guardrails → overrides → monitoring. A <b>1:1</b> sets this up on <b>your</b> formulary and prescriber roster, with pricing and go-live — that's the conversation, not another explainer."}
+];
+</script>
+<script src="tour.js"></script>
 </body></html>

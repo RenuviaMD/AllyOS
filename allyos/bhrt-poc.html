@@ -122,7 +122,7 @@
 <script src="allyos-auth.js"></script>
 <script src="lab-import.js"></script>
 <script>
-var IS_DEMO=location.search.indexOf('demo=1')>-1; // public no-signup demo mode
+var IS_DEMO=location.search.indexOf('demo=1')>-1||location.search.indexOf('tour=1')>-1; // public no-signup demo / guided-tour mode
 if(window.AllyOSAuth && !IS_DEMO){AllyOSAuth.guard(['provider','admin','nurse']);}
 if(IS_DEMO){document.addEventListener('DOMContentLoaded',function(){var r=document.querySelector('.top .right');if(r)r.innerHTML='<a href="book-demo.html" style="color:#04121a;background:linear-gradient(120deg,var(--teal),var(--green));font-weight:800;padding:7px 13px;border-radius:8px;text-decoration:none">📅 Book a 1:1 live demo</a>';});}
 function esc(x){return(''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -556,4 +556,31 @@ function generate(){
   out.scrollIntoView({behavior:'smooth'});
 }
 </script>
+
+<!-- Guided tour (Tier-1 demo): activates only on ?tour=1 -->
+<script>
+window.ALLYOS_TOUR_TITLE="Women's BHRT (Menopause)";
+window.ALLYOS_TOUR_SEED=function(){
+  function setV(id,v){var el=document.getElementById(id); if(!el)return; el.value=v; el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true}));}
+  setV('pocName','R. Delgado · WX-2207'); setV('pocDob','52'); setV('age','52');
+  setV('uterus','intact'); setV('stage','post'); setV('bmi','26.5'); setV('sbp','124'); setV('dbp','78');
+  // symptom-based (NAMS 2022) — rate a realistic moderate profile (correct MRS keys)
+  try{ window.sev.vms=3; window.sev.vag=3; window.sev.sleep=2; window.sev.mood=2; window.sev.anx=2; window.sev.cog=2; window.sev.sex=2; window.sev.msk=2; window.sev.bladder=1; if(window.renderMrs) renderMrs(); }catch(e){}
+  try{ if(window.generate) generate(); }catch(e){}
+};
+window.ALLYOS_TOUR_STEPS=[
+  {intro:true,title:"Women's BHRT (Menopause) — the complete walkthrough",body:"Every step, every option, on <b>sample data</b>, per NAMS 2022. Symptom-based, transdermal-preferred. The treating provider owns and signs every decision. ~2–3 min · use <b>Next ›</b>."},
+  {sel:'#flags',title:"Step 1 · Red-flag screen (first, always)",body:"Absolute contraindications are screened before anything. Any red flag <b>stops the plan</b> pending review — the tool never routes around it.",optsLabel:"Hard stops screened",options:["Postmenopausal / unexplained vaginal bleeding","Estrogen-sensitive cancer (uncleared)","Active/recent VTE · PE · stroke · MI","Active liver disease","Pregnant / breastfeeding"]},
+  {sel:'#uterus',title:"Step 2 · Context sets the rules",body:"Uterus status and menopause stage drive the plan. An <b>intact uterus means progesterone is required</b> for endometrial protection — the tool enforces it.",optsLabel:"Context inputs",options:["Uterus: intact · hysterectomy · unknown","Stage: perimenopause · postmenopause · surgical/POI","Age · BP · BMI (route factors)"]},
+  {sel:'#mrsPanel',title:"Step 3 · Symptoms — the driver (MRS 0–4)",body:"The plan is built from <b>symptom severity</b>, not labs — the NAMS 2022 standard. Each symptom is rated 0 (none) → 4 (very severe).",optsLabel:"Menopause Rating Scale",options:["Hot flushes / sweating (VMS)","Sleep problems","Depressive mood · irritability · anxiety","Exhaustion — memory / focus","Sexual problems (desire)","Bladder problems · vaginal dryness (GSM)","Joint & muscle discomfort"]},
+  {sel:'#goals',title:"Step 4 · Goals (optional)",body:"Goals shape the conversation and monitoring — never whether to treat. Symptoms decide that."},
+  {sel:'#labimport',title:"Step 5 · Confirmatory labs (optional)",body:"BHRT is symptom-based — labs <b>confirm and monitor</b>, they never gate the decision. Drag a report if you have one; the plan doesn't wait on it.",optsLabel:"Optional, does NOT change the plan",options:["FSH · Estradiol · TSH","Metabolic · hepatic context","Reads the lab's own reference ranges"]},
+  {sel:'#out',title:"Step 6 · The clinical conclusion",body:"Candidacy, <b>transdermal-preferred</b> route, <b>FDA-approved before compounded</b>, and uterus-aware progesterone — with the citations the physician reviews and signs. Nothing invented."},
+  {sel:'#bhrtRxLine',title:"Step 7 · Regimen options — matched to symptoms",body:"After the decision, the tool proposes regimens matched to the symptom profile. The provider checks what they're prescribing; the plan and after-visit summary update live.",optsLabel:"Proposed regimens (symptom-matched)",options:["Systemic 17β-estradiol — transdermal (patch / gel / spray)","Micronized progesterone 100 mg — if uterus intact","Local vaginal estrogen — for GSM","Testosterone — low-dose transdermal for HSDD (ISSWSH)","Fezolinetant 45 mg — non-hormonal VMS option"]},
+  {sel:'#out',title:"Step 8 · Monitoring & follow-up",body:"Symptom-based therapy is reassessed on a cadence — lowest effective dose, annual benefit-risk review, and clear triggers to investigate.",optsLabel:"Follow-up cadence",options:["Reassess symptoms at ~4–6 weeks, then 3 months","Annual benefit–risk review · lowest effective dose","Investigate any new / unscheduled bleeding","Fezolinetant: LFTs at baseline & months 1/2/3/6/9"]},
+  {sel:'#doctabs',title:"Step 9 · Three documents from one intake",body:"The same encounter produces three documents — no re-typing, ready to file or scan into the EMR.",optsLabel:"Generated documents",options:["📋 Provider POC (the clinical conclusion)","📖 Patient Education guide","👤 After-Visit Summary"]},
+  {cta:true,title:"You've seen the whole workflow",body:"Red-flag screen → context → symptoms → decision → regimen → signed documents. A <b>1:1</b> sets this up on <b>your</b> formulary, letterhead, and pricing, and gets your team live — that's the conversation, not another explainer."}
+];
+</script>
+<script src="tour.js"></script>
 </body></html>

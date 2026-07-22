@@ -308,11 +308,21 @@ Promise.all([
   MOD=d; REF=arr[1]||{}; DRAFTS=arr[2]||{ingredients:[],stacks:[]}; SCREEN=arr[3]||{ingredients:{}};
   MENU=(d.ingredients||[]).concat(DRAFTS.ingredients||[]);
   try{var iv=JSON.parse(localStorage.getItem('allyos_iv_inventory_v1')||'{}');INV=iv.inv||{};}catch(e){}
-  if(window.AllyOSAuth){AllyOSAuth.guard(['nurse','provider','admin']);var s=AllyOSAuth.session();if(s){document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+((AllyOSAuth.ROLES[s.role]||{}).label||s.role);document.getElementById('mdMode').checked=!!s.mdOfRecord;
+  var IS_TOUR=location.search.indexOf('tour=1')>-1||location.search.indexOf('demo=1')>-1;
+  if(window.AllyOSAuth && !IS_TOUR){AllyOSAuth.guard(['nurse','provider','admin']);var s=AllyOSAuth.session();if(s){document.getElementById('who').textContent=AllyOSAuth.greeting()+' · '+((AllyOSAuth.ROLES[s.role]||{}).label||s.role);document.getElementById('mdMode').checked=!!s.mdOfRecord;
     if(s.sandbox){var db=document.getElementById('demobar');if(db){db.style.display='flex';db.innerHTML='<span>🧪 <b>DEMO MODE</b> — sample patients · nothing is saved to a real chart · <b>not for real patient care</b></span><span><a href="#" onclick="tourOpen();return false">▶ replay guide</a> &nbsp;·&nbsp; <a href="login.html">Sign in</a> &nbsp;·&nbsp; <a href="onboard.html" style="color:var(--gold)">Set up your clinic →</a></span>';}
       IS_DEMO=true;var dm=document.getElementById('demoMode');if(dm)dm.checked=true; // alarms playable in demo
       try{if(!sessionStorage.getItem('allyos_demo_tour'))setTimeout(showTour,700);}catch(e){setTimeout(showTour,700);}
     }}}
+  if(IS_TOUR){
+    var who=document.getElementById('who'); if(who)who.textContent='Demo · sample data';
+    var db=document.getElementById('demobar');
+    if(db){db.style.display='flex';db.innerHTML='<span>🧪 <b>GUIDED DEMO</b> — sample patients · nothing is saved · advisory only, not a prescription</span><span><a href="#" onclick="tourOpen();return false" style="color:var(--teal)">▶ replay guide</a> &nbsp;·&nbsp; <a href="book-demo.html" style="color:var(--gold)">📅 Request a live demo →</a></span>';}
+    IS_DEMO=true; var dm=document.getElementById('demoMode'); if(dm)dm.checked=true;
+    // keep the visitor inside the demo — block any nav / sign-out that would hit a login wall (allow the CTA + replay guide)
+    document.addEventListener('click',function(e){var a=e.target&&e.target.closest?e.target.closest('a'):null;if(!a)return;var h=a.getAttribute('href')||'';var oc=a.getAttribute('onclick')||'';if(/book-demo/.test(h))return;if(/tour|replay|showTour/i.test(oc))return;if((h===''||h==='#')&&!oc)return;if(/^(https?:|mailto:|tel:)/i.test(h))return;e.preventDefault();e.stopImmediatePropagation();},true);
+    setTimeout(showTour,700);
+  }
   document.getElementById('disc').innerHTML='AllyOS Chairside · advisory clinical decision-support · <b>PHI stays on this device only</b> (no server, no analytics) · no drug brokering · gates enforce in MD-of-record mode. © 2026 RenuviaMD® Compliance Division.';
   load(); fillProto(); renderEmergency(); renderQueue(); renderChairs(); renderPrep(); renderDetail();
 }).catch(function(e){document.getElementById('chairs').innerHTML='<div class="flag crit">Could not load IV module ('+e.message+')</div>';});
@@ -1140,17 +1150,23 @@ function allySend(){var inp=document.getElementById('allyInput');var q=(inp.valu
 
 // ---------- DEMO COACH GUIDE (non-blocking, step-by-step, highlights the area) ----------
 var TOUR=[
- {sel:'#queue',t:'👈 Start here. Click a waiting patient — try <b>Emily R.</b> (she reads <b style="color:var(--green)">READY</b>).'},
- {sel:'#detail',t:'On the right, choose <b>🧪 Pre-made protocol</b> (or à-la-carte), then <b>Prepare on the bench →</b>.'},
- {sel:'#prep',t:'This is the compounding bench. <b>Ally screens every additive live</b> — clear any flag, then <b>▶ Send to chair</b>.'},
- {sel:'#chairs',t:'On the chair, hit <b>▶ Start</b> (pre-vitals). Then tap the <b>⏩</b> button to fast-forward and hear the <b>🟠 orange / 🔴 red alarms</b>.'},
- {sel:'#chairs',t:'When it ends, <b>Discharge</b> → it auto-builds a <b>signed infusion note</b> + a <b>patient aftercare handout</b>. That\'s the whole loop! 🎉'}
+ {sel:'#embar',t:'<b>IV / IM Chairside — the complete walkthrough.</b> Emergency protocols are pinned on top, always one tap away — so no one hunts through a manual mid-reaction.',o:['Anaphylaxis','Vasovagal','Suspected Mg toxicity','Infiltration / extravasation']},
+ {sel:'#queue',t:'<b>Gate.</b> Every checked-in patient is in one list. Before anyone is seated, the tool requires <b>two green gates</b> — a current Good-Faith Exam <b>and</b> signed consent. Red / amber cards physically can\'t proceed. Click a patient to begin.',o:['Gate 1 — Good-Faith Exam on file','Gate 2 — signed consent','Ungated patient never reaches a chair']},
+ {sel:'#detail',t:'<b>GFE workspace.</b> A provider-only exam — wellness goal, conditions screen, vitals, and a signed determination. Signing clears the gate and writes the chart; a flag here (e.g. <b>G6PD</b>) becomes a chart alert that follows the patient into every build.',o:['Wellness goal','Conditions screen (G6PD · allergies · renal)','Vitals','Signed determination → chart']},
+ {sel:'#detail',t:'<b>Build.</b> Pick a ready-made protocol (Myers’, Immune, Hydration+) and the full recipe drops onto the bench pre-filled — or compose ingredient by ingredient. Both paths land in the same bench with the same checks.',o:['Pre-made protocol (auto-fills the bag)','À-la-carte from the formulary','Same safety checks either way']},
+ {sel:'#prep',t:'<b>Live drip & pump math.</b> Enter base, volume and time — AllyOS computes the <b>drip rate (gtt/min)</b> and <b>pump rate (mL/hr)</b> instantly from your drop factor. No bedside arithmetic, no unit slips.',o:['Base · volume · time in','Drip rate — gtt/min','Pump rate — mL/hr']},
+ {sel:'#prep',t:'<b>Chart-aware hard-stop screening.</b> The bench screens every build against the patient’s chart — allergies, G6PD, renal status. Unsafe combinations (e.g. high-dose Vitamin C in G6PD deficiency) are <b>blocked outright, not merely flagged</b>. It won’t send until it’s safe.',o:['Allergies','G6PD deficiency','Renal status','Unsafe build = blocked, not just flagged']},
+ {sel:'#chairs',t:'<b>Run.</b> A sent bag becomes a live chair counting down in real time, with <b>5- and 2-minute alarms</b>. Pre-vitals are captured before Start. Tap <b>⏩</b> to fast-forward and hear the 🟠 / 🔴 alarms.',o:['6 chairs · live occupancy','Pre-infusion vitals','🟠 5-min · 🔴 2-min / end alarms']},
+ {sel:'#chairs',t:'<b>In-chair check-ins.</b> While the drip runs, one-tap patient check-ins — <b>feels OK / nausea / chest</b> — are timestamped straight into the record as it goes.',o:['Feels OK','Nausea','Chest — each timestamped to the chart']},
+ {sel:'#chairs',t:'<b>Document → EMR.</b> On discharge the infusion note writes itself — composition, rate, monitoring, signature — with a <b>compliance checklist</b>. Print it or upload straight to your EMR, plus a patient aftercare handout.',o:['Auto-built signed infusion note','Compliance checklist','Print / upload to EMR + aftercare handout']},
+ {sel:'#demobar',t:'That\'s the full loop — <b>gate → GFE → build → math → screen → run → check-ins → signed note.</b> A <b>1:1</b> sets this up on <b>your</b> formulary and stations, with pricing and go-live. Tap <b>📅 Request a live demo</b> above — that\'s the conversation.'}
 ];
 var tStep=0,tEl=null;
 function clearHi(){if(tEl){tEl.classList.remove('tourhi');tEl=null;}}
 function showTour(){var g=document.getElementById('demoGuide');if(!g)return;tStep=Math.max(0,Math.min(tStep,TOUR.length-1));var s=TOUR[tStep];clearHi();tEl=document.querySelector(s.sel);if(tEl){tEl.classList.add('tourhi');tEl.scrollIntoView({behavior:'smooth',block:'center'});}
   g.style.display='block';
-  g.innerHTML='<div class="gh"><b>📋 Demo guide</b><span class="gstep">'+(tStep+1)+' / '+TOUR.length+'</span></div><p>'+s.t+'</p>'+
+  var optHtml=(s.o&&s.o.length)?('<div style="margin:2px 0 10px">'+s.o.map(function(o){return '<div style="font-size:11.5px;color:#eaf3f5;padding:5px 9px;margin-top:5px;background:#0e1c2e;border:1px solid #28405c;border-radius:7px">'+o+'</div>';}).join('')+'</div>'):'';
+  g.innerHTML='<div class="gh"><b>📋 Demo guide</b><span class="gstep">'+(tStep+1)+' / '+TOUR.length+'</span></div><p>'+s.t+'</p>'+optHtml+
     '<div class="gbtns">'+(tStep<TOUR.length-1?'<button class="btn neon" style="flex:1" onclick="tourNext()">Next →</button>':'<button class="btn neon-green" style="flex:1" onclick="tourDone()">Got it ✓</button>')+'<button class="btn ghost" onclick="tourDone()">Skip</button></div>';}
 function tourNext(){tStep++;showTour();}
 function tourDone(){clearHi();var g=document.getElementById('demoGuide');if(g)g.style.display='none';try{sessionStorage.setItem('allyos_demo_tour','1');}catch(e){}}
