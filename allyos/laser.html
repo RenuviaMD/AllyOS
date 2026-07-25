@@ -276,7 +276,7 @@ function viewClient(id){ var c=clientById(id); if(!c) return viewClients(); var 
   var areaChips=AREAS.map(function(a){var on=(c.areas||[]).indexOf(a)>-1;return '<span class="tag '+(on?'info':'')+'" style="cursor:pointer;'+(on?'':'opacity:.5')+'" onclick="toggleArea(\''+c.id+'\',\''+a.replace(/'/g,"\\'")+'\')">'+esc(a)+'</span>';}).join(' ');
   var cxHits=contraFlags(c); var cxHtml = cxHits.length? '<div class="flag amber">Screen flags: '+cxHits.map(function(x){return esc(x.t);}).join('; ')+'</div>':'<div class="flag good">No contraindications flagged.</div>';
   return '<span class="back" onclick="go(\'clients\')">← All clients</span>'
-    +(ROLE!=='md'?' &nbsp; <button class="btn sm" onclick="gfeRequest(\''+c.id+'\')">📤 Send GFE request</button>':'')
+    +(ROLE!=='md'?' &nbsp; <button class="btn sm" onclick="gfeRequest(\''+c.id+'\')">📤 Send GFE request</button> <button class="btn sm ghost" onclick="aftercare(\''+c.id+'\')">🧴 Aftercare sheet</button>':'')
     +'<div class="grid g2">'
     +'<div class="card"><h2><span class="ic">👤</span>'+esc(c.name)+' &nbsp;'+statusTag(c)+'</h2>'
     +'<table><tr><th>Phone</th><td>'+esc(c.phone||'—')+'</td></tr><tr><th>Email</th><td>'+esc(c.email||'—')+'</td></tr><tr><th>Age/DOB</th><td>'+esc(c.dob||'—')+'</td></tr><tr><th>Fitzpatrick</th><td>'+esc(c.fitz)+'</td></tr><tr><th>Hair / goal</th><td>'+esc(c.hairColor||'—')+'</td></tr></table>'
@@ -359,6 +359,44 @@ function gfeRequest(id){
     +'<div class="bar"><button onclick="window.print()">🖨 Print / Save as PDF</button><a class="btn2" href="'+mailto+'"><button>✉ Email Dr. Falcon</button></a></div>'
     +'</body></html>';
   var w=window.open('','_blank'); if(w){ w.document.write(html); w.document.close(); } else { alert('Allow pop-ups to open the GFE request, then Print → Save as PDF and email it to Dr. Falcon.'); }
+}
+
+/* ============ patient aftercare instructions ============ */
+function aftercare(id){
+  var c=clientById(id);
+  var last=(c.sessions||[])[c.sessions.length-1];
+  var mod = last? last.modality : null;  /* 'laser' | 'electro' | null(general) */
+  var title = mod==='laser'?'Laser Hair Removal':mod==='electro'?'Electrolysis':'Hair Removal';
+  var normalMod = mod==='laser'
+      ? '<li>Treated hairs will <b>shed over the next 1–3 weeks</b> — this is normal, not new growth.</li>'
+      : mod==='electro'
+      ? '<li>Tiny <b>pinpoint scabs</b> may form — <b>do not pick them</b>; let them fall off on their own.</li>'
+      : '<li>Treated hairs may shed over the next few weeks; small pinpoint scabs can form — <b>do not pick them</b>.</li>';
+  var betweenMod = mod==='laser'
+      ? '<li>You may <b>shave</b> between sessions, but do <b>not wax, pluck, or thread</b> (removing the root disrupts treatment).</li>'
+      : mod==='electro'
+      ? '<li>Do <b>not tweeze or wax</b> between sessions.</li>'
+      : '<li>Do <b>not wax, pluck, or thread</b> between sessions (shaving is fine for laser).</li>';
+  var b='Your post-treatment care instructions are attached / printed. Please follow them for the next few days, and call the clinic with any concerns.';
+  var mailto='mailto:'+encodeURIComponent(c.email||'')+'?subject='+encodeURIComponent('Your aftercare instructions — '+title)+'&body='+encodeURIComponent(b);
+  var html='<!DOCTYPE html><html><head><meta charset=utf-8><title>Aftercare — '+esc(c.name)+'</title><style>body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:720px;margin:0 auto;padding:26px;color:#12242e;line-height:1.5}h1{font-size:19px;margin:0}h3{margin:18px 0 4px;font-size:14px;color:#0e8a8a}.sub{color:#5b7287;font-size:12px;margin-bottom:6px}ul{margin:4px 0 0 18px;padding:0}li{margin:5px 0;font-size:13.5px}.warn{background:#fdeeee;border:1px solid #e6b8b8;border-radius:9px;padding:11px;margin-top:12px;font-size:13px}.warn b{color:#c0392b}.bar{margin:18px 0;display:flex;gap:8px}button{font:inherit;font-size:13px;padding:9px 15px;border-radius:8px;border:1px solid #0e8a8a;background:#0e8a8a;color:#fff;cursor:pointer}a.b2 button{background:#fff;color:#0e8a8a}.ft{margin-top:20px;border-top:1px solid #e3ecea;padding-top:10px;font-size:11px;color:#5b7287}@media print{.bar{display:none}}</style></head><body>'
+    +'<h1>Post-Treatment Care · '+esc(title)+'</h1><div class="sub">'+esc(c.name)+' · '+today()+'</div>'
+    +'<h3>What\'s normal</h3><ul><li><b>Redness and mild swelling</b> around the follicles for a few hours (up to 24 h).</li>'+normalMod+'</ul>'
+    +'<h3>For the next 24–48 hours</h3><ul>'
+      +'<li>Keep the area <b>clean and dry</b>. A cool compress helps if it feels warm.</li>'
+      +'<li>Apply a soothing agent — <b>pure aloe vera or witch hazel</b> — 2–3× a day.</li>'
+      +'<li><b>Avoid heat:</b> hot showers, saunas, hot tubs, and intense/sweaty exercise.</li>'
+      +'<li>No makeup, deodorant, perfumed lotions, or harsh products on the area.</li>'
+      +'<li>No swimming (pools/chlorine or ocean).</li>'
+      +'<li><b>Do not touch, scratch, rub, or pick</b> the treated area — this prevents infection and scarring.</li></ul>'
+    +'<h3>For the next 1–2 weeks</h3><ul>'
+      +'<li><b>Avoid sun and tanning</b> on the area; apply <b>SPF 30+</b> daily if it will be exposed.</li>'
+      +'<li>No exfoliants, retinoids, or glycolic/salicylic acids on the area.</li>'+betweenMod+'</ul>'
+    +'<div class="warn"><b>Call the clinic</b> if you notice: blistering or open sores, increasing redness/swelling after 48 h, pus or fever (possible infection), or unusual/worsening pain.</div>'
+    +'<div class="bar"><button onclick="window.print()">🖨 Print / Save as PDF</button>'+(c.email?'<a class="b2" href="'+mailto+'"><button>✉ Email to patient</button></a>':'')+'</div>'
+    +'<div class="ft">RenuviaMD® · Hair Removal · advisory patient education. Under the medical direction of Armando A. Falcon, MD (FL ME 84789). Keep this sheet; contact the clinic with any questions.</div>'
+    +'</body></html>';
+  var w=window.open('','_blank'); if(w){ w.document.write(html); w.document.close(); } else { alert('Allow pop-ups to open the aftercare sheet.'); }
 }
 
 /* ============ TREATMENT ============ */
