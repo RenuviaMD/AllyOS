@@ -275,7 +275,9 @@ function viewClient(id){ var c=clientById(id); if(!c) return viewClients(); var 
   var sess=(c.sessions||[]).map(function(s){ var set = s.modality==='laser' ? (s.hp+' nm · '+s.fluence+' J · '+s.mode) : (ELECTRO[s.etype].label.split(' ')[0]+' · '+s.timing+'s · '+s.mA+' mA'); return '<tr><td>'+esc(s.date)+'</td><td>'+esc(s.area)+'</td><td>'+(s.modality==='laser'?'⚡ Laser':'🔌 Electrolysis')+'</td><td>'+esc(set)+'</td><td>'+esc(s.response||'')+'</td></tr>'; }).join('');
   var areaChips=AREAS.map(function(a){var on=(c.areas||[]).indexOf(a)>-1;return '<span class="tag '+(on?'info':'')+'" style="cursor:pointer;'+(on?'':'opacity:.5')+'" onclick="toggleArea(\''+c.id+'\',\''+a.replace(/'/g,"\\'")+'\')">'+esc(a)+'</span>';}).join(' ');
   var cxHits=contraFlags(c); var cxHtml = cxHits.length? '<div class="flag amber">Screen flags: '+cxHits.map(function(x){return esc(x.t);}).join('; ')+'</div>':'<div class="flag good">No contraindications flagged.</div>';
-  return '<span class="back" onclick="go(\'clients\')">← All clients</span><div class="grid g2">'
+  return '<span class="back" onclick="go(\'clients\')">← All clients</span>'
+    +(ROLE!=='md'?' &nbsp; <button class="btn sm" onclick="gfeRequest(\''+c.id+'\')">📤 Send GFE request</button>':'')
+    +'<div class="grid g2">'
     +'<div class="card"><h2><span class="ic">👤</span>'+esc(c.name)+' &nbsp;'+statusTag(c)+'</h2>'
     +'<table><tr><th>Phone</th><td>'+esc(c.phone||'—')+'</td></tr><tr><th>Email</th><td>'+esc(c.email||'—')+'</td></tr><tr><th>Age/DOB</th><td>'+esc(c.dob||'—')+'</td></tr><tr><th>Fitzpatrick</th><td>'+esc(c.fitz)+'</td></tr><tr><th>Hair / goal</th><td>'+esc(c.hairColor||'—')+'</td></tr></table>'
     + cxHtml
@@ -337,6 +339,26 @@ function signGfe(id){ var c=clientById(id);
   if(!(c.payments||[]).some(function(p){return p.type&&p.type.indexOf('GFE')===0;})){ (c.payments=c.payments||[]).push({date:today(),type:'GFE (physician clearance)',amount:fee,note:'Valid 1 yr'}); }
   if(!c.package){ c.package={ total:(c.gfe.expected*c.gfe.perSession), sessionsPaid:0 }; }
   save(); curClient=id; cur='clients'; render();
+}
+
+/* ============ send GFE request (on-device handoff) ============ */
+function gfeRequest(id){
+  var c=clientById(id);
+  var cx=(c.contra||[]).map(function(k){var f=CONTRA.filter(function(x){return x.k===k;})[0];return f?f.t:k;});
+  var photos=(c.photos||[]).filter(function(p){return p.kind==='baseline';});
+  var subject='GFE request — '+c.name;
+  var body='GFE request for '+c.name+'\r\nDOB/age: '+(c.dob||'')+'  Phone: '+(c.phone||'')+'  Email: '+(c.email||'')+'\r\nAreas: '+((c.areas||[]).join(', '))+'\r\nProposed Fitzpatrick: '+(c.fitz||'')+'\r\nMedications: '+(c.meds||'none')+'\r\nHistory: '+(c.hx||'none')+'\r\nScreen flags: '+(cx.join('; ')||'none')+'\r\n\r\nBaseline photos are in the attached PDF (print this page → Save as PDF → attach).';
+  var mailto='mailto:drfalcon@renuviamd.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+  var html='<!DOCTYPE html><html><head><meta charset=utf-8><title>'+esc(subject)+'</title><style>body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:720px;margin:0 auto;padding:24px;color:#12242e}h1{font-size:18px;margin:0 0 4px}.sub{color:#5b7287;font-size:12px;margin-bottom:14px}table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:left;padding:7px 9px;border-bottom:1px solid #e3ecea}th{color:#5b7287;width:38%}.b{background:#eef6f5;border:1px solid #bfe3de;border-radius:9px;padding:11px;margin:10px 0;font-size:13px}.no{color:#c0392b;font-weight:600}img{width:180px;height:180px;object-fit:cover;border-radius:9px;margin:6px 6px 0 0;border:1px solid #cfe}.bar{margin:18px 0;display:flex;gap:8px}button{font:inherit;font-size:13px;padding:9px 15px;border-radius:8px;border:1px solid #0e8a8a;background:#0e8a8a;color:#fff;cursor:pointer}a.btn2 button{background:#fff;color:#0e8a8a}@media print{.bar{display:none}}</style></head><body>'
+    +'<h1>Good-Faith Exam — request for physician review</h1><div class="sub">RenuviaMD® · Hair Removal · generated '+today()+' · PHI — handle securely</div>'
+    +'<div class="b"><b>'+esc(c.name)+'</b> &nbsp;·&nbsp; '+esc(c.phone||'')+' &nbsp;·&nbsp; '+esc(c.email||'')+' &nbsp;·&nbsp; DOB/age '+esc(c.dob||'—')+'</div>'
+    +'<table><tr><th>Proposed Fitzpatrick (electrologist)</th><td>'+esc(c.fitz||'—')+' — physician to confirm from photos</td></tr><tr><th>Treatment areas</th><td>'+esc((c.areas||[]).join(', ')||'—')+'</td></tr><tr><th>Medications</th><td>'+esc(c.meds||'—')+'</td></tr><tr><th>Medical / hormonal history</th><td>'+esc(c.hx||'—')+'</td></tr><tr><th>Prior hair removal</th><td>'+esc(c.prior||'—')+'</td></tr></table>'
+    +'<p><b>Contraindication screen:</b> '+(cx.length?('<span class="no">'+cx.map(esc).join('; ')+'</span>'):'none reported')+'</p>'
+    +'<h3 style="margin-bottom:2px">Baseline photos</h3><div>'+(photos.length?photos.map(function(p){return '<img src="'+p.data+'">';}).join(''):'<i>none uploaded</i>')+'</div>'
+    +'<p style="font-size:12px;color:#5b7287;margin-top:14px">Physician: review and issue the GFE clearance (confirm Fitzpatrick + approve modalities), or schedule a 15-minute telehealth visit.</p>'
+    +'<div class="bar"><button onclick="window.print()">🖨 Print / Save as PDF</button><a class="btn2" href="'+mailto+'"><button>✉ Email Dr. Falcon</button></a></div>'
+    +'</body></html>';
+  var w=window.open('','_blank'); if(w){ w.document.write(html); w.document.close(); } else { alert('Allow pop-ups to open the GFE request, then Print → Save as PDF and email it to Dr. Falcon.'); }
 }
 
 /* ============ TREATMENT ============ */
