@@ -142,6 +142,7 @@ function load(){ try{ DB=JSON.parse(localStorage.getItem(KEY))||fresh(); }catch(
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){} }
 function uid(){ return 'c'+(DB.clients.length+1)+'-'+Math.floor(performance.now()); }
 function clientById(id){ return DB.clients.filter(function(c){return c.id===id;})[0]; }
+function fitzOf(c){ return (c.gfe&&c.gfe.fitzConfirmed)||c.fitz; }
 
 /* ============ gfe validity ============ */
 function gfeValid(c){ return !!(c.gfe&&c.gfe.cleared&&(!c.gfe.expires||c.gfe.expires>=today())); }
@@ -192,7 +193,7 @@ function seedDemo(){
     fitz:'IV', hairColor:'Coarse, dark', contra:[], areas:['Upper lip','Chin'],
     photos:[{id:'p1',date:today(),kind:'baseline',label:'Baseline · Upper lip',data:placeholderPhoto('Upper lip')},{id:'p2',date:today(),kind:'baseline',label:'Baseline · Chin',data:placeholderPhoto('Chin')}],
     gfe:{ cleared:true, date:today(), expires:addYear(today()), md:'Armando A. Falcon, MD · FL ME 84789',
-      laser:['810'], electro:['thermolysis','blend'], fee:35, expected:12, perSession:60,
+      fitzConfirmed:'IV', laser:['810'], electro:['thermolysis','blend'], fee:35, expected:12, perSession:60,
       notes:'Fitzpatrick IV; coarse dark facial hair (PCOS pattern). No pacemaker/ICD, no isotretinoin, no recent tan. Cleared for 810 nm laser and thermolysis/blend electrolysis. Conservative first settings.' },
     sessions:[{ date:today(), modality:'electro', etype:'blend', timing:'0.8', mA:'0.3', probe:'F3 gold', insertions:120, area:'Upper lip', response:'Mild erythema, resolved <20 min', next:'Slight timing increase if tolerated' }],
     payments:[{date:today(),type:'GFE (physician clearance)',amount:35,note:'Valid 1 yr'},{date:today(),type:'Package (60-min block)',amount:90,note:'Card on terminal'}],
@@ -280,7 +281,7 @@ function viewClient(id){ var c=clientById(id); if(!c) return viewClients(); var 
     +'</div>'
     +'<div><div class="card"><h2><span class="ic">🩺</span>GFE (physician gate)</h2>'
     + (gfeValid(c)
-        ? '<div class="flag good">✓ Cleared by '+esc(c.gfe.md)+' on '+esc(c.gfe.date)+' · <b>valid until '+esc(c.gfe.expires||'—')+'</b><br>Approved: '+(modBadges(c)||'—')+' · Fee '+money(c.gfe.fee||0)+' · '+esc(c.gfe.expected||0)+' est. sessions</div><div class="note">'+esc(c.gfe.notes||'')+'</div>'
+        ? '<div class="flag good">✓ Cleared by '+esc(c.gfe.md)+' on '+esc(c.gfe.date)+' · <b>valid until '+esc(c.gfe.expires||'—')+'</b><br>Fitzpatrick <b>'+esc(c.gfe.fitzConfirmed||c.fitz)+'</b> (physician-confirmed) · Approved: '+(modBadges(c)||'—')+' · Fee '+money(c.gfe.fee||0)+' · '+esc(c.gfe.expected||0)+' est. sessions</div><div class="note">'+esc(c.gfe.notes||'')+'</div>'
         : (c.gfe&&c.gfe.telehealth&&!c.gfe.cleared
             ? '<div class="flag amber">📹 Live telehealth GFE pending'+(c.gfe.telehealth.link?' — <a href="'+esc(c.gfe.telehealth.link)+'" target="_blank" style="color:var(--teal)">open Doxy.me room</a>':' (link pending)')+'. Complete the exam, then clear.</div><button class="btn sm" style="margin-top:10px" onclick="doGfe(\''+c.id+'\')">Complete GFE →</button>'
             : (gfeExpired(c)? '<div class="flag warn">⏳ GFE expired '+esc(c.gfe.expires)+' — treatment locked. Re-clear to continue.</div>' : '<div class="flag warn">⏳ No signed GFE — treatment locked.</div>')+'<button class="btn sm" style="margin-top:10px" onclick="doGfe(\''+c.id+'\')">Perform GFE →</button>'))
@@ -310,6 +311,8 @@ function viewGfeForm(id){ var c=clientById(id); if(!c) return viewGfe(); var rec
     + (contraFlags(c).length? '<div class="flag amber">Screen: '+contraFlags(c).map(function(x){return esc(x.t);}).join('; ')+'</div>':'<div class="flag good">No contraindications flagged.</div>')
     + deferHtml
     +'<label style="margin-top:14px">Baseline photos — review before clearing</label>'+photoGrid(c,'baseline')
+    +'<label style="margin-top:14px">Fitzpatrick — physician confirm (from photos)</label><select id="g_fitz">'+FITZ.map(function(x){return '<option'+(x===c.fitz?' selected':'')+'>'+x+'</option>';}).join('')+'</select>'
+    +'<div class="note">Electrologist proposed <b>'+esc(c.fitz)+'</b> at intake; confirm or adjust it from the baseline photos. Your confirmed value is authoritative and gates the laser wavelength.</div>'
     +'</div>'
     +'<div class="card"><h2><span class="ic">🩺</span>Physician clearance</h2>'
     +'<label>Approve LASER wavelength(s)</label><div style="line-height:2.4">'+Object.keys(HP).map(function(k){var def=(k===rec);return '<label class="ck" style="display:inline-flex;margin-right:14px"><input type="checkbox" id="g_l_'+k+'" '+(def?'checked':'')+'> <span class="dot" style="background:'+HP[k].color+'"></span> '+k+' nm <span style="color:var(--dim)">('+HP[k].fitz.join('/')+')</span></label>';}).join('')+'</div>'
@@ -327,7 +330,7 @@ function signGfe(id){ var c=clientById(id);
   var electro=Object.keys(ELECTRO).filter(function(k){var el=document.getElementById('g_e_'+k);return el&&el.checked&&!el.disabled;});
   if(!laser.length&&!electro.length){ alert('Approve at least one modality (laser wavelength or electrolysis type)'); return; }
   var fee=+document.getElementById('g_fee').value||35;
-  c.gfe={ cleared:true, date:today(), expires:addYear(today()), md:'Armando A. Falcon, MD · FL ME 84789', laser:laser, electro:electro, fee:fee, expected:+document.getElementById('g_exp').value||0, perSession:+document.getElementById('g_price').value||0, notes:document.getElementById('g_notes').value };
+  c.gfe={ cleared:true, date:today(), expires:addYear(today()), md:'Armando A. Falcon, MD · FL ME 84789', fitzConfirmed:((document.getElementById('g_fitz')||{}).value)||c.fitz, laser:laser, electro:electro, fee:fee, expected:+document.getElementById('g_exp').value||0, perSession:+document.getElementById('g_price').value||0, notes:document.getElementById('g_notes').value };
   if(!(c.payments||[]).some(function(p){return p.type&&p.type.indexOf('GFE')===0;})){ (c.payments=c.payments||[]).push({date:today(),type:'GFE (physician clearance)',amount:fee,note:'Valid 1 yr'}); }
   if(!c.package){ c.package={ total:(c.gfe.expected*c.gfe.perSession), sessionsPaid:0 }; }
   save(); curClient=id; cur='clients'; render();
@@ -374,8 +377,8 @@ function renderTreatForm(id){ var c=clientById(id), f=document.getElementById('t
   }
 }
 function checkLaser(id){ var c=clientById(id), hp=document.getElementById('t_hp').value, w=document.getElementById('t_warn'); if(!hp){w.innerHTML='';return;}
-  var fitzOk=HP[hp].fitz.indexOf(c.fitz)>-1;
-  w.innerHTML = fitzOk? '<div class="flag good">'+hp+' nm approved &amp; matches Fitzpatrick '+esc(c.fitz)+'.</div>' : '<div class="flag warn">⚠ '+hp+' nm is not the recommended wavelength for Fitzpatrick '+esc(c.fitz)+' (use '+recHP(c.fitz)+' nm).</div>';
+  var fz=fitzOf(c); var fitzOk=HP[hp].fitz.indexOf(fz)>-1;
+  w.innerHTML = fitzOk? '<div class="flag good">'+hp+' nm approved &amp; matches physician-confirmed Fitzpatrick '+esc(fz)+'.</div>' : '<div class="flag warn">⚠ '+hp+' nm is not the recommended wavelength for confirmed Fitzpatrick '+esc(fz)+' (use '+recHP(fz)+' nm).</div>';
 }
 function saveLaser(id){ var c=clientById(id), hp=document.getElementById('t_hp').value, pulses=+document.getElementById('t_pulse').value||0;
   c.sessions.push({date:today(),modality:'laser',area:document.getElementById('t_area').value,hp:hp,mode:document.getElementById('t_mode').value,fluence:document.getElementById('t_flu').value,pw:document.getElementById('t_pw').value,hz:document.getElementById('t_hz').value,cooling:document.getElementById('t_cool').value,passes:document.getElementById('t_pass').value,pulses:pulses,response:document.getElementById('t_resp').value,next:document.getElementById('t_next').value});
