@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AllyOS Laser — EpiLaze Workspace · RenuviaMD®</title>
+<link rel="icon" type="image/png" href="ally-avatar-64.png">
+<style>
+  :root{--bg:#060a12;--card:#0d1726;--card2:#0b1422;--line:#1c2a3d;--line2:#28405c;--ink:#eaf3f5;--muted:#8ba0b5;--dim:#5f7185;--teal:#2ee6d6;--green:#2bbf76;--gold:#e7b84e;--red:#e0655a;--pink:#e59ac0}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Inter',Segoe UI,sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
+  .app{display:flex;min-height:100vh}
+  /* sidebar */
+  .sidebar{width:224px;flex-shrink:0;background:#0a1120;border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+  .brand{display:flex;align-items:center;gap:9px;padding:15px 16px;border-bottom:1px solid var(--line);font-weight:700}
+  .brand img{width:26px;height:26px;border-radius:50%}
+  .brand b{color:var(--gold)}.brand .t{color:var(--teal)}.brand .s{font-size:10px;color:var(--dim);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+  nav{padding:10px 8px;flex:1;overflow:auto}
+  .nav{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;color:var(--muted);cursor:pointer;font-weight:600;font-size:13px;margin-bottom:2px}
+  .nav:hover{background:#101f33;color:var(--ink)}
+  .nav.on{background:linear-gradient(120deg,rgba(46,230,214,.14),rgba(43,191,118,.1));color:var(--teal)}
+  .nav .ic{width:18px;text-align:center}
+  .nav .badge{margin-left:auto;font-size:10px;font-weight:800;background:var(--gold);color:#1a1200;border-radius:20px;padding:1px 7px}
+  .sfoot{padding:12px 16px;border-top:1px solid var(--line);font-size:10.5px;color:var(--dim)}
+  /* main */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .top{display:flex;align-items:center;gap:12px;padding:13px 24px;border-bottom:1px solid var(--line);background:#0a1120cc;position:sticky;top:0;z-index:5;backdrop-filter:blur(6px)}
+  .top h1{font-size:1.05rem;font-weight:700}
+  .top .sub{color:var(--dim);font-size:12px}
+  .top .right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .pill{font-size:11px;font-weight:700;border-radius:20px;padding:4px 11px}
+  .pill.md{background:rgba(46,230,214,.12);border:1px solid var(--teal);color:#9ff0e7}
+  .pill.demo{background:rgba(231,184,78,.12);border:1px solid var(--gold);color:#f0d089}
+  .view{padding:22px 24px;max-width:1180px}
+  /* cards / grid */
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}.g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:900px){.g2,.g3,.g4{grid-template-columns:1fr}}
+  .card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line2);border-radius:14px;padding:16px 18px}
+  .card h2{font-size:.95rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:9px}
+  .card h2 .ic{color:var(--teal)}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .stat .n{font-size:1.7rem;font-weight:750}.stat .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+  .stat .n.teal{color:var(--teal)}.stat .n.gold{color:var(--gold)}.stat .n.green{color:var(--green)}
+  /* forms */
+  label{display:block;font-size:11.5px;color:var(--muted);font-weight:600;margin:10px 0 4px}
+  input,select,textarea{width:100%;background:#0a1422;border:1px solid var(--line2);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;padding:9px 11px}
+  textarea{min-height:64px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
+  .row{display:flex;gap:12px;flex-wrap:wrap}.row>*{flex:1;min-width:130px}
+  .btn{background:linear-gradient(120deg,var(--teal),var(--green));color:#04140e;font-weight:700;border:0;border-radius:10px;padding:10px 18px;font-size:13px;cursor:pointer}
+  .btn.ghost{background:transparent;border:1px solid var(--line2);color:var(--ink)}
+  .btn.sm{padding:7px 12px;font-size:12px}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  /* list */
+  .clist{display:flex;flex-direction:column;gap:8px}
+  .crow{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:11px 14px;cursor:pointer}
+  .crow:hover{border-color:var(--line2)}
+  .crow .nm{font-weight:700}.crow .meta{font-size:11.5px;color:var(--dim)}
+  .crow .sp{margin-left:auto;display:flex;gap:6px;align-items:center}
+  .tag{font-size:10px;font-weight:800;border-radius:20px;padding:2px 9px;letter-spacing:.03em;text-transform:uppercase}
+  .tag.ok{background:rgba(43,191,118,.14);border:1px solid var(--green);color:#7be6ad}
+  .tag.wait{background:rgba(231,184,78,.12);border:1px solid var(--gold);color:#f0d089}
+  .tag.none{background:rgba(224,101,90,.1);border:1px solid var(--red);color:#f2b0a6}
+  .tag.info{background:rgba(111,183,224,.12);border:1px solid #4d84ad;color:#a9d3ec}
+  .empty{color:var(--dim);font-size:13px;padding:22px;text-align:center;border:1px dashed var(--line2);border-radius:12px}
+  .note{font-size:11.5px;color:var(--dim);line-height:1.5;margin-top:8px}
+  .flag{border-radius:9px;padding:9px 12px;font-size:12px;margin-top:10px}
+  .flag.warn{background:rgba(224,101,90,.09);border:1px solid var(--red);color:#f2b0a6}
+  .flag.good{background:rgba(43,191,118,.09);border:1px solid var(--green);color:#9fe6c1}
+  .hp{display:inline-flex;align-items:center;gap:6px;font-weight:700}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .back{color:var(--teal);font-size:12px;cursor:pointer;margin-bottom:12px;display:inline-block}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+  th{color:var(--dim);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em}
+  .sig{margin-top:12px;padding:10px 12px;border:1px dashed var(--line2);border-radius:10px;font-size:12px;color:var(--muted)}
+  .disc{font-size:10.5px;color:var(--dim);border-top:1px solid var(--line);padding:14px 24px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><img src="ally-avatar-64.png" alt="Ally" onerror="this.style.display='none'">Renuvia<b>MD</b>®<span class="t">&nbsp;Laser</span></div>
+    <nav id="nav"></nav>
+    <div class="sfoot">Local · private · on device<br>PHI never leaves this device</div>
+  </aside>
+  <main class="main">
+    <div class="top">
+      <div><h1 id="secTitle">Today</h1><div class="sub" id="secSub">EpiLaze laser workspace</div></div>
+      <div class="right" id="topRight"></div>
+    </div>
+    <div class="view" id="view"></div>
+    <div class="disc">AllyOS Laser · advisory clinical decision-support · <b>PHI stays on this device only</b> — no server, no analytics. The Good-Faith Exam is performed and signed by the supervising physician; treatment is gated on a signed GFE. Device: Rohrer EpiLaze (755/810/1064 nm diode). © 2026 RenuviaMD® Compliance.</div>
+  </main>
+</div>
+
+<script>
+/* ---------- device + clinical model ---------- */
+var HP = {
+  '755': {label:'755 nm Diode', fitz:['I','II'],   use:'Fine hair · light skin (I–II)',  color:'#6fb7e0'},
+  '810': {label:'810 nm Diode', fitz:['III','IV'], use:'Standard · medium skin (III–IV)', color:'#2ee6d6'},
+  '1064':{label:'1064 nm Diode',fitz:['V','VI'],   use:'Dark skin · deepest (V–VI)',      color:'#e59ac0'}
+};
+var FITZ = ['I','II','III','IV','V','VI'];
+var AREAS = ['Full face','Upper lip','Chin','Neck','Underarms','Arms','Bikini','Brazilian','Legs (full)','Legs (lower)','Back','Chest','Abdomen'];
+function recHP(fitz){ for(var k in HP){ if(HP[k].fitz.indexOf(fitz)>-1) return k; } return '810'; }
+function esc(s){return (''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function money(n){return '$'+(Math.round((+n||0)*100)/100).toFixed(2);}
+function today(){ try{ return new Date().toISOString().slice(0,10); }catch(e){ return '—'; } }
+
+/* ---------- storage ---------- */
+var KEY='allyos_laser_v1';
+var IS_DEMO = location.search.indexOf('demo=1')>-1 || location.search.indexOf('tour=1')>-1;
+function fresh(){ return { clients:[], equipment:{ system:653170, '755':2238, '810':169085, '1064':402514, serviceLog:[] } }; }
+var DB;
+function load(){ try{ DB=JSON.parse(localStorage.getItem(KEY))||fresh(); }catch(e){ DB=fresh(); } if(!DB.equipment) DB.equipment=fresh().equipment; }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){} }
+function uid(){ return 'c'+(DB.clients.length+1)+'-'+Math.floor(performance.now()); }
+
+/* ---------- seed demo ---------- */
+function seedDemo(){
+  DB = fresh();
+  DB.clients.push({
+    id:'c-demo-1', name:'M. Rivera', phone:'(305) 555-0142', email:'m.rivera@example.com', dob:'34',
+    fitz:'IV', hairColor:'Dark brown', meds:'None', contra:'None reported', tan:'no',
+    areas:['Underarms','Bikini'],
+    gfe:{ cleared:true, date:today(), md:'Armando A. Falcon, MD · FL ME 84789', approved:['810'], expected:8, perSession:120, notes:'Fitzpatrick IV, no photosensitizing meds, no recent tan. Cleared for 810 nm. Standard fluence ramp; conservative first pass.' },
+    sessions:[{ date:today(), area:'Underarms', hp:'810', mode:'STANDARD', fluence:14, pw:30, hz:2, cooling:5, passes:2, pulses:420, response:'Mild perifollicular erythema, resolved <30 min', next:'2–3 mm fluence increase next visit if tolerated' }],
+    payments:[{date:today(), type:'Package (8 sessions)', amount:960, note:'Card on terminal'}],
+    package:{ total:960, sessionsPaid:8 }
+  });
+  DB.equipment['810'] += 420;
+  DB.equipment.system += 420;
+  save();
+}
+
+/* ---------- nav ---------- */
+var SECTIONS = [
+  {id:'today', ic:'📅', t:'Today',        sub:'Schedule &amp; status'},
+  {id:'clients',ic:'👤', t:'Clients',      sub:'Records &amp; intake'},
+  {id:'gfe',   ic:'🩺', t:'GFE',          sub:'Physician clearance gate'},
+  {id:'treat', ic:'⚡', t:'Treatment',    sub:'EpiLaze session'},
+  {id:'pay',   ic:'💳', t:'Payments',     sub:'Packages &amp; balances'},
+  {id:'equip', ic:'🔧', t:'Equipment',    sub:'Pulse counts &amp; service'}
+];
+var cur='today', curClient=null;
+function renderNav(){
+  var pend = DB.clients.filter(function(c){ return !(c.gfe&&c.gfe.cleared); }).length;
+  document.getElementById('nav').innerHTML = SECTIONS.map(function(s){
+    var b = (s.id==='gfe'&&pend)?'<span class="badge">'+pend+'</span>':'';
+    return '<div class="nav'+(cur===s.id?' on':'')+'" onclick="go(\''+s.id+'\')"><span class="ic">'+s.ic+'</span>'+s.t+b+'</div>';
+  }).join('');
+}
+function go(id){ cur=id; curClient=null; render(); }
+function render(){
+  var s = SECTIONS.filter(function(x){return x.id===cur;})[0];
+  document.getElementById('secTitle').innerHTML = s.t;
+  document.getElementById('secSub').innerHTML = s.sub;
+  document.getElementById('topRight').innerHTML = (IS_DEMO?'<span class="pill demo">🧪 DEMO · sample data</span>':'') + '<span class="pill md">Dr. Falcon · Medical Director</span>';
+  renderNav();
+  var v = document.getElementById('view');
+  if(cur==='today') v.innerHTML = viewToday();
+  else if(cur==='clients') v.innerHTML = curClient? viewClient(curClient) : viewClients();
+  else if(cur==='gfe') v.innerHTML = curClient? viewGfeForm(curClient) : viewGfe();
+  else if(cur==='treat') v.innerHTML = viewTreat();
+  else if(cur==='pay') v.innerHTML = viewPay();
+  else if(cur==='equip') v.innerHTML = viewEquip();
+}
+
+/* ---------- helpers ---------- */
+function clientById(id){ return DB.clients.filter(function(c){return c.id===id;})[0]; }
+function statusTag(c){
+  if(!(c.gfe&&c.gfe.cleared)) return '<span class="tag none">GFE needed</span>';
+  return '<span class="tag ok">Cleared '+esc(c.gfe.approved.map(function(h){return h+'nm';}).join('/'))+'</span>';
+}
+function balance(c){
+  var paid = (c.payments||[]).reduce(function(a,p){return a+(+p.amount||0);},0);
+  var done = (c.sessions||[]).length;
+  var pkg = c.package&&c.package.total? c.package.total : 0;
+  return { paid:paid, done:done, remaining: c.package? Math.max(0,(c.package.sessionsPaid||0)-done):0, pkg:pkg };
+}
+
+/* ---------- TODAY ---------- */
+function viewToday(){
+  var total=DB.clients.length, pend=DB.clients.filter(function(c){return !(c.gfe&&c.gfe.cleared);}).length;
+  var sessions=DB.clients.reduce(function(a,c){return a+(c.sessions||[]).length;},0);
+  var rev=DB.clients.reduce(function(a,c){return a+(c.payments||[]).reduce(function(x,p){return x+(+p.amount||0);},0);},0);
+  var rows=DB.clients.map(function(c){
+    var b=balance(c);
+    return '<div class="crow" onclick="openClient(\''+c.id+'\')"><div><div class="nm">'+esc(c.name)+'</div><div class="meta">Fitz '+esc(c.fitz||'—')+' · '+esc((c.areas||[]).join(', ')||'no areas')+'</div></div><div class="sp">'+statusTag(c)+(b.remaining?'<span class="tag info">'+b.remaining+' left</span>':'')+'</div></div>';
+  }).join('');
+  return '<div class="grid g4" style="margin-bottom:16px">'
+    +'<div class="stat"><div class="n teal">'+total+'</div><div class="l">Active clients</div></div>'
+    +'<div class="stat"><div class="n gold">'+pend+'</div><div class="l">Awaiting GFE</div></div>'
+    +'<div class="stat"><div class="n">'+sessions+'</div><div class="l">Sessions logged</div></div>'
+    +'<div class="stat"><div class="n green">'+money(rev)+'</div><div class="l">Collected</div></div>'
+    +'</div>'
+    +'<div class="card"><h2><span class="ic">📋</span>Clients &amp; status</h2>'+(rows? '<div class="clist">'+rows+'</div>':'<div class="empty">No clients yet — add one under <b>Clients</b>.</div>')+'</div>';
+}
+
+/* ---------- CLIENTS ---------- */
+function viewClients(){
+  var rows=DB.clients.map(function(c){
+    return '<div class="crow" onclick="openClient(\''+c.id+'\')"><div><div class="nm">'+esc(c.name)+'</div><div class="meta">'+esc(c.phone||'')+' · Fitz '+esc(c.fitz||'—')+'</div></div><div class="sp">'+statusTag(c)+'</div></div>';
+  }).join('');
+  return '<div class="grid g2"><div>'
+    +'<div class="card"><h2><span class="ic">➕</span>New client</h2>'
+    +'<label>Name</label><input id="f_name" placeholder="First initial + last name">'
+    +'<div class="row"><div><label>Phone</label><input id="f_phone"></div><div><label>Email</label><input id="f_email"></div></div>'
+    +'<div class="row"><div><label>Age / DOB</label><input id="f_dob"></div>'
+    +'<div><label>Fitzpatrick skin type</label><select id="f_fitz">'+FITZ.map(function(x){return '<option>'+x+'</option>';}).join('')+'</select></div></div>'
+    +'<div class="row"><div><label>Hair color</label><input id="f_hair" placeholder="e.g. dark brown"></div>'
+    +'<div><label>Recent tan / sun (last 4 wks)?</label><select id="f_tan"><option value="no">No</option><option value="yes">Yes</option></select></div></div>'
+    +'<label>Medications (photosensitizing?)</label><input id="f_meds" placeholder="e.g. none / isotretinoin / doxycycline">'
+    +'<label>Contraindications / history</label><textarea id="f_contra" placeholder="pregnancy, keloids, active infection, melasma, prior burns…"></textarea>'
+    +'<button class="btn" style="margin-top:12px" onclick="addClient()">Add client</button>'
+    +'<div class="note">Intake is PHI — stored on this device only. The physician GFE clears the client before any treatment.</div>'
+    +'</div></div>'
+    +'<div><div class="card"><h2><span class="ic">👥</span>Clients</h2>'+(rows?'<div class="clist">'+rows+'</div>':'<div class="empty">No clients yet.</div>')+'</div></div></div>';
+}
+function addClient(){
+  var name=(document.getElementById('f_name').value||'').trim();
+  if(!name){ alert('Client name required'); return; }
+  DB.clients.push({ id:uid(), name:name,
+    phone:document.getElementById('f_phone').value, email:document.getElementById('f_email').value, dob:document.getElementById('f_dob').value,
+    fitz:document.getElementById('f_fitz').value, hairColor:document.getElementById('f_hair').value, tan:document.getElementById('f_tan').value,
+    meds:document.getElementById('f_meds').value, contra:document.getElementById('f_contra').value,
+    areas:[], gfe:{cleared:false}, sessions:[], payments:[], package:null });
+  save(); render();
+}
+function openClient(id){ curClient=id; cur='clients'; render(); }
+function viewClient(id){
+  var c=clientById(id); if(!c) return viewClients();
+  var b=balance(c);
+  var sess=(c.sessions||[]).map(function(s){ return '<tr><td>'+esc(s.date)+'</td><td>'+esc(s.area)+'</td><td><span class="hp"><span class="dot" style="background:'+HP[s.hp].color+'"></span>'+s.hp+'nm</span></td><td>'+esc(s.fluence)+' J · '+esc(s.mode)+'</td><td>'+esc(s.response||'')+'</td></tr>'; }).join('');
+  var areaChips = AREAS.map(function(a){ var on=(c.areas||[]).indexOf(a)>-1; return '<span class="tag '+(on?'info':'')+'" style="cursor:pointer;'+(on?'':'opacity:.5')+'" onclick="toggleArea(\''+c.id+'\',\''+a.replace(/'/g,"\\'")+'\')">'+esc(a)+'</span>'; }).join(' ');
+  return '<span class="back" onclick="go(\'clients\')">← All clients</span>'
+    +'<div class="grid g2">'
+    +'<div class="card"><h2><span class="ic">👤</span>'+esc(c.name)+' &nbsp;'+statusTag(c)+'</h2>'
+    +'<table><tr><th>Phone</th><td>'+esc(c.phone||'—')+'</td></tr><tr><th>Email</th><td>'+esc(c.email||'—')+'</td></tr>'
+    +'<tr><th>Age/DOB</th><td>'+esc(c.dob||'—')+'</td></tr><tr><th>Fitzpatrick</th><td>'+esc(c.fitz)+' → recommended '+recHP(c.fitz)+' nm</td></tr>'
+    +'<tr><th>Hair</th><td>'+esc(c.hairColor||'—')+'</td></tr><tr><th>Recent tan</th><td>'+(c.tan==='yes'?'<span style="color:var(--red)">Yes — caution</span>':'No')+'</td></tr>'
+    +'<tr><th>Meds</th><td>'+esc(c.meds||'—')+'</td></tr><tr><th>Contra.</th><td>'+esc(c.contra||'—')+'</td></tr></table>'
+    +'<label style="margin-top:14px">Treatment areas (click to toggle)</label><div style="line-height:2.2">'+areaChips+'</div>'
+    +'</div>'
+    +'<div><div class="card"><h2><span class="ic">🩺</span>GFE (physician gate)</h2>'
+    + (c.gfe&&c.gfe.cleared
+        ? '<div class="flag good">✓ Cleared by '+esc(c.gfe.md)+' on '+esc(c.gfe.date)+'<br>Approved: '+esc(c.gfe.approved.map(function(h){return h+' nm';}).join(', '))+' · Expected '+esc(c.gfe.expected)+' sessions</div><div class="note">'+esc(c.gfe.notes||'')+'</div>'
+        : '<div class="flag warn">⏳ No signed GFE — treatment is locked. Open the <b>GFE</b> section to review &amp; clear.</div><button class="btn sm" style="margin-top:10px" onclick="doGfe(\''+c.id+'\')">Perform GFE →</button>')
+    +'</div>'
+    +'<div class="card" style="margin-top:14px"><h2><span class="ic">💳</span>Package &amp; balance</h2>'
+    +'<div class="row"><div class="stat"><div class="n">'+b.done+'</div><div class="l">Sessions done</div></div><div class="stat"><div class="n teal">'+(c.package?b.remaining:'—')+'</div><div class="l">Remaining</div></div><div class="stat"><div class="n green">'+money(b.paid)+'</div><div class="l">Paid</div></div></div>'
+    +'</div></div>'
+    +'</div>'
+    +'<div class="card" style="margin-top:14px"><h2><span class="ic">📖</span>Session history</h2>'
+    + (sess? '<table><tr><th>Date</th><th>Area</th><th>Handpiece</th><th>Settings</th><th>Skin response</th></tr>'+sess+'</table>' : '<div class="empty">No sessions yet.</div>')
+    +'</div>';
+}
+function toggleArea(id,a){ var c=clientById(id); var i=(c.areas||[]).indexOf(a); if(i>-1)c.areas.splice(i,1); else (c.areas=c.areas||[]).push(a); save(); render(); }
+function doGfe(id){ curClient=id; cur='gfe'; render(); }
+
+/* ---------- GFE (physician) ---------- */
+function viewGfe(){
+  var pend=DB.clients.filter(function(c){return !(c.gfe&&c.gfe.cleared);});
+  var done=DB.clients.filter(function(c){return c.gfe&&c.gfe.cleared;});
+  function row(c,cl){ return '<div class="crow" onclick="doGfe(\''+c.id+'\')"><div><div class="nm">'+esc(c.name)+'</div><div class="meta">Fitz '+esc(c.fitz)+' · '+esc((c.areas||[]).join(', ')||'areas not set')+'</div></div><div class="sp">'+statusTag(c)+'</div></div>'; }
+  return '<div class="card" style="margin-bottom:14px"><div class="note" style="margin:0">The <b>Good-Faith Exam is performed and signed by the supervising physician</b> (Dr. Falcon). Review the client\'s intake and baseline, confirm Fitzpatrick type, approve the matching handpiece(s) and expected sessions, then sign. Treatment stays locked until you clear it.</div></div>'
+    +'<div class="grid g2">'
+    +'<div class="card"><h2><span class="ic">⏳</span>Awaiting GFE ('+pend.length+')</h2>'+(pend.length?'<div class="clist">'+pend.map(row).join('')+'</div>':'<div class="empty">Nothing waiting — all clear.</div>')+'</div>'
+    +'<div class="card"><h2><span class="ic">✓</span>Cleared ('+done.length+')</h2>'+(done.length?'<div class="clist">'+done.map(row).join('')+'</div>':'<div class="empty">None cleared yet.</div>')+'</div>'
+    +'</div>';
+}
+function viewGfeForm(id){
+  var c=clientById(id); if(!c) return viewGfe();
+  var rec=recHP(c.fitz);
+  var warn = c.tan==='yes' ? '<div class="flag warn">⚠ Recent tan/sun reported — consider deferring or reducing fluence; higher burn/dyschromia risk.</div>' : '';
+  var mism = '<div class="flag good">Recommended handpiece for Fitzpatrick '+esc(c.fitz)+': <b>'+rec+' nm</b> ('+esc(HP[rec].use)+').</div>';
+  return '<span class="back" onclick="go(\'gfe\')">← GFE queue</span>'
+    +'<div class="grid g2">'
+    +'<div class="card"><h2><span class="ic">🔎</span>Intake review — '+esc(c.name)+'</h2>'
+    +'<table><tr><th>Fitzpatrick</th><td><b>'+esc(c.fitz)+'</b></td></tr><tr><th>Hair</th><td>'+esc(c.hairColor||'—')+'</td></tr>'
+    +'<tr><th>Recent tan</th><td>'+(c.tan==='yes'?'<span style="color:var(--red)">Yes</span>':'No')+'</td></tr><tr><th>Meds</th><td>'+esc(c.meds||'—')+'</td></tr>'
+    +'<tr><th>Contra.</th><td>'+esc(c.contra||'—')+'</td></tr><tr><th>Areas</th><td>'+esc((c.areas||[]).join(', ')||'—')+'</td></tr></table>'
+    + mism + warn
+    +'</div>'
+    +'<div class="card"><h2><span class="ic">🩺</span>Physician clearance</h2>'
+    +'<label>Approve handpiece(s) — by wavelength/skin type</label>'
+    +'<div style="line-height:2.4">'+Object.keys(HP).map(function(k){ var def=(k===rec); return '<label style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;color:var(--ink);font-weight:600;font-size:13px"><input type="checkbox" id="g_hp_'+k+'" '+(def?'checked':'')+' style="width:auto"> <span class="dot" style="background:'+HP[k].color+'"></span> '+k+' nm <span style="color:var(--dim);font-weight:400">('+HP[k].fitz.join('/')+')</span></label>'; }).join('')+'</div>'
+    +'<div class="row"><div><label>Expected sessions</label><input id="g_exp" type="number" value="8"></div><div><label>Per-session price ($)</label><input id="g_price" type="number" value="120"></div></div>'
+    +'<label>GFE notes / protocol</label><textarea id="g_notes" placeholder="Assessment, clearance rationale, fluence guidance, precautions…">Fitzpatrick '+esc(c.fitz)+'; intake reviewed. Cleared for '+rec+' nm. Conservative first-pass fluence, test spot if any doubt.</textarea>'
+    +'<div class="sig">Signing as <b>Armando A. Falcon, MD</b> · FL ME 84789 · NPI 1447295126 — telehealth GFE, '+today()+'.</div>'
+    +'<button class="btn" style="margin-top:12px" onclick="signGfe(\''+c.id+'\')">✓ Sign &amp; clear for treatment</button>'
+    +'</div></div>';
+}
+function signGfe(id){
+  var c=clientById(id);
+  var approved=Object.keys(HP).filter(function(k){var el=document.getElementById('g_hp_'+k);return el&&el.checked;});
+  if(!approved.length){ alert('Approve at least one handpiece'); return; }
+  c.gfe={ cleared:true, date:today(), md:'Armando A. Falcon, MD · FL ME 84789', approved:approved,
+    expected:+document.getElementById('g_exp').value||0, perSession:+document.getElementById('g_price').value||0,
+    notes:document.getElementById('g_notes').value };
+  if(!c.package){ c.package={ total:(c.gfe.expected*c.gfe.perSession), sessionsPaid:0 }; }
+  save(); curClient=id; cur='clients'; render();
+}
+
+/* ---------- TREATMENT ---------- */
+function viewTreat(){
+  var elig=DB.clients.filter(function(c){return c.gfe&&c.gfe.cleared;});
+  var opts='<option value="">— select a cleared client —</option>'+elig.map(function(c){return '<option value="'+c.id+'">'+esc(c.name)+' (Fitz '+esc(c.fitz)+')</option>';}).join('');
+  var locked=DB.clients.filter(function(c){return !(c.gfe&&c.gfe.cleared);}).length;
+  return '<div class="card"><h2><span class="ic">⚡</span>New EpiLaze session</h2>'
+    + (elig.length? '' : '<div class="flag warn">No clients are cleared yet. The physician GFE must be signed before any treatment. '+ (locked?locked+' client(s) awaiting GFE.':'') +'</div>')
+    +'<label>Client</label><select id="t_client" onchange="onTreatClient()">'+opts+'</select>'
+    +'<div id="t_body"></div>'
+    +'</div>';
+}
+function onTreatClient(){
+  var id=document.getElementById('t_client').value, box=document.getElementById('t_body');
+  if(!id){ box.innerHTML=''; return; }
+  var c=clientById(id);
+  var areaOpts=(c.areas&&c.areas.length?c.areas:AREAS).map(function(a){return '<option>'+esc(a)+'</option>';}).join('');
+  var hpOpts=Object.keys(HP).map(function(k){ var ap=c.gfe.approved.indexOf(k)>-1; return '<option value="'+k+'"'+(k===c.gfe.approved[0]?' selected':'')+'>'+k+' nm '+(ap?'✓ approved':'⚠ NOT approved')+'</option>'; }).join('');
+  box.innerHTML='<div class="flag good" style="margin-top:14px">✓ Cleared by '+esc(c.gfe.md)+' — approved: '+esc(c.gfe.approved.map(function(h){return h+' nm';}).join(', '))+'. Fitzpatrick '+esc(c.fitz)+'.</div>'
+    +'<div class="row"><div><label>Treatment area</label><select id="t_area">'+areaOpts+'</select></div>'
+    +'<div><label>Handpiece</label><select id="t_hp" onchange="checkHp(\''+id+'\')">'+hpOpts+'</select></div>'
+    +'<div><label>Mode</label><select id="t_mode"><option>STANDARD</option><option>SFT (motion)</option></select></div></div>'
+    +'<div id="t_hpwarn"></div>'
+    +'<div class="row"><div><label>Fluence (J/cm²)</label><input id="t_flu" type="number" step="0.1"></div>'
+    +'<div><label>Pulse width (ms)</label><input id="t_pw" type="number"></div>'
+    +'<div><label>Rate (Hz)</label><input id="t_hz" type="number" step="0.5"></div></div>'
+    +'<div class="row"><div><label>Cooling (°C / level)</label><input id="t_cool"></div>'
+    +'<div><label>Passes</label><input id="t_pass" type="number"></div>'
+    +'<div><label>Pulses this session</label><input id="t_pulse" type="number" placeholder="count"></div></div>'
+    +'<label>Skin response</label><input id="t_resp" placeholder="e.g. perifollicular erythema, resolved <30 min">'
+    +'<label>Next-session recommendation</label><input id="t_next" placeholder="e.g. +2–3 J fluence if tolerated">'
+    +'<button class="btn" style="margin-top:12px" onclick="saveSession(\''+id+'\')">Save session &amp; log pulses</button>';
+  checkHp(id);
+}
+function checkHp(id){
+  var c=clientById(id), hp=document.getElementById('t_hp').value, w=document.getElementById('t_hpwarn');
+  var approved=c.gfe.approved.indexOf(hp)>-1;
+  var fitzOk=HP[hp].fitz.indexOf(c.fitz)>-1;
+  if(approved&&fitzOk){ w.innerHTML='<div class="flag good">'+hp+' nm is approved and matches Fitzpatrick '+esc(c.fitz)+'.</div>'; }
+  else{ w.innerHTML='<div class="flag warn">⚠ '+hp+' nm is '+(approved?'':'NOT on the signed GFE')+(approved?'':' and ')+(fitzOk?'':'not the recommended wavelength for Fitzpatrick '+esc(c.fitz)+' (use '+recHP(c.fitz)+' nm)')+'. Do not proceed outside the physician-approved plan without re-clearance.</div>'; }
+}
+function saveSession(id){
+  var c=clientById(id);
+  var hp=document.getElementById('t_hp').value;
+  if(c.gfe.approved.indexOf(hp)<0){ if(!confirm('This handpiece is NOT on the signed GFE. Recording it will flag the session. Continue?')) return; }
+  var pulses=+document.getElementById('t_pulse').value||0;
+  c.sessions.push({ date:today(), area:document.getElementById('t_area').value, hp:hp, mode:document.getElementById('t_mode').value,
+    fluence:document.getElementById('t_flu').value, pw:document.getElementById('t_pw').value, hz:document.getElementById('t_hz').value,
+    cooling:document.getElementById('t_cool').value, passes:document.getElementById('t_pass').value, pulses:pulses,
+    response:document.getElementById('t_resp').value, next:document.getElementById('t_next').value });
+  if(pulses){ DB.equipment[hp]=(DB.equipment[hp]||0)+pulses; DB.equipment.system=(DB.equipment.system||0)+pulses; }
+  save(); curClient=id; cur='clients'; render();
+}
+
+/* ---------- PAYMENTS ---------- */
+function viewPay(){
+  var opts='<option value="">— select client —</option>'+DB.clients.map(function(c){return '<option value="'+c.id+'">'+esc(c.name)+'</option>';}).join('');
+  var rows=DB.clients.map(function(c){ var b=balance(c); return '<tr><td>'+esc(c.name)+'</td><td>'+(c.package?money(c.package.total):'—')+'</td><td>'+money(b.paid)+'</td><td>'+b.done+'</td><td>'+(c.package?b.remaining:'—')+'</td></tr>'; }).join('');
+  return '<div class="grid g2"><div class="card"><h2><span class="ic">➕</span>Record payment</h2>'
+    +'<div class="note" style="margin:0 0 8px">Track-only — the card is run on the clinic\'s own terminal; AllyOS records it. No card data is stored here.</div>'
+    +'<label>Client</label><select id="p_client">'+opts+'</select>'
+    +'<div class="row"><div><label>Type</label><select id="p_type"><option>Deposit</option><option>Single session</option><option>Package</option><option>Refund</option></select></div>'
+    +'<div><label>Amount ($)</label><input id="p_amt" type="number" step="0.01"></div></div>'
+    +'<label>Note (receipt ref, method)</label><input id="p_note" placeholder="e.g. Visa ••42 · receipt #1032">'
+    +'<button class="btn" style="margin-top:12px" onclick="addPay()">Record</button></div>'
+    +'<div class="card"><h2><span class="ic">📊</span>Balances</h2>'+(rows?'<table><tr><th>Client</th><th>Package</th><th>Paid</th><th>Done</th><th>Left</th></tr>'+rows+'</table>':'<div class="empty">No clients yet.</div>')+'</div></div>';
+}
+function addPay(){
+  var id=document.getElementById('p_client').value; if(!id){ alert('Select a client'); return; }
+  var c=clientById(id); var amt=+document.getElementById('p_amt').value||0; var type=document.getElementById('p_type').value;
+  if(type==='Refund') amt=-Math.abs(amt);
+  c.payments.push({ date:today(), type:type, amount:amt, note:document.getElementById('p_note').value });
+  save(); render();
+}
+
+/* ---------- EQUIPMENT ---------- */
+function viewEquip(){
+  var e=DB.equipment;
+  function card(k,extra){ return '<div class="stat"><div class="n" style="color:'+(HP[k]?HP[k].color:'var(--gold)')+'">'+(e[k]||0).toLocaleString()+'</div><div class="l">'+extra+'</div></div>'; }
+  return '<div class="card" style="margin-bottom:14px"><div class="note" style="margin:0">Rohrer <b>EpiLaze</b> (2021) · 3 diode handpieces. Pulse counts below start from the machine\'s actual readings and increment automatically as you log treatments.</div></div>'
+    +'<div class="grid g4" style="margin-bottom:16px">'
+    +'<div class="stat"><div class="n">'+(e.system||0).toLocaleString()+'</div><div class="l">System pulses</div></div>'
+    + card('755','755 nm handpiece (I–II)') + card('810','810 nm handpiece (III–IV)') + card('1064','1064 nm handpiece (V–VI)')
+    +'</div>'
+    +'<div class="card"><h2><span class="ic">🛠️</span>Service &amp; maintenance</h2>'
+    +'<div class="row"><div><label>Log entry</label><input id="e_note" placeholder="e.g. water refill, handpiece calibration, annual PM"></div><div style="flex:0 0 auto;display:flex;align-items:flex-end"><button class="btn sm" onclick="addService()">Add</button></div></div>'
+    + ((e.serviceLog&&e.serviceLog.length)? '<table style="margin-top:12px"><tr><th>Date</th><th>Entry</th></tr>'+e.serviceLog.map(function(s){return '<tr><td>'+esc(s.date)+'</td><td>'+esc(s.note)+'</td></tr>';}).join('')+'</table>' : '<div class="note">No service entries yet.</div>')
+    +'</div>';
+}
+function addService(){ var n=(document.getElementById('e_note').value||'').trim(); if(!n)return; (DB.equipment.serviceLog=DB.equipment.serviceLog||[]).push({date:today(),note:n}); save(); render(); }
+
+/* ---------- boot ---------- */
+if(IS_DEMO){ seedDemo(); } else { load(); }
+render();
+</script>
+</body>
+</html>
