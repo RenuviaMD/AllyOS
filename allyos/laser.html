@@ -136,6 +136,7 @@ function addYear(d){ try{ var x=new Date(d); x.setFullYear(x.getFullYear()+1); r
 /* ============ storage ============ */
 var KEY='allyos_hairremoval_v1';
 var IS_DEMO = location.search.indexOf('demo=1')>-1 || location.search.indexOf('tour=1')>-1;
+var ROLE = /[?&]role=md/.test(location.search) ? 'md' : 'tech';  /* tech = electrologist (default) · md = physician GFE view */
 function fresh(){ return { clients:[], equipment:{ system:653170, '755':2238, '810':169085, '1064':402514, serviceLog:[] } }; }
 var DB;
 function load(){ try{ DB=JSON.parse(localStorage.getItem(KEY))||fresh(); }catch(e){ DB=fresh(); } if(!DB.equipment) DB.equipment=fresh().equipment; }
@@ -203,20 +204,21 @@ function seedDemo(){
 
 /* ============ nav ============ */
 var SECTIONS=[
-  {id:'today',ic:'📅',t:'Today',    sub:'Schedule &amp; status'},
-  {id:'clients',ic:'👤',t:'Clients', sub:'Records, intake &amp; contraindication screen'},
-  {id:'gfe',ic:'🩺',t:'GFE',        sub:'Physician clearance — $35, valid 1 year'},
-  {id:'treat',ic:'⚡',t:'Treatment', sub:'Electrolysis or laser session'},
-  {id:'pay',ic:'💳',t:'Payments',   sub:'GFE fee, packages &amp; balances'},
-  {id:'equip',ic:'🔧',t:'Equipment', sub:'EpiLaze pulse counts &amp; service'}
+  {id:'today',ic:'📅',t:'Today',    sub:'Schedule &amp; status', roles:['tech','md']},
+  {id:'clients',ic:'👤',t:'Clients', sub:'Records &amp; intake', roles:['tech','md']},
+  {id:'gfe',ic:'🩺',t:'GFE',        sub:'Physician clearance — $35, valid 1 year · approve or 15-min tele-visit', roles:['md']},
+  {id:'treat',ic:'⚡',t:'Treatment', sub:'Electrolysis or laser session', roles:['tech']},
+  {id:'pay',ic:'💳',t:'Payments',   sub:'Packages, receipts &amp; balances', roles:['tech']},
+  {id:'equip',ic:'🔧',t:'Equipment', sub:'EpiLaze pulse counts &amp; service', roles:['tech']}
 ];
-var cur='today', curClient=null, treatMod='electro';
+var cur=(ROLE==='md'?'gfe':'today'), curClient=null, treatMod='electro';
+function secAllowed(id){ var s=SECTIONS.filter(function(x){return x.id===id;})[0]; return s&&s.roles.indexOf(ROLE)>-1; }
 function renderNav(){ var pend=DB.clients.filter(function(c){return !gfeValid(c);}).length;
-  document.getElementById('nav').innerHTML=SECTIONS.map(function(s){ var b=(s.id==='gfe'&&pend)?'<span class="badge">'+pend+'</span>':''; return '<div class="nav'+(cur===s.id?' on':'')+'" onclick="go(\''+s.id+'\')"><span class="ic">'+s.ic+'</span>'+s.t+b+'</div>'; }).join(''); }
+  document.getElementById('nav').innerHTML=SECTIONS.filter(function(s){return s.roles.indexOf(ROLE)>-1;}).map(function(s){ var b=(s.id==='gfe'&&pend)?'<span class="badge">'+pend+'</span>':''; return '<div class="nav'+(cur===s.id?' on':'')+'" onclick="go(\''+s.id+'\')"><span class="ic">'+s.ic+'</span>'+s.t+b+'</div>'; }).join(''); }
 function go(id){ cur=id; curClient=null; render(); }
-function render(){ var s=SECTIONS.filter(function(x){return x.id===cur;})[0];
+function render(){ if(!secAllowed(cur)) cur=(ROLE==='md'?'gfe':'today'); var s=SECTIONS.filter(function(x){return x.id===cur;})[0];
   document.getElementById('secTitle').innerHTML=s.t; document.getElementById('secSub').innerHTML=s.sub;
-  document.getElementById('topRight').innerHTML=(IS_DEMO?'<span class="pill demo">🧪 DEMO · sample data</span>':'')+'<span class="pill md">Dr. Falcon · Medical Director</span>';
+  document.getElementById('topRight').innerHTML=(IS_DEMO?'<span class="pill demo">🧪 DEMO · sample data</span>':'')+'<span class="pill md">'+(ROLE==='md'?'Dr. Falcon · Medical Director':'Electrologist · treatment suite')+'</span>';
   renderNav(); var v=document.getElementById('view');
   if(cur==='today') v.innerHTML=viewToday();
   else if(cur==='clients') v.innerHTML=curClient?viewClient(curClient):viewClients();
@@ -283,8 +285,8 @@ function viewClient(id){ var c=clientById(id); if(!c) return viewClients(); var 
     + (gfeValid(c)
         ? '<div class="flag good">✓ Cleared by '+esc(c.gfe.md)+' on '+esc(c.gfe.date)+' · <b>valid until '+esc(c.gfe.expires||'—')+'</b><br>Fitzpatrick <b>'+esc(c.gfe.fitzConfirmed||c.fitz)+'</b> (physician-confirmed) · Approved: '+(modBadges(c)||'—')+' · Fee '+money(c.gfe.fee||0)+' · '+esc(c.gfe.expected||0)+' est. sessions</div><div class="note">'+esc(c.gfe.notes||'')+'</div>'
         : (c.gfe&&c.gfe.telehealth&&!c.gfe.cleared
-            ? '<div class="flag amber">📹 Live telehealth GFE pending'+(c.gfe.telehealth.link?' — <a href="'+esc(c.gfe.telehealth.link)+'" target="_blank" style="color:var(--teal)">open Doxy.me room</a>':' (link pending)')+'. Complete the exam, then clear.</div><button class="btn sm" style="margin-top:10px" onclick="doGfe(\''+c.id+'\')">Complete GFE →</button>'
-            : (gfeExpired(c)? '<div class="flag warn">⏳ GFE expired '+esc(c.gfe.expires)+' — treatment locked. Re-clear to continue.</div>' : '<div class="flag warn">⏳ No signed GFE — treatment locked.</div>')+'<button class="btn sm" style="margin-top:10px" onclick="doGfe(\''+c.id+'\')">Perform GFE →</button>'))
+            ? '<div class="flag amber">📹 Live telehealth GFE pending'+(c.gfe.telehealth.link?' — <a href="'+esc(c.gfe.telehealth.link)+'" target="_blank" style="color:var(--teal)">open Doxy.me room</a>':' (link pending)')+'. Complete the exam, then clear.</div>'+(ROLE==='md'?'<button class="btn sm" style="margin-top:10px" onclick="doGfe(\''+c.id+'\')">Complete GFE →</button>':'<div class="note">Awaiting physician tele-visit.</div>')
+            : (gfeExpired(c)? '<div class="flag warn">⏳ GFE expired '+esc(c.gfe.expires)+' — treatment locked. Re-clear to continue.</div>' : '<div class="flag warn">⏳ No signed GFE — treatment locked.</div>')+(ROLE==='md'?'<button class="btn sm" style="margin-top:10px" onclick="doGfe(\''+c.id+'\')">Perform GFE →</button>':'<div class="note">Awaiting physician GFE.</div>')))
     +'</div>'
     +'<div class="card" style="margin-top:14px"><h2><span class="ic">💳</span>Balance</h2><div class="row"><div class="stat"><div class="n">'+b.done+'</div><div class="l">Sessions</div></div><div class="stat"><div class="n teal">'+(c.package?b.remaining:'—')+'</div><div class="l">Remaining</div></div><div class="stat"><div class="n green">'+money(b.paid)+'</div><div class="l">Paid</div></div></div></div>'
     +'</div></div>'
