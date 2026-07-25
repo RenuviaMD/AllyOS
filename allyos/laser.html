@@ -137,6 +137,7 @@ function addYear(d){ try{ var x=new Date(d); x.setFullYear(x.getFullYear()+1); r
 var KEY='allyos_hairremoval_v1';
 var IS_DEMO = location.search.indexOf('demo=1')>-1 || location.search.indexOf('tour=1')>-1;
 var ROLE = /[?&]role=md/.test(location.search) ? 'md' : 'tech';  /* tech = electrologist (default) · md = physician GFE view */
+var IS_INTAKE = /[?&]intake=1/.test(location.search);  /* client self-intake questionnaire */
 function fresh(){ return { clients:[], equipment:{ system:653170, '755':2238, '810':169085, '1064':402514, serviceLog:[] } }; }
 var DB;
 function load(){ try{ DB=JSON.parse(localStorage.getItem(KEY))||fresh(); }catch(e){ DB=fresh(); } if(!DB.equipment) DB.equipment=fresh().equipment; }
@@ -410,9 +411,40 @@ function viewEquip(){ var e=DB.equipment;
 }
 function addService(){ var n=(document.getElementById('e_note').value||'').trim(); if(!n)return; (DB.equipment.serviceLog=DB.equipment.serviceLog||[]).push({date:today(),note:n}); save(); render(); }
 
+/* ============ client self-intake (minimal, tap-based) ============ */
+var _iAreas=[];
+function toggleIntakeArea(el,a){ var i=_iAreas.indexOf(a); if(i>-1){_iAreas.splice(i,1);el.style.opacity='.5';el.classList.remove('info');} else {_iAreas.push(a);el.style.opacity='1';el.classList.add('info');} }
+function showIntake(){
+  document.querySelector('.app').style.display='none';
+  var w=document.createElement('div'); w.id='intakeWrap'; w.style.cssText='max-width:600px;margin:0 auto;padding:28px 18px 60px';
+  w.innerHTML='<div style="text-align:center;margin-bottom:18px"><div style="font-weight:800;font-size:1.3rem">Renuvia<span style="color:var(--gold)">MD</span>® · Hair Removal</div><div style="color:var(--muted);font-size:13px;margin-top:4px">New-client intake — about a minute, mostly taps</div></div>'
+    +'<div class="card">'
+    +'<label>Your name *</label><input id="i_name">'
+    +'<div class="row"><div><label>Phone</label><input id="i_phone" type="tel"></div><div><label>Email</label><input id="i_email" type="email"></div></div>'
+    +'<label>Date of birth / age</label><input id="i_dob">'
+    +'<label style="margin-top:14px">Where would you like treatment? <span style="color:var(--dim)">(tap all that apply)</span></label><div style="line-height:2.5">'+AREAS.map(function(a){return '<span class="tag" style="cursor:pointer;opacity:.5" onclick="toggleIntakeArea(this,\''+a.replace(/'/g,"\\'")+'\')">'+esc(a)+'</span>';}).join(' ')+'</div>'
+    +'<label style="margin-top:16px">Please tap anything that applies to your health</label>'+CONTRA.map(function(cx){return '<label class="ck"><input type="checkbox" id="i_cx_'+cx.k+'"> '+esc(cx.t)+'</label>';}).join('')
+    +'<label style="margin-top:12px">Current medications <span style="color:var(--dim)">(or leave blank)</span></label><input id="i_meds">'
+    +'<label class="ck" style="margin-top:16px"><input type="checkbox" id="i_consent"> I consent to a telehealth Good-Faith Exam by the supervising physician before treatment.</label>'
+    +'<button class="btn" style="margin-top:16px;width:100%" onclick="submitIntake()">Submit intake</button>'
+    +'<div class="note" style="text-align:center">Your information stays private on the clinic device. A physician reviews it before any treatment.</div>'
+    +'</div>';
+  document.body.insertBefore(w, document.getElementById('lightbox'));
+}
+function submitIntake(){
+  var name=(document.getElementById('i_name').value||'').trim(); if(!name){alert('Please enter your name');return;}
+  if(!document.getElementById('i_consent').checked){alert('Please check the consent box to continue');return;}
+  var contra=CONTRA.filter(function(cx){return document.getElementById('i_cx_'+cx.k).checked;}).map(function(cx){return cx.k;});
+  DB.clients.push({ id:uid(), name:name, phone:document.getElementById('i_phone').value, email:document.getElementById('i_email').value, dob:document.getElementById('i_dob').value,
+    fitz:'III', hairColor:'', meds:document.getElementById('i_meds').value, prior:'', hx:'', contra:contra, areas:_iAreas.slice(),
+    photos:[], gfe:{cleared:false}, sessions:[], payments:[], package:null, selfIntake:true });
+  save();
+  document.getElementById('intakeWrap').innerHTML='<div class="card" style="text-align:center;max-width:480px;margin:40px auto"><div style="font-size:2.4rem">✓</div><h2 style="justify-content:center">Thank you, '+esc(name.split(' ')[0])+'</h2><p style="color:var(--muted);line-height:1.6">Your intake is submitted. A physician reviews it before your appointment — you\'re all set. You can close this page.</p></div>';
+}
+
 /* ============ boot ============ */
 if(IS_DEMO){ seedDemo(); } else { load(); }
-render();
+if(IS_INTAKE){ showIntake(); } else { render(); }
 </script>
 </body>
 </html>
