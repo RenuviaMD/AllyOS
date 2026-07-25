@@ -147,10 +147,12 @@ function clientById(id){ return DB.clients.filter(function(c){return c.id===id;}
 function gfeValid(c){ return !!(c.gfe&&c.gfe.cleared&&(!c.gfe.expires||c.gfe.expires>=today())); }
 function gfeExpired(c){ return !!(c.gfe&&c.gfe.cleared&&c.gfe.expires&&c.gfe.expires<today()); }
 function statusTag(c){
+  if(c.gfe&&c.gfe.telehealth&&!c.gfe.cleared) return '<span class="tag wait">📹 Telehealth visit</span>';
   if(gfeExpired(c)) return '<span class="tag none">GFE expired</span>';
   if(!(c.gfe&&c.gfe.cleared)) return '<span class="tag none">GFE needed</span>';
   return '<span class="tag ok">Cleared</span>';
 }
+function scheduleTele(id){ var c=clientById(id); var link=(document.getElementById('g_doxy')||{}).value||''; c.gfe={ cleared:false, telehealth:{link:link, requested:today()}, md:'Armando A. Falcon, MD · FL ME 84789' }; save(); curClient=id; cur='clients'; render(); }
 function modBadges(c){
   if(!gfeValid(c)) return '';
   var b=[];
@@ -246,7 +248,9 @@ function viewClients(){
     +'<label>Name</label><input id="f_name" placeholder="First initial + last name">'
     +'<div class="row"><div><label>Phone</label><input id="f_phone"></div><div><label>Email</label><input id="f_email"></div></div>'
     +'<div class="row"><div><label>Age / DOB</label><input id="f_dob"></div><div><label>Fitzpatrick skin type</label><select id="f_fitz">'+FITZ.map(function(x){return '<option>'+x+'</option>';}).join('')+'</select></div></div>'
-    +'<label>Hair morphology (goals)</label><input id="f_hair" placeholder="e.g. coarse dark chin/lip; gender-affirming clearing">'
+    +'<label>Hair morphology (coarse / fine / distorted follicles)</label><input id="f_hair" placeholder="e.g. coarse dark chin/lip; gender-affirming clearing">'
+    +'<div class="row"><div><label>Current medications</label><input id="f_meds" placeholder="e.g. none / spironolactone / metformin"></div><div><label>Prior hair removal</label><input id="f_prior" placeholder="e.g. waxing, prior laser"></div></div>'
+    +'<label>Medical / hormonal history (PCOS, thyroid, skin)</label><input id="f_hx" placeholder="e.g. PCOS, hypothyroid, eczema">'
     +'<label style="margin-top:14px">Contraindication screen — check any that apply</label>'
     + CONTRA.map(function(cx){ return '<label class="ck"><input type="checkbox" id="f_cx_'+cx.k+'"> '+esc(cx.t)+'</label>'; }).join('')
     +'<button class="btn" style="margin-top:12px" onclick="addClient()">Add client</button>'
@@ -257,7 +261,8 @@ function viewClients(){
 function addClient(){ var name=(document.getElementById('f_name').value||'').trim(); if(!name){alert('Client name required');return;}
   var contra=CONTRA.filter(function(cx){var el=document.getElementById('f_cx_'+cx.k);return el&&el.checked;}).map(function(cx){return cx.k;});
   DB.clients.push({ id:uid(), name:name, phone:document.getElementById('f_phone').value, email:document.getElementById('f_email').value, dob:document.getElementById('f_dob').value,
-    fitz:document.getElementById('f_fitz').value, hairColor:document.getElementById('f_hair').value, contra:contra,
+    fitz:document.getElementById('f_fitz').value, hairColor:document.getElementById('f_hair').value,
+    meds:(document.getElementById('f_meds')||{}).value||'', prior:(document.getElementById('f_prior')||{}).value||'', hx:(document.getElementById('f_hx')||{}).value||'', contra:contra,
     areas:[], photos:[], gfe:{cleared:false}, sessions:[], payments:[], package:null });
   save(); render();
 }
@@ -276,7 +281,9 @@ function viewClient(id){ var c=clientById(id); if(!c) return viewClients(); var 
     +'<div><div class="card"><h2><span class="ic">🩺</span>GFE (physician gate)</h2>'
     + (gfeValid(c)
         ? '<div class="flag good">✓ Cleared by '+esc(c.gfe.md)+' on '+esc(c.gfe.date)+' · <b>valid until '+esc(c.gfe.expires||'—')+'</b><br>Approved: '+(modBadges(c)||'—')+' · Fee '+money(c.gfe.fee||0)+' · '+esc(c.gfe.expected||0)+' est. sessions</div><div class="note">'+esc(c.gfe.notes||'')+'</div>'
-        : (gfeExpired(c)? '<div class="flag warn">⏳ GFE expired '+esc(c.gfe.expires)+' — treatment locked. Re-clear to continue.</div>' : '<div class="flag warn">⏳ No signed GFE — treatment locked.</div>')+'<button class="btn sm" style="margin-top:10px" onclick="doGfe(\''+c.id+'\')">Perform GFE →</button>')
+        : (c.gfe&&c.gfe.telehealth&&!c.gfe.cleared
+            ? '<div class="flag amber">📹 Live telehealth GFE pending'+(c.gfe.telehealth.link?' — <a href="'+esc(c.gfe.telehealth.link)+'" target="_blank" style="color:var(--teal)">open Doxy.me room</a>':' (link pending)')+'. Complete the exam, then clear.</div><button class="btn sm" style="margin-top:10px" onclick="doGfe(\''+c.id+'\')">Complete GFE →</button>'
+            : (gfeExpired(c)? '<div class="flag warn">⏳ GFE expired '+esc(c.gfe.expires)+' — treatment locked. Re-clear to continue.</div>' : '<div class="flag warn">⏳ No signed GFE — treatment locked.</div>')+'<button class="btn sm" style="margin-top:10px" onclick="doGfe(\''+c.id+'\')">Perform GFE →</button>'))
     +'</div>'
     +'<div class="card" style="margin-top:14px"><h2><span class="ic">💳</span>Balance</h2><div class="row"><div class="stat"><div class="n">'+b.done+'</div><div class="l">Sessions</div></div><div class="stat"><div class="n teal">'+(c.package?b.remaining:'—')+'</div><div class="l">Remaining</div></div><div class="stat"><div class="n green">'+money(b.paid)+'</div><div class="l">Paid</div></div></div></div>'
     +'</div></div>'
@@ -299,7 +306,7 @@ function viewGfeForm(id){ var c=clientById(id); if(!c) return viewGfe(); var rec
   var deferHtml = bothDefer.length? '<div class="flag warn">⚠ '+bothDefer.map(function(x){return esc(x.t);}).join('; ')+' — consider deferring both modalities until resolved.</div>':'';
   return '<span class="back" onclick="go(\'gfe\')">← GFE queue</span><div class="grid g2">'
     +'<div class="card"><h2><span class="ic">🔎</span>Intake review — '+esc(c.name)+'</h2>'
-    +'<table><tr><th>Fitzpatrick</th><td><b>'+esc(c.fitz)+'</b> → laser rec '+rec+' nm</td></tr><tr><th>Hair / goal</th><td>'+esc(c.hairColor||'—')+'</td></tr><tr><th>Areas</th><td>'+esc((c.areas||[]).join(', ')||'—')+'</td></tr></table>'
+    +'<table><tr><th>Fitzpatrick</th><td><b>'+esc(c.fitz)+'</b> → laser rec '+rec+' nm</td></tr><tr><th>Hair / goal</th><td>'+esc(c.hairColor||'—')+'</td></tr><tr><th>Medications</th><td>'+esc(c.meds||'—')+'</td></tr><tr><th>Med / hormonal hx</th><td>'+esc(c.hx||'—')+'</td></tr><tr><th>Prior removal</th><td>'+esc(c.prior||'—')+'</td></tr><tr><th>Areas</th><td>'+esc((c.areas||[]).join(', ')||'—')+'</td></tr></table>'
     + (contraFlags(c).length? '<div class="flag amber">Screen: '+contraFlags(c).map(function(x){return esc(x.t);}).join('; ')+'</div>':'<div class="flag good">No contraindications flagged.</div>')
     + deferHtml
     +'<label style="margin-top:14px">Baseline photos — review before clearing</label>'+photoGrid(c,'baseline')
@@ -311,7 +318,8 @@ function viewGfeForm(id){ var c=clientById(id); if(!c) return viewGfe(); var rec
     +'<div class="row"><div><label>GFE fee ($)</label><input id="g_fee" type="number" value="35"></div><div><label>Est. sessions</label><input id="g_exp" type="number" value="12"></div><div><label>Per-session ($)</label><input id="g_price" type="number" value="60"></div></div>'
     +'<label>GFE notes / protocol</label><textarea id="g_notes">Fitzpatrick '+esc(c.fitz)+'; intake &amp; contraindications reviewed. Conservative first settings; test area if any doubt.</textarea>'
     +'<div class="sig">Signing as <b>Armando A. Falcon, MD</b> · FL ME 84789 · NPI 1447295126 — telehealth GFE, '+today()+'. Valid 1 year (through '+addYear(today())+').</div>'
-    +'<button class="btn" style="margin-top:12px" onclick="signGfe(\''+c.id+'\')">✓ Sign &amp; clear ($'+'35, 1 yr)</button>'
+    +'<label style="margin-top:14px">Needs a live exam? — Doxy.me telehealth room link (optional)</label><input id="g_doxy" placeholder="https://doxy.me/dr-falcon" value="'+esc((c.gfe&&c.gfe.telehealth&&c.gfe.telehealth.link)||'')+'">'
+    +'<div class="row" style="margin-top:12px"><button class="btn" onclick="signGfe(\''+c.id+'\')">✓ Sign &amp; clear ($35, 1 yr)</button><button class="btn ghost" onclick="scheduleTele(\''+c.id+'\')">📹 Requires live visit</button></div>'
     +'</div></div>';
 }
 function signGfe(id){ var c=clientById(id);
