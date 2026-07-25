@@ -76,6 +76,15 @@
   th{color:var(--dim);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em}
   .sig{margin-top:12px;padding:10px 12px;border:1px dashed var(--line2);border-radius:10px;font-size:12px;color:var(--muted)}
   .disc{font-size:10.5px;color:var(--dim);border-top:1px solid var(--line);padding:14px 24px;line-height:1.5}
+  .photos{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .ph{position:relative;width:90px;height:90px;border-radius:9px;overflow:hidden;border:1px solid var(--line2);cursor:pointer;background:#0a1422}
+  .ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .ph .cap{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.62);color:#fff;font-size:9px;padding:2px 4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ph .x{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.65);color:#fff;border-radius:50%;width:17px;height:17px;font-size:12px;line-height:16px;text-align:center}
+  .addph{width:90px;height:90px;border:1px dashed var(--line2);border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--dim);cursor:pointer;font-size:11px;text-align:center}
+  .addph:hover{border-color:var(--teal);color:var(--teal)}
+  #lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;display:none;align-items:center;justify-content:center;padding:30px;cursor:zoom-out}
+  #lightbox img{max-width:92vw;max-height:92vh;border-radius:10px;border:1px solid var(--line2)}
 </style>
 </head>
 <body>
@@ -94,6 +103,7 @@
     <div class="disc">AllyOS Laser · advisory clinical decision-support · <b>PHI stays on this device only</b> — no server, no analytics. The Good-Faith Exam is performed and signed by the supervising physician; treatment is gated on a signed GFE. Device: Rohrer EpiLaze (755/810/1064 nm diode). © 2026 RenuviaMD® Compliance.</div>
   </main>
 </div>
+<div id="lightbox" onclick="this.style.display='none'"><img src="" alt="photo"></div>
 
 <script>
 /* ---------- device + clinical model ---------- */
@@ -108,6 +118,48 @@ function recHP(fitz){ for(var k in HP){ if(HP[k].fitz.indexOf(fitz)>-1) return k
 function esc(s){return (''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function money(n){return '$'+(Math.round((+n||0)*100)/100).toFixed(2);}
 function today(){ try{ return new Date().toISOString().slice(0,10); }catch(e){ return '—'; } }
+
+/* ---------- photos (on-device, resized) ---------- */
+function photoGrid(c, kind){
+  var list=(c.photos||[]).filter(function(p){ return !kind || p.kind===kind; });
+  var thumbs=list.map(function(p){
+    return '<div class="ph" onclick="lightbox(\''+c.id+'\',\''+p.id+'\')"><img src="'+p.data+'" alt=""><span class="cap">'+esc(p.label||'photo')+'</span>'
+      +'<span class="x" onclick="event.stopPropagation();delPhoto(\''+c.id+'\',\''+p.id+'\')">×</span></div>';
+  }).join('');
+  var add='<label class="addph"><span style="font-size:20px">＋</span><span>Add photo</span>'
+    +'<input type="file" accept="image/*" capture="environment" style="display:none" onchange="addPhoto(\''+c.id+'\',this,\''+(kind||'baseline')+'\')"></label>';
+  return '<div class="photos">'+thumbs+add+'</div>';
+}
+function addPhoto(id,input,kind){
+  var f=input.files&&input.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(){
+    var img=new Image();
+    img.onload=function(){
+      var max=1000, w=img.width, h=img.height;
+      if(w>max||h>max){ var s=max/Math.max(w,h); w=Math.round(w*s); h=Math.round(h*s); }
+      var cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+      cv.getContext('2d').drawImage(img,0,0,w,h);
+      var data=cv.toDataURL('image/jpeg',0.72);
+      var c=clientById(id);
+      (c.photos=c.photos||[]).push({ id:'p'+Math.floor(performance.now()), date:today(), kind:kind, label:(kind==='baseline'?'Baseline':'Photo')+' · '+today(), data:data });
+      try{ save(); }catch(e){ alert('Storage full — remove some photos.'); }
+      render();
+    };
+    img.src=r.result;
+  };
+  r.readAsDataURL(f);
+}
+function delPhoto(id,pid){ var c=clientById(id); c.photos=(c.photos||[]).filter(function(p){return p.id!==pid;}); save(); render(); }
+function lightbox(id,pid){ var c=clientById(id); var p=(c.photos||[]).filter(function(x){return x.id===pid;})[0]; if(!p)return; var lb=document.getElementById('lightbox'); lb.querySelector('img').src=p.data; lb.style.display='flex'; }
+function placeholderPhoto(label){
+  var cv=document.createElement('canvas'); cv.width=220; cv.height=220; var x=cv.getContext('2d');
+  var g=x.createLinearGradient(0,0,220,220); g.addColorStop(0,'#13273f'); g.addColorStop(1,'#0a1422'); x.fillStyle=g; x.fillRect(0,0,220,220);
+  x.strokeStyle='#28405c'; x.strokeRect(8,8,204,204);
+  x.fillStyle='#2ee6d6'; x.font='bold 15px sans-serif'; x.textAlign='center'; x.fillText('BASELINE',110,104);
+  x.fillStyle='#8ba0b5'; x.font='12px sans-serif'; x.fillText(label,110,126);
+  return cv.toDataURL('image/jpeg',0.7);
+}
 
 /* ---------- storage ---------- */
 var KEY='allyos_laser_v1';
@@ -125,6 +177,8 @@ function seedDemo(){
     id:'c-demo-1', name:'M. Rivera', phone:'(305) 555-0142', email:'m.rivera@example.com', dob:'34',
     fitz:'IV', hairColor:'Dark brown', meds:'None', contra:'None reported', tan:'no',
     areas:['Underarms','Bikini'],
+    photos:[ {id:'p-demo-1',date:today(),kind:'baseline',label:'Baseline · Underarms',data:placeholderPhoto('Underarms')},
+             {id:'p-demo-2',date:today(),kind:'baseline',label:'Baseline · Bikini',data:placeholderPhoto('Bikini')} ],
     gfe:{ cleared:true, date:today(), md:'Armando A. Falcon, MD · FL ME 84789', approved:['810'], expected:8, perSession:120, notes:'Fitzpatrick IV, no photosensitizing meds, no recent tan. Cleared for 810 nm. Standard fluence ramp; conservative first pass.' },
     sessions:[{ date:today(), area:'Underarms', hp:'810', mode:'STANDARD', fluence:14, pw:30, hz:2, cooling:5, passes:2, pulses:420, response:'Mild perifollicular erythema, resolved <30 min', next:'2–3 mm fluence increase next visit if tolerated' }],
     payments:[{date:today(), type:'Package (8 sessions)', amount:960, note:'Card on terminal'}],
@@ -243,6 +297,7 @@ function viewClient(id){
     +'<tr><th>Hair</th><td>'+esc(c.hairColor||'—')+'</td></tr><tr><th>Recent tan</th><td>'+(c.tan==='yes'?'<span style="color:var(--red)">Yes — caution</span>':'No')+'</td></tr>'
     +'<tr><th>Meds</th><td>'+esc(c.meds||'—')+'</td></tr><tr><th>Contra.</th><td>'+esc(c.contra||'—')+'</td></tr></table>'
     +'<label style="margin-top:14px">Treatment areas (click to toggle)</label><div style="line-height:2.2">'+areaChips+'</div>'
+    +'<label style="margin-top:14px">Baseline photos</label>'+ photoGrid(c,'baseline')
     +'</div>'
     +'<div><div class="card"><h2><span class="ic">🩺</span>GFE (physician gate)</h2>'
     + (c.gfe&&c.gfe.cleared
@@ -283,6 +338,8 @@ function viewGfeForm(id){
     +'<tr><th>Recent tan</th><td>'+(c.tan==='yes'?'<span style="color:var(--red)">Yes</span>':'No')+'</td></tr><tr><th>Meds</th><td>'+esc(c.meds||'—')+'</td></tr>'
     +'<tr><th>Contra.</th><td>'+esc(c.contra||'—')+'</td></tr><tr><th>Areas</th><td>'+esc((c.areas||[]).join(', ')||'—')+'</td></tr></table>'
     + mism + warn
+    +'<label style="margin-top:14px">Baseline photos — review before clearing</label>'+ photoGrid(c,'baseline')
+    +'<div class="note">Standardized before-photos of each treatment area. Reviewed as part of the GFE; stored on this device only.</div>'
     +'</div>'
     +'<div class="card"><h2><span class="ic">🩺</span>Physician clearance</h2>'
     +'<label>Approve handpiece(s) — by wavelength/skin type</label>'
