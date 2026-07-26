@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AllyOS Hair Removal — Electrolysis + Laser · RenuviaMD®</title>
+<title>AllyOS Laser Hair Removal · RenuviaMD®</title>
 <link rel="icon" type="image/png" href="ally-avatar-64.png">
 <style>
   :root{--bg:#060a12;--card:#0d1726;--card2:#0b1422;--line:#1c2a3d;--line2:#28405c;--ink:#eaf3f5;--muted:#8ba0b5;--dim:#5f7185;--teal:#2ee6d6;--green:#2bbf76;--gold:#e7b84e;--red:#e0655a;--pink:#e59ac0;--blue:#6fb7e0}
@@ -98,7 +98,7 @@
       <div class="right" id="topRight"></div>
     </div>
     <div class="view" id="view"></div>
-    <div class="disc">AllyOS Hair Removal · advisory clinical decision-support · <b>PHI stays on this device only</b> — no server. The Good-Faith Exam is performed &amp; signed by the supervising physician; treatment is gated on a valid GFE. Electrolysis (thermolysis / galvanic / blend) + laser (Rohrer EpiLaze 755/810/1064 nm). © 2026 RenuviaMD® Compliance.</div>
+    <div class="disc">AllyOS Hair Removal · advisory clinical decision-support · <b>PHI stays on this device only</b> — no server. The Good-Faith Exam is performed &amp; signed by the supervising physician; treatment is gated on a valid GFE. Laser hair removal — Rohrer EpiLaze 755/810/1064 nm. © 2026 RenuviaMD® Compliance.</div>
   </main>
 </div>
 <div id="lightbox" onclick="this.style.display='none'"><img src="" alt="photo"></div>
@@ -138,6 +138,7 @@ var KEY='allyos_hairremoval_v1';
 var IS_DEMO = location.search.indexOf('demo=1')>-1 || location.search.indexOf('tour=1')>-1;
 var ROLE = /[?&]role=md/.test(location.search) ? 'md' : 'tech';  /* tech = electrologist (default) · md = physician GFE view */
 var IS_INTAKE = /[?&]intake=1/.test(location.search);  /* client self-intake questionnaire */
+var LASER_ONLY = !/[?&]electro=1/.test(location.search);  /* LASER-ONLY is the permanent default — electrolysis needs no physician GFE/supervision and adds no MD liability. Electrolysis stays dormant unless explicitly enabled with ?electro=1. */
 function fresh(){ return { clients:[], equipment:{ system:653170, '755':2238, '810':169085, '1064':402514, serviceLog:[] } }; }
 var DB;
 function load(){ try{ DB=JSON.parse(localStorage.getItem(KEY))||fresh(); }catch(e){ DB=fresh(); } if(!DB.equipment) DB.equipment=fresh().equipment; }
@@ -192,12 +193,12 @@ function placeholderPhoto(label){ var cv=document.createElement('canvas');cv.wid
 function seedDemo(){
   DB=fresh();
   DB.clients.push({ id:'c-demo-1', name:'M. Rivera', phone:'(305) 555-0142', email:'m.rivera@example.com', dob:'34',
-    fitz:'IV', hairColor:'Coarse, dark', contra:[], areas:['Upper lip','Chin'],
+    fitz:'IV', hairColor:'Coarse, dark', contra:[], areas:['Upper lip','Chin'], consent:{signed:true,date:today()},
     photos:[{id:'p1',date:today(),kind:'baseline',label:'Baseline · Upper lip',data:placeholderPhoto('Upper lip')},{id:'p2',date:today(),kind:'baseline',label:'Baseline · Chin',data:placeholderPhoto('Chin')}],
     gfe:{ cleared:true, date:today(), expires:addYear(today()), md:'Armando A. Falcon, MD · FL ME 84789',
-      fitzConfirmed:'IV', laser:['810'], electro:['thermolysis','blend'], fee:35, expected:12, perSession:60,
-      notes:'Fitzpatrick IV; coarse dark facial hair (PCOS pattern). No pacemaker/ICD, no isotretinoin, no recent tan. Cleared for 810 nm laser and thermolysis/blend electrolysis. Conservative first settings.' },
-    sessions:[{ date:today(), modality:'electro', etype:'blend', timing:'0.8', mA:'0.3', probe:'F3 gold', insertions:120, area:'Upper lip', response:'Mild erythema, resolved <20 min', next:'Slight timing increase if tolerated' }],
+      fitzConfirmed:'IV', laser:['810'], electro:[], fee:35, expected:12, perSession:60,
+      notes:'Fitzpatrick IV; coarse dark facial hair (PCOS pattern). No pacemaker/ICD, no isotretinoin, no recent tan. Cleared for 810 nm laser. Conservative first settings.' },
+    sessions:[{ date:today(), modality:'laser', hp:'810', mode:'STANDARD', fluence:'14', pw:'30', hz:'2', cooling:'ice pack', passes:'1', pulses:420, area:'Upper lip', response:'Perifollicular edema, resolved <20 min', next:'Increase fluence to 16 if tolerated' }],
     payments:[{date:today(),type:'GFE (physician clearance)',amount:35,note:'Valid 1 yr'},{date:today(),type:'Package (60-min block)',amount:90,note:'Card on terminal'}],
     package:{ total:720, sessionsPaid:1 } });
   save();
@@ -271,12 +272,13 @@ function addClient(){ var name=(document.getElementById('f_name').value||'').tri
   save(); render();
 }
 function openClient(id){ curClient=id; cur='clients'; render(); }
+function recordConsent(id){ var c=clientById(id); if(!confirm('Confirm the client has signed the laser informed-consent form (risks, no-guarantee, aftercare) before treatment?')) return; c.consent={signed:true, date:today()}; save(); render(); }
 function viewClient(id){ var c=clientById(id); if(!c) return viewClients(); var b=balance(c);
   var sess=(c.sessions||[]).map(function(s){ var set = s.modality==='laser' ? (s.hp+' nm · '+s.fluence+' J · '+s.mode) : (ELECTRO[s.etype].label.split(' ')[0]+' · '+s.timing+'s · '+s.mA+' mA'); return '<tr><td>'+esc(s.date)+'</td><td>'+esc(s.area)+'</td><td>'+(s.modality==='laser'?'⚡ Laser':'🔌 Electrolysis')+'</td><td>'+esc(set)+'</td><td>'+esc(s.response||'')+'</td></tr>'; }).join('');
   var areaChips=AREAS.map(function(a){var on=(c.areas||[]).indexOf(a)>-1;return '<span class="tag '+(on?'info':'')+'" style="cursor:pointer;'+(on?'':'opacity:.5')+'" onclick="toggleArea(\''+c.id+'\',\''+a.replace(/'/g,"\\'")+'\')">'+esc(a)+'</span>';}).join(' ');
   var cxHits=contraFlags(c); var cxHtml = cxHits.length? '<div class="flag amber">Screen flags: '+cxHits.map(function(x){return esc(x.t);}).join('; ')+'</div>':'<div class="flag good">No contraindications flagged.</div>';
   return '<span class="back" onclick="go(\'clients\')">← All clients</span>'
-    +(ROLE!=='md'?' &nbsp; <button class="btn sm" onclick="gfeRequest(\''+c.id+'\')">📤 Send GFE request</button> <button class="btn sm ghost" onclick="aftercare(\''+c.id+'\')">🧴 Aftercare sheet</button>':'')
+    +(ROLE!=='md'?' &nbsp; <button class="btn sm" onclick="gfeRequest(\''+c.id+'\')">📤 Send GFE request</button> '+((c.consent&&c.consent.signed)?'<span class="tag ok">✓ Consent on file '+esc(c.consent.date)+'</span>':'<button class="btn sm ghost" onclick="recordConsent(\''+c.id+'\')">✍ Record signed consent</button>')+' <button class="btn sm ghost" onclick="aftercare(\''+c.id+'\')">🧴 Aftercare sheet</button>':'')
     +'<div class="grid g2">'
     +'<div class="card"><h2><span class="ic">👤</span>'+esc(c.name)+' &nbsp;'+statusTag(c)+'</h2>'
     +'<table><tr><th>Phone</th><td>'+esc(c.phone||'—')+'</td></tr><tr><th>Email</th><td>'+esc(c.email||'—')+'</td></tr><tr><th>Age/DOB</th><td>'+esc(c.dob||'—')+'</td></tr><tr><th>Fitzpatrick</th><td>'+esc(c.fitz)+'</td></tr><tr><th>Hair / goal</th><td>'+esc(c.hairColor||'—')+'</td></tr></table>'
@@ -321,11 +323,11 @@ function viewGfeForm(id){ var c=clientById(id); if(!c) return viewGfe(); var rec
     +'</div>'
     +'<div class="card"><h2><span class="ic">🩺</span>Physician clearance</h2>'
     +'<label>Approve LASER wavelength(s)</label><div style="line-height:2.4">'+Object.keys(HP).map(function(k){var def=(k===rec);return '<label class="ck" style="display:inline-flex;margin-right:14px"><input type="checkbox" id="g_l_'+k+'" '+(def?'checked':'')+'> <span class="dot" style="background:'+HP[k].color+'"></span> '+k+' nm <span style="color:var(--dim)">('+HP[k].fitz.join('/')+')</span></label>';}).join('')+'</div>'
-    +'<label>Approve ELECTROLYSIS modalit(ies)</label><div style="line-height:2.4">'+Object.keys(ELECTRO).map(function(k){var block=hasPacer&&ELECTRO[k].current;return '<label class="ck" style="display:inline-flex;margin-right:14px'+(block?';opacity:.55':'')+'"><input type="checkbox" id="g_e_'+k+'" '+(block?'disabled':'')+'> '+esc(ELECTRO[k].label)+(block?' ⛔':'')+'</label>';}).join('')+'</div>'
-    + (hasPacer? '<div class="flag warn">⛔ Pacemaker/ICD on file — galvanic &amp; blend are blocked (galvanic current). Thermolysis &amp; laser remain available.</div>':'')
+    + (LASER_ONLY?'':('<label>Approve ELECTROLYSIS modalit(ies)</label><div style="line-height:2.4">'+Object.keys(ELECTRO).map(function(k){var block=hasPacer&&ELECTRO[k].current;return '<label class="ck" style="display:inline-flex;margin-right:14px'+(block?';opacity:.55':'')+'"><input type="checkbox" id="g_e_'+k+'" '+(block?'disabled':'')+'> '+esc(ELECTRO[k].label)+(block?' ⛔':'')+'</label>';}).join('')+'</div>'
+    + (hasPacer? '<div class="flag warn">⛔ Pacemaker/ICD on file — galvanic &amp; blend are blocked (galvanic current). Thermolysis &amp; laser remain available.</div>':'')))
     +'<div class="row"><div><label>GFE fee ($)</label><input id="g_fee" type="number" value="35"></div><div><label>Est. sessions</label><input id="g_exp" type="number" value="12"></div><div><label>Per-session ($)</label><input id="g_price" type="number" value="60"></div></div>'
     +'<label>GFE notes / protocol</label><textarea id="g_notes">Fitzpatrick '+esc(c.fitz)+'; intake &amp; contraindications reviewed. Conservative first settings; test area if any doubt.</textarea>'
-    +'<div class="sig">Signing as <b>Armando A. Falcon, MD</b> · FL ME 84789 · NPI 1447295126 — telehealth GFE, '+today()+'. Valid 1 year (through '+addYear(today())+').</div>'
+    +'<div class="sig">Signing as <b>Armando A. Falcon, MD</b> · FL ME 84789 · NPI 1447295126 — GFE (records review / telehealth as applicable), '+today()+'. Valid 1 year (through '+addYear(today())+').</div>'
     +'<label style="margin-top:14px">Needs a live exam? — Doxy.me telehealth room link (optional)</label><input id="g_doxy" placeholder="https://doxy.me/dr-falcon" value="'+esc((c.gfe&&c.gfe.telehealth&&c.gfe.telehealth.link)||'')+'">'
     +'<div class="row" style="margin-top:12px"><button class="btn" onclick="signGfe(\''+c.id+'\')">✓ Sign &amp; clear ($35, 1 yr)</button><button class="btn ghost" onclick="scheduleTele(\''+c.id+'\')">📹 Requires live visit</button></div>'
     +'</div></div>';
@@ -410,14 +412,16 @@ function viewTreat(){
 }
 function onTreatClient(){ var id=document.getElementById('t_client').value, box=document.getElementById('t_body'); if(!id){box.innerHTML='';return;}
   var c=clientById(id);
-  var hasL=(c.gfe.laser||[]).length, hasE=(c.gfe.electro||[]).length;
+  var hasL=(c.gfe.laser||[]).length, hasE=(c.gfe.electro||[]).length; if(LASER_ONLY){ hasE=0; }
   treatMod = hasE? 'electro' : 'laser';
   var seg='<div class="seg" style="margin:14px 0">'
     +(hasE?'<button id="seg_e" class="'+(treatMod==='electro'?'on':'')+'" onclick="setMod(\''+id+'\',\'electro\')">🔌 Electrolysis</button>':'')
     +(hasL?'<button id="seg_l" class="'+(treatMod==='laser'?'on':'')+'" onclick="setMod(\''+id+'\',\'laser\')">⚡ Laser</button>':'')
     +'</div>';
-  box.innerHTML='<div class="flag good" style="margin-top:14px">✓ Cleared by '+esc(c.gfe.md)+' · valid until '+esc(c.gfe.expires)+'. Approved: '+(modBadges(c)||'—')+'.</div>'+seg+'<div id="t_form"></div>';
-  renderTreatForm(id);
+  var consentOk = !!(c.consent && c.consent.signed);
+  var consentBlock = consentOk ? '' : '<div class="flag warn" style="margin-top:14px">⚠ Treatment consent not on file — obtain the signed laser informed consent before treating. <button class="btn sm" style="margin-top:8px" onclick="recordConsent(\''+id+'\')">✍ Record signed consent</button></div>';
+  box.innerHTML='<div class="flag good" style="margin-top:14px">✓ Cleared by '+esc(c.gfe.md)+' · valid until '+esc(c.gfe.expires)+'. Approved: '+(modBadges(c)||'—')+'.</div>'+consentBlock+(consentOk?(seg+'<div id="t_form"></div>'):'');
+  if(consentOk) renderTreatForm(id);
 }
 function setMod(id,m){ treatMod=m; var e=document.getElementById('seg_e'),l=document.getElementById('seg_l'); if(e)e.className=(m==='electro'?'on':''); if(l)l.className=(m==='laser'?'on':''); renderTreatForm(id); }
 function renderTreatForm(id){ var c=clientById(id), f=document.getElementById('t_form');
