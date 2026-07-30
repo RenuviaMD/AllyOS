@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Medical-Direction Readiness Check — RenuviaMD® AllyOS</title>
+<meta name="description" content="A two-minute check of whether your practice is structured to run each line of care safely — then a real medical director reviews it.">
+<style>
+  :root{
+    --teal:#0e8a8a; --teal-d:#0b6e6e; --teal-ink:#16323a; --gold:#e6a012; --gold-d:#c9870a;
+    --ink:#1c2b32; --muted:#5b6b72; --faint:#8898a0; --bg:#ffffff; --soft:#eaf4f2; --line:#e3ecea;
+    --green:#1e9e6a; --amber:#d98a00; --red:#d7483b;
+    --shadow:0 1px 2px rgba(16,50,58,.06),0 10px 30px rgba(16,50,58,.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);line-height:1.6;background:var(--bg);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:720px;margin:0 auto;padding:0 22px}
+  a{text-decoration:none;color:inherit}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;background:var(--gold);color:#3a2a00;font-weight:800;
+    font-size:1rem;padding:14px 26px;border-radius:11px;box-shadow:0 8px 22px rgba(230,160,18,.32);transition:transform .12s;border:none;cursor:pointer}
+  .btn:hover{transform:translateY(-1px)}
+  .btn:disabled{opacity:.6;cursor:default;transform:none}
+  .btn.ghost{background:#fff;color:var(--teal-d);border:1px solid var(--line);box-shadow:var(--shadow)}
+  .eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:.76rem;font-weight:800;color:var(--gold)}
+
+  header{background:linear-gradient(155deg,#0e3a40 0%,#0e8a8a 100%);color:#fff;padding:20px 0 40px}
+  .nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:1.05rem}
+  .brand .d{width:11px;height:11px;border-radius:3px;background:var(--gold);box-shadow:0 0 0 4px rgba(230,160,18,.25)}
+  .brand span{color:#ffd98a}
+  .back{color:#d8efec;font-size:.9rem;font-weight:700}
+  .hero{padding-top:26px}
+  .hero h1{font-size:2rem;line-height:1.14;letter-spacing:-.02em;margin-bottom:10px}
+  .hero p{color:#d8efec;max-width:560px}
+
+  main{padding:28px 0 60px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;margin-top:16px;box-shadow:var(--shadow)}
+  .card>.q{font-size:1.05rem;font-weight:700;margin-bottom:4px}
+  .card>.h{font-size:.8rem;color:var(--faint);margin-bottom:12px}
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:560px){.choices{grid-template-columns:1fr}}
+  .choice{text-align:left;padding:14px 16px;border-radius:12px;font-weight:700;font-size:.98rem;border:1.5px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;transition:all .12s}
+  .choice .s{display:block;font-size:.78rem;font-weight:400;color:var(--faint);margin-top:2px}
+  .choice.on{background:var(--teal);border-color:var(--teal);color:#fff}
+  .choice.on .s{color:rgba(255,255,255,.85)}
+
+  .line-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #f1f6f5}
+  .line-row:first-of-type{border-top:none}
+  .line-row .nm{font-weight:600;display:flex;align-items:center;gap:9px}
+  .line-row .nm .ic{font-size:1.2rem}
+  .seg{display:flex;gap:7px}
+  .seg button{padding:7px 13px;border-radius:9px;font-size:.82rem;font-weight:700;border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer}
+  .seg button.on{background:var(--teal);border-color:var(--teal);color:#fff}
+
+  .stepper{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0}
+  .stepper .lb{font-weight:600}.stepper .lb .s{display:block;font-size:.76rem;color:var(--faint);font-weight:400}
+  .stepper .ct{display:flex;align-items:center;gap:12px}
+  .stepper .ct button{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:#fff;font-size:1.1rem;font-weight:800;color:var(--teal-d);cursor:pointer}
+  .stepper .ct .v{width:26px;text-align:center;font-weight:800;font-size:1.1rem}
+
+  .out{background:linear-gradient(135deg,#0e3a40,#0e8a8a);color:#fff;border-radius:16px;padding:24px;margin-top:20px}
+  .out .tier{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#ffd98a}
+  .out h3{font-size:1.4rem;margin:4px 0 14px}
+  .rline{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:14px 16px;margin-top:10px}
+  .rline .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .rline .nm{font-weight:700}
+  .rstat{font-size:.68rem;font-weight:800;padding:3px 10px;border-radius:999px;white-space:nowrap}
+  .rstat.ready{background:#0c7a4d;color:#eafff5} .rstat.gap{background:#b5670a;color:#fff4e3}
+  .rline ul{margin:9px 0 0 18px} .rline li{font-size:.86rem;color:#e6f4f2;margin-top:3px}
+  .placeholder{color:rgba(255,255,255,.75);text-align:center;padding:8px 0}
+
+  form label{display:block;font-size:.78rem;color:var(--muted);font-weight:700;margin:12px 0 4px}
+  form input,form select{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px 13px;font-size:1rem;background:#fff;color:var(--ink)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:560px){.grid2{grid-template-columns:1fr}}
+  .msg{font-weight:700;margin-top:10px}.msg.err{color:var(--red)}
+  footer{padding:26px 0 46px;color:var(--faint);font-size:.8rem}
+  .sent{text-align:center;padding:34px 22px}
+  .sent .ok{width:56px;height:56px;border-radius:50%;background:#e8f7f0;color:var(--green);display:flex;align-items:center;justify-content:center;font-size:1.7rem;margin:0 auto 12px;border:2px solid #bfe8d6}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="nav">
+      <div class="brand"><span class="d"></span>Renuvia<span>MD</span>® · AllyOS</div>
+      <a class="back" href="directorship.html">← Lines of care</a>
+    </div>
+    <div class="hero">
+      <h1>Is your practice ready to run each line?</h1>
+      <p>Two minutes. You'll see, line by line, whether your structure is ready or needs direction — then Dr. Falcon reviews it personally. No price to see your result.</p>
+    </div>
+  </div>
+</header>
+
+<main><div class="wrap" id="app">
+
+  <div class="card">
+    <div class="q">Where are you starting from?</div>
+    <div class="h">So we know whether we're building a compliance foundation or moving an existing practice onto ours.</div>
+    <div class="choices">
+      <button type="button" class="choice" data-status="new">I'm opening a new practice<span class="s">Building from scratch</span></button>
+      <button type="button" class="choice" data-status="active">I already have a practice<span class="s">Adding a line or switching direction</span></button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="q">Which lines do you want to run?</div>
+    <div class="h">Pick what you run today, or what you're planning. Your result covers each one.</div>
+    <div id="lines"><p class="h">Loading lines…</p></div>
+  </div>
+
+  <div class="card">
+    <div class="q">Who's on your clinical team?</div>
+    <div class="h">This is who a medical director supervises. Leave at zero if you're still hiring.</div>
+    <div class="stepper"><div class="lb">Physicians (MD / DO)<span class="s">On your team — separate from your medical director</span></div><div class="ct"><button type="button" data-step="md" data-d="-1">−</button><span class="v" id="v-md">0</span><button type="button" data-step="md" data-d="1">+</button></div></div>
+    <div class="stepper"><div class="lb">Nurse practitioners / PAs<span class="s">The prescribers a director supervises</span></div><div class="ct"><button type="button" data-step="app" data-d="-1">−</button><span class="v" id="v-app">0</span><button type="button" data-step="app" data-d="1">+</button></div></div>
+    <div class="stepper"><div class="lb">Registered nurses (RNs)<span class="s">Can run aesthetics &amp; IV under orders</span></div><div class="ct"><button type="button" data-step="rn" data-d="-1">−</button><span class="v" id="v-rn">0</span><button type="button" data-step="rn" data-d="1">+</button></div></div>
+  </div>
+
+  <div class="card">
+    <div class="q">Do you already have written, signed protocols?</div>
+    <div class="h">Standing orders, consents, and treatment protocols for the lines above.</div>
+    <div class="choices" style="grid-template-columns:1fr 1fr 1fr">
+      <button type="button" class="choice" data-proto="yes">Yes, all of them</button>
+      <button type="button" class="choice" data-proto="some">Some of them</button>
+      <button type="button" class="choice" data-proto="no">No — I'll need them</button>
+    </div>
+  </div>
+
+  <div class="out" id="out">
+    <div class="tier">Your readiness</div>
+    <h3 id="tier-h">Pick a line to see your result</h3>
+    <div id="rlines"><p class="placeholder">Choose at least one line above and your line-by-line readiness appears here.</p></div>
+  </div>
+
+  <div style="text-align:center;margin-top:20px" id="cta-wrap">
+    <button type="button" class="btn" id="cta" disabled>See what direction you need</button>
+    <p class="h" style="margin-top:8px">Comes with a 15-minute call — no obligation.</p>
+  </div>
+
+  <div class="card" id="consult" style="display:none">
+    <div class="q">Where should Dr. Falcon send your review?</div>
+    <div class="h">He reviews these personally — you'll hear back within one business day.</div>
+    <form id="form">
+      <div class="grid2">
+        <div><label>Your name *</label><input id="c-name" required></div>
+        <div><label>Practice name</label><input id="c-practice"></div>
+        <div><label>Email *</label><input id="c-email" type="email" required></div>
+        <div><label>Phone</label><input id="c-phone"></div>
+        <div><label>Practice state</label><input id="c-state" placeholder="FL"></div>
+        <div><label>Best time to reach you</label><input id="c-timing"></div>
+      </div>
+      <div class="msg err" id="form-err" style="display:none">Just need your name and a valid email to send it.</div>
+      <button type="submit" class="btn" id="submit" style="width:100%;margin-top:16px">Send my readiness review</button>
+    </form>
+  </div>
+
+</div></main>
+
+<footer><div class="wrap">
+  This readiness check is a structural self-assessment, not medical, legal, or licensing advice, and creates no physician–patient or director relationship. Final scope is confirmed with Dr. Falcon after review. Curated by Armando A. Falcon, MD (FL ME 84789). © RenuviaMD®.
+</div></footer>
+
+<script>
+const FORMSUBMIT='https://formsubmit.co/ajax/drfalcon@renuviamd.com';
+const RN_OK=['iv','aesthetics'];               // lines an RN can run under orders
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const params=new URLSearchParams(location.search);
+const prefLine=params.get('line')||'';
+
+const state={status:'',proto:'',md:0,app:0,rn:0,lines:{}}; // lines[id]='current'|'planned'
+let AVENUES=[];
+
+// ---- render line toggles ----
+const linesEl=document.getElementById('lines');
+function renderLines(){
+  linesEl.innerHTML=AVENUES.map(av=>`
+    <div class="line-row">
+      <span class="nm"><span class="ic">${av.icon||'•'}</span>${esc(av.name)}</span>
+      <span class="seg" data-line="${av.id}">
+        <button type="button" data-v="current" class="${state.lines[av.id]==='current'?'on':''}">Running now</button>
+        <button type="button" data-v="planned" class="${state.lines[av.id]==='planned'?'on':''}">Planning</button>
+      </span>
+    </div>`).join('');
+  linesEl.querySelectorAll('.seg').forEach(seg=>{
+    const id=seg.dataset.line;
+    seg.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+      state.lines[id]= state.lines[id]===b.dataset.v ? undefined : b.dataset.v;
+      if(!state.lines[id]) delete state.lines[id];
+      renderLines(); compute();
+    });
+  });
+}
+
+// ---- readiness logic (deterministic, honest) ----
+function lineReadiness(av){
+  const gaps=[];
+  const needProvider=!RN_OK.includes(av.id);
+  const prescribers=state.md+state.app;
+  const anyClin=state.md+state.app+state.rn;
+  if(needProvider && prescribers===0)
+    gaps.push('Prescriber coverage — an MD or NP/PA is required for this line');
+  if(!needProvider && anyClin===0)
+    gaps.push('At least one qualified clinician (RN, NP/PA, or MD) to deliver treatments');
+  if(state.proto==='no') gaps.push('Written, MD-signed protocols &amp; standing orders to build');
+  else if(state.proto==='some') gaps.push('Remaining protocols to complete and sign');
+  else if(state.proto==='') gaps.push('Confirm your written protocols &amp; consents');
+  if((av.compliance_notes||[]).length)
+    gaps.push('Line-specific compliance guardrails to lock (see the ' + esc(av.name) + ' line)');
+  // Every line needs the director sign-off + periodic review that Dr. Falcon provides:
+  gaps.push('Medical-director sign-off, periodic chart review &amp; adverse-event pathway');
+  return {ready: gaps.length<=1, gaps};
+}
+
+function selectedAvenues(){ return AVENUES.filter(av=>state.lines[av.id]); }
+
+function compute(){
+  const sel=selectedAvenues();
+  const out=document.getElementById('rlines');
+  const cta=document.getElementById('cta');
+  if(!sel.length){
+    document.getElementById('tier-h').textContent='Pick a line to see your result';
+    out.innerHTML='<p class="placeholder">Choose at least one line above and your line-by-line readiness appears here.</p>';
+    cta.disabled=true; return;
+  }
+  cta.disabled=false;
+  let readyCount=0;
+  const rows=sel.map(av=>{
+    const r=lineReadiness(av); if(r.ready) readyCount++;
+    return `<div class="rline"><div class="top"><span class="nm">${av.icon||''} ${esc(av.name)} <span style="font-weight:400;color:rgba(255,255,255,.6);font-size:.8rem">· ${state.lines[av.id]==='current'?'running now':'planning'}</span></span>
+      <span class="rstat ${r.ready?'ready':'gap'}">${r.ready?'Structure looks ready':'Needs direction'}</span></div>
+      <ul>${r.gaps.map(g=>`<li>${g}</li>`).join('')}</ul></div>`;
+  }).join('');
+  const tier = readyCount===sel.length ? 'Close to ready — direction locks it in'
+             : readyCount>0 ? 'Partly ready — some lines need direction'
+             : 'Foundation needed — direction is exactly what provides it';
+  document.getElementById('tier-h').textContent=tier;
+  out.innerHTML=rows + (state.status==='active'
+     ? '<p style="font-size:.82rem;color:#cfeae6;margin-top:12px">Switching medical directors? We handle the transition — records, standing orders, and continuity — so nothing lapses.</p>'
+     : '');
+}
+
+// ---- inputs ----
+document.querySelectorAll('[data-status]').forEach(b=>b.onclick=()=>{
+  state.status=b.dataset.status;
+  document.querySelectorAll('[data-status]').forEach(x=>x.classList.toggle('on',x===b));
+  compute();
+});
+document.querySelectorAll('[data-proto]').forEach(b=>b.onclick=()=>{
+  state.proto=b.dataset.proto;
+  document.querySelectorAll('[data-proto]').forEach(x=>x.classList.toggle('on',x===b));
+  compute();
+});
+document.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>{
+  const k=b.dataset.step, d=+b.dataset.d;
+  state[k]=Math.max(0,Math.min(30,state[k]+d));
+  document.getElementById('v-'+k).textContent=state[k];
+  compute();
+});
+document.getElementById('cta').onclick=()=>{
+  document.getElementById('consult').style.display='';
+  document.getElementById('consult').scrollIntoView({behavior:'smooth',block:'start'});
+};
+
+// ---- consult capture ----
+function buildBrief(){
+  const sel=selectedAvenues();
+  const lineLabel=av=>`${av.name} (${state.lines[av.id]})`;
+  const rl=sel.map(av=>{const r=lineReadiness(av);
+    return `  • ${av.name} [${state.lines[av.id]}] — ${r.ready?'STRUCTURE OK':'NEEDS DIRECTION'}\n    - ${r.gaps.map(g=>g.replace(/&amp;/g,'&')).join('\n    - ')}`;}).join('\n');
+  return [
+    `PRACTICE STATUS: ${state.status==='new'?'New practice (build from scratch)':state.status==='active'?'Active practice (add / switch direction)':'(unspecified)'}`,
+    `LINES: ${sel.length?sel.map(lineLabel).join(', '):'none selected'}`,
+    `STAFFING: MD/DO ${state.md}, NP/PA ${state.app}, RN ${state.rn}`,
+    `WRITTEN PROTOCOLS: ${state.proto||'(unspecified)'}`,
+    '',
+    'READINESS BY LINE:',
+    rl||'  (none)',
+  ].join('\n');
+}
+const form=document.getElementById('form');
+form.onsubmit=async(e)=>{
+  e.preventDefault();
+  const name=document.getElementById('c-name').value.trim();
+  const email=document.getElementById('c-email').value.trim();
+  const err=document.getElementById('form-err');
+  if(!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){err.style.display='';return;}
+  err.style.display='none';
+  const btn=document.getElementById('submit'); btn.disabled=true; btn.textContent='Sending…';
+  const sel=selectedAvenues();
+  try{
+    await fetch(FORMSUBMIT,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
+      body:JSON.stringify({
+        _subject:`Readiness review — ${document.getElementById('c-practice').value||name} — ${document.getElementById('c-state').value||'state n/a'}`,
+        _cc:'info@myfloridamedicaldirector.com',
+        Name:name, 'Practice Name':document.getElementById('c-practice').value,
+        Email:email, Phone:document.getElementById('c-phone').value,
+        'Practice State':document.getElementById('c-state').value,
+        'Preferred Timing':document.getElementById('c-timing').value,
+        'Practice Status':state.status,
+        Lines:sel.map(av=>`${av.name} (${state.lines[av.id]})`).join(', ')||'none',
+        Staffing:`MD/DO ${state.md}, NP/PA ${state.app}, RN ${state.rn}`,
+        'Written Protocols':state.proto,
+        '— READINESS SUMMARY —':buildBrief(),
+        Source:'AllyOS directorship readiness check',
+      })});
+    document.getElementById('app').innerHTML=`<div class="card sent"><div class="ok">✓</div>
+      <h3 style="font-size:1.4rem;margin-bottom:6px">It's on the way</h3>
+      <p style="color:var(--muted)">Dr. Falcon will personally review your readiness and reply to ${esc(email)} within one business day — with the exact direction your lines need and a 15-minute call to walk you through it.</p></div>`;
+  }catch(_){
+    btn.disabled=false; btn.textContent='Send my readiness review';
+    err.textContent='Something went wrong sending that. Please try again, or email drfalcon@renuviamd.com.'; err.style.display='';
+  }
+};
+
+// ---- boot ----
+fetch('avenues.json').then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}).then(data=>{
+  AVENUES=data.avenues||[];
+  if(prefLine && AVENUES.some(a=>a.id===prefLine)) state.lines[prefLine]='current';
+  renderLines(); compute();
+}).catch(e=>{ linesEl.innerHTML=`<p class="msg err">Could not load the lines of care (${esc(e.message)}). Please refresh.</p>`; });
+</script>
+<script src="../disclaimer.js"></script>
+</body>
+</html>

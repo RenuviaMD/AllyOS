@@ -100,6 +100,27 @@
             "follow-up"
           ]
         }
+      ],
+      "tool_status": [
+        {
+          "tool": "Reconstitution & dosing calculator",
+          "status": "live",
+          "href": "calculator.html"
+        },
+        {
+          "tool": "Protocol compendium",
+          "status": "live",
+          "href": "library.html"
+        },
+        {
+          "tool": "Visit Packet (intake \u00b7 consent \u00b7 note \u00b7 handout)",
+          "status": "live",
+          "href": "poc.html"
+        },
+        {
+          "tool": "Ally \u2014 clinical AI",
+          "status": "live"
+        }
       ]
     },
     {
@@ -114,77 +135,160 @@
         {
           "name": "Testosterone replacement / optimization",
           "group": "Men",
-          "focus": []
+          "focus": [
+            "eligibility & symptom review",
+            "PSA / prostate-risk screen",
+            "hematocrit / erythrocytosis monitoring",
+            "baseline + follow-up labs (total/free T, estradiol)",
+            "consent"
+          ]
         },
         {
           "name": "Testosterone injectable protocol",
           "group": "Men",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "injection schedule & site rotation",
+            "hematocrit monitoring",
+            "estradiol-management trigger",
+            "consent"
+          ]
         },
         {
           "name": "Testosterone topical protocol",
           "group": "Men",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "transference precautions",
+            "titration to target",
+            "labs & monitoring",
+            "consent"
+          ]
         },
         {
           "name": "Gonadorelin / fertility-preservation adjunct (if used)",
           "group": "Men",
-          "focus": []
+          "focus": [
+            "indication (fertility preservation)",
+            "schedule",
+            "monitoring",
+            "consent"
+          ]
         },
         {
           "name": "hCG adjunct (if legal/source-appropriate)",
           "group": "Men",
-          "focus": []
+          "focus": [
+            "source / legality verification",
+            "indication",
+            "monitoring",
+            "consent"
+          ]
         },
         {
           "name": "Anastrozole / estrogen-management adjunct (if used)",
           "group": "Men",
-          "focus": []
+          "focus": [
+            "indication (estradiol elevation)",
+            "over-suppression caution",
+            "estradiol / lipid / bone monitoring",
+            "consent"
+          ]
         },
         {
           "name": "DHEA / pregnenolone support",
           "group": "Men",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "baseline labs",
+            "titration to target",
+            "monitoring",
+            "consent"
+          ]
         },
         {
           "name": "Erectile-dysfunction medication pathway (if included)",
           "group": "Men",
-          "focus": []
+          "focus": [
+            "cardiovascular / nitrate screen",
+            "eligibility",
+            "counseling",
+            "consent"
+          ]
         },
         {
           "name": "Hair-loss medication pathway (if included)",
           "group": "Men",
-          "focus": []
+          "focus": [
+            "eligibility & counseling",
+            "adverse-effect disclosure",
+            "monitoring",
+            "consent"
+          ]
         },
         {
           "name": "Perimenopause / menopause hormone optimization",
           "group": "Women",
-          "focus": []
+          "focus": [
+            "eligibility & symptom review",
+            "breast / estrogen-sensitive cancer screen",
+            "VTE / clotting-risk screen",
+            "baseline + follow-up labs",
+            "consent"
+          ]
         },
         {
           "name": "Estradiol topical / transdermal protocol",
           "group": "Women",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "VTE / cardiovascular screen",
+            "titration",
+            "monitoring",
+            "consent"
+          ]
         },
         {
           "name": "Progesterone oral / topical protocol",
           "group": "Women",
-          "focus": []
+          "focus": [
+            "indication (endometrial protection)",
+            "abnormal-bleeding escalation",
+            "monitoring",
+            "consent"
+          ]
         },
         {
           "name": "Testosterone for women (if included)",
           "group": "Women",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "low-dose titration",
+            "androgenic side-effect monitoring",
+            "labs",
+            "consent"
+          ]
         },
         {
           "name": "DHEA / pregnenolone support",
           "group": "Women",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "baseline labs",
+            "titration to target",
+            "monitoring",
+            "consent"
+          ]
         },
         {
           "name": "Thyroid-adjacent wellness review (if clinically included)",
           "group": "Women",
-          "focus": []
+          "focus": [
+            "scope limits (wellness, not disease treatment)",
+            "labs",
+            "referral triggers",
+            "consent"
+          ]
         }
       ],
       "universal": [
@@ -233,6 +337,22 @@
         {
           "name": "Follow-up, dose-change & adverse-effect protocol"
         }
+      ],
+      "tool_status": [
+        {
+          "tool": "Protocol compendium",
+          "status": "building",
+          "href": "library.html"
+        },
+        {
+          "tool": "Visit Packet",
+          "status": "building",
+          "href": "poc.html"
+        },
+        {
+          "tool": "Ally \u2014 clinical AI",
+          "status": "live"
+        }
       ]
     },
     {
@@ -247,75 +367,165 @@
       "families": [
         {
           "name": "Core IV hydration",
-          "focus": []
+          "focus": [
+            "GFE / eligibility",
+            "same-day RN safety screen",
+            "volume / ingredient ceilings",
+            "adverse-event pathway"
+          ]
         },
         {
           "name": "Myers / foundational wellness IV",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "ingredient ceilings",
+            "infusion monitoring",
+            "adverse-event pathway"
+          ]
         },
         {
           "name": "B-complex IV / IM",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "dosing limits",
+            "injection / infusion technique",
+            "adverse-event pathway"
+          ]
         },
         {
           "name": "Methyl-B12 IM",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "schedule",
+            "injection technique",
+            "consent"
+          ]
         },
         {
           "name": "Vitamin C wellness IV",
-          "focus": []
+          "focus": [
+            "wellness framing (no disease claims)",
+            "dosing ceiling",
+            "G6PD note (see high-dose)",
+            "adverse-event pathway"
+          ]
         },
         {
           "name": "High-dose vitamin C (HIGH-RISK, separate)",
-          "focus": []
+          "focus": [
+            "G6PD screen (mandatory)",
+            "oxalate / renal-risk screen",
+            "separate high-risk consent",
+            "dosing & monitoring"
+          ]
         },
         {
           "name": "Glutathione IV push / post-drip",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "push-rate technique",
+            "adverse-event pathway",
+            "consent"
+          ]
         },
         {
           "name": "NAD+ slow infusion",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "slow-infusion rate & tolerance",
+            "symptom monitoring",
+            "adverse-event pathway"
+          ]
         },
         {
           "name": "Amino acid IV",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "ingredient ceilings",
+            "infusion monitoring",
+            "adverse-event pathway"
+          ]
         },
         {
           "name": "Trace mineral / zinc support",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "dosing ceilings",
+            "monitoring",
+            "adverse-event pathway"
+          ]
         },
         {
           "name": "Magnesium-containing IV",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "infusion rate (hypotension / flushing)",
+            "cardiac caution",
+            "adverse-event pathway"
+          ]
         },
         {
           "name": "Calcium-containing IV (if used)",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "infusion rate & cardiac caution",
+            "incompatibility check",
+            "adverse-event pathway"
+          ]
         },
         {
           "name": "Recovery / athletic support IV",
-          "focus": []
+          "focus": [
+            "wellness framing",
+            "eligibility",
+            "ingredient ceilings",
+            "adverse-event pathway"
+          ]
         },
         {
           "name": "Skin / glow IV",
-          "focus": []
+          "focus": [
+            "wellness framing (no disease claims)",
+            "eligibility",
+            "ingredient ceilings",
+            "adverse-event pathway"
+          ]
         },
         {
           "name": "Energy / fatigue-support IV (wellness language)",
-          "focus": []
+          "focus": [
+            "wellness framing only",
+            "eligibility",
+            "ingredient ceilings",
+            "adverse-event pathway"
+          ]
         },
         {
           "name": "Immune / seasonal wellness IV (wellness language)",
-          "focus": []
+          "focus": [
+            "wellness framing only",
+            "eligibility",
+            "ingredient ceilings",
+            "adverse-event pathway"
+          ]
         },
         {
           "name": "Metabolic wellness IV",
-          "focus": []
+          "focus": [
+            "wellness framing",
+            "eligibility",
+            "ingredient ceilings",
+            "adverse-event pathway"
+          ]
         },
         {
           "name": "IM wellness injection program",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "standing-order coverage",
+            "injection technique",
+            "adverse-event pathway"
+          ]
         }
       ],
       "universal": [
@@ -334,6 +544,21 @@
         {
           "name": "Mobile IV addendum (if applicable)"
         }
+      ],
+      "tool_status": [
+        {
+          "tool": "IV / IM builder",
+          "status": "building"
+        },
+        {
+          "tool": "Protocol compendium",
+          "status": "building",
+          "href": "library.html"
+        },
+        {
+          "tool": "Ally \u2014 clinical AI",
+          "status": "live"
+        }
       ]
     },
     {
@@ -347,27 +572,57 @@
       "families": [
         {
           "name": "PRP facial / aesthetic rejuvenation",
-          "focus": []
+          "focus": [
+            "eligibility & consent",
+            "sterile blood draw & processing",
+            "photo documentation",
+            "aftercare & adverse-event pathway"
+          ]
         },
         {
           "name": "PRP hair restoration",
-          "focus": []
+          "focus": [
+            "eligibility & counseling",
+            "sterile draw & processing",
+            "injection technique",
+            "aftercare & follow-up"
+          ]
         },
         {
           "name": "PRP with microneedling",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "sterile technique & infection control",
+            "depth settings",
+            "aftercare"
+          ]
         },
         {
           "name": "PRP scar / skin-quality support",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "sterile processing",
+            "injection plane",
+            "aftercare"
+          ]
         },
         {
           "name": "PRP joint / musculoskeletal injection (HIGHER-RISK, if included)",
-          "focus": []
+          "focus": [
+            "higher-risk direct-care consent",
+            "indication / imaging",
+            "sterile technique",
+            "adverse-event / infection pathway"
+          ]
         },
         {
           "name": "PRF (if used)",
-          "focus": []
+          "focus": [
+            "eligibility",
+            "processing protocol (no anticoagulant)",
+            "sterile handling",
+            "aftercare"
+          ]
         }
       ],
       "universal": [
@@ -400,6 +655,17 @@
         },
         {
           "name": "Photo documentation (aesthetic PRP)"
+        }
+      ],
+      "tool_status": [
+        {
+          "tool": "Protocol compendium",
+          "status": "building",
+          "href": "library.html"
+        },
+        {
+          "tool": "Ally \u2014 clinical AI",
+          "status": "live"
         }
       ]
     },
@@ -594,6 +860,17 @@
             "provider signature",
             "follow-up plan"
           ]
+        }
+      ],
+      "tool_status": [
+        {
+          "tool": "Protocol compendium",
+          "status": "building",
+          "href": "library.html"
+        },
+        {
+          "tool": "Ally \u2014 clinical AI",
+          "status": "live"
         }
       ]
     }

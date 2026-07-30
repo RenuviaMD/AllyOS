@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Line of Care — RenuviaMD® AllyOS</title>
+<meta name="description" content="Medical direction, protocols, and tools for a single line of care under Armando A. Falcon, MD.">
+<style>
+  :root{
+    --teal:#0e8a8a; --teal-d:#0b6e6e; --teal-ink:#16323a; --gold:#e6a012; --gold-d:#c9870a;
+    --ink:#1c2b32; --muted:#5b6b72; --faint:#8898a0; --bg:#ffffff; --soft:#eaf4f2; --line:#e3ecea;
+    --green:#1e9e6a; --amber:#d98a00; --red:#d7483b;
+    --shadow:0 1px 2px rgba(16,50,58,.06),0 10px 30px rgba(16,50,58,.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);line-height:1.6;background:var(--bg);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:960px;margin:0 auto;padding:0 24px}
+  a{text-decoration:none;color:inherit}
+  .btn{display:inline-flex;align-items:center;gap:9px;background:var(--gold);color:#3a2a00;font-weight:800;
+    font-size:1rem;padding:13px 24px;border-radius:11px;box-shadow:0 8px 22px rgba(230,160,18,.32);transition:transform .12s}
+  .btn:hover{transform:translateY(-1px)}
+  .btn.ghost{background:#fff;color:var(--teal-d);border:1px solid var(--line);box-shadow:var(--shadow)}
+  .eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:.76rem;font-weight:800;color:var(--gold)}
+
+  header{background:linear-gradient(155deg,#0e3a40 0%,#0e8a8a 100%);color:#fff;padding:20px 0 44px}
+  .nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:1.05rem}
+  .brand .d{width:11px;height:11px;border-radius:3px;background:var(--gold);box-shadow:0 0 0 4px rgba(230,160,18,.25)}
+  .brand span{color:#ffd98a}
+  .back{color:#d8efec;font-size:.9rem;font-weight:700}
+  .lhead{padding-top:30px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .lhead .ic{font-size:3rem;line-height:1}
+  .lhead h1{font-size:2.3rem;line-height:1.1;letter-spacing:-.02em}
+  .lhead .kicker{font-size:.85rem;color:#bfe6e1;font-weight:600}
+  .flag{font-size:.62rem;font-weight:800;color:#3a2a00;background:#ffd98a;padding:3px 9px;border-radius:6px;letter-spacing:.05em;text-transform:uppercase;vertical-align:middle}
+
+  section{padding:40px 0}
+  h2{font-size:1.5rem;letter-spacing:-.01em;margin-bottom:6px}
+  .sublead{color:var(--muted);margin-bottom:22px;max-width:680px}
+
+  .notes{background:#fff7ea;border:1px solid #f2dfb5;border-left:4px solid var(--gold);border-radius:12px;padding:16px 18px;margin-top:8px}
+  .notes .eyebrow{color:var(--gold-d)}
+  .notes ul{margin:8px 0 0 18px} .notes li{font-size:.92rem;color:#7a5a12;margin-top:4px}
+
+  .grp{margin-top:26px}
+  .grp>h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--teal-d);font-weight:800;margin-bottom:12px;
+    padding-bottom:6px;border-bottom:1px solid var(--line)}
+  .fam{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:18px;box-shadow:var(--shadow)}
+  .card h4{font-size:1.02rem;margin-bottom:3px}
+  .card .prod{font-size:.82rem;color:var(--teal-d);font-weight:600;margin-bottom:10px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .chip{font-size:.72rem;background:var(--soft);color:var(--teal-ink);padding:4px 10px;border-radius:999px;border:1px solid #d6e8e5}
+  .noteaser{font-size:.8rem;color:var(--faint);font-style:italic}
+
+  .uni{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-top:8px}
+  .u{display:flex;gap:10px;align-items:flex-start;background:#f7fbfa;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .u .ck{color:var(--teal);font-weight:800;flex:0 0 auto}
+  .u b{font-size:.9rem;font-weight:600}
+  .u p{font-size:.78rem;color:var(--muted);margin-top:2px}
+
+  .tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:8px}
+  .tool{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+  .tool .n{font-size:.92rem;font-weight:700}
+  .badge{font-size:.66rem;font-weight:800;padding:3px 9px;border-radius:7px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+  .badge .dot{width:6px;height:6px;border-radius:50%}
+  .badge.live{background:#e8f7f0;color:#0c7a4d} .badge.live .dot{background:var(--green)}
+  .badge.building{background:#fdf3e2;color:#9a6300} .badge.building .dot{background:var(--amber)}
+  .tool a.open{font-size:.8rem;font-weight:800;color:var(--teal-d)}
+
+  .cta-band{background:linear-gradient(120deg,#0e3a40,#0e8a8a);color:#fff;border-radius:18px;padding:38px;text-align:center;margin-top:20px}
+  .cta-band h2{color:#fff} .cta-band p{color:#d8efec;max-width:560px;margin:6px auto 20px}
+
+  footer{padding:30px 0 46px;color:var(--faint);font-size:.8rem}
+  .err{color:var(--red);font-weight:700;padding:40px 0}
+  @media(max-width:640px){.lhead h1{font-size:1.7rem}.lhead .ic{font-size:2.2rem}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="nav">
+      <div class="brand"><span class="d"></span>Renuvia<span>MD</span>® · AllyOS</div>
+      <a class="back" href="directorship.html">← All lines of care</a>
+    </div>
+    <div class="lhead" id="lhead">
+      <div class="ic">…</div>
+      <div><h1 id="ltitle">Loading…</h1><div class="kicker">Medical direction by line of care</div></div>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section><div class="wrap"><p class="sublead">Loading this line of care…</p></div></section>
+</main>
+
+<footer><div class="wrap">
+  Protocols are drafting aids — every dose, contraindication, and monitoring plan is reviewed, customized, and signed by the treating physician before use. Not a prescription, standing order, or patient-specific recommendation. Curated by Armando A. Falcon, MD (FL ME 84789). © RenuviaMD®.
+</div></footer>
+
+<script>
+const params=new URLSearchParams(location.search);
+const lineId=params.get('line')||'';
+const main=document.getElementById('main');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function fam_card(f){
+  const chips=(f.focus&&f.focus.length)
+    ? `<div class="chips">${f.focus.map(x=>`<span class="chip">${esc(x)}</span>`).join('')}</div>`
+    : `<div class="noteaser">Protocol rigor detailed inside — eligibility, screens, dosing, monitoring, consent.</div>`;
+  return `<div class="card">
+    <h4>${esc(f.name)}</h4>
+    ${f.products?`<div class="prod">${esc(f.products)}</div>`:''}
+    ${chips}
+  </div>`;
+}
+function group_families(fams){
+  // group by optional 'group' key (e.g. Men/Women); preserve order of first appearance
+  const order=[]; const map={};
+  fams.forEach(f=>{const g=f.group||'';if(!(g in map)){map[g]=[];order.push(g);}map[g].push(f);});
+  return order.map(g=>`<div class="grp">${g?`<h3>${esc(g)}</h3>`:''}<div class="fam">${map[g].map(fam_card).join('')}</div></div>`).join('');
+}
+function uni_item(u){
+  const covers=(u.covers&&u.covers.length)?`<p>${u.covers.map(esc).join(' · ')}</p>`:'';
+  return `<div class="u"><span class="ck">✓</span><div><b>${esc(u.name)}</b>${covers}</div></div>`;
+}
+function tool_row(t){
+  const s=(t.status==='live')?'live':'building';
+  const label=(t.status==='live')?'Live':'Building';
+  const open=(t.href&&t.status==='live')?`<a class="open" href="${esc(t.href)}">Open →</a>`:'';
+  return `<div class="tool"><span class="n">${esc(t.tool)}</span><span style="display:flex;align-items:center;gap:10px"><span class="badge ${s}"><span class="dot"></span>${label}</span>${open}</span></div>`;
+}
+
+fetch('avenues.json').then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}).then(data=>{
+  const av=(data.avenues||[]).find(a=>a.id===lineId);
+  if(!av){
+    document.getElementById('ltitle').textContent='Line not found';
+    document.getElementById('lhead').querySelector('.ic').textContent='?';
+    main.innerHTML=`<section><div class="wrap"><p class="err">No line of care matches “${esc(lineId||'(none)')}”. <a href="directorship.html" style="color:var(--teal-d);font-weight:800">See all lines →</a></p></div></section>`;
+    return;
+  }
+  document.title=`${av.name} — Medical Direction · RenuviaMD® AllyOS`;
+  document.getElementById('lhead').querySelector('.ic').textContent=av.icon||'•';
+  document.getElementById('ltitle').innerHTML=`Medical direction for ${esc(av.name)} ${av.flagship?'<span class="flag">Flagship</span>':''}`;
+
+  const notes=(av.compliance_notes&&av.compliance_notes.length)
+    ? `<div class="notes"><div class="eyebrow">Compliance guardrails</div><ul>${av.compliance_notes.map(n=>`<li>${esc(n)}</li>`).join('')}</ul></div>`
+    : '';
+  const famHtml=group_families(av.families||[]);
+  const uniHtml=(av.universal&&av.universal.length)
+    ? `<section class="alt"><div class="wrap"><div class="eyebrow">Every patient, every time</div><h2>Operational protocols</h2><p class="sublead">The universal safeguards that run underneath every family in this line.</p><div class="uni">${av.universal.map(uni_item).join('')}</div></div></section>`
+    : '';
+  const toolsHtml=(av.tool_status&&av.tool_status.length)
+    ? `<section><div class="wrap"><div class="eyebrow">Tools behind this line</div><h2>What AllyOS gives you</h2><p class="sublead">Honest build state — what is live now, what is still being built. We never mark a tool live before it is.</p><div class="tools">${av.tool_status.map(tool_row).join('')}</div></div></section>`
+    : '';
+
+  main.innerHTML=`
+    <section><div class="wrap">
+      <div class="eyebrow">The protocol families</div>
+      <h2>What this line covers</h2>
+      <p class="sublead">Each family is a full clinical package. The tags show the rigor built into every protocol — the dosing and protocol content itself unlocks with your membership.</p>
+      ${notes}
+      ${famHtml}
+    </div></section>
+    ${uniHtml}
+    ${toolsHtml}
+    <section><div class="wrap"><div class="cta-band">
+      <h2>Run ${esc(av.name)} under a real medical director.</h2>
+      <p>Take the two-minute readiness check for this line, and Dr. Falcon will review exactly where you stand.</p>
+      <a class="btn" href="readiness.html?line=${encodeURIComponent(av.id)}" style="background:#fff;color:var(--teal-d)">Check readiness for ${esc(av.name)} →</a>
+    </div></div></section>`;
+}).catch(e=>{
+  main.innerHTML=`<section><div class="wrap"><p class="err">Could not load this line (${esc(e.message)}). Please refresh.</p></div></section>`;
+});
+</script>
+<script src="../disclaimer.js"></script>
+</body>
+</html>

@@ -57,7 +57,11 @@ function calc(){const mg=+document.getElementById('mg').value,ml=+document.getEl
  document.getElementById('vol').textContent=f(vol);
  document.getElementById('units').textContent=f(units,1);
  document.getElementById('doses').textContent=isFinite(doses)?Math.floor(doses):'—';
- document.getElementById('steps').innerHTML=`<b>${mg} mg</b> ÷ <b>${ml} mL</b> = ${f(mgml)} mg/mL = <span class="gold">${f(mcgml,0)} mcg/mL</span>. &nbsp; <b>${dose} mcg</b> ÷ ${f(mcgml,0)} = <b>${f(vol)} mL</b> × 100 = <span class="gold">${f(units,1)} units</span> (U-100).`;
+ const cap = !isFinite(units) ? ''
+   : units>100
+     ? `<div style="margin-top:12px;padding:9px 12px;border-radius:9px;background:rgba(215,72,59,.18);border:1px solid rgba(215,72,59,.5);color:#ffd6d1"><b>⚠ Exceeds one U-100 syringe.</b> ${f(units,1)} units is more than a U-100 insulin syringe holds (max 100 units / 1&nbsp;mL). Add more BAC water to lower the volume, or split the dose across more than one injection.</div>`
+     : `<div style="margin-top:10px;font-size:.78rem;color:#bfe6e1">Draws into a ${units<=30?'0.3&nbsp;mL (30-unit)':units<=50?'0.5&nbsp;mL (50-unit)':'1&nbsp;mL (100-unit)'} U-100 insulin syringe.</div>`;
+ document.getElementById('steps').innerHTML=`<b>${mg} mg</b> ÷ <b>${ml} mL</b> = ${f(mgml)} mg/mL = <span class="gold">${f(mcgml,0)} mcg/mL</span>. &nbsp; <b>${dose} mcg</b> ÷ ${f(mcgml,0)} = <b>${f(vol)} mL</b> × 100 = <span class="gold">${f(units,1)} units</span> (U-100).`+cap;
 }
 ['mg','ml','dose'].forEach(id=>document.getElementById(id).oninput=calc);
 sel.onchange=()=>{const b=sel.selectedOptions[0].dataset.body||'';const m=b.match(/(\d+(?:\.\d+)?)\s*mg\s*\+\s*(\d+(?:\.\d+)?)\s*mL/);if(m){document.getElementById('mg').value=m[1];document.getElementById('ml').value=m[2];}
