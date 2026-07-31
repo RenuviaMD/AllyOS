@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Medical Direction by Line of Care — RenuviaMD® AllyOS</title>
+<meta name="description" content="One accountable medical director across every line you run — peptides, BHRT, IV/IM, regenerative/PRP, and aesthetics. Honest, evidence-graded protocols and on-device documentation.">
+<style>
+  :root{
+    --teal:#0e8a8a; --teal-d:#0b6e6e; --teal-ink:#16323a; --gold:#e6a012; --gold-d:#c9870a;
+    --ink:#1c2b32; --muted:#5b6b72; --faint:#8898a0; --bg:#ffffff; --soft:#eaf4f2; --line:#e3ecea;
+    --green:#1e9e6a; --amber:#d98a00; --red:#d7483b;
+    --shadow:0 1px 2px rgba(16,50,58,.06),0 10px 30px rgba(16,50,58,.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);line-height:1.6;background:var(--bg);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  a{text-decoration:none;color:inherit}
+  .btn{display:inline-flex;align-items:center;gap:9px;background:var(--gold);color:#3a2a00;font-weight:800;
+    font-size:1rem;padding:14px 26px;border-radius:11px;box-shadow:0 8px 22px rgba(230,160,18,.32);transition:transform .12s;border:none;cursor:pointer}
+  .btn:hover{transform:translateY(-1px)}
+  .btn.ghost{background:#fff;color:var(--teal-d);border:1px solid var(--line);box-shadow:var(--shadow)}
+  .eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:.76rem;font-weight:800;color:var(--gold)}
+
+  header{background:linear-gradient(155deg,#0e3a40 0%,#0e8a8a 100%);color:#fff;padding:22px 0 78px}
+  .nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:1.1rem}
+  .brand .d{width:11px;height:11px;border-radius:3px;background:var(--gold);box-shadow:0 0 0 4px rgba(230,160,18,.25)}
+  .brand span{color:#ffd98a}
+  .hero{text-align:center;padding-top:54px;max-width:800px;margin:0 auto}
+  .hero .tag{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+    border-radius:999px;padding:6px 15px;font-size:.82rem;color:#eafaf8;margin-bottom:20px}
+  h1{font-size:2.9rem;line-height:1.12;letter-spacing:-.02em;margin-bottom:18px}
+  .hero p.sub{font-size:1.18rem;color:#d8efec;max-width:660px;margin:0 auto 28px}
+  .cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .micro{margin-top:16px;font-size:.85rem;color:#bfe6e1}
+
+  section{padding:62px 0}
+  h2{font-size:1.85rem;letter-spacing:-.01em;margin-bottom:12px}
+  .lead{font-size:1.1rem;color:var(--muted);max-width:740px}
+  .alt{background:#f5faf9;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+
+  .lines{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:30px}
+  .lc{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--shadow);
+    position:relative;display:flex;flex-direction:column;transition:transform .12s,box-shadow .12s}
+  .lc:hover{transform:translateY(-2px);box-shadow:0 4px 8px rgba(16,50,58,.08),0 16px 40px rgba(16,50,58,.1)}
+  .lc h3{font-size:1.18rem;margin-bottom:6px;display:flex;align-items:center;gap:9px}
+  .lc .ic{font-size:1.4rem;line-height:1}
+  .lc p.count{font-size:.86rem;color:var(--muted);margin-bottom:12px}
+  .lc .tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:12px}
+  .tp{font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:7px;display:inline-flex;align-items:center;gap:5px}
+  .tp .dot{width:6px;height:6px;border-radius:50%}
+  .tp.live{background:#e8f7f0;color:#0c7a4d} .tp.live .dot{background:var(--green)}
+  .tp.building{background:#fdf3e2;color:#9a6300} .tp.building .dot{background:var(--amber)}
+  .lc .go{margin-top:14px;font-weight:800;color:var(--teal-d);font-size:.92rem;display:inline-flex;align-items:center;gap:6px}
+
+  .feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:30px}
+  .f{display:flex;gap:13px;align-items:flex-start}
+  .f .ic{flex:0 0 38px;height:38px;border-radius:10px;background:var(--soft);color:var(--teal);
+    display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+  .f b{display:block;margin-bottom:3px;color:var(--ink)}
+  .f p{font-size:.9rem;color:var(--muted)}
+
+  .cta-band{background:linear-gradient(120deg,#0e3a40,#0e8a8a);color:#fff;border-radius:18px;padding:44px;text-align:center;margin-top:10px}
+  .cta-band h2{color:#fff} .cta-band p{color:#d8efec;max-width:600px;margin:6px auto 22px}
+  .cta-band .btn.ghost{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.3)}
+
+  footer{padding:34px 0 46px;color:var(--faint);font-size:.82rem}
+  footer b{color:var(--muted)}
+  .err{color:var(--red);font-weight:700}
+  @media(max-width:640px){h1{font-size:2.1rem}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="nav">
+      <div class="brand"><span class="d"></span>Renuvia<span>MD</span>® · AllyOS</div>
+      <a class="btn ghost" href="readiness.html">Check your readiness →</a>
+    </div>
+    <div class="hero">
+      <div class="tag">Medical direction for cash-pay wellness &amp; aesthetic practices</div>
+      <h1>One accountable medical director. Every line you run.</h1>
+      <p class="sub">Armando A. Falcon, MD (FL ME 84789) directs your practice across all five lines of care — with honest, evidence-graded protocols and on-device documentation behind every one. Not an advisory board. One named physician who signs.</p>
+      <div class="cta-row">
+        <a class="btn" href="readiness.html">Check your readiness</a>
+        <a class="btn ghost" href="#lines">See the lines</a>
+      </div>
+      <div class="micro">Real, named, accountable · protocols you can print · patient data never leaves your device</div>
+    </div>
+  </div>
+</header>
+
+<section id="lines">
+  <div class="wrap">
+    <div class="eyebrow">By line of care</div>
+    <h2>Direction, protocols, and tools — line by line.</h2>
+    <p class="lead">Each line is a full clinical package: eligibility and safety screens, dosing and monitoring, consent, and a complication pathway — under one medical director. Open a line to see exactly what it covers.</p>
+    <div class="lines" id="lines-grid">
+      <p class="lead" id="loading">Loading lines of care…</p>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow">Why one director, not a board</div>
+    <h2>Accountable by design.</h2>
+    <div class="feat">
+      <div class="f"><div class="ic">✓</div><div><b>One named MD who signs</b><p>No advisory-board theater. A single, real, accountable physician stands behind every protocol you run.</p></div></div>
+      <div class="f"><div class="ic">▤</div><div><b>Honest, evidence-graded protocols</b><p>Grades A–D with real citations — including the trials that failed. We flag what to verify; we never fabricate.</p></div></div>
+      <div class="f"><div class="ic">🔒</div><div><b>PHI never leaves the device</b><p>Documentation is built and printed locally. Patient data never reaches our servers — no breach exposure, no BAA.</p></div></div>
+      <div class="f"><div class="ic">↻</div><div><b>Kept current</b><p>Fast-moving evidence (peptides especially) is regenerated, re-verified, and re-signed — never a stale PDF.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="cta-band">
+      <h2>See where your practice stands.</h2>
+      <p>A two-minute readiness check tells you which lines you can run today, where the gaps are, and what direction you need — then Dr. Falcon reviews it personally.</p>
+      <div class="cta-row">
+        <a class="btn" href="readiness.html" style="background:#fff;color:var(--teal-d)">Check your readiness →</a>
+        <a class="btn ghost" href="readiness.html#consult">Request a consult</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer><div class="wrap">
+  <b>Medical direction &amp; internal clinical reference for licensed providers.</b> Protocols are drafting aids — every dose, contraindication, and monitoring plan is reviewed, customized, and signed by the treating physician before use. Not a prescription, standing order, or patient-specific recommendation. Curated by Armando A. Falcon, MD (FL ME 84789). © RenuviaMD®.
+</div></footer>
+
+<script>
+const ICON_FALLBACK='•';
+const grid=document.getElementById('lines-grid');
+const line_href=id=>`line.html?line=${encodeURIComponent(id)}`;
+
+function toolPill(t){
+  const s=(t.status==='live')?'live':'building';
+  const label=(t.status==='live')?'Live':'Building';
+  return `<span class="tp ${s}" title="${t.tool}"><span class="dot"></span>${label}</span>`;
+}
+function toolSummary(av){
+  const ts=av.tool_status||[];
+  if(!ts.length) return '';
+  // one pill per distinct status, de-duplicated, honest
+  const live=ts.filter(t=>t.status==='live').length;
+  const building=ts.filter(t=>t.status!=='live').length;
+  let out='';
+  if(live) out+=`<span class="tp live"><span class="dot"></span>${live} tool${live>1?'s':''} live</span>`;
+  if(building) out+=`<span class="tp building"><span class="dot"></span>${building} building</span>`;
+  return out;
+}
+function famCount(av){
+  const fam=(av.families||[]).length;
+  const uni=(av.universal||[]).length;
+  return `${fam} protocol famil${fam===1?'y':'ies'} · ${uni} operational protocol${uni===1?'':'s'}`;
+}
+
+fetch('avenues.json').then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}).then(data=>{
+  const avenues=data.avenues||[];
+  grid.innerHTML = avenues.map(av=>`
+    <a class="lc" href="${line_href(av.id)}">
+      <h3><span class="ic">${av.icon||ICON_FALLBACK}</span>${av.name}${av.flagship?' <span style="font-size:.6rem;font-weight:800;color:var(--gold-d);background:#fdf3e2;padding:2px 7px;border-radius:6px;letter-spacing:.05em;text-transform:uppercase">Flagship</span>':''}</h3>
+      <p class="count">${famCount(av)}</p>
+      <div class="tools">${toolSummary(av)}</div>
+      <span class="go">Open this line →</span>
+    </a>`).join('');
+}).catch(e=>{
+  grid.innerHTML=`<p class="err">Could not load the lines of care (${e.message}). Please refresh.</p>`;
+});
+</script>
+<script src="../disclaimer.js"></script>
+</body>
+</html>
