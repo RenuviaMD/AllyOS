@@ -74,6 +74,22 @@ async function ensureCustomer(clinic, key) {
   const rows = await sbGet("clinics?id=eq." + encodeURIComponent(clinic.id) + "&select=stripe_customer_id");
   return (rows[0] && rows[0].stripe_customer_id) || c.id;
 }
+// Write billing CONTACT (address + phone + email) onto the clinic's Stripe customer — the
+// natural home for statement contact info: it prints on every invoice and needs no DB column.
+// Creates the customer if the clinic doesn't have one yet (ensureCustomer persists the id).
+async function upsertCustomerContact(clinic, contact, key) {
+  const addr = (contact.address == null ? "" : String(contact.address)).trim();
+  const phone = (contact.phone == null ? "" : String(contact.phone)).trim();
+  const email = (contact.email == null ? "" : String(contact.email)).trim();
+  if (!addr && !phone && !email && !clinic.stripe_customer_id) return null;
+  const customer = await ensureCustomer(Object.assign({}, clinic, { md_billing_email: email || clinic.md_billing_email }), key);
+  const params = {};
+  if (email) params.email = email;
+  if (contact.phone !== undefined) params.phone = phone.slice(0, 40);
+  if (contact.address !== undefined) params.address = { line1: addr.slice(0, 300) };
+  if (Object.keys(params).length) { try { await stripePost("customers/" + encodeURIComponent(customer), params, key); } catch (e) {} }
+  return customer;
+}
 async function invoicesFor(customer, key) {
   if (!customer) return [];
   const list = await stripeGet("invoices?customer=" + encodeURIComponent(customer) + "&limit=10", key);
@@ -127,16 +143,25 @@ exports.handler = async (event) => {
       for (var ci = 0; ci < (rows || []).length; ci++) {
         var c = rows[ci];
         var agg = await invoiceAgg(c.stripe_customer_id, key, yearStartSec, nowSec);
+        // Billing contact (address/phone) lives on the Stripe customer — read it for the roster.
+        var addr = null, phone = null;
+        if (c.stripe_customer_id) {
+          try { var cust = await stripeGet("customers/" + encodeURIComponent(c.stripe_customer_id), key);
+            addr = (cust && cust.address && cust.address.line1) || null; phone = (cust && cust.phone) || null; } catch (e) {}
+        }
+        var paused = (c.status === "paused");
         clinics.push({
           id: c.id, name: c.name, governance_type: c.governance_type || null,
           md_fee: (c.md_fee != null ? Number(c.md_fee) : null),
           gfe_fee: (c.md_gfe_fee != null ? Number(c.md_gfe_fee) : null),
           status: c.md_subscription_status || "none", email: c.md_billing_email || null,
+          address: addr, phone: phone, hold: paused,
           on_stripe: !!c.stripe_customer_id,
           past_due: agg.past_due, outstanding: agg.outstanding, ytd: agg.ytd,
         });
       }
-      const recurring = clinics.reduce(function (a, c) { return a + (c.md_fee || 0); }, 0);
+      // Paused clinics stay on the roster but drop out of Monthly Recurring (not billing now).
+      const recurring = clinics.reduce(function (a, c) { return a + (c.hold ? 0 : (c.md_fee || 0)); }, 0);
       const acha = clinics.filter(function (c) { return c.governance_type === "acha"; }).length;
       return json(200, {
         clinics: clinics, count: clinics.length,
@@ -164,6 +189,10 @@ exports.handler = async (event) => {
       };
       const created = await sbPost("clinics", row);
       if (!created || !created.id) return json(502, { error: "insert_failed", hint: "Could not create the clinic record." });
+      // Address / phone (and email) live on the Stripe customer — write them if provided.
+      if (body.md_billing_address || body.md_billing_phone || body.md_billing_email) {
+        try { await upsertCustomerContact({ id: created.id, name: created.name || name, md_billing_email: body.md_billing_email || null, stripe_customer_id: null }, { address: body.md_billing_address, phone: body.md_billing_phone, email: body.md_billing_email }, key); } catch (e) {}
+      }
       return json(200, { ok: true, id: created.id });
     }
 
@@ -177,6 +206,18 @@ exports.handler = async (event) => {
         const inv = await stripePost("invoices/" + encodeURIComponent(invId) + "/pay", { paid_out_of_band: true }, key);
         return json(200, { ok: true, status: inv.status });
       } catch (e) { return json(502, { error: "mark_paid_failed", detail: String(e).slice(0, 160) }); }
+    }
+
+    // Waive / write off an invoice: Stripe marks it "uncollectible", so it leaves Past Due and
+    // is NOT counted as collected (invoiceAgg already excludes uncollectible). Owner only.
+    if (action === "waive") {
+      const g = await requireOwner(event); if (g.error) return g.error;
+      const invId = body.invoice_id;
+      if (!invId) return json(400, { error: "invoice_id required" });
+      try {
+        const inv = await stripePost("invoices/" + encodeURIComponent(invId) + "/mark_uncollectible", {}, key);
+        return json(200, { ok: true, status: inv.status });
+      } catch (e) { return json(502, { error: "waive_failed", detail: String(e).slice(0, 160) }); }
     }
 
     const clinicId = body.clinic_id;
@@ -250,7 +291,21 @@ exports.handler = async (event) => {
       if (body.md_billing_email !== undefined) patch.md_billing_email = body.md_billing_email || null;
       if (body.name) patch.name = body.name;
       if (Object.keys(patch).length) { patch.billing_updated_at = new Date().toISOString(); await sbPatch("clinics?id=eq." + encodeURIComponent(clinicId), patch); }
+      // Address / phone live on the Stripe customer — update them when the modal sends them.
+      if (body.md_billing_address !== undefined || body.md_billing_phone !== undefined) {
+        try { await upsertCustomerContact(clinic, { address: body.md_billing_address, phone: body.md_billing_phone, email: (body.md_billing_email !== undefined ? body.md_billing_email : clinic.md_billing_email) }, key); } catch (e) {}
+      }
       return json(200, { ok: true });
+    }
+
+    // Pause / resume a clinic (put its governance on hold). Paused clinics stay on the roster but
+    // drop out of Monthly Recurring; uses the existing clinics.status column. Owner only.
+    if (action === "set_hold") {
+      const g = await requireOwner(event); if (g.error) return g.error;
+      const paused = !!body.paused;
+      const ok = await sbPatch("clinics?id=eq." + encodeURIComponent(clinicId), { status: paused ? "paused" : "active", billing_updated_at: new Date().toISOString() });
+      if (!ok) return json(502, { error: "hold_failed", hint: "Could not update the hold state." });
+      return json(200, { ok: true, paused: paused });
     }
 
     if (action === "bill") {

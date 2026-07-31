@@ -33,6 +33,8 @@ h1{font-family:var(--fdisp);font-size:1.6rem;margin-top:2px}
 .fee{font-family:var(--fdisp);color:var(--gold)}
 .pill{font-size:.62rem;font-weight:700;padding:2px 9px;border-radius:20px}
 .pill.on{background:#0e2a1d;color:var(--green);border:1px solid #1c5238}.pill.off{background:#1a222b;color:var(--muted);border:1px solid var(--line2)}
+.pill.hold{background:#3a2a0e;color:var(--gold);border:1px solid #5a441a}
+.card.held{opacity:.6}.card.held:hover{opacity:.85}
 .btn{font-family:var(--fdisp);font-weight:600;border:none;border-radius:10px;padding:8px 14px;font-size:.82rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
 .btn.go{background:linear-gradient(120deg,var(--teal),#19b9c9);color:#04121a}
 .btn.ghost{background:transparent;border:1px solid var(--line2);color:var(--ink)}
@@ -59,7 +61,7 @@ h1{font-family:var(--fdisp);font-size:1.6rem;margin-top:2px}
     <div>
       <div class="kick">RenuviaMD® · Medical Director Finance</div>
       <h1>Governance billing</h1>
-      <div class="who" id="who">Every clinic you supervise — one place to bill and track. Billed by bank/ACH, separate from AllyOS.</div>
+      <div class="who" id="who">Every clinic you supervise — one place to bill and track. Bank account (ACH) only — cards are not accepted. Separate from AllyOS.</div>
     </div>
     <div class="r"><div id="whoR" style="color:var(--ink)"></div><div style="margin-top:4px"><a href="clinic-network.html">← Cockpit</a> &nbsp;·&nbsp; <a href="#" onclick="if(window.AllyOSAuth)AllyOSAuth.signOut();return false" style="color:var(--muted)">Logout</a></div>
       <div style="margin-top:10px"><button class="btn go" onclick="openFee(null)">+ Add clinic</button></div></div>
@@ -74,7 +76,7 @@ h1{font-family:var(--fdisp);font-size:1.6rem;margin-top:2px}
 
   <div id="list"><div class="card" style="color:var(--muted)">Loading clinics…</div></div>
 
-  <div class="disc">Statements are emailed by Stripe (pay by bank / ACH — ~$5 fee, not card %). This is your Medical-Director revenue, kept separate from the AllyOS software subscription. Fees are complexity-based and set per clinic; one-off extras are added per bill.</div>
+  <div class="disc"><b style="color:var(--ink)">Payment is by bank account (ACH) only — cards are not accepted.</b> Statements are emailed by Stripe with a pay-by-bank button (~$5 flat bank fee, never a card %). This is your Medical-Director revenue, kept separate from the AllyOS software subscription. Fees are complexity-based and set per clinic; one-off extras are added per bill.</div>
 </div>
 
 <!-- Set fee modal -->
@@ -86,6 +88,8 @@ h1{font-family:var(--fdisp);font-size:1.6rem;margin-top:2px}
   <div class="fld"><label>Base monthly fee ($)</label><input id="fFee" type="number" min="0" step="1" placeholder="1850"></div>
   <div class="fld"><label>Per-GFE fee ($) — added per signed GFE when you're MD-of-record</label><input id="fGfe" type="number" min="0" step="1" placeholder="30"></div>
   <div class="fld"><label>Billing email (where the statement goes)</label><input id="fEmail" type="email" placeholder="billing@clinic.com"></div>
+  <div class="fld"><label>Clinic address</label><input id="fAddr" placeholder="123 Main St, Miami, FL 33009"></div>
+  <div class="fld"><label>Clinic phone</label><input id="fPhone" type="tel" placeholder="(305) 555-0142"></div>
   <div class="mrow"><span class="msg" id="feeMsg"></span><div><button class="btn ghost" id="fDel" style="display:none;border-color:#6a2020;color:#f0a59d" onclick="deleteClinic()">Delete</button> <button class="btn ghost" onclick="closeFee()">Cancel</button> <button class="btn go" onclick="saveFee()">Save</button></div></div>
 </div></div>
 
@@ -100,7 +104,7 @@ h1{font-family:var(--fdisp);font-size:1.6rem;margin-top:2px}
   </div>
   <div class="tot">Total this bill <b id="billTot">$0</b></div>
   <div class="fld" style="margin-top:8px"><label>Due in (days)</label><input id="bDue" type="number" min="1" max="60" value="15"></div>
-  <div style="font-size:.72rem;color:var(--muted)">Stripe emails the statement to the clinic with a “pay by bank” button — like a card bill. You’ll see it here as Paid once they pay.</div>
+  <div style="font-size:.72rem;color:var(--muted)">Stripe emails the statement to the clinic with a “pay by bank account (ACH)” button — no cards. You’ll see it here as Paid once they pay.</div>
   <div class="mrow"><span class="msg" id="billMsg"></span><div><button class="btn ghost" onclick="closeBill()">Cancel</button> <button class="btn gold" onclick="sendBill()">Send bill →</button></div></div>
 </div></div>
 
@@ -129,16 +133,28 @@ function load(){
 }
 function tagChip(t){if(!t)return '';var lbl={acha:'ACHA',pi:'Personal injury',np:'NP/PA supervision',ally:'AllyOS'}[t]||t;return '<span class="tag '+t+'">'+esc(lbl)+'</span>';}
 function card(c){
+  var held=!!c.hold;
   var feeTxt=c.md_fee!=null?'<span class="fee">'+money(c.md_fee)+'</span> /mo':'<span style="color:var(--muted)">fee not set</span>';
   var bank=c.status==='active'?'<span class="pill on">bank on file</span>':'<span class="pill off">no autopay</span>';
-  var pd=(c.past_due>0)?' &nbsp;·&nbsp; <span style="color:var(--red)">past due '+money(c.past_due)+'</span>':'';
+  var pd=(c.past_due>0)?' &nbsp;·&nbsp; <a href="#" onclick="openStatement(\''+c.id+'\');return false" style="color:var(--red);text-decoration:none">past due '+money(c.past_due)+' →</a>':'';
   var ytd=' &nbsp;·&nbsp; <span style="color:var(--green)">YTD '+money(c.ytd||0)+'</span>';
-  return '<div class="card"><div class="crow">'+
-    '<div><div class="cname">'+esc(c.name||'Clinic')+' '+tagChip(c.governance_type)+'</div>'+
-      '<div style="font-size:.8rem;color:var(--muted);margin-top:3px">'+feeTxt+' &nbsp;·&nbsp; '+bank+(c.email?' &nbsp;·&nbsp; '+esc(c.email):' &nbsp;·&nbsp; <span style="color:var(--gold)">no billing email</span>')+pd+ytd+'</div></div>'+
+  var holdPill=held?' <span class="pill hold">on hold</span>':'';
+  var bits=[];
+  if(c.address)bits.push('📍 '+esc(c.address));
+  if(c.phone)bits.push('📞 '+esc(c.phone));
+  var contactLine=bits.length?'<div style="font-size:.76rem;color:var(--muted);margin-top:4px">'+bits.join(' &nbsp;·&nbsp; ')+'</div>':'';
+  var holdBtn=held
+    ? '<button class="btn ghost" style="border-color:#1c5238;color:var(--green)" onclick="setHold(\''+c.id+'\',false)">▶ Resume</button>'
+    : '<button class="btn ghost" onclick="setHold(\''+c.id+'\',true)">⏸ Hold</button>';
+  var billBtn=held
+    ? '<button class="btn ghost" disabled title="Resume this clinic to bill it" style="opacity:.5;cursor:not-allowed">Bill →</button>'
+    : '<button class="btn gold" onclick="openBill(\''+c.id+'\')">Bill →</button>';
+  return '<div class="card'+(held?' held':'')+'"><div class="crow">'+
+    '<div><div class="cname">'+esc(c.name||'Clinic')+' '+tagChip(c.governance_type)+holdPill+'</div>'+
+      '<div style="font-size:.8rem;color:var(--muted);margin-top:3px">'+feeTxt+' &nbsp;·&nbsp; '+bank+(c.email?' &nbsp;·&nbsp; '+esc(c.email):' &nbsp;·&nbsp; <span style="color:var(--gold)">no billing email</span>')+pd+ytd+'</div>'+contactLine+'</div>'+
     '<div class="actions"><button class="btn ghost" onclick="openStatement(\''+c.id+'\')">📄 Statement</button>'+
       '<button class="btn ghost" onclick="openFee(\''+c.id+'\')">⚙ Fee</button>'+
-      '<button class="btn gold" onclick="openBill(\''+c.id+'\')">Bill →</button></div>'+
+      holdBtn+billBtn+'</div>'+
     '</div><div id="inv-'+c.id+'" style="margin-top:10px"></div></div>';
 }
 function byId(id){for(var i=0;i<CLINICS.length;i++)if(CLINICS[i].id===id)return CLINICS[i];return null;}
@@ -153,6 +169,8 @@ function openFee(id){feeId=id;var c=id?byId(id):null;
   document.getElementById('fFee').value=(c&&c.md_fee!=null)?c.md_fee:'';
   document.getElementById('fGfe').value=(c&&c.gfe_fee!=null)?c.gfe_fee:'';
   document.getElementById('fEmail').value=c?(c.email||''):'';
+  document.getElementById('fAddr').value=c?(c.address||''):'';
+  document.getElementById('fPhone').value=c?(c.phone||''):'';
   var m=document.getElementById('feeMsg');m.textContent='';m.style.color='var(--green)';
   document.getElementById('fDel').style.display=c?'':'none';
   document.getElementById('feeBack').classList.add('on');
@@ -170,7 +188,7 @@ function deleteClinic(){
 }
 function closeFee(){document.getElementById('feeBack').classList.remove('on');}
 function saveFee(){var m=document.getElementById('feeMsg');
-  var payload={name:document.getElementById('fName').value.trim(),governance_type:document.getElementById('fType').value,md_fee:document.getElementById('fFee').value,md_gfe_fee:document.getElementById('fGfe').value,md_billing_email:document.getElementById('fEmail').value.trim()};
+  var payload={name:document.getElementById('fName').value.trim(),governance_type:document.getElementById('fType').value,md_fee:document.getElementById('fFee').value,md_gfe_fee:document.getElementById('fGfe').value,md_billing_email:document.getElementById('fEmail').value.trim(),md_billing_address:document.getElementById('fAddr').value.trim(),md_billing_phone:document.getElementById('fPhone').value.trim()};
   if(!feeId&&!payload.name){m.textContent='Clinic name is required.';m.style.color='var(--red)';return;}
   if(feeId){payload.action='set_fee';payload.clinic_id=feeId;}else{payload.action='add_clinic';}
   m.style.color='var(--green)';m.textContent='Saving…';
@@ -207,8 +225,9 @@ function openStatement(id){
     var gfe=d.gfe_fee!=null?'<div style="font-size:.72rem;color:var(--muted);margin-bottom:6px">Per-GFE fee: <b style="color:var(--gold)">'+money(d.gfe_fee)+'</b></div>':'';
     var out=d.outstanding>0?'<div style="font-size:.8rem;margin-bottom:8px">Outstanding: <b style="color:var(--gold)">'+money(d.outstanding)+'</b></div>':'<div style="font-size:.8rem;margin-bottom:8px;color:var(--green)">All caught up.</div>';
     var rows=inv.length?inv.map(function(v){
-      var mark=(v.status==='open'&&v.id)?' &nbsp; <a href="#" onclick="markPaid(\''+esc(v.id)+'\',\''+id+'\');return false" style="color:var(--green)">Mark paid ✓</a>':'';
-      return '<div class="inv"><span>'+money(v.amount_due||v.amount_paid)+' <span class="st '+(v.status==='paid'?'paid':(v.status==='open'?'open':'other'))+'">'+esc(v.status)+'</span></span><span>'+(v.number?esc(v.number)+' · ':'')+(v.url?'<a href="'+esc(v.url)+'" target="_blank" rel="noopener" style="color:var(--teal)">open ↗</a>':'')+mark+'</span></div>';}).join(''):'<div style="color:var(--muted);font-size:.8rem">No statements yet.</div>';
+      var mark=(v.status==='open'&&v.id)?' &nbsp; <a href="#" onclick="markPaid(\''+esc(v.id)+'\',\''+id+'\');return false" style="color:var(--green)">Mark paid ✓</a> &nbsp; <a href="#" onclick="waiveInv(\''+esc(v.id)+'\',\''+id+'\');return false" style="color:var(--gold)">Waive</a>':'';
+      var stLabel=(v.status==='uncollectible')?'waived':v.status;
+      return '<div class="inv"><span>'+money(v.amount_due||v.amount_paid)+' <span class="st '+(v.status==='paid'?'paid':(v.status==='open'?'open':'other'))+'">'+esc(stLabel)+'</span></span><span>'+(v.number?esc(v.number)+' · ':'')+(v.url?'<a href="'+esc(v.url)+'" target="_blank" rel="noopener" style="color:var(--teal)">open ↗</a>':'')+mark+'</span></div>';}).join(''):'<div style="color:var(--muted);font-size:.8rem">No statements yet.</div>';
     el.innerHTML=gfe+out+rows;
   }).catch(function(){el.innerHTML='<div style="color:var(--muted);font-size:.8rem">Could not reach billing.</div>';});
 }
@@ -219,6 +238,24 @@ function markPaid(invId,clinicId){
   api({action:'mark_paid',invoice_id:invId}).then(function(d){
     if(d&&d.ok){var el=document.getElementById('inv-'+clinicId);if(el)el.removeAttribute('data-open');openStatement(clinicId);load();}
     else{alert((d&&d.detail)||'Could not mark paid — try again.');}
+  }).catch(function(){alert('Could not reach billing.');});
+}
+// Waive / write off a charge: Stripe marks it uncollectible, so it leaves Past Due and is NOT
+// counted as collected. Use for a courtesy credit or a bill you're forgiving.
+function waiveInv(invId,clinicId){
+  if(!confirm('WAIVE this charge? It is written off (uncollectible) — it leaves Past Due and is NOT counted as collected. Use this to forgive a bill or issue a courtesy credit.'))return;
+  api({action:'waive',invoice_id:invId}).then(function(d){
+    if(d&&d.ok){var el=document.getElementById('inv-'+clinicId);if(el)el.removeAttribute('data-open');openStatement(clinicId);load();}
+    else{alert((d&&d.detail)||'Could not waive — try again.');}
+  }).catch(function(){alert('Could not reach billing.');});
+}
+// Put a clinic on hold / resume it. Paused clinics stay on the roster but drop out of Monthly Recurring.
+function setHold(id,paused){
+  var c=byId(id);var nm=(c&&c.name)||'this clinic';
+  var q=paused?('Put '+nm+' ON HOLD? It stays on your roster but is paused — it drops out of Monthly Recurring, and its Bill button is disabled until you resume.'):('Resume billing for '+nm+'?');
+  if(!confirm(q))return;
+  api({action:'set_hold',clinic_id:id,paused:paused}).then(function(d){
+    if(d&&d.ok){load();}else{alert((d&&d.hint)||'Could not update hold — try again.');}
   }).catch(function(){alert('Could not reach billing.');});
 }
 function closeBill(){document.getElementById('billBack').classList.remove('on');}
