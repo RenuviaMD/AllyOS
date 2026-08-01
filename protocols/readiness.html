@@ -167,6 +167,10 @@
 
 <script>
 const FORMSUBMIT='https://formsubmit.co/ajax/drfalcon@renuviamd.com';
+// Leads are stored in the RenuviaMD `renuvia` Supabase project (CRM source of truth);
+// the FormSubmit email below is a best-effort notification on top of that store.
+const SUPABASE_URL='https://gdjtxpjfxbfyhdwrxqrx.supabase.co';
+const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkanR4cGpmeGJmeWhkd3J4cXJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2MTIwMTcsImV4cCI6MjEwMTE4ODAxN30.FLIkE4mGsmp-6CJEYXeDSsx5Sv0raRtnyoxsZcXRmYg';
 const RN_OK=['iv','aesthetics'];               // lines an RN can run under orders
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const params=new URLSearchParams(location.search);
@@ -292,22 +296,44 @@ form.onsubmit=async(e)=>{
   err.style.display='none';
   const btn=document.getElementById('submit'); btn.disabled=true; btn.textContent='Sending…';
   const sel=selectedAvenues();
+  const practice=document.getElementById('c-practice').value;
+  const stt=document.getElementById('c-state').value;
+  const phone=document.getElementById('c-phone').value;
+  const timing=document.getElementById('c-timing').value;
+  const linesArr=sel.map(av=>({id:av.id,name:av.name,stage:state.lines[av.id]}));
   try{
-    await fetch(FORMSUBMIT,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
+    // Primary: store the lead in the renuvia CRM (source of truth).
+    const res=await fetch(SUPABASE_URL+'/rest/v1/leads',{method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON,
+        'Authorization':'Bearer '+SUPABASE_ANON,'Prefer':'return=minimal'},
       body:JSON.stringify({
-        _subject:`Readiness review — ${document.getElementById('c-practice').value||name} — ${document.getElementById('c-state').value||'state n/a'}`,
+        kind:'directorship_consult',
+        name, practice_name:practice||null, email, phone:phone||null,
+        practice_state:stt||null, preferred_timing:timing||null,
+        practice_status:state.status||null,
+        lines:linesArr, staffing:{md:state.md,app:state.app,rn:state.rn},
+        written_protocols:state.proto||null,
+        readiness_summary:buildBrief(),
+        source:'AllyOS directorship readiness check',
+        page_url:location.href, user_agent:navigator.userAgent,
+      })});
+    if(!res.ok) throw new Error('store '+res.status);
+    // Best-effort: email Dr. Falcon so it also lands in his inbox (never blocks success).
+    fetch(FORMSUBMIT,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
+      body:JSON.stringify({
+        _subject:`Readiness review — ${practice||name} — ${stt||'state n/a'}`,
         _cc:'info@myfloridamedicaldirector.com',
-        Name:name, 'Practice Name':document.getElementById('c-practice').value,
-        Email:email, Phone:document.getElementById('c-phone').value,
-        'Practice State':document.getElementById('c-state').value,
-        'Preferred Timing':document.getElementById('c-timing').value,
+        Name:name, 'Practice Name':practice,
+        Email:email, Phone:phone,
+        'Practice State':stt,
+        'Preferred Timing':timing,
         'Practice Status':state.status,
         Lines:sel.map(av=>`${av.name} (${state.lines[av.id]})`).join(', ')||'none',
         Staffing:`MD/DO ${state.md}, NP/PA ${state.app}, RN ${state.rn}`,
         'Written Protocols':state.proto,
         '— READINESS SUMMARY —':buildBrief(),
         Source:'AllyOS directorship readiness check',
-      })});
+      })}).catch(()=>{});
     document.getElementById('app').innerHTML=`<div class="card sent"><div class="ok">✓</div>
       <h3 style="font-size:1.4rem;margin-bottom:6px">It's on the way</h3>
       <p style="color:var(--muted)">Dr. Falcon will personally review your readiness and reply to ${esc(email)} within one business day — with the exact direction your lines need and a 15-minute call to walk you through it.</p></div>`;
