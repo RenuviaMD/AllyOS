@@ -1,0 +1,10 @@
+© Anthropic PBC. All rights reserved. Use is subject to Anthropic's
+Commercial Terms of Service: https://www.anthropic.com/legal/commercial-terms
+
+Source: https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design
+Upstream plugin: frontend-design v1.1.0
+Authors: Prithvi Rajasekaran, Alexander Bricken (Anthropic)
+
+SKILL.md in this directory is a verbatim copy of the upstream skill file
+(anthropics/claude-code @ 5cf69b18c86d0224dc53815332bbd85574b97097, vendored 2026-08-06).
+Do not hand-edit it — re-vendor from upstream instead so it stays in sync.

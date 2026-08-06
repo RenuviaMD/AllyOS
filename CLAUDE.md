@@ -1,5 +1,25 @@
 # renuviamd-site — working notes for Claude
 
+## UI/UX toolchain — REPO-WIDE, every app, new or old
+Applies to **all** front-end surfaces in this repo without exception: `app-pimaster/` (Vite/React/TS),
+`allyos/` and `ally/` (static HTML), `protocols/`, and the root marketing/legal pages
+(`index.html`, `privacy.html`, `terms.html`, `RenuviaMD-storefront.html`, the `*-print.html` documents),
+plus any new app added later. Setup notes and verification: `.claude/README.md`.
+
+- **`frontend-design` skill** (`.claude/skills/frontend-design/`) — vendored verbatim from Anthropic's
+  `frontend-design` plugin. Invoke it BEFORE writing or reshaping any UI: new screens, redesigns,
+  restyling an existing page, or any change where layout, palette, or typography is in play.
+  Purpose is to avoid templated "AI default" aesthetics. Do not hand-edit SKILL.md — re-vendor upstream.
+- **21st.dev MCP** (`.mcp.json`, server `21st`) — component/logo search and UI generation
+  (`generate`, `get_inspiration`, `search`, `search_logo`). Needs `TWENTY_FIRST_API_KEY` in the
+  environment; without it the server loads but every call 401s. Treat its output as a starting
+  point to adapt, never as drop-in code.
+- **Precedence — these are style tools, not authority.** The domain rules below and the old-repo
+  Design Bible (rule 13) outrank both. In clinical surfaces, aesthetics never alter clinical
+  content, terminology (rule 12), or what is documented: no invented findings or copy (rule 3),
+  no PHI added to admin/compliance surfaces (rule 6). Never paste generated components that pull
+  remote scripts, fonts, or assets into a PHI-handling page.
+
 ## Active project: app-pimaster (PI Master™)
 - Vite + React + TS clinical documentation app for Florida PI/PIP clinics. All work happens here unless told otherwise.
 - Verify before every commit: `cd app-pimaster && npm run verify` (tests + typecheck + build). Commit AND push in the same turn — a stop hook rejects a dirty tree.
