@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Longevity/sleep-axis support, short pulsed courses"
   contraindications_short: "active malignancy, pregnancy, lactation, age <18, hypersensitivity"
   clinical_notes_short: "Human evidence is thin and mostly older Russian work. Dosed in short 10-20 day pulses, not chronically. Telomerase claims are unproven — set expectations honestly."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Epitalon

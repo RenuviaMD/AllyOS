@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Cognitive support in post-stroke, TBI, and neurodegenerative decline"
   contraindications_short: "pregnancy, lactation, age <18, hypersensitivity, severe renal impairment, status epilepticus"
   clinical_notes_short: "EU/RU/AR-labeled, no US brand — fully off-shore. Given as IV/IM courses, not a quick injection. Epilepsy is a caution. Verify a legitimate source — counterfeits exist."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Cerebrolysin

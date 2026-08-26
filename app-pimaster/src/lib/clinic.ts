@@ -19,7 +19,7 @@ export const DEFAULT_CLINIC: ClinicProfile = {
   phone: "305-994-9500",
   fax: "786-441-2179",
   email: "wellnesshcc@gmail.com",
-  provider: "Dr. Armando Falcon, MD",
+  provider: "Dr. Armando A Falcon, MD",
   license: "FL ME 84789",
   npi: "1447295126",
 };

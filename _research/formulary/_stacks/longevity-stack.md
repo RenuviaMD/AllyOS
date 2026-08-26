@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Healthspan, metabolic, and mitochondrial support"
   contraindications_short: "active malignancy, pregnancy, lactation, age <18, hypersensitivity"
   clinical_notes_short: "All three are early-evidence — honest expectations required. Epitalon pulses, MOTS-c and SS-31 daily/weekly. Tie continuation to objective metabolic markers."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Longevity Stack (Epitalon + MOTS-c + SS-31)

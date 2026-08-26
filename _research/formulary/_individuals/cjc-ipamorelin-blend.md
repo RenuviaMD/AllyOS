@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Combined GH-axis support for recovery, body composition, and sleep"
   contraindications_short: "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity"
   clinical_notes_short: "The workhorse growth combo — GHRH + GHRP synergy beats either alone. One bedtime shot. Watch fluid retention and glucose as you titrate."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # CJC-1295 + Ipamorelin (blend)

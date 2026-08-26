@@ -1,6 +1,6 @@
 # Men's TRT dosing — sign-off sheet (v0.1 DRAFT)
 
-For: Armando A. Falcon, MD — Medical Director, RenuviaMD® / AllyOS
+For: Armando A Falcon, MD — Medical Director, RenuviaMD® / AllyOS
 Prepared by: AllyOS audit (PubMed live verification) · 2026-06-30
 Scope: the testosterone starting regimens now emitted by `allyos/mens-poc.html` (shown ONLY on the
 candidate-review eligibility path; engine proposes, provider titrates to mid-normal & signs).

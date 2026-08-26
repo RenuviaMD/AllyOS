@@ -33,7 +33,7 @@ window.AllyOSGovReport = (function () {
 
   function build(pl){
     var overallColor=pl.overall==='Compliant'?GREEN:pl.overall==='Needs correction'?RED:SLATE;
-    var pracRows=(pl.practitioners&&pl.practitioners.length?pl.practitioners:[['Armando A. Falcon','Medical Director','FL Medical License · ME 84789','Verify']])
+    var pracRows=(pl.practitioners&&pl.practitioners.length?pl.practitioners:[['Armando A Falcon','Medical Director','FL Medical License · ME 84789','Verify']])
       .map(function(r,i){return [String(i+1)].concat([r[0]||'—',r[1]||'—',r[2]||'—',r[3]||'—']);});
     // charts may be objects {ref,ini,dos,line,status} (chart-review engine) or legacy [chart,dos,type].
     var chartsSrc=(pl.charts&&pl.charts.length)?pl.charts:[{ref:'{chart 1}',dos:'{DOS}',line:'{review type}',status:'Reviewed'},{ref:'{chart 2}',dos:'{DOS}',line:'{review type}',status:'Reviewed'},{ref:'{chart 3}',dos:'{DOS}',line:'{review type}',status:'Reviewed'},{ref:'{chart 4}',dos:'{DOS}',line:'{review type}',status:'Reviewed'},{ref:'{chart 5}',dos:'{DOS}',line:'{review type}',status:'Reviewed'}];

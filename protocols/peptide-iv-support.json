@@ -7,7 +7,7 @@
     "requires_md_signoff": true,
     "effective": "2026-06-29",
     "source": "Consolidated from two provider-supplied packages: stack-level recommender v0.4 + ingredient-level match matrix v0.1 (see protocols/peptide-iv-support/). Safety is DELEGATED to the locked iv-module — this layer adds matching, evidence labels, and claim guardrails only.",
-    "curated_by": "Armando A. Falcon, MD (FL ME 84789) — RenuviaMD® PLLC, AllyOS Compliance Division",
+    "curated_by": "Armando A Falcon, MD (FL ME 84789) — RenuviaMD® PLLC, AllyOS Compliance Division",
     "scope": "Selective, OPTIONAL IV support for peptide patients. Wellness-elective: a healthy client's GOAL (energy, glow, recovery, calm) may trigger an ingredient/option match — deficiency is NOT required. The provider's role is SAFETY + contraindication rule-out, not treating a disease.",
     "posture": {
       "wellness_goal_trigger_allowed": true,
@@ -152,7 +152,7 @@
   "signoff_ledger": {
     "status": "LOCKED 2026-06-29 — matching + claim-discipline layer signed. SAFETY hard-stops are carried by the separately-locked protocols/wellness-iv-hard-stop.json (all 9 families); ingredient ceilings/screens by the locked iv-module. The items below are post-lock matching/UX enhancements, NOT safety gaps.",
     "md_signoff": {
-      "by": "Armando A. Falcon, MD (FL ME 84789)",
+      "by": "Armando A Falcon, MD (FL ME 84789)",
       "role": "Medical Director / curator — editorial governance sign-off (framework, once). NOT a per-patient clinical signature; the treating provider owns and signs each encounter in their own record.",
       "date": "2026-06-29",
       "attests": "The wellness-elective posture, safety delegation to the locked iv-module, GLP drug-context gates, evidence labels, and claim guardrails are correct and carry no efficacy/synergy overclaim. Family-level absolute contraindications are delegated to the locked wellness-iv-hard-stop gate package. Effective 2026-06-29.",

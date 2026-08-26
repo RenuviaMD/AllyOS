@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Immune modulation in chronic/recurrent infection or immunosenescence"
   contraindications_short: "transplant on immunosuppression, severe active autoimmune, pregnancy, lactation, age <18"
   clinical_notes_short: "Modulator, not a generic booster — use against a defined immune problem. Always ask about transplant/immunosuppression. Strongest data is in hepatitis; favorable safety profile."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Thymosin alpha-1 (Zadaxin — non-US)

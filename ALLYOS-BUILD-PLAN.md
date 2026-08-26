@@ -1,7 +1,7 @@
 # AllyOS — Master Build Plan
 
 _The honest, multi-line clinical operating system by RenuviaMD® Compliance Division._
-_Platform = **AllyOS** · AI = **Ally** · curated by Armando A. Falcon, MD (FL ME 84789)._
+_Platform = **AllyOS** · AI = **Ally** · curated by Armando A Falcon, MD (FL ME 84789)._
 
 ---
 

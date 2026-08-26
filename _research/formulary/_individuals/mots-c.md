@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Metabolic/healthspan support — insulin sensitivity and metabolic flexibility"
   contraindications_short: "active malignancy, pregnancy, lactation, age <18, hypersensitivity"
   clinical_notes_short: "No human therapeutic trials — preclinical only. Tie use to a number (HOMA-IR/A1c) and stop if it doesn't move. Exercise is the proven version of this mechanism."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # MOTS-c

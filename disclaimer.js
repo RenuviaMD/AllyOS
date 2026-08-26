@@ -9,7 +9,7 @@
         'AllyOS provides educational clinical decision-support and software for licensed providers. ' +
         'It is <b>not medical or legal advice, not prescribing authorization, and does not create a ' +
         'medical-director, supervisory, or physician-patient relationship</b> with RenuviaMD&reg; or ' +
-        'Armando A. Falcon, MD. <b>Clinical decisions remain the sole responsibility of the licensed ' +
+        'Armando A Falcon, MD. <b>Clinical decisions remain the sole responsibility of the licensed ' +
         'practitioner.</b> AI responses (Ally) are decision-support only, may be incomplete or in error, ' +
         'and must be independently verified. Peptides and compounds referenced are ' +
         '<b>not FDA-approved drugs unless otherwise noted</b>; evidence quality varies (Grade A&ndash;D). ' +

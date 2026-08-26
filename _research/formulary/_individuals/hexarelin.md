@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Reported off-label for GH elevation; preclinical cardiovascular interest - not approved"
   contraindications_short: "active malignancy, hypersensitivity; receptor desensitization with continued use, cortisol/prolactin effects"
   clinical_notes_short: "Grade D. No human therapeutic approval or efficacy trials; potent GH secretagogue prone to receptor desensitization. 2024-26 literature is preclinical/analytical only."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-22", last_clinical_review: "2026-06-22" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-22", last_clinical_review: "2026-06-22" }
 ---
 
 # Hexarelin (Examorelin)

@@ -1,6 +1,6 @@
 # BHRT Plan-of-Care generator — dose & titration sign-off sheet (v0.1 DRAFT)
 
-For: Armando A. Falcon, MD — Medical Director, RenuviaMD® / AllyOS
+For: Armando A Falcon, MD — Medical Director, RenuviaMD® / AllyOS
 Prepared by: AllyOS audit (PubMed live verification) · 2026-06-30
 Scope: every dose, titration step, and monitoring claim emitted by `allyos/bhrt-poc.html`.
 Purpose: one-read approval. The engine **proposes**; you **decide & sign**. Nothing goes live to a clinic until you initial below.
@@ -69,6 +69,6 @@ Two recommended refinements (R1 wording, R3 safety-monitoring) and one optional 
 ### Sign-off — APPROVED (2026-07-01)
 - [x] **R1 — APPROVED & applied.** Testosterone block uses the ISSWSH stance (government-approved male transdermal product dosed to the female physiologic range; compounded testosterone not recommended).
 - [x] **R3 — APPROVED & applied.** Fezolinetant LFT schedule extended to baseline, 1, 2, 3, 6, and 9 months (updated FDA Veozah label).
-- [x] **I, Armando A. Falcon, MD, approve the BHRT dose/titration logic above for live use in the AllyOS Hormone line.**  Date: **2026-07-01**.
+- [x] **I, Armando A Falcon, MD, approve the BHRT dose/titration logic above for live use in the AllyOS Hormone line.**  Date: **2026-07-01**.
 
 Status: **MD-signed.** R1/R3 applied in `bhrt-poc.html`; live in the Hormone line with the MD-signed badge. Estradiol ladder (0.025–0.1 mg/day) and micronized progesterone verified vs FDA labels + NAMS 2022.

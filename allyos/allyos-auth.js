@@ -65,7 +65,7 @@ window.AllyOSAuth = (function () {
     var s = session(); if (!s) return '';
     if (s.credential === 'MD' || s.credential === 'DO') {
       var nm = s.name || '';
-      if (/^falcon$/i.test(nm.trim())) nm = 'Armando A. Falcon';
+      if (/^falcon$/i.test(nm.trim())) nm = 'Armando A Falcon';
       return 'Dr. ' + nm + ', ' + s.credential;
     }
     return s.name;

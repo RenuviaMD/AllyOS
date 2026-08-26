@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Libido and reproductive-axis support; investigational"
   contraindications_short: "active hormone-sensitive cancer, pregnancy, lactation, age <18, hypersensitivity"
   clinical_notes_short: "Very early human data, mostly IV research dosing — SC use is empiric. Acts upstream on GnRH. Caution with hormone-sensitive conditions; consent as experimental."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Kisspeptin-10

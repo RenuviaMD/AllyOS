@@ -7,7 +7,7 @@
     "status": "locked",
     "requires_md_signoff": true,
     "effective": "2026-06-29",
-    "curated_by": "Armando A. Falcon, MD (FL ME 84789) — RenuviaMD® PLLC, AllyOS Compliance Division",
+    "curated_by": "Armando A Falcon, MD (FL ME 84789) — RenuviaMD® PLLC, AllyOS Compliance Division",
     "purpose": "The single shared RED-level hard-stop layer that every peptide stack family (FAM01–FAM09) routes to BEFORE any optional IV/IM wellness support is matched. It introduces NO new ingredient ceilings or screens — those live only in the locked iv-module. It (a) delegates the universal acute hold/referral to the locked iv-module, (b) states the wellness-elective principle, and (c) consolidates the peptide-context absolute contraindications by family so the deterministic engine has one place to route the family gate_package string.",
     "delegates_to": {
       "iv_module": "protocols/iv-module.json (LOCKED v1.0, effective 2026-06-24)",
@@ -193,7 +193,7 @@
   "signoff_ledger": {
     "status": "LOCKED 2026-06-29 — 3-auditor pass with all load-bearing notes applied; MD sign-off recorded.",
     "md_signoff": {
-      "by": "Armando A. Falcon, MD (FL ME 84789)",
+      "by": "Armando A Falcon, MD (FL ME 84789)",
       "role": "Medical Director / curator — editorial governance sign-off (frameworks, once). This is NOT a per-patient clinical signature; the treating provider owns and signs each encounter determination in their own record.",
       "date": "2026-06-29",
       "attests": "This shared hard-stop gate package delegates to the locked iv-module (IVIM_GATE_VITALS) without relaxing any locked gate, consolidates the 9-family absolute contraindications faithfully to peptide-stack-families.json, and is advisory by default (enforcement only in MD-of-record mode). Effective 2026-06-29."

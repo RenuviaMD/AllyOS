@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Reported (gray-market) for skin tanning and sexual arousal — not approved for any use"
   contraindications_short: "personal/family melanoma or atypical/dysplastic nevi, dysplastic nevus syndrome, pregnancy, lactation, hypersensitivity"
   clinical_notes_short: "Grade D, not approved. Major safety concern — case reports of melanoma and new/darkening or changing moles after use; nausea, flushing, and priapism are common. Distinct from FDA-approved afamelanotide (SCENESSE). Mandate full-body skin surveillance; many clinicians decline to prescribe."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-22", last_clinical_review: "2026-06-22" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-22", last_clinical_review: "2026-06-22" }
 ---
 
 # Melanotan II

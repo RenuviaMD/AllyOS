@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Focus, cognitive support, and recovery from cognitive fatigue"
   contraindications_short: "pregnancy, lactation, age <18, hypersensitivity"
   clinical_notes_short: "Russian-origin nootropic, now dosed SC here. Short well-tolerated courses; effects are subtle. SC gives more reliable dosing than intranasal drops — verify vial concentration."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Semax

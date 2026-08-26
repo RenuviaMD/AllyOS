@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Skin/connective-tissue repair, hair, and aesthetic regeneration"
   contraindications_short: "active/prior malignancy, pregnancy, lactation, age <18, hypersensitivity"
   clinical_notes_short: "Most evidence is topical; injectable/SC use is empiric. Watch cumulative copper with chronic systemic dosing. Same angiogenic cancer caution."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Copper tripeptide-1 (GHK-Cu)

@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Type 2 diabetes and chronic weight management (BMI ≥30, or ≥27 with comorbidity)"
   contraindications_short: "MTC/MEN-2 hx, acute pancreatitis, severe gastroparesis, pregnancy, hypersensitivity"
   clinical_notes_short: "Titrate to tolerance, not by calendar — most 'non-response' is stopping at 5 mg. Cut sulfonylurea/insulin at start to avoid lows. Counsel on oral-contraceptive absorption."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Tirzepatide (Mounjaro / Zepbound)

@@ -2,7 +2,7 @@
 window.RENUVIA_PROTOCOLS = {
   "meta": {
     "title": "RenuviaMD Clinical Protocol Library",
-    "curated_by": "Armando Falcon, MD",
+    "curated_by": "Armando A Falcon, MD",
     "tiers": {
       "1": "Curated, MD-signed library",
       "2": "On-demand peptide engine \u2014 verified, graduates into Tier 1"

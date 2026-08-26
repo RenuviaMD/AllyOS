@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Recovery, body composition, and sleep in symptomatic low-normal IGF-1 adults"
   contraindications_short: "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity"
   clinical_notes_short: "One GHRH + one GHRP is the clean synergy — no need to stack two GHRH analogs. Treat thyroid first. One bedtime shot; keep IGF-1 upper-normal-for-age, not above."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Growth Stack (Sermorelin + Ipamorelin)

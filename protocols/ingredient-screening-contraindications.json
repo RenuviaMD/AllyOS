@@ -5,7 +5,7 @@
     "version": "v1.0 (published)",
     "status": "published",
     "owner": "RenuviaMD® PLLC · AllyOS Compliance Division",
-    "curated_under": "Armando A. Falcon, MD (FL ME 84789)",
+    "curated_under": "Armando A Falcon, MD (FL ME 84789)",
     "date_drafted": "2026-06-26",
     "scope": "Per-INGREDIENT contraindications and cautions, mapped to the FORM-IV-GFE-01 Section-B screening conditions, allergy (Section C) and medication (Section D) screens. Deliberately NOT coupled to any protocol/stack — a contraindication attaches to the ingredient itself, so it fires no matter which stack or a-la-carte build the ingredient lands in.",
     "how_it_links": "GFE screens the condition (e.g. 'Kidney disease / dialysis'). When a patient with that flag gets a build that contains an ingredient whose screen lists that flag, the bench raises the matching alert (avoid = hard stop in MD-of-record mode / red advisory otherwise; caution/screen = amber).",
@@ -34,7 +34,7 @@
     ],
     "honesty_notes": "Items marked VERIFY are mechanistically plausible but rest on limited or contested human data — the MD must confirm before they are treated as hard rules. Everything else is established pharmacology. No dose, citation, or interaction below is invented; where the locked iv-module.json already carries a guardrail it is referenced, not duplicated.",
     "no_fabrication": true,
-    "published_by": "Armando A. Falcon, MD — AllyOS curator (editorial review; not a prescription)",
+    "published_by": "Armando A Falcon, MD — AllyOS curator (editorial review; not a prescription)",
     "published_date": "2026-06-26"
   },
   "ingredients": {

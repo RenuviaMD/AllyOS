@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Type 2 diabetes (Victoza) and chronic weight management (Saxenda); pediatric weight data"
   contraindications_short: "personal/family MTC or MEN2, pregnancy, pancreatitis history, hypersensitivity"
   clinical_notes_short: "FDA-approved, Grade A. Daily dosing (vs weekly semaglutide). First generic Victoza (2024) and generic Saxenda (2025) now available; SCALE Kids extended pediatric use. Titrate to limit GI effects."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-22", last_clinical_review: "2026-06-22" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-22", last_clinical_review: "2026-06-22" }
 ---
 
 # Liraglutide

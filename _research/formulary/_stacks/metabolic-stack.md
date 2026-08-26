@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Visceral fat reduction and metabolic optimization"
   contraindications_short: "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity"
   clinical_notes_short: "Four agents — heavy stack; reserve for motivated patients with objective VAT. Tesamorelin and MOTS-c can both touch glucose, so monitor A1c. Diet/exercise still does the heavy lifting."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Metabolic Stack (Tesamorelin + CJC/Ipa Blend + AOD-9604 + MOTS-c)

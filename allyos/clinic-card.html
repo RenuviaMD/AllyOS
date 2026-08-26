@@ -131,7 +131,7 @@ function renderCareRO(c,l){
   var gfe=(md&&rn)?'<span style="color:#f0a59d">GFE done by the MD (tab hidden on the floor)</span>':'<span style="color:var(--green)">GFE done by the clinic\'s credentialed APP/MD</span>';
   document.getElementById('careRO').innerHTML=
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px">'+
-      '<div><span style="color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.03em">MD-of-record</span><div style="color:var(--ink)">'+(md?'RenuviaMD — Armando Falcon, MD':'The clinic\'s own MD')+'</div></div>'+
+      '<div><span style="color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.03em">MD-of-record</span><div style="color:var(--ink)">'+(md?'RenuviaMD — Armando A Falcon, MD':'The clinic\'s own MD')+'</div></div>'+
       '<div><span style="color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.03em">Care model</span><div>'+(md&&rn?'RN-run (MD does the GFE)':'On-site provider model')+'</div></div>'+
       '<div style="grid-column:1/-1"><span style="color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.03em">GFE</span><div>'+gfe+'</div></div>'+
       '<div style="grid-column:1/-1"><span style="color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.03em">Active lines</span><div style="margin-top:3px">'+(keys.length?keys.map(function(k){return '<span class="badge app" style="margin-right:5px">'+LN[k]+'</span>';}).join(''):'<span class="muted">none</span>')+'</div></div>'+

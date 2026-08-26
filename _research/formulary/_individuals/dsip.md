@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Sleep-onset/quality support, adjunct in stress-related insomnia"
   contraindications_short: "pregnancy, lactation, age <18, hypersensitivity"
   clinical_notes_short: "Inconsistent human data; effects are variable patient-to-patient. Bedtime SC dosing. Address sleep hygiene and OSA first — don't paper over an untreated disorder."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Delta sleep-inducing peptide (DSIP)

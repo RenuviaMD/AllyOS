@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Adult age-related GH decline with low-normal IGF-1 and consistent symptoms"
   contraindications_short: "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity"
   clinical_notes_short: "Brand discontinued — compounded only. Treat thyroid first or you'll mislabel a responder. Bedtime, empty stomach; chase IGF-1 upper-normal-for-age, not above."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Sermorelin (Geref — discontinued)

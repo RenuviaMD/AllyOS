@@ -155,7 +155,7 @@ function statusTag(c){
   if(!(c.gfe&&c.gfe.cleared)) return '<span class="tag none">GFE needed</span>';
   return '<span class="tag ok">Cleared</span>';
 }
-function scheduleTele(id){ var c=clientById(id); var link=(document.getElementById('g_doxy')||{}).value||''; c.gfe={ cleared:false, telehealth:{link:link, requested:today()}, md:'Armando A. Falcon, MD · FL ME 84789' }; save(); curClient=id; cur='clients'; render(); }
+function scheduleTele(id){ var c=clientById(id); var link=(document.getElementById('g_doxy')||{}).value||''; c.gfe={ cleared:false, telehealth:{link:link, requested:today()}, md:'Armando A Falcon, MD · FL ME 84789' }; save(); curClient=id; cur='clients'; render(); }
 function modBadges(c){
   if(!gfeValid(c)) return '';
   var b=[];
@@ -194,7 +194,7 @@ function seedDemo(){
   DB.clients.push({ id:'c-demo-1', name:'M. Rivera', phone:'(305) 555-0142', email:'m.rivera@example.com', dob:'34',
     fitz:'IV', hairColor:'Coarse, dark', contra:[], areas:['Upper lip','Chin'],
     photos:[{id:'p1',date:today(),kind:'baseline',label:'Baseline · Upper lip',data:placeholderPhoto('Upper lip')},{id:'p2',date:today(),kind:'baseline',label:'Baseline · Chin',data:placeholderPhoto('Chin')}],
-    gfe:{ cleared:true, date:today(), expires:addYear(today()), md:'Armando A. Falcon, MD · FL ME 84789',
+    gfe:{ cleared:true, date:today(), expires:addYear(today()), md:'Armando A Falcon, MD · FL ME 84789',
       fitzConfirmed:'IV', laser:['810'], electro:['thermolysis','blend'], fee:35, expected:12, perSession:60,
       notes:'Fitzpatrick IV; coarse dark facial hair (PCOS pattern). No pacemaker/ICD, no isotretinoin, no recent tan. Cleared for 810 nm laser and thermolysis/blend electrolysis. Conservative first settings.' },
     sessions:[{ date:today(), modality:'electro', etype:'blend', timing:'0.8', mA:'0.3', probe:'F3 gold', insertions:120, area:'Upper lip', response:'Mild erythema, resolved <20 min', next:'Slight timing increase if tolerated' }],
@@ -325,7 +325,7 @@ function viewGfeForm(id){ var c=clientById(id); if(!c) return viewGfe(); var rec
     + (hasPacer? '<div class="flag warn">⛔ Pacemaker/ICD on file — galvanic &amp; blend are blocked (galvanic current). Thermolysis &amp; laser remain available.</div>':'')
     +'<div class="row"><div><label>GFE fee ($)</label><input id="g_fee" type="number" value="35"></div><div><label>Est. sessions</label><input id="g_exp" type="number" value="12"></div><div><label>Per-session ($)</label><input id="g_price" type="number" value="60"></div></div>'
     +'<label>GFE notes / protocol</label><textarea id="g_notes">Fitzpatrick '+esc(c.fitz)+'; intake &amp; contraindications reviewed. Conservative first settings; test area if any doubt.</textarea>'
-    +'<div class="sig">Signing as <b>Armando A. Falcon, MD</b> · FL ME 84789 · NPI 1447295126 — telehealth GFE, '+today()+'. Valid 1 year (through '+addYear(today())+').</div>'
+    +'<div class="sig">Signing as <b>Armando A Falcon, MD</b> · FL ME 84789 · NPI 1447295126 — telehealth GFE, '+today()+'. Valid 1 year (through '+addYear(today())+').</div>'
     +'<label style="margin-top:14px">Needs a live exam? — Doxy.me telehealth room link (optional)</label><input id="g_doxy" placeholder="https://doxy.me/dr-falcon" value="'+esc((c.gfe&&c.gfe.telehealth&&c.gfe.telehealth.link)||'')+'">'
     +'<div class="row" style="margin-top:12px"><button class="btn" onclick="signGfe(\''+c.id+'\')">✓ Sign &amp; clear ($35, 1 yr)</button><button class="btn ghost" onclick="scheduleTele(\''+c.id+'\')">📹 Requires live visit</button></div>'
     +'</div></div>';
@@ -335,7 +335,7 @@ function signGfe(id){ var c=clientById(id);
   var electro=Object.keys(ELECTRO).filter(function(k){var el=document.getElementById('g_e_'+k);return el&&el.checked&&!el.disabled;});
   if(!laser.length&&!electro.length){ alert('Approve at least one modality (laser wavelength or electrolysis type)'); return; }
   var fee=+document.getElementById('g_fee').value||35;
-  c.gfe={ cleared:true, date:today(), expires:addYear(today()), md:'Armando A. Falcon, MD · FL ME 84789', fitzConfirmed:((document.getElementById('g_fitz')||{}).value)||c.fitz, laser:laser, electro:electro, fee:fee, expected:+document.getElementById('g_exp').value||0, perSession:+document.getElementById('g_price').value||0, notes:document.getElementById('g_notes').value };
+  c.gfe={ cleared:true, date:today(), expires:addYear(today()), md:'Armando A Falcon, MD · FL ME 84789', fitzConfirmed:((document.getElementById('g_fitz')||{}).value)||c.fitz, laser:laser, electro:electro, fee:fee, expected:+document.getElementById('g_exp').value||0, perSession:+document.getElementById('g_price').value||0, notes:document.getElementById('g_notes').value };
   if(!(c.payments||[]).some(function(p){return p.type&&p.type.indexOf('GFE')===0;})){ (c.payments=c.payments||[]).push({date:today(),type:'GFE (physician clearance)',amount:fee,note:'Valid 1 yr'}); }
   if(!c.package){ c.package={ total:(c.gfe.expected*c.gfe.perSession), sessionsPaid:0 }; }
   save(); curClient=id; cur='clients'; render();
@@ -394,7 +394,7 @@ function aftercare(id){
       +'<li>No exfoliants, retinoids, or glycolic/salicylic acids on the area.</li>'+betweenMod+'</ul>'
     +'<div class="warn"><b>Call the clinic</b> if you notice: blistering or open sores, increasing redness/swelling after 48 h, pus or fever (possible infection), or unusual/worsening pain.</div>'
     +'<div class="bar"><button onclick="window.print()">🖨 Print / Save as PDF</button>'+(c.email?'<a class="b2" href="'+mailto+'"><button>✉ Email to patient</button></a>':'')+'</div>'
-    +'<div class="ft">RenuviaMD® · Hair Removal · advisory patient education. Under the medical direction of Armando A. Falcon, MD (FL ME 84789). Keep this sheet; contact the clinic with any questions.</div>'
+    +'<div class="ft">RenuviaMD® · Hair Removal · advisory patient education. Under the medical direction of Armando A Falcon, MD (FL ME 84789). Keep this sheet; contact the clinic with any questions.</div>'
     +'</body></html>';
   var w=window.open('','_blank'); if(w){ w.document.write(html); w.document.close(); } else { alert('Allow pop-ups to open the aftercare sheet.'); }
 }

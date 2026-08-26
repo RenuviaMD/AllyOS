@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "GH-axis support for recovery, body composition, and sleep, paired with a GHRH analog"
   contraindications_short: "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity"
   clinical_notes_short: "Cleanest GHRP — minimal hunger/cortisol vs GHRP-6. Synergistic with CJC-1295 or sermorelin. Bedtime dosing leverages the natural GH pulse."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Ipamorelin

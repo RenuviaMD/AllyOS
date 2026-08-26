@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "GH-stimulation diagnostic agent abroad; reported off-label for GH elevation - not approved in the US"
   contraindications_short: "active malignancy, hypersensitivity; theoretical cortisol/prolactin and appetite effects"
   clinical_notes_short: "Grade D therapeutic. Recognized GH-stimulation test agent (approved in some countries) but no US therapeutic approval and no efficacy trials for anti-aging/body-composition use. Often stacked with a GHRH analog (unproven)."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-22", last_clinical_review: "2026-06-22" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-22", last_clinical_review: "2026-06-22" }
 ---
 
 # GHRP-2 (Pralmorelin)

@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Libido and sexual-function support — central + hormonal axes"
   contraindications_short: "uncontrolled HTN, significant CVD, hormone-sensitive cancer, pregnancy, lactation, age <18"
   clinical_notes_short: "PT-141 brings the BP contraindication and nausea; Kisspeptin is experimental and acts upstream. Document controlled BP and hormone-sensitive cancer screen before starting."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Vitality Stack (PT-141 + Kisspeptin-10)

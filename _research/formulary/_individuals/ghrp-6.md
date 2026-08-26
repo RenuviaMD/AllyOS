@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Reported off-label for GH elevation and appetite - not approved; preclinical cardioprotection interest"
   contraindications_short: "active malignancy, hypersensitivity; pronounced appetite stimulation, cortisol/prolactin effects"
   clinical_notes_short: "Grade D. No human efficacy trials for wellness use; strong appetite/hunger effect. 2024-26 literature is preclinical (cardioprotective/anti-fibrotic) only. Stacked with GHRH analogs (unproven)."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-22", last_clinical_review: "2026-06-22" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-22", last_clinical_review: "2026-06-22" }
 ---
 
 # GHRP-6

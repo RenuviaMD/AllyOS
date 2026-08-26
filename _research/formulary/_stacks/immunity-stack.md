@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Immune modulation plus anti-inflammatory support"
   contraindications_short: "transplant on immunosuppression, severe active autoimmune, pregnancy, lactation, age <18"
   clinical_notes_short: "Tα1 sets immune tone, KPV calms inflammation — complementary. Always screen for transplant/immunosuppression and autoimmune disease before starting either."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Immunity Stack (Thymosin Alpha-1 + KPV)

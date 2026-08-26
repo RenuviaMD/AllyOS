@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Anxiety/stress and cognitive support without sedation"
   contraindications_short: "pregnancy, lactation, age <18, hypersensitivity"
   clinical_notes_short: "Russian-origin anxiolytic peptide, dosed SC here, non-sedating. Pairs with Semax. SC gives tighter dose control than nasal; not a substitute for evaluating real anxiety."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Selank

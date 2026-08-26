@@ -12,7 +12,7 @@ This is the only signature with your name **in the product**, and it is **not a 
 not a treatment authorization, and not a medical-director relationship with any patient.** It is
 an **editorial attestation** — like an editor signing a monograph for publication, or an UpToDate
 author — that the DRAFT library content is accurate and fit to ship as reference. The library is
-published *"curated under Armando A. Falcon, MD,"* so this is you vouching for **content quality,
+published *"curated under Armando A Falcon, MD,"* so this is you vouching for **content quality,
 nothing more**. No patient. No chart. No order.
 
 - **Effect of publishing:** the item moves from `draft` (experimental/hidden) to `published` in the AllyOS library. It remains **ADVISORY** for every clinic that brings its own Medical Director.
@@ -63,7 +63,7 @@ reference; it does **not** order anything for a patient:
 - Item: <file + version>
   PUBLISHED to the AllyOS library as accurate decision-support reference (curator editorial review).
   This is NOT a prescription or treatment authorization for any patient.
-  Curator: Armando A. Falcon, MD   (RenuviaMD® AllyOS Compliance Division)
+  Curator: Armando A Falcon, MD   (RenuviaMD® AllyOS Compliance Division)
   Date: 2026-__-__                 Commit: <sha>
   Edits required before publish: <none | list>
 ```
@@ -74,19 +74,19 @@ reference; it does **not** order anything for a patient:
 - Item: ingredient-screening-contraindications.json v1.0
   PUBLISHED to the AllyOS library as accurate decision-support reference (curator editorial review).
   This is NOT a prescription or treatment authorization for any patient.
-  Curator: Armando A. Falcon, MD   (RenuviaMD® AllyOS Compliance Division)
+  Curator: Armando A Falcon, MD   (RenuviaMD® AllyOS Compliance Division)
   Date: 2026-06-26
   Edits required before publish: none (VERIFY-flagged items remain flagged as caution-to-confirm)
 
 - Item: draft-additions.json — Niagen/NR ingredient + NR-01 protocol
   PUBLISHED to the AllyOS library as accurate decision-support reference (curator editorial review).
   NR-01 is a TEMPLATE; the clinic's own prescriber signs the NR standing order for their patients.
-  Curator: Armando A. Falcon, MD   (RenuviaMD® AllyOS Compliance Division)
+  Curator: Armando A Falcon, MD   (RenuviaMD® AllyOS Compliance Division)
   Date: 2026-06-26
   Edits required before publish: none (evidence grade C–D noted; standing order required to use)
 
 - Item: niagen-nr-iv-standing-order.md — PUBLISHED as a reference TEMPLATE.
-  Curator: Armando A. Falcon, MD   Date: 2026-06-26
+  Curator: Armando A Falcon, MD   Date: 2026-06-26
   (The actual standing order is signed by each clinic's prescriber, in that clinic's records — not here.)
 ```
 

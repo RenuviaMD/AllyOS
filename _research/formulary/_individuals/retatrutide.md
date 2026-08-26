@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Investigational obesity/metabolic — severe obesity not at goal on dual agonists"
   contraindications_short: "MTC/MEN-2 hx, acute pancreatitis, severe gastroparesis, pregnancy, hypersensitivity"
   clinical_notes_short: "Not FDA-approved — Phase 3 ongoing. Glucagon arm can raise heart rate and nudge glucose; monitor closely. Treat as experimental and consent accordingly."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Retatrutide

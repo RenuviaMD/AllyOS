@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Cognitive performance, stress, and sleep optimization"
   contraindications_short: "pregnancy, lactation, age <18, hypersensitivity, severe renal impairment, uncontrolled epilepsy"
   clinical_notes_short: "Cerebrolysin is the heavyweight here (IV/IM courses) and brings the renal/seizure cautions. SC peptides are subtle. Verify source authenticity for Cerebrolysin and Russian peptides."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Cognition Stack (Selank + Semax + DSIP + Cerebrolysin)

@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Aggressive soft-tissue/tendon repair and recovery, plateaued on standard care"
   contraindications_short: "active/prior malignancy, copper overload, pregnancy, lactation, age <18, hypersensitivity"
   clinical_notes_short: "The flagship repair combo — all three are angiogenic, so cancer history is an absolute no. Image the injury first. Short goal-bound course; watch cumulative copper from GHK-Cu."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Wolverine GLOW (BPC-157 + TB-500 + GHK-Cu)

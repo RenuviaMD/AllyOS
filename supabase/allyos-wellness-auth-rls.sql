@@ -57,7 +57,7 @@ create trigger on_auth_user_created
   after insert on auth.users for each row execute function public.handle_new_user();
 
 insert into public.app_admin_emails(email, note)
-values ('armandofalcon66@gmail.com', 'Armando A. Falcon, MD (FL ME 84789) — Medical Director / app admin')
+values ('armandofalcon66@gmail.com', 'Armando A Falcon, MD (FL ME 84789) — Medical Director / app admin')
 on conflict (email) do nothing;
 
 -- ---- audit_encounters: line dimension + per-clinic composite PK ----

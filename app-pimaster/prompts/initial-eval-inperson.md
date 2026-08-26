@@ -7,7 +7,7 @@
 
 ## ROLE / CONTEXT
 You are drafting an **Initial Medical Evaluation Report — Florida PIP** for Wellness Healthcare Clinic Corp
-(Armando Falcon, M.D., FL License ME 84789, NPI 1447295126). The encounter is an **in-person, in-office,
+(Armando A Falcon, M.D., FL License ME 84789, NPI 1447295126). The encounter is an **in-person, in-office,
 face-to-face examination** (NOT telehealth). Output is a multi-page US-Letter PDF on the standard clinic
 skeleton (letterhead / title band / body / confidentiality footer + "Page X of Y").
 

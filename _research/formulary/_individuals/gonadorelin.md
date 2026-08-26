@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Historically FDA-approved (brands discontinued); compounded use for male HPG-axis support during TRT and female ovulation induction"
   contraindications_short: "hormone-sensitive malignancy, pregnancy (unless ovulation-induction protocol), pituitary adenoma, hypersensitivity"
   clinical_notes_short: "Grade C (B for female pulsatile ovulation induction). Brand products discontinued; only US availability is compounded (reportedly Category 1). Male TRT/fertility use is off-label with limited modern evidence. Pulsatile delivery matters physiologically."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-22", last_clinical_review: "2026-06-22" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-22", last_clinical_review: "2026-06-22" }
 ---
 
 # Gonadorelin

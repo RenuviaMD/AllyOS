@@ -1,7 +1,7 @@
 # Peptide module — Medical Director VERIFY sign-off checklist
 
 **Module:** `protocols/peptide-module.json` (v1.0-draft)
-**For:** Armando A. Falcon, MD · FL ME 84789
+**For:** Armando A Falcon, MD · FL ME 84789
 **Purpose:** The FDA-approved agents are already label-grounded and need no action. The **research / compounded / investigational** agents below carry **prudent-convention or mechanism-based** contraindications marked `(VERIFY)` — these need *your clinical judgment* to clear or correct. Tick each box (or edit the item), and the module flips from DRAFT → locked, MD-signed (same as BHRT/IV).
 
 > How to use: review each agent's items. For each line: **keep** (leave the checkbox, it becomes a confirmed advisory), **edit** (change the wording), or **remove** (strike it). When an agent's list is fully reviewed, check its header box. When all headers are checked, the module is ready to lock.
@@ -88,7 +88,7 @@ When the above are reviewed:
 
 ```
 Medical Director governance sign-off
-  by:      Armando A. Falcon, MD
+  by:      Armando A Falcon, MD
   license: FL ME 84789
   role:    Medical Director — governance / framework approval (not per-patient treating provider)
   date:    __________

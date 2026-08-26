@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Anti-inflammatory support, gut/skin inflammation adjunct"
   contraindications_short: "transplant on immunosuppression, severe active autoimmune, pregnancy, lactation, age <18"
   clinical_notes_short: "Anti-inflammatory tripeptide, oral or SC. Useful gut/skin adjunct; preclinical evidence. Pairs with Tα1 for an immune-axis combo. Not a substitute for IBD work-up."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # KPV

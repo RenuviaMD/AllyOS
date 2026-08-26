@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Type 2 diabetes; chronic weight management; MASH with fibrosis (2025); CV and renal risk reduction"
   contraindications_short: "personal/family medullary thyroid carcinoma or MEN2, pregnancy, prior serious hypersensitivity, pancreatitis history (caution)"
   clinical_notes_short: "FDA-approved, Grade A — the reference GLP-1. Titrate slowly to limit GI effects. Now approved for MASH (2025) with positive renal (FLOW) and CV (SELECT) outcomes. Counsel on reduced oral-contraceptive reliability with delayed gastric emptying, and on pancreatitis/gallbladder symptoms."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-22", last_clinical_review: "2026-06-22" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-22", last_clinical_review: "2026-06-22" }
 ---
 
 # Semaglutide

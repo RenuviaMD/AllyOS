@@ -15,7 +15,7 @@ _Compiled 2026-06-23 from 5 parallel research passes, cross-checked against the 
 
 # Metabolic / Longevity Peptide Dosing Protocols
 
-_Decision-support compilation for LICENSED providers. Source of record: `/home/user/renuviamd-site/protocols/protocols.json` (MD-curated, Armando Falcon MD). FDA-approved agents use the label titration; non-approved/compounded uses are empiric community-protocol and flagged **VERIFY**._
+_Decision-support compilation for LICENSED providers. Source of record: `/home/user/renuviamd-site/protocols/protocols.json` (MD-curated, Armando A Falcon MD). FDA-approved agents use the label titration; non-approved/compounded uses are empiric community-protocol and flagged **VERIFY**._
 
 ---
 
@@ -163,7 +163,7 @@ _Decision-support compilation for LICENSED providers. Source of record: `/home/u
 
 > **CLINICAL DISCLOSURE — READ FIRST.** Decision-support for LICENSED providers only. None of the five peptides below is FDA-approved for the indications described (Thymosin alpha-1 is marketed as **Zadaxin outside the US**, not FDA-approved domestically). All dosing is **empiric / community-protocol convention and is NOT clinically validated** — treat every regimen as **VERIFY** and confirm against current source/compounding pharmacy labeling, contraindication screen, and patient-specific factors before use. Reconstitution values are **calculator DEFAULTS** for a starting vial, not prescriptions. No citation has been fabricated; only DOIs already present in the MD-curated library are reproduced.
 
-Source of record: `/home/user/renuviamd-site/protocols/protocols.json` (Tier-1, curated by Armando Falcon, MD; reviewed 2026-06-10). Frequency, rest/off period, and suggested recon standardized/extended below.
+Source of record: `/home/user/renuviamd-site/protocols/protocols.json` (Tier-1, curated by Armando A Falcon, MD; reviewed 2026-06-10). Frequency, rest/off period, and suggested recon standardized/extended below.
 
 ---
 

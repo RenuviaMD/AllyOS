@@ -13,7 +13,7 @@ popup_summary:
   primary_use: "Excess visceral adiposity (on-label: HIV lipodystrophy); off-label VAT reduction"
   contraindications_short: "active malignancy, untreated hypothyroidism, pregnancy, lactation, age <18, hypersensitivity"
   clinical_notes_short: "Strongest GH-secretagogue data for visceral fat. Brand is pricey; compounded common but verify source. Monitor IGF-1 and glucose — it can nudge insulin resistance."
-document_meta: { author: "Armando Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
+document_meta: { author: "Armando A Falcon, MD", version: "2026-06-10", last_clinical_review: "2026-06-10" }
 ---
 
 # Tesamorelin (Egrifta)

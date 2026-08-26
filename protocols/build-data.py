@@ -232,7 +232,7 @@ lines = [
 data = {
     "meta": {
         "title": "RenuviaMD Clinical Protocol Library",
-        "curated_by": "Armando Falcon, MD",
+        "curated_by": "Armando A Falcon, MD",
         "tiers": {"1": "Curated, MD-signed library", "2": "On-demand peptide engine — verified, graduates into Tier 1"},
         "count": len(items),
     },

@@ -1,7 +1,7 @@
 # The RenuviaMD Peptide Reference
 ### Evidence-cited monographs + quick-reference cards for licensed clinicians
 
-*Compiled & edited by Armando Falcon, physician. Published by RenuviaMD.*
+*Compiled & edited by Armando A Falcon, physician. Published by RenuviaMD.*
 *Citations verified against PubMed and ClinicalTrials.gov; DOI links included per PubMed terms of use.*
 
 > **Educational reference for licensed clinicians.** This document reports published

@@ -5,7 +5,7 @@ _Last written: 2026-06-22. Branch: `claude/funny-sagan-clvl38`. This file is the
 ---
 
 ## 0. WHO / WHAT
-- **Dr. Armando A. Falcon, MD** — FL License ME 84789, RenuviaMD® PLLC, Florida Medical Director.
+- **Dr. Armando A Falcon, MD** — FL License ME 84789, RenuviaMD® PLLC, Florida Medical Director.
 - **Platform = AllyOS** · **AI = Ally** · lives at `allyos.renuviamd.com`, one repo `RenuviaMD/allyos` (cockpit to stand up). This repo (`armandofalcon66/renuviamd-site`) is the **prototype** that ports into it.
 - **NOT "PeptidOS"** — peptides are the flagship *line*, not a separate brand. One platform, one login, one name.
 
